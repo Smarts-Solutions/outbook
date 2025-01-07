@@ -31,6 +31,19 @@ const Paper = () => {
   const [folderPath, setFolderPath] = useState("");
 
   const handleFileChange = (event) => {
+   
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      fileInputRef.current.value = "";
+      return;
+    }
+
+
     const files = event.currentTarget.files;
     var fileArray;
 
@@ -91,7 +104,6 @@ const Paper = () => {
       setPreviews(previewData);
     });
   };
-
   const GetCustomerData = async () => {
     const req = { customer_id: address, pageStatus: "4" };
     const data1 = { req: req, authToken: token };
@@ -131,22 +143,19 @@ const Paper = () => {
     fetchSiteDetails();
   }, []);
 
-
   const handleSubmit = async (values) => {
     let customer_name = "DEMO"
     if (customerDetails.data.customer != undefined) {
       // customer_name = customerDetails.data.customer.trading_name;
       customer_name = 'CUST' + customerDetails.data.customer.customer_id;
     }
-
-
-
     const uploadedFilesArray = [];
-    if (newFiles.length > 0) {
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
+     if (newFiles.length > 0) {
       setIsLoading(true);
       const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
       const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
-
       for (const file of newFiles) {
         const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
         const uploadedFileInfo = {
@@ -159,6 +168,7 @@ const Paper = () => {
         uploadedFilesArray.push(uploadedFileInfo);
       }
 
+     }
     }
 
     const data1 = {

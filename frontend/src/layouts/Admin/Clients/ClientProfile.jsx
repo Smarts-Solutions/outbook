@@ -342,6 +342,17 @@ const ClientList = () => {
 
   const handleFileChange = (event) => {
 
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      fileInputRef.current.value = "";
+      return;
+    }
+
     const files = event.currentTarget.files;
     var fileArray;
 
@@ -422,50 +433,54 @@ const ClientList = () => {
     const uploadedFilesArray = [];
 
     if (newFiles.length > 0) {
-      setIsLoading(true);
-      const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-      const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, client_name, sharepoint_token);
 
-      for (const file of newFiles) {
-        const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-        const uploadedFileInfo = {
-          web_url: uploadDataUrl,
-          filename: file.lastModified + '-' + file.name,
-          originalname: file.name,
-          mimetype: file.type,
-          size: file.size
-        };
-        uploadedFilesArray.push(uploadedFileInfo);
-      }
+      const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+      if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
 
+        setIsLoading(true);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, client_name, sharepoint_token);
 
-      const req = { fileData: newFiles, client_id: location.state.data.client.id, authToken: token, uploadedFiles: uploadedFilesArray }
-      await dispatch(addClientDocument(req))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            sweatalert
-              .fire({
-                title: response.message,
-                icon: "success",
-                timer: 3000,
-              })
-              .then(() => {
-                // navigate("/admin/client/profile");
-                resetFileInput();
-                setNewFiles([]);
-                setFileState([]);
-                setPreviews([]);
-                GetClientDetails();
-                setIsLoading(false);
-              });
+        for (const file of newFiles) {
+          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadedFileInfo = {
+            web_url: uploadDataUrl,
+            filename: file.lastModified + '-' + file.name,
+            originalname: file.name,
+            mimetype: file.type,
+            size: file.size
+          };
+          uploadedFilesArray.push(uploadedFileInfo);
+        }
+        const req = { fileData: newFiles, client_id: location.state.data.client.id, authToken: token, uploadedFiles: uploadedFilesArray }
+        await dispatch(addClientDocument(req))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              sweatalert
+                .fire({
+                  title: response.message,
+                  icon: "success",
+                  timer: 3000,
+                })
+                .then(() => {
+                  // navigate("/admin/client/profile");
+                  resetFileInput();
+                  setNewFiles([]);
+                  setFileState([]);
+                  setPreviews([]);
+                  GetClientDetails();
+                  setIsLoading(false);
+                });
+              setIsLoading(false);
+            }
+          })
+          .catch((error) => {
             setIsLoading(false);
-          }
-        })
-        .catch((error) => {
-          setIsLoading(false);
-          return;
-        });
+            return;
+          });
+
+      }
 
     } else {
       sweatalert.fire({
@@ -581,6 +596,17 @@ const ClientList = () => {
     if (type == 1) {
       return;
     }
+
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      return;
+    }
+
     const invalidValues = [undefined, null, "", 0, "0"];
     let client_name = "CLIENT_DEMO"
     if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id)) {

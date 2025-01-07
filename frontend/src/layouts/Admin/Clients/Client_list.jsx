@@ -452,7 +452,7 @@ const ClientList = () => {
       reorder: false,
     },
   ];
-  
+
   const DocumentListColumns = [
     {
       name: "File Image",
@@ -554,10 +554,22 @@ const ClientList = () => {
     if (type == 1) {
       return;
     }
+
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      return;
+    }
+
+
     let customer_name = "DEMO"
     if (customerDetails.data.customer != undefined) {
       // customer_name = customerDetails.data.customer.trading_name;
-      customer_name =  'CUST'+customerDetails.data.customer.customer_id;
+      customer_name = 'CUST' + customerDetails.data.customer.customer_id;
     }
     let fileName = file.name;
     if (type == 2) {

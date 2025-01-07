@@ -135,13 +135,15 @@ export const SiteUrlFolderPath = async () => {
     let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
     const TokenExpire =  await SharePointTokenExpire(sharepoint_token);
     // console.log("TokenExpire",TokenExpire);
-    if (TokenExpire) { 
+    if (TokenExpire) {
      const newSharePointToken = await ActivityLogData();
      if(newSharePointToken == "error"){
         localStorage.setItem("sharepoint_token", JSON.stringify('sharepoint_token_not_found'));
       }else{
         localStorage.setItem("sharepoint_token", JSON.stringify(newSharePointToken));
       }
+    }else{
+      localStorage.setItem("sharepoint_token", JSON.stringify('sharepoint_token_not_found'));
     }
     return { siteUrl,folderPath,sharepoint_token};
 }

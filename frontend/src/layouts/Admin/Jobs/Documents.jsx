@@ -26,16 +26,12 @@ const Documents = ({ getAccessDataJob }) => {
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
 
-  console.log("uploadfiles", uploadfiles)
-  console.log("newFiles", newFiles)
-  console.log("jobDocumentListData", jobDocumentListData)
-
-    const fetchSiteDetails = async () => {
-      const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
-      setSiteUrl(siteUrl);
-      setFolderPath(folderPath);
-      setSharepoint_token(sharepoint_token);
-    };
+  const fetchSiteDetails = async () => {
+    const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
+    setSiteUrl(siteUrl);
+    setFolderPath(folderPath);
+    setSharepoint_token(sharepoint_token);
+  };
 
   useEffect(() => {
     GetAllDocumentList();
@@ -125,7 +121,7 @@ const Documents = ({ getAccessDataJob }) => {
         <div>
           {
             (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-              <button className="delete-icon"  onClick={() => removeItem(row, 2)}>
+              <button className="delete-icon" onClick={() => removeItem(row, 2)}>
                 <i className="ti-trash fs-5 text-danger" />
               </button>
             )
@@ -144,6 +140,19 @@ const Documents = ({ getAccessDataJob }) => {
   }
 
   const handleChangeDocument = async (e) => {
+
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      fileInputRef.current.value = "";
+      return;
+    }
+
+
     const files = e.target.files;
 
     // const files = event.currentTarget.files;
@@ -209,82 +218,97 @@ const Documents = ({ getAccessDataJob }) => {
   }
 
   const uploadDocumentFun = async (e) => {
-     
+
     const invalidValues = [undefined, null, "", 0, "0"];
     let job_name = "JOB_DEMO"
     if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-      job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id+ '_JOB' + location.state.data.job.job_id;
+      job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
     }
 
     const uploadedFilesArray = [];
-    
-        if (newFiles.length > 0) {
-          setIsLoading(true);
-          const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-          const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
-    
-          for (const file of newFiles) {
-            const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-            const uploadedFileInfo = {
-              web_url: uploadDataUrl,
-              filename: file.lastModified + '-' + file.name,
-              originalname: file.name,
-              mimetype: file.type,
-              size: file.size
-            };
-            uploadedFilesArray.push(uploadedFileInfo);
-          }
 
-          const req = { action: "add", job_id: location.state.job_id , fileData: newFiles ,uploadedFiles: uploadedFilesArray }
-          const data = { req: req, authToken: token }
-          await dispatch(JobDocumentAction(data))
-            .unwrap()
-            .then((response) => {
-              if (response.status) {
-                sweatalert
-                  .fire({
-                    title: response.message,
-                    icon: "success",
-                    timer: 3000,
-                  })
-                  .then(() => {
-                    setNewFiles([]);
-                    setFileState([]);
-                    setPreviews([]);
-                    GetAllDocumentList();
-                    setUploadfiles(false);
-                    setIsLoading(false);
-                  });
-                setUploadfiles(false);
-                setIsLoading(false);
-              }
-            })
-            .catch((error) => {
-              setIsLoading(false);
-              setUploadfiles(false);
-              return;
-            });
-    
-        } else {
-          sweatalert.fire({
-            icon: "warning",
-            title: "Oops...",
-            text: "Please select a file to upload.",
-          });
-          return;
+    if (newFiles.length > 0) {
+
+      const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+      if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
+
+        setIsLoading(true);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+
+        for (const file of newFiles) {
+          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadedFileInfo = {
+            web_url: uploadDataUrl,
+            filename: file.lastModified + '-' + file.name,
+            originalname: file.name,
+            mimetype: file.type,
+            size: file.size
+          };
+          uploadedFilesArray.push(uploadedFileInfo);
         }
-       setUploadfiles(false);
+
+        const req = { action: "add", job_id: location.state.job_id, fileData: newFiles, uploadedFiles: uploadedFilesArray }
+        const data = { req: req, authToken: token }
+        await dispatch(JobDocumentAction(data))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              sweatalert
+                .fire({
+                  title: response.message,
+                  icon: "success",
+                  timer: 3000,
+                })
+                .then(() => {
+                  setNewFiles([]);
+                  setFileState([]);
+                  setPreviews([]);
+                  GetAllDocumentList();
+                  setUploadfiles(false);
+                  setIsLoading(false);
+                });
+              setUploadfiles(false);
+              setIsLoading(false);
+            }
+          })
+          .catch((error) => {
+            setIsLoading(false);
+            setUploadfiles(false);
+            return;
+          });
+      }
+
+    } else {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Please select a file to upload.",
+      });
+      return;
+    }
+    setUploadfiles(false);
   }
 
- const removeItem = async (file, type) => {
+  const removeItem = async (file, type) => {
     if (type == 1) {
       return;
     }
-   
+    
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      return;
+    }
+
     const invalidValues = [undefined, null, "", 0, "0"];
     let job_name = "JOB_DEMO"
     if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-      job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id+ '_JOB' + location.state.data.job.job_id;
+      job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
     }
 
 
@@ -294,7 +318,7 @@ const Documents = ({ getAccessDataJob }) => {
     }
 
     if (fileName != undefined) {
-      const req = { action: "delete", job_id: location.state.job_id , id: file.id,file_name: file.file_name }
+      const req = { action: "delete", job_id: location.state.job_id, id: file.id, file_name: file.file_name }
       const data = { req: req, authToken: token }
       sweatalert
         .fire({
@@ -339,212 +363,212 @@ const Documents = ({ getAccessDataJob }) => {
 
   return (
     <div className={isLoading ? "blur-container" : ""}>
-    {isLoading && (
-      <div className="loader-overlay">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    )}
-
-    <div className=''>
-      <div className='row'>
-        <div className='col-md-5 col-lg-5 col-sm-3'>
-          <div className='tab-title'>
-            <h3>Document</h3>
+      {isLoading && (
+        <div className="loader-overlay">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
           </div>
         </div>
-        <div className='col-md-7 col-lg-7 col-sm-9 mt-3 mt-sm-0'>
-          <div>
-            {/* {
+      )}
+
+      <div className=''>
+        <div className='row'>
+          <div className='col-md-5 col-lg-5 col-sm-3'>
+            <div className='tab-title'>
+              <h3>Document</h3>
+            </div>
+          </div>
+          <div className='col-md-7 col-lg-7 col-sm-9 mt-3 mt-sm-0'>
+            <div>
+              {/* {
               (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
                 <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-sm-end ms-sm-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
               )} */}
-            {
-              (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-                <button type="button" className="btn btn-info text-white float-sm-end ms-2" onClick={() => setUploadfiles(true)}> <i className="fa-regular fa-plus pe-1"></i> Add Document</button>
-              )}
+              {
+                (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                  <button type="button" className="btn btn-info text-white float-sm-end ms-2" onClick={() => setUploadfiles(true)}> <i className="fa-regular fa-plus pe-1"></i> Add Document</button>
+                )}
 
+
+            </div>
 
           </div>
-
         </div>
-      </div>
 
-      <div className='datatable-wrapper '>
+        <div className='datatable-wrapper '>
 
-        <Datatable
-          filter={true}
-          columns={columns} data={jobDocumentListData && jobDocumentListData} />
-      </div>
+          <Datatable
+            filter={true}
+            columns={columns} data={jobDocumentListData && jobDocumentListData} />
+        </div>
 
-      <CommonModal
-        isOpen={uploadfiles}
-        backdrop="static"
-        size="md"
-        title="Upload Files"
-        cancel_btn={true}
-        hideBtn={false}
-        btn_name="Upload"
-        handleClose={() => {
-          closeModelUploadDocument();
-          // formik.resetForm();
-        }}
-        Submit_Function={() => {
-          uploadDocumentFun(false);
-        }}
-        Submit_Cancel_Function={() => {
-          closeModelUploadDocument();
-        }}
+        <CommonModal
+          isOpen={uploadfiles}
+          backdrop="static"
+          size="md"
+          title="Upload Files"
+          cancel_btn={true}
+          hideBtn={false}
+          btn_name="Upload"
+          handleClose={() => {
+            closeModelUploadDocument();
+            // formik.resetForm();
+          }}
+          Submit_Function={() => {
+            uploadDocumentFun(false);
+          }}
+          Submit_Cancel_Function={() => {
+            closeModelUploadDocument();
+          }}
 
-      >
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="card">
-              <div className="card-body">
-                <div className="upload-box" style={{ height: 150 }}>
-                  <div className="dz-message needsclick">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      multiple
-                      id="upload_document"
-                      name="upload_document"
-                      className="form-control"
-                      onChange={(e) => handleChangeDocument(e)}></input>
-                    <div
-                      className="mb-3"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                      }}
-                    >
-                    </div>
-                    {/* <h6 className="text-center">
+        >
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="card">
+                <div className="card-body">
+                  <div className="upload-box" style={{ height: 150 }}>
+                    <div className="dz-message needsclick">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        multiple
+                        id="upload_document"
+                        name="upload_document"
+                        className="form-control"
+                        onChange={(e) => handleChangeDocument(e)}></input>
+                      <div
+                        className="mb-3"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                      </div>
+                      {/* <h6 className="text-center">
                       <p>Or Drag File in here</p>
                     </h6> */}
+                    </div>
                   </div>
-                </div>
-                <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
-                 {
-                  newFiles.length > 0 ?
-                  <div className="container-fluid page-title-box">
-                  <div className="row">
-                    <div className="col-lg-12">
-                      <div className="card">
-                        <div className="card-body pt-0">
-                          <div id="customerList">
-                            <div className="row g-4 mb-3">
-                              <div className="d-flex justify-content-end">
-                                <div className="pagination-wrap hstack gap-2"></div>
-                              </div>
-                            </div>
-                            <div className="table-responsive table-card mb-1">
-                              <table
-                                className="table align-middle table-nowrap"
-                                id="customerTable"
-                              >
-                                <thead className="table-light table-head-blue">
-                                  <tr>
-                                    <th className="" data-sort="file_name">
-                                      File Image
-                                    </th>
-                                    <th className="" data-sort="file_name">
-                                      File Name
-                                    </th>
-                                    <th className="" data-sort="file_type">
-                                      File Type
-                                    </th>
-                                    <th className="" data-sort="size">
-                                      Size
-                                    </th>
-                                    <th className="" data-sort="action">
-                                      Action
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody className="list form-check-all">
-                                  {newFiles.length > 0 &&
-                                    Array.from(newFiles).map(
-                                      (file, index) => (
-                                        <tr key={`new-${index}`}>
-                                          <td className="file_name">
-                                            {" "}
-                                            <img
-                                              src={previews[index]}
-                                              alt="preview"
-                                              style={{
-                                                width: "50px",
-                                                height: "50px",
-                                              }}
-                                            />{" "}
-                                          </td>
-                                          <td className="file_name">
-                                            {file.name}
-                                          </td>
-                                          <td className="file_type">
-                                            {file.type}
-                                          </td>
-                                          <td className="size">
-                                            {file.size < 1024 * 1024
-                                              ? `${(file.size / 1024).toFixed(
-                                                2
-                                              )} KB`
-                                              : `${(
-                                                file.size /
-                                                (1024 * 1024)
-                                              ).toFixed(2)} MB`}
-                                          </td>
-
-                                          <td className="action">
-                                            <div className="d-flex gap-2">
-                                              <div className="remove">
-                                                <button
-                                                  className="delete-icon"
-
-                                                  onClick={() => {
-                                                    fileInputRef.current.value = "";
-                                                    const updatedFiles =
-                                                      newFiles.filter(
-                                                        (_, idx) =>
-                                                          idx !== index
-                                                      );
-                                                    setNewFiles(updatedFiles);
-                                                    setPreviews(
-                                                      previews.filter(
-                                                        (_, idx) =>
-                                                          idx !== index
-                                                      )
-                                                    );
-                                                    removeItem(file ,1);
-                                                  }}
-                                                >
-                                                  <i className="ti-trash text-danger " />
-                                                </button>
-                                              </div>
-                                            </div>
-                                          </td>
+                  <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
+                  {
+                    newFiles.length > 0 ?
+                      <div className="container-fluid page-title-box">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="card">
+                              <div className="card-body pt-0">
+                                <div id="customerList">
+                                  <div className="row g-4 mb-3">
+                                    <div className="d-flex justify-content-end">
+                                      <div className="pagination-wrap hstack gap-2"></div>
+                                    </div>
+                                  </div>
+                                  <div className="table-responsive table-card mb-1">
+                                    <table
+                                      className="table align-middle table-nowrap"
+                                      id="customerTable"
+                                    >
+                                      <thead className="table-light table-head-blue">
+                                        <tr>
+                                          <th className="" data-sort="file_name">
+                                            File Image
+                                          </th>
+                                          <th className="" data-sort="file_name">
+                                            File Name
+                                          </th>
+                                          <th className="" data-sort="file_type">
+                                            File Type
+                                          </th>
+                                          <th className="" data-sort="size">
+                                            Size
+                                          </th>
+                                          <th className="" data-sort="action">
+                                            Action
+                                          </th>
                                         </tr>
-                                      )
-                                    )}
-                                </tbody>
-                              </table>
+                                      </thead>
+                                      <tbody className="list form-check-all">
+                                        {newFiles.length > 0 &&
+                                          Array.from(newFiles).map(
+                                            (file, index) => (
+                                              <tr key={`new-${index}`}>
+                                                <td className="file_name">
+                                                  {" "}
+                                                  <img
+                                                    src={previews[index]}
+                                                    alt="preview"
+                                                    style={{
+                                                      width: "50px",
+                                                      height: "50px",
+                                                    }}
+                                                  />{" "}
+                                                </td>
+                                                <td className="file_name">
+                                                  {file.name}
+                                                </td>
+                                                <td className="file_type">
+                                                  {file.type}
+                                                </td>
+                                                <td className="size">
+                                                  {file.size < 1024 * 1024
+                                                    ? `${(file.size / 1024).toFixed(
+                                                      2
+                                                    )} KB`
+                                                    : `${(
+                                                      file.size /
+                                                      (1024 * 1024)
+                                                    ).toFixed(2)} MB`}
+                                                </td>
+
+                                                <td className="action">
+                                                  <div className="d-flex gap-2">
+                                                    <div className="remove">
+                                                      <button
+                                                        className="delete-icon"
+
+                                                        onClick={() => {
+                                                          fileInputRef.current.value = "";
+                                                          const updatedFiles =
+                                                            newFiles.filter(
+                                                              (_, idx) =>
+                                                                idx !== index
+                                                            );
+                                                          setNewFiles(updatedFiles);
+                                                          setPreviews(
+                                                            previews.filter(
+                                                              (_, idx) =>
+                                                                idx !== index
+                                                            )
+                                                          );
+                                                          removeItem(file, 1);
+                                                        }}
+                                                      >
+                                                        <i className="ti-trash text-danger " />
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            )
+                                          )}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                      : ""
+                  }
                 </div>
-                  : ""
-                 }
               </div>
             </div>
           </div>
-        </div>
-      </CommonModal>
-    </div>
+        </CommonModal>
+      </div>
     </div>
   )
 }

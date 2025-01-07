@@ -40,6 +40,17 @@ const Paper = () => {
     //  if(customerDetails.data.customer != undefined){
     //    customer_name = customerDetails.data.customer.trading_name;
     //  }
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      fileInputRef.current.value = "";
+      return;
+    }
+
     const files = event.currentTarget.files;
     var fileArray;
 
@@ -106,31 +117,6 @@ const Paper = () => {
     });
 
 
-
-    // const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-    // const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID,customer_name, sharepoint_token);
-
-    // for (const file of uniqueValidFiles) {
-
-    //   console.log("file", file);
-    //   const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-    //   // console.log(`Uploaded file: ${file.name}`);
-    //   // console.log(`uploadDataUrl: ${uploadDataUrl}`);
-    //   // file.webUrl = uploadDataUrl;
-    //   setUploadedFiles(prevUploadedFiles => [
-    //     ...prevUploadedFiles, 
-    //     {
-    //       ...file, 
-    //       web_url: uploadDataUrl,
-    //       filename: file.lastModified+'-'+file.name,
-    //       originalname: file.name,
-    //       mimetype: file.type,
-    //       size: file.size
-    //     }
-    //   ]);
-    // }
-
-
   };
 
   const GetCustomerData = async () => {
@@ -162,6 +148,7 @@ const Paper = () => {
   };
   const fetchSiteDetails = async () => {
     const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
+
     setSiteUrl(siteUrl);
     setFolderPath(folderPath);
     setSharepoint_token(sharepoint_token);
@@ -180,22 +167,25 @@ const Paper = () => {
     }
 
     const uploadedFilesArray = [];
-    if (newFiles.length > 0) {
-      setIsLoading(true);
-      const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-      const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
-      for (const file of newFiles) {
-        const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-        const uploadedFileInfo = {
-          web_url: uploadDataUrl,
-          filename: file.lastModified + '-' + file.name,
-          originalname: file.name,
-          mimetype: file.type,
-          size: file.size
-        };
-        uploadedFilesArray.push(uploadedFileInfo);
-      }
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
+      if (newFiles.length > 0) {
+        setIsLoading(true);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+        for (const file of newFiles) {
+          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadedFileInfo = {
+            web_url: uploadDataUrl,
+            filename: file.lastModified + '-' + file.name,
+            originalname: file.name,
+            mimetype: file.type,
+            size: file.size
+          };
+          uploadedFilesArray.push(uploadedFileInfo);
+        }
 
+      }
     }
 
     const data1 = {
@@ -229,6 +219,17 @@ const Paper = () => {
     if (type == 1) {
       return;
     }
+
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Unable to connect to SharePoint.",
+      });
+      return;
+    }
+
     let customer_name = "DEMO"
     if (customerDetails.data.customer != undefined) {
       // customer_name = customerDetails.data.customer.trading_name;
@@ -564,7 +565,7 @@ const Paper = () => {
 
                                             <td>
                                               {file.file_type.startsWith("image/") ? (
-                                              
+
                                                 <img
                                                   src={file.web_url}
                                                   alt="preview"
@@ -574,7 +575,7 @@ const Paper = () => {
                                                   }}
                                                 />
                                               ) : file.file_type === "application/pdf" ? (
-                                             
+
                                                 <i
                                                   className="fa fa-file-pdf"
                                                   style={{
@@ -583,7 +584,7 @@ const Paper = () => {
                                                   }}
                                                 ></i>
                                               ) : (
-                                               
+
                                                 <i
                                                   className="fa fa-file"
                                                   style={{
