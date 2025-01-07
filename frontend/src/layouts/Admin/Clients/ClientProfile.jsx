@@ -40,8 +40,6 @@ const ClientList = () => {
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
 
-  console.log("fileStateClient", fileStateClient);
-
   const fetchSiteDetails = async () => {
     const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
     setSiteUrl(siteUrl);
@@ -341,7 +339,6 @@ const ClientList = () => {
   ];
 
   const handleFileChange = (event) => {
-
     const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({

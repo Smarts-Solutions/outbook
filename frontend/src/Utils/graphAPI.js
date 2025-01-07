@@ -142,8 +142,6 @@ export const SiteUrlFolderPath = async () => {
       }else{
         localStorage.setItem("sharepoint_token", JSON.stringify(newSharePointToken));
       }
-    }else{
-      localStorage.setItem("sharepoint_token", JSON.stringify('sharepoint_token_not_found'));
     }
     return { siteUrl,folderPath,sharepoint_token};
 }
