@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { JobAction, Update_Status, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
+import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
