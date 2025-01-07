@@ -7,6 +7,7 @@ import { JobDocumentAction } from "../../../ReduxStore/Slice/Customer/CustomerSl
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
+import {allowedTypes } from "../../../Utils/Comman_function";
 
 
 const Documents = ({ getAccessDataJob }) => {
@@ -164,14 +165,6 @@ const Documents = ({ getAccessDataJob }) => {
       return;
     }
 
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "image/png",
-      "image/jpg",
-      "image/jpeg",
-    ];
 
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)
@@ -294,7 +287,7 @@ const Documents = ({ getAccessDataJob }) => {
     if (type == 1) {
       return;
     }
-    
+
     const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({

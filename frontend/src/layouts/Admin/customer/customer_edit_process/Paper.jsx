@@ -8,6 +8,7 @@ import sweatalert from "sweetalert2";
 import { ADD_PEPPER_WORKS, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
+import {allowedTypes } from "../../../../Utils/Comman_function";
 
 const Paper = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -59,17 +60,6 @@ const Paper = () => {
     } else {
       return;
     }
-
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "image/png",
-      "image/jpg",
-      "image/jpeg",
-    ];
-
-
 
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)

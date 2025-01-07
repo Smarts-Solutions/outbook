@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
+import {allowedTypes } from "../../../Utils/Comman_function";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -339,6 +340,7 @@ const ClientList = () => {
   ];
 
   const handleFileChange = (event) => {
+
     const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
@@ -358,15 +360,6 @@ const ClientList = () => {
     } else {
       return;
     }
-
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "image/png",
-      "image/jpg",
-      "image/jpeg",
-    ];
 
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)
@@ -450,6 +443,8 @@ const ClientList = () => {
           uploadedFilesArray.push(uploadedFileInfo);
         }
         const req = { fileData: newFiles, client_id: location.state.data.client.id, authToken: token, uploadedFiles: uploadedFilesArray }
+
+        console.log("req", req);
         await dispatch(addClientDocument(req))
           .unwrap()
           .then((response) => {
@@ -578,6 +573,10 @@ const ClientList = () => {
             <i className="ti-trash text-danger" />
           </button>
 
+          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url,sharepoint_token, row.original_name)}>
+          <i className="ti-download" />
+        </button>
+
         </div>
       ),
       ignoreRowClick: true,
@@ -588,6 +587,59 @@ const ClientList = () => {
 
 
   ];
+
+ 
+  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+    console.log("sharePointFileUrl", sharePointFileUrl);
+    console.log("accessToken", accessToken);
+    try {
+      // Make a GET request to SharePoint to get the file as a blob
+      const response = await fetch(sharePointFileUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      console.log("response", response);
+  
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+  
+      // Convert the response to a Blob (binary data)
+      const fileBlob = await response.blob();
+  
+      // Create a URL for the Blob
+      const fileURL = window.URL.createObjectURL(fileBlob);
+  
+      // Create a temporary <a> element to trigger the download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName; // Provide a file name (optional)
+      downloadLink.click(); // Trigger the download
+      window.URL.revokeObjectURL(fileURL); // Clean up after the download
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+    }
+  };
+  
+  
+  // const openAndDownloadFile = (url, filename = '') => {
+  //   // Open the file in a new tab
+  //   window.open(url, '_blank');
+  
+  //   // Create a temporary link to trigger download
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.target = '_blank'; // Open in a new tab
+  //   link.download = filename || ''; // Specify a filename here if needed
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
 
   const removeItem = async (file, type) => {
     if (type == 1) {

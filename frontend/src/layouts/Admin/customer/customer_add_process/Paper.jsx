@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
+import {allowedTypes } from "../../../../Utils/Comman_function";
 
 const Paper = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +32,7 @@ const Paper = () => {
   const [folderPath, setFolderPath] = useState("");
 
   const handleFileChange = (event) => {
-   
+
     const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
@@ -52,15 +53,6 @@ const Paper = () => {
     } else {
       return;
     }
-
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "image/png",
-      "image/jpg",
-      "image/jpeg",
-    ];
 
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)
@@ -152,23 +144,23 @@ const Paper = () => {
     const uploadedFilesArray = [];
     const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
     if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
-     if (newFiles.length > 0) {
-      setIsLoading(true);
-      const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-      const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
-      for (const file of newFiles) {
-        const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-        const uploadedFileInfo = {
-          web_url: uploadDataUrl,
-          filename: file.lastModified + '-' + file.name,
-          originalname: file.name,
-          mimetype: file.type,
-          size: file.size
-        };
-        uploadedFilesArray.push(uploadedFileInfo);
-      }
+      if (newFiles.length > 0) {
+        setIsLoading(true);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+        for (const file of newFiles) {
+          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadedFileInfo = {
+            web_url: uploadDataUrl,
+            filename: file.lastModified + '-' + file.name,
+            originalname: file.name,
+            mimetype: file.type,
+            size: file.size
+          };
+          uploadedFilesArray.push(uploadedFileInfo);
+        }
 
-     }
+      }
     }
 
     const data1 = {
