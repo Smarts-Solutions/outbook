@@ -4,7 +4,7 @@ import { GetClientIndustry, Edit_Client, ClientAction } from "../../../ReduxStor
 import { GetAllCompany ,GetOfficerDetails} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { validate, ScrollToViewFirstErrorContactForm } from '../../../Utils/Comman_function'
+import { validate, ScrollToViewFirstErrorContactForm ,convertDate} from '../../../Utils/Comman_function'
 import { PersonRole, Country } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 const ClientEdit = () => {
@@ -1514,7 +1514,7 @@ const ClientEdit = () => {
                                               id="IncorporationDate"
                                               onChange={(e) => handleInputsChange(e, 2)}
                                               value={
-                                                getCompanyDetails.IncorporationDate
+                                                convertDate(getCompanyDetails.IncorporationDate)
                                               }
                                             // disabled
                                             />

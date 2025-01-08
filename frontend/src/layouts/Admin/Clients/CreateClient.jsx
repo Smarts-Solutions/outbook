@@ -6,7 +6,7 @@ import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { PersonRole, Country } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../Utils/Comman_function'
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm ,convertDate } from '../../../Utils/Comman_function'
 
 const CreateClient = () => {
   const dispatch = useDispatch();
@@ -1611,7 +1611,7 @@ const CreateClient = () => {
                                               id="IncorporationDate"
                                               onChange={(e) => handleChange2(e)}
                                               value={
-                                                getCompanyDetails.IncorporationDate
+                                                convertDate(getCompanyDetails.IncorporationDate)
                                               }
                                             // disabled
                                             />

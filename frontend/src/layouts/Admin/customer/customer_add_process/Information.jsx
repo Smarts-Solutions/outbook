@@ -11,7 +11,7 @@ import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA, GetOfficerDetails} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm ,convertDate } from '../../../../Utils/Comman_function'
 import { use } from "react";
 
 const Information = ({ id, pageStatus }) => {
@@ -1689,7 +1689,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails?.IncorporationDate}
+                                  value={convertDate(getCompanyDetails?.IncorporationDate)}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">

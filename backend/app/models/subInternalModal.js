@@ -4,13 +4,13 @@ const { SatffLogUpdateOperation } = require("../utils/helper");
 const AddSubInternal = async (subInternal) => {
     const { name , internal_id } = subInternal;
     // add internal
-    const checkQuery = `SELECT 1 FROM sub_internal WHERE name = ?`;
+    const checkQuery = `SELECT 1 FROM sub_internal WHERE name = ? AND internal_id = ?`;
     const query = `
   INSERT INTO sub_internal (name, internal_id)
   VALUES (?,?)
   `;
     try {
-        const [check] = await pool.query(checkQuery, [name]);
+        const [check] = await pool.query(checkQuery, [name, internal_id]);
         if (check.length > 0) {
             return { status: false, message: 'Internal task already exists.' };
         }
