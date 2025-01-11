@@ -1115,11 +1115,6 @@ const Information = ({ id, pageStatus }) => {
   };
 
 
-
-
-
-
-
   return (
     <>
       <Formik
@@ -1716,14 +1711,12 @@ const Information = ({ id, pageStatus }) => {
                                 /> */}
 
                                 <select
-
                                   className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
-
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails?.IncorporationIn}
-                                >
+                                  >
                                   <option value="">
                                     Please Select Incorporation In
                                   </option>

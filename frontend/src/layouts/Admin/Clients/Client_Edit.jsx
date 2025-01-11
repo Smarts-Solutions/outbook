@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { GetClientIndustry, Edit_Client, ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
-import { GetAllCompany ,GetOfficerDetails} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GetAllCompany, GetOfficerDetails } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { validate, ScrollToViewFirstErrorContactForm ,convertDate} from '../../../Utils/Comman_function'
-import { PersonRole, Country } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { validate, ScrollToViewFirstErrorContactForm, convertDate } from '../../../Utils/Comman_function'
+import { PersonRole, Country, IncorporationApi } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 const ClientEdit = () => {
   const dispatch = useDispatch();
@@ -19,10 +19,36 @@ const ClientEdit = () => {
   const [getSearchDetails, setSearchDetails] = useState("");
   const [searchItem, setSearchItem] = useState("");
   const [partnershipContacts, setPartnershipContacts] = useState([]);
+  const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
+
+
+
+
+
+
+
+  const incorporationData = async (req) => {
+    const data = { req: { action: "getAll" }, authToken: token };
+    await dispatch(IncorporationApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setIncorporationDataAll(response.data);
+        } else {
+          setIncorporationDataAll([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+
+
   const [companyContactsErrors, setCompanyContactsErrors] = useState([
     {
       first_name: false,
@@ -142,6 +168,7 @@ const ClientEdit = () => {
     CustomerPersonRoleData();
     GetClientDetails();
     getClientIndustry();
+    incorporationData();
   }, []);
 
   useEffect(() => {
@@ -170,7 +197,7 @@ const ClientEdit = () => {
         website:
           !getClientDetails.loading && getClientDetails.data.client.website,
         notes:
-        !getClientDetails.loading && getClientDetails.data.client.notes,
+          !getClientDetails.loading && getClientDetails.data.client.notes,
         first_name:
           !getClientDetails.loading &&
           getClientDetails.data.contact_details[0].first_name,
@@ -1096,7 +1123,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             VAT Number
-                                            
+
                                           </label>
                                           <input
                                             type="text"
@@ -1116,7 +1143,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Website
-                                          
+
                                           </label>
                                           <input
                                             type="text"
@@ -1247,7 +1274,7 @@ const ClientEdit = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Email
-                                          
+
                                         </label>
                                         <input
                                           type="text"
@@ -1270,7 +1297,7 @@ const ClientEdit = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Residential Address
-                                         
+
                                         </label>
                                         <input
                                           type="text"
@@ -1318,7 +1345,7 @@ const ClientEdit = () => {
                                           </div>
                                         )}
                                       </div>
-                                    </div>  
+                                    </div>
                                   </div>
                                 </div>
 
@@ -1568,7 +1595,7 @@ const ClientEdit = () => {
                                                 *
                                               </span>{" "}
                                             </label>
-                                            <input
+                                            {/* <input
                                               type="text"
                                               className={errors2["IncorporationIn"] ? "error-field form-control" : "form-control"}
                                               placeholder="Please Enter Incorporation In"
@@ -1578,8 +1605,26 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
-                                            // disabled
-                                            />
+                                            /> */}
+
+                                            <select
+                                              className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
+
+                                              name="IncorporationIn"
+                                              id="IncorporationIn"
+                                              onChange={(e) => handleInputsChange(e , 2)}
+                                              value={getCompanyDetails?.IncorporationIn}
+                                            >
+                                              <option value="">
+                                                Please Select Incorporation In
+                                              </option>
+                                              {incorporationDataAll &&
+                                                incorporationDataAll?.map((data) => (
+                                                  <option key={data?.id} value={data?.id}>
+                                                    {data?.name}
+                                                  </option>
+                                                ))}
+                                            </select>
 
                                             {errors2["IncorporationIn"] && (
                                               <div className="error-text">
@@ -1777,320 +1822,320 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                                <div className="col-lg-12">
-                                  <div className="card card_shadow">
-                                    <div className="card-header card-header-light-blue align-items-center d-flex">
-                                      <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                        Officer Details
-                                      </h4>
-                                    </div>
-                                    <div className="row">
-                                      <div className="card-body">
-                                        <div className="row">
-                                          {CompanyContacts.length > 0 &&
-                                            CompanyContacts.map((contact, index) => (
-                                              <div
-                                                className="col-xl-12 col-lg-12 mt-3"
-                                                key={index}
-                                              >
-                                                <div className="card pricing-box p-3 m-2 mt-0">
-                                                  <div className="row">
-                                                    {index !== 0 && (
-                                                      <div className="col-lg-12">
-                                                        <div className="form-check mb-3 d-flex justify-content-end">
-                                                          <button
-                                                            className="delete-icon"
-                                                            onClick={() =>
-                                                              handleDeleteCompanyContact(
-                                                                index
+                              <div className="col-lg-12">
+                                <div className="card card_shadow">
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
+                                      Officer Details
+                                    </h4>
+                                  </div>
+                                  <div className="row">
+                                    <div className="card-body">
+                                      <div className="row">
+                                        {CompanyContacts.length > 0 &&
+                                          CompanyContacts.map((contact, index) => (
+                                            <div
+                                              className="col-xl-12 col-lg-12 mt-3"
+                                              key={index}
+                                            >
+                                              <div className="card pricing-box p-3 m-2 mt-0">
+                                                <div className="row">
+                                                  {index !== 0 && (
+                                                    <div className="col-lg-12">
+                                                      <div className="form-check mb-3 d-flex justify-content-end">
+                                                        <button
+                                                          className="delete-icon"
+                                                          onClick={() =>
+                                                            handleDeleteCompanyContact(
+                                                              index
+                                                            )
+                                                          }
+                                                          disabled={
+                                                            CompanyContacts.length ===
+                                                            1
+                                                          }
+                                                        >
+                                                          <i className="ti-trash text-danger"></i>{" "}
+
+                                                        </button>
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`first_name-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        First Name
+                                                        <span
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          *
+                                                        </span>
+                                                      </label>
+                                                      <input
+                                                        type="text"
+                                                        className={companyContactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
+
+                                                        placeholder="First Name"
+                                                        id={`first_name-${index}`}
+                                                        value={
+                                                          contact.first_name
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleContactInputChange(
+                                                            index,
+                                                            "first_name",
+                                                            e.target.value,
+                                                            1
+                                                          )
+                                                        }
+                                                        maxLength={50}
+                                                      />
+                                                      {companyContactsErrors[index] &&
+                                                        companyContactsErrors[index]
+                                                          .first_name && (
+                                                          <div className="error-text">
+                                                            {
+                                                              companyContactsErrors[index]?.first_name
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`last_name-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        Last Name
+                                                        <span
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          *
+                                                        </span>
+                                                      </label>
+                                                      <input
+                                                        type="text"
+                                                        className={companyContactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
+
+                                                        placeholder="Last Name"
+                                                        id={`last_name-${index}`}
+                                                        value={
+                                                          contact.last_name
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleContactInputChange(
+                                                            index,
+                                                            "last_name",
+                                                            e.target.value,
+                                                            1
+                                                          )
+                                                        }
+                                                        maxLength={50}
+                                                      />
+                                                      {companyContactsErrors[index] &&
+                                                        companyContactsErrors[index]
+                                                          .last_name && (
+                                                          <div className="error-text">
+                                                            {
+                                                              companyContactsErrors[index]?.last_name
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`customer_contact_person_role_id-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        Role
+
+                                                      </label>
+                                                      <select
+                                                        className="form-select"
+                                                        id={`customer_contact_person_role_id-${index}`}
+                                                        value={contact.customer_contact_person_role_id}
+                                                        onChange={(e) =>
+                                                          handleContactInputChange(
+                                                            index,
+                                                            "customer_contact_person_role_id",
+                                                            e.target.value,
+                                                            1
+                                                          )
+                                                        }
+                                                      >
+                                                        <option value="">
+                                                          Select Role
+                                                        </option>
+                                                        {personRoleDataAll &&
+                                                          personRoleDataAll.data.map(
+                                                            (item, i) => (
+                                                              <>
+                                                                <option
+                                                                  value={
+                                                                    item.id
+                                                                  }
+                                                                  key={i}
+                                                                >
+                                                                  {item.name}
+                                                                </option>
+                                                              </>
+                                                            )
+                                                          )}
+                                                      </select>
+                                                      {companyContactsErrors[index] &&
+                                                        companyContactsErrors[index]
+                                                          .customer_contact_person_role_id && (
+                                                          <div className="error-text">
+                                                            {
+                                                              companyContactsErrors[index]?.customer_contact_person_role_id
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label className="form-label">
+                                                        Phone
+                                                      </label>
+                                                      <div className="row">
+                                                        <div className="col-md-4 pe-0">
+                                                          <select
+                                                            className="form-select"
+                                                            onChange={(e) =>
+                                                              handleContactInputChange(
+                                                                index,
+                                                                "phone_code",
+                                                                e.target.value,
+                                                                1
                                                               )
                                                             }
-                                                            disabled={
-                                                              CompanyContacts.length ===
-                                                              1
+                                                            name="phone_code"
+                                                            value={
+                                                              contact.phone_code
                                                             }
                                                           >
-                                                            <i className="ti-trash text-danger"></i>{" "}
-
-                                                          </button>
-                                                        </div>
-                                                      </div>
-                                                    )}
-                                                    <div className="col-lg-4">
-                                                      <div className="mb-3">
-                                                        <label
-                                                          htmlFor={`first_name-${index}`}
-                                                          className="form-label"
-                                                        >
-                                                          First Name
-                                                          <span
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            *
-                                                          </span>
-                                                        </label>
-                                                        <input
-                                                          type="text"
-                                                          className={companyContactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
-
-                                                          placeholder="First Name"
-                                                          id={`first_name-${index}`}
-                                                          value={
-                                                            contact.first_name
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleContactInputChange(
-                                                              index,
-                                                              "first_name",
-                                                              e.target.value,
-                                                              1
-                                                            )
-                                                          }
-                                                          maxLength={50}
-                                                        />
-                                                        {companyContactsErrors[index] &&
-                                                          companyContactsErrors[index]
-                                                            .first_name && (
-                                                            <div className="error-text">
-                                                              {
-                                                                companyContactsErrors[index]?.first_name
-                                                              }
-                                                            </div>
-                                                          )}
-                                                      </div>
-                                                    </div>
-                                                    <div className="col-lg-4">
-                                                      <div className="mb-3">
-                                                        <label
-                                                          htmlFor={`last_name-${index}`}
-                                                          className="form-label"
-                                                        >
-                                                          Last Name
-                                                          <span
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            *
-                                                          </span>
-                                                        </label>
-                                                        <input
-                                                          type="text"
-                                                          className={companyContactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
-
-                                                          placeholder="Last Name"
-                                                          id={`last_name-${index}`}
-                                                          value={
-                                                            contact.last_name
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleContactInputChange(
-                                                              index,
-                                                              "last_name",
-                                                              e.target.value,
-                                                              1
-                                                            )
-                                                          }
-                                                          maxLength={50}
-                                                        />
-                                                        {companyContactsErrors[index] &&
-                                                          companyContactsErrors[index]
-                                                            .last_name && (
-                                                            <div className="error-text">
-                                                              {
-                                                                companyContactsErrors[index]?.last_name
-                                                              }
-                                                            </div>
-                                                          )}
-                                                      </div>
-                                                    </div>
-                                                    <div className="col-lg-4">
-                                                      <div className="mb-3">
-                                                        <label
-                                                          htmlFor={`customer_contact_person_role_id-${index}`}
-                                                          className="form-label"
-                                                        >
-                                                          Role
-                                                          
-                                                        </label>
-                                                        <select
-                                                          className="form-select"
-                                                          id={`customer_contact_person_role_id-${index}`}
-                                                          value={contact.customer_contact_person_role_id}
-                                                          onChange={(e) =>
-                                                            handleContactInputChange(
-                                                              index,
-                                                              "customer_contact_person_role_id",
-                                                              e.target.value,
-                                                              1
-                                                            )
-                                                          }
-                                                        >
-                                                          <option value="">
-                                                            Select Role
-                                                          </option>
-                                                          {personRoleDataAll &&
-                                                            personRoleDataAll.data.map(
-                                                              (item, i) => (
-                                                                <>
-                                                                  <option
-                                                                    value={
-                                                                      item.id
-                                                                    }
-                                                                    key={i}
-                                                                  >
-                                                                    {item.name}
-                                                                  </option>
-                                                                </>
+                                                            {countryDataAll.data.map(
+                                                              (data) => (
+                                                                <option
+                                                                  key={
+                                                                    data.code
+                                                                  }
+                                                                  value={
+                                                                    data.code
+                                                                  }
+                                                                >
+                                                                  {data.code}
+                                                                </option>
                                                               )
                                                             )}
-                                                        </select>
-                                                        {companyContactsErrors[index] &&
-                                                          companyContactsErrors[index]
-                                                            .customer_contact_person_role_id && (
-                                                            <div className="error-text">
-                                                              {
-                                                                companyContactsErrors[index]?.customer_contact_person_role_id
-                                                              }
-                                                            </div>
-                                                          )}
-                                                      </div>
-                                                    </div>
-
-                                                    <div className="col-lg-4">
-                                                      <div className="mb-3">
-                                                        <label className="form-label">
-                                                          Phone
-                                                        </label>
-                                                        <div className="row">
-                                                          <div className="col-md-4 pe-0">
-                                                            <select
-                                                              className="form-select"
-                                                              onChange={(e) =>
-                                                                handleContactInputChange(
-                                                                  index,
-                                                                  "phone_code",
-                                                                  e.target.value,
-                                                                  1
-                                                                )
-                                                              }
-                                                              name="phone_code"
-                                                              value={
-                                                                contact.phone_code
-                                                              }
-                                                            >
-                                                              {countryDataAll.data.map(
-                                                                (data) => (
-                                                                  <option
-                                                                    key={
-                                                                      data.code
-                                                                    }
-                                                                    value={
-                                                                      data.code
-                                                                    }
-                                                                  >
-                                                                    {data.code}
-                                                                  </option>
-                                                                )
-                                                              )}
-                                                            </select>
-                                                          </div>
-                                                          <div className="mb-3 col-md-8 ps-1">
-                                                            <input
-                                                              type="number"
-                                                              className="form-control"
-                                                              placeholder="Phone Number"
-                                                              id={`phone-${index}`}
-                                                              value={
-                                                                contact?.phone
-                                                              }
-                                                              onChange={(e) =>
-                                                                handleContactInputChange(
-                                                                  index,
-                                                                  "phone",
-                                                                  e.target.value,
-                                                                  1
-                                                                )
-                                                              }
-                                                              maxLength={12}
-                                                              minLength={9}
-                                                            />
-                                                            {companyContactsErrors[index] &&
-                                                              companyContactsErrors[index]
-                                                                .phone && (
-                                                                <div
-                                                                  style={{
-                                                                    color:
-                                                                      "red",
-                                                                  }}
-                                                                >
-                                                                  {
-                                                                    companyContactsErrors[index]?.phone
-                                                                  }
-                                                                </div>
-                                                              )}
-                                                          </div>
+                                                          </select>
+                                                        </div>
+                                                        <div className="mb-3 col-md-8 ps-1">
+                                                          <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            placeholder="Phone Number"
+                                                            id={`phone-${index}`}
+                                                            value={
+                                                              contact?.phone
+                                                            }
+                                                            onChange={(e) =>
+                                                              handleContactInputChange(
+                                                                index,
+                                                                "phone",
+                                                                e.target.value,
+                                                                1
+                                                              )
+                                                            }
+                                                            maxLength={12}
+                                                            minLength={9}
+                                                          />
+                                                          {companyContactsErrors[index] &&
+                                                            companyContactsErrors[index]
+                                                              .phone && (
+                                                              <div
+                                                                style={{
+                                                                  color:
+                                                                    "red",
+                                                                }}
+                                                              >
+                                                                {
+                                                                  companyContactsErrors[index]?.phone
+                                                                }
+                                                              </div>
+                                                            )}
                                                         </div>
                                                       </div>
                                                     </div>
+                                                  </div>
 
-                                                    <div className="col-lg-4">
-                                                      <div className="mb-3">
-                                                        <label
-                                                          htmlFor={`email-${index}`}
-                                                          className="form-label"
-                                                        >
-                                                          Email
-                                                          
-                                                        </label>
-                                                        <input
-                                                          type="text"
-                                                          className={companyContactsErrors[index]?.email ? "error-field form-control" : "form-control"}
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`email-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        Email
 
-                                                          placeholder="Email"
-                                                          id={`email-${index}`}
-                                                          value={contact.email}
-                                                          onChange={(e) =>
-                                                            handleContactInputChange(
-                                                              index,
-                                                              "email",
-                                                              e.target.value,
-                                                              1
-                                                            )
-                                                          }
-                                                        />
-                                                        {companyContactsErrors[index] &&
-                                                          companyContactsErrors[index]
-                                                            .email && (
-                                                            <div className="error-text">
-                                                              {
-                                                                companyContactsErrors[index]?.email
-                                                              }
-                                                            </div>
-                                                          )}
-                                                      </div>
+                                                      </label>
+                                                      <input
+                                                        type="text"
+                                                        className={companyContactsErrors[index]?.email ? "error-field form-control" : "form-control"}
+
+                                                        placeholder="Email"
+                                                        id={`email-${index}`}
+                                                        value={contact.email}
+                                                        onChange={(e) =>
+                                                          handleContactInputChange(
+                                                            index,
+                                                            "email",
+                                                            e.target.value,
+                                                            1
+                                                          )
+                                                        }
+                                                      />
+                                                      {companyContactsErrors[index] &&
+                                                        companyContactsErrors[index]
+                                                          .email && (
+                                                          <div className="error-text">
+                                                            {
+                                                              companyContactsErrors[index]?.email
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                 </div>
                                               </div>
-                                            ))}
-                                          <div className="justify-content-end d-flex align-items-center">
-                                            <button
-                                              className="btn btn-info text-white blue-btn"
-                                              onClick={handleAddCompanyContact}
-                                            >
-                                              <i className="fa fa-plus pe-1"></i>
-                                              Add Officer
-                                            </button>
-                                          </div>
+                                            </div>
+                                          ))}
+                                        <div className="justify-content-end d-flex align-items-center">
+                                          <button
+                                            className="btn btn-info text-white blue-btn"
+                                            onClick={handleAddCompanyContact}
+                                          >
+                                            <i className="fa fa-plus pe-1"></i>
+                                            Add Officer
+                                          </button>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>{" "}
-                                <div className="col-lg-12">
+                                </div>
+                              </div>{" "}
+                              <div className="col-lg-12">
                                 <div className="card card_shadow ">
                                   {/* end card header */}
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
@@ -2102,7 +2147,7 @@ const ClientEdit = () => {
                                     <div className="row">
                                       <div className="col-lg-12">
                                         <div className="mb-3">
-                            
+
                                           <textarea
                                             type="text"
                                             className={errors2["notes"] ? "error-field form-control" : "form-control"}
@@ -2126,8 +2171,8 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                              </div>
-                           
+                            </div>
+
                           ) : selectClientType == 3 ? (
                             <div className="row ">
                               <div className="col-lg-12">
@@ -2320,444 +2365,444 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                              
-                                <div className="col-lg-12">
-                                  <div className="card card_shadow">
-                                    <div className="card-header card-header-light-blue align-items-center d-flex">
-                                      <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                       Partner Details
-                                      </h4>
-                                    </div>
-                                    <div className="card-body">
-                                      <div className="row">
-                                        {partnershipContacts &&
-                                          partnershipContacts.map((contact, index) => (
-                                            <div
-                                              className="col-xxl-12 col-lg-12"
-                                              key={contact.contact_id}
-                                            >
-                                              <div className="card pricing-box p-3 m-2 mt-0">
-                                                <div className="row">
-                                                  <div className="col-lg-12">
-                                                      <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
-                                                    <div className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end" dir="ltr"  >
 
-                                                      {index !== 0 &&
-                                                        index !== 1 && (
-                                                          <div>
-                                                            <button
-                                                              className="delete-icon"
-                                                              type="button"
-                                                              onClick={() =>
-                                                                handleDeletePartnershipContact(
-                                                                  index
-                                                                )
-                                                              }
-                                                              disabled={
-                                                                partnershipContacts.length ===
-                                                                1
-                                                              }
-                                                            >
-                                                              <i className="ti-trash text-danger"></i>{" "}
+                              <div className="col-lg-12">
+                                <div className="card card_shadow">
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
+                                      Partner Details
+                                    </h4>
+                                  </div>
+                                  <div className="card-body">
+                                    <div className="row">
+                                      {partnershipContacts &&
+                                        partnershipContacts.map((contact, index) => (
+                                          <div
+                                            className="col-xxl-12 col-lg-12"
+                                            key={contact.contact_id}
+                                          >
+                                            <div className="card pricing-box p-3 m-2 mt-0">
+                                              <div className="row">
+                                                <div className="col-lg-12">
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                  <div className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end" dir="ltr"  >
 
-                                                            </button>
-                                                          </div>
-                                                        )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        First Name
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className={PartnershiContactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
-
-                                                        placeholder="First Name"
-                                                        name="first_name"
-                                                        id={`first_name-${index}`}
-                                                        value={
-                                                          contact.first_name
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleContactInputChange(
-                                                            index,
-                                                            "first_name",
-                                                            e.target.value,
-                                                            2
-                                                          )
-                                                        }
-                                                        maxLength={50}
-                                                      />
-                                                      {PartnershiContactsErrors[index]
-                                                        ?.first_name && (
-                                                          <div
-                                                            className="error-text"
-                                                          >
-                                                            {
-                                                              PartnershiContactsErrors[
+                                                    {index !== 0 &&
+                                                      index !== 1 && (
+                                                        <div>
+                                                          <button
+                                                            className="delete-icon"
+                                                            type="button"
+                                                            onClick={() =>
+                                                              handleDeletePartnershipContact(
                                                                 index
-                                                              ].first_name
-                                                            }
-                                                          </div>
-                                                        )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Last Name
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className={PartnershiContactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
-
-                                                        placeholder="Last Name"
-                                                        name="last_name"
-                                                        id={`last_name-${index}`}
-
-                                                        value={
-                                                          contact.last_name
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleContactInputChange(
-                                                            index,
-                                                            "last_name",
-                                                            e.target.value,
-                                                            2
-                                                          )
-                                                        }
-                                                        maxLength={50}
-                                                      />
-                                                      {PartnershiContactsErrors[index]
-                                                        ?.last_name && (
-                                                          <div
-                                                            className="error-text"
-                                                          >
-                                                            {
-                                                              PartnershiContactsErrors[
-                                                                index
-                                                              ].last_name
-                                                            }
-                                                          </div>
-                                                        )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Role
-                                                        
-                                                      </label>
-                                                      <select
-                                                        className="form-select"
-                                                        id={`customer_contact_person_role_id-${index}`}
-                                                        value={
-                                                          contact.customer_contact_person_role_id
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleContactInputChange(
-                                                            index,
-                                                            "customer_contact_person_role_id",
-                                                            e.target.value,
-                                                            2
-                                                          )
-                                                        }
-                                                      >
-                                                        <option value="">
-                                                          Select Role
-                                                        </option>
-                                                        {personRoleDataAll &&
-                                                          personRoleDataAll.data.map(
-                                                            (item, i) => (
-                                                              <option
-                                                                value={item.id}
-                                                                key={i}
-                                                              >
-                                                                {item.name}
-                                                              </option>
-                                                            )
-                                                          )}
-                                                      </select>
-                                                      {PartnershiContactsErrors[index]
-                                                        ?.customer_contact_person_role_id && (
-                                                          <div
-                                                            className="error-text"
-                                                          >
-                                                            {
-                                                              PartnershiContactsErrors[
-                                                                index
-                                                              ]
-                                                                .customer_contact_person_role_id
-                                                            }
-                                                          </div>
-                                                        )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4 pe-0">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Phone
-                                                      </label>
-                                                      <div className="row">
-                                                        <div className="col-md-4">
-                                                          <select
-                                                            className="form-select"
-                                                            onChange={(e) =>
-                                                              handleContactInputChange(
-                                                                index,
-                                                                "phone_code",
-                                                                e.target.value,
-                                                                2
                                                               )
                                                             }
-                                                            name="phone_code"
-                                                            value={
-                                                              contact.phone_code
+                                                            disabled={
+                                                              partnershipContacts.length ===
+                                                              1
                                                             }
                                                           >
-                                                            {countryDataAll.data.map(
-                                                              (data) => (
-                                                                <option
-                                                                  key={
-                                                                    data.code
-                                                                  }
-                                                                  value={
-                                                                    data.code
-                                                                  }
-                                                                >
-                                                                  {data.code}
-                                                                </option>
-                                                              )
-                                                            )}
-                                                          </select>
+                                                            <i className="ti-trash text-danger"></i>{" "}
+
+                                                          </button>
                                                         </div>
-                                                        <div className="mb-3 col-md-8 ps-1">
-                                                          <input
-                                                            type="number"
-                                                            className="form-control"
-                                                            placeholder="Phone"
-                                                            name="phone"
-                                                            id={`phone-${index}`}
-                                                            value={
-                                                              contact.phone
-                                                            }
-                                                            onChange={(e) =>
-                                                              handleContactInputChange(
-                                                                index,
-                                                                "phone",
-                                                                e.target.value,
-                                                                2
-                                                              )
-                                                            }
-                                                            maxLength={12}
-                                                          />
-                                                          {PartnershiContactsErrors[
-                                                            index
-                                                          ] &&
+                                                      )}
+                                                  </div>
+                                                </div>
+                                                <div className="col-lg-4">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      First Name
+                                                      <span
+                                                        style={{
+                                                          color: "red",
+                                                        }}
+                                                      >
+                                                        *
+                                                      </span>
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      className={PartnershiContactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
+
+                                                      placeholder="First Name"
+                                                      name="first_name"
+                                                      id={`first_name-${index}`}
+                                                      value={
+                                                        contact.first_name
+                                                      }
+                                                      onChange={(e) =>
+                                                        handleContactInputChange(
+                                                          index,
+                                                          "first_name",
+                                                          e.target.value,
+                                                          2
+                                                        )
+                                                      }
+                                                      maxLength={50}
+                                                    />
+                                                    {PartnershiContactsErrors[index]
+                                                      ?.first_name && (
+                                                        <div
+                                                          className="error-text"
+                                                        >
+                                                          {
                                                             PartnershiContactsErrors[
                                                               index
-                                                            ].phone && (
-                                                              <div className="error-text">
-                                                                {
-                                                                  PartnershiContactsErrors[
-                                                                    index
-                                                                  ].phone
-                                                                }
-                                                              </div>
-                                                            )}
+                                                            ].first_name
+                                                          }
                                                         </div>
-                                                      </div>
-                                                    </div>
+                                                      )}
                                                   </div>
+                                                </div>
+                                                <div className="col-lg-4">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      Last Name
+                                                      <span
+                                                        style={{
+                                                          color: "red",
+                                                        }}
+                                                      >
+                                                        *
+                                                      </span>
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      className={PartnershiContactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
 
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Alternate Phone Number
-                                                      </label>
-                                                      <div className="row">
-                                                        <div className="col-md-4 pe-0">
-                                                          <select
-                                                            className="form-select"
-                                                            onChange={(e) =>
-                                                              handleContactInputChange(
-                                                                index,
-                                                                "alternate_phone_code",
-                                                                e.target.value,
-                                                                2
-                                                              )
-                                                            }
-                                                            name="alternate_phone_code"
-                                                            id={`alternate_phone_code-${index}`}
+                                                      placeholder="Last Name"
+                                                      name="last_name"
+                                                      id={`last_name-${index}`}
 
-                                                            value={
-                                                              contact.alternate_phone_code
-                                                            }
-                                                          >
-                                                            {countryDataAll.data.map(
-                                                              (data) => (
-                                                                <option
-                                                                  key={
-                                                                    data.code
-                                                                  }
-                                                                  value={
-                                                                    data.code
-                                                                  }
-                                                                >
-                                                                  {data.code}
-                                                                </option>
-                                                              )
-                                                            )}
-                                                          </select>
+                                                      value={
+                                                        contact.last_name
+                                                      }
+                                                      onChange={(e) =>
+                                                        handleContactInputChange(
+                                                          index,
+                                                          "last_name",
+                                                          e.target.value,
+                                                          2
+                                                        )
+                                                      }
+                                                      maxLength={50}
+                                                    />
+                                                    {PartnershiContactsErrors[index]
+                                                      ?.last_name && (
+                                                        <div
+                                                          className="error-text"
+                                                        >
+                                                          {
+                                                            PartnershiContactsErrors[
+                                                              index
+                                                            ].last_name
+                                                          }
                                                         </div>
-                                                        <div className="mb-3 col-md-8 ps-1">
-                                                          <input
-                                                            type="number"
-                                                            className="form-control"
-                                                            placeholder="Alternate Phone Number"
-                                                            name="alternate_phone"
-                                                            id={`alternate_phone-${index}`}
-                                                            value={
-                                                              contact.alternate_phone
-                                                            }
-                                                            onChange={(e) =>
-                                                              handleContactInputChange(
-                                                                index,
-                                                                "alternate_phone",
-                                                                e.target.value,
-                                                                2
-                                                              )
-                                                            }
-                                                            maxLength={12}
-                                                          />
-                                                          {PartnershiContactsErrors[
-                                                            index
-                                                          ] &&
+                                                      )}
+                                                  </div>
+                                                </div>
+                                                <div className="col-lg-4">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      Role
+
+                                                    </label>
+                                                    <select
+                                                      className="form-select"
+                                                      id={`customer_contact_person_role_id-${index}`}
+                                                      value={
+                                                        contact.customer_contact_person_role_id
+                                                      }
+                                                      onChange={(e) =>
+                                                        handleContactInputChange(
+                                                          index,
+                                                          "customer_contact_person_role_id",
+                                                          e.target.value,
+                                                          2
+                                                        )
+                                                      }
+                                                    >
+                                                      <option value="">
+                                                        Select Role
+                                                      </option>
+                                                      {personRoleDataAll &&
+                                                        personRoleDataAll.data.map(
+                                                          (item, i) => (
+                                                            <option
+                                                              value={item.id}
+                                                              key={i}
+                                                            >
+                                                              {item.name}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                    </select>
+                                                    {PartnershiContactsErrors[index]
+                                                      ?.customer_contact_person_role_id && (
+                                                        <div
+                                                          className="error-text"
+                                                        >
+                                                          {
                                                             PartnershiContactsErrors[
                                                               index
                                                             ]
-                                                              .alternate_phone && (
-                                                              <div className="error-text">
-                                                                {
-                                                                  PartnershiContactsErrors[
-                                                                    index
-                                                                  ]
-                                                                    .alternate_phone
-                                                                }
-                                                              </div>
-                                                            )}
+                                                              .customer_contact_person_role_id
+                                                          }
                                                         </div>
+                                                      )}
+                                                  </div>
+                                                </div>
+                                                <div className="col-lg-4 pe-0">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      Phone
+                                                    </label>
+                                                    <div className="row">
+                                                      <div className="col-md-4">
+                                                        <select
+                                                          className="form-select"
+                                                          onChange={(e) =>
+                                                            handleContactInputChange(
+                                                              index,
+                                                              "phone_code",
+                                                              e.target.value,
+                                                              2
+                                                            )
+                                                          }
+                                                          name="phone_code"
+                                                          value={
+                                                            contact.phone_code
+                                                          }
+                                                        >
+                                                          {countryDataAll.data.map(
+                                                            (data) => (
+                                                              <option
+                                                                key={
+                                                                  data.code
+                                                                }
+                                                                value={
+                                                                  data.code
+                                                                }
+                                                              >
+                                                                {data.code}
+                                                              </option>
+                                                            )
+                                                          )}
+                                                        </select>
+                                                      </div>
+                                                      <div className="mb-3 col-md-8 ps-1">
+                                                        <input
+                                                          type="number"
+                                                          className="form-control"
+                                                          placeholder="Phone"
+                                                          name="phone"
+                                                          id={`phone-${index}`}
+                                                          value={
+                                                            contact.phone
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleContactInputChange(
+                                                              index,
+                                                              "phone",
+                                                              e.target.value,
+                                                              2
+                                                            )
+                                                          }
+                                                          maxLength={12}
+                                                        />
+                                                        {PartnershiContactsErrors[
+                                                          index
+                                                        ] &&
+                                                          PartnershiContactsErrors[
+                                                            index
+                                                          ].phone && (
+                                                            <div className="error-text">
+                                                              {
+                                                                PartnershiContactsErrors[
+                                                                  index
+                                                                ].phone
+                                                              }
+                                                            </div>
+                                                          )}
                                                       </div>
                                                     </div>
                                                   </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Email
-                                                      
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="Enter Email"
-                                                        name="email"
-                                                        id={`email-${index}`}
-                                                        value={contact.email}
-                                                        onChange={(e) =>
-                                                          handleContactInputChange(
-                                                            index,
-                                                            "email",
-                                                            e.target.value,
-                                                            2
-                                                          )
-                                                        }
-                                                      />
-                                                      {PartnershiContactsErrors[index]
-                                                        ?.email && (
-                                                          <div className="error-text" >
-                                                            {
-                                                              PartnershiContactsErrors[
-                                                                index
-                                                              ].email
-                                                            }
-                                                          </div>
-                                                        )}
+                                                </div>
+
+                                                <div className="col-lg-4">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      Alternate Phone Number
+                                                    </label>
+                                                    <div className="row">
+                                                      <div className="col-md-4 pe-0">
+                                                        <select
+                                                          className="form-select"
+                                                          onChange={(e) =>
+                                                            handleContactInputChange(
+                                                              index,
+                                                              "alternate_phone_code",
+                                                              e.target.value,
+                                                              2
+                                                            )
+                                                          }
+                                                          name="alternate_phone_code"
+                                                          id={`alternate_phone_code-${index}`}
+
+                                                          value={
+                                                            contact.alternate_phone_code
+                                                          }
+                                                        >
+                                                          {countryDataAll.data.map(
+                                                            (data) => (
+                                                              <option
+                                                                key={
+                                                                  data.code
+                                                                }
+                                                                value={
+                                                                  data.code
+                                                                }
+                                                              >
+                                                                {data.code}
+                                                              </option>
+                                                            )
+                                                          )}
+                                                        </select>
+                                                      </div>
+                                                      <div className="mb-3 col-md-8 ps-1">
+                                                        <input
+                                                          type="number"
+                                                          className="form-control"
+                                                          placeholder="Alternate Phone Number"
+                                                          name="alternate_phone"
+                                                          id={`alternate_phone-${index}`}
+                                                          value={
+                                                            contact.alternate_phone
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleContactInputChange(
+                                                              index,
+                                                              "alternate_phone",
+                                                              e.target.value,
+                                                              2
+                                                            )
+                                                          }
+                                                          maxLength={12}
+                                                        />
+                                                        {PartnershiContactsErrors[
+                                                          index
+                                                        ] &&
+                                                          PartnershiContactsErrors[
+                                                            index
+                                                          ]
+                                                            .alternate_phone && (
+                                                            <div className="error-text">
+                                                              {
+                                                                PartnershiContactsErrors[
+                                                                  index
+                                                                ]
+                                                                  .alternate_phone
+                                                              }
+                                                            </div>
+                                                          )}
+                                                      </div>
                                                     </div>
                                                   </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Alternate Email
-                                                        
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="Enter Alternate Email"
-                                                        name="alternate_email"
-                                                        id={`alternate_email-${index}`}
-                                                        value={
-                                                          contact.alternate_email
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleContactInputChange(
-                                                            index,
-                                                            "alternate_email",
-                                                            e.target.value,
-                                                            2
-                                                          )
-                                                        }
-                                                      />
-                                                      {PartnershiContactsErrors[index]
-                                                        ?.alternate_email && (
-                                                          <div className="error-text">
-                                                            {
-                                                              PartnershiContactsErrors[
-                                                                index
-                                                              ].alternate_email
-                                                            }
-                                                          </div>
-                                                        )}
-                                                    </div>
+                                                </div>
+                                                <div className="col-lg-4">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      Email
+
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      className="form-control"
+                                                      placeholder="Enter Email"
+                                                      name="email"
+                                                      id={`email-${index}`}
+                                                      value={contact.email}
+                                                      onChange={(e) =>
+                                                        handleContactInputChange(
+                                                          index,
+                                                          "email",
+                                                          e.target.value,
+                                                          2
+                                                        )
+                                                      }
+                                                    />
+                                                    {PartnershiContactsErrors[index]
+                                                      ?.email && (
+                                                        <div className="error-text" >
+                                                          {
+                                                            PartnershiContactsErrors[
+                                                              index
+                                                            ].email
+                                                          }
+                                                        </div>
+                                                      )}
+                                                  </div>
+                                                </div>
+                                                <div className="col-lg-4">
+                                                  <div className="mb-3">
+                                                    <label className="form-label">
+                                                      Alternate Email
+
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      className="form-control"
+                                                      placeholder="Enter Alternate Email"
+                                                      name="alternate_email"
+                                                      id={`alternate_email-${index}`}
+                                                      value={
+                                                        contact.alternate_email
+                                                      }
+                                                      onChange={(e) =>
+                                                        handleContactInputChange(
+                                                          index,
+                                                          "alternate_email",
+                                                          e.target.value,
+                                                          2
+                                                        )
+                                                      }
+                                                    />
+                                                    {PartnershiContactsErrors[index]
+                                                      ?.alternate_email && (
+                                                        <div className="error-text">
+                                                          {
+                                                            PartnershiContactsErrors[
+                                                              index
+                                                            ].alternate_email
+                                                          }
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </div>
                                               </div>
                                             </div>
-                                          ))}
-
-                                        <div className="justify-content-end d-flex align-items-center">
-                                          <div>
-                                            <button
-                                              className="btn btn-info text-white blue-btn"
-                                              onClick={handleAddPartnershipContact}
-                                            >
-                                              <i className="fa fa-plus pe-1"></i>
-                                              Add Partner
-                                            </button>
                                           </div>
+                                        ))}
+
+                                      <div className="justify-content-end d-flex align-items-center">
+                                        <div>
+                                          <button
+                                            className="btn btn-info text-white blue-btn"
+                                            onClick={handleAddPartnershipContact}
+                                          >
+                                            <i className="fa fa-plus pe-1"></i>
+                                            Add Partner
+                                          </button>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
+                              </div>
 
-                                <div className="col-lg-12">
+                              <div className="col-lg-12">
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title fs-16 mb-0 flex-grow-1">
@@ -2793,7 +2838,7 @@ const ClientEdit = () => {
                                 </div>
                               </div>
 
-                              
+
                             </div>
                           ) : selectClientType == 4 ? (
                             getIndivisualDetails && (
@@ -2950,7 +2995,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Email
-                                            
+
                                           </label>
                                           <input
                                             type="text"
@@ -2974,7 +3019,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Residential Address
-                                            
+
                                           </label>
                                           <input
                                             type="text"
@@ -3008,7 +3053,7 @@ const ClientEdit = () => {
                                     <div className="card-body row">
                                       <div className="col-lg-12">
                                         <div className="mb-3">
-                                          
+
                                           <textarea
                                             type="text"
                                             name="notes"
