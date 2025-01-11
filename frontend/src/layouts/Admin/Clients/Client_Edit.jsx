@@ -374,7 +374,6 @@ const ClientEdit = () => {
         CompanyNumber: getSearchDetails[0].company_number,
         RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
         IncorporationDate: getSearchDetails[0].date_of_creation,
-        IncorporationIn: getSearchDetails[0].description,
         TradingName: getSearchDetails[0].title,
         TradingAddress: getSearchDetails[0].address_snippet,
       }));
@@ -1615,9 +1614,9 @@ const ClientEdit = () => {
                                               onChange={(e) => handleInputsChange(e , 2)}
                                               value={getCompanyDetails?.IncorporationIn}
                                             >
-                                              <option value="">
+                                              {/* <option value="">
                                                 Please Select Incorporation In
-                                              </option>
+                                              </option> */}
                                               {incorporationDataAll &&
                                                 incorporationDataAll?.map((data) => (
                                                   <option key={data?.id} value={data?.id}>

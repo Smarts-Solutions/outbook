@@ -200,7 +200,6 @@ const CreateClient = () => {
         CompanyNumber: getSearchDetails[0].company_number,
         RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
         IncorporationDate: getSearchDetails[0].date_of_creation,
-        IncorporationIn: getSearchDetails[0].description,
         TradingName: getSearchDetails[0].title,
         TradingAddress: getSearchDetails[0].address_snippet,
       }));
