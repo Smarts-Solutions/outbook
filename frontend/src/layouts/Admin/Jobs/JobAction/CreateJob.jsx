@@ -86,7 +86,6 @@ const CreateJob = () => {
     InvoiceRemark: "",
     notes: "",
   });
-  console.log("location.state", location.state);
   useEffect(() => {
     setJobData((prevState) => ({
       ...prevState,
@@ -439,8 +438,6 @@ const CreateJob = () => {
       },
     };
     const data = { req: req, authToken: token };
-
-
     setIsSubmitted(true);
     const isValid = validateAllFields();
     if (isValid) {
@@ -540,7 +537,6 @@ const CreateJob = () => {
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
-
     const validate = (field, setter, message) => {
       if (value.trim() === "" || isNaN(value) || value <= 0) {
         setter(message);
@@ -1831,7 +1827,7 @@ const CreateJob = () => {
                             </div>
                           </div>
 
-                          {jobData.EngagementModel !=
+                          {/* {jobData.EngagementModel !=
                             "fte_dedicated_staffing" && (
                               <div className="col-lg-12">
                                 <div className="col-lg-12">
@@ -2031,7 +2027,7 @@ const CreateJob = () => {
                                   </div>
                                 </div>
                               </div>
-                            )}
+                            )} */}
 
 
                           <div className="col-lg-12">

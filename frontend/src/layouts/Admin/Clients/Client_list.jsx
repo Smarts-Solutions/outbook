@@ -430,7 +430,7 @@ const ClientList = () => {
             getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() =>
                 navigate("/admin/job/edit", {
-                  state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab },
+                  state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab , jab : row},
                 })}>
                 <i className="ti-pencil" />
               </button>

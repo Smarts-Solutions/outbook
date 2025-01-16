@@ -340,9 +340,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             }, {})
         : {};
 
-    //console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
-    // console.log("JobInformationData", JobInformationData.EngagementModel)
-    console.log("location.state - 1 ", location.state)
+    console.log("selectStatusIs ", selectStatusIs)
 
 
     return (
@@ -1149,7 +1147,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     </div>
 
                     {
-                        JobInformationData.EngagementModel == "fte_dedicated_staffing" ? "" :
+                        JobInformationData.EngagementModel == "fte_dedicated_staffing" || selectStatusIs != 6 ? "" :
                             <div className="col-lg-12">
                                 <div className="col-lg-12">
                                     <div className="card card_shadow">
@@ -1316,7 +1314,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                 </div>
                             </div>
                         </div>
-                    
+
                     </div>
 
 

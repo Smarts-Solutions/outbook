@@ -213,7 +213,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="job-information-tab"
         >
-          <JobInformation job_id={location?.state?.job_id} getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
+          <JobInformation job_id={location?.state?.job_id} getAccessDataJob={getAccessDataJob} goto={location?.state?.goto}   />
         </div>
 
         <div
