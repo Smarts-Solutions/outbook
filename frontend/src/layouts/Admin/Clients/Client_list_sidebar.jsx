@@ -8,7 +8,7 @@ import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -1011,6 +1011,13 @@ const ClientLists = () => {
                 <div className="tab-title">
                   <h3 className="mt-0">{tab.title}</h3>
                 </div>
+                  <div className="col-md-2">
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={tab.data}
+                    fileName={`${tab.title} Details`}
+                  />
+                </div>
 
                 {/* {tab.placeholder && (
                   <div className="search-input">
@@ -1026,6 +1033,7 @@ const ClientLists = () => {
               </div>
 
               <div className="datatable-wrapper">
+             
                 {tab.data && tab.data.length > 0 ? (
                   <Datatable
                     columns={tab.columns}

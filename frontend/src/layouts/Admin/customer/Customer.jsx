@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-// import Datatable from "../../../Components/ExtraComponents/Datatable";
+import ExportToExcel  from '../../../Components/ExtraComponents/ExportToExcel';
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { getDateRange } from "../../../Utils/Comman_function";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
-import { use } from "react";
+
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -30,7 +29,6 @@ const Customer = () => {
   });
 
 
-  console.log("statusFilter", statusFilter);
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "customer"
@@ -303,37 +301,6 @@ const Customer = () => {
     });
   };
 
-  const [selectedTab, setSelectedTab] = useState('this-year');
-
-  const tabs = [
-    { id: 'this-week', label: 'This Week' },
-    { id: 'last-week', label: 'Last Week' },
-    { id: 'this-month', label: 'This Month' },
-    { id: 'last-month', label: 'Last Month' },
-    { id: 'last-quarter', label: 'Last Quarter' },
-    { id: 'this-6-months', label: 'This 6 Months' },
-    { id: 'last-6-months', label: 'Last 6 Months' },
-    { id: 'this-year', label: 'This Year' },
-    { id: 'last-year', label: 'Last Year' },
-    { id: 'custom', label: 'Custom' }
-  ];
-
-  useEffect(() => {
-    //  GetAllCustomerData();
-  }, []);
-
-  useEffect(() => {
-    //  GetAllCustomerData();
-  }, [selectedTab]);
-
-  const handleTabChange = (event) => {
-    setSelectedTab(event.target.value);
-  };
-
-
-
-  ////////////////////////////////////
-
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -374,7 +341,6 @@ const Customer = () => {
 
         setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
-        // setCustomerData(response.data.pagination.totalItems);
 
       } else {
         setFilteredData([]);
@@ -384,9 +350,9 @@ const Customer = () => {
     }
   };
 
-  
+
   useEffect(() => {
-    const StatusfilterData= filteredData.filter((item) =>  (item.status == statusFilter || statusFilter == "") )
+    const StatusfilterData = filteredData.filter((item) => (item.status == statusFilter || statusFilter == ""))
     setFilteredData1(StatusfilterData);
 
   }, [filteredData, statusFilter]);
@@ -426,6 +392,7 @@ const Customer = () => {
   const handleEdit = (row) => {
     navigate("/admin/editcustomer", { state: row });
   };
+
 
   return (
     <div className="container-fluid">
@@ -492,12 +459,16 @@ const Customer = () => {
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                           </select>
-
-
+                        </div>
+                        <div className="col-md-2">
+                        <ExportToExcel
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        apiData={filteredData}
+                        fileName={"Customer Details"}
+                      />
                         </div>
                       </div>
-
-
+                      
 
                       <Datatable columns={columns} data={filteredData1} />
 
