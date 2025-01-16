@@ -19,6 +19,7 @@ import {
   GetAllCompany,
   GetOfficerDetails
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {convertDate } from '../../../../Utils/Comman_function'
 
 const Information = ({ id, pageStatus }) => {
   const { address, setAddress, next } = useContext(MultiStepFormContext);
@@ -1522,7 +1523,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails?.IncorporationDate}
+                                  value={convertDate(getCompanyDetails?.IncorporationDate)}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">

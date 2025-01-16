@@ -275,67 +275,67 @@ const Dashboard = () => {
     }
   };
 
+  // const uploadImage = async (file) => {
+  //   const val = await fetchData();
+    
+  //   let  userName = "JohnDoe"; // Replace with the actual user's name
+    
+  //   let site_ID = val.site_ID;
+  //   let drive_ID = val.drive_ID;
+  //   let folder_ID = val.folder_ID;
+    
+  //   console.log("site_ID - ",site_ID);
+  //   console.log("drive_ID - ",drive_ID);
+  //   console.log("folder_ID - ",folder_ID);
+  //   console.log("folder_path - ",folder_path);
+  //   console.log("accessToken - ",accessToken);
+
+  //   // Create a folder based on the user's name
+  //   const folderId = await createFolderIfNotExists(userName);
+  //   folder_ID = folderId;
+  //   try {
+      
+  //     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
+  
+  //     const response = await axios.put(uploadUrl, file, {
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //         "Content-Type": file.type, // Ensure correct MIME type
+  //       },
+  //     });
+  
+  //     console.log("Image uploaded successfully:", response.data);
+  //   } catch (error) {
+  //     console.error("Error uploading image:", error);
+  //   }
+  // };
+
   const uploadImage = async (file) => {
     const val = await fetchData();
-    
-    let  userName = "JohnDoe"; // Replace with the actual user's name
-    
+    let  userName = "JohnDoe";
     let site_ID = val.site_ID;
     let drive_ID = val.drive_ID;
-    let folder_ID = val.folder_ID;
-    
-    console.log("site_ID - ",site_ID);
-    console.log("drive_ID - ",drive_ID);
-    console.log("folder_ID - ",folder_ID);
-    console.log("folder_path - ",folder_path);
-    console.log("accessToken - ",accessToken);
+    let parentFolderId = val.folder_ID; // Assuming this is the ID of the parent folder
 
     // Create a folder based on the user's name
-    // const folderId = await createFolderIfNotExists(userName);
-    // folder_ID = folderId;
+    const folderId = await createFolderIfNotExists(userName);
+
+    // Construct the upload URL
+    const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}:/${file.name}:/content`;
+
     try {
-      
-      const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
-  
-      const response = await axios.put(uploadUrl, file, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": file.type, // Ensure correct MIME type
-        },
-      });
-  
-      console.log("Image uploaded successfully:", response.data);
+        const response = await axios.put(uploadUrl, file, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": file.type, // Ensure correct MIME type
+            },
+        });
+
+        console.log("Image uploaded successfully:", response.data);
     } catch (error) {
-      console.error("Error uploading image:", error);
+        console.error("Error uploading image:", error);
     }
-  };
-
-//   const uploadImage = async (file) => {
-//     const val = await fetchData();
-//     let  userName = "JohnDoe";
-//     let site_ID = val.site_ID;
-//     let drive_ID = val.drive_ID;
-//     let folder_ID = val.folder_ID; // Assuming this is the ID of the parent folder
-
-//     // Create a folder based on the user's name
-//     // const folderId = await createFolderIfNotExists(userName);
-
-//     // Construct the upload URL
-//     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${file.name}:/content`;
-
-//     try {
-//         const response = await axios.put(uploadUrl, file, {
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`,
-//                 "Content-Type": file.type, // Ensure correct MIME type
-//             },
-//         });
-
-//         console.log("Image uploaded successfully:", response.data);
-//     } catch (error) {
-//         console.error("Error uploading image:", error);
-//     }
-// };
+};
 
 const createFolderIfNotExists = async (folderName) => {
   const val = await fetchData();
@@ -409,7 +409,7 @@ const handleFileChange = (event) => {
 
 const deleteImage = async () => {
   const val = await fetchData();
-  let fileName = "Clipboard - August 20, 2024 3_26 PM.png";
+  let fileName = "002.png";
   let site_ID = val.site_ID; 
   let drive_ID = val.drive_ID; 
   let folder_ID = val.folder_ID; 
@@ -477,9 +477,9 @@ const deleteImage = async () => {
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (decodedToken.exp && decodedToken.exp < currentTime) {
-       //console.log("Token Expired");
+       console.log("Token Expired");
       }else{
-       //console.log("Token Not Expired");
+       console.log("Token Not Expired");
       }
 
     }else{
@@ -551,8 +551,10 @@ const deleteImage = async () => {
 
 
 
-                {/* <div className="col-lg-4 col-md-6 col-sm-6">
+                <div className="col-lg-4 col-md-6 col-sm-6">
                   <div className="form-group">
+
+                    {/* <button className="form-control" onClick={refreshToken}>Refresh Token</button> */}
                     <button className="form-control" onClick={fetchData}>Refresh Token</button>
                     {newAccessToken && <p>New Access Token: {newAccessToken}</p>}
                     {error && <p style={{ color: "red" }}>{error}</p>}
@@ -567,7 +569,7 @@ const deleteImage = async () => {
                   <button className="form-control" onClick={deleteImage} > Delete Image</button>
                  
                   </div>
-                </div> */}
+                </div>
 
               </div>
               <div className="tab-content mt-5">

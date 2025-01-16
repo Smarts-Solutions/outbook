@@ -64,8 +64,10 @@ const updateProcessCustomer = async (req, res) => {
 const updateProcessCustomerFile = async (req, res) => {
   try {
       const customer_id = req.body.customer_id
+      const uploadedFiles = req.body.uploadedFiles
       const customerProcessDataFiles = req.files;
-      const data = await customerService.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
+
+      const data = await customerService.updateProcessCustomerFile(customerProcessDataFiles , customer_id ,uploadedFiles);
       if(data != undefined){
        return res.status(200).json({ status:true,message: "Customer details have been saved successfully!",data : data});
       }else{

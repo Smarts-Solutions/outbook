@@ -365,10 +365,8 @@ const sharepoint_token = async () => {
   } catch (err) {
     console.log("Error sharepoint token data:", err);
     return "sharepoint_token_not_found";
-
   }
 };
-
 
 const CheckExpirySharePointToken = async (token) => {
   // console.log("token", token);
@@ -437,6 +435,40 @@ const genrateSharePointAccessToken = async (refresh_token, client_id, client_sec
     return token;
 }
 
+const getSharePointToken = async (staff) => {
+  const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
+  try {
+    const [[result]] = await pool.execute(query);
+    //console.log("result", result);
+    if (result != undefined && result != null) {
+      if (result.access_token != null && result.access_token != "" && result.access_token != undefined) {
+        const TokenExpiry = await CheckExpirySharePointToken(result.access_token);
+        if (TokenExpiry) {
+          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token, result.client_id, result.client_secret);
+          if(genrateAccessToken == "error"){
+            return "sharepoint_token_not_found";
+          }else{
+          return genrateAccessToken;
+          }
+        } else {
+          return result.access_token;
+        }
+
+      } else {
+        return "sharepoint_token_not_found";
+      }
+
+    } else {
+      console.log(" sharepoint record not found:");
+      return "sharepoint_token_not_found";
+    }
+
+  } catch (err) {
+    console.log("Error sharepoint token data:", err);
+    return "sharepoint_token_not_found";
+  }
+}
+
 
 module.exports = {
   createStaff,
@@ -453,4 +485,5 @@ module.exports = {
   managePortfolio,
   status,
   sharepoint_token,
+  getSharePointToken
 };

@@ -407,10 +407,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
 
 const getJobByCustomer = async (job) => {
   const { customer_id, StaffUserId } = job;
-
-  console.log("customer_id", customer_id)
-  console.log("StaffUserId", StaffUserId) 
-
   try {
     const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
     let result = []
@@ -556,9 +552,6 @@ const getJobByCustomer = async (job) => {
         `;
           const [rows] = await pool.execute(query, [ExistStaff[0].id, customer_id ,ExistStaff[0].id, customer_id]);
           result = rows
-
-          console.log("result 2 ", result)
-  
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
@@ -863,7 +856,6 @@ const getJobByClient = async (job) => {
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
-        console.log("ExistStaff[0].role_id ", ExistStaff[0].role_id)
         const query = `
      SELECT 
      jobs.id AS job_id,
@@ -1760,13 +1752,9 @@ const updateJobStatus = async (job) => {
        `;
     const [result] = await pool.execute(query, [status_type, job_id]);
 
-    console.log("result", result)
-
     if (result.changedRows > 0) {
   
       const [[StatusName]] = await pool.execute(`SELECT  MAX(CASE WHEN id = ${ExistJobData[0].status_type} THEN name END) AS from_status, MAX(CASE WHEN id = ${status_type} THEN name END) AS to_status FROM master_status WHERE id IN (${ExistJobData[0].status_type}, ${status_type})`);
-
-         console.log("StatusName",StatusName)  
 
       const currentDate = new Date();
       await SatffLogUpdateOperation(

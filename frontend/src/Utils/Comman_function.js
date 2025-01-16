@@ -192,8 +192,6 @@ export const validate = (name, value, errors, setErrors) => {
   return Object.keys(newErrors).length === 0;
 };
 
-
-
 export async function GET_IP(data, token) {
   try {
     const res = await axios.get(`https://api.ipify.org?format=json`)
@@ -213,3 +211,26 @@ export const convertDate = (date) => {
   }
   return "";
 }
+
+export const allowedTypes = 
+  [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "message/rfc822", // For .eml
+    "application/vnd.ms-outlook", // For .msg
+    "application/mbox", // For .mbox
+    "application/vnd.ms-outlook-pst", // For .pst
+    "application/vnd.ms-outlook-ost", // For .ost
+    "text/vcard", // For .vcf
+    "text/calendar", // For .ics
+    "application/vnd.ms-outlook-template", // For .oft
+    "text/csv", // For .csv
+    "application/vnd.ms-excel", // For .xls
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" // For .xlsx
+
+  ]
+

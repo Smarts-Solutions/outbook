@@ -3,7 +3,7 @@ const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const createCustomer = async (customer) => {
-  
+
     // Customer Code(cust+CustName+UniqueNo)
     const { customer_id } = customer;
 
@@ -16,9 +16,9 @@ const createCustomer = async (customer) => {
         const customer_code = await generateNextUniqueCode(data);
 
         if (customer.CustomerType == "1") {
-            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address ,notes } = customer;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address, notes } = customer;
 
-            const Trading_Name  = customer.Trading_Name;
+            const Trading_Name = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -34,7 +34,7 @@ const createCustomer = async (customer) => {
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus , notes]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -65,9 +65,9 @@ const createCustomer = async (customer) => {
         }
         else if (customer.CustomerType == "2") {
 
-            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails,notes} = customer;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails, notes } = customer;
 
-            const Trading_Name  = customer.Trading_Name+'_'+customer_code;
+            const Trading_Name = customer.Trading_Name + '_' + customer_code;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -132,9 +132,9 @@ const createCustomer = async (customer) => {
         else if (customer.CustomerType == "3") {
 
 
-            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails ,notes } = customer;
-            
-            const Trading_Name  = customer.Trading_Name;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails, notes } = customer;
+
+            const Trading_Name = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -830,7 +830,7 @@ LIMIT ? OFFSET ?
             let queryData = [staff_id, limit, offset];
             if (search) {
                 queryData = [staff_id, limit, offset];
-                }
+            }
             const [result1] = await pool.execute(query, queryData);
             result = result1
             total = total_count;
@@ -892,7 +892,6 @@ ORDER BY
 id DESC;`;
 
         const [result] = await pool.execute(query);
-        console.log("result",result)
 
         return { status: true, message: 'Success..', data: result };
     }
@@ -901,7 +900,7 @@ id DESC;`;
     if (rows.length > 0) {
         // Allocated to
         if (rows[0].role_id == 3) {
-        
+
             const query = `
             SELECT  
                 customers.id AS id,
@@ -930,7 +929,6 @@ id DESC;`;
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-             console.log("modelll INSIDE...",customer)
             const query = `
             SELECT  
             customers.id AS id,
@@ -959,12 +957,12 @@ id DESC;`;
             `;
             const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
             result = resultAllocated;
-           
+
         }
 
         // Reviewer
         else if (rows[0].role_id == 6) {
-           
+
             const query = `
             SELECT  
             customers.id AS id,
@@ -1010,8 +1008,8 @@ id DESC;`;
         }
     }
     try {
-       
-         return { status: true, message: 'Success..', data: result };
+
+        return { status: true, message: 'Success..', data: result };
 
     } catch (err) {
         console.error('Error selecting getCustomer_dropdown  data:', err);
@@ -1019,7 +1017,6 @@ id DESC;`;
     }
 
 }
-
 
 const deleteCustomer = async (customer) => {
     // if(parseInt(customer_id)  > 0){
@@ -1051,9 +1048,6 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         let service_id = serVal.service_id;
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
-
-        console.log("service_id", service_id);
-        console.log("account_manager_id", account_manager_id);
 
         //checklist submit customer
         const QueryCustomerAssign = `
@@ -1284,8 +1278,6 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     if (fte_dedicated_staffing === "1") {
 
         const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customerProcessData;
-
-        console.log("fee_per_accountant", fee_per_accountant);
 
         const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
         const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
@@ -1605,22 +1597,27 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     return customer_id;
 }
 
-const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) => {
+const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id, uploadedFiles) => {
 
+    if (uploadedFiles && uploadedFiles.length > 0) {
 
-    if (customerProcessDataFiles && customerProcessDataFiles.length > 0) {
-
-        for (let file of customerProcessDataFiles) {
+        for (let file of uploadedFiles) {
             const file_name = file.filename;
             const original_name = file.originalname;
             const file_type = file.mimetype;
             const file_size = file.size;
+            const web_url = file.web_url;
 
+            const checkQuery = `SELECT id FROM customer_paper_work WHERE customer_id = ? AND original_name = ?`;
+            const [rows] = await pool.execute(checkQuery, [customer_id, original_name]);
+            if (rows.length > 0) {
+                continue;
+            }
 
             const insertQuery = `
                 INSERT INTO customer_paper_work (
-                    customer_id, file_name, original_name, file_type, file_size
-                ) VALUES (?, ?, ?, ?, ?)
+                    customer_id, file_name, original_name, file_type, file_size , web_url
+                ) VALUES (?, ?, ?, ?, ?, ?)
             `;
 
             try {
@@ -1629,7 +1626,8 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
                     file_name,
                     original_name,
                     file_type,
-                    file_size
+                    file_size,
+                    web_url
                 ]);
 
             } catch (error) {
@@ -1638,6 +1636,37 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
         }
     }
 
+
+
+    // if (customerProcessDataFiles && customerProcessDataFiles.length > 0) {
+
+    //     for (let file of customerProcessDataFiles) {
+    //         const file_name = file.filename;
+    //         const original_name = file.originalname;
+    //         const file_type = file.mimetype;
+    //         const file_size = file.size;
+
+
+    //         const insertQuery = `
+    //             INSERT INTO customer_paper_work (
+    //                 customer_id, file_name, original_name, file_type, file_size
+    //             ) VALUES (?, ?, ?, ?, ?)
+    //         `;
+
+    //         try {
+    //             const [result] = await pool.execute(insertQuery, [
+    //                 customer_id,
+    //                 file_name,
+    //                 original_name,
+    //                 file_type,
+    //                 file_size
+    //             ]);
+
+    //         } catch (error) {
+    //             console.log('Error inserting file:', error);
+    //         }
+    //     }
+    // }
     // Update customer process page
     let pageStatus = "4"
     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [pageStatus, customer_id]);
@@ -2245,16 +2274,21 @@ const getSingleCustomer = async (customer) => {
             customer_paper_work.file_name AS file_name,
             customer_paper_work.original_name AS original_name,
             customer_paper_work.file_type AS file_type,
-            customer_paper_work.file_size AS file_size
+            customer_paper_work.file_size AS file_size,
+            customer_paper_work.web_url AS web_url
+
         FROM 
             customers
-        JOIN 
+        LEFT JOIN 
             customer_paper_work ON customers.id = customer_paper_work.customer_id
         WHERE 
             customers.id = ?
+        ORDER BY customer_paper_work.id DESC    
         `;
 
+
         const [rows] = await pool.execute(query, [customer_id]);
+
         if (rows.length > 0) {
             const customerData = {
                 customer_id: rows[0].customer_id,
@@ -2272,13 +2306,23 @@ const getSingleCustomer = async (customer) => {
                 status: rows[0].status,
             };
 
-            const customer_paper_work = rows.map(row => ({
-                customer_paper_work_id: row.customer_paper_work_id,
-                file_name: row.file_name,
-                original_name: row.original_name,
-                file_type: row.file_type,
-                file_size: row.file_size
-            }));
+            // const customer_paper_work = rows.map(row => ({
+            //     customer_paper_work_id: row.customer_paper_work_id,
+            //     file_name: row.file_name,
+            //     original_name: row.original_name,
+            //     file_type: row.file_type,
+            //     file_size: row.file_size
+            // }));
+            const customer_paper_work = rows
+                .filter(row => row.file_name !== null) // Filter out rows with file_name as null
+                .map(row => ({
+                    customer_paper_work_id: row.customer_paper_work_id,
+                    file_name: row.file_name,
+                    original_name: row.original_name,
+                    file_type: row.file_type,
+                    file_size: row.file_size,
+                    web_url: row.web_url
+                }));
 
 
 
@@ -2286,7 +2330,6 @@ const getSingleCustomer = async (customer) => {
                 customer: customerData,
                 customer_paper_work: customer_paper_work
             };
-
             return result;
         } else {
             return [];
@@ -2307,7 +2350,7 @@ const customerUpdate = async (customer) => {
     // Page Status 1 
     if (pageStatus === "1") {
 
-        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails ,notes } = customer;
+        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails, notes } = customer;
 
 
         const firstThreeLetters = trading_name.substring(0, 3);
@@ -2326,7 +2369,7 @@ const customerUpdate = async (customer) => {
         WHERE id = ?
         `;
 
-        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website,notes, customer_id]);
+        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, notes, customer_id]);
 
         let cust_type = 'sole trader'
         if (customer_type === '2') {
@@ -2497,16 +2540,12 @@ const customerUpdate = async (customer) => {
                         }
                     );
                 }
-
-
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
                 console.log(err);
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
-
-
         }
 
         // Partnership Details
@@ -3381,7 +3420,6 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 const customerStatusUpdate = async (customer) => {
     const { customer_id, status } = customer;
-    console.log("status ", typeof status)
     const query = `UPDATE customers SET status = ? WHERE id = ?`;
     const [result] = await pool.execute(query, [status, customer_id]);
 

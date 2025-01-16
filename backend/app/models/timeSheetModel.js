@@ -554,7 +554,6 @@ const getTimesheetTaskType = async (Timesheet) => {
             }
             // Reviewer
             else if (rows[0].role_id == 6) {
-              console.log('Reviewer')
 
               const query = `
                SELECT  
@@ -739,7 +738,6 @@ const getTimesheetTaskType = async (Timesheet) => {
             }
             // Reviewer
             else if (rows[0].role_id == 6) {
-              console.log('Reviewer')
 
               const query = `
                SELECT  
@@ -1109,7 +1107,6 @@ const getTimesheetTaskType = async (Timesheet) => {
       client_job_task.id DESC;
      `;
       const [rows] = await pool.execute(query, [job_id]);
-      console.log("rows job", rows)
       if (rows.length > 0) {
         return { status: true, message: "success.", data: rows };
       } else {
@@ -1124,8 +1121,6 @@ const getTimesheetTaskType = async (Timesheet) => {
      jobs.id = ?
      `;
         const [rows] = await pool.execute(query, [job_id]);
-        console.log("rows job", rows)
-
         return { status: true, message: "success.", data: rows };
       }
     }
@@ -1142,7 +1137,6 @@ const getTimesheetTaskType = async (Timesheet) => {
 const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows } = Timesheet;
-    console.log("Timesheet", Timesheet)
 
     const timesheet_log_msg = [];
 
@@ -1174,12 +1168,6 @@ const saveTimesheet = async (Timesheet) => {
         const friday_hours = formatTime(row.friday_hours);
         const saturday_hours = formatTime(row.saturday_hours);
         const sunday_hours = formatTime(row.sunday_hours);
-
-
-        console.log("row.submit_status", row.submit_status)
-        console.log("row.submit_status", typeof row.submit_status)
-
-
         if (row.id === null) {
           let DateTimeString = "";
           const days = [
@@ -1356,14 +1344,11 @@ const saveTimesheet = async (Timesheet) => {
       }
     }
 
-    console.log("timesheet_log_msg", timesheet_log_msg)
     if (timesheet_log_msg.length > 0) {
       const msgLog = timesheet_log_msg.length > 1
         ? timesheet_log_msg.slice(0, -1).join(', ') + ' and ' + timesheet_log_msg.slice(-1)
         : timesheet_log_msg[0];
       const currentDate = new Date();
-
-      console.log("msgLog", msgLog)
       await SatffLogUpdateOperation(
         {
           staff_id: staff_id,

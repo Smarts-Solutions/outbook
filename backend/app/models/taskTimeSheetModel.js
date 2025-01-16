@@ -959,39 +959,87 @@ const editDraft = async (draft) => {
 }
 
 // JobDocument
+const addedJobDocument = async (jobDocument) => {
+ const { job_id, uploadedFiles , StaffUserId } = jobDocument;
+ try {
+   if (uploadedFiles && uploadedFiles.length > 0) {
+
+     for (let file of uploadedFiles) {
+         const file_name = file.filename;
+         const original_name = file.originalname;
+         const file_type = file.mimetype;
+         const file_size = file.size;
+         const web_url = file.web_url;
+        
+         const checkQuery = `SELECT id FROM job_documents WHERE job_id = ? AND original_name = ?`;
+         const [rows] = await pool.execute(checkQuery, [job_id, original_name]);
+         if (rows.length > 0) {
+           continue;
+         }
+         
+         const insertQuery = `
+             INSERT INTO job_documents (
+                 job_id, file_name, original_name, file_type, file_size , web_url
+             ) VALUES (?, ?, ?, ?, ?, ?)
+         `;
+
+         try {
+             const [result] = await pool.execute(insertQuery, [
+                 job_id,
+                 file_name,
+                 original_name,
+                 file_type,
+                 file_size,
+                 web_url
+             ]);
+
+         } catch (error) {
+             console.log('Error inserting file:', error);
+             return { status: false, message: "Error inserting file - 1" };
+         }
+     }
+     return { status: true, message: "job document uploaded successfully.", data: job_id };
+ }else{
+     return { status: true, message: "job document uploaded successfully.", data: job_id };
+ }
+ } catch (error) {
+   return { status: false, message: "Error inserting file - 2" };
+ } 
+}
+
 const addJobDocument = async (jobDocument) => {
-  const { job_id } = jobDocument.body
-  const job_document = jobDocument.files;
+  // const { job_id } = jobDocument.body
+  // const job_document = jobDocument.files;
 
-  if (job_document.length > 0) {
-    for (let file of job_document) {
-      const file_name = file.filename;
-      const original_name = file.originalname;
-      const file_type = file.mimetype;
-      const file_size = file.size;
-      const insertQuery = `
-          INSERT INTO job_documents (
-              job_id, file_name, original_name, file_type, file_size
-          ) VALUES (?, ?, ?, ?, ?)
-      `;
-      try {
-        const [result] = await pool.execute(insertQuery, [
-          job_id,
-          file_name,
-          original_name,
-          file_type,
-          file_size
-        ]);
+  // if (job_document.length > 0) {
+  //   for (let file of job_document) {
+  //     const file_name = file.filename;
+  //     const original_name = file.originalname;
+  //     const file_type = file.mimetype;
+  //     const file_size = file.size;
+  //     const insertQuery = `
+  //         INSERT INTO job_documents (
+  //             job_id, file_name, original_name, file_type, file_size
+  //         ) VALUES (?, ?, ?, ?, ?)
+  //     `;
+  //     try {
+  //       const [result] = await pool.execute(insertQuery, [
+  //         job_id,
+  //         file_name,
+  //         original_name,
+  //         file_type,
+  //         file_size
+  //       ]);
 
-      } catch (error) {
-        console.log('Error inserting file:', error);
+  //     } catch (error) {
+  //       console.log('Error inserting file:', error);
 
-      }
-    }
-    return { status: true, message: 'success .', data: [] };
-  } else {
-    return { status: true, message: 'no data .', data: [] };
-  }
+  //     }
+  //   }
+  //   return { status: true, message: 'success .', data: [] };
+  // } else {
+  //   return { status: true, message: 'no data .', data: [] };
+  // }
 }
 
 const getJobDocument = async (jobDocument) => {
@@ -1004,7 +1052,8 @@ const getJobDocument = async (jobDocument) => {
       job_documents.file_name AS file_name,
       job_documents.original_name AS original_name,
       job_documents.file_type AS file_type,
-      job_documents.file_size AS file_size
+      job_documents.file_size AS file_size,
+      job_documents.web_url AS web_url
      FROM 
       job_documents
      WHERE 
@@ -1022,13 +1071,9 @@ const getJobDocument = async (jobDocument) => {
 
 const deleteJobDocument = async (jobDocument) => {
   const { id, file_name } = jobDocument;
+
   try {
-    const query = `
-     DELETE FROM 
-      job_documents
-     WHERE 
-      job_documents.id = ?
-     `;
+    const query = `DELETE FROM job_documents WHERE id = ?`;
     const [rows] = await pool.execute(query, [id]);
     deleteUploadFile(file_name)
     return { status: true, message: 'Success.', data: rows };
@@ -1059,6 +1104,8 @@ module.exports = {
   addJobDocument,
   getJobDocument,
   deleteJobDocument,
-  editDraft
+  editDraft,
+  addedJobDocument
+  
 
 };

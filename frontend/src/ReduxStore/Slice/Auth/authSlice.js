@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT , STATUS} from "../../../Services/Auth/authService";
+import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT , STATUS ,GET_SHAREPOINT_TOKEN} from "../../../Services/Auth/authService";
 const token = localStorage.getItem("token");
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
@@ -66,6 +66,17 @@ export const Status = createAsyncThunk("status", async (data) => {
     return err;
   }
 });
+export const GetSharePointToken = ("getSharePointToken", async (data) => {
+  try {
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...data, ip: IP_Data };
+    const res = await GET_SHAREPOINT_TOKEN(updatedReq);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 
 const AuthSlice = createSlice({
   name: "AuthSlice",

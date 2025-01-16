@@ -89,13 +89,13 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          const filteredData = response.data.filter((item) => {
-            const itemDate = new Date(item.created_at);
-            const { startDate, endDate } = getDateRange(activeTab);
-            return itemDate >= startDate && itemDate <= endDate;
-          });
+          // const filteredData = response.data.filter((item) => {
+          //   const itemDate = new Date(item.created_at);
+          //   const { startDate, endDate } = getDateRange(activeTab);
+          //   return itemDate >= startDate && itemDate <= endDate;
+          // });
 
-          setStaffDataAll({ loading: false, data: filteredData });
+          setStaffDataAll({ loading: false, data: response.data });
         } else {
           setStaffDataAll({ loading: false, data: [] });
         }
@@ -581,6 +581,8 @@ const StaffPage = () => {
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
   };
+
+
 
   return (
     <div>

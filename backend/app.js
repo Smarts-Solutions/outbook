@@ -93,15 +93,6 @@ async function uploadImage(imagePath) {
 // uploadImage('./path/to/your/image.jpg');
 
 
-
-
-
-
-
-
-
-
-
 /// ---- END DEMO CODE SHAREPOINT URL ---- ////////////
 
 
@@ -135,8 +126,6 @@ axios.request(config)
 });
 
  }
-
-
 
 app.get('/',async(req,res)=>{
 // const accessToken = await getAccessToken();

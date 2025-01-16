@@ -27,8 +27,18 @@ const clientUpdate = async (client) => {
   return clientModel.clientUpdate(client);
 }; 
 
+const addClientDocument = async (client) => {
+  return clientModel.addClientDocument(client);
+};
+
+const deleteClientFile = async (client) => {
+  return clientModel.deleteClientFile(client);
+};
+
 module.exports = {
   addClient,
   clientAction,
-  clientUpdate
+  clientUpdate,
+  addClientDocument,
+  deleteClientFile
 };

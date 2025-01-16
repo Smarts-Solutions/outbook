@@ -146,8 +146,9 @@ const status = async (id) => {
   return staffModel.status(id);
 }
 
-
-
+const getSharePointToken = async (staff) => {
+  return staffModel.getSharePointToken(staff);
+}
 
 const isLoginAuthTokenCheck = async (staff) => {
   return staffModel.isLoginAuthTokenCheckmodel(staff);
@@ -169,5 +170,6 @@ module.exports = {
     isLoginAuthTokenCheck,
     isLogOut,
     managePortfolio,
-    status
+    status,
+    getSharePointToken
 };

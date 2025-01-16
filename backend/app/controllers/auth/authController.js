@@ -156,6 +156,20 @@ const status = async (req, res) => {
   } 
 }
 
+const getSharePointToken = async (req, res) => {
+  try {
+    const { ...staff } = req.body;
+    const data = await authService.getSharePointToken(staff);
+    if(data == "sharepoint_token_not_found"){
+      return res.send({ status: false, message: "Sharepoint token not found" , data : data });
+    }else{
+      return res.send({ status: true, message: "Success.." , data : data });
+    }
+  }
+  catch (error) {
+    return res.send({ status: false, message: error.message , data : "sharepoint_token_not_found" });
+  }
+}
 
 module.exports = {
   handleStaff,
@@ -166,5 +180,6 @@ module.exports = {
   isLoginAuthTokenCheck,
   profile,
   isLogOut,
-  status
+  status,
+  getSharePointToken
 };
