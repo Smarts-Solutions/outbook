@@ -626,7 +626,7 @@ console.log("JobInformationData",JobInformationData)
 
                                     </div>
 
-                                    <div className="col-lg-4">
+                                    {/* <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label">Year End</label>
                                             <input
@@ -640,7 +640,7 @@ console.log("JobInformationData",JobInformationData)
                                                 value={JobInformationData.YearEnd}
                                             />
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <div className="col-lg-4">
                                         <div className="mb-3">

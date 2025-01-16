@@ -3,7 +3,7 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
 import { convertDate } from "../../../Utils/Comman_function";
-
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 const JobStatus = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -111,7 +111,7 @@ const JobStatus = () => {
     },
     {
       name: "Companies House Due Date",
-      
+
       selector: (row) => convertDate(row.filing_Companies_date),
       reorder: false,
       sortable: true,
@@ -158,13 +158,20 @@ const JobStatus = () => {
     <div>
       <div className="report-data">
         <div className="row">
-          <div className="col-md-7 mb-5">
+          <div className="col-md-7 mb-2">
             <div className="tab-title">
               <h3>Job Status Report</h3>
             </div>
           </div>
         </div>
         <div className="datatable-wrapper mt-minus">
+          <div className="d-flex justify-content-end mb-3">
+            <ExportToExcel
+              className="btn btn-outline-info fw-bold float-end border-3 "
+              apiData={JobStatusData}
+              fileName={`Job Status Report`}
+            />
+          </div>
           <Datatable
             filter={true}
             columns={columns}

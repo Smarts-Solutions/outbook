@@ -1047,7 +1047,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  {/* <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label">
                                         Year End
@@ -1066,7 +1066,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                  </div>
+                                  </div> */}
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label">

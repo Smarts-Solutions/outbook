@@ -1166,7 +1166,7 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  {/* <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label">
                                         Year End
@@ -1185,7 +1185,7 @@ const EditJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                  </div>
+                                  </div> */}
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
