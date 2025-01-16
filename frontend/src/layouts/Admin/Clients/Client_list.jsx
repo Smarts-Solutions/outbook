@@ -7,6 +7,7 @@ import { JobAction, Update_Status, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } fro
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
+
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
@@ -430,7 +431,7 @@ const ClientList = () => {
             getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() =>
                 navigate("/admin/job/edit", {
-                  state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab },
+                  state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab, jab: row },
                 })}>
                 <i className="ti-pencil" />
               </button>
@@ -1175,6 +1176,7 @@ const ClientList = () => {
               </div>
 
               <div className="datatable-wrapper">
+                
                 {tab.data && tab.data.length > 0 ? (
                   <Datatable
                     columns={tab.columns}

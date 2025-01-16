@@ -10,6 +10,7 @@ import { fa_time } from "../../../Utils/Date_formet";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { convertDate } from '../../../Utils/Comman_function';
 
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 const Status = () => {
   const dispatch = useDispatch();
@@ -316,41 +317,45 @@ const Status = () => {
           <div className="tab-title">
             <div className="row">
               <div className="col-12 col-sm-6">
-              <h3 className="mt-0">Status</h3>
+                <h3 className="mt-0">Status</h3>
               </div>
               <div className="col-12 col-sm-6">
-              <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
-            <div>
-              {
-                getAccessData.insert === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-                  <button
-                    type="button"
-                    className="btn btn-info text-white float-md-end  "
-                    onClick={() => {
-                      setShowModal(true);
-                      setEditItem(null);
-                      setStatsAdd({
-                        statusname: "",
-                        statustype: "",
-                      });
-                    }}
-                  >
-                    <i className="fa fa-plus pe-1" /> Add Status
-                  </button>
-                ) : <div className="mt-5"></div>
-              }
+                <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
+                  <div>
+                    {
+                      getAccessData.insert === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
+                        <button
+                          type="button"
+                          className="btn btn-info text-white float-md-end  "
+                          onClick={() => {
+                            setShowModal(true);
+                            setEditItem(null);
+                            setStatsAdd({
+                              statusname: "",
+                              statustype: "",
+                            });
+                          }}
+                        >
+                          <i className="fa fa-plus pe-1" /> Add Status
+                        </button>
+                      ) : <div className="mt-5"></div>
+                    }
 
-            </div>
-          </div>
+                  </div>
+                </div>
               </div>
             </div>
-            
-
-            
           </div>
         </div>
         <div className="report-data mt-4 ">
-          
+            <div className="d-flex justify-content-end">
+              <ExportToExcel
+                className="btn btn-outline-info fw-bold float-end border-3 "
+                apiData={statusDataAll}
+                fileName={`Stauts`}
+              />
+            </div>
+
           <div className="datatable-wrapper  ">
             <Datatable filter={true} columns={columns} data={statusDataAll} />
           </div>

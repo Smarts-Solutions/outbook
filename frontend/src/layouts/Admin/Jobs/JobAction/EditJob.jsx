@@ -1077,7 +1077,7 @@ const EditJob = () => {
                                             value={reviewer.reviewer_id}
                                             key={reviewer.reviewer_id}
                                           >
-                                            {reviewer.reviewer_name}
+                                             {reviewer.reviewer_name + " (" + reviewer?.reviewer_email + ")"}
                                           </option>
                                         )
                                       )}
@@ -1109,7 +1109,7 @@ const EditJob = () => {
                                             value={staff.allocated_id}
                                             key={staff.allocated_id}
                                           >
-                                            {staff.allocated_name}
+                                              {staff.allocated_name +  " (" + staff?.allocated_email + ")"}
                                           </option>
                                         )
                                       )}
@@ -1166,7 +1166,7 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  {/* <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label">
                                         Year End
@@ -1185,7 +1185,7 @@ const EditJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                  </div>
+                                  </div> */}
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
@@ -1947,7 +1947,7 @@ const EditJob = () => {
                           </div>
 
                           {jobData.EngagementModel !=
-                            "fte_dedicated_staffing" && (
+                            "fte_dedicated_staffing" &&  location?.state?.jab?.status_type==6 && (
                               <div className="col-lg-12">
                                 <div className="card card_shadow">
                                   <div className="card-header align-items-center d-flex card-header-light-blue">

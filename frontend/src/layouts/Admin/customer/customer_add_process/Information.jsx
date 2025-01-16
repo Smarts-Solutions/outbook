@@ -1183,7 +1183,7 @@ const Information = ({ id, pageStatus }) => {
                                 <option key={data?.id} value={data?.id}>
                                   {capitalizeFirstLetter(data?.first_name) +
                                     " " +
-                                    capitalizeFirstLetter(data?.last_name)}
+                                    capitalizeFirstLetter(data?.last_name) +  " (" + data?.email + ")"}
                                 </option>
                               ))}
                           </Field>

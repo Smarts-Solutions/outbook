@@ -10,7 +10,7 @@ import sweatalert from "sweetalert2";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { getDateRange } from "../../../Utils/Comman_function";
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
@@ -32,7 +32,7 @@ const StaffPage = () => {
     minutes: "",
   });
 
-  
+
   useEffect(() => {
     if (
       accessData &&
@@ -256,38 +256,39 @@ const StaffPage = () => {
     {
       name: "Actions",
       cell: (row) => {
-        return(
-        <div className="dropdown">
-          <button
-            className="btn "
-            type="button"
-            id="dropdownMenuButton"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
-            <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
-          </button>
-          <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
-            {/* <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
+        return (
+          <div className="dropdown">
+            <button
+              className="btn "
+              type="button"
+              id="dropdownMenuButton"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+            </button>
+            <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
+              {/* <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
               <FaPencilAlt />  Portfolio
             </a> */}
-            <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
-              <FaBriefcase />  Edit
-            </a>
-            <a className="dropdown-item" onClick={() => { ServiceData(row); SetCompetancy(true) }} style={{ cursor: 'pointer' }} >
-              <FaPlus />  Competency
-            </a>
-            {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
-            <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() =>
-              navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+              <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
+                <FaBriefcase />  Edit
+              </a>
+              <a className="dropdown-item" onClick={() => { ServiceData(row); SetCompetancy(true) }} style={{ cursor: 'pointer' }} >
+                <FaPlus />  Competency
+              </a>
+              {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
+              <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() =>
+                navigate(`/admin/staff/viewlogs`, { state: { row: row } })
               } >
 
-              <FaEye />  Logs
-            </a>
+                <FaEye />  Logs
+              </a>
+            </div>
           </div>
-        </div>
-      )},
+        )
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -308,25 +309,25 @@ const StaffPage = () => {
       role: "3",
       status: "1",
     },
-     validationSchema : Yup.object({
+    validationSchema: Yup.object({
       first_name: Yup.string()
-        .trim(Validation_Message.FirstNameValidation)  
+        .trim(Validation_Message.FirstNameValidation)
         .required(Validation_Message.FirstNameValidation),
       last_name: Yup.string()
-        .trim(Validation_Message.LastNameValidation)  
+        .trim(Validation_Message.LastNameValidation)
         .required(Validation_Message.LastNameValidation),
       email: Yup.string()
-        .trim(Validation_Message.EmailValidation)  
+        .trim(Validation_Message.EmailValidation)
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
       role: Yup.string()
-        .trim(Validation_Message.RoleValidation)  
+        .trim(Validation_Message.RoleValidation)
         .required(Validation_Message.RoleValidation),
       status: Yup.string()
-        .trim(Validation_Message.StatusValidation) 
+        .trim(Validation_Message.StatusValidation)
         .required(Validation_Message.StatusValidation),
     }),
-    
+
     onSubmit: async (values) => {
       let req = {
         first_name: values.first_name,
@@ -339,7 +340,7 @@ const StaffPage = () => {
         created_by: StaffUserId.id,
         hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
           }`,
-      }; 
+      };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
@@ -445,7 +446,7 @@ const StaffPage = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-    //  disable: editShowModel == true ? true : false,
+      //  disable: editShowModel == true ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
@@ -584,6 +585,7 @@ const StaffPage = () => {
 
 
 
+  console.log("staffDataAll", staffDataAll.data);
   return (
     <div>
       <div className="container-fluid">
@@ -599,9 +601,9 @@ const StaffPage = () => {
             <div className="row align-items-start">
               <div className="col-md-6">
               </div>
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <div className="d-flex justify-content-end mb-4">
-                  
+
                   <div className="">
                     {showStaffInsertTab && (
                       <button
@@ -617,17 +619,24 @@ const StaffPage = () => {
                       </button>
                     )}
                   </div>
+
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div className="tab-content mt-minus-90" id="pills-tabContent">
+
+          <div className="d-flex justify-content-end">
+            <ExportToExcel
+              className="btn btn-outline-info fw-bold float-end border-3 "
+              apiData={staffDataAll.data}
+              fileName={`Staff Details`}
+            />
+          </div>
+
           {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
-                }`}
+            <div key={tab.id} className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""}`}
               id={tab.id}
               role="tabpanel"
             >
@@ -657,7 +666,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Add"
-          closeBtn={(e) =>{formik.resetForm(); setAddStaff(false) }}
+          closeBtn={(e) => { formik.resetForm(); setAddStaff(false) }}
         />
       </CommanModal>
 
@@ -776,7 +785,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Update"
-          closeBtn={(e) => {formik.resetForm(); setEditStaff(false) ; setEditStaffData({})}}
+          closeBtn={(e) => { formik.resetForm(); setEditStaff(false); setEditStaffData({}) }}
           additional_field={
             <div className="row mt-2 ">
 
