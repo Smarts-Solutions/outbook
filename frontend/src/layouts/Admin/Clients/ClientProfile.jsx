@@ -730,7 +730,7 @@ const ClientList = () => {
   };
 
   function handleEdit(row) {
-    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab } });
+    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab , job : row } });
   }
 
   const handleDelete = async (row, type) => {

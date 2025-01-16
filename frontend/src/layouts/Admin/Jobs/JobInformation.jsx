@@ -115,6 +115,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         hours: response.data.invoice_hours.split(":")[0],
                         minutes: response.data.invoice_hours.split(":")[1]
                     })
+                    console.log("response", response.data)
                     setJobInformationData(prevState => ({
                         ...prevState,
                         AccountManager: `${response.data.outbooks_acount_manager_first_name} ${response.data.outbooks_acount_manager_last_name}`,
@@ -339,9 +340,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                 return obj;
             }, {})
         : {};
-
-    console.log("selectStatusIs ", selectStatusIs)
-
+ 
+console.log("JobInformationData",JobInformationData)
 
     return (
         <div>
@@ -553,7 +553,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                             </div>
                                         </div>
                                     </div>
-
                                     <div className="col-lg-4">
                                         <label className="form-label">Reviewer</label>
                                         <select className="form-select mb-3"
@@ -566,9 +565,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                         >
                                             <option value=""> Select Reviewer</option>
                                             {
-
                                                 (AllJobData?.data?.reviewer || []).map((reviewer) => (
-                                                    <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name}</option>
+                                                    <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name + " (" + reviewer.reviewer_email + ")"}</option>
                                                 ))
                                             }
                                         </select>
@@ -587,7 +585,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                             <option value=""> Select Staff</option>
                                             {
                                                 (AllJobData?.data?.allocated || []).map((staff) => (
-                                                    <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
+                                                    <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name + "(" + staff.allocated_email +  ")"}</option>
                                                 ))}
                                         </select>
 

@@ -100,7 +100,8 @@ const getAddJobData = async (job) => {
      SELECT  
          staffs.id AS reviewer_id,
          staffs.first_name AS reviewer_first_name,
-         staffs.last_name AS reviewer_last_name
+         staffs.last_name AS reviewer_last_name,
+         staffs.email AS reviewer_email
     FROM 
          staffs
     JOIN 
@@ -116,7 +117,8 @@ const getAddJobData = async (job) => {
     if (rows4.length > 0) {
       reviewer = rows4.map(row => ({
         reviewer_id: row.reviewer_id,
-        reviewer_name: row.reviewer_first_name + " " + row.reviewer_last_name
+        reviewer_name: row.reviewer_first_name + " " + row.reviewer_last_name,
+        reviewer_email: row.reviewer_email
       }));
     }
 
@@ -125,7 +127,8 @@ const getAddJobData = async (job) => {
      SELECT  
          staffs.id AS staff_id,
          staffs.first_name AS staff_first_name,
-         staffs.last_name AS staff_last_name
+         staffs.last_name AS staff_last_name,
+          staffs.email AS staff_email
     FROM 
          staffs
     JOIN 
@@ -141,7 +144,8 @@ const getAddJobData = async (job) => {
     if (rows5.length > 0) {
       allocated = rows5.map(row => ({
         allocated_id: row.staff_id,
-        allocated_name: row.staff_first_name + " " + row.staff_last_name
+        allocated_name: row.staff_first_name + " " + row.staff_last_name,
+        allocated_email: row.staff_email
       }));
     }
 
@@ -1121,9 +1125,12 @@ const getJobById = async (job) => {
      staffs2.id AS reviewer_id,
      staffs2.first_name AS reviewer_first_name,
      staffs2.last_name AS reviewer_last_name,
+     staffs2.email AS reviewer_email,
+     
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
+     staffs.email AS staff_email,
      DATE_FORMAT(jobs.allocated_on, '%Y-%m-%d') AS allocated_on,
      DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
      jobs.year_end AS year_end,
@@ -1240,6 +1247,8 @@ const getJobById = async (job) => {
         allocated_id: rows[0].allocated_id,
         allocated_first_name: rows[0].allocated_first_name,
         allocated_last_name: rows[0].allocated_last_name,
+        staff_email: rows[0].staff_email,
+        reviewer_email: rows[0].reviewer_email,
         allocated_on: rows[0].allocated_on,
         date_received_on: rows[0].date_received_on,
         year_end: rows[0].year_end,

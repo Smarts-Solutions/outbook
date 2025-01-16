@@ -965,7 +965,7 @@ const CreateJob = () => {
                                             value={reviewer.reviewer_id}
                                             key={reviewer.reviewer_id}
                                           >
-                                            {reviewer.reviewer_name}
+                                            {reviewer.reviewer_name + " (" + reviewer?.reviewer_email + ")"}
                                           </option>
                                         )
                                       )}
@@ -996,7 +996,7 @@ const CreateJob = () => {
                                             value={staff.allocated_id}
                                             key={staff.allocated_id}
                                           >
-                                            {staff.allocated_name}
+                                            {staff.allocated_name +  " (" + staff?.allocated_email + ")"}
                                           </option>
                                         )
                                       )}
