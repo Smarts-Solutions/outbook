@@ -310,6 +310,16 @@ const Status = () => {
     statusTypeData();
   }, []);
 
+
+  const exportData = statusDataAll.map((item) => ({
+    "Status Name": item.name,
+    "Status Type": item.status_type,
+    "Created Date": convertDate(item.created_at),
+    "Last Update On": convertDate(item.updated_at),
+   
+  }));
+
+
   return (
     <div>
       <div className="container-fluid">
@@ -351,7 +361,7 @@ const Status = () => {
             <div className="d-flex justify-content-end">
               <ExportToExcel
                 className="btn btn-outline-info fw-bold float-end border-3 "
-                apiData={statusDataAll}
+                apiData={exportData}
                 fileName={`Stauts`}
               />
             </div>

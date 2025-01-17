@@ -585,7 +585,15 @@ const StaffPage = () => {
 
 
 
-  console.log("staffDataAll", staffDataAll.data);
+
+   const exportData = staffDataAll.data.map((item) => ({
+    "First Name": item.first_name,
+    "Last Name": item.last_name,
+    "Email": item.email,
+    "Phone": item.phone,
+    "Role": item.role_name,
+    "Status": item.status === "1" ? "Active" : "Inactive",
+    }));
   return (
     <div>
       <div className="container-fluid">
@@ -630,7 +638,7 @@ const StaffPage = () => {
           <div className="d-flex justify-content-end">
             <ExportToExcel
               className="btn btn-outline-info fw-bold float-end border-3 "
-              apiData={staffDataAll.data}
+              apiData={exportData}
               fileName={`Staff Details`}
             />
           </div>

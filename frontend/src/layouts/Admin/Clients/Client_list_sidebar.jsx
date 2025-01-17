@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { JobAction, Update_Status ,getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status, getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
@@ -24,16 +24,16 @@ const ClientLists = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerData(response.data);
-          if(response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
+          if (response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
             setCustomerId(customer_id_sidebar || response?.data[0]?.id);
             GetAllClientData(customer_id_sidebar || response?.data[0]?.id);
             setCustomerName(response?.data[0]?.trading_name);
-            setHararchyData({ customer: {id:customer_id_sidebar || response?.data[0]?.id,trading_name:response?.data[0]?.trading_name}});
+            setHararchyData({ customer: { id: customer_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name } });
             setActiveTab("client");
           }
 
         } else {
-         setCustomerData([]);
+          setCustomerData([]);
         }
       })
       .catch((error) => {
@@ -42,7 +42,7 @@ const ClientLists = () => {
   };
 
   useEffect(() => {
-  GetAllCustomer();
+    GetAllCustomer();
   }, []);
 
   const location = useLocation();
@@ -52,7 +52,7 @@ const ClientLists = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-  const [hararchyData, setHararchyData] = useState({ customer: {id:customerId,trading_name:customerName}});
+  const [hararchyData, setHararchyData] = useState({ customer: { id: customerId, trading_name: customerName } });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState('')
   const [statusDataAll, setStatusDataAll] = useState([])
@@ -69,10 +69,10 @@ const ClientLists = () => {
   });
 
   const accessDataCustomer =
-  JSON.parse(localStorage.getItem("accessData") || "[]").find(
-    (item) => item.permission_name === "customer"
-  )?.items || [];
-  
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "customer"
+    )?.items || [];
+
   useEffect(() => {
     if (accessDataCustomer.length === 0) return;
     const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
@@ -106,8 +106,8 @@ const ClientLists = () => {
 
 
   const initialTabs = [
-   // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-   // { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    // { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
     //{ id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
@@ -218,9 +218,9 @@ const ClientLists = () => {
       name: "Client Code",
       cell: (row) => (
         <div title={row.client_code || "-"}>
-         {row.client_code || "-"}
+          {row.client_code || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.client_code || "-",
       sortable: true,
       reorder: false,
@@ -301,11 +301,11 @@ const ClientLists = () => {
       name: "Client Name",
       cell: (row) => (
         <div
-        title={row.client_trading_name || "-"}
+          title={row.client_trading_name || "-"}
         >
-         {row.client_trading_name || "-"}
+          {row.client_trading_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
       reorder: false,
@@ -314,11 +314,11 @@ const ClientLists = () => {
       name: "Job Type",
       cell: (row) => (
         <div
-        title={row.job_type_name || "-"}
+          title={row.job_type_name || "-"}
         >
-         {row.job_type_name || "-"}
+          {row.job_type_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
       reorder: false,
@@ -332,7 +332,7 @@ const ClientLists = () => {
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
-              disabled={ getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+              disabled={getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -352,15 +352,15 @@ const ClientLists = () => {
 
       cell: (row) => (
         <div
-        title={ row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-"}
+          title={row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name || "-"}
         >
-         { row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name || "-"}
+          {row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -372,11 +372,11 @@ const ClientLists = () => {
       name: "Client Job Code",
       cell: (row) => (
         <div
-        title={row.client_job_code || "-"}
+          title={row.client_job_code || "-"}
         >
-         {row.client_job_code || "-"}
+          {row.client_job_code || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.client_job_code || "-",
       sortable: true,
       reorder: false,
@@ -385,15 +385,15 @@ const ClientLists = () => {
       name: "Outbook Account Manager",
       cell: (row) => (
         <div
-        title={ row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-"}
+          title={row.outbooks_acount_manager_first_name +
+            " " +
+            row.outbooks_acount_manager_last_name || "-"}
         >
-         { row.outbooks_acount_manager_first_name +
-        " " +
-        row.outbooks_acount_manager_last_name || "-"}
+          {row.outbooks_acount_manager_first_name +
+            " " +
+            row.outbooks_acount_manager_last_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -402,27 +402,27 @@ const ClientLists = () => {
       reorder: false,
     },
 
-  {
-    name: "Allocated To",
-    selector: (row) =>
-      row.allocated_id != null
-        ? row.allocated_first_name + " " + row.allocated_last_name
-        : "",
-    sortable: true,
-  },
+    {
+      name: "Allocated To",
+      selector: (row) =>
+        row.allocated_id != null
+          ? row.allocated_first_name + " " + row.allocated_last_name
+          : "",
+      sortable: true,
+    },
     {
       name: "Timesheet",
       cell: (row) => (
         <div
-        title={row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "-"}
+          title={row.total_hours_status == "1" && row.total_hours != null ?
+            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+            : "-"}
         >
-         {row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "-"}
+          {row.total_hours_status == "1" && row.total_hours != null ?
+            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+            : "-"}
         </div>
-   ),
+      ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null ?
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
@@ -451,12 +451,12 @@ const ClientLists = () => {
             ) : null
           }
           {
-            row.timesheet_job_id ==null ?
-            getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
-                <i className="ti-trash text-danger" />
-              </button>
-            ) : null :""
+            row.timesheet_job_id == null ?
+              getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
+                <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+                  <i className="ti-trash text-danger" />
+                </button>
+              ) : null : ""
           }
 
         </div>
@@ -558,7 +558,7 @@ const ClientLists = () => {
       cell: (row) => (
         <div>
           <a
-           title={row.check_list_name}
+            title={row.check_list_name}
           // onClick={() => HandleClientView(row)}
           // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
@@ -574,11 +574,11 @@ const ClientLists = () => {
       name: "Service Type",
       cell: (row) => (
         <div
-        title={row.service_name}
+          title={row.service_name}
         >
-         {row.service_name}
+          {row.service_name}
         </div>
-   ),
+      ),
       selector: (row) => row.service_name,
       sortable: true,
     },
@@ -586,11 +586,11 @@ const ClientLists = () => {
       name: "Job Type",
       cell: (row) => (
         <div
-        title={row.job_type_type}
+          title={row.job_type_type}
         >
-         {row.job_type_type}
+          {row.job_type_type}
         </div>
-   ),
+      ),
       selector: (row) => row.job_type_type, sortable: true,
       width: "200px"
     }
@@ -599,11 +599,11 @@ const ClientLists = () => {
       name: "Client Type",
       cell: (row) => (
         <div
-        title={row.client_type_type}
+          title={row.client_type_type}
         >
-         {row.client_type_type}
+          {row.client_type_type}
         </div>
-   ),
+      ),
       selector: (row) => row.client_type_type,
       sortable: true,
       width: "200px",
@@ -618,7 +618,7 @@ const ClientLists = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div className="d-flex"> 
+        <div className="d-flex">
           {
             (getAccessDataCustomer.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() =>
@@ -864,162 +864,185 @@ const ClientLists = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id,timesheet_job_id:row?.timesheet_job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, timesheet_job_id: row?.timesheet_job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
       return updatedData;
     });
   };
 
- const selectCustomerId = (id , name) => {
-  if(id != "") {
-    sessionStorage.setItem('customer_id_sidebar', id);
-    setCustomerId(id);
-    GetAllClientData(id);
-    setCustomerName(name);
-    setHararchyData({ customer: {id:id,trading_name:name}});
-    setActiveTab("client");
-  }else {
-    setCustomerId('');
-    setClientData([]);
-    setHararchyData({ customer: {id:'',trading_name:''}});
+  const selectCustomerId = (id, name) => {
+    if (id != "") {
+      sessionStorage.setItem('customer_id_sidebar', id);
+      setCustomerId(id);
+      GetAllClientData(id);
+      setCustomerName(name);
+      setHararchyData({ customer: { id: id, trading_name: name } });
+      setActiveTab("client");
+    } else {
+      setCustomerId('');
+      setClientData([]);
+      setHararchyData({ customer: { id: '', trading_name: '' } });
+    }
   }
- }
-  
- 
+
+
+
+
   return (
     <div className="container-fluid">
       <div className="content-title">
-      <div className="row ">
-        
-        <div className="col-sm-12">
-         <div className="form-group col-md-4 mb-0">
-                  <label className="form-label mb-2">Select Customer</label>
-                  <select
-                    name="staff_id"
-                    className="form-select"
-                    id="tabSelect"
-                    defaultValue={customerId}
-                    // onChange={(e) => selectCustomerId(e)}
-                    onChange={(e) => {
-                      const selectedId = e.target.value;
-                      const selectedCustomer = CustomerData.find(customer => customer.id == selectedId);
-                      selectCustomerId(selectedId, selectedCustomer?.trading_name);
-                    }}
-                  >
-                    {CustomerData &&
-                      CustomerData.map((val, index) => (
-                        <option
-                          key={index}
-                          value={val.id}
-                          selected={customerId == val.id}
-                        >
-                          {val.trading_name}
-                        </option>
-                      ))}
-                  </select>
-         </div>
+        <div className="row ">
 
-          <div className="page-title-box pt-2">
-            <div className="row align-items-start flex-md-row flex-column-reverse">
-              <div className="col-md-6 col-lg-8">
-                <ul
-                  className="nav nav-pills rounded-tabs"
-                  id="pills-tab"
-                  role="tablist"
-                >
-                  {tabs.map((tab) => (
-                    <li className="nav-item" role="presentation" key={tab.id}>
-                      <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
-                        id={`${tab.id}-tab`}
-                        data-bs-toggle="pill"
-                        data-bs-target={`#${tab.id}`}
-                        type="button"
-                        role="tab"
-                        aria-controls={tab.id}
-                        aria-selected={activeTab === tab.id}
-                        onClick={() => SetTab(tab.id)}
-                      >
-                        <i className={tab.icon}></i>
-                        {tab.label}
-                      </button>
-                    </li>
+          <div className="col-sm-12">
+            <div className="form-group col-md-4 mb-0">
+              <label className="form-label mb-2">Select Customer</label>
+              <select
+                name="staff_id"
+                className="form-select"
+                id="tabSelect"
+                defaultValue={customerId}
+                // onChange={(e) => selectCustomerId(e)}
+                onChange={(e) => {
+                  const selectedId = e.target.value;
+                  const selectedCustomer = CustomerData.find(customer => customer.id == selectedId);
+                  selectCustomerId(selectedId, selectedCustomer?.trading_name);
+                }}
+              >
+                {CustomerData &&
+                  CustomerData.map((val, index) => (
+                    <option
+                      key={index}
+                      value={val.id}
+                      selected={customerId == val.id}
+                    >
+                      {val.trading_name}
+                    </option>
                   ))}
-                </ul>
-              </div>
-              <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                {activeTab === "client" ||
-                  activeTab === "checklist" ||
-                  activeTab === "" ||
-                  activeTab === "job" ? (
-                  <>
-                    
-                    {
-                      (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" && customerId != "" ? (
-                        <>
-                          <div className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
-                            onClick={() => navigate("/admin/addclient", { state: { id: customerId, activeTab: activeTab } })} >
-                            <i className="fa fa-plus pe-1" /> Add Client
-                          </div>
-                        </>
-                      ) : (ClientData?.length > 0 && (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
-                        <>
+              </select>
+            </div>
 
-                          <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
-                            navigate("/admin/createjob", {
-                              state: { customer_id: customerId, goto: "Customer", activeTab: activeTab },
-                            })
-                          } >
-                            <i className="fa fa-plus pe-1" /> Create Job
-                          </div>
-                        </>
-                      ) : (getAccessDataCustomer.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "checklist" ? (
-                        <>
-                          <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
-                            navigate("/admin/create/checklist", { state: { id: customerId, activeTab: activeTab } })
-                          } >
-                            <i className="fa fa-plus pe-1" /> Add Checklist
-                          </div>
-                        </>
-                      ) : (
-                        null
-                      )}
-                  
-                  </>
-                ) : null}
+            <div className="page-title-box pt-2">
+              <div className="row align-items-start flex-md-row flex-column-reverse">
+                <div className="col-md-6 col-lg-8">
+                  <ul
+                    className="nav nav-pills rounded-tabs"
+                    id="pills-tab"
+                    role="tablist"
+                  >
+                    {tabs.map((tab) => (
+                      <li className="nav-item" role="presentation" key={tab.id}>
+                        <button
+                          className={`nav-link ${activeTab === tab.id ? "active" : ""
+                            }`}
+                          id={`${tab.id}-tab`}
+                          data-bs-toggle="pill"
+                          data-bs-target={`#${tab.id}`}
+                          type="button"
+                          role="tab"
+                          aria-controls={tab.id}
+                          aria-selected={activeTab === tab.id}
+                          onClick={() => SetTab(tab.id)}
+                        >
+                          <i className={tab.icon}></i>
+                          {tab.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+                  {activeTab === "client" ||
+                    activeTab === "checklist" ||
+                    activeTab === "" ||
+                    activeTab === "job" ? (
+                    <>
+
+                      {
+                        (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" && customerId != "" ? (
+                          <>
+                            <div className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
+                              onClick={() => navigate("/admin/addclient", { state: { id: customerId, activeTab: activeTab } })} >
+                              <i className="fa fa-plus pe-1" /> Add Client
+                            </div>
+                          </>
+                        ) : (ClientData?.length > 0 && (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
+                          <>
+
+                            <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
+                              navigate("/admin/createjob", {
+                                state: { customer_id: customerId, goto: "Customer", activeTab: activeTab },
+                              })
+                            } >
+                              <i className="fa fa-plus pe-1" /> Create Job
+                            </div>
+                          </>
+                        ) : (getAccessDataCustomer.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "checklist" ? (
+                          <>
+                            <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
+                              navigate("/admin/create/checklist", { state: { id: customerId, activeTab: activeTab } })
+                            } >
+                              <i className="fa fa-plus pe-1" /> Add Checklist
+                            </div>
+                          </>
+                        ) : (
+                          null
+                        )}
+
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-     <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
+        <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
 
-      <div className="tab-content" id="pills-tabContent">
-        {tabs1.map((tab) => (
-          <div
-            key={tab.key}
-            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
-              }`}
-            id={tab.key}
-            role="tabpanel"
-            aria-labelledby={`${tab.key}-tab`}
-          >
+        <div className="tab-content" id="pills-tabContent">
+          {tabs1.map((tab) => (
+            <div
+              key={tab.key}
+              className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+                }`}
+              id={tab.key}
+              role="tabpanel"
+              aria-labelledby={`${tab.key}-tab`}
+            >
 
-            <div className="report-data mt-4">
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="tab-title">
-                  <h3 className="mt-0">{tab.title}</h3>
-                </div>
+              <div className="report-data mt-4">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="tab-title">
+                    <h3 className="mt-0">{tab.title}</h3>
+                  </div>
                   <div className="col-md-2">
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={tab.data}
-                    fileName={`${tab.title} Details`}
-                  />
-                </div>
+                    {console.log("SS", tab.data)}
+                    {console.log("SS", tab.title)}
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3 "
+                      apiData={
+                        tab.title == "Clients" ? tab.data.map((item) => ({
+                          "Client Name": item.client_name,
+                          "Client Code": item.client_code,
+                          "Client Type Name": item.client_type_name,
+                          "Status": item.status == 1 ? "Active" : "Deactive",
+                        })) : tab.title == "Jobs" ? tab.data.map((item) => ({
+                          "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
+                          "Client Name": item.client_trading_name,
+                          "Job Type": item.job_type_name,
+                          "Status": item.status,
+                          "Client Contact Person": item.account_manager_officer_first_name + " " + item.account_manager_officer_last_name,
+                          "Client Job Code": item.client_job_code,
+                          "Outbook Account Manager": item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name,
+                          "Allocated To": item.allocated_id != null ? item.allocated_first_name + " " + item.allocated_last_name : "",
+                          "Timesheet": item.total_hours_status == 1 && item.total_hours != null ? item.total_hours.split(":")[0] + "h " + item.total_hours.split(":")[1] + "m" : "-",
+                          "Invoicing": item.invoiced == 1 ? "YES" : "NO",
+                        })) : tab.data
 
-                {/* {tab.placeholder && (
+                      }
+                      fileName={`${tab.title} Details`}
+                    />
+                  </div>
+
+                  {/* {tab.placeholder && (
                   <div className="search-input">
                     <input
                       type="text"
@@ -1030,36 +1053,36 @@ const ClientLists = () => {
                     />
                   </div>
                 )} */}
-              </div>
+                </div>
 
-              <div className="datatable-wrapper">
-             
-                {tab.data && tab.data.length > 0 ? (
-                  <Datatable
-                    columns={tab.columns}
-                    data={tab.data}
-                    filter={true}
-                  />
-                ) : (
-                  <div className="text-center">
-                    <img
-                      src="/assets/images/No-data-amico.png"
-                      alt="No records available"
-                      style={{
-                        width: "250px",
-                        height: "auto",
-                        objectFit: "contain",
-                      }}
+                <div className="datatable-wrapper">
+
+                  {tab.data && tab.data.length > 0 ? (
+                    <Datatable
+                      columns={tab.columns}
+                      data={tab.data}
+                      filter={true}
                     />
-                    <p>No data available.</p>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center">
+                      <img
+                        src="/assets/images/No-data-amico.png"
+                        alt="No records available"
+                        style={{
+                          width: "250px",
+                          height: "auto",
+                          objectFit: "contain",
+                        }}
+                      />
+                      <p>No data available.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-        ))}
-      </div>
+          ))}
+        </div>
       </div>
     </div>
   );

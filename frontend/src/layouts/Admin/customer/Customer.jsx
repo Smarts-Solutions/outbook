@@ -394,6 +394,15 @@ const Customer = () => {
   };
 
 
+  const exportData = filteredData.map((item) => ({
+    "Trading Name": item.trading_name,
+    "Customer Code": item.customer_code,
+    "Type": item.customer_type === '1'  ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
+    "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+    "Status": item.status == 1 ? "Active" : "Deactive",
+  }));
+
+
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -463,7 +472,7 @@ const Customer = () => {
                         <div className="col-md-2">
                         <ExportToExcel
                         className="btn btn-outline-info fw-bold float-end border-3 "
-                        apiData={filteredData}
+                        apiData={exportData}
                         fileName={"Customer Details"}
                       />
                         </div>

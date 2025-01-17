@@ -154,6 +154,31 @@ const JobStatus = () => {
     },
   ];
 
+
+  const exportData = JobStatusData.map((item) => {
+    return {
+      "Job Id": item.job_code_id,
+      "Customer Name": item.customer_trading_name,
+      "Account Manager": item.account_manager_name,
+      "Clients": item.client_trading_name,
+      "Service Type": item.service_name,
+      "Job Type": item.job_type_name,
+      "Status": item.status,
+      "Allocated To": item.allocated_name,
+      "Received On": item.reviewer_name,
+      "Companies House Due Date": convertDate(item.filing_Companies_date),
+      "Internal Deadline": convertDate(item.internal_deadline_date),
+      "Customer Deadline": convertDate(item.customer_deadline_date),
+      "Initial Query Sent Date": convertDate(item.query_sent_date),
+      "Final Query Response Received Date": convertDate(
+        item.final_query_response_received_date
+      ),
+      "First Draft Sent": convertDate(item.draft_sent_on),
+      "Final Draft Sent": convertDate(item.final_draft_sent_on),
+    };
+  });
+
+
   return (
     <div>
       <div className="report-data">
@@ -168,7 +193,7 @@ const JobStatus = () => {
           <div className="d-flex justify-content-end mb-3">
             <ExportToExcel
               className="btn btn-outline-info fw-bold float-end border-3 "
-              apiData={JobStatusData}
+              apiData={exportData}
               fileName={`Job Status Report`}
             />
           </div>

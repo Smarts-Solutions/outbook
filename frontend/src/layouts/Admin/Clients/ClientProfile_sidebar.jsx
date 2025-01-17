@@ -500,7 +500,18 @@ const ClientList = () => {
     }
   }
 
-  console.log("hararchyData", hararchyData);
+
+
+  const exportData = customerData.map((item) => ({
+    "Job Code Id": item.job_code_id,
+    "Client Trading Name": item.client_trading_name,
+    "Job Type Name": item.job_type_name,
+    "Account Manager": item.account_manager_officer_first_name + " " + item.account_manager_officer_last_name,
+    "Outbooks Account Manager": item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name,
+    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
+    "Invoiced": item.invoiced == "1" ? "YES" : "NO",
+    "Status": item.status ,
+  }));
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -660,7 +671,7 @@ const ClientList = () => {
                       <div className="col-md-2">
                         <ExportToExcel
                           className="btn btn-outline-info fw-bold float-end border-3 "
-                          apiData={customerData}
+                          apiData={exportData}
                           fileName={`Job Details`}
                         />
                       </div>
