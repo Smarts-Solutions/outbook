@@ -694,24 +694,6 @@ const EditJob = () => {
     );
   }
 
-  // useEffect(() => {
-
-
-  //   if(budgeted_hour_totalTime.hours && budgeted_hour_totalTime.minutes){
-
-
-  //   setBudgetedHours({
-  //     hours: budgeted_hour_totalTime.hours || '0',
-  //     minutes: budgeted_hour_totalTime.minutes || '0'
-  //   });
-  // }
-  // }, [AddTaskArr]);
-
-
-
-
-  console.log("getJobDetails", getJobDetails.data.staff_created_id);
-  console.log("staffCreatedId", staffCreatedId);
 
 
   return (
@@ -1945,6 +1927,7 @@ const EditJob = () => {
                               </div>
                             </div>
                           </div>
+
 
                           {jobData.EngagementModel !=
                             "fte_dedicated_staffing" &&  location?.state?.jab?.status_type==6 && (
