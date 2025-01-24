@@ -10,6 +10,7 @@ import sweatalert from "sweetalert2";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import Select from 'react-select';
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from 'react-icons/fa';
@@ -269,9 +270,9 @@ const StaffPage = () => {
               <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
             </button>
             <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
-              {/* <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
-              <FaPencilAlt />  Portfolio
-            </a> */}
+              <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
+                <FaPencilAlt />  Portfolio
+              </a>
               <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
                 <FaBriefcase />  Edit
               </a>
@@ -586,14 +587,30 @@ const StaffPage = () => {
 
 
 
-   const exportData = staffDataAll.data.map((item) => ({
+  const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
     "Last Name": item.last_name,
     "Email": item.email,
     "Phone": item.phone,
     "Role": item.role_name,
     "Status": item.status === "1" ? "Active" : "Inactive",
-    }));
+  }));
+
+
+  const [AddCustomer, setAddCustomer] = useState([]);
+  const colourOptions = [
+    { value: 'ocean', label: 'Ocean' },
+    { value: 'blue', label: 'Blue' },
+    { value: 'purple', label: 'Purple' },
+    { value: 'red', label: 'Red' },
+    { value: 'orange', label: 'Orange' },
+  ];
+
+  const handleAddCustomer = (e) => {
+    setAddCustomer(e);
+  }
+
+
   return (
     <div>
       <div className="container-fluid">
@@ -694,83 +711,19 @@ const StaffPage = () => {
       >
         <div className="modal-body px-0">
           <div className="row w-100">
-            <div className="col-9">
-              <div className="search-box ms-2">
-                <i className="ri-search-line search-icon" />
-                <input
-                  type="text"
-                  className="form-control search"
-                  placeholder="Search Customer..."
-                />
-              </div>
-            </div>
-            <div className="col-3">
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-info add-btn"
-                  data-bs-toggle="modal"
-                  id="create-btn"
-                  data-bs-target="#showModal123"
-                >
-                  <i className="fa fa-plus"></i> Add
-                </button>
-              </div>
-            </div>
-            <div className="col-md-6" />
-            <div className="table-responsive  mt-3 mb-1">
-              <table
-                className="table align-middle table-nowrap"
-                id="customerTable"
-              >
-                <thead className="table-light">
-                  <tr>
-                    <th className="" data-="customer_name">
-                      Company Name
-                    </th>
-
-                    <th className="tabel_left" data-="action" width="80">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="list form-check-all">
-                  {allCustomerData &&
-                    allCustomerData.map((item, index) => (
-                      <tr className="tabel_new" key={index}>
-                        <td>{item.customer_name}</td>
-                        <td className="tabel_left">
-                          <div className=" gap-2">
-                            <div className="remove">
-                              <button
-                                onclick="deleteRecordModalshow()"
-                                className="text-decoration-none remove-item-btn delete-icon"
-                              >
-                                <i className="ti-trash text-danger "></i>
-                              </button>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-              <div className="noresult" style={{ display: "none" }}>
-                <div className="text-center">
-                  <lord-icon
-                    src="https://cdn.lordicon.com/msoeawqm.json"
-                    trigger="loop"
-                    colors="primary:#121331,secondary:#08a88a"
-                    style={{ width: 75, height: 75 }}
-                  />
-                  <h5 className="mt-2">Sorry! No Result Found</h5>
-                  <p className="text-muted mb-0">
-                    We've searched more than 150+ Orders We did not find any
-                    orders for you search.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <div className="col-12">
+              <Select
+                name="colors"
+                className="basic-multi-select"
+                classNamePrefix="select"
+                options={allCustomerData.map((item) => ({
+                  value: item.id,
+                  label: item.customer_name,
+                }))}
+                onChange={handleAddCustomer}
+                isMulti
+              />
+            </div>  
           </div>
         </div>
       </CommanModal>
