@@ -25,6 +25,10 @@ const CreateClient = () => {
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
   const [errors5, setErrors5] = useState({});
+  const [errors6, setErrors6] = useState({});
+  const [errors7, setErrors7] = useState({});
+
+
 
   const incorporationData = async (req) => {
     const data = { req: { action: "getAll" }, authToken: token };
@@ -96,7 +100,6 @@ const CreateClient = () => {
     notes: "",
   });
 
-
   const [getCharityIncorporatedOrganisation, setCharityIncorporatedOrganisation] = useState({
     charity_name: "",
     TradingName: "",
@@ -107,6 +110,23 @@ const CreateClient = () => {
     VATNumber: "",
     Website: "",
     notes: "",
+  });
+
+  const [getTrust, setTrust] = useState({
+    TrustName: "",
+    TrustAddress: "",
+    VATRegistered: "0",
+    VATNumber: "",
+    Website: "",
+
+  });
+
+  const [getAssociationDetails, setAssociationDetails] = useState({
+    AssociationName: "",
+    AssociationAddress: "",
+    VATRegistered: "0",
+    VATNumber: "",
+    Website: "",
   });
 
   const [contacts, setContacts] = useState([
@@ -161,7 +181,55 @@ const CreateClient = () => {
       email: "",
       alternate_email: "",
     },
-    
+
+  ]);
+
+  const [errorMemberTrustDetails, setErrorMemberTrustDetails] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+
+  ]);
+
+  const [errorTrustTrusteeDetails, setErrorTrustTrusteeDetails] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+
+  ]);
+
+  const [errorMemberDetailsUnincorporated, setErrorMemberDetailsUnincorporated] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+
   ]);
 
   const [errorTrusteeDetails, setErrorTrusteeDetails] = useState([
@@ -177,7 +245,7 @@ const CreateClient = () => {
       email: "",
       alternate_email: "",
     },
-    
+
   ]);
 
   const [contactsMembers, setContactsMembers] = useState([
@@ -194,6 +262,52 @@ const CreateClient = () => {
       alternate_email: "",
     },
   ]);
+
+  const [contactsMembersUnincorporated, setContactsMembersUnincorporated] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
+
+  const [contactsMembersTrust, setContactsMembersTrust] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
+
+  const [contactsTrustTrustee, setContactsTrustTrustee] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
+
 
   const [contactsTrustee, setContactsTrustee] = useState([
     {
@@ -386,9 +500,9 @@ const CreateClient = () => {
     ]);
   };
 
-  const handleAddContactTrusteeDetails = () => {
-    setContactsTrustee([
-      ...contactsTrustee,
+  const handleAddContactMemberDetailsUnincorporated = () => {
+    setContactsMembersUnincorporated([
+      ...contactsMembersUnincorporated,
       {
         authorised_signatory_status: true,
         first_name: "",
@@ -402,8 +516,99 @@ const CreateClient = () => {
         alternate_email: "",
       },
     ]);
-    setErrorTrusteeDetails([
-      ...errorTrusteeDetails,
+    setErrorMemberDetailsUnincorporated([
+      ...errorMemberDetailsUnincorporated,
+      {
+        first_name: "",
+        last_name: "",
+        role: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+  };
+
+  const handleAddContactTrusteeDetails = () => {
+    setContactsTrustTrustee([
+      ...contactsTrustTrustee,
+      {
+        authorised_signatory_status: true,
+        first_name: "",
+        last_name: "",
+        role: "",
+        phone: "",
+        alternate_phone: "",
+        phone_code: "+44",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setErrorTrustTrusteeDetails([
+      ...errorTrustTrusteeDetails,
+      {
+        first_name: "",
+        last_name: "",
+        role: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+   
+  };
+
+  const handleAddContactTrustMemberDetails = () => {
+    setContactsMembersTrust([
+      ...contactsMembersTrust,
+      {
+        authorised_signatory_status: true,
+        first_name: "",
+        last_name: "",
+        role: "",
+        phone: "",
+        alternate_phone: "",
+        phone_code: "+44",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setErrorMemberTrustDetails([
+      ...errorMemberTrustDetails,
+      {
+        first_name: "",
+        last_name: "",
+        role: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+  };
+
+  const handleAddContactTrustTrusteeDetails = () => {
+    setContactsTrustTrustee([
+      ...contactsTrustTrustee,
+      {
+        authorised_signatory_status: true,
+        first_name: "",
+        last_name: "",
+        role: "",
+        phone: "",
+        alternate_phone: "",
+        phone_code: "+44",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setErrorTrustTrusteeDetails([
+      ...errorTrustTrusteeDetails,
       {
         first_name: "",
         last_name: "",
@@ -437,6 +642,13 @@ const CreateClient = () => {
     setErrorMemberDetails(newErrors);
   };
 
+  const handleDeleteContactMemberDetailsUnincorporated = (index) => {
+    const newContacts = contactsMembersUnincorporated.filter((_, i) => i !== index);
+    const newErrors = errorMemberDetailsUnincorporated.filter((_, i) => i !== index);
+    setContactsMembersUnincorporated(newContacts);
+    setErrorMemberDetailsUnincorporated(newErrors);
+  }
+
   const handleDeleteContactTrusteeDetails = (index) => {
     const newContacts = contactsTrustee.filter((_, i) => i !== index);
     const newErrors = errorTrusteeDetails.filter((_, i) => i !== index);
@@ -444,6 +656,20 @@ const CreateClient = () => {
     setErrorTrusteeDetails(newErrors);
   };
 
+  const handleDeleteContactTrustmemberDetails = (index) => {
+    const newContacts = contactsMembersTrust.filter((_, i) => i !== index);
+    const newErrors = errorMemberTrustDetails.filter((_, i) => i !== index);
+    setContactsMembersTrust(newContacts);
+    setErrorMemberTrustDetails(newErrors);
+  };
+
+  const handleDeleteContactTrusTrusteeDetails = (index) => {
+    const newContacts = contactsTrustTrustee.filter((_, i) => i !== index);
+    const newErrors = errorTrustTrusteeDetails.filter((_, i) => i !== index);
+    setContactsTrustTrustee(newContacts);
+    setErrorTrustTrusteeDetails(newErrors);
+   
+  };
 
   const CustomerPersonRoleData = async () => {
     const req = {
@@ -506,6 +732,30 @@ const CreateClient = () => {
     }
     validate5(name, value);
     setCharityIncorporatedOrganisation({ ...getCharityIncorporatedOrganisation, [name]: value });
+  };
+
+  const handleChange6 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate6(name, value);
+    setAssociationDetails({ ...getAssociationDetails, [name]: value });
+
+  };
+
+  const handleChange7 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate7(name, value);
+    setTrust({ ...getTrust, [name]: value });
+
   };
 
   const handleChangeIndivisul = (e) => {
@@ -736,18 +986,18 @@ const CreateClient = () => {
     console.log(name, value)
     if (!value?.trim()) {
       switch (name) {
-         case "charity_name":
+        case "charity_name":
           newErrors[name] = "Please enter Trading Name";
           break;
-          case "TradingName":
+        case "TradingName":
           newErrors[name] = "Please enter Trading Name";
           break;
-          case "charity_commission_number":
+        case "charity_commission_number":
           newErrors[name] = "Please enter Charity Commission Number";
-          case "VATRegistered":
+        case "VATRegistered":
           newErrors[name] = "Please Enter VAT Registered";
           break;
-          case "principal_office_address":
+        case "principal_office_address":
           newErrors[name] = "Please Enter Principal Office Address";
           break;
         default:
@@ -775,10 +1025,85 @@ const CreateClient = () => {
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  // validate all fields when submit
+  const validate6 = (name, value) => {
+    const newErrors = { ...errors6 }
+    if (!value?.trim()) {
+      switch (name) {
+        case "AssociationName":
+          newErrors[name] = "Please enter Association Name";
+          break;
+        case "AssociationAddress":
+          newErrors[name] = "Please enter Association Address";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+      delete newErrors[name];
+      setErrors6((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+
+    }
+
+    ScrollToViewFirstError(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors6((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate7 = (name, value) => {
+    const newErrors = { ...errors7 }
+    if (!value?.trim()) {
+      switch (name) {
+        case "TrustName":
+          newErrors[name] = "Please enter Trust Name";
+          break;
+        case "TrustAddress":
+          newErrors[name] = "Please enter Trust Address";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+      delete newErrors[name];
+      setErrors7((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+
+    }
+
+    ScrollToViewFirstError(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors7((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
   const validateAllFields = (type) => {
-    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails , getCharityIncorporatedOrganisation];
-    const validate = [validate1, validate2, validate3, validate4, validate5];
+    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails, getCharityIncorporatedOrganisation, getAssociationDetails, getTrust];
+    const validate = [validate1, validate2, validate3, validate4, validate5, validate6, validate7];
     let isValid = true;
     for (const key in customer_type[type - 1]) {
       if (!validate[type - 1](key, customer_type[type - 1][key])) {
@@ -901,12 +1226,34 @@ const CreateClient = () => {
     validateField1(index, field, value);
   };
 
-
   const handleChangeMember = (index, field, value) => {
     const newContacts = [...contactsMembers];
     newContacts[index][field] = value;
     setErrorMemberDetails(newContacts);
     validateContactMemberField(index, field, value);
+  };
+
+  const handleChangeMemberUnincorporated = (index, field, value) => {
+    const newContacts = [...contactsMembersUnincorporated];
+    newContacts[index][field] = value;
+    setContactsMembersUnincorporated(newContacts);
+    validateContactMemberFieldUnincorporated(index, field, value);
+  };
+
+  const handleChangeTrust = (index, field, value) => {
+    const newContacts = [...contactsMembersTrust];
+    newContacts[index][field] = value;
+    setErrorMemberTrustDetails(newContacts);
+    validateContactMemberTrust(index, field, value);
+   
+  };
+
+
+  const handleChangeTrustTrustee = (index, field, value) => {
+    const newContacts = [...contactsTrustTrustee];
+    newContacts[index][field] = value;
+    setContactsTrustTrustee(newContacts);
+    validateContactTrustTrustee(index, field, value);
   };
 
   const handleChangeTrustee = (index, field, value) => {
@@ -958,8 +1305,6 @@ const CreateClient = () => {
       case "last_name":
         newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
         break;
-      case "role":
-        // newErrors[index].role = value ? '' : 'Role is required';
         break;
       case "email":
         if (!value?.trim()) {
@@ -1012,12 +1357,63 @@ const CreateClient = () => {
       case "last_name":
         newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
         break;
-      
+
       default:
         break;
     }
     setErrorMemberDetails(newErrors);
   };
+
+  const validateContactMemberFieldUnincorporated = (index, field, value) => {
+    const newErrors = [...errorMemberDetailsUnincorporated];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
+        break;
+
+      default:
+        break;
+    }
+    setErrorMemberDetailsUnincorporated(newErrors);
+  };
+
+  const validateContactMemberTrust = (index, field, value) => {
+    const newErrors = [...errorMemberTrustDetails];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
+        break;
+
+      default:
+        break;
+    }
+    setErrorMemberTrustDetails(newErrors);
+    
+  };
+
+  const validateContactTrustTrustee = (index, field, value) => {
+     const newErrors = [...errorTrustTrusteeDetails];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
+        break;
+
+      default:
+        break;
+
+    }
+    setErrorTrustTrusteeDetails(newErrors);
+  };
+
 
   const validateContactTrusteeField = (index, field, value) => {
     const newErrors = [...errorTrusteeDetails];
@@ -1028,7 +1424,7 @@ const CreateClient = () => {
       case "last_name":
         newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
         break;
-      
+
       default:
         break;
     }
@@ -1041,7 +1437,6 @@ const CreateClient = () => {
     );
     setSearchDetails(filterData);
   };
-
 
   const AddClientFun = async (req) => {
 
@@ -1083,8 +1478,8 @@ const CreateClient = () => {
         vat_number: getSoleTraderDetails.vatNumber,
         website: getSoleTraderDetails.website,
         notes: getSoleTraderDetails.notes,
-        first_name: getSoleTraderDetails.first_name,
-        last_name: getSoleTraderDetails.last_name,
+        first_name: getSoleTraderDetails?.first_name,
+        last_name: getSoleTraderDetails?.last_name,
         phone: getSoleTraderDetails.phone,
         email: getSoleTraderDetails.email,
         residential_address: getSoleTraderDetails.residentialAddress,
@@ -1098,9 +1493,8 @@ const CreateClient = () => {
       let formIsValid = true;
       const newErrors = contacts.map((contact, index) => {
         const error = {
-          first_name: contact.first_name?.trim() ? "" : "First Name is required",
-          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
-          // role: contact.role ? '' : 'Role is required',
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
           phone:
             contact.phone?.trim() === ""
               ? ""
@@ -1116,11 +1510,11 @@ const CreateClient = () => {
         };
 
         if (
-          error.first_name ||
-          error.last_name ||
-          error.role ||
-          error.phone ||
-          error.email
+          error?.first_name ||
+          error?.last_name ||
+          error?.role ||
+          error?.phone ||
+          error?.email
         ) {
           formIsValid = false;
         }
@@ -1157,9 +1551,8 @@ const CreateClient = () => {
       let formIsValid = true;
       const newErrors = contacts1.map((contact, index) => {
         const error = {
-          first_name: contact.first_name?.trim() ? "" : "First Name is required",
-          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
-          // role: contact.role ? '' : 'Role is required',
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
           phone:
             contact.phone?.trim() === ""
               ? ""
@@ -1187,11 +1580,11 @@ const CreateClient = () => {
         };
 
         if (
-          error.first_name ||
-          error.last_name ||
-          error.role ||
-          error.phone ||
-          error.email
+          error?.first_name ||
+          error?.last_name ||
+          error?.role ||
+          error?.phone ||
+          error?.email
         ) {
           formIsValid = false;
         }
@@ -1225,8 +1618,8 @@ const CreateClient = () => {
         client_type: "4",
         customer_id: location.state.id,
         trading_name: getIndivisualDetails.tradingName,
-        first_name: getIndivisualDetails.first_name,
-        last_name: getIndivisualDetails.last_name,
+        first_name: getIndivisualDetails?.first_name,
+        last_name: getIndivisualDetails?.last_name,
         phone: getIndivisualDetails.phone,
         email: getIndivisualDetails.email,
         residential_address: getIndivisualDetails.residentialAddress,
@@ -1262,32 +1655,31 @@ const CreateClient = () => {
       let formIsValid = true;
       let newErrors = contactsMembers.map((contact, index) => {
         const error = {
-          first_name: contact.first_name?.trim() ? "" : "First Name is required",
-          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
-          
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
         };
 
         if (
-          error.first_name ||
-          error.last_name 
+          error?.first_name ||
+          error?.last_name
         ) {
           formIsValid = false;
         }
-        console.log("newErrors", error)
         return error;
       });
 
 
       let newErrors1 = contactsTrustee.map((contact, index) => {
         const error = {
-          first_name: contact.first_name?.trim() ? "" : "First Name is required",
-          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
-          
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
         };
 
         if (
-          error.first_name ||
-          error.last_name 
+          error?.first_name ||
+          error?.last_name
         ) {
           formIsValid = false;
         }
@@ -1298,7 +1690,7 @@ const CreateClient = () => {
       setErrorMemberDetails(newErrors);
       setErrorTrusteeDetails(newErrors1);
 
-     
+
 
       if (formIsValid) {
         const req = {
@@ -1326,9 +1718,114 @@ const CreateClient = () => {
 
       }
     }
+    else if (selectClientType == 6 && validateAllFields(6)) {
+      let formIsValid = true;
+      let newErrors = contactsMembersUnincorporated.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+
+      });
+      setErrorMemberDetailsUnincorporated(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "6",
+          customer_id: location.state.id,
+          association_name: getAssociationDetails.AssociationName,
+          association_address: getAssociationDetails.AssociationAddress,
+          vat_registered: getAssociationDetails.VATRegistered,
+          vat_number: getAssociationDetails.VATNumber,
+          website: getAssociationDetails.Website,
+          notes: getAssociationDetails.notes,
+          member_details: contactsMembersUnincorporated,
+
+        };
+        console.log("req", req)
+        alert("Charity Incorporated Organisation")
+        return
+        await AddClientFun(req);
+
+      }
+      else {
+        ScrollToViewFirstErrorContactForm(contactsErrors);
+
+      }
+    }
+    else if (selectClientType == 7 && validateAllFields(7)) {
+      let formIsValid = true;
+      let newErrors = contactsMembersTrust.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+        };
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+
+      });
+      let newErrors1 = contactsTrustTrustee.map((contact, index) => {
+        const error = { 
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+        };
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      }
+      );
+
+
+      setErrorMemberTrustDetails(newErrors);
+      setErrorTrustTrusteeDetails(newErrors1);
+
+
+
+      if (formIsValid) {
+        const req = {
+          client_type: "5",
+          customer_id: location.state.id,
+          charity_name: getCharityIncorporatedOrganisation.charity_name,
+          charity_commission_number: getCharityIncorporatedOrganisation.charity_commission_number,
+          principal_office_address: getCharityIncorporatedOrganisation.principal_office_address,
+          service_address: getCharityIncorporatedOrganisation.service_address,
+          vat_registered: getCharityIncorporatedOrganisation.VATRegistered,
+          vat_number: getCharityIncorporatedOrganisation.VATNumber,
+          website: getCharityIncorporatedOrganisation.Website,
+          notes: getCharityIncorporatedOrganisation.notes,
+          member_details: contactsMembers,
+          trustee_details: contactsTrustee,
+        };
+        console.log("req", req)
+        alert("Charity Incorporated Organisation")
+        return
+        await AddClientFun(req);
+
+      }
+      else {
+        ScrollToViewFirstErrorContactForm(contactsErrors);
+
+      }
+    }
+
   };
-
-
 
 
 
@@ -1599,7 +2096,7 @@ const CreateClient = () => {
                                           name="first_name"
                                           id="first_name"
                                           value={
-                                            getSoleTraderDetails.first_name
+                                            getSoleTraderDetails?.first_name
                                           }
                                           maxLength={50}
                                           onChange={(e) => handleChange1(e)}
@@ -1625,7 +2122,7 @@ const CreateClient = () => {
                                           placeholder="Last Name"
                                           name="last_name"
                                           id="last_name"
-                                          value={getSoleTraderDetails.last_name}
+                                          value={getSoleTraderDetails?.last_name}
                                           maxLength={50}
                                           onChange={(e) => handleChange1(e)}
                                         />
@@ -2280,11 +2777,11 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={errors[index].first_name ? "error-field form-control" : "form-control"}
+                                                        className={errors[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                         placeholder="First Name"
                                                         id={`first_name-${index}`}
-                                                        value={contact.first_name}
+                                                        value={contact?.first_name}
                                                         maxLength={50}
                                                         onChange={(e) =>
                                                           handleChange(
@@ -2295,11 +2792,11 @@ const CreateClient = () => {
                                                         }
                                                       />
                                                       {errors[index]
-                                                        .first_name && (
+                                                        ?.first_name && (
                                                           <div className="error-text">
                                                             {
                                                               errors[index]
-                                                                .first_name
+                                                                ?.first_name
                                                             }
                                                           </div>
                                                         )}
@@ -2322,11 +2819,11 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={errors[index].last_name ? "error-field form-control" : "form-control"}
+                                                        className={errors[index]?.last_name ? "error-field form-control" : "form-control"}
                                                         placeholder="Last Name"
                                                         id={`last_name-${index}`}
                                                         value={
-                                                          contact.last_name
+                                                          contact?.last_name
                                                         }
                                                         maxLength={50}
                                                         onChange={(e) =>
@@ -2338,11 +2835,11 @@ const CreateClient = () => {
                                                         }
                                                       />
                                                       {errors[index]
-                                                        .last_name && (
+                                                        ?.last_name && (
                                                           <div className="error-text">
                                                             {
                                                               errors[index]
-                                                                .last_name
+                                                                ?.last_name
                                                             }
                                                           </div>
                                                         )}
@@ -2359,7 +2856,7 @@ const CreateClient = () => {
                                                       <select
                                                         className="form-select"
                                                         id={`role-${index}`}
-                                                        value={contact.role}
+                                                        value={contact?.role}
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
@@ -2383,9 +2880,9 @@ const CreateClient = () => {
                                                             )
                                                           )}
                                                       </select>
-                                                      {errors[index].role && (
+                                                      {errors[index]?.role && (
                                                         <div className="error-text">
-                                                          {errors[index].role}
+                                                          {errors[index]?.role}
                                                         </div>
                                                       )}
                                                     </div>
@@ -2788,13 +3285,13 @@ const CreateClient = () => {
                                                       <input
                                                         type="text"
 
-                                                        className={contactsErrors[index].first_name ? "error-field form-control" : "form-control"}
+                                                        className={contactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                         placeholder="First Name"
                                                         name="first_name"
                                                         id={`first_name-${index}`}
                                                         value={
-                                                          contacts1.first_name
+                                                          contacts1?.first_name
                                                         }
                                                         maxLength={50}
                                                         onChange={(e) =>
@@ -2807,11 +3304,11 @@ const CreateClient = () => {
 
                                                       />
                                                       {contactsErrors[index]
-                                                        .first_name && (
+                                                        ?.first_name && (
                                                           <div className="error-text">
                                                             {
                                                               contactsErrors[index]
-                                                                .first_name
+                                                                ?.first_name
                                                             }
                                                           </div>
                                                         )}
@@ -2830,13 +3327,13 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={contactsErrors[index].last_name ? "error-field form-control" : "form-control"}
+                                                        className={contactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                         placeholder=" Last Name"
                                                         name="last_name"
                                                         id={`last_name-${index}`}
                                                         value={
-                                                          contacts1.last_name
+                                                          contacts1?.last_name
                                                         }
                                                         onChange={(e) =>
                                                           handleChange4(
@@ -2848,11 +3345,11 @@ const CreateClient = () => {
                                                         maxLength={50}
                                                       />
                                                       {contactsErrors[index]
-                                                        .last_name && (
+                                                        ?.last_name && (
                                                           <div className="error-text">
                                                             {
                                                               contactsErrors[index]
-                                                                .last_name
+                                                                ?.last_name
                                                             }
                                                           </div>
                                                         )}
@@ -2868,7 +3365,7 @@ const CreateClient = () => {
                                                       <select
                                                         className="form-select"
                                                         id={`role-${index}`}
-                                                        value={contacts1.role}
+                                                        value={contacts1?.role}
                                                         onChange={(e) =>
                                                           handleChange4(
                                                             index,
@@ -2892,15 +3389,13 @@ const CreateClient = () => {
                                                             )
                                                           )}
                                                       </select>
-                                                      {contactsErrors[index]
-                                                        .role && (
-                                                          <div className="error-text">
-                                                            {
-                                                              contactsErrors[index]
-                                                                .role
-                                                            }
-                                                          </div>
-                                                        )}
+                                                      {contactsErrors[index]?.role && (
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[index]?.role
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
 
@@ -3233,7 +3728,7 @@ const CreateClient = () => {
                                                 id="first_name"
 
                                                 value={
-                                                  getIndivisualDetails.first_name
+                                                  getIndivisualDetails?.first_name
                                                 }
                                                 onChange={(e) => handleChangeIndivisul(e)}
                                               />
@@ -3259,7 +3754,7 @@ const CreateClient = () => {
                                                 placeholder="Last Name"
                                                 name="last_name"
                                                 id="last_name"
-                                                value={getIndivisualDetails.last_name}
+                                                value={getIndivisualDetails?.last_name}
                                                 onChange={(e) => handleChangeIndivisul(e)}
                                               />
                                               {errors4["last_name"] && (
@@ -3681,7 +4176,7 @@ const CreateClient = () => {
                                                         >
 
                                                           {index !== 0 &&
-                                                           (
+                                                            (
                                                               <div>
                                                                 <button
                                                                   className="delete-icon"
@@ -3716,13 +4211,13 @@ const CreateClient = () => {
                                                           <input
                                                             type="text"
 
-                                                            className={errorMemberDetails[index].first_name ? "error-field form-control" : "form-control"}
+                                                            className={errorMemberDetails[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                             placeholder="First Name"
                                                             name="first_name"
                                                             id={`first_name-${index}`}
                                                             value={
-                                                              contacts1.first_name
+                                                              contacts1?.first_name
                                                             }
                                                             maxLength={50}
                                                             onChange={(e) =>
@@ -3735,11 +4230,11 @@ const CreateClient = () => {
 
                                                           />
                                                           {errorMemberDetails[index]
-                                                            .first_name && (
+                                                            ?.first_name && (
                                                               <div className="error-text">
                                                                 {
                                                                   errorMemberDetails[index]
-                                                                    .first_name
+                                                                    ?.first_name
                                                                 }
                                                               </div>
                                                             )}
@@ -3758,13 +4253,13 @@ const CreateClient = () => {
                                                           </label>
                                                           <input
                                                             type="text"
-                                                            className={errorMemberDetails[index].last_name ? "error-field form-control" : "form-control"}
+                                                            className={errorMemberDetails[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                             placeholder=" Last Name"
                                                             name="last_name"
                                                             id={`last_name-${index}`}
                                                             value={
-                                                              contacts1.last_name
+                                                              contacts1?.last_name
                                                             }
                                                             onChange={(e) =>
                                                               handleChangeMember(
@@ -3776,11 +4271,11 @@ const CreateClient = () => {
                                                             maxLength={50}
                                                           />
                                                           {errorMemberDetails[index]
-                                                            .last_name && (
+                                                            ?.last_name && (
                                                               <div className="error-text">
                                                                 {
                                                                   errorMemberDetails[index]
-                                                                    .last_name
+                                                                    ?.last_name
                                                                 }
                                                               </div>
                                                             )}
@@ -3796,7 +4291,7 @@ const CreateClient = () => {
                                                           <select
                                                             className="form-select"
                                                             id={`role-${index}`}
-                                                            value={contacts1.role}
+                                                            value={contacts1?.role}
                                                             onChange={(e) =>
                                                               handleChangeMember(
                                                                 index,
@@ -3820,15 +4315,13 @@ const CreateClient = () => {
                                                                 )
                                                               )}
                                                           </select>
-                                                          {errorMemberDetails[index]
-                                                            .role && (
-                                                              <div className="error-text">
-                                                                {
-                                                                  errorMemberDetails[index]
-                                                                    .role
-                                                                }
-                                                              </div>
-                                                            )}
+                                                          {errorMemberDetails[index]?.role && (
+                                                            <div className="error-text">
+                                                              {
+                                                                errorMemberDetails[index]?.role
+                                                              }
+                                                            </div>
+                                                          )}
                                                         </div>
                                                       </div>
 
@@ -4084,7 +4577,7 @@ const CreateClient = () => {
                                                         >
 
                                                           {index !== 0 &&
-                                                             (
+                                                            (
                                                               <div>
                                                                 <button
                                                                   className="delete-icon"
@@ -4119,13 +4612,13 @@ const CreateClient = () => {
                                                           <input
                                                             type="text"
 
-                                                            className={errorTrusteeDetails[index].first_name ? "error-field form-control" : "form-control"}
+                                                            className={errorTrusteeDetails[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                             placeholder="First Name"
                                                             name="first_name"
                                                             id={`first_name-${index}`}
                                                             value={
-                                                              contacts1.first_name
+                                                              contacts1?.first_name
                                                             }
                                                             maxLength={50}
                                                             onChange={(e) =>
@@ -4138,11 +4631,11 @@ const CreateClient = () => {
 
                                                           />
                                                           {errorTrusteeDetails[index]
-                                                            .first_name && (
+                                                            ?.first_name && (
                                                               <div className="error-text">
                                                                 {
                                                                   errorTrusteeDetails[index]
-                                                                    .first_name
+                                                                    ?.first_name
                                                                 }
                                                               </div>
                                                             )}
@@ -4161,13 +4654,13 @@ const CreateClient = () => {
                                                           </label>
                                                           <input
                                                             type="text"
-                                                            className={errorTrusteeDetails[index].last_name ? "error-field form-control" : "form-control"}
+                                                            className={errorTrusteeDetails[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                             placeholder=" Last Name"
                                                             name="last_name"
                                                             id={`last_name-${index}`}
                                                             value={
-                                                              contacts1.last_name
+                                                              contacts1?.last_name
                                                             }
                                                             onChange={(e) =>
                                                               handleChangeTrustee(
@@ -4179,11 +4672,11 @@ const CreateClient = () => {
                                                             maxLength={50}
                                                           />
                                                           {errorTrusteeDetails[index]
-                                                            .last_name && (
+                                                            ?.last_name && (
                                                               <div className="error-text">
                                                                 {
                                                                   errorTrusteeDetails[index]
-                                                                    .last_name
+                                                                    ?.last_name
                                                                 }
                                                               </div>
                                                             )}
@@ -4199,7 +4692,7 @@ const CreateClient = () => {
                                                           <select
                                                             className="form-select"
                                                             id={`role-${index}`}
-                                                            value={contacts1.role}
+                                                            value={contacts1?.role}
                                                             onChange={(e) =>
                                                               handleChangeTrustee(
                                                                 index,
@@ -4223,15 +4716,13 @@ const CreateClient = () => {
                                                                 )
                                                               )}
                                                           </select>
-                                                          {errorTrusteeDetails[index]
-                                                            .role && (
-                                                              <div className="error-text">
-                                                                {
-                                                                  errorTrusteeDetails[index]
-                                                                    .role
-                                                                }
-                                                              </div>
-                                                            )}
+                                                          {errorTrusteeDetails[index]?.role && (
+                                                            <div className="error-text">
+                                                              {
+                                                                errorTrusteeDetails[index]?.role
+                                                              }
+                                                            </div>
+                                                          )}
                                                         </div>
                                                       </div>
 
@@ -4504,14 +4995,13 @@ const CreateClient = () => {
                                     </div>
 
                                   ) :
-
                                     selectClientType == 6 ? (
                                       <div className="row ">
                                         <div className="col-lg-12">
                                           <div className="card card_shadow ">
                                             <div className="card-header  card-header-light-blue align-items-center d-flex">
                                               <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                Partnership Information
+                                                Unincorporated Association Information
                                               </h4>
                                             </div>
                                             {/* end card header */}
@@ -4520,64 +5010,25 @@ const CreateClient = () => {
                                                 <div className="col-lg-4">
                                                   <div className="mb-3">
                                                     <label className="form-label">
-                                                      Client Industry
-                                                    </label>
-                                                    <select
-                                                      name="ClientIndustry"
-                                                      className="form-select"
-                                                      id="ClientIndustry"
-                                                      value={
-                                                        getPartnershipDetails.ClientIndustry
-                                                      }
-                                                      onChange={(e) => handleChange3(e)}
-                                                    >
-                                                      <option value={0}>
-                                                        Select Client Industry
-                                                      </option>
-                                                      {clientIndustry.map(
-                                                        (data, index) => {
-                                                          return (
-                                                            <option
-                                                              value={data.id}
-                                                              key={data.id}
-                                                            >
-                                                              {data.business_type}
-                                                            </option>
-                                                          );
-                                                        }
-                                                      )}
-                                                    </select>
-                                                    {errors3["ClientIndustry"] && (
-                                                      <div style={{ color: "red" }}>
-                                                        {errors3["ClientIndustry"]}
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                                <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label className="form-label">
-                                                      Trading Name
+                                                      Association Name
                                                       <span style={{ color: "red" }}>
                                                         *
                                                       </span>
                                                     </label>
                                                     <input
                                                       type="text"
-                                                      className={errors3["TradingName"] ? "error-field form-control" : "form-control"}
+                                                      className={errors6["AssociationName"] ? "error-field form-control" : "form-control"}
 
-                                                      placeholder="Trading Name"
-                                                      name="TradingName"
-                                                      id="TradingName"
-                                                      value={
-                                                        getPartnershipDetails.TradingName
-                                                      }
-                                                      onChange={(e) => handleChange3(e)}
+                                                      placeholder="Association Name"
+                                                      name="AssociationName"
+                                                      id="AssociationName"
+                                                      value={getAssociationDetails.AssociationName}
+                                                      onChange={(e) => handleChange6(e)}
                                                       maxLength={200}
                                                     />
-                                                    {errors3["TradingName"] && (
+                                                    {errors6["AssociationName"] && (
                                                       <div className="error-text">
-                                                        {errors3["TradingName"]}
+                                                        {errors6["AssociationName"]}
                                                       </div>
                                                     )}
                                                   </div>
@@ -4585,27 +5036,27 @@ const CreateClient = () => {
                                                 <div className="col-lg-4">
                                                   <div className="mb-3">
                                                     <label className="form-label">
-                                                      Trading Address
+                                                      Association Address
                                                       <span style={{ color: "red" }}>
                                                         *
                                                       </span>{" "}
                                                     </label>
                                                     <input
                                                       type="text"
-                                                      className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
+                                                      className={errors6["AssociationAddress"] ? "error-field form-control" : "form-control"}
                                                       maxLength={200}
-                                                      placeholder="Trading Address"
-                                                      name="TradingAddress"
-                                                      id="TradingAddress"
+                                                      placeholder="Association Address"
+                                                      name="AssociationAddress"
+                                                      id="AssociationAddress"
                                                       value={
-                                                        getPartnershipDetails.TradingAddress
+                                                        getAssociationDetails.AssociationAddress
                                                       }
-                                                      onChange={(e) => handleChange3(e)}
+                                                      onChange={(e) => handleChange6(e)}
 
                                                     />
-                                                    {errors3["TradingAddress"] && (
+                                                    {errors6["AssociationAddress"] && (
                                                       <div className="error-text">
-                                                        {errors3["TradingAddress"]}
+                                                        {errors6["AssociationAddress"]}
                                                       </div>
                                                     )}
                                                   </div>
@@ -4621,14 +5072,14 @@ const CreateClient = () => {
                                                         name="VATRegistered"
                                                         id="VATRegistered"
                                                         defaultValue={0}
-                                                        onChange={(e) => handleChange3(e)}
+                                                        onChange={(e) => handleChange6(e)}
                                                       >
                                                         <option value={1}>Yes</option>
                                                         <option value={0}>No</option>
                                                       </select>
-                                                      {errors3["VATRegistered"] && (
+                                                      {errors6["VATRegistered"] && (
                                                         <div className="error-text">
-                                                          {errors3["VATRegistered"]}
+                                                          {errors6["VATRegistered"]}
                                                         </div>
                                                       )}
                                                     </div>
@@ -4647,14 +5098,14 @@ const CreateClient = () => {
                                                         name="VATNumber"
                                                         id="VATNumber"
                                                         value={
-                                                          getPartnershipDetails.VATNumber
+                                                          getAssociationDetails.VATNumber
                                                         }
-                                                        onChange={(e) => handleChange3(e)}
+                                                        onChange={(e) => handleChange6(e)}
                                                         maxLength={9}
                                                       />
-                                                      {errors3["VATNumber"] && (
+                                                      {errors6["VATNumber"] && (
                                                         <div className="error-text">
-                                                          {errors3["VATNumber"]}
+                                                          {errors6["VATNumber"]}
                                                         </div>
                                                       )}
                                                     </div>
@@ -4672,15 +5123,15 @@ const CreateClient = () => {
                                                       name="Website"
                                                       id="Website"
                                                       value={
-                                                        getPartnershipDetails.Website
+                                                        getAssociationDetails.Website
                                                       }
-                                                      onChange={(e) => handleChange3(e)}
+                                                      onChange={(e) => handleChange6(e)}
                                                       maxLength={200}
                                                     />
 
-                                                    {errors3["Website"] && (
+                                                    {errors6["Website"] && (
                                                       <div style={{ color: "red" }}>
-                                                        {errors3["Website"]}
+                                                        {errors6["Website"]}
                                                       </div>
                                                     )}
                                                   </div>
@@ -4694,12 +5145,13 @@ const CreateClient = () => {
                                           <div className="card card_shadow">
                                             <div className="card-header card-header-light-blue align-items-center d-flex">
                                               <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                Partner Details
+                                                Members Details
                                               </h4>
                                             </div>
                                             <div className="card-body">
                                               <div className="row">
-                                                {contacts1.map((contact, index) => (
+
+                                                {contactsMembersUnincorporated.map((contact, index) => (
                                                   <div className="col-xxl-12 col-lg-12">
                                                     <div className="card pricing-box p-3 m-2 mt-0">
                                                       <div className="row">
@@ -4713,13 +5165,13 @@ const CreateClient = () => {
                                                           >
 
                                                             {index !== 0 &&
-                                                              index !== 1 && (
+                                                              (
                                                                 <div>
                                                                   <button
                                                                     className="delete-icon"
                                                                     type="button"
                                                                     onClick={() =>
-                                                                      handleDeleteContact1(
+                                                                      handleDeleteContactMemberDetailsUnincorporated(
                                                                         index
                                                                       )
                                                                     }
@@ -4748,17 +5200,17 @@ const CreateClient = () => {
                                                             <input
                                                               type="text"
 
-                                                              className={contactsErrors[index].first_name ? "error-field form-control" : "form-control"}
+                                                              className={errorMemberDetailsUnincorporated[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                               placeholder="First Name"
                                                               name="first_name"
                                                               id={`first_name-${index}`}
                                                               value={
-                                                                contacts1.first_name
+                                                                contacts1?.first_name
                                                               }
                                                               maxLength={50}
                                                               onChange={(e) =>
-                                                                handleChange4(
+                                                                handleChangeMemberUnincorporated(
                                                                   index,
                                                                   "first_name",
                                                                   e.target.value
@@ -4766,12 +5218,11 @@ const CreateClient = () => {
                                                               }
 
                                                             />
-                                                            {contactsErrors[index]
-                                                              .first_name && (
+                                                            {errorMemberDetailsUnincorporated[index]
+                                                              ?.first_name && (
                                                                 <div className="error-text">
                                                                   {
-                                                                    contactsErrors[index]
-                                                                      .first_name
+                                                                    errorMemberDetailsUnincorporated[index]?.first_name
                                                                   }
                                                                 </div>
                                                               )}
@@ -4790,16 +5241,16 @@ const CreateClient = () => {
                                                             </label>
                                                             <input
                                                               type="text"
-                                                              className={contactsErrors[index].last_name ? "error-field form-control" : "form-control"}
+                                                              className={errorMemberDetailsUnincorporated[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                               placeholder=" Last Name"
                                                               name="last_name"
                                                               id={`last_name-${index}`}
                                                               value={
-                                                                contacts1.last_name
+                                                                contacts1?.last_name
                                                               }
                                                               onChange={(e) =>
-                                                                handleChange4(
+                                                                handleChangeMemberUnincorporated(
                                                                   index,
                                                                   "last_name",
                                                                   e.target.value
@@ -4807,12 +5258,11 @@ const CreateClient = () => {
                                                               }
                                                               maxLength={50}
                                                             />
-                                                            {contactsErrors[index]
-                                                              .last_name && (
+                                                            {errorMemberDetailsUnincorporated[index]
+                                                              ?.last_name && (
                                                                 <div className="error-text">
                                                                   {
-                                                                    contactsErrors[index]
-                                                                      .last_name
+                                                                    errorMemberDetailsUnincorporated[index]?.last_name
                                                                   }
                                                                 </div>
                                                               )}
@@ -4828,9 +5278,9 @@ const CreateClient = () => {
                                                             <select
                                                               className="form-select"
                                                               id={`role-${index}`}
-                                                              value={contacts1.role}
+                                                              value={contacts1?.role}
                                                               onChange={(e) =>
-                                                                handleChange4(
+                                                                handleChangeMemberUnincorporated(
                                                                   index,
                                                                   "role",
                                                                   e.target.value
@@ -4852,15 +5302,13 @@ const CreateClient = () => {
                                                                   )
                                                                 )}
                                                             </select>
-                                                            {contactsErrors[index]
-                                                              .role && (
-                                                                <div className="error-text">
-                                                                  {
-                                                                    contactsErrors[index]
-                                                                      .role
-                                                                  }
-                                                                </div>
-                                                              )}
+                                                            {errorMemberDetailsUnincorporated[index]?.role && (
+                                                              <div className="error-text">
+                                                                {
+                                                                  errorMemberDetailsUnincorporated[index]?.role
+                                                                }
+                                                              </div>
+                                                            )}
                                                           </div>
                                                         </div>
 
@@ -4875,7 +5323,7 @@ const CreateClient = () => {
                                                                   className="form-select"
 
                                                                   onChange={(e) =>
-                                                                    handleChange4(
+                                                                    handleChangeMemberUnincorporated(
                                                                       index,
                                                                       "phone_code",
                                                                       e.target.value
@@ -4911,7 +5359,7 @@ const CreateClient = () => {
                                                                     contacts1.phone
                                                                   }
                                                                   onChange={(e) =>
-                                                                    handleChange4(
+                                                                    handleChangeMemberUnincorporated(
                                                                       index,
                                                                       "phone",
                                                                       e.target.value
@@ -4919,11 +5367,11 @@ const CreateClient = () => {
                                                                   }
                                                                   maxLength={12}
                                                                 />
-                                                                {contactsErrors[index]
+                                                                {errorMemberDetailsUnincorporated[index]
                                                                   .phone && (
                                                                     <div className="error-text">
                                                                       {
-                                                                        contactsErrors[
+                                                                        errorMemberDetailsUnincorporated[
                                                                           index
                                                                         ].phone
                                                                       }
@@ -4943,7 +5391,7 @@ const CreateClient = () => {
                                                                 <select
                                                                   className="form-select"
                                                                   onChange={(e) =>
-                                                                    handleChange4(
+                                                                    handleChangeMemberUnincorporated(
                                                                       index,
                                                                       "alternate_phone_code",
                                                                       e.target.value
@@ -4979,18 +5427,18 @@ const CreateClient = () => {
                                                                     contacts1.alternate_phone
                                                                   }
                                                                   onChange={(e) =>
-                                                                    handleChange4(
+                                                                    handleChangeMemberUnincorporated(
                                                                       index,
                                                                       "alternate_phone",
                                                                       e.target.value
                                                                     )
                                                                   }
                                                                 />
-                                                                {contactsErrors[index]
+                                                                {errorMemberDetailsUnincorporated[index]
                                                                   .alternate_phone && (
                                                                     <div className="error-text">
                                                                       {
-                                                                        contactsErrors[
+                                                                        errorMemberDetailsUnincorporated[
                                                                           index
                                                                         ].alternate_phone
                                                                       }
@@ -5014,18 +5462,18 @@ const CreateClient = () => {
                                                               id={`email-${index}`}
                                                               value={contacts1.email}
                                                               onChange={(e) =>
-                                                                handleChange4(
+                                                                handleChangeMemberUnincorporated(
                                                                   index,
                                                                   "email",
                                                                   e.target.value
                                                                 )
                                                               }
                                                             />
-                                                            {contactsErrors[index]
+                                                            {errorMemberDetailsUnincorporated[index]
                                                               .email && (
                                                                 <div className="error-text">
                                                                   {
-                                                                    contactsErrors[index]
+                                                                    errorMemberDetailsUnincorporated[index]
                                                                       .email
                                                                   }
                                                                 </div>
@@ -5049,18 +5497,18 @@ const CreateClient = () => {
                                                                 contacts1.alternate_email
                                                               }
                                                               onChange={(e) =>
-                                                                handleChange4(
+                                                                handleChangeMemberUnincorporated(
                                                                   index,
                                                                   "alternate_email",
                                                                   e.target.value
                                                                 )
                                                               }
                                                             />
-                                                            {contactsErrors[index]
+                                                            {errorMemberDetailsUnincorporated[index]
                                                               .alternate_email && (
                                                                 <div className="error-text">
                                                                   {
-                                                                    contactsErrors[index]
+                                                                    errorMemberDetailsUnincorporated[index]
                                                                       .alternate_email
                                                                   }
                                                                 </div>
@@ -5071,11 +5519,12 @@ const CreateClient = () => {
                                                     </div>
                                                   </div>
                                                 ))}
+
                                                 <div className=" d-flex align-items-center justify-content-end">
                                                   <div>
                                                     <button
                                                       className="btn btn-info text-white blue-btn"
-                                                      onClick={handleAddContact1}
+                                                      onClick={handleAddContactMemberDetailsUnincorporated}
                                                     >
                                                       {" "}
                                                       <i className="fa fa-plus pe-1">
@@ -5089,13 +5538,6 @@ const CreateClient = () => {
                                             </div>
                                           </div>
                                         </div>
-
-
-
-
-
-
-
                                         <div className="col-lg-12">
                                           <div className="card card_shadow ">
                                             <div className="card-header  card-header-light-blue align-items-center d-flex">
@@ -5144,7 +5586,7 @@ const CreateClient = () => {
                                             <div className="card card_shadow ">
                                               <div className="card-header  card-header-light-blue align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                  Partnership Information
+                                                  Trust  Information
                                                 </h4>
                                               </div>
                                               {/* end card header */}
@@ -5153,64 +5595,27 @@ const CreateClient = () => {
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
                                                       <label className="form-label">
-                                                        Client Industry
-                                                      </label>
-                                                      <select
-                                                        name="ClientIndustry"
-                                                        className="form-select"
-                                                        id="ClientIndustry"
-                                                        value={
-                                                          getPartnershipDetails.ClientIndustry
-                                                        }
-                                                        onChange={(e) => handleChange3(e)}
-                                                      >
-                                                        <option value={0}>
-                                                          Select Client Industry
-                                                        </option>
-                                                        {clientIndustry.map(
-                                                          (data, index) => {
-                                                            return (
-                                                              <option
-                                                                value={data.id}
-                                                                key={data.id}
-                                                              >
-                                                                {data.business_type}
-                                                              </option>
-                                                            );
-                                                          }
-                                                        )}
-                                                      </select>
-                                                      {errors3["ClientIndustry"] && (
-                                                        <div style={{ color: "red" }}>
-                                                          {errors3["ClientIndustry"]}
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Trading Name
+                                                        Trust  Name
                                                         <span style={{ color: "red" }}>
                                                           *
                                                         </span>
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={errors3["TradingName"] ? "error-field form-control" : "form-control"}
+                                                        className={errors7["TrustName"] ? "error-field form-control" : "form-control"}
 
-                                                        placeholder="Trading Name"
-                                                        name="TradingName"
-                                                        id="TradingName"
+                                                        placeholder="Trust Name"
+                                                        name="TrustName"
+                                                        id="TrustName"
                                                         value={
-                                                          getPartnershipDetails.TradingName
+                                                          getTrust.TradingName
                                                         }
-                                                        onChange={(e) => handleChange3(e)}
+                                                        onChange={(e) => handleChange7(e)}
                                                         maxLength={200}
                                                       />
-                                                      {errors3["TradingName"] && (
+                                                      {errors7["TrustName"] && (
                                                         <div className="error-text">
-                                                          {errors3["TradingName"]}
+                                                          {errors7["TrustName"]}
                                                         </div>
                                                       )}
                                                     </div>
@@ -5218,27 +5623,27 @@ const CreateClient = () => {
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
                                                       <label className="form-label">
-                                                        Trading Address
+                                                        Trust  Address
                                                         <span style={{ color: "red" }}>
                                                           *
                                                         </span>{" "}
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
+                                                        className={errors7["TrustAddress"] ? "error-field form-control" : "form-control"}
                                                         maxLength={200}
-                                                        placeholder="Trading Address"
-                                                        name="TradingAddress"
-                                                        id="TradingAddress"
+                                                        placeholder="Trust Address"
+                                                        name="TrustAddress"
+                                                        id="TrustAddress"
                                                         value={
-                                                          getPartnershipDetails.TradingAddress
+                                                          getTrust.TrustAddress
                                                         }
-                                                        onChange={(e) => handleChange3(e)}
+                                                        onChange={(e) => handleChange7(e)}
 
                                                       />
-                                                      {errors3["TradingAddress"] && (
+                                                      {errors7["TrustAddress"] && (
                                                         <div className="error-text">
-                                                          {errors3["TradingAddress"]}
+                                                          {errors7["TrustAddress"]}
                                                         </div>
                                                       )}
                                                     </div>
@@ -5254,14 +5659,14 @@ const CreateClient = () => {
                                                           name="VATRegistered"
                                                           id="VATRegistered"
                                                           defaultValue={0}
-                                                          onChange={(e) => handleChange3(e)}
+                                                          onChange={(e) => handleChange7(e)}
                                                         >
                                                           <option value={1}>Yes</option>
                                                           <option value={0}>No</option>
                                                         </select>
-                                                        {errors3["VATRegistered"] && (
+                                                        {errors7["VATRegistered"] && (
                                                           <div className="error-text">
-                                                            {errors3["VATRegistered"]}
+                                                            {errors7["VATRegistered"]}
                                                           </div>
                                                         )}
                                                       </div>
@@ -5280,14 +5685,14 @@ const CreateClient = () => {
                                                           name="VATNumber"
                                                           id="VATNumber"
                                                           value={
-                                                            getPartnershipDetails.VATNumber
+                                                            getTrust.VATNumber
                                                           }
-                                                          onChange={(e) => handleChange3(e)}
+                                                          onChange={(e) => handleChange7(e)}
                                                           maxLength={9}
                                                         />
-                                                        {errors3["VATNumber"] && (
+                                                        {errors7["VATNumber"] && (
                                                           <div className="error-text">
-                                                            {errors3["VATNumber"]}
+                                                            {errors7["VATNumber"]}
                                                           </div>
                                                         )}
                                                       </div>
@@ -5305,15 +5710,15 @@ const CreateClient = () => {
                                                         name="Website"
                                                         id="Website"
                                                         value={
-                                                          getPartnershipDetails.Website
+                                                          getTrust.Website
                                                         }
-                                                        onChange={(e) => handleChange3(e)}
+                                                        onChange={(e) => handleChange7(e)}
                                                         maxLength={200}
                                                       />
 
-                                                      {errors3["Website"] && (
+                                                      {errors7["Website"] && (
                                                         <div style={{ color: "red" }}>
-                                                          {errors3["Website"]}
+                                                          {errors7["Website"]}
                                                         </div>
                                                       )}
                                                     </div>
@@ -5332,7 +5737,7 @@ const CreateClient = () => {
                                               </div>
                                               <div className="card-body">
                                                 <div className="row">
-                                                  {contacts1.map((contact, index) => (
+                                                  {contactsMembersTrust.map((contact, index) => (
                                                     <div className="col-xxl-12 col-lg-12">
                                                       <div className="card pricing-box p-3 m-2 mt-0">
                                                         <div className="row">
@@ -5345,14 +5750,13 @@ const CreateClient = () => {
                                                               dir="ltr"
                                                             >
 
-                                                              {index !== 0 &&
-                                                                index !== 1 && (
+                                                              {index !== 0 && (
                                                                   <div>
                                                                     <button
                                                                       className="delete-icon"
                                                                       type="button"
                                                                       onClick={() =>
-                                                                        handleDeleteContact1(
+                                                                        handleDeleteContactTrustmemberDetails(
                                                                           index
                                                                         )
                                                                       }
@@ -5381,17 +5785,17 @@ const CreateClient = () => {
                                                               <input
                                                                 type="text"
 
-                                                                className={contactsErrors[index].first_name ? "error-field form-control" : "form-control"}
+                                                                className={errorMemberTrustDetails[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                                 placeholder="First Name"
                                                                 name="first_name"
                                                                 id={`first_name-${index}`}
                                                                 value={
-                                                                  contacts1.first_name
+                                                                  contacts1?.first_name
                                                                 }
                                                                 maxLength={50}
                                                                 onChange={(e) =>
-                                                                  handleChange4(
+                                                                  handleChangeTrust(
                                                                     index,
                                                                     "first_name",
                                                                     e.target.value
@@ -5399,12 +5803,12 @@ const CreateClient = () => {
                                                                 }
 
                                                               />
-                                                              {contactsErrors[index]
-                                                                .first_name && (
+                                                              {errorMemberTrustDetails[index]
+                                                                ?.first_name && (
                                                                   <div className="error-text">
                                                                     {
-                                                                      contactsErrors[index]
-                                                                        .first_name
+                                                                      errorMemberTrustDetails[index]
+                                                                        ?.first_name
                                                                     }
                                                                   </div>
                                                                 )}
@@ -5423,16 +5827,16 @@ const CreateClient = () => {
                                                               </label>
                                                               <input
                                                                 type="text"
-                                                                className={contactsErrors[index].last_name ? "error-field form-control" : "form-control"}
+                                                                className={errorMemberTrustDetails[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                                 placeholder=" Last Name"
                                                                 name="last_name"
                                                                 id={`last_name-${index}`}
                                                                 value={
-                                                                  contacts1.last_name
+                                                                  contacts1?.last_name
                                                                 }
                                                                 onChange={(e) =>
-                                                                  handleChange4(
+                                                                  handleChangeTrust(
                                                                     index,
                                                                     "last_name",
                                                                     e.target.value
@@ -5440,12 +5844,12 @@ const CreateClient = () => {
                                                                 }
                                                                 maxLength={50}
                                                               />
-                                                              {contactsErrors[index]
-                                                                .last_name && (
+                                                              {errorMemberTrustDetails[index]
+                                                                ?.last_name && (
                                                                   <div className="error-text">
                                                                     {
-                                                                      contactsErrors[index]
-                                                                        .last_name
+                                                                      errorMemberTrustDetails[index]
+                                                                        ?.last_name
                                                                     }
                                                                   </div>
                                                                 )}
@@ -5461,9 +5865,9 @@ const CreateClient = () => {
                                                               <select
                                                                 className="form-select"
                                                                 id={`role-${index}`}
-                                                                value={contacts1.role}
+                                                                value={contacts1?.role}
                                                                 onChange={(e) =>
-                                                                  handleChange4(
+                                                                  handleChangeTrust(
                                                                     index,
                                                                     "role",
                                                                     e.target.value
@@ -5485,15 +5889,13 @@ const CreateClient = () => {
                                                                     )
                                                                   )}
                                                               </select>
-                                                              {contactsErrors[index]
-                                                                .role && (
-                                                                  <div className="error-text">
-                                                                    {
-                                                                      contactsErrors[index]
-                                                                        .role
-                                                                    }
-                                                                  </div>
-                                                                )}
+                                                              {errorMemberTrustDetails[index]?.role && (
+                                                                <div className="error-text">
+                                                                  {
+                                                                    errorMemberTrustDetails[index]?.role
+                                                                  }
+                                                                </div>
+                                                              )}
                                                             </div>
                                                           </div>
 
@@ -5508,7 +5910,7 @@ const CreateClient = () => {
                                                                     className="form-select"
 
                                                                     onChange={(e) =>
-                                                                      handleChange4(
+                                                                      handleChangeTrust(
                                                                         index,
                                                                         "phone_code",
                                                                         e.target.value
@@ -5544,7 +5946,7 @@ const CreateClient = () => {
                                                                       contacts1.phone
                                                                     }
                                                                     onChange={(e) =>
-                                                                      handleChange4(
+                                                                      handleChangeTrust(
                                                                         index,
                                                                         "phone",
                                                                         e.target.value
@@ -5552,11 +5954,11 @@ const CreateClient = () => {
                                                                     }
                                                                     maxLength={12}
                                                                   />
-                                                                  {contactsErrors[index]
+                                                                  {errorMemberTrustDetails[index]
                                                                     .phone && (
                                                                       <div className="error-text">
                                                                         {
-                                                                          contactsErrors[
+                                                                          errorMemberTrustDetails[
                                                                             index
                                                                           ].phone
                                                                         }
@@ -5576,7 +5978,7 @@ const CreateClient = () => {
                                                                   <select
                                                                     className="form-select"
                                                                     onChange={(e) =>
-                                                                      handleChange4(
+                                                                      handleChangeTrust(
                                                                         index,
                                                                         "alternate_phone_code",
                                                                         e.target.value
@@ -5612,18 +6014,18 @@ const CreateClient = () => {
                                                                       contacts1.alternate_phone
                                                                     }
                                                                     onChange={(e) =>
-                                                                      handleChange4(
+                                                                      handleChangeTrust(
                                                                         index,
                                                                         "alternate_phone",
                                                                         e.target.value
                                                                       )
                                                                     }
                                                                   />
-                                                                  {contactsErrors[index]
+                                                                  {errorMemberTrustDetails[index]
                                                                     .alternate_phone && (
                                                                       <div className="error-text">
                                                                         {
-                                                                          contactsErrors[
+                                                                          errorMemberTrustDetails[
                                                                             index
                                                                           ].alternate_phone
                                                                         }
@@ -5647,18 +6049,18 @@ const CreateClient = () => {
                                                                 id={`email-${index}`}
                                                                 value={contacts1.email}
                                                                 onChange={(e) =>
-                                                                  handleChange4(
+                                                                  handleChangeTrust(
                                                                     index,
                                                                     "email",
                                                                     e.target.value
                                                                   )
                                                                 }
                                                               />
-                                                              {contactsErrors[index]
+                                                              {errorMemberTrustDetails[index]
                                                                 .email && (
                                                                   <div className="error-text">
                                                                     {
-                                                                      contactsErrors[index]
+                                                                      errorMemberTrustDetails[index]
                                                                         .email
                                                                     }
                                                                   </div>
@@ -5682,18 +6084,18 @@ const CreateClient = () => {
                                                                   contacts1.alternate_email
                                                                 }
                                                                 onChange={(e) =>
-                                                                  handleChange4(
+                                                                  handleChangeTrust(
                                                                     index,
                                                                     "alternate_email",
                                                                     e.target.value
                                                                   )
                                                                 }
                                                               />
-                                                              {contactsErrors[index]
+                                                              {errorMemberTrustDetails[index]
                                                                 .alternate_email && (
                                                                   <div className="error-text">
                                                                     {
-                                                                      contactsErrors[index]
+                                                                      errorMemberTrustDetails[index]
                                                                         .alternate_email
                                                                     }
                                                                   </div>
@@ -5708,7 +6110,404 @@ const CreateClient = () => {
                                                     <div>
                                                       <button
                                                         className="btn btn-info text-white blue-btn"
-                                                        onClick={handleAddContact1}
+                                                        onClick={handleAddContactTrustMemberDetails}
+                                                      >
+                                                        {" "}
+                                                        <i className="fa fa-plus pe-1">
+                                                          {" "}
+                                                        </i>
+                                                        Add Partner
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="col-lg-12">
+                                            <div className="card card_shadow">
+                                              <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                                  Partner Details
+                                                </h4>
+                                              </div>
+                                              <div className="card-body">
+                                                <div className="row">
+                                                  {contactsTrustTrustee.map((contact, index) => (
+                                                    <div className="col-xxl-12 col-lg-12">
+                                                      <div className="card pricing-box p-3 m-2 mt-0">
+                                                        <div className="row">
+                                                          <div className="col-lg-12">
+                                                            <div>
+                                                              <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                            </div>
+                                                            <div
+                                                              className="form-check form-switch form-switch-md d-flex justify-content-end"
+                                                              dir="ltr"
+                                                            >
+
+                                                              {index !== 0 && (
+                                                                  <div>
+                                                                    <button
+                                                                      className="delete-icon"
+                                                                      type="button"
+                                                                      onClick={() =>
+                                                                        handleDeleteContactTrusTrusteeDetails(
+                                                                          index
+                                                                        )
+                                                                      }
+                                                                      disabled={
+                                                                        contacts1.length ===
+                                                                        1
+                                                                      }
+                                                                    >
+                                                                      <i className="ti-trash  text-danger"></i>{" "}
+
+                                                                    </button>
+                                                                  </div>
+                                                                )}
+                                                            </div>
+                                                          </div>
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label className="form-label">
+                                                                First Name
+                                                                <span
+                                                                  style={{ color: "red" }}
+                                                                >
+                                                                  *
+                                                                </span>
+                                                              </label>
+                                                              <input
+                                                                type="text"
+
+                                                                className={errorTrustTrusteeDetails[index]?.first_name ? "error-field form-control" : "form-control"}
+
+                                                                placeholder="First Name"
+                                                                name="first_name"
+                                                                id={`first_name-${index}`}
+                                                                value={
+                                                                  contacts1?.first_name
+                                                                }
+                                                                maxLength={50}
+                                                                onChange={(e) =>
+                                                                  handleChangeTrustTrustee(
+                                                                    index,
+                                                                    "first_name",
+                                                                    e.target.value
+                                                                  )
+                                                                }
+
+                                                              />
+                                                              {errorTrustTrusteeDetails[index]
+                                                                ?.first_name && (
+                                                                  <div className="error-text">
+                                                                    {
+                                                                      errorTrustTrusteeDetails[index]
+                                                                        ?.first_name
+                                                                    }
+                                                                  </div>
+                                                                )}
+                                                            </div>
+                                                          </div>
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label className="form-label">
+                                                                {" "}
+                                                                Last Name
+                                                                <span
+                                                                  style={{ color: "red" }}
+                                                                >
+                                                                  *
+                                                                </span>
+                                                              </label>
+                                                              <input
+                                                                type="text"
+                                                                className={errorTrustTrusteeDetails[index]?.last_name ? "error-field form-control" : "form-control"}
+
+                                                                placeholder=" Last Name"
+                                                                name="last_name"
+                                                                id={`last_name-${index}`}
+                                                                value={
+                                                                  contacts1?.last_name
+                                                                }
+                                                                onChange={(e) =>
+                                                                  handleChangeTrustTrustee(
+                                                                    index,
+                                                                    "last_name",
+                                                                    e.target.value
+                                                                  )
+                                                                }
+                                                                maxLength={50}
+                                                              />
+                                                              {errorTrustTrusteeDetails[index]
+                                                                ?.last_name && (
+                                                                  <div className="error-text">
+                                                                    {
+                                                                      errorTrustTrusteeDetails[index]
+                                                                        ?.last_name
+                                                                    }
+                                                                  </div>
+                                                                )}
+                                                            </div>
+                                                          </div>
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label className="form-label">
+                                                                Role
+
+                                                              </label>
+
+                                                              <select
+                                                                className="form-select"
+                                                                id={`role-${index}`}
+                                                                value={contacts1?.role}
+                                                                onChange={(e) =>
+                                                                  handleChangeTrustTrustee(
+                                                                    index,
+                                                                    "role",
+                                                                    e.target.value
+                                                                  )
+                                                                }
+                                                              >
+                                                                <option value="">
+                                                                  Select Role
+                                                                </option>
+                                                                {personRoleDataAll &&
+                                                                  personRoleDataAll.data.map(
+                                                                    (item, i) => (
+                                                                      <option
+                                                                        value={item.id}
+                                                                        key={i}
+                                                                      >
+                                                                        {item.name}
+                                                                      </option>
+                                                                    )
+                                                                  )}
+                                                              </select>
+                                                              {errorTrustTrusteeDetails[index]?.role && (
+                                                                <div className="error-text">
+                                                                  {
+                                                                    errorTrustTrusteeDetails[index]?.role
+                                                                  }
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                          </div>
+
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label classNameName="form-label">
+                                                                Phone
+                                                              </label>
+                                                              <div className="row">
+                                                                <div className="col-md-4 pe-0">
+                                                                  <select
+                                                                    className="form-select"
+
+                                                                    onChange={(e) =>
+                                                                      handleChangeTrustTrustee(
+                                                                        index,
+                                                                        "phone_code",
+                                                                        e.target.value
+                                                                      )
+                                                                    }
+                                                                    name="phone_code"
+                                                                    value={
+                                                                      contact.phone_code
+                                                                    }
+                                                                  >
+                                                                    {countryDataAll.data.map(
+                                                                      (data) => (
+                                                                        <option
+                                                                          key={data.code}
+                                                                          value={
+                                                                            data.code
+                                                                          }
+                                                                        >
+                                                                          {data.code}
+                                                                        </option>
+                                                                      )
+                                                                    )}
+                                                                  </select>
+                                                                </div>
+                                                                <div className="mb-3 col-md-8 ps-1">
+                                                                  <input
+                                                                    type="text"
+                                                                    className="form-control"
+                                                                    placeholder="Phone Number"
+                                                                    name="phone"
+                                                                    id={`phone-${index}`}
+                                                                    value={
+                                                                      contacts1.phone
+                                                                    }
+                                                                    onChange={(e) =>
+                                                                      handleChangeTrustTrustee(
+                                                                        index,
+                                                                        "phone",
+                                                                        e.target.value
+                                                                      )
+                                                                    }
+                                                                    maxLength={12}
+                                                                  />
+                                                                  {errorTrustTrusteeDetails[index]
+                                                                    .phone && (
+                                                                      <div className="error-text">
+                                                                        {
+                                                                          errorTrustTrusteeDetails[
+                                                                            index
+                                                                          ].phone
+                                                                        }
+                                                                      </div>
+                                                                    )}
+                                                                </div>
+                                                              </div>
+                                                            </div>
+                                                          </div>
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label classNameName="form-label">
+                                                                Alternate Phone Number
+                                                              </label>
+                                                              <div className="row">
+                                                                <div className="col-md-4 pe-0">
+                                                                  <select
+                                                                    className="form-select"
+                                                                    onChange={(e) =>
+                                                                      handleChangeTrustTrustee(
+                                                                        index,
+                                                                        "alternate_phone_code",
+                                                                        e.target.value
+                                                                      )
+                                                                    }
+                                                                    name="alternate_phone_code"
+                                                                    value={
+                                                                      contact.alternate_phone_code
+                                                                    }
+                                                                  >
+                                                                    {countryDataAll.data.map(
+                                                                      (data) => (
+                                                                        <option
+                                                                          key={data.code}
+                                                                          value={
+                                                                            data.code
+                                                                          }
+                                                                        >
+                                                                          {data.code}
+                                                                        </option>
+                                                                      )
+                                                                    )}
+                                                                  </select>
+                                                                </div>
+                                                                <div className="mb-3 col-md-8 ps-1">
+                                                                  <input
+                                                                    type="number"
+                                                                    className="form-control"
+                                                                    placeholder=" Alternate Phone Number"
+                                                                    name="alternate_phone"
+                                                                    id={`alternate_phone-${index}`}
+                                                                    value={
+                                                                      contacts1.alternate_phone
+                                                                    }
+                                                                    onChange={(e) =>
+                                                                      handleChangeTrustTrustee(
+                                                                        index,
+                                                                        "alternate_phone",
+                                                                        e.target.value
+                                                                      )
+                                                                    }
+                                                                  />
+                                                                  {errorTrustTrusteeDetails[index]
+                                                                    .alternate_phone && (
+                                                                      <div className="error-text">
+                                                                        {
+                                                                          errorTrustTrusteeDetails[
+                                                                            index
+                                                                          ].alternate_phone
+                                                                        }
+                                                                      </div>
+                                                                    )}
+                                                                </div>
+                                                              </div>
+                                                            </div>
+                                                          </div>
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label className="form-label">
+                                                                Email
+
+                                                              </label>
+                                                              <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                placeholder="Enter Email"
+                                                                name="email"
+                                                                id={`email-${index}`}
+                                                                value={contacts1.email}
+                                                                onChange={(e) =>
+                                                                  handleChangeTrustTrustee(
+                                                                    index,
+                                                                    "email",
+                                                                    e.target.value
+                                                                  )
+                                                                }
+                                                              />
+                                                              {errorTrustTrusteeDetails[index]
+                                                                .email && (
+                                                                  <div className="error-text">
+                                                                    {
+                                                                      errorTrustTrusteeDetails[index]
+                                                                        .email
+                                                                    }
+                                                                  </div>
+                                                                )}
+                                                            </div>
+                                                          </div>
+                                                          <div className="col-lg-4">
+                                                            <div className="mb-3">
+                                                              <label className="form-label">
+                                                                {" "}
+                                                                Alternate Email
+
+                                                              </label>
+                                                              <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                placeholder="Enter Alternate Email"
+                                                                name="alternate_email"
+                                                                id={`alternate_email-${index}`}
+                                                                value={
+                                                                  contacts1.alternate_email
+                                                                }
+                                                                onChange={(e) =>
+                                                                  handleChangeTrustTrustee(
+                                                                    index,
+                                                                    "alternate_email",
+                                                                    e.target.value
+                                                                  )
+                                                                }
+                                                              />
+                                                              {errorTrustTrusteeDetails[index]
+                                                                .alternate_email && (
+                                                                  <div className="error-text">
+                                                                    {
+                                                                      errorTrustTrusteeDetails[index]
+                                                                        .alternate_email
+                                                                    }
+                                                                  </div>
+                                                                )}
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  ))}
+                                                  <div className=" d-flex align-items-center justify-content-end">
+                                                    <div>
+                                                      <button
+                                                        className="btn btn-info text-white blue-btn"
+                                                        onClick={handleAddContactTrustTrusteeDetails}
                                                       >
                                                         {" "}
                                                         <i className="fa fa-plus pe-1">
@@ -5724,9 +6523,7 @@ const CreateClient = () => {
                                           </div>
 
 
-
-
-
+                                          
 
 
                                           <div className="col-lg-12">
@@ -5764,8 +6561,6 @@ const CreateClient = () => {
                                               </div>
                                             </div>
                                           </div>
-
-
 
                                         </div>
 
