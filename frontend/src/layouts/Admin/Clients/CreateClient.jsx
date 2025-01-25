@@ -1827,8 +1827,6 @@ const CreateClient = () => {
 
   };
 
-
-
   return (
     <div>
       <div className="container-fluid mt-4">
