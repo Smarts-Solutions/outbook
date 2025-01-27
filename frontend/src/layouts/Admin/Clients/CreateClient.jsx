@@ -5477,7 +5477,6 @@ const CreateClient = () => {
                                           </div>
                                         </div>
 
-
                                         <div className="col-lg-12">
                                           <div className="card card_shadow ">
                                             <div className="card-header  card-header-light-blue align-items-center d-flex">
@@ -5513,8 +5512,6 @@ const CreateClient = () => {
                                             </div>
                                           </div>
                                         </div>
-
-
 
                                       </div>
 
