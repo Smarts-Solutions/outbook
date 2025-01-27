@@ -118,7 +118,7 @@ const CreateClient = () => {
     VATRegistered: "0",
     VATNumber: "",
     Website: "",
-
+    notes: "",
   });
 
   const [getAssociationDetails, setAssociationDetails] = useState({
@@ -5581,7 +5581,7 @@ const CreateClient = () => {
                                             <div className="card card_shadow ">
                                               <div className="card-header  card-header-light-blue align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                  Trust  Information
+                                                  Trust Information
                                                 </h4>
                                               </div>
                                               {/* end card header */}
@@ -5727,7 +5727,7 @@ const CreateClient = () => {
                                             <div className="card card_shadow">
                                               <div className="card-header card-header-light-blue align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                  Partner Details
+                                                Beneficiaries Details
                                                 </h4>
                                               </div>
                                               <div className="card-body">
@@ -6124,7 +6124,7 @@ const CreateClient = () => {
                                             <div className="card card_shadow">
                                               <div className="card-header card-header-light-blue align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                  Partner Details
+                                                Trustees Details
                                                 </h4>
                                               </div>
                                               <div className="card-body">
@@ -6518,9 +6518,6 @@ const CreateClient = () => {
                                           </div>
 
 
-                                          
-
-
                                           <div className="col-lg-12">
                                             <div className="card card_shadow ">
                                               <div className="card-header  card-header-light-blue align-items-center d-flex">
@@ -6535,19 +6532,19 @@ const CreateClient = () => {
                                                     <div className="mb-3">
                                                       <textarea
                                                         type="text"
-                                                        className={errors3["notes"] ? "error-field form-control" : "form-control"}
+                                                        className={errors7["notes"] ? "error-field form-control" : "form-control"}
 
                                                         placeholder="Enter Notes"
                                                         name="notes"
                                                         id="notes"
                                                         value={
-                                                          getPartnershipDetails.notes
+                                                          getTrust.notes
                                                         }
-                                                        onChange={(e) => handleChange3(e)}
+                                                        onChange={(e) => handleChange7(e)}
                                                       />
-                                                      {errors3["notes"] && (
+                                                      {errors7["notes"] && (
                                                         <div className="error-text">
-                                                          {errors3["notes"]}
+                                                          {errors7["notes"]}
                                                         </div>
                                                       )}
                                                     </div>
