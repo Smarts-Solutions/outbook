@@ -1318,7 +1318,8 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else if (client_type == "3") {
+  } 
+  else if (client_type == "3") {
     const query = `
  SELECT 
     clients.id AS client_id, 
@@ -1427,7 +1428,8 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else if (client_type == "4") {
+  } 
+  else if (client_type == "4") {
     const query = `
  SELECT 
     clients.id AS client_id, 
@@ -1520,7 +1522,449 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else {
+  }
+  else if (client_type == "5") {
+    const query = `
+  SELECT 
+    clients.id AS client_id, 
+    clients.client_type AS client_type, 
+    clients.customer_id AS customer_id, 
+    clients.client_industry_id AS client_industry_id, 
+    clients.trading_name AS trading_name,  
+    clients.trading_address AS trading_address, 
+    clients.vat_registered AS vat_registered, 
+    clients.vat_number AS vat_number, 
+    clients.website AS website,
+    clients.notes AS notes,
+    clients.status AS status, 
+    client_contact_details.id AS contact_id,
+    client_contact_details.first_name AS first_name,
+    client_contact_details.last_name AS last_name,
+    client_contact_details.email AS email,
+    client_contact_details.alternate_email AS alternate_email,
+    client_contact_details.phone_code AS phone_code,
+    client_contact_details.phone AS phone,
+    client_contact_details.alternate_phone_code AS alternate_phone_code,
+    client_contact_details.alternate_phone AS alternate_phone,
+    client_contact_details.authorised_signatory_status AS authorised_signatory_status,
+    customer_contact_person_role.name AS customer_role_contact_name,
+    customer_contact_person_role.id AS customer_role_contact_id,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
+FROM 
+    clients
+JOIN
+    customers ON clients.customer_id = customers.id
+LEFT JOIN 
+    client_contact_details ON clients.id = client_contact_details.client_id
+LEFT JOIN 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+    LEFT JOIN
+    client_documents ON clients.id = client_documents.client_id
+WHERE 
+    clients.id = ?
+    `;
+    const [rows] = await pool.execute(query, [client_id]);
+
+    // Trustee Details
+
+    const query2 = `
+    SELECT 
+      clients.id AS client_id, 
+      client_trustee_contact_details.id AS contact_id,
+      client_trustee_contact_details.first_name AS first_name,
+      client_trustee_contact_details.last_name AS last_name,
+      client_trustee_contact_details.email AS email,
+      client_trustee_contact_details.alternate_email AS alternate_email,
+      client_trustee_contact_details.phone_code AS phone_code,
+      client_trustee_contact_details.phone AS phone,
+      client_trustee_contact_details.alternate_phone_code AS alternate_phone_code,
+      client_trustee_contact_details.alternate_phone AS alternate_phone,
+      client_trustee_contact_details.authorised_signatory_status AS authorised_signatory_status,
+      customer_contact_person_role.name AS customer_role_contact_name,
+      customer_contact_person_role.id AS customer_role_contact_id
+  FROM 
+      clients
+  JOIN
+      customers ON clients.customer_id = customers.id
+  LEFT JOIN 
+      client_trustee_contact_details ON clients.id = client_trustee_contact_details.client_id
+  LEFT JOIN 
+      customer_contact_person_role ON customer_contact_person_role.id = client_trustee_contact_details.role
+      LEFT JOIN
+      client_documents ON clients.id = client_documents.client_id
+  WHERE 
+      clients.id = ?
+      `;
+      const [rows2] = await pool.execute(query2, [client_id]);
+
+
+
+    if (rows.length > 0) {
+      const clientData = {
+        id: rows[0].client_id,
+        client_type: rows[0].client_type,
+        customer_id: rows[0].customer_id,
+        client_industry_id: rows[0].client_industry_id,
+        trading_name: rows[0].trading_name,
+        client_code: rows[0].client_code,
+        trading_address: rows[0].trading_address,
+        vat_registered: rows[0].vat_registered,
+        vat_number: rows[0].vat_number,
+        website: rows[0].website,
+        notes: rows[0].notes,
+        status: rows[0].status,
+      };
+
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+        contact_id: row.contact_id,
+        customer_contact_person_role_id: row.customer_role_contact_id,
+        customer_contact_person_role_name: row.customer_role_contact_name,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        alternate_email: row.alternate_email,
+        phone_code: row.phone_code,
+        phone: row.phone,
+        alternate_phone_code: row.alternate_phone_code,
+        alternate_phone: row.alternate_phone,
+        authorised_signatory_status:
+        row.authorised_signatory_status == "1" ? true : false,
+        }));
+
+
+        const trusteeDetails = rows2
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+        contact_id: row.contact_id,
+        customer_contact_person_role_id: row.customer_role_contact_id,
+        customer_contact_person_role_name: row.customer_role_contact_name,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        alternate_email: row.alternate_email,
+        phone_code: row.phone_code,
+        phone: row.phone,
+        alternate_phone_code: row.alternate_phone_code,
+        alternate_phone: row.alternate_phone,
+        authorised_signatory_status:
+        row.authorised_signatory_status == "1" ? true : false,
+        }));
+
+
+        const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
+
+      const result = {
+        client: clientData,
+        member_details: contactDetails,
+        trustee_details: trusteeDetails,
+        client_documents: clientDocuments
+      };
+
+      return { status: true, message: "success.", data: result };
+      // Return or further process `result` as needed
+    } else {
+      return { status: false, message: "No customer found with the given ID." };
+    }
+  }
+  else if (client_type == "6") {
+    const query = `
+  SELECT 
+    clients.id AS client_id, 
+    clients.client_type AS client_type, 
+    clients.customer_id AS customer_id, 
+    clients.client_industry_id AS client_industry_id, 
+    clients.trading_name AS trading_name,  
+    clients.trading_address AS trading_address, 
+    clients.vat_registered AS vat_registered, 
+    clients.vat_number AS vat_number, 
+    clients.website AS website,
+    clients.notes AS notes,
+    clients.status AS status, 
+    client_contact_details.id AS contact_id,
+    client_contact_details.first_name AS first_name,
+    client_contact_details.last_name AS last_name,
+    client_contact_details.email AS email,
+    client_contact_details.alternate_email AS alternate_email,
+    client_contact_details.phone_code AS phone_code,
+    client_contact_details.phone AS phone,
+    client_contact_details.alternate_phone_code AS alternate_phone_code,
+    client_contact_details.alternate_phone AS alternate_phone,
+    client_contact_details.authorised_signatory_status AS authorised_signatory_status,
+    customer_contact_person_role.name AS customer_role_contact_name,
+    customer_contact_person_role.id AS customer_role_contact_id,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
+FROM 
+    clients
+JOIN
+    customers ON clients.customer_id = customers.id
+LEFT JOIN 
+    client_contact_details ON clients.id = client_contact_details.client_id
+LEFT JOIN 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+    LEFT JOIN
+    client_documents ON clients.id = client_documents.client_id
+WHERE 
+    clients.id = ?
+    `;
+    const [rows] = await pool.execute(query, [client_id]);
+
+    
+
+    if (rows.length > 0) {
+      const clientData = {
+        id: rows[0].client_id,
+        client_type: rows[0].client_type,
+        customer_id: rows[0].customer_id,
+        client_industry_id: rows[0].client_industry_id,
+        trading_name: rows[0].trading_name,
+        client_code: rows[0].client_code,
+        trading_address: rows[0].trading_address,
+        vat_registered: rows[0].vat_registered,
+        vat_number: rows[0].vat_number,
+        website: rows[0].website,
+        notes: rows[0].notes,
+        status: rows[0].status,
+      };
+
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+        contact_id: row.contact_id,
+        customer_contact_person_role_id: row.customer_role_contact_id,
+        customer_contact_person_role_name: row.customer_role_contact_name,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        alternate_email: row.alternate_email,
+        phone_code: row.phone_code,
+        phone: row.phone,
+        alternate_phone_code: row.alternate_phone_code,
+        alternate_phone: row.alternate_phone,
+        authorised_signatory_status:
+        row.authorised_signatory_status == "1" ? true : false,
+        }));
+
+
+      
+        const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
+
+      const result = {
+        client: clientData,
+        member_details: contactDetails,
+        client_documents: clientDocuments
+      };
+
+      return { status: true, message: "success.", data: result };
+      // Return or further process `result` as needed
+    } else {
+      return { status: false, message: "No customer found with the given ID." };
+    }
+  }
+  else if (client_type == "5") {
+    const query = `
+  SELECT 
+    clients.id AS client_id, 
+    clients.client_type AS client_type, 
+    clients.customer_id AS customer_id, 
+    clients.client_industry_id AS client_industry_id, 
+    clients.trading_name AS trading_name,  
+    clients.trading_address AS trading_address, 
+    clients.vat_registered AS vat_registered, 
+    clients.vat_number AS vat_number, 
+    clients.website AS website,
+    clients.notes AS notes,
+    clients.status AS status, 
+    client_contact_details.id AS contact_id,
+    client_contact_details.first_name AS first_name,
+    client_contact_details.last_name AS last_name,
+    client_contact_details.email AS email,
+    client_contact_details.alternate_email AS alternate_email,
+    client_contact_details.phone_code AS phone_code,
+    client_contact_details.phone AS phone,
+    client_contact_details.alternate_phone_code AS alternate_phone_code,
+    client_contact_details.alternate_phone AS alternate_phone,
+    client_contact_details.authorised_signatory_status AS authorised_signatory_status,
+    customer_contact_person_role.name AS customer_role_contact_name,
+    customer_contact_person_role.id AS customer_role_contact_id,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
+FROM 
+    clients
+JOIN
+    customers ON clients.customer_id = customers.id
+LEFT JOIN 
+    client_contact_details ON clients.id = client_contact_details.client_id
+LEFT JOIN 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+    LEFT JOIN
+    client_documents ON clients.id = client_documents.client_id
+WHERE 
+    clients.id = ?
+    `;
+    const [rows] = await pool.execute(query, [client_id]);
+
+    // Trustee Details
+
+    const query2 = `
+    SELECT 
+      clients.id AS client_id, 
+      client_trustee_contact_details.id AS contact_id,
+      client_trustee_contact_details.first_name AS first_name,
+      client_trustee_contact_details.last_name AS last_name,
+      client_trustee_contact_details.email AS email,
+      client_trustee_contact_details.alternate_email AS alternate_email,
+      client_trustee_contact_details.phone_code AS phone_code,
+      client_trustee_contact_details.phone AS phone,
+      client_trustee_contact_details.alternate_phone_code AS alternate_phone_code,
+      client_trustee_contact_details.alternate_phone AS alternate_phone,
+      client_trustee_contact_details.authorised_signatory_status AS authorised_signatory_status,
+      customer_contact_person_role.name AS customer_role_contact_name,
+      customer_contact_person_role.id AS customer_role_contact_id
+  FROM 
+      clients
+  JOIN
+      customers ON clients.customer_id = customers.id
+  LEFT JOIN 
+      client_trustee_contact_details ON clients.id = client_trustee_contact_details.client_id
+  LEFT JOIN 
+      customer_contact_person_role ON customer_contact_person_role.id = client_trustee_contact_details.role
+      LEFT JOIN
+      client_documents ON clients.id = client_documents.client_id
+  WHERE 
+      clients.id = ?
+      `;
+      const [rows2] = await pool.execute(query2, [client_id]);
+
+
+
+    if (rows.length > 0) {
+      const clientData = {
+        id: rows[0].client_id,
+        client_type: rows[0].client_type,
+        customer_id: rows[0].customer_id,
+        client_industry_id: rows[0].client_industry_id,
+        trading_name: rows[0].trading_name,
+        client_code: rows[0].client_code,
+        trading_address: rows[0].trading_address,
+        vat_registered: rows[0].vat_registered,
+        vat_number: rows[0].vat_number,
+        website: rows[0].website,
+        notes: rows[0].notes,
+        status: rows[0].status,
+      };
+
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+        contact_id: row.contact_id,
+        customer_contact_person_role_id: row.customer_role_contact_id,
+        customer_contact_person_role_name: row.customer_role_contact_name,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        alternate_email: row.alternate_email,
+        phone_code: row.phone_code,
+        phone: row.phone,
+        alternate_phone_code: row.alternate_phone_code,
+        alternate_phone: row.alternate_phone,
+        authorised_signatory_status:
+        row.authorised_signatory_status == "1" ? true : false,
+        }));
+
+
+        const trusteeDetails = rows2
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+        contact_id: row.contact_id,
+        customer_contact_person_role_id: row.customer_role_contact_id,
+        customer_contact_person_role_name: row.customer_role_contact_name,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        alternate_email: row.alternate_email,
+        phone_code: row.phone_code,
+        phone: row.phone,
+        alternate_phone_code: row.alternate_phone_code,
+        alternate_phone: row.alternate_phone,
+        authorised_signatory_status:
+        row.authorised_signatory_status == "1" ? true : false,
+        }));
+
+
+        const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
+
+      const result = {
+        client: clientData,
+        beneficiaries_details: contactDetails,
+        trustee_details: trusteeDetails,
+        client_documents: clientDocuments
+      };
+
+      return { status: true, message: "success.", data: result };
+      // Return or further process `result` as needed
+    } else {
+      return { status: false, message: "No customer found with the given ID." };
+    }
+  }
+  else {
     return { status: false, message: "No customer found with the given ID." };
   }
 };

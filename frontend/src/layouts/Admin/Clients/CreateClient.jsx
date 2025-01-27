@@ -323,18 +323,7 @@ const CreateClient = () => {
       email: "",
       alternate_email: "",
     },
-    // {
-    //   authorised_signatory_status: true,
-    //   first_name: "",
-    //   last_name: "",
-    //   role: "",
-    //   phone: "",
-    //   phone_code: "+44",
-    //   alternate_phone: "",
-    //   alternate_phone_code: "+44",
-    //   email: "",
-    //   alternate_email: "",
-    // },
+    
   ]);
 
   const [contactsErrors, setContactsErrors] = useState([
@@ -559,7 +548,7 @@ const CreateClient = () => {
         alternate_email: "",
       },
     ]);
-   
+
   };
 
   const handleAddContactTrustMemberDetails = () => {
@@ -669,7 +658,7 @@ const CreateClient = () => {
     const newErrors = errorTrustTrusteeDetails.filter((_, i) => i !== index);
     setContactsTrustTrustee(newContacts);
     setErrorTrustTrusteeDetails(newErrors);
-   
+
   };
 
   const CustomerPersonRoleData = async () => {
@@ -1243,7 +1232,7 @@ const CreateClient = () => {
     newContacts[index][field] = value;
     setErrorMemberTrustDetails(newContacts);
     validateContactMemberTrust(index, field, value);
-   
+
   };
 
 
@@ -1392,11 +1381,11 @@ const CreateClient = () => {
         break;
     }
     setErrorMemberTrustDetails(newErrors);
-    
+
   };
 
   const validateContactTrustTrustee = (index, field, value) => {
-     const newErrors = [...errorTrustTrusteeDetails];
+    const newErrors = [...errorTrustTrusteeDetails];
     switch (field) {
       case "first_name":
         newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
@@ -1765,7 +1754,7 @@ const CreateClient = () => {
 
       });
       let newErrors1 = contactsTrustTrustee.map((contact, index) => {
-        const error = { 
+        const error = {
           first_name: contact?.first_name?.trim() ? "" : "First Name is required",
           last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
         };
@@ -5669,7 +5658,7 @@ const CreateClient = () => {
                                             <div className="card card_shadow">
                                               <div className="card-header card-header-light-blue align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                Beneficiaries Details
+                                                  Beneficiaries Details
                                                 </h4>
                                               </div>
                                               <div className="card-body">
@@ -5688,25 +5677,25 @@ const CreateClient = () => {
                                                             >
 
                                                               {index !== 0 && (
-                                                                  <div>
-                                                                    <button
-                                                                      className="delete-icon"
-                                                                      type="button"
-                                                                      onClick={() =>
-                                                                        handleDeleteContactTrustmemberDetails(
-                                                                          index
-                                                                        )
-                                                                      }
-                                                                      disabled={
-                                                                        contacts1.length ===
-                                                                        1
-                                                                      }
-                                                                    >
-                                                                      <i className="ti-trash  text-danger"></i>{" "}
+                                                                <div>
+                                                                  <button
+                                                                    className="delete-icon"
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                      handleDeleteContactTrustmemberDetails(
+                                                                        index
+                                                                      )
+                                                                    }
+                                                                    disabled={
+                                                                      contacts1.length ===
+                                                                      1
+                                                                    }
+                                                                  >
+                                                                    <i className="ti-trash  text-danger"></i>{" "}
 
-                                                                    </button>
-                                                                  </div>
-                                                                )}
+                                                                  </button>
+                                                                </div>
+                                                              )}
                                                             </div>
                                                           </div>
                                                           <div className="col-lg-4">
@@ -6066,7 +6055,7 @@ const CreateClient = () => {
                                             <div className="card card_shadow">
                                               <div className="card-header card-header-light-blue align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                                Trustees Details
+                                                  Trustees Details
                                                 </h4>
                                               </div>
                                               <div className="card-body">
@@ -6085,25 +6074,25 @@ const CreateClient = () => {
                                                             >
 
                                                               {index !== 0 && (
-                                                                  <div>
-                                                                    <button
-                                                                      className="delete-icon"
-                                                                      type="button"
-                                                                      onClick={() =>
-                                                                        handleDeleteContactTrusTrusteeDetails(
-                                                                          index
-                                                                        )
-                                                                      }
-                                                                      disabled={
-                                                                        contacts1.length ===
-                                                                        1
-                                                                      }
-                                                                    >
-                                                                      <i className="ti-trash  text-danger"></i>{" "}
+                                                                <div>
+                                                                  <button
+                                                                    className="delete-icon"
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                      handleDeleteContactTrusTrusteeDetails(
+                                                                        index
+                                                                      )
+                                                                    }
+                                                                    disabled={
+                                                                      contacts1.length ===
+                                                                      1
+                                                                    }
+                                                                  >
+                                                                    <i className="ti-trash  text-danger"></i>{" "}
 
-                                                                    </button>
-                                                                  </div>
-                                                                )}
+                                                                  </button>
+                                                                </div>
+                                                              )}
                                                             </div>
                                                           </div>
                                                           <div className="col-lg-4">
