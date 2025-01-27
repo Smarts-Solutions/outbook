@@ -1601,7 +1601,6 @@ const CreateClient = () => {
           notes: getPartnershipDetails.notes,
           contactDetails: contacts1,
         };
-
         await AddClientFun(req);
 
       }
@@ -1666,7 +1665,6 @@ const CreateClient = () => {
         return error;
       });
 
-
       let newErrors1 = contactsTrustee.map((contact, index) => {
         const error = {
           first_name: contact?.first_name?.trim() ? "" : "First Name is required",
@@ -1687,8 +1685,6 @@ const CreateClient = () => {
       setErrorMemberDetails(newErrors);
       setErrorTrusteeDetails(newErrors1);
 
-
-
       if (formIsValid) {
         const req = {
           client_type: "5",
@@ -1704,9 +1700,6 @@ const CreateClient = () => {
           member_details: contactsMembers,
           trustee_details: contactsTrustee,
         };
-        console.log("req", req)
-        alert("Charity Incorporated Organisation")
-        return
         await AddClientFun(req);
 
       }
@@ -1745,11 +1738,7 @@ const CreateClient = () => {
           website: getAssociationDetails.Website,
           notes: getAssociationDetails.notes,
           member_details: contactsMembersUnincorporated,
-
         };
-        console.log("req", req)
-        alert("Charity Incorporated Organisation")
-        return
         await AddClientFun(req);
 
       }
@@ -1789,11 +1778,8 @@ const CreateClient = () => {
       }
       );
 
-
       setErrorMemberTrustDetails(newErrors);
       setErrorTrustTrusteeDetails(newErrors1);
-
-
 
       if (formIsValid) {
         const req = {
@@ -1808,8 +1794,6 @@ const CreateClient = () => {
           trustee_details: contactsTrustTrustee,
           beneficiaries_details: contactsMembersTrust,
         };
-        console.log("req", req)
-        return
         await AddClientFun(req);
 
       }
