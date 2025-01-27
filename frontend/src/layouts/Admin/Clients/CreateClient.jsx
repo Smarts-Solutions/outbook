@@ -987,10 +987,7 @@ const CreateClient = () => {
     if (!value?.trim()) {
       switch (name) {
         case "charity_name":
-          newErrors[name] = "Please enter Trading Name";
-          break;
-        case "TradingName":
-          newErrors[name] = "Please enter Trading Name";
+          newErrors[name] = "Please enter charity_name";
           break;
         case "charity_commission_number":
           newErrors[name] = "Please enter Charity Commission Number";
@@ -1696,9 +1693,9 @@ const CreateClient = () => {
         const req = {
           client_type: "5",
           customer_id: location.state.id,
-          charity_name: getCharityIncorporatedOrganisation.charity_name,
+          trading_name: getCharityIncorporatedOrganisation.charity_name,
           charity_commission_number: getCharityIncorporatedOrganisation.charity_commission_number,
-          principal_office_address: getCharityIncorporatedOrganisation.principal_office_address,
+          trading_address: getCharityIncorporatedOrganisation.principal_office_address,
           service_address: getCharityIncorporatedOrganisation.service_address,
           vat_registered: getCharityIncorporatedOrganisation.VATRegistered,
           vat_number: getCharityIncorporatedOrganisation.VATNumber,
@@ -1741,8 +1738,8 @@ const CreateClient = () => {
         const req = {
           client_type: "6",
           customer_id: location.state.id,
-          association_name: getAssociationDetails.AssociationName,
-          association_address: getAssociationDetails.AssociationAddress,
+          trading_name: getAssociationDetails.AssociationName,
+          trading_address: getAssociationDetails.AssociationAddress,
           vat_registered: getAssociationDetails.VATRegistered,
           vat_number: getAssociationDetails.VATNumber,
           website: getAssociationDetails.Website,
