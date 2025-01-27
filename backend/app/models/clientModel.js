@@ -3,7 +3,6 @@ const deleteUploadFile = require("../middlewares/deleteUploadFile");
 const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const createClient = async (client) => {
-
   // client Code(cli_CUS_CLI_00001)
   let data = {
     table: "clients",
@@ -42,11 +41,92 @@ const createClient = async (client) => {
       : client.client_industry_id;
 
   if (client_type != "4") {
+
+    if(client_type == "5"){
+      //console.log('client', client)
+      let {service_address} = client;
+      const query = `
+      INSERT INTO clients (client_type,customer_id,staff_created_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes,service_address)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+          try {
+            const [result] = await pool.execute(query, [
+              client_type,
+              customer_id,
+              StaffUserId,
+              trading_name,
+              client_code,
+              trading_address,
+              vat_registered,
+              vat_number,
+              website,
+              notes,
+              service_address
+            ]);
+            client_id = result.insertId;
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+              {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `created client profile. client code :`,
+                permission_type: 'created',
+                module_id: client_id,
+              }
+            );
+          } catch (err) {
+            console.error("Error inserting data: - 5 ", err);
+            throw err;
+          }
+
+    }
+    else if(client_type == "6"){
+
+      const query = `
+      INSERT INTO clients (client_type,customer_id,staff_created_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+          try {
+            const [result] = await pool.execute(query, [
+              client_type,
+              customer_id,
+              StaffUserId,
+              trading_name,
+              client_code,
+              trading_address,
+              vat_registered,
+              vat_number,
+              website,
+              notes,
+            ]);
+            client_id = result.insertId;
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+              {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `created client profile. client code :`,
+                permission_type: 'created',
+                module_id: client_id,
+              }
+            );
+          } catch (err) {
+            console.error("Error inserting data: - 1 , 2 , 3 ", err);
+            throw err;
+          }
+
+    }
+   
+    else{
+   
     const query = `
 INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
-
+    `;
     try {
       const [result] = await pool.execute(query, [
         client_type,
@@ -74,12 +154,15 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           module_id: client_id,
         }
       );
-
     } catch (err) {
-      console.error("Error inserting data:", err);
+      console.error("Error inserting data: - 1 , 2 , 3 ", err);
       throw err;
     }
-  } else {
+  }
+
+
+  }
+  else {
     const query = `
     INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,notes)
     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -114,6 +197,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     }
   }
 
+
+
+
   if (client_type == "1") {
     const { first_name, last_name, phone, email, residential_address } = client;
     let phone_code =
@@ -141,7 +227,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       console.error("Error inserting data:", err);
       throw err;
     }
-  } else if (client_type == "2") {
+  } 
+  else if (client_type == "2") {
     const {
       company_name,
       entity_type,
@@ -204,7 +291,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       console.error("Error inserting data:", err);
       throw err;
     }
-  } else if (client_type == "3") {
+  } 
+  else if (client_type == "3") {
     const { contactDetails } = client;
     try {
       const query2 = `
@@ -250,8 +338,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       throw err;
     }
   }
-
-  if (client_type == "4") {
+  else if (client_type == "4") {
     const { first_name, last_name, phone, email, residential_address } = client;
     let phone_code =
       client.phone_code == undefined || client.phone_code == ""
@@ -278,6 +365,150 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       console.error("Error inserting data:", err);
       throw err;
     }
+  }
+  else if (client_type == "5") {
+    const { member_details , trustee_details} = client;
+    // Member Details
+    try {
+      const query2 = `
+        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+      if(member_details.length > 0){
+       for (const detail of member_details) {
+        let role =
+          detail.role == undefined || detail.role == "" ? 0 : detail.role;
+        let first_name = detail.first_name;
+        let last_name = detail.last_name;
+        let email = detail.email;
+        let alternate_email = detail.alternate_email;
+        let phone_code =
+          detail.phone_code == undefined || detail.phone_code == ""
+            ? ""
+            : detail.phone_code;
+          let alternate_phone_code =
+          detail.alternate_phone_code == undefined ||
+            detail.alternate_phone_code == ""
+            ? ""
+            : detail.alternate_phone_code;
+        let phone = detail.phone;
+        let alternate_phone = detail.alternate_phone;
+        let authorised_signatory_status = detail.authorised_signatory_status;
+        const [result2] = await pool.execute(query2, [
+          client_id,
+          role,
+          first_name,
+          last_name,
+          email,
+          alternate_email,
+          phone_code,
+          phone,
+          alternate_phone_code,
+          alternate_phone,
+          authorised_signatory_status,
+        ]);
+       }
+      }
+    } catch (err) {
+      console.error("Error inserting data:", err);
+      throw err;
+    }
+
+    // Trustee Details
+    try {
+      const query3 = `
+        INSERT INTO client_trustee_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+      if(trustee_details.length > 0){
+       for (const detail of trustee_details) {
+        let role =
+          detail.role == undefined || detail.role == "" ? 0 : detail.role;
+        let first_name = detail.first_name;
+        let last_name = detail.last_name;
+        let email = detail.email;
+        let alternate_email = detail.alternate_email;
+        let phone_code =
+          detail.phone_code == undefined || detail.phone_code == ""
+            ? ""
+            : detail.phone_code;
+          let alternate_phone_code =
+          detail.alternate_phone_code == undefined ||
+            detail.alternate_phone_code == ""
+            ? ""
+            : detail.alternate_phone_code;
+        let phone = detail.phone;
+        let alternate_phone = detail.alternate_phone;
+        let authorised_signatory_status = detail.authorised_signatory_status;
+        const [result2] = await pool.execute(query3, [
+          client_id,
+          role,
+          first_name,
+          last_name,
+          email,
+          alternate_email,
+          phone_code,
+          phone,
+          alternate_phone_code,
+          alternate_phone,
+          authorised_signatory_status,
+        ]);
+       }
+      }
+    } catch (err) {
+      console.error("Error inserting data:", err);
+      throw err;
+    }
+  }
+
+  else if (client_type == "6") {
+    const { member_details} = client;
+    // Member Details
+    try {
+      const query2 = `
+        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+      if(member_details.length > 0){
+       for (const detail of member_details) {
+        let role =
+          detail.role == undefined || detail.role == "" ? 0 : detail.role;
+        let first_name = detail.first_name;
+        let last_name = detail.last_name;
+        let email = detail.email;
+        let alternate_email = detail.alternate_email;
+        let phone_code =
+          detail.phone_code == undefined || detail.phone_code == ""
+            ? ""
+            : detail.phone_code;
+          let alternate_phone_code =
+          detail.alternate_phone_code == undefined ||
+            detail.alternate_phone_code == ""
+            ? ""
+            : detail.alternate_phone_code;
+        let phone = detail.phone;
+        let alternate_phone = detail.alternate_phone;
+        let authorised_signatory_status = detail.authorised_signatory_status;
+        const [result2] = await pool.execute(query2, [
+          client_id,
+          role,
+          first_name,
+          last_name,
+          email,
+          alternate_email,
+          phone_code,
+          phone,
+          alternate_phone_code,
+          alternate_phone,
+          authorised_signatory_status,
+        ]);
+       }
+      }
+    } catch (err) {
+      console.error("Error inserting data:", err);
+      throw err;
+    }
+
   }
 
   return { status: true, message: "client add successfully.", data: client_id };

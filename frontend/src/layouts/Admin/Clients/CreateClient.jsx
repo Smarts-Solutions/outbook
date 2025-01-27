@@ -127,6 +127,7 @@ const CreateClient = () => {
     VATRegistered: "0",
     VATNumber: "",
     Website: "",
+    notes: "",
   });
 
   const [contacts, setContacts] = useState([
@@ -531,8 +532,8 @@ const CreateClient = () => {
   };
 
   const handleAddContactTrusteeDetails = () => {
-    setContactsTrustTrustee([
-      ...contactsTrustTrustee,
+    setContactsTrustee([
+      ...contactsTrustee,
       {
         authorised_signatory_status: true,
         first_name: "",
@@ -546,8 +547,8 @@ const CreateClient = () => {
         alternate_email: "",
       },
     ]);
-    setErrorTrustTrusteeDetails([
-      ...errorTrustTrusteeDetails,
+    setErrorTrusteeDetails([
+      ...errorTrusteeDetails,
       {
         first_name: "",
         last_name: "",
@@ -3919,38 +3920,6 @@ const CreateClient = () => {
                                                 </div>
                                               </div>
 
-
-
-                                              <div className="col-lg-4">
-                                                <div className="mb-3">
-                                                  <label className="form-label">
-                                                    Trading Name
-                                                    <span style={{ color: "red" }}>
-                                                      *
-                                                    </span>
-                                                  </label>
-                                                  <input
-                                                    type="text"
-                                                    className={errors5["TradingName"] ? "error-field form-control" : "form-control"}
-
-                                                    placeholder="Trading Name"
-                                                    name="TradingName"
-                                                    id="TradingName"
-                                                    value={
-                                                      getCharityIncorporatedOrganisation.TradingName
-                                                    }
-                                                    onChange={(e) => handleChange5(e)}
-                                                    maxLength={200}
-                                                  />
-                                                  {errors5["TradingName"] && (
-                                                    <div className="error-text">
-                                                      {errors5["TradingName"]}
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </div>
-
-
                                               <div className="col-lg-4">
                                                 <div className="mb-3">
                                                   <label className="form-label">
@@ -3979,8 +3948,6 @@ const CreateClient = () => {
                                                   )}
                                                 </div>
                                               </div>
-
-
 
                                               <div className="col-lg-4">
                                                 <div className="mb-3">
@@ -4011,7 +3978,6 @@ const CreateClient = () => {
                                                 </div>
                                               </div>
 
-
                                               <div className="col-lg-4">
                                                 <div className="mb-3">
                                                   <label className="form-label">
@@ -4040,9 +4006,6 @@ const CreateClient = () => {
                                                   )}
                                                 </div>
                                               </div>
-
-
-
 
                                               <div className="col-lg-4">
                                                 <div className="mb-3">
@@ -4095,7 +4058,6 @@ const CreateClient = () => {
                                                   </div>
                                                 </div>
                                               </div>
-
 
                                               <div className="col-lg-4">
                                                 <div className="mb-3">
@@ -5514,6 +5476,8 @@ const CreateClient = () => {
                                             </div>
                                           </div>
                                         </div>
+
+
                                         <div className="col-lg-12">
                                           <div className="card card_shadow ">
                                             <div className="card-header  card-header-light-blue align-items-center d-flex">
@@ -5528,19 +5492,19 @@ const CreateClient = () => {
                                                   <div className="mb-3">
                                                     <textarea
                                                       type="text"
-                                                      className={errors3["notes"] ? "error-field form-control" : "form-control"}
+                                                      className={errors6["notes"] ? "error-field form-control" : "form-control"}
 
                                                       placeholder="Enter Notes"
                                                       name="notes"
                                                       id="notes"
                                                       value={
-                                                        getPartnershipDetails.notes
+                                                        getAssociationDetails.notes
                                                       }
-                                                      onChange={(e) => handleChange3(e)}
+                                                      onChange={(e) => handleChange6(e)}
                                                     />
-                                                    {errors3["notes"] && (
+                                                    {errors6["notes"] && (
                                                       <div className="error-text">
-                                                        {errors3["notes"]}
+                                                        {errors6["notes"]}
                                                       </div>
                                                     )}
                                                   </div>
