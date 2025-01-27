@@ -1800,21 +1800,18 @@ const CreateClient = () => {
 
       if (formIsValid) {
         const req = {
-          client_type: "5",
+          client_type: "7",
           customer_id: location.state.id,
-          charity_name: getCharityIncorporatedOrganisation.charity_name,
-          charity_commission_number: getCharityIncorporatedOrganisation.charity_commission_number,
-          principal_office_address: getCharityIncorporatedOrganisation.principal_office_address,
-          service_address: getCharityIncorporatedOrganisation.service_address,
-          vat_registered: getCharityIncorporatedOrganisation.VATRegistered,
-          vat_number: getCharityIncorporatedOrganisation.VATNumber,
-          website: getCharityIncorporatedOrganisation.Website,
-          notes: getCharityIncorporatedOrganisation.notes,
-          member_details: contactsMembers,
-          trustee_details: contactsTrustee,
+          trading_name: getTrust.TrustName,
+          trading_address: getTrust.TrustAddress,
+          vat_registered: getTrust.VATRegistered,
+          vat_number: getTrust.VATNumber,
+          website: getTrust.Website,
+          notes: getTrust.notes,
+          trustee_details: contactsTrustTrustee,
+          beneficiaries_details: contactsMembersTrust,
         };
         console.log("req", req)
-        alert("Charity Incorporated Organisation")
         return
         await AddClientFun(req);
 
