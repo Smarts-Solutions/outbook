@@ -1800,7 +1800,7 @@ WHERE
       return { status: false, message: "No customer found with the given ID." };
     }
   }
-  else if (client_type == "5") {
+  else if (client_type == "7") {
     const query = `
   SELECT 
     clients.id AS client_id, 
@@ -1922,7 +1922,7 @@ WHERE
 
 
         const trusteeDetails = rows2
-        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .filter(row => row.contact_id !== null) 
         .map(row => ({
         contact_id: row.contact_id,
         customer_contact_person_role_id: row.customer_role_contact_id,
@@ -1941,7 +1941,7 @@ WHERE
 
 
         const clientDocuments = rows
-        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .filter(row => row.original_name !== null) 
         .map(row => ({
           client_documents_id: row.client_documents_id,
           file_name: row.file_name,
@@ -1959,7 +1959,6 @@ WHERE
       };
 
       return { status: true, message: "success.", data: result };
-      // Return or further process `result` as needed
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }

@@ -1014,8 +1014,6 @@ const ClientLists = () => {
                     <h3 className="mt-0">{tab.title}</h3>
                   </div>
                   <div className="col-md-2">
-                    {console.log("SS", tab.data)}
-                    {console.log("SS", tab.title)}
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3 "
                       apiData={
