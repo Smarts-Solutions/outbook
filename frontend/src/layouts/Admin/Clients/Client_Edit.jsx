@@ -20,11 +20,13 @@ const ClientEdit = () => {
   const [searchItem, setSearchItem] = useState("");
   const [partnershipContacts, setPartnershipContacts] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
+  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [], });
+  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [] });
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
-
   const [errors5, setErrors5] = useState({});
   const [errors6, setErrors6] = useState({});
   const [errors7, setErrors7] = useState({});
@@ -78,12 +80,45 @@ const ClientEdit = () => {
     },
   ]);
 
-  const [errorMemberDetails, setErrorMemberDetails] = useState([
+  const [getAssociationDetails, setAssociationDetails] = useState({
+    AssociationName: "",
+    AssociationAddress: "",
+    VATRegistered: "0",
+    VATNumber: "",
+    Website: "",
+    notes: "",
+  });
+
+  const [getTrust, setTrust] = useState({
+    TrustName: "",
+    TrustAddress: "",
+    VATRegistered: "0",
+    VATNumber: "",
+    Website: "",
+    notes: "",
+  });
+
+  const [contactsMembersTrust, setContactsMembersTrust] = useState([
     {
       authorised_signatory_status: true,
       first_name: "",
       last_name: "",
       role: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
+
+  const [errorMemberDetails, setErrorMemberDetails] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
       phone: "",
       phone_code: "+44",
       alternate_phone: "",
@@ -99,7 +134,7 @@ const ClientEdit = () => {
       authorised_signatory_status: true,
       first_name: "",
       last_name: "",
-      role: "",
+      customer_contact_person_role_id: "",
       phone: "",
       phone_code: "+44",
       alternate_phone: "",
@@ -110,9 +145,38 @@ const ClientEdit = () => {
 
   ]);
 
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
-  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [], });
-  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [] });
+  const [errorMemberTrustDetails, setErrorMemberTrustDetails] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+
+  ]);
+
+  const [errorTrustTrusteeDetails, setErrorTrustTrusteeDetails] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+
+  ]);
+
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     IndustryType: "",
     TradingName: "",
@@ -128,6 +192,7 @@ const ClientEdit = () => {
     phone_code: "",
     notes: "",
   });
+
   const [getCompanyDetails, setCompanyDetails] = useState({
     SearchCompany: "",
     CompanyName: "",
@@ -145,6 +210,7 @@ const ClientEdit = () => {
     TradingName: "",
     TradingAddress: "",
   });
+
   const [getPartnershipDetails, setPartnershipDetails] = useState({
     ClientIndustry: "",
     TradingName: "",
@@ -154,6 +220,7 @@ const ClientEdit = () => {
     Website: "",
     notes: "",
   });
+
   const [CompanyContacts, setCompanyContacts] = useState([
     {
       authorised_signatory_status: 0,
@@ -166,24 +233,13 @@ const ClientEdit = () => {
       email: "",
     },
   ]);
- const [contacts1, setContacts1] = useState([
+
+  const [contactsMembers, setContactsMembers] = useState([
     {
       authorised_signatory_status: true,
       first_name: "",
       last_name: "",
-      role: "",
-      phone: "",
-      phone_code: "+44",
-      alternate_phone: "",
-      alternate_phone_code: "+44",
-      email: "",
-      alternate_email: "",
-    },
-    {
-      authorised_signatory_status: true,
-      first_name: "",
-      last_name: "",
-      role: "",
+      customer_contact_person_role_id: "",
       phone: "",
       phone_code: "+44",
       alternate_phone: "",
@@ -193,26 +249,12 @@ const ClientEdit = () => {
     },
   ]);
 
-  const [contactsMembers, setContactsMembers] = useState([
-    {
-      authorised_signatory_status: true,
-      first_name: "",
-      last_name: "",
-      role: "",
-      phone: "",
-      phone_code: "+44",
-      alternate_phone: "",
-      alternate_phone_code: "+44",
-      email: "",
-      alternate_email: "",
-    },
-  ]);
   const [contactsTrustee, setContactsTrustee] = useState([
     {
       authorised_signatory_status: true,
       first_name: "",
       last_name: "",
-      role: "",
+      customer_contact_person_role_id: "",
       phone: "",
       phone_code: "+44",
       alternate_phone: "",
@@ -234,6 +276,36 @@ const ClientEdit = () => {
     notes: "",
   });
 
+  const [contactsMembersUnincorporated, setContactsMembersUnincorporated] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
+
+  const [contactsTrustTrustee, setContactsTrustTrustee] = useState([
+    {
+      authorised_signatory_status: true,
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "+44",
+      alternate_phone: "",
+      alternate_phone_code: "+44",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
+
   const [getCharityIncorporatedOrganisation, setCharityIncorporatedOrganisation] = useState({
     charity_name: "",
     TradingName: "",
@@ -251,7 +323,7 @@ const ClientEdit = () => {
       authorised_signatory_status: true,
       first_name: "",
       last_name: "",
-      role: "",
+      customer_contact_person_role_id: "",
       phone: "",
       phone_code: "+44",
       alternate_phone: "",
@@ -282,9 +354,6 @@ const ClientEdit = () => {
   useEffect(() => {
     Get_Company();
   }, [searchItem]);
-
-
-  console.log("getClientDetails", getClientDetails);
 
   useEffect(() => {
     if (location.state.row.client_type_name == "SoleTrader") {
@@ -459,7 +528,7 @@ const ClientEdit = () => {
           getClientDetails.data.contact_details[0].phone,
         email:
           !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].email,
+          getClientDetails.data.contact_details[0]?.email,
         residentialAddress:
           !getClientDetails.loading &&
           getClientDetails.data.contact_details[0].residential_address,
@@ -470,8 +539,134 @@ const ClientEdit = () => {
           !getClientDetails.loading && getClientDetails.data.client.notes,
       }));
     }
+    if (location.state.row.client_type_name == "Charity Incorporated Organisation") {
 
-  }, [getClientDetails]);
+      setCharityIncorporatedOrganisation((prevState) => ({
+        ...prevState,
+        charity_name: !getClientDetails.loading && getClientDetails.data.client.trading_name,
+        TradingName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
+        charity_commission_number: !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        principal_office_address: !getClientDetails.loading && getClientDetails.data.client.trading_address,
+        service_address: !getClientDetails.loading && getClientDetails.data.client.trading_address,
+        VATRegistered: !getClientDetails.loading && getClientDetails.data.client.vat_registered,
+        VATNumber: !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        Website: !getClientDetails.loading && getClientDetails.data.client.website,
+        notes: !getClientDetails.loading && getClientDetails.data.client.notes,
+      }));
+      if (getClientDetails?.data?.member_details) {
+
+        setContactsMembers(getClientDetails?.data?.member_details)
+
+        const newErrors = [...errorMemberDetails];
+        for (let i = 1; i < getClientDetails?.data?.member_details?.length; i++) {
+          newErrors.push({
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            alternate_phone: "",
+            email: "",
+            alternate_email: "",
+          });
+        }
+        setErrorMemberDetails(newErrors);
+      }
+
+      if (getClientDetails?.data?.trustee_details) {
+        setContactsTrustee(getClientDetails?.data?.trustee_details)
+        const newErrors = [...errorTrusteeDetails];
+        for (let i = 1; i < getClientDetails?.data?.trustee_details?.length; i++) {
+          newErrors.push({
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            alternate_phone: "",
+            email: "",
+            alternate_email: "",
+          });
+        }
+        setErrorTrusteeDetails(newErrors);
+      }
+
+    }
+    if (location?.state?.row?.client_type_name == "Unincorporated Association") {
+      setAssociationDetails((prevState) => ({
+        ...prevState,
+        AssociationName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
+        AssociationAddress: !getClientDetails.loading && getClientDetails.data.client.trading_address,
+        VATRegistered: !getClientDetails.loading && getClientDetails.data.client.vat_registered,
+        VATNumber: !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        Website: !getClientDetails.loading && getClientDetails.data.client.website,
+
+        notes: !getClientDetails.loading && getClientDetails.data.client.notes,
+      }));
+      if (getClientDetails?.data?.member_details) {
+        setContactsMembersUnincorporated(getClientDetails?.data?.member_details)
+        const newErrors = [...errorMemberDetailsUnincorporated];
+        for (let i = 1; i < getClientDetails?.data?.member_details?.length; i++) {
+          newErrors.push({
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            alternate_phone: "",
+            email: "",
+            alternate_email: "",
+          });
+        }
+        setErrorMemberDetailsUnincorporated(newErrors);
+      }
+    }
+    if (location?.state?.row?.client_type_name == "Trust") {
+
+      console.log("!get", !getClientDetails.loading && getClientDetails.data.client)
+      setTrust((prevState) => ({
+        ...prevState,
+        TrustName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
+        TrustAddress: !getClientDetails.loading && getClientDetails.data.client.trading_address,
+        VATRegistered: !getClientDetails.loading && getClientDetails.data.client.vat_registered,
+        VATNumber: !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        Website: !getClientDetails.loading && getClientDetails.data.client.website,
+        notes: !getClientDetails.loading && getClientDetails.data.client.notes,
+      }));
+      if (getClientDetails?.data?.beneficiaries_details) {
+
+        setContactsMembersTrust(getClientDetails?.data?.beneficiaries_details)
+        const newErrors = [...errorMemberTrustDetails];
+        for (let i = 1; i < getClientDetails?.data?.beneficiaries_details?.length; i++) {
+          newErrors.push({
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            alternate_phone: "",
+            email: "",
+            alternate_email: "",
+          });
+        }
+        setErrorMemberTrustDetails(newErrors);
+      }
+
+      if (getClientDetails?.data?.trustee_details) {
+        setContactsTrustTrustee(getClientDetails?.data?.trustee_details)
+        const newErrors = [...errorTrustTrusteeDetails];
+        for (let i = 1; i < getClientDetails?.data?.trustee_details?.length; i++) {
+          newErrors.push({
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            alternate_phone: "",
+            email: "",
+            alternate_email: "",
+          });
+        }
+        setErrorTrustTrusteeDetails(newErrors);
+      }
+    }
+  }, [getClientDetails?.data]);
+
 
   useEffect(() => {
     if (getSearchDetails.length > 0) {
@@ -532,7 +727,7 @@ const ClientEdit = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        customer_contact_person_role_id: "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -546,7 +741,7 @@ const ClientEdit = () => {
       {
         first_name: "",
         last_name: "",
-        role: "",
+        customer_contact_person_role_id: "",
         phone: "",
         alternate_phone: "",
         email: "",
@@ -594,7 +789,7 @@ const ClientEdit = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        customer_contact_person_role_id: "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -608,7 +803,7 @@ const ClientEdit = () => {
       {
         first_name: "",
         last_name: "",
-        role: "",
+        customer_contact_person_role_id: "",
         phone: "",
         alternate_phone: "",
         email: "",
@@ -616,6 +811,96 @@ const ClientEdit = () => {
       },
     ]);
 
+  };
+
+  const handleAddContactMemberDetailsUnincorporated = () => {
+    setContactsMembersUnincorporated([
+      ...contactsMembersUnincorporated,
+      {
+        authorised_signatory_status: true,
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        phone_code: "+44",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setErrorMemberDetailsUnincorporated([
+      ...errorMemberDetailsUnincorporated,
+      {
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+  };
+
+  const handleAddContactTrustMemberDetails = () => {
+    setContactsMembersTrust([
+      ...contactsMembersTrust,
+      {
+        authorised_signatory_status: true,
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        phone_code: "+44",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setErrorMemberTrustDetails([
+      ...errorMemberTrustDetails,
+      {
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+  };
+
+  const handleAddContactTrustTrusteeDetails = () => {
+    setContactsTrustTrustee([
+      ...contactsTrustTrustee,
+      {
+        authorised_signatory_status: true,
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        phone_code: "+44",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setErrorTrustTrusteeDetails([
+      ...errorTrustTrusteeDetails,
+      {
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
   };
 
   const handleDeleteCompanyContact = (index) => {
@@ -626,8 +911,8 @@ const ClientEdit = () => {
   };
 
   const handleDeleteContactMemberDetails = (index) => {
-    const newContacts = contactsMembers.filter((_, i) => i !== index);
-    const newErrors = errorMemberDetails.filter((_, i) => i !== index);
+    const newContacts = contactsMembers?.filter((_, i) => i !== index);
+    const newErrors = errorMemberDetails?.filter((_, i) => i !== index);
     setContactsMembers(newContacts);
     setErrorMemberDetails(newErrors);
   };
@@ -637,6 +922,21 @@ const ClientEdit = () => {
     const newErrors = errorTrusteeDetails.filter((_, i) => i !== index);
     setContactsTrustee(newContacts);
     setErrorTrusteeDetails(newErrors);
+  };
+
+  const handleDeleteContactTrustmemberDetails = (index) => {
+    const newContacts = contactsMembersTrust.filter((_, i) => i !== index);
+    const newErrors = errorMemberTrustDetails.filter((_, i) => i !== index);
+    setContactsMembersTrust(newContacts);
+    setErrorMemberTrustDetails(newErrors);
+  };
+
+  const handleDeleteContactTrusTrusteeDetails = (index) => {
+    const newContacts = contactsTrustTrustee.filter((_, i) => i !== index);
+    const newErrors = errorTrustTrusteeDetails.filter((_, i) => i !== index);
+    setContactsTrustTrustee(newContacts);
+    setErrorTrustTrusteeDetails(newErrors);
+
   };
 
   const GetClientDetails = async () => {
@@ -786,7 +1086,6 @@ const ClientEdit = () => {
   const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
 
 
-
   const handleInputsChange = (e, type) => {
     const { name, value } = e.target;
     if (name === "VATNumber" || name === "phone") {
@@ -811,17 +1110,6 @@ const ClientEdit = () => {
     }
   };
 
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate3(name, value);
-    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
-  };
-
   const handleChange5 = (e) => {
     const { name, value } = e.target;
     if (name === "VATNumber") {
@@ -833,23 +1121,39 @@ const ClientEdit = () => {
     setCharityIncorporatedOrganisation({ ...getCharityIncorporatedOrganisation, [name]: value });
   };
 
-  const handleChangeTrustee = (index, field, value) => {
-    const newContacts = [...contactsTrustee];
-    newContacts[index][field] = value;
-    setErrorTrusteeDetails(newContacts);
-    validateContactTrusteeField(index, field, value);
+  const handleChange6 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate6(name, value);
+    setAssociationDetails({ ...getAssociationDetails, [name]: value });
+
   };
 
+  const handleChange7 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate7(name, value);
+    setTrust({ ...getTrust, [name]: value });
 
-  const validate3 = (name, value) => {
-    const newErrors = { ...errors3 };
+  };
+
+  const validate6 = (name, value) => {
+    const newErrors = { ...errors6 }
     if (!value?.trim()) {
       switch (name) {
-        case "TradingName":
-          newErrors[name] = "Please Enter Trading Name";
+        case "AssociationName":
+          newErrors[name] = "Please enter Association Name";
           break;
-        case "TradingAddress":
-          newErrors[name] = "Please Enter Trading Address";
+        case "AssociationAddress":
+          newErrors[name] = "Please enter Association Address";
           break;
         case "VATRegistered":
           newErrors[name] = "Please Enter VAT Registered";
@@ -859,9 +1163,8 @@ const ClientEdit = () => {
       }
     }
     else {
-
       delete newErrors[name];
-      setErrors3((prevErrors) => {
+      setErrors6((prevErrors) => {
         const updatedErrors = { ...prevErrors };
         delete updatedErrors[name];
         return updatedErrors;
@@ -872,7 +1175,45 @@ const ClientEdit = () => {
     ScrollToViewFirstError(newErrors);
 
     if (Object.keys(newErrors).length !== 0) {
-      setErrors3((prevErrors) => ({
+      setErrors6((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate7 = (name, value) => {
+    const newErrors = { ...errors7 }
+    if (!value?.trim()) {
+      switch (name) {
+        case "TrustName":
+          newErrors[name] = "Please enter Trust Name";
+          break;
+        case "TrustAddress":
+          newErrors[name] = "Please enter Trust Address";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+      delete newErrors[name];
+      setErrors7((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+
+    }
+
+    ScrollToViewFirstError(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors7((prevErrors) => ({
         ...prevErrors,
         ...newErrors,
       }));
@@ -889,7 +1230,6 @@ const ClientEdit = () => {
     }
     return isValid;
   };
-
 
   const ContactsArr = [CompanyContacts, partnershipContacts,];
   const ErrorsArr = [companyContactsErrors, PartnershiContactsErrors,]
@@ -909,6 +1249,53 @@ const ClientEdit = () => {
     if (type == 2) setPartnershipContacts(newContacts);
 
     validateField(index, field, value, type);
+  };
+
+  const handleChangeMember = (index, field, value) => {
+    setContactsMembers((prevContacts) =>
+      prevContacts.map((member, i) =>
+        i === index ? { ...member, [field]: value } : member
+      )
+    );
+    validateContactMemberField(index, field, value);
+  };
+
+  const handleChangeTrustee = (index, field, value) => {
+    setContactsTrustee((prevContacts) =>
+      prevContacts.map((member, i) =>
+        i === index ? { ...member, [field]: value } : member
+      )
+    );
+    validateContactTrusteeField(index, field, value);
+
+  };
+
+  const handleChangeTrust = (index, field, value) => {
+    setContactsMembersTrust((prevContacts) =>
+      prevContacts.map((member, i) =>
+        i === index ? { ...member, [field]: value } : member
+      )
+    );
+    validateContactMemberTrust(index, field, value);
+  };
+
+  const handleChangeTrustTrustee = (index, field, value) => {
+    setContactsTrustTrustee((prevContacts) =>
+      prevContacts.map((member, i) =>
+        i === index ? { ...member, [field]: value } : member
+      )
+    );
+    validateContactTrustTrustee(index, field, value);
+  };
+
+  const handleChangeMemberUnincorporated = (index, field, value) => {
+    setContactsMembersUnincorporated((prevContacts) =>
+      prevContacts.map((member, i) =>
+        i === index ? { ...member, [field]: value } : member
+      )
+    );
+    validateContactMemberFieldUnincorporated(index, field, value);
+
   };
 
   const validate5 = (name, value) => {
@@ -951,7 +1338,6 @@ const ClientEdit = () => {
     }
     return Object.keys(newErrors).length === 0 ? true : false;
   };
-
 
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
@@ -1030,6 +1416,23 @@ const ClientEdit = () => {
     setErrorMemberDetails(newErrors);
   };
 
+  const validateContactMemberTrust = (index, field, value) => {
+    const newErrors = [...errorMemberTrustDetails];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
+        break;
+
+      default:
+        break;
+    }
+    setErrorMemberTrustDetails(newErrors);
+
+  };
+
   const validateContactTrusteeField = (index, field, value) => {
     const newErrors = [...errorTrusteeDetails];
     switch (field) {
@@ -1062,7 +1465,30 @@ const ClientEdit = () => {
     setErrorMemberDetailsUnincorporated(newErrors);
   };
 
-  // common submit function for all type of customer
+  const validateContactTrustTrustee = (index, field, value) => {
+    const newErrors = [...errorTrustTrusteeDetails];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
+        break;
+
+      default:
+        break;
+
+    }
+    setErrorTrustTrusteeDetails(newErrors);
+  };
+
+  const handleDeleteContactMemberDetailsUnincorporated = (index) => {
+    const newContacts = contactsMembersUnincorporated.filter((_, i) => i !== index);
+    const newErrors = errorMemberDetailsUnincorporated.filter((_, i) => i !== index);
+    setContactsMembersUnincorporated(newContacts);
+    setErrorMemberDetailsUnincorporated(newErrors);
+  }
+
   const EditClientFun = async (req) => {
     const data = { req: req, authToken: token };
     await dispatch(Edit_Client(req))
@@ -1107,14 +1533,14 @@ const ClientEdit = () => {
         first_name: getSoleTraderDetails.first_name,
         last_name: getSoleTraderDetails.last_name,
         phone: getSoleTraderDetails.phone,
-        email: getSoleTraderDetails.email,
+        email: getSoleTraderDetails?.email,
         residential_address: getSoleTraderDetails.residentialAddress,
         client_code: location.state.row.id,
         phone_code: getSoleTraderDetails.phone_code,
       };
       await EditClientFun(req);
     }
-    if (selectClientType == 2 && validateAllFields(2)) {
+    else if (selectClientType == 2 && validateAllFields(2)) {
       let formIsValid = true;
       const newErrors = CompanyContacts.map((contact, index) => {
         const error = {
@@ -1127,9 +1553,9 @@ const ClientEdit = () => {
                 ? ""
                 : "Phone Number must be between 9 to 12 digits",
           email:
-            contact.email?.trim() === ""
+            contact?.email?.trim() === ""
               ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact?.email)
                 ? ""
                 : "Valid Email is required",
         };
@@ -1138,7 +1564,7 @@ const ClientEdit = () => {
           error.last_name ||
           error.customer_contact_person_role_id ||
           error.phone ||
-          error.email
+          error?.email
         ) {
           formIsValid = false;
         }
@@ -1172,7 +1598,7 @@ const ClientEdit = () => {
         ScrollToViewFirstErrorContactForm(companyContactsErrors);
       }
     }
-    if (selectClientType == 3 && validateAllFields(3)) {
+    else if (selectClientType == 3 && validateAllFields(3)) {
       let formIsValid = true;
       const newErrors = partnershipContacts.map((contact, index) => {
         const error = {
@@ -1185,21 +1611,21 @@ const ClientEdit = () => {
                 ? ""
                 : "Phone Number must be between 9 to 12 digits",
           alternate_phone:
-            contact.alternate_phone?.trim() === ""
+            contact?.alternate_phone?.trim() === ""
               ? ""
-              : /^\d{9,12}$/.test(contact.alternate_phone)
+              : /^\d{9,12}$/.test(contact?.alternate_phone)
                 ? ""
                 : "Alternate Phone Number must be between 9 to 12 digits",
           email:
-            contact.email?.trim() === ""
+            contact?.email?.trim() === ""
               ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact?.email)
                 ? ""
                 : "Valid Email is required",
           alternate_email:
-            contact.alternate_email?.trim() === ""
+            contact?.alternate_email?.trim() === ""
               ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact?.alternate_email)
                 ? ""
                 : "Valid Email is required",
         };
@@ -1209,7 +1635,7 @@ const ClientEdit = () => {
           error.last_name ||
           error.customer_contact_person_role_id ||
           error.phone ||
-          error.email
+          error?.email
         ) {
           formIsValid = false;
         }
@@ -1236,7 +1662,7 @@ const ClientEdit = () => {
         ScrollToViewFirstErrorContactForm(PartnershiContactsErrors);
       }
     }
-    if (selectClientType == 4 && validateAllFields(4)) {
+    else if (selectClientType == 4 && validateAllFields(4)) {
       const req = {
         client_type: "4",
         client_id: location.state.row.id,
@@ -1245,7 +1671,7 @@ const ClientEdit = () => {
         first_name: getIndivisualDetails.first_name,
         last_name: getIndivisualDetails.last_name,
         phone: getIndivisualDetails.phone,
-        email: getIndivisualDetails.email,
+        email: getIndivisualDetails?.email,
         residential_address: getIndivisualDetails.residentialAddress,
         client_code: location.state.row.id,
         phone_code: getIndivisualDetails.phone_code,
@@ -1254,13 +1680,160 @@ const ClientEdit = () => {
       await EditClientFun(req);
 
     }
-  };
+    else if (selectClientType == 5 && validateAllFields(5)) {
+      let formIsValid = true;
+      let newErrors = contactsMembers.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
 
-  const handleChangeMember = (index, field, value) => {
-    const newContacts = [...contactsMembers];
-    newContacts[index][field] = value;
-    setErrorMemberDetails(newContacts);
-    validateContactMemberField(index, field, value);
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+
+      let newErrors1 = contactsTrustee.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+
+
+      setErrorMemberDetails(newErrors);
+      setErrorTrusteeDetails(newErrors1);
+
+      if (formIsValid) {
+        const req = {
+          client_type: "5",
+          customer_id: location.state.id,
+          client_id: location.state.row.id,
+          trading_name: getCharityIncorporatedOrganisation.charity_name,
+          charity_commission_number: getCharityIncorporatedOrganisation.charity_commission_number,
+          trading_address: getCharityIncorporatedOrganisation.principal_office_address,
+          service_address: getCharityIncorporatedOrganisation.service_address,
+          vat_registered: getCharityIncorporatedOrganisation.VATRegistered,
+          vat_number: getCharityIncorporatedOrganisation.VATNumber,
+          website: getCharityIncorporatedOrganisation.Website,
+          notes: getCharityIncorporatedOrganisation.notes,
+          member_details: contactsMembers,
+          trustee_details: contactsTrustee,
+        };
+        await EditClientFun(req);
+
+      }
+      
+    }
+    else if (selectClientType == 6 && validateAllFields(6)) {
+      let formIsValid = true;
+      let newErrors = contactsMembersUnincorporated.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+
+      });
+      setErrorMemberDetailsUnincorporated(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "6",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          trading_name: getAssociationDetails.AssociationName,
+          trading_address: getAssociationDetails.AssociationAddress,
+          vat_registered: getAssociationDetails.VATRegistered,
+          vat_number: getAssociationDetails.VATNumber,
+          website: getAssociationDetails.Website,
+          notes: getAssociationDetails.notes,
+          member_details: contactsMembersUnincorporated,
+        };
+        await EditClientFun(req);
+
+      }
+     
+    }
+    else if (selectClientType == 7 && validateAllFields(7)) {
+      let formIsValid = true;
+      let newErrors = contactsMembersTrust.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+        };
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+
+      });
+      let newErrors1 = contactsTrustTrustee.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+        };
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      }
+      );
+
+      setErrorMemberTrustDetails(newErrors);
+      setErrorTrustTrusteeDetails(newErrors1);
+
+      if (formIsValid) {
+        const req = {
+          client_type: "7",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          trading_name: getTrust.TrustName,
+          trading_address: getTrust.TrustAddress,
+          vat_registered: getTrust.VATRegistered,
+          vat_number: getTrust.VATNumber,
+          website: getTrust.Website,
+          notes: getTrust.notes,
+          trustee_details: contactsTrustTrustee,
+          beneficiaries_details: contactsMembersTrust,
+        };
+        await EditClientFun(req);
+
+      }
+     
+    }
+
+
+
+
+
   };
 
   const FilterSearchDetails = () => {
@@ -2446,7 +3019,7 @@ const ClientEdit = () => {
 
                                                         placeholder="Email"
                                                         id={`email-${index}`}
-                                                        value={contact.email}
+                                                        value={contact?.email}
                                                         onChange={(e) =>
                                                           handleContactInputChange(
                                                             index,
@@ -2458,7 +3031,7 @@ const ClientEdit = () => {
                                                       />
                                                       {companyContactsErrors[index] &&
                                                         companyContactsErrors[index]
-                                                          .email && (
+                                                          ?.email && (
                                                           <div className="error-text">
                                                             {
                                                               companyContactsErrors[index]?.email
@@ -3029,7 +3602,7 @@ const ClientEdit = () => {
                                                           name="alternate_phone"
                                                           id={`alternate_phone-${index}`}
                                                           value={
-                                                            contact.alternate_phone
+                                                            contact?.alternate_phone
                                                           }
                                                           onChange={(e) =>
                                                             handleContactInputChange(
@@ -3047,13 +3620,13 @@ const ClientEdit = () => {
                                                           PartnershiContactsErrors[
                                                             index
                                                           ]
-                                                            .alternate_phone && (
+                                                            ?.alternate_phone && (
                                                             <div className="error-text">
                                                               {
                                                                 PartnershiContactsErrors[
                                                                   index
                                                                 ]
-                                                                  .alternate_phone
+                                                                  ?.alternate_phone
                                                               }
                                                             </div>
                                                           )}
@@ -3073,7 +3646,7 @@ const ClientEdit = () => {
                                                       placeholder="Enter Email"
                                                       name="email"
                                                       id={`email-${index}`}
-                                                      value={contact.email}
+                                                      value={contact?.email}
                                                       onChange={(e) =>
                                                         handleContactInputChange(
                                                           index,
@@ -3089,7 +3662,7 @@ const ClientEdit = () => {
                                                           {
                                                             PartnershiContactsErrors[
                                                               index
-                                                            ].email
+                                                            ]?.email
                                                           }
                                                         </div>
                                                       )}
@@ -3108,7 +3681,7 @@ const ClientEdit = () => {
                                                       name="alternate_email"
                                                       id={`alternate_email-${index}`}
                                                       value={
-                                                        contact.alternate_email
+                                                        contact?.alternate_email
                                                       }
                                                       onChange={(e) =>
                                                         handleContactInputChange(
@@ -3125,7 +3698,7 @@ const ClientEdit = () => {
                                                           {
                                                             PartnershiContactsErrors[
                                                               index
-                                                            ].alternate_email
+                                                            ]?.alternate_email
                                                           }
                                                         </div>
                                                       )}
@@ -3354,7 +3927,7 @@ const ClientEdit = () => {
                                             placeholder="Enter Email ID"
                                             name="email"
                                             id="email"
-                                            value={getIndivisualDetails.email}
+                                            value={getIndivisualDetails?.email}
                                             onChange={(e) => handleInputsChange(e, 4)}
                                           />
                                           {errors4["email"] && (
@@ -3654,7 +4227,7 @@ const ClientEdit = () => {
                                   <div className="card-body">
                                     <div className="row">
 
-                                      {contactsMembers.map((contact, index) => (
+                                      {(contactsMembers || [])?.map((contact, index) => (
                                         <div className="col-xxl-12 col-lg-12">
                                           <div className="card pricing-box p-3 m-2 mt-0">
                                             <div className="row">
@@ -3679,7 +4252,7 @@ const ClientEdit = () => {
                                                             )
                                                           }
                                                           disabled={
-                                                            contacts1.length ===
+                                                            contact.length ===
                                                             1
                                                           }
                                                         >
@@ -3709,7 +4282,7 @@ const ClientEdit = () => {
                                                     name="first_name"
                                                     id={`first_name-${index}`}
                                                     value={
-                                                      contacts1?.first_name
+                                                      contact?.first_name
                                                     }
                                                     maxLength={50}
                                                     onChange={(e) =>
@@ -3751,7 +4324,7 @@ const ClientEdit = () => {
                                                     name="last_name"
                                                     id={`last_name-${index}`}
                                                     value={
-                                                      contacts1?.last_name
+                                                      contact?.last_name
                                                     }
                                                     onChange={(e) =>
                                                       handleChangeMember(
@@ -3782,12 +4355,12 @@ const ClientEdit = () => {
 
                                                   <select
                                                     className="form-select"
-                                                    id={`role-${index}`}
-                                                    value={contacts1?.role}
+                                                    id={`customer_contact_person_role_id-${index}`}
+                                                    value={contact?.customer_contact_person_role_id}
                                                     onChange={(e) =>
                                                       handleChangeMember(
                                                         index,
-                                                        "role",
+                                                        "customer_contact_person_role_id",
                                                         e.target.value
                                                       )
                                                     }
@@ -3807,10 +4380,10 @@ const ClientEdit = () => {
                                                         )
                                                       )}
                                                   </select>
-                                                  {errorMemberDetails[index]?.role && (
+                                                  {errorMemberDetails[index]?.customer_contact_person_role_id && (
                                                     <div className="error-text">
                                                       {
-                                                        errorMemberDetails[index]?.role
+                                                        errorMemberDetails[index]?.customer_contact_person_role_id
                                                       }
                                                     </div>
                                                   )}
@@ -3861,7 +4434,7 @@ const ClientEdit = () => {
                                                         name="phone"
                                                         id={`phone-${index}`}
                                                         value={
-                                                          contacts1.phone
+                                                          contact?.phone
                                                         }
                                                         onChange={(e) =>
                                                           handleChangeMember(
@@ -3872,16 +4445,15 @@ const ClientEdit = () => {
                                                         }
                                                         maxLength={12}
                                                       />
-                                                      {errorMemberDetails[index]
-                                                        .phone && (
-                                                          <div className="error-text">
-                                                            {
-                                                              errorMemberDetails[
-                                                                index
-                                                              ].phone
-                                                            }
-                                                          </div>
-                                                        )}
+                                                      {errorMemberDetails[index]?.phone && (
+                                                        <div className="error-text">
+                                                          {
+                                                            errorMemberDetails[
+                                                              index
+                                                            ].phone
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                 </div>
@@ -3904,7 +4476,7 @@ const ClientEdit = () => {
                                                         }
                                                         name="alternate_phone_code"
                                                         value={
-                                                          contact.alternate_phone_code
+                                                          contact?.alternate_phone_code
                                                         }
                                                       >
                                                         {countryDataAll.data.map(
@@ -3929,7 +4501,7 @@ const ClientEdit = () => {
                                                         name="alternate_phone"
                                                         id={`alternate_phone-${index}`}
                                                         value={
-                                                          contacts1.alternate_phone
+                                                          contact?.alternate_phone
                                                         }
                                                         onChange={(e) =>
                                                           handleChangeMember(
@@ -3940,12 +4512,12 @@ const ClientEdit = () => {
                                                         }
                                                       />
                                                       {errorMemberDetails[index]
-                                                        .alternate_phone && (
+                                                        ?.alternate_phone && (
                                                           <div className="error-text">
                                                             {
                                                               errorMemberDetails[
                                                                 index
-                                                              ].alternate_phone
+                                                              ]?.alternate_phone
                                                             }
                                                           </div>
                                                         )}
@@ -3965,7 +4537,7 @@ const ClientEdit = () => {
                                                     placeholder="Enter Email"
                                                     name="email"
                                                     id={`email-${index}`}
-                                                    value={contacts1.email}
+                                                    value={contact?.email}
                                                     onChange={(e) =>
                                                       handleChangeMember(
                                                         index,
@@ -3975,11 +4547,11 @@ const ClientEdit = () => {
                                                     }
                                                   />
                                                   {errorMemberDetails[index]
-                                                    .email && (
+                                                    ?.email && (
                                                       <div className="error-text">
                                                         {
                                                           errorMemberDetails[index]
-                                                            .email
+                                                            ?.email
                                                         }
                                                       </div>
                                                     )}
@@ -3999,7 +4571,7 @@ const ClientEdit = () => {
                                                     name="alternate_email"
                                                     id={`alternate_email-${index}`}
                                                     value={
-                                                      contacts1.alternate_email
+                                                      contact?.alternate_email
                                                     }
                                                     onChange={(e) =>
                                                       handleChangeMember(
@@ -4010,11 +4582,11 @@ const ClientEdit = () => {
                                                     }
                                                   />
                                                   {errorMemberDetails[index]
-                                                    .alternate_email && (
+                                                    ?.alternate_email && (
                                                       <div className="error-text">
                                                         {
                                                           errorMemberDetails[index]
-                                                            .alternate_email
+                                                            ?.alternate_email
                                                         }
                                                       </div>
                                                     )}
@@ -4080,7 +4652,7 @@ const ClientEdit = () => {
                                                             )
                                                           }
                                                           disabled={
-                                                            contacts1.length ===
+                                                            contact.length ===
                                                             1
                                                           }
                                                         >
@@ -4110,7 +4682,7 @@ const ClientEdit = () => {
                                                     name="first_name"
                                                     id={`first_name-${index}`}
                                                     value={
-                                                      contacts1?.first_name
+                                                      contact?.first_name
                                                     }
                                                     maxLength={50}
                                                     onChange={(e) =>
@@ -4152,7 +4724,7 @@ const ClientEdit = () => {
                                                     name="last_name"
                                                     id={`last_name-${index}`}
                                                     value={
-                                                      contacts1?.last_name
+                                                      contact?.last_name
                                                     }
                                                     onChange={(e) =>
                                                       handleChangeTrustee(
@@ -4183,12 +4755,12 @@ const ClientEdit = () => {
 
                                                   <select
                                                     className="form-select"
-                                                    id={`role-${index}`}
-                                                    value={contacts1?.role}
+                                                    id={`customer_contact_person_role_id-${index}`}
+                                                    value={contact?.customer_contact_person_role_id}
                                                     onChange={(e) =>
                                                       handleChangeTrustee(
                                                         index,
-                                                        "role",
+                                                        "customer_contact_person_role_id",
                                                         e.target.value
                                                       )
                                                     }
@@ -4208,10 +4780,10 @@ const ClientEdit = () => {
                                                         )
                                                       )}
                                                   </select>
-                                                  {errorTrusteeDetails[index]?.role && (
+                                                  {errorTrusteeDetails[index]?.customer_contact_person_role_id && (
                                                     <div className="error-text">
                                                       {
-                                                        errorTrusteeDetails[index]?.role
+                                                        errorTrusteeDetails[index]?.customer_contact_person_role_id
                                                       }
                                                     </div>
                                                   )}
@@ -4262,7 +4834,7 @@ const ClientEdit = () => {
                                                         name="phone"
                                                         id={`phone-${index}`}
                                                         value={
-                                                          contacts1.phone
+                                                          contact.phone
                                                         }
                                                         onChange={(e) =>
                                                           handleChangeTrustee(
@@ -4305,7 +4877,7 @@ const ClientEdit = () => {
                                                         }
                                                         name="alternate_phone_code"
                                                         value={
-                                                          contact.alternate_phone_code
+                                                          contact?.alternate_phone_code
                                                         }
                                                       >
                                                         {countryDataAll.data.map(
@@ -4330,7 +4902,7 @@ const ClientEdit = () => {
                                                         name="alternate_phone"
                                                         id={`alternate_phone-${index}`}
                                                         value={
-                                                          contacts1.alternate_phone
+                                                          contact?.alternate_phone
                                                         }
                                                         onChange={(e) =>
                                                           handleChangeTrustee(
@@ -4341,12 +4913,12 @@ const ClientEdit = () => {
                                                         }
                                                       />
                                                       {errorTrusteeDetails[index]
-                                                        .alternate_phone && (
+                                                        ?.alternate_phone && (
                                                           <div className="error-text">
                                                             {
                                                               errorTrusteeDetails[
                                                                 index
-                                                              ].alternate_phone
+                                                              ]?.alternate_phone
                                                             }
                                                           </div>
                                                         )}
@@ -4366,7 +4938,7 @@ const ClientEdit = () => {
                                                     placeholder="Enter Email"
                                                     name="email"
                                                     id={`email-${index}`}
-                                                    value={contacts1.email}
+                                                    value={contact?.email}
                                                     onChange={(e) =>
                                                       handleChangeTrustee(
                                                         index,
@@ -4376,11 +4948,11 @@ const ClientEdit = () => {
                                                     }
                                                   />
                                                   {errorTrusteeDetails[index]
-                                                    .email && (
+                                                    ?.email && (
                                                       <div className="error-text">
                                                         {
                                                           errorTrusteeDetails[index]
-                                                            .email
+                                                            ?.email
                                                         }
                                                       </div>
                                                     )}
@@ -4400,7 +4972,7 @@ const ClientEdit = () => {
                                                     name="alternate_email"
                                                     id={`alternate_email-${index}`}
                                                     value={
-                                                      contacts1.alternate_email
+                                                      contact?.alternate_email
                                                     }
                                                     onChange={(e) =>
                                                       handleChangeTrustee(
@@ -4411,11 +4983,11 @@ const ClientEdit = () => {
                                                     }
                                                   />
                                                   {errorTrusteeDetails[index]
-                                                    .alternate_email && (
+                                                    ?.alternate_email && (
                                                       <div className="error-text">
                                                         {
                                                           errorTrusteeDetails[index]
-                                                            .alternate_email
+                                                            ?.alternate_email
                                                         }
                                                       </div>
                                                     )}
@@ -4466,13 +5038,14 @@ const ClientEdit = () => {
                                             name="notes"
                                             id="notes"
                                             value={
-                                              getPartnershipDetails.notes
+                                              getCharityIncorporatedOrganisation.notes
+
                                             }
-                                            onChange={(e) => handleChange3(e)}
+                                            onChange={(e) => handleChange5(e)}
                                           />
-                                          {errors3["notes"] && (
+                                          {errors5["notes"] && (
                                             <div className="error-text">
-                                              {errors3["notes"]}
+                                              {errors5["notes"]}
                                             </div>
                                           )}
                                         </div>
@@ -4483,6 +5056,1568 @@ const ClientEdit = () => {
                               </div>
 
 
+
+                            </div>
+
+                          ) : selectClientType == 6 ? (
+                            <div className="row ">
+                              <div className="col-lg-12">
+                                <div className="card card_shadow ">
+                                  <div className="card-header  card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Unincorporated Association Information
+                                    </h4>
+                                  </div>
+                                  {/* end card header */}
+                                  <div className="card-body">
+                                    <div className="row">
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Association Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className={errors6["AssociationName"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Association Name"
+                                            name="AssociationName"
+                                            id="AssociationName"
+                                            value={getAssociationDetails.AssociationName}
+                                            onChange={(e) => handleChange6(e)}
+                                            maxLength={200}
+                                          />
+                                          {errors6["AssociationName"] && (
+                                            <div className="error-text">
+                                              {errors6["AssociationName"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Association Address
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>{" "}
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className={errors6["AssociationAddress"] ? "error-field form-control" : "form-control"}
+                                            maxLength={200}
+                                            placeholder="Association Address"
+                                            name="AssociationAddress"
+                                            id="AssociationAddress"
+                                            value={
+                                              getAssociationDetails.AssociationAddress
+                                            }
+                                            onChange={(e) => handleChange6(e)}
+
+                                          />
+                                          {errors6["AssociationAddress"] && (
+                                            <div className="error-text">
+                                              {errors6["AssociationAddress"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              VAT Registered
+                                            </label>
+                                            <select
+                                              className="form-select "
+                                              name="VATRegistered"
+                                              id="VATRegistered"
+                                              defaultValue={0}
+                                              onChange={(e) => handleChange6(e)}
+                                            >
+                                              <option value={1}>Yes</option>
+                                              <option value={0}>No</option>
+                                            </select>
+                                            {errors6["VATRegistered"] && (
+                                              <div className="error-text">
+                                                {errors6["VATRegistered"]}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              VAT Number
+                                            </label>
+                                            <input
+                                              type="text"
+                                              className="form-control "
+                                              placeholder="VAT Number"
+                                              name="VATNumber"
+                                              id="VATNumber"
+                                              value={
+                                                getAssociationDetails.VATNumber
+                                              }
+                                              onChange={(e) => handleChange6(e)}
+                                              maxLength={9}
+                                            />
+                                            {errors6["VATNumber"] && (
+                                              <div className="error-text">
+                                                {errors6["VATNumber"]}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Website
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control "
+                                            placeholder="URL"
+                                            name="Website"
+                                            id="Website"
+                                            value={
+                                              getAssociationDetails.Website
+                                            }
+                                            onChange={(e) => handleChange6(e)}
+                                            maxLength={200}
+                                          />
+
+                                          {errors6["Website"] && (
+                                            <div style={{ color: "red" }}>
+                                              {errors6["Website"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-lg-12">
+                                <div className="card card_shadow">
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Members Details
+                                    </h4>
+                                  </div>
+                                  <div className="card-body">
+                                    <div className="row">
+
+                                      {contactsMembersUnincorporated.map((contact, index) => (
+                                        <div className="col-xxl-12 col-lg-12">
+                                          <div className="card pricing-box p-3 m-2 mt-0">
+                                            <div className="row">
+                                              <div className="col-lg-12">
+                                                <div>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                </div>
+                                                <div
+                                                  className="form-check form-switch form-switch-md d-flex justify-content-end"
+                                                  dir="ltr"
+                                                >
+
+                                                  {index !== 0 &&
+                                                    (
+                                                      <div>
+                                                        <button
+                                                          className="delete-icon"
+                                                          type="button"
+                                                          onClick={() =>
+                                                            handleDeleteContactMemberDetailsUnincorporated(
+                                                              index
+                                                            )
+                                                          }
+                                                          disabled={
+                                                            contact.length ===
+                                                            1
+                                                          }
+                                                        >
+                                                          <i className="ti-trash  text-danger"></i>{" "}
+
+                                                        </button>
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    First Name
+                                                    <span
+                                                      style={{ color: "red" }}
+                                                    >
+                                                      *
+                                                    </span>
+                                                  </label>
+                                                  <input
+                                                    type="text"
+
+                                                    className={errorMemberDetailsUnincorporated[index]?.first_name ? "error-field form-control" : "form-control"}
+
+                                                    placeholder="First Name"
+                                                    name="first_name"
+                                                    id={`first_name-${index}`}
+                                                    value={
+                                                      contact?.first_name
+                                                    }
+                                                    maxLength={50}
+                                                    onChange={(e) =>
+                                                      handleChangeMemberUnincorporated(
+                                                        index,
+                                                        "first_name",
+                                                        e.target.value
+                                                      )
+                                                    }
+
+                                                  />
+                                                  {errorMemberDetailsUnincorporated[index]
+                                                    ?.first_name && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberDetailsUnincorporated[index]?.first_name
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    {" "}
+                                                    Last Name
+                                                    <span
+                                                      style={{ color: "red" }}
+                                                    >
+                                                      *
+                                                    </span>
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className={errorMemberDetailsUnincorporated[index]?.last_name ? "error-field form-control" : "form-control"}
+
+                                                    placeholder=" Last Name"
+                                                    name="last_name"
+                                                    id={`last_name-${index}`}
+                                                    value={
+                                                      contact?.last_name
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleChangeMemberUnincorporated(
+                                                        index,
+                                                        "last_name",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    maxLength={50}
+                                                  />
+                                                  {errorMemberDetailsUnincorporated[index]
+                                                    ?.last_name && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberDetailsUnincorporated[index]?.last_name
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    Role
+
+                                                  </label>
+
+                                                  <select
+                                                    className="form-select"
+                                                    id={`customer_contact_person_role_id-${index}`}
+                                                    value={contact?.customer_contact_person_role_id}
+                                                    onChange={(e) =>
+                                                      handleChangeMemberUnincorporated(
+                                                        index,
+                                                        "customer_contact_person_role_id",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  >
+                                                    <option value="">
+                                                      Select Role
+                                                    </option>
+                                                    {personRoleDataAll &&
+                                                      personRoleDataAll.data.map(
+                                                        (item, i) => (
+                                                          <option
+                                                            value={item.id}
+                                                            key={i}
+                                                          >
+                                                            {item.name}
+                                                          </option>
+                                                        )
+                                                      )}
+                                                  </select>
+                                                  {errorMemberDetailsUnincorporated[index]?.customer_contact_person_role_id && (
+                                                    <div className="error-text">
+                                                      {
+                                                        errorMemberDetailsUnincorporated[index]?.customer_contact_person_role_id
+                                                      }
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label classNameName="form-label">
+                                                    Phone
+                                                  </label>
+                                                  <div className="row">
+                                                    <div className="col-md-4 pe-0">
+                                                      <select
+                                                        className="form-select"
+
+                                                        onChange={(e) =>
+                                                          handleChangeMemberUnincorporated(
+                                                            index,
+                                                            "phone_code",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        name="phone_code"
+                                                        value={
+                                                          contact.phone_code
+                                                        }
+                                                      >
+                                                        {countryDataAll.data.map(
+                                                          (data) => (
+                                                            <option
+                                                              key={data.code}
+                                                              value={
+                                                                data.code
+                                                              }
+                                                            >
+                                                              {data.code}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                      </select>
+                                                    </div>
+                                                    <div className="mb-3 col-md-8 ps-1">
+                                                      <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Phone Number"
+                                                        name="phone"
+                                                        id={`phone-${index}`}
+                                                        value={
+                                                          contact.phone
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChangeMemberUnincorporated(
+                                                            index,
+                                                            "phone",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        maxLength={12}
+                                                      />
+                                                      {errorMemberDetailsUnincorporated[index]
+                                                        .phone && (
+                                                          <div className="error-text">
+                                                            {
+                                                              errorMemberDetailsUnincorporated[
+                                                                index
+                                                              ].phone
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label classNameName="form-label">
+                                                    Alternate Phone Number
+                                                  </label>
+                                                  <div className="row">
+                                                    <div className="col-md-4 pe-0">
+                                                      <select
+                                                        className="form-select"
+                                                        onChange={(e) =>
+                                                          handleChangeMemberUnincorporated(
+                                                            index,
+                                                            "alternate_phone_code",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        name="alternate_phone_code"
+                                                        value={
+                                                          contact.alternate_phone_code
+                                                        }
+                                                      >
+                                                        {countryDataAll.data.map(
+                                                          (data) => (
+                                                            <option
+                                                              key={data.code}
+                                                              value={
+                                                                data.code
+                                                              }
+                                                            >
+                                                              {data.code}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                      </select>
+                                                    </div>
+                                                    <div className="mb-3 col-md-8 ps-1">
+                                                      <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        placeholder=" Alternate Phone Number"
+                                                        name="alternate_phone"
+                                                        id={`alternate_phone-${index}`}
+                                                        value={
+                                                          contact.alternate_phone
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChangeMemberUnincorporated(
+                                                            index,
+                                                            "alternate_phone",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                      />
+                                                      {errorMemberDetailsUnincorporated[index]
+                                                        .alternate_phone && (
+                                                          <div className="error-text">
+                                                            {
+                                                              errorMemberDetailsUnincorporated[
+                                                                index
+                                                              ].alternate_phone
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    Email
+
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter Email"
+                                                    name="email"
+                                                    id={`email-${index}`}
+                                                    value={contact.email}
+                                                    onChange={(e) =>
+                                                      handleChangeMemberUnincorporated(
+                                                        index,
+                                                        "email",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  />
+                                                  {errorMemberDetailsUnincorporated[index]
+                                                    .email && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberDetailsUnincorporated[index]
+                                                            .email
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    {" "}
+                                                    Alternate Email
+
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter Alternate Email"
+                                                    name="alternate_email"
+                                                    id={`alternate_email-${index}`}
+                                                    value={
+                                                      contact.alternate_email
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleChangeMemberUnincorporated(
+                                                        index,
+                                                        "alternate_email",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  />
+                                                  {errorMemberDetailsUnincorporated[index]
+                                                    .alternate_email && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberDetailsUnincorporated[index]
+                                                            .alternate_email
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+
+                                      <div className=" d-flex align-items-center justify-content-end">
+                                        <div>
+                                          <button
+                                            className="btn btn-info text-white blue-btn"
+                                            onClick={handleAddContactMemberDetailsUnincorporated}
+                                          >
+                                            {" "}
+                                            <i className="fa fa-plus pe-1">
+                                              {" "}
+                                            </i>
+                                            Add Partner
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-lg-12">
+                                <div className="card card_shadow ">
+                                  <div className="card-header  card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Notes
+                                    </h4>
+                                  </div>
+                                  {/* end card header */}
+                                  <div className="card-body">
+                                    <div className="row">
+                                      <div className="col-lg-12">
+                                        <div className="mb-3">
+                                          <textarea
+                                            type="text"
+                                            className={errors6["notes"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Notes"
+                                            name="notes"
+                                            id="notes"
+                                            value={
+                                              getAssociationDetails.notes
+                                            }
+                                            onChange={(e) => handleChange6(e)}
+                                          />
+                                          {errors6["notes"] && (
+                                            <div className="error-text">
+                                              {errors6["notes"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+
+                          ) : selectClientType == 7 ? (
+                            <div className="row ">
+                              <div className="col-lg-12">
+                                <div className="card card_shadow ">
+                                  <div className="card-header  card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Trust Information
+                                    </h4>
+                                  </div>
+                                  {/* end card header */}
+                                  <div className="card-body">
+                                    <div className="row">
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Trust  Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          {console.log("sss", getTrust.TrustName)}
+                                          <input
+                                            type="text"
+                                            className={errors7["TrustName"] ? "error-field form-control" : "form-control"}
+                                            placeholder="Trust Name"
+                                            name="TrustName"
+                                            id="TrustName"
+                                            value={
+                                              getTrust.TrustName
+                                            }
+                                            onChange={(e) => handleChange7(e)}
+                                            maxLength={200}
+                                          />
+                                          {errors7["TrustName"] && (
+                                            <div className="error-text">
+                                              {errors7["TrustName"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Trust  Address
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>{" "}
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className={errors7["TrustAddress"] ? "error-field form-control" : "form-control"}
+                                            maxLength={200}
+                                            placeholder="Trust Address"
+                                            name="TrustAddress"
+                                            id="TrustAddress"
+                                            value={
+                                              getTrust.TrustAddress
+                                            }
+                                            onChange={(e) => handleChange7(e)}
+
+                                          />
+                                          {errors7["TrustAddress"] && (
+                                            <div className="error-text">
+                                              {errors7["TrustAddress"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              VAT Registered
+                                            </label>
+                                            <select
+                                              className="form-select "
+                                              name="VATRegistered"
+                                              id="VATRegistered"
+                                              onChange={(e) => handleChange7(e)}
+                                            >
+                                              <option value={1}>Yes</option>
+                                              <option value={0}>No</option>
+                                            </select>
+                                            {errors7["VATRegistered"] && (
+                                              <div className="error-text">
+                                                {errors7["VATRegistered"]}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              VAT Number
+                                            </label>
+                                            <input
+                                              type="text"
+                                              className="form-control "
+                                              placeholder="VAT Number"
+                                              name="VATNumber"
+                                              id="VATNumber"
+                                              value={
+                                                getTrust.VATNumber
+                                              }
+                                              onChange={(e) => handleChange7(e)}
+                                              maxLength={9}
+                                            />
+                                            {errors7["VATNumber"] && (
+                                              <div className="error-text">
+                                                {errors7["VATNumber"]}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Website
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control "
+                                            placeholder="URL"
+                                            name="Website"
+                                            id="Website"
+                                            value={
+                                              getTrust.Website
+                                            }
+                                            onChange={(e) => handleChange7(e)}
+                                            maxLength={200}
+                                          />
+
+                                          {errors7["Website"] && (
+                                            <div style={{ color: "red" }}>
+                                              {errors7["Website"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-lg-12">
+                                <div className="card card_shadow">
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Beneficiaries Details
+                                    </h4>
+                                  </div>
+                                  <div className="card-body">
+                                    <div className="row">
+                                      {contactsMembersTrust.map((contact, index) => (
+                                        <div className="col-xxl-12 col-lg-12">
+                                          <div className="card pricing-box p-3 m-2 mt-0">
+                                            <div className="row">
+                                              <div className="col-lg-12">
+                                                <div>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                </div>
+                                                <div
+                                                  className="form-check form-switch form-switch-md d-flex justify-content-end"
+                                                  dir="ltr"
+                                                >
+
+                                                  {index !== 0 && (
+                                                    <div>
+                                                      <button
+                                                        className="delete-icon"
+                                                        type="button"
+                                                        onClick={() =>
+                                                          handleDeleteContactTrustmemberDetails(
+                                                            index
+                                                          )
+                                                        }
+                                                        disabled={
+                                                          contactsMembersTrust.length ===
+                                                          1
+                                                        }
+                                                      >
+                                                        <i className="ti-trash  text-danger"></i>{" "}
+
+                                                      </button>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    First Name
+                                                    <span
+                                                      style={{ color: "red" }}
+                                                    >
+                                                      *
+                                                    </span>
+                                                  </label>
+                                                  <input
+                                                    type="text"
+
+                                                    className={errorMemberTrustDetails[index]?.first_name ? "error-field form-control" : "form-control"}
+
+                                                    placeholder="First Name"
+                                                    name="first_name"
+                                                    id={`first_name-${index}`}
+                                                    value={
+                                                      contact?.first_name
+                                                    }
+                                                    maxLength={50}
+                                                    onChange={(e) =>
+                                                      handleChangeTrust(
+                                                        index,
+                                                        "first_name",
+                                                        e.target.value
+                                                      )
+                                                    }
+
+                                                  />
+                                                  {errorMemberTrustDetails[index]
+                                                    ?.first_name && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberTrustDetails[index]
+                                                            ?.first_name
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    {" "}
+                                                    Last Name
+                                                    <span
+                                                      style={{ color: "red" }}
+                                                    >
+                                                      *
+                                                    </span>
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className={errorMemberTrustDetails[index]?.last_name ? "error-field form-control" : "form-control"}
+
+                                                    placeholder=" Last Name"
+                                                    name="last_name"
+                                                    id={`last_name-${index}`}
+                                                    value={
+                                                      contact?.last_name
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleChangeTrust(
+                                                        index,
+                                                        "last_name",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    maxLength={50}
+                                                  />
+                                                  {errorMemberTrustDetails[index]
+                                                    ?.last_name && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberTrustDetails[index]
+                                                            ?.last_name
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    Role
+
+                                                  </label>
+
+                                                  <select
+                                                    className="form-select"
+                                                    id={`customer_contact_person_role_id-${index}`}
+                                                    value={contact?.customer_contact_person_role_id}
+                                                    onChange={(e) =>
+                                                      handleChangeTrust(
+                                                        index,
+                                                        "customer_contact_person_role_id",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  >
+                                                    <option value="">
+                                                      Select Role
+                                                    </option>
+                                                    {personRoleDataAll &&
+                                                      personRoleDataAll.data.map(
+                                                        (item, i) => (
+                                                          <option
+                                                            value={item.id}
+                                                            key={i}
+                                                          >
+                                                            {item.name}
+                                                          </option>
+                                                        )
+                                                      )}
+                                                  </select>
+                                                  {errorMemberTrustDetails[index]?.customer_contact_person_role_id && (
+                                                    <div className="error-text">
+                                                      {
+                                                        errorMemberTrustDetails[index]?.customer_contact_person_role_id
+                                                      }
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label classNameName="form-label">
+                                                    Phone
+                                                  </label>
+                                                  <div className="row">
+                                                    <div className="col-md-4 pe-0">
+                                                      <select
+                                                        className="form-select"
+
+                                                        onChange={(e) =>
+                                                          handleChangeTrust(
+                                                            index,
+                                                            "phone_code",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        name="phone_code"
+                                                        value={
+                                                          contact.phone_code
+                                                        }
+                                                      >
+                                                        {countryDataAll.data.map(
+                                                          (data) => (
+                                                            <option
+                                                              key={data.code}
+                                                              value={
+                                                                data.code
+                                                              }
+                                                            >
+                                                              {data.code}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                      </select>
+                                                    </div>
+                                                    <div className="mb-3 col-md-8 ps-1">
+                                                      <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Phone Number"
+                                                        name="phone"
+                                                        id={`phone-${index}`}
+                                                        value={
+                                                          contact.phone
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChangeTrust(
+                                                            index,
+                                                            "phone",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        maxLength={12}
+                                                      />
+                                                      {errorMemberTrustDetails[index]
+                                                        .phone && (
+                                                          <div className="error-text">
+                                                            {
+                                                              errorMemberTrustDetails[
+                                                                index
+                                                              ].phone
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label classNameName="form-label">
+                                                    Alternate Phone Number
+                                                  </label>
+                                                  <div className="row">
+                                                    <div className="col-md-4 pe-0">
+                                                      <select
+                                                        className="form-select"
+                                                        onChange={(e) =>
+                                                          handleChangeTrust(
+                                                            index,
+                                                            "alternate_phone_code",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        name="alternate_phone_code"
+                                                        value={
+                                                          contact.alternate_phone_code
+                                                        }
+                                                      >
+                                                        {countryDataAll.data.map(
+                                                          (data) => (
+                                                            <option
+                                                              key={data.code}
+                                                              value={
+                                                                data.code
+                                                              }
+                                                            >
+                                                              {data.code}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                      </select>
+                                                    </div>
+                                                    <div className="mb-3 col-md-8 ps-1">
+                                                      <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        placeholder=" Alternate Phone Number"
+                                                        name="alternate_phone"
+                                                        id={`alternate_phone-${index}`}
+                                                        value={
+                                                          contact.alternate_phone
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChangeTrust(
+                                                            index,
+                                                            "alternate_phone",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                      />
+                                                      {errorMemberTrustDetails[index]
+                                                        .alternate_phone && (
+                                                          <div className="error-text">
+                                                            {
+                                                              errorMemberTrustDetails[
+                                                                index
+                                                              ].alternate_phone
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    Email
+
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter Email"
+                                                    name="email"
+                                                    id={`email-${index}`}
+                                                    value={contact.email}
+                                                    onChange={(e) =>
+                                                      handleChangeTrust(
+                                                        index,
+                                                        "email",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  />
+                                                  {errorMemberTrustDetails[index]
+                                                    .email && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberTrustDetails[index]
+                                                            .email
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    {" "}
+                                                    Alternate Email
+
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter Alternate Email"
+                                                    name="alternate_email"
+                                                    id={`alternate_email-${index}`}
+                                                    value={
+                                                      contact.alternate_email
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleChangeTrust(
+                                                        index,
+                                                        "alternate_email",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  />
+                                                  {errorMemberTrustDetails[index]
+                                                    .alternate_email && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorMemberTrustDetails[index]
+                                                            .alternate_email
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                      <div className=" d-flex align-items-center justify-content-end">
+                                        <div>
+                                          <button
+                                            className="btn btn-info text-white blue-btn"
+                                            onClick={handleAddContactTrustMemberDetails}
+                                          >
+                                            {" "}
+                                            <i className="fa fa-plus pe-1">
+                                              {" "}
+                                            </i>
+                                            Add Partner
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-lg-12">
+                                <div className="card card_shadow">
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Trustees Details
+                                    </h4>
+                                  </div>
+                                  <div className="card-body">
+                                    <div className="row">
+                                      {contactsTrustTrustee.map((contact, index) => (
+                                        <div className="col-xxl-12 col-lg-12">
+                                          <div className="card pricing-box p-3 m-2 mt-0">
+                                            <div className="row">
+                                              <div className="col-lg-12">
+                                                <div>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                </div>
+                                                <div
+                                                  className="form-check form-switch form-switch-md d-flex justify-content-end"
+                                                  dir="ltr"
+                                                >
+
+                                                  {index !== 0 && (
+                                                    <div>
+                                                      <button
+                                                        className="delete-icon"
+                                                        type="button"
+                                                        onClick={() =>
+                                                          handleDeleteContactTrusTrusteeDetails(
+                                                            index
+                                                          )
+                                                        }
+                                                        disabled={
+                                                          contactsTrustTrustee.length ===
+                                                          1
+                                                        }
+                                                      >
+                                                        <i className="ti-trash  text-danger"></i>{" "}
+
+                                                      </button>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    First Name
+                                                    <span
+                                                      style={{ color: "red" }}
+                                                    >
+                                                      *
+                                                    </span>
+                                                  </label>
+                                                  <input
+                                                    type="text"
+
+                                                    className={errorTrustTrusteeDetails[index]?.first_name ? "error-field form-control" : "form-control"}
+
+                                                    placeholder="First Name"
+                                                    name="first_name"
+                                                    id={`first_name-${index}`}
+                                                    value={
+                                                      contact?.first_name
+                                                    }
+                                                    maxLength={50}
+                                                    onChange={(e) =>
+                                                      handleChangeTrustTrustee(
+                                                        index,
+                                                        "first_name",
+                                                        e.target.value
+                                                      )
+                                                    }
+
+                                                  />
+                                                  {errorTrustTrusteeDetails[index]
+                                                    ?.first_name && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorTrustTrusteeDetails[index]
+                                                            ?.first_name
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    {" "}
+                                                    Last Name
+                                                    <span
+                                                      style={{ color: "red" }}
+                                                    >
+                                                      *
+                                                    </span>
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className={errorTrustTrusteeDetails[index]?.last_name ? "error-field form-control" : "form-control"}
+
+                                                    placeholder=" Last Name"
+                                                    name="last_name"
+                                                    id={`last_name-${index}`}
+                                                    value={
+                                                      contact?.last_name
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleChangeTrustTrustee(
+                                                        index,
+                                                        "last_name",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    maxLength={50}
+                                                  />
+                                                  {errorTrustTrusteeDetails[index]
+                                                    ?.last_name && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorTrustTrusteeDetails[index]
+                                                            ?.last_name
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    Role
+
+                                                  </label>
+
+                                                  <select
+                                                    className="form-select"
+                                                    id={`customer_contact_person_role_id-${index}`}
+                                                    value={contact?.customer_contact_person_role_id}
+                                                    onChange={(e) =>
+                                                      handleChangeTrustTrustee(
+                                                        index,
+                                                        "customer_contact_person_role_id",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  >
+                                                    <option value="">
+                                                      Select Role
+                                                    </option>
+                                                    {personRoleDataAll &&
+                                                      personRoleDataAll.data.map(
+                                                        (item, i) => (
+                                                          <option
+                                                            value={item.id}
+                                                            key={i}
+                                                          >
+                                                            {item.name}
+                                                          </option>
+                                                        )
+                                                      )}
+                                                  </select>
+                                                  {errorTrustTrusteeDetails[index]?.customer_contact_person_role_id && (
+                                                    <div className="error-text">
+                                                      {
+                                                        errorTrustTrusteeDetails[index]?.customer_contact_person_role_id
+                                                      }
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label classNameName="form-label">
+                                                    Phone
+                                                  </label>
+                                                  <div className="row">
+                                                    <div className="col-md-4 pe-0">
+                                                      <select
+                                                        className="form-select"
+
+                                                        onChange={(e) =>
+                                                          handleChangeTrustTrustee(
+                                                            index,
+                                                            "phone_code",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        name="phone_code"
+                                                        value={
+                                                          contact.phone_code
+                                                        }
+                                                      >
+                                                        {countryDataAll.data.map(
+                                                          (data) => (
+                                                            <option
+                                                              key={data.code}
+                                                              value={
+                                                                data.code
+                                                              }
+                                                            >
+                                                              {data.code}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                      </select>
+                                                    </div>
+                                                    <div className="mb-3 col-md-8 ps-1">
+                                                      <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Phone Number"
+                                                        name="phone"
+                                                        id={`phone-${index}`}
+                                                        value={
+                                                          contact.phone
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChangeTrustTrustee(
+                                                            index,
+                                                            "phone",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        maxLength={12}
+                                                      />
+                                                      {errorTrustTrusteeDetails[index]
+                                                        .phone && (
+                                                          <div className="error-text">
+                                                            {
+                                                              errorTrustTrusteeDetails[
+                                                                index
+                                                              ].phone
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label classNameName="form-label">
+                                                    Alternate Phone Number
+                                                  </label>
+                                                  <div className="row">
+                                                    <div className="col-md-4 pe-0">
+                                                      <select
+                                                        className="form-select"
+                                                        onChange={(e) =>
+                                                          handleChangeTrustTrustee(
+                                                            index,
+                                                            "alternate_phone_code",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        name="alternate_phone_code"
+                                                        value={
+                                                          contact.alternate_phone_code
+                                                        }
+                                                      >
+                                                        {countryDataAll.data.map(
+                                                          (data) => (
+                                                            <option
+                                                              key={data.code}
+                                                              value={
+                                                                data.code
+                                                              }
+                                                            >
+                                                              {data.code}
+                                                            </option>
+                                                          )
+                                                        )}
+                                                      </select>
+                                                    </div>
+                                                    <div className="mb-3 col-md-8 ps-1">
+                                                      <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        placeholder=" Alternate Phone Number"
+                                                        name="alternate_phone"
+                                                        id={`alternate_phone-${index}`}
+                                                        value={
+                                                          contact.alternate_phone
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChangeTrustTrustee(
+                                                            index,
+                                                            "alternate_phone",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                      />
+                                                      {errorTrustTrusteeDetails[index]
+                                                        .alternate_phone && (
+                                                          <div className="error-text">
+                                                            {
+                                                              errorTrustTrusteeDetails[
+                                                                index
+                                                              ].alternate_phone
+                                                            }
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    Email
+
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter Email"
+                                                    name="email"
+                                                    id={`email-${index}`}
+                                                    value={contact.email}
+                                                    onChange={(e) =>
+                                                      handleChangeTrustTrustee(
+                                                        index,
+                                                        "email",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  />
+                                                  {errorTrustTrusteeDetails[index]
+                                                    .email && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorTrustTrusteeDetails[index]
+                                                            .email
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                              <div className="col-lg-4">
+                                                <div className="mb-3">
+                                                  <label className="form-label">
+                                                    {" "}
+                                                    Alternate Email
+
+                                                  </label>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter Alternate Email"
+                                                    name="alternate_email"
+                                                    id={`alternate_email-${index}`}
+                                                    value={
+                                                      contact.alternate_email
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleChangeTrustTrustee(
+                                                        index,
+                                                        "alternate_email",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                  />
+                                                  {errorTrustTrusteeDetails[index]
+                                                    .alternate_email && (
+                                                      <div className="error-text">
+                                                        {
+                                                          errorTrustTrusteeDetails[index]
+                                                            .alternate_email
+                                                        }
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                      <div className=" d-flex align-items-center justify-content-end">
+                                        <div>
+                                          <button
+                                            className="btn btn-info text-white blue-btn"
+                                            onClick={handleAddContactTrustTrusteeDetails}
+                                          >
+                                            {" "}
+                                            <i className="fa fa-plus pe-1">
+                                              {" "}
+                                            </i>
+                                            Add Partner
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+
+                              <div className="col-lg-12">
+                                <div className="card card_shadow ">
+                                  <div className="card-header  card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                      Notes
+                                    </h4>
+                                  </div>
+                                  {/* end card header */}
+                                  <div className="card-body">
+                                    <div className="row">
+                                      <div className="col-lg-12">
+                                        <div className="mb-3">
+                                          <textarea
+                                            type="text"
+                                            className={errors7["notes"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Notes"
+                                            name="notes"
+                                            id="notes"
+                                            value={
+                                              getTrust.notes
+                                            }
+                                            onChange={(e) => handleChange7(e)}
+                                          />
+                                          {errors7["notes"] && (
+                                            <div className="error-text">
+                                              {errors7["notes"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
 
                             </div>
 
