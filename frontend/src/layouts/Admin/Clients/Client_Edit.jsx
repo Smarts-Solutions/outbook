@@ -20,11 +20,13 @@ const ClientEdit = () => {
   const [searchItem, setSearchItem] = useState("");
   const [partnershipContacts, setPartnershipContacts] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
+  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [], });
+  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [] });
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
-
   const [errors5, setErrors5] = useState({});
   const [errors6, setErrors6] = useState({});
   const [errors7, setErrors7] = useState({});
@@ -95,6 +97,7 @@ const ClientEdit = () => {
     Website: "",
     notes: "",
   });
+
   const [contactsMembersTrust, setContactsMembersTrust] = useState([
     {
       authorised_signatory_status: true,
@@ -110,8 +113,6 @@ const ClientEdit = () => {
     },
   ]);
 
-
-  console.log("getTrust", getTrust);
   const [errorMemberDetails, setErrorMemberDetails] = useState([
     {
       authorised_signatory_status: true,
@@ -143,6 +144,7 @@ const ClientEdit = () => {
     },
 
   ]);
+
   const [errorMemberTrustDetails, setErrorMemberTrustDetails] = useState([
     {
       authorised_signatory_status: true,
@@ -158,7 +160,6 @@ const ClientEdit = () => {
     },
 
   ]);
-
 
   const [errorTrustTrusteeDetails, setErrorTrustTrusteeDetails] = useState([
     {
@@ -176,9 +177,6 @@ const ClientEdit = () => {
 
   ]);
 
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
-  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [], });
-  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [] });
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     IndustryType: "",
     TradingName: "",
@@ -194,6 +192,7 @@ const ClientEdit = () => {
     phone_code: "",
     notes: "",
   });
+
   const [getCompanyDetails, setCompanyDetails] = useState({
     SearchCompany: "",
     CompanyName: "",
@@ -211,6 +210,7 @@ const ClientEdit = () => {
     TradingName: "",
     TradingAddress: "",
   });
+
   const [getPartnershipDetails, setPartnershipDetails] = useState({
     ClientIndustry: "",
     TradingName: "",
@@ -220,6 +220,7 @@ const ClientEdit = () => {
     Website: "",
     notes: "",
   });
+
   const [CompanyContacts, setCompanyContacts] = useState([
     {
       authorised_signatory_status: 0,
@@ -232,7 +233,6 @@ const ClientEdit = () => {
       email: "",
     },
   ]);
-
 
   const [contactsMembers, setContactsMembers] = useState([
     {
@@ -248,6 +248,7 @@ const ClientEdit = () => {
       alternate_email: "",
     },
   ]);
+
   const [contactsTrustee, setContactsTrustee] = useState([
     {
       authorised_signatory_status: true,
@@ -263,7 +264,6 @@ const ClientEdit = () => {
     },
 
   ]);
-
 
   const [getIndivisualDetails, setIndivisualDetails] = useState({
     TradingName: "",
@@ -354,8 +354,6 @@ const ClientEdit = () => {
   useEffect(() => {
     Get_Company();
   }, [searchItem]);
-
-
 
   useEffect(() => {
     if (location.state.row.client_type_name == "SoleTrader") {
@@ -620,8 +618,6 @@ const ClientEdit = () => {
         setErrorMemberDetailsUnincorporated(newErrors);
       }
     }
-
-
     if (location?.state?.row?.client_type_name == "Trust") {
 
       console.log("!get", !getClientDetails.loading && getClientDetails.data.client)
@@ -669,12 +665,7 @@ const ClientEdit = () => {
         setErrorTrustTrusteeDetails(newErrors);
       }
     }
-
-
-
   }, [getClientDetails?.data]);
-
-
 
 
   useEffect(() => {
@@ -948,7 +939,6 @@ const ClientEdit = () => {
 
   };
 
-
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
@@ -1120,17 +1110,6 @@ const ClientEdit = () => {
     }
   };
 
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate3(name, value);
-    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
-  };
-
   const handleChange5 = (e) => {
     const { name, value } = e.target;
     if (name === "VATNumber") {
@@ -1164,45 +1143,6 @@ const ClientEdit = () => {
     validate7(name, value);
     setTrust({ ...getTrust, [name]: value });
 
-  };
-
-  const validate3 = (name, value) => {
-    const newErrors = { ...errors3 };
-    if (!value?.trim()) {
-      switch (name) {
-        case "TradingName":
-          newErrors[name] = "Please Enter Trading Name";
-          break;
-        case "TradingAddress":
-          newErrors[name] = "Please Enter Trading Address";
-          break;
-        case "VATRegistered":
-          newErrors[name] = "Please Enter VAT Registered";
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-
-      delete newErrors[name];
-      setErrors3((prevErrors) => {
-        const updatedErrors = { ...prevErrors };
-        delete updatedErrors[name];
-        return updatedErrors;
-      });
-
-    }
-
-    ScrollToViewFirstError(newErrors);
-
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors3((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0 ? true : false;
   };
 
   const validate6 = (name, value) => {
@@ -1398,7 +1338,6 @@ const ClientEdit = () => {
     }
     return Object.keys(newErrors).length === 0 ? true : false;
   };
-
 
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
@@ -1601,7 +1540,7 @@ const ClientEdit = () => {
       };
       await EditClientFun(req);
     }
-    if (selectClientType == 2 && validateAllFields(2)) {
+    else if (selectClientType == 2 && validateAllFields(2)) {
       let formIsValid = true;
       const newErrors = CompanyContacts.map((contact, index) => {
         const error = {
@@ -1659,7 +1598,7 @@ const ClientEdit = () => {
         ScrollToViewFirstErrorContactForm(companyContactsErrors);
       }
     }
-    if (selectClientType == 3 && validateAllFields(3)) {
+    else if (selectClientType == 3 && validateAllFields(3)) {
       let formIsValid = true;
       const newErrors = partnershipContacts.map((contact, index) => {
         const error = {
@@ -1723,7 +1662,7 @@ const ClientEdit = () => {
         ScrollToViewFirstErrorContactForm(PartnershiContactsErrors);
       }
     }
-    if (selectClientType == 4 && validateAllFields(4)) {
+    else if (selectClientType == 4 && validateAllFields(4)) {
       const req = {
         client_type: "4",
         client_id: location.state.row.id,
@@ -1741,6 +1680,160 @@ const ClientEdit = () => {
       await EditClientFun(req);
 
     }
+    else if (selectClientType == 5 && validateAllFields(5)) {
+      let formIsValid = true;
+      let newErrors = contactsMembers.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+
+      let newErrors1 = contactsTrustee.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+
+
+      setErrorMemberDetails(newErrors);
+      setErrorTrusteeDetails(newErrors1);
+
+      if (formIsValid) {
+        const req = {
+          client_type: "5",
+          customer_id: location.state.id,
+          client_id: location.state.row.id,
+          trading_name: getCharityIncorporatedOrganisation.charity_name,
+          charity_commission_number: getCharityIncorporatedOrganisation.charity_commission_number,
+          trading_address: getCharityIncorporatedOrganisation.principal_office_address,
+          service_address: getCharityIncorporatedOrganisation.service_address,
+          vat_registered: getCharityIncorporatedOrganisation.VATRegistered,
+          vat_number: getCharityIncorporatedOrganisation.VATNumber,
+          website: getCharityIncorporatedOrganisation.Website,
+          notes: getCharityIncorporatedOrganisation.notes,
+          member_details: contactsMembers,
+          trustee_details: contactsTrustee,
+        };
+        await EditClientFun(req);
+
+      }
+      
+    }
+    else if (selectClientType == 6 && validateAllFields(6)) {
+      let formIsValid = true;
+      let newErrors = contactsMembersUnincorporated.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+
+        };
+
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+
+      });
+      setErrorMemberDetailsUnincorporated(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "6",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          trading_name: getAssociationDetails.AssociationName,
+          trading_address: getAssociationDetails.AssociationAddress,
+          vat_registered: getAssociationDetails.VATRegistered,
+          vat_number: getAssociationDetails.VATNumber,
+          website: getAssociationDetails.Website,
+          notes: getAssociationDetails.notes,
+          member_details: contactsMembersUnincorporated,
+        };
+        await EditClientFun(req);
+
+      }
+     
+    }
+    else if (selectClientType == 7 && validateAllFields(7)) {
+      let formIsValid = true;
+      let newErrors = contactsMembersTrust.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+        };
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+
+      });
+      let newErrors1 = contactsTrustTrustee.map((contact, index) => {
+        const error = {
+          first_name: contact?.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact?.last_name?.trim() ? "" : "Last Name is required",
+        };
+        if (
+          error?.first_name ||
+          error?.last_name
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      }
+      );
+
+      setErrorMemberTrustDetails(newErrors);
+      setErrorTrustTrusteeDetails(newErrors1);
+
+      if (formIsValid) {
+        const req = {
+          client_type: "7",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          trading_name: getTrust.TrustName,
+          trading_address: getTrust.TrustAddress,
+          vat_registered: getTrust.VATRegistered,
+          vat_number: getTrust.VATNumber,
+          website: getTrust.Website,
+          notes: getTrust.notes,
+          trustee_details: contactsTrustTrustee,
+          beneficiaries_details: contactsMembersTrust,
+        };
+        await EditClientFun(req);
+
+      }
+     
+    }
+
+
+
+
+
   };
 
   const FilterSearchDetails = () => {

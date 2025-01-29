@@ -5507,7 +5507,6 @@ const CreateClient = () => {
                                       </div>
 
                                     ) :
-
                                       selectClientType == 7 ? (
                                         <div className="row ">
                                           <div className="col-lg-12">
