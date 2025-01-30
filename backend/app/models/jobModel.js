@@ -516,7 +516,7 @@ VALUES (
     // Apply the undefined check for each field
     const cleanedValues = values.map(handleUndefined);
 
-    console.log(query, ":", cleanedValues.length);
+   
 
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
