@@ -1535,6 +1535,8 @@ WHERE
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
     clients.website AS website,
+    clients.charity_commission_number AS charity_commission_number,
+    clients.service_address AS service_address,
     clients.notes AS notes,
     clients.status AS status, 
     client_contact_details.id AS contact_id,
@@ -1622,6 +1624,8 @@ WHERE
         vat_number: rows[0].vat_number,
         website: rows[0].website,
         notes: rows[0].notes,
+        charity_commission_number: rows[0].charity_commission_number,
+        service_address: rows[0].service_address,
         status: rows[0].status,
       };
 
@@ -1973,7 +1977,6 @@ const getCustomerId = async (client) => {
   const [ExistClient] = await pool.execute(
     "SELECT client_type FROM `clients` WHERE id =" + client_id
   );
-
   const client_type = ExistClient[0].client_type;
 
   //Solo Traders Details
@@ -2121,8 +2124,6 @@ const clientUpdate = async (client) => {
   } = client;
 
   let notes = client.notes == undefined ? "" : client.notes;
-
-
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
 
   const [check] = await pool.execute(checkQuery, [trading_name, client_id]);
@@ -2140,42 +2141,124 @@ const clientUpdate = async (client) => {
     cli_type = 'partnership'
   } else if (client_type === '4') {
     cli_type = 'individual'
+  }else if (client_type === '5') {
+    cli_type = 'Charity Incorporated Organisation'
+  }else if (client_type === '6') {
+    cli_type = 'Unincorporated Association'
+  }else if (client_type === '7') {
+    cli_type = 'Trust'
   }
 
   if (client_type != "4") {
-    try {
-      const query = `
-         UPDATE clients
-         SET 
-             client_type = ?,
-             client_industry_id = ?,
-             trading_name = ?,
-             trading_address = ?,
-             vat_registered = ?,
-             vat_number = ?,
-             website = ?,
-             notes = ?
-         WHERE
-             id = ?
-      `;
-      const [result] = await pool.execute(query, [
-        client_type,
-        client_industry_id,
-        trading_name,
-        trading_address,
-        vat_registered,
-        vat_number,
-        website,
-        notes,
-        client_id,
-      ]);
-      if (result.changedRows > 0) {
-        information_client = true
+    if(client_type == "5"){
+
+      const {charity_commission_number, service_address} = client;
+      try {
+        const query = `
+           UPDATE clients
+           SET 
+               client_type = ?,
+               trading_name = ?,
+               trading_address = ?,
+               vat_registered = ?,
+               vat_number = ?,
+               website = ?,
+               notes = ?,
+               charity_commission_number = ?,
+               service_address = ?
+           WHERE
+               id = ?
+        `;
+        const [result] = await pool.execute(query, [
+          client_type,
+          trading_name,
+          trading_address,
+          vat_registered,
+          vat_number,
+          website,
+          notes,
+          charity_commission_number,
+          service_address,
+          client_id,
+        ]);
+        if (result.changedRows > 0) {
+          information_client = true
+        }
+      } catch (err) {
+        return { status: false, message: "client update Err type 6 , 7" };
       }
-    } catch (err) {
-      return { status: false, message: "client update Err" };
+
+
+    }else if(client_type == "6" || client_type == "7"){
+
+      try {
+        const query = `
+           UPDATE clients
+           SET 
+               client_type = ?,
+               trading_name = ?,
+               trading_address = ?,
+               vat_registered = ?,
+               vat_number = ?,
+               website = ?,
+               notes = ?
+           WHERE
+               id = ?
+        `;
+        const [result] = await pool.execute(query, [
+          client_type,
+          trading_name,
+          trading_address,
+          vat_registered,
+          vat_number,
+          website,
+          notes,
+          client_id,
+        ]);
+        if (result.changedRows > 0) {
+          information_client = true
+        }
+      } catch (err) {
+        return { status: false, message: "client update Err type 6 , 7" };
+      }
+
+    }else{
+      try {
+        const query = `
+           UPDATE clients
+           SET 
+               client_type = ?,
+               client_industry_id = ?,
+               trading_name = ?,
+               trading_address = ?,
+               vat_registered = ?,
+               vat_number = ?,
+               website = ?,
+               notes = ?
+           WHERE
+               id = ?
+        `;
+        const [result] = await pool.execute(query, [
+          client_type,
+          client_industry_id,
+          trading_name,
+          trading_address,
+          vat_registered,
+          vat_number,
+          website,
+          notes,
+          client_id,
+        ]);
+        if (result.changedRows > 0) {
+          information_client = true
+        }
+      } catch (err) {
+        return { status: false, message: "client update Err type 1,2,3" };
+      }
     }
+
   } else {
+    console.log("client_type ELSEE", client_type);
     try {
       const query = `
          UPDATE clients
@@ -2197,7 +2280,6 @@ const clientUpdate = async (client) => {
         information_client = true
       }
     } catch (err) {
-
       return { status: false, message: "client update Err" };
     }
   }
@@ -2270,7 +2352,6 @@ const clientUpdate = async (client) => {
       return { status: false, message: "client update Err Client Type 1" };
     }
   }
-
   else if (client_type == "2") {
 
     let addedOfficer = false;
@@ -2630,6 +2711,665 @@ const clientUpdate = async (client) => {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 1" };
     }
+  }
+  else if (client_type == "5") {
+    
+   const { member_details , trustee_details } = client;
+
+   if(member_details.length > 0){
+    let addedOfficer = false;
+    let removeOfficer = false;
+    let editOfficer = false;
+    try {
+      const [existIdResult] = await pool.execute(
+        "SELECT id FROM client_contact_details WHERE client_id = ?",
+        [client_id]
+      );
+      const idArray = await existIdResult.map((item) => item.id);
+      let arrayInterId = [];
+
+      const query2 = `
+    UPDATE client_contact_details
+    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?
+    WHERE client_id = ? AND id = ?
+    `;
+     
+      for (const detail of member_details) {
+        let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
+
+        let first_name = detail.first_name;
+        let last_name = detail.last_name;
+        let email = detail.email;
+        let alternate_email = detail.alternate_email;
+        let phone_code =
+          detail.phone_code == undefined || detail.phone_code == ""
+            ? ""
+            : detail.phone_code;
+        let phone = detail.phone;
+        let alternate_phone_code =
+          detail.alternate_phone_code == undefined ||
+            detail.alternate_phone_code == ""
+            ? ""
+            : detail.alternate_phone_code;
+        let alternate_phone = detail.alternate_phone;
+
+        let contact_id = detail.contact_id; // Assuming each contactDetail has an id
+        if (contact_id == "" || contact_id == undefined || contact_id == null) {
+          const [result2] = await pool.execute(
+            "INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+              client_id,
+              customer_contact_person_role_id,
+              first_name,
+              last_name,
+              email,
+              alternate_email,
+              phone_code,
+              phone,
+              alternate_phone_code,
+              alternate_phone,
+
+            ]
+          );
+          if (result2.changedRows > 0) {
+            addedOfficer = true
+          }
+        } else {
+          arrayInterId.push(contact_id);
+          const [result2] = await pool.execute(query2, [
+            customer_contact_person_role_id,
+            first_name,
+            last_name,
+            email,
+            alternate_email,
+            phone_code,
+            phone,
+            alternate_phone_code,
+            alternate_phone,
+            client_id,
+            contact_id,
+          ]);
+          if (result2.changedRows > 0) {
+            editOfficer = true
+          }
+        }
+      }
+      let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
+      if (deleteIdArray.length > 0) {
+        for (const id of deleteIdArray) {
+          removeOfficer = true
+          const query3 = `
+                        DELETE FROM client_contact_details WHERE id = ?
+                        `;
+          const [result3] = await pool.execute(query3, [id]);
+        }
+      }
+
+      let model_name = [];
+      if (information_client == true) {
+        model_name.push(`edited ${cli_type} information`)
+      }
+      if (addedOfficer == true) {
+        model_name.push(`added ${cli_type} additional Officer information`)
+      }
+      if (editOfficer == true) {
+        model_name.push(`edited ${cli_type} Officer information`)
+      }
+      if (removeOfficer == true) {
+        model_name.push(`removed ${cli_type} Officer information`)
+      }
+
+      if (model_name.length > 0) {
+        const msgLog = model_name.length > 1
+          ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+          : model_name[0];
+
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `${msgLog}. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
+        );
+
+      }
+
+    } catch (err) {
+      console.log("err", err);
+      return { status: false, message: "client update Err Client Type 3" };
+    }
+   }
+
+
+   if(trustee_details.length > 0){
+    let addedOfficer = false;
+    let removeOfficer = false;
+    let editOfficer = false;
+    try {
+      const [existIdResult] = await pool.execute(
+        "SELECT id FROM client_trustee_contact_details WHERE client_id = ?",
+        [client_id]
+      );
+      const idArray = await existIdResult.map((item) => item.id);
+      let arrayInterId = [];
+
+      const query2 = `
+    UPDATE client_trustee_contact_details
+    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?
+    WHERE client_id = ? AND id = ?
+    `;
+     
+      for (const detail of trustee_details) {
+        let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
+
+        let first_name = detail.first_name;
+        let last_name = detail.last_name;
+        let email = detail.email;
+        let alternate_email = detail.alternate_email;
+        let phone_code =
+          detail.phone_code == undefined || detail.phone_code == ""
+            ? ""
+            : detail.phone_code;
+        let phone = detail.phone;
+        let alternate_phone_code =
+          detail.alternate_phone_code == undefined ||
+            detail.alternate_phone_code == ""
+            ? ""
+            : detail.alternate_phone_code;
+        let alternate_phone = detail.alternate_phone;
+
+        let contact_id = detail.contact_id; // Assuming each contactDetail has an id
+        if (contact_id == "" || contact_id == undefined || contact_id == null) {
+          const [result2] = await pool.execute(
+            "INSERT INTO client_trustee_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+              client_id,
+              customer_contact_person_role_id,
+              first_name,
+              last_name,
+              email,
+              alternate_email,
+              phone_code,
+              phone,
+              alternate_phone_code,
+              alternate_phone,
+
+            ]
+          );
+          if (result2.changedRows > 0) {
+            addedOfficer = true
+          }
+        } else {
+          arrayInterId.push(contact_id);
+          const [result2] = await pool.execute(query2, [
+            customer_contact_person_role_id,
+            first_name,
+            last_name,
+            email,
+            alternate_email,
+            phone_code,
+            phone,
+            alternate_phone_code,
+            alternate_phone,
+            client_id,
+            contact_id,
+          ]);
+          if (result2.changedRows > 0) {
+            editOfficer = true
+          }
+        }
+      }
+      let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
+      if (deleteIdArray.length > 0) {
+        for (const id of deleteIdArray) {
+          removeOfficer = true
+          const query3 = `
+                        DELETE FROM client_trustee_contact_details WHERE id = ?
+                        `;
+          const [result3] = await pool.execute(query3, [id]);
+        }
+      }
+
+      let model_name = [];
+      if (information_client == true) {
+        model_name.push(`edited ${cli_type} information`)
+      }
+      if (addedOfficer == true) {
+        model_name.push(`added ${cli_type} additional Officer information`)
+      }
+      if (editOfficer == true) {
+        model_name.push(`edited ${cli_type} Officer information`)
+      }
+      if (removeOfficer == true) {
+        model_name.push(`removed ${cli_type} Officer information`)
+      }
+
+      if (model_name.length > 0) {
+        const msgLog = model_name.length > 1
+          ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+          : model_name[0];
+
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `${msgLog}. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
+        );
+
+      }
+
+    } catch (err) {
+      console.log("err", err);
+      return { status: false, message: "client update Err Client Type 3" };
+    }
+   }
+
+
+  }
+  else if (client_type == "6") {
+    const { member_details} = client;
+    if(member_details.length > 0){
+     let addedOfficer = false;
+     let removeOfficer = false;
+     let editOfficer = false;
+     try {
+       const [existIdResult] = await pool.execute(
+         "SELECT id FROM client_contact_details WHERE client_id = ?",
+         [client_id]
+       );
+       const idArray = await existIdResult.map((item) => item.id);
+       let arrayInterId = [];
+ 
+       const query2 = `
+     UPDATE client_contact_details
+     SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?
+     WHERE client_id = ? AND id = ?
+     `;
+      
+       for (const detail of member_details) {
+         let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
+ 
+         let first_name = detail.first_name;
+         let last_name = detail.last_name;
+         let email = detail.email;
+         let alternate_email = detail.alternate_email;
+         let phone_code =
+           detail.phone_code == undefined || detail.phone_code == ""
+             ? ""
+             : detail.phone_code;
+         let phone = detail.phone;
+         let alternate_phone_code =
+           detail.alternate_phone_code == undefined ||
+             detail.alternate_phone_code == ""
+             ? ""
+             : detail.alternate_phone_code;
+         let alternate_phone = detail.alternate_phone;
+ 
+         let contact_id = detail.contact_id; // Assuming each contactDetail has an id
+         if (contact_id == "" || contact_id == undefined || contact_id == null) {
+           const [result2] = await pool.execute(
+             "INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+             [
+               client_id,
+               customer_contact_person_role_id,
+               first_name,
+               last_name,
+               email,
+               alternate_email,
+               phone_code,
+               phone,
+               alternate_phone_code,
+               alternate_phone,
+ 
+             ]
+           );
+           if (result2.changedRows > 0) {
+             addedOfficer = true
+           }
+         } else {
+           arrayInterId.push(contact_id);
+           const [result2] = await pool.execute(query2, [
+             customer_contact_person_role_id,
+             first_name,
+             last_name,
+             email,
+             alternate_email,
+             phone_code,
+             phone,
+             alternate_phone_code,
+             alternate_phone,
+             client_id,
+             contact_id,
+           ]);
+           if (result2.changedRows > 0) {
+             editOfficer = true
+           }
+         }
+       }
+       let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
+       if (deleteIdArray.length > 0) {
+         for (const id of deleteIdArray) {
+           removeOfficer = true
+           const query3 = `
+                         DELETE FROM client_contact_details WHERE id = ?
+                         `;
+           const [result3] = await pool.execute(query3, [id]);
+         }
+       }
+ 
+       let model_name = [];
+       if (information_client == true) {
+         model_name.push(`edited ${cli_type} information`)
+       }
+       if (addedOfficer == true) {
+         model_name.push(`added ${cli_type} additional Officer information`)
+       }
+       if (editOfficer == true) {
+         model_name.push(`edited ${cli_type} Officer information`)
+       }
+       if (removeOfficer == true) {
+         model_name.push(`removed ${cli_type} Officer information`)
+       }
+ 
+       if (model_name.length > 0) {
+         const msgLog = model_name.length > 1
+           ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+           : model_name[0];
+ 
+         const currentDate = new Date();
+         await SatffLogUpdateOperation(
+           {
+             staff_id: client.StaffUserId,
+             ip: client.ip,
+             date: currentDate.toISOString().split('T')[0],
+             module_name: 'client',
+             log_message: `${msgLog}. client code :`,
+             permission_type: 'updated',
+             module_id: client_id,
+           }
+         );
+ 
+       }
+ 
+     } catch (err) {
+       console.log("err", err);
+       return { status: false, message: "client update Err Client Type 3" };
+     }
+    }
+  }
+  else if (client_type == "7") {
+   
+    const { beneficiaries_details , trustee_details } = client;
+ 
+    if(beneficiaries_details.length > 0){
+     let addedOfficer = false;
+     let removeOfficer = false;
+     let editOfficer = false;
+     try {
+       const [existIdResult] = await pool.execute(
+         "SELECT id FROM client_contact_details WHERE client_id = ?",
+         [client_id]
+       );
+       const idArray = await existIdResult.map((item) => item.id);
+       let arrayInterId = [];
+ 
+       const query2 = `
+     UPDATE client_contact_details
+     SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?
+     WHERE client_id = ? AND id = ?
+     `;
+      
+       for (const detail of beneficiaries_details) {
+         let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
+ 
+         let first_name = detail.first_name;
+         let last_name = detail.last_name;
+         let email = detail.email;
+         let alternate_email = detail.alternate_email;
+         let phone_code =
+           detail.phone_code == undefined || detail.phone_code == ""
+             ? ""
+             : detail.phone_code;
+         let phone = detail.phone;
+         let alternate_phone_code =
+           detail.alternate_phone_code == undefined ||
+             detail.alternate_phone_code == ""
+             ? ""
+             : detail.alternate_phone_code;
+         let alternate_phone = detail.alternate_phone;
+ 
+         let contact_id = detail.contact_id; // Assuming each contactDetail has an id
+         if (contact_id == "" || contact_id == undefined || contact_id == null) {
+           const [result2] = await pool.execute(
+             "INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+             [
+               client_id,
+               customer_contact_person_role_id,
+               first_name,
+               last_name,
+               email,
+               alternate_email,
+               phone_code,
+               phone,
+               alternate_phone_code,
+               alternate_phone,
+ 
+             ]
+           );
+           if (result2.changedRows > 0) {
+             addedOfficer = true
+           }
+         } else {
+           arrayInterId.push(contact_id);
+           const [result2] = await pool.execute(query2, [
+             customer_contact_person_role_id,
+             first_name,
+             last_name,
+             email,
+             alternate_email,
+             phone_code,
+             phone,
+             alternate_phone_code,
+             alternate_phone,
+             client_id,
+             contact_id,
+           ]);
+           if (result2.changedRows > 0) {
+             editOfficer = true
+           }
+         }
+       }
+       let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
+       if (deleteIdArray.length > 0) {
+         for (const id of deleteIdArray) {
+           removeOfficer = true
+           const query3 = `
+                         DELETE FROM client_contact_details WHERE id = ?
+                         `;
+           const [result3] = await pool.execute(query3, [id]);
+         }
+       }
+ 
+       let model_name = [];
+       if (information_client == true) {
+         model_name.push(`edited ${cli_type} information`)
+       }
+       if (addedOfficer == true) {
+         model_name.push(`added ${cli_type} additional Officer information`)
+       }
+       if (editOfficer == true) {
+         model_name.push(`edited ${cli_type} Officer information`)
+       }
+       if (removeOfficer == true) {
+         model_name.push(`removed ${cli_type} Officer information`)
+       }
+ 
+       if (model_name.length > 0) {
+         const msgLog = model_name.length > 1
+           ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+           : model_name[0];
+ 
+         const currentDate = new Date();
+         await SatffLogUpdateOperation(
+           {
+             staff_id: client.StaffUserId,
+             ip: client.ip,
+             date: currentDate.toISOString().split('T')[0],
+             module_name: 'client',
+             log_message: `${msgLog}. client code :`,
+             permission_type: 'updated',
+             module_id: client_id,
+           }
+         );
+ 
+       }
+ 
+     } catch (err) {
+       console.log("err", err);
+       return { status: false, message: "client update Err Client Type 3" };
+     }
+    }
+ 
+    if(trustee_details.length > 0){
+     let addedOfficer = false;
+     let removeOfficer = false;
+     let editOfficer = false;
+     try {
+       const [existIdResult] = await pool.execute(
+         "SELECT id FROM client_trustee_contact_details WHERE client_id = ?",
+         [client_id]
+       );
+       const idArray = await existIdResult.map((item) => item.id);
+       let arrayInterId = [];
+ 
+       const query2 = `
+     UPDATE client_trustee_contact_details
+     SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?
+     WHERE client_id = ? AND id = ?
+     `;
+      
+       for (const detail of trustee_details) {
+         let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
+ 
+         let first_name = detail.first_name;
+         let last_name = detail.last_name;
+         let email = detail.email;
+         let alternate_email = detail.alternate_email;
+         let phone_code =
+           detail.phone_code == undefined || detail.phone_code == ""
+             ? ""
+             : detail.phone_code;
+         let phone = detail.phone;
+         let alternate_phone_code =
+           detail.alternate_phone_code == undefined ||
+             detail.alternate_phone_code == ""
+             ? ""
+             : detail.alternate_phone_code;
+         let alternate_phone = detail.alternate_phone;
+ 
+         let contact_id = detail.contact_id; // Assuming each contactDetail has an id
+         if (contact_id == "" || contact_id == undefined || contact_id == null) {
+           const [result2] = await pool.execute(
+             "INSERT INTO client_trustee_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+             [
+               client_id,
+               customer_contact_person_role_id,
+               first_name,
+               last_name,
+               email,
+               alternate_email,
+               phone_code,
+               phone,
+               alternate_phone_code,
+               alternate_phone,
+ 
+             ]
+           );
+           if (result2.changedRows > 0) {
+             addedOfficer = true
+           }
+         } else {
+           arrayInterId.push(contact_id);
+           const [result2] = await pool.execute(query2, [
+             customer_contact_person_role_id,
+             first_name,
+             last_name,
+             email,
+             alternate_email,
+             phone_code,
+             phone,
+             alternate_phone_code,
+             alternate_phone,
+             client_id,
+             contact_id,
+           ]);
+           if (result2.changedRows > 0) {
+             editOfficer = true
+           }
+         }
+       }
+       let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
+       if (deleteIdArray.length > 0) {
+         for (const id of deleteIdArray) {
+           removeOfficer = true
+           const query3 = `
+                         DELETE FROM client_trustee_contact_details WHERE id = ?
+                         `;
+           const [result3] = await pool.execute(query3, [id]);
+         }
+       }
+ 
+       let model_name = [];
+       if (information_client == true) {
+         model_name.push(`edited ${cli_type} information`)
+       }
+       if (addedOfficer == true) {
+         model_name.push(`added ${cli_type} additional Officer information`)
+       }
+       if (editOfficer == true) {
+         model_name.push(`edited ${cli_type} Officer information`)
+       }
+       if (removeOfficer == true) {
+         model_name.push(`removed ${cli_type} Officer information`)
+       }
+ 
+       if (model_name.length > 0) {
+         const msgLog = model_name.length > 1
+           ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+           : model_name[0];
+ 
+         const currentDate = new Date();
+         await SatffLogUpdateOperation(
+           {
+             staff_id: client.StaffUserId,
+             ip: client.ip,
+             date: currentDate.toISOString().split('T')[0],
+             module_name: 'client',
+             log_message: `${msgLog}. client code :`,
+             permission_type: 'updated',
+             module_id: client_id,
+           }
+         );
+ 
+       }
+ 
+     } catch (err) {
+       console.log("err", err);
+       return { status: false, message: "client update Err Client Type 3" };
+     }
+    }
+ 
   }
 
   return {
