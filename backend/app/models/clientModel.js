@@ -2008,7 +2008,8 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else if (client_type == "2") {
+  } 
+  else if (client_type == "2") {
     const query = `
  SELECT 
     clients.id AS client_id, 
@@ -2037,7 +2038,8 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else if (client_type == "3") {
+  } 
+  else if (client_type == "3") {
     const query = `
  SELECT 
     clients.id AS client_id, 
@@ -2066,7 +2068,104 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else {
+  }
+  else if (client_type == "4") {
+  const query = `
+SELECT
+  clients.id AS client_id,
+  clients.client_type AS client_type,
+  clients.customer_id AS customer_id
+  FROM
+  clients
+  WHERE
+  clients.id = ?
+  `;
+  const [rows] = await pool.execute(query, [client_id]);
+  if (rows.length > 0) {
+    const clientData = {
+      id: rows[0].client_id,
+      client_type: rows[0].client_type,
+      customer_id: rows[0].customer_id,
+    };
+    const result = {
+      client: clientData,
+    };
+    return { status: true, message: "success.", data: result };
+  }
+  }
+  else if (client_type == "5") {
+    const query = `
+  SELECT
+    clients.id AS client_id,
+    clients.client_type AS client_type,
+    clients.customer_id AS customer_id
+    FROM
+    clients
+    WHERE
+    clients.id = ?
+    `;
+    const [rows] = await pool.execute(query, [client_id]);
+    if (rows.length > 0) {
+      const clientData = {
+        id: rows[0].client_id,
+        client_type: rows[0].client_type,
+        customer_id: rows[0].customer_id,
+      };
+      const result = {
+        client: clientData,
+      };
+      return { status: true, message: "success.", data: result };
+    }
+  }
+  else if (client_type == "6") {
+    const query = `
+  SELECT
+    clients.id AS client_id,
+    clients.client_type AS client_type,
+    clients.customer_id AS customer_id
+    FROM
+    clients
+    WHERE
+    clients.id = ?
+    `;
+    const [rows] = await pool.execute(query, [client_id]);
+    if (rows.length > 0) {
+      const clientData = {
+        id: rows[0].client_id,
+        client_type: rows[0].client_type,
+        customer_id: rows[0].customer_id,
+      };
+      const result = {
+        client: clientData,
+      };
+      return { status: true, message: "success.", data: result };
+    }
+  }
+  else if (client_type == "7") {
+    const query = `
+  SELECT
+    clients.id AS client_id,
+    clients.client_type AS client_type,
+    clients.customer_id AS customer_id
+    FROM
+    clients
+    WHERE
+    clients.id = ?
+    `;
+    const [rows] = await pool.execute(query, [client_id]);
+    if (rows.length > 0) {
+      const clientData = {
+        id: rows[0].client_id,
+        client_type: rows[0].client_type,
+        customer_id: rows[0].customer_id,
+      };
+      const result = {
+        client: clientData,
+      };
+      return { status: true, message: "success.", data: result };
+    }
+  }
+  else {
     return { status: false, message: "No customer found with the given ID." };
   }
 };
