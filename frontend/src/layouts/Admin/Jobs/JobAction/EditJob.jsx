@@ -198,6 +198,7 @@ const EditJob = () => {
               InvoiceRemark: response.data.invoice_remark ?? "",
               status_type: response.data.status_type ?? null,
               notes: response.data.notes ?? "",
+              ...response.data
             }));
           }
 
@@ -409,8 +410,11 @@ const EditJob = () => {
   }
 
   const handleSubmit = async () => {
+    console.log("jobData", Number(jobData.Service));
     const req = {
+
       job_id: location.state.job_id,
+      ...jobData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
         getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
@@ -492,6 +496,7 @@ const EditJob = () => {
         checklist_id: getChecklistId,
         task: AddTaskArr,
       },
+  
     };
 
     const data = { req: req, authToken: token };
@@ -693,6 +698,378 @@ const EditJob = () => {
       { hours: 0, minutes: 0 }
     );
   }
+
+ const serviceFields = [
+    {
+      id: 0, // Common fields (default)
+      fields: [
+        {
+          name: "Turnover Period",
+          key: "Turnover_Period_id_0",
+          type: "dropdown",
+          options: ["Monthly", "Quarterly", "Yearly"],
+        },
+        {
+          name: "Turnover Currency",
+          key: "Turnover_Currency_id_0",
+          type: "dropdown",
+          options: ["GBP", "USD", "INR", "EUR", "JPY", "SGD", "CNY", "Other"],
+        },
+        { 
+          name: "Turnover", 
+          key: "Turnover_id_0", 
+          type: "number", 
+          min: 0, 
+          max: 1000000000 
+        },
+        {
+          name: "VAT Registered",
+          key: "VAT_Registered_id_0",
+          type: "dropdown",
+          options: [
+            "No",
+            "Cash",
+            "Accrual",
+            "Flat Rate",
+            "TOMS",
+            "Margin",
+            "Other",
+          ],
+        },
+        {
+          name: "VAT Frequency",
+          key: "VAT_Frequency_id_0",
+          type: "dropdown",
+          options: ["Quarterly", "Monthly", "Yearly", "NA"],
+        },
+      ],
+    },
+    {
+      id: 1, // Accounts Production
+      fields: [
+        {
+          name: "Who Did The Bookkeeping",
+          key: "Who_Did_The_Bookkeeping_id_1",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+        {
+          name: "PAYE Registered",
+          key: "PAYE_Registered_id_1",
+          type: "dropdown",
+          options: [
+            "No",
+            "0",
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 50",
+            "51 to 100",
+            "100+",
+          ],
+        },
+        {
+          name: "Number of Trial Balance Items",
+          key: "Number_of_Trial_Balance_Items_id_1",
+          type: "dropdown",
+          options: [
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 30",
+            "31 to 40",
+            "41 to 50",
+            "51 to 75",
+            "75 to 100",
+            "101 to 200",
+            "201 to 300",
+            "301 to 400",
+            "401 to 500",
+            "500+",
+          ],
+        },
+      ],
+    },
+    {
+      id: 2, // Bookkeeping
+      fields: [
+        {
+          name: "Bookkeeping Frequency",
+          key: "Bookkeeping_Frequency_id_2",
+          type: "dropdown",
+          options: [
+            "Daily",
+            "Weekly",
+            "Fortnightly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+          ],
+        },
+        {
+          name: "Number of Total Transactions",
+          key: "Number_of_Total_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Bank Transactions",
+          key: "Number_of_Bank_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Purchase Invoices",
+          key: "Number_of_Purchase_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Sales Invoices",
+          key: "Number_of_Sales_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Petty Cash Transactions",
+          key: "Number_of_Petty_Cash_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Journal Entries",
+          key: "Number_of_Journal_Entries_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Other Transactions",
+          key: "Number_of_Other_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Transactions Posting",
+          key: "Transactions_Posting_id_2",
+          type: "dropdown",
+          options: ["Manual", "Dext", "Hubdoc", "Auto Entry", "Other"],
+        },
+        {
+          name: "Quality of Paperwork",
+          key: "Quality_of_Paperwork_id_2",
+          type: "dropdown",
+          options: ["Bad", "Good", "Excellent"],
+        },
+        {
+          name: "Number of Integration Software Platforms",
+          key: "Number_of_Integration_Software_Platforms_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+        { name: "CIS", key: "CIS_id_2", type: "dropdown", options: ["No", "Yes"] },
+        {
+          name: "Posting Payroll Journals",
+          key: "Posting_Payroll_Journals_id_2",
+          type: "dropdown",
+          options: ["Yes", "No"],
+        },
+        {
+          name: "Department Tracking",
+          key: "Department_Tracking_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Sales Reconciliation Required",
+          key: "Sales_Reconciliation_Required_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Factoring Account",
+          key: "Factoring_Account_id_2",
+          type: "dropdown",
+          options: [
+            "Provider Deducts Commission Only",
+            "Rapid Cash Account",
+            "Provider Deducts Fixed Percentage",
+            "No Factoring Account",
+          ],
+        },
+        {
+          name: "Payment Methods",
+          key: "Payment_Methods_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+      ],
+    },
+    {
+      id: 3, // Payroll
+      fields: [
+        {
+          name: "Payroll Frequency",
+          key: "Payroll_Frequency_id_3",
+          type: "dropdown",
+          options: [
+            "Weekly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+            "Weekly & Monthly",
+          ],
+        },
+        {
+          name: "Type of Payslip",
+          key: "Type_of_Payslip_id_3",
+          type: "dropdown",
+          options: ["Wages Only", "Wages/Pension"],
+        },
+        {
+          name: "Percentage of Variable Payslips",
+          key: "Percentage_of_Variable_Payslips_id_3",
+          type: "dropdown",
+          options: [
+            "0%",
+            "up to 25%",
+            "25.1 to 50%",
+            "50.1 to 75%",
+            "75.1 to 100%",
+          ],
+        },
+        { name: "Is CIS Required", key: "Is_CIS_Required_id_3", type: "dropdown", options: ["No", "Yes"] },
+        {
+          name: "CIS Frequency",
+          key: "CIS_Frequency_id_3",
+          type: "dropdown",
+          options: ["Weekly", "Monthly", "Weekly & Monthly", "Quarterly"],
+        },
+        {
+          name: "Number of Sub-contractors",
+          key: "Number_of_Sub_contractors_id_3",
+          type: "number",
+          min: 0,
+          max: 10000,
+        },
+      ],
+    },
+    {
+      id: 4, // Personal Tax Return
+      fields: [
+        {
+          name: "Whose Tax Return is it",
+          key: "Whose_Tax_Return_is_it_id_4",
+          type: "dropdown",
+          options: [
+            "Director",
+            "Sole Trader",
+            "Individual Earning more than £100k",
+            "Partner in Partnership",
+            "Landlord",
+            "Other",
+          ],
+        },
+        {
+          name: "Number of Income Sources",
+          key: "Number_of_Income_Sources_id_4",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9+"],
+        },
+        {
+          name: "If Landlord, Number of Properties",
+          key: "If_Landlord_Number_of_Properties_id_4",
+          type: "dropdown",
+          options: [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "30+",
+          ],
+        },
+        {
+          name: "If Sole Trader, Who is doing Bookkeeping",
+          key: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+      ],
+    },
+    {
+      id: 5, // Admin Support
+      fields: [],
+    },
+    {
+      id: 6, // Management Accounts
+      fields: [
+        {
+          name: "Management Accounts Frequency",
+          key: "Management_Accounts_Frequency_id_6",
+          type: "dropdown",
+          options: ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly"],
+        },
+      ],
+    },
+    {
+      id: 7, // Company Secretarial
+      fields: [],
+    },
+];
+
+
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  useEffect(() => {
+    setServiceFieldsData(
+      serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+    );
+  }, [jobData?.Service]);
 
 
 
@@ -1774,158 +2151,65 @@ const EditJob = () => {
                                 </div>
                               </div>
                             </div>
+                            {serviceFieldsData?.length > 0 && (
                             <div className="card card_shadow">
-                              <div className="card-header align-items-center d-flex card-header-light-blue">
-                                <h4 className="card-title mb-0 flex-grow-1">
-                                  {" "}
+                              <div className="card-header card-header-light-blue align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                   Other Data{" "}
                                 </h4>
                               </div>
                               <div className="card-body">
                                 <div className="" style={{ marginTop: 15 }}>
                                   <div className="row">
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Number of Transactions{" "}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Number of Transactions"
-                                        name="NumberOfTransactions"
-                                        onChange={HandleChange}
-                                        value={jobData.NumberOfTransactions}
-                                      />
-                                      {errors["NumberOfTransactions"] && (
-                                        <div className="error-text">
-                                          {errors["NumberOfTransactions"]}
+                                    {serviceFieldsData?.length > 0 &&
+                                      serviceFieldsData?.map((field, index) => (
+                                        <div
+                                          className="col-lg-4 mb-3"
+                                          key={index}
+                                        >
+                                          <label className="form-label">
+                                            {field.name}
+                                          </label>
+                                          {field.type === "dropdown" ? (
+                                            <select
+                                              className="form-control"
+                                              name={field.key}
+                                              onChange={(e) => HandleChange(e)}
+                                              value={jobData[field.key]}
+                                            >
+                                              <option value="">
+                                                Select {field.name}
+                                              </option>
+                                              {field.options?.map(
+                                                (option, i) => (
+                                                  <option
+                                                    value={option}
+                                                    key={i}
+                                                  >
+                                                    {option}
+                                                  </option>
+                                                )
+                                              )}
+                                            </select>
+                                          ) : (
+                                            <input
+                                              type={field.type || "text"}
+                                              className="form-control"
+                                              placeholder={field.key}
+                                              name={field.name}
+                                              min={field.min}
+                                              max={field.max}
+                                              onChange={(e) => HandleChange(e)}
+                                              value={jobData[field.key]}
+                                            />
+                                          )}
                                         </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Number of Trial Balance Items
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Number of Trial Balance Items"
-                                        name="NumberOfTrialBalanceItems"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.NumberOfTrialBalanceItems
-                                        }
-                                      />
-                                      {errors["NumberOfTrialBalanceItems"] && (
-                                        <div className="error-text">
-                                          {errors["NumberOfTrialBalanceItems"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Turnover
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Turnover"
-                                        name="Turnover"
-                                        onChange={HandleChange}
-                                        value={jobData.Turnover}
-                                      />
-                                      {errors["Turnover"] && (
-                                        <div className="error-text">
-                                          {errors["Turnover"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        {" "}
-                                        No.Of Employees{" "}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="No.Of Employees"
-                                        name="NoOfEmployees"
-                                        onChange={HandleChange}
-                                        value={jobData.NoOfEmployees}
-                                      />
-                                      {errors["NoOfEmployees"] && (
-                                        <div className="error-text">
-                                          {errors["NoOfEmployees"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        VAT Reconciliation
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="VATReconciliation"
-                                        onChange={HandleChange}
-                                        value={jobData.VATReconciliation}
-                                      >
-                                        <option value="">
-                                          Please Select VAT Reconciliation
-                                        </option>
-                                        <option value="1">Yes</option>
-                                        <option value="0">No</option>
-                                      </select>
-                                      {errors["VATReconciliation"] && (
-                                        <div className="error-text">
-                                          {errors["VATReconciliation"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Bookkeeping?
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="Bookkeeping"
-                                        onChange={HandleChange}
-                                        value={jobData.Bookkeeping}
-                                      >
-                                        <option value="">
-                                          Please Select Bookkeeping
-                                        </option>
-                                        <option value="1">Yes</option>
-                                        <option value="0">No</option>
-                                      </select>
-                                      {errors["Bookkeeping"] && (
-                                        <div className="error-text">
-                                          {errors["Bookkeeping"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Processing Type
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="ProcessingType"
-                                        onChange={HandleChange}
-                                        value={jobData.ProcessingType}
-                                      >
-                                        <option value="1"> Manual </option>
-                                        <option value="2">Software</option>
-                                      </select>
-                                      {errors["ProcessingType"] && (
-                                        <div className="error-text">
-                                          {errors["ProcessingType"]}
-                                        </div>
-                                      )}
-                                    </div>
+                                      ))}
                                   </div>
                                 </div>
                               </div>
                             </div>
+                          )}
                           </div>
 
 

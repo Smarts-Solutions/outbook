@@ -11,6 +11,7 @@ import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { Modal, Button } from "react-bootstrap";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
+import { use } from "react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -24,19 +25,34 @@ const CreateJob = () => {
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "", });
-  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "", });
+  const [PreparationTimne, setPreparationTimne] = useState({
+    hours: "",
+    minutes: "",
+  });
+  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" });
-  const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "", });
+  const [budgetedHours, setBudgetedHours] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" });
-  const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [], });
+  const [AllChecklistData, setAllChecklistData] = useState({
+    loading: false,
+    data: [],
+  });
   const [getChecklistId, setChecklistId] = useState("");
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [taskNameError, setTaskNameError] = useState("");
   const [jobModalStatus, jobModalSetStatus] = useState(false);
-  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "", });
+  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
@@ -86,6 +102,7 @@ const CreateJob = () => {
     InvoiceRemark: "",
     notes: "",
   });
+
   useEffect(() => {
     setJobData((prevState) => ({
       ...prevState,
@@ -109,6 +126,10 @@ const CreateJob = () => {
             loading: true,
             data: response.data,
           });
+          setJobData((prevState) => ({
+            ...prevState,
+            Service: response.data?.services?.[0]?.service_id,
+          }));
         } else {
           setAllJobData({
             loading: true,
@@ -125,8 +146,6 @@ const CreateJob = () => {
     GetJobData();
   }, []);
 
-
-
   const getAllChecklist = async () => {
     if (
       AllJobData?.data?.client?.[0]?.client_id &&
@@ -140,8 +159,10 @@ const CreateJob = () => {
         customer_id: AllJobData?.data?.customer?.customer_id,
         job_type_id: jobData.JobType,
         // clientId: AllJobData?.data?.client[0]?.client_id,
-        clientId: location?.state?.goto == "Customer" ? Number(jobData.Client) : location?.state?.clientName?.id,
-
+        clientId:
+          location?.state?.goto == "Customer"
+            ? Number(jobData.Client)
+            : location?.state?.clientName?.id,
       };
       const data = { req: req, authToken: token };
       await dispatch(GET_ALL_CHECKLIST(data))
@@ -150,16 +171,18 @@ const CreateJob = () => {
           //  console.log("data checklist",response)
           if (response.status) {
             if (response.data.length > 0) {
-              const isIncluded = response.data[0].client_type_id.split(',').includes(response.data[0].client_type);
+              const isIncluded = response.data[0].client_type_id
+                .split(",")
+                .includes(response.data[0].client_type);
               if (isIncluded == true) {
                 setAllChecklistData({
                   loading: true,
-                  data: response.data
+                  data: response.data,
                 });
               } else {
                 setAllChecklistData({
                   loading: true,
-                  data: []
+                  data: [],
                 });
               }
             } else {
@@ -168,15 +191,12 @@ const CreateJob = () => {
                 data: [],
               });
             }
-
           } else {
             setAllChecklistData({
               loading: true,
               data: [],
             });
           }
-
-
         })
         .catch((error) => {
           return;
@@ -248,6 +268,7 @@ const CreateJob = () => {
   const HandleChange = (e) => {
     let name = e.target.name;
     let value = e.target.value;
+    console.log( name, ":", value);
 
     if (
       name == "NumberOfTransactions" ||
@@ -268,6 +289,7 @@ const CreateJob = () => {
     ) {
       value = value.replace(":", "");
     }
+
     setJobData((prevState) => ({
       ...prevState,
       [name]: value,
@@ -359,28 +381,25 @@ const CreateJob = () => {
 
   useEffect(() => {
     setBudgetedHours({
-      hours: budgeted_hour_totalTime.hours || '0',
-      minutes: budgeted_hour_totalTime.minutes || '0'
+      hours: budgeted_hour_totalTime.hours || "0",
+      minutes: budgeted_hour_totalTime.minutes || "0",
     });
   }, [AddTaskArr]);
-
-
-
 
   const handleSubmit = async () => {
     const req = {
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
-      client_id: location?.state?.goto == "Customer" ? Number(jobData.Client) : location?.state?.clientName?.id,
+      client_id:
+        location?.state?.goto == "Customer"
+          ? Number(jobData.Client)
+          : location?.state?.clientName?.id,
       client_job_code: jobData.ClientJobCode,
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
       job_type_id: Number(jobData.JobType),
-      budgeted_hours: formatTime(
-        budgetedHours.hours,
-        budgetedHours.minutes
-      ),
+      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
@@ -436,7 +455,9 @@ const CreateJob = () => {
         checklist_id: getChecklistId,
         task: AddTaskArr,
       },
+      ...jobData
     };
+    console.log("req",req)
     const data = { req: req, authToken: token };
     setIsSubmitted(true);
     const isValid = validateAllFields();
@@ -453,7 +474,7 @@ const CreateJob = () => {
               timer: 1500,
             });
             setTimeout(() => {
-              sessionStorage.setItem('activeTab', location.state.activeTab);
+              sessionStorage.setItem("activeTab", location.state.activeTab);
               window.history.back();
             }, 1500);
           } else {
@@ -469,22 +490,22 @@ const CreateJob = () => {
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-      .reduce((obj, key) => {
-        const keyMapping = {
-          "fte_dedicated_staffing": "Fte Dedicated Staffing",
-          "percentage_model": "Percentage Model",
-          "adhoc_payg_hourly": "Adhoc Payg Hourly",
-          "customised_pricing": "Customised Pricing"
-        };
+        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+        .reduce((obj, key) => {
+          const keyMapping = {
+            fte_dedicated_staffing: "Fte Dedicated Staffing",
+            percentage_model: "Percentage Model",
+            adhoc_payg_hourly: "Adhoc Payg Hourly",
+            customised_pricing: "Customised Pricing",
+          };
 
-        if (keyMapping[key]) {
-          RearrangeEngagementOptionArr.push(keyMapping[key]);
-        }
+          if (keyMapping[key]) {
+            RearrangeEngagementOptionArr.push(keyMapping[key]);
+          }
 
-        obj[key] = AllJobData.data.engagement_model[0][key];
-        return obj;
-      }, {})
+          obj[key] = AllJobData.data.engagement_model[0][key];
+          return obj;
+        }, {})
     : {};
 
   const totalHours =
@@ -570,8 +591,8 @@ const CreateJob = () => {
           : "Required",
       budgetedMinuteError:
         BudgetedHoursAddTask.minutes &&
-          BudgetedHoursAddTask.minutes >= 0 &&
-          BudgetedHoursAddTask.minutes <= 59
+        BudgetedHoursAddTask.minutes >= 0 &&
+        BudgetedHoursAddTask.minutes <= 59
           ? ""
           : "Required",
     };
@@ -614,6 +635,380 @@ const CreateJob = () => {
     jobModalSetStatus(false);
   };
 
+  const serviceFields = [
+    {
+      id: 0, // Common fields (default)
+      fields: [
+        {
+          name: "Turnover Period",
+          key: "Turnover_Period_id_0",
+          type: "dropdown",
+          options: ["Monthly", "Quarterly", "Yearly"],
+        },
+        {
+          name: "Turnover Currency",
+          key: "Turnover_Currency_id_0",
+          type: "dropdown",
+          options: ["GBP", "USD", "INR", "EUR", "JPY", "SGD", "CNY", "Other"],
+        },
+        { 
+          name: "Turnover", 
+          key: "Turnover_id_0", 
+          type: "number", 
+          min: 0, 
+          max: 1000000000 
+        },
+        {
+          name: "VAT Registered",
+          key: "VAT_Registered_id_0",
+          type: "dropdown",
+          options: [
+            "No",
+            "Cash",
+            "Accrual",
+            "Flat Rate",
+            "TOMS",
+            "Margin",
+            "Other",
+          ],
+        },
+        {
+          name: "VAT Frequency",
+          key: "VAT_Frequency_id_0",
+          type: "dropdown",
+          options: ["Quarterly", "Monthly", "Yearly", "NA"],
+        },
+      ],
+    },
+    {
+      id: 1, // Accounts Production
+      fields: [
+        {
+          name: "Who Did The Bookkeeping",
+          key: "Who_Did_The_Bookkeeping_id_1",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+        {
+          name: "PAYE Registered",
+          key: "PAYE_Registered_id_1",
+          type: "dropdown",
+          options: [
+            "No",
+            "0",
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 50",
+            "51 to 100",
+            "100+",
+          ],
+        },
+        {
+          name: "Number of Trial Balance Items",
+          key: "Number_of_Trial_Balance_Items_id_1",
+          type: "dropdown",
+          options: [
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 30",
+            "31 to 40",
+            "41 to 50",
+            "51 to 75",
+            "75 to 100",
+            "101 to 200",
+            "201 to 300",
+            "301 to 400",
+            "401 to 500",
+            "500+",
+          ],
+        },
+      ],
+    },
+    {
+      id: 2, // Bookkeeping
+      fields: [
+        {
+          name: "Bookkeeping Frequency",
+          key: "Bookkeeping_Frequency_id_2",
+          type: "dropdown",
+          options: [
+            "Daily",
+            "Weekly",
+            "Fortnightly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+          ],
+        },
+        {
+          name: "Number of Total Transactions",
+          key: "Number_of_Total_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Bank Transactions",
+          key: "Number_of_Bank_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Purchase Invoices",
+          key: "Number_of_Purchase_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Sales Invoices",
+          key: "Number_of_Sales_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Petty Cash Transactions",
+          key: "Number_of_Petty_Cash_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Journal Entries",
+          key: "Number_of_Journal_Entries_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Other Transactions",
+          key: "Number_of_Other_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Transactions Posting",
+          key: "Transactions_Posting_id_2",
+          type: "dropdown",
+          options: ["Manual", "Dext", "Hubdoc", "Auto Entry", "Other"],
+        },
+        {
+          name: "Quality of Paperwork",
+          key: "Quality_of_Paperwork_id_2",
+          type: "dropdown",
+          options: ["Bad", "Good", "Excellent"],
+        },
+        {
+          name: "Number of Integration Software Platforms",
+          key: "Number_of_Integration_Software_Platforms_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+        { name: "CIS", key: "CIS_id_2", type: "dropdown", options: ["No", "Yes"] },
+        {
+          name: "Posting Payroll Journals",
+          key: "Posting_Payroll_Journals_id_2",
+          type: "dropdown",
+          options: ["Yes", "No"],
+        },
+        {
+          name: "Department Tracking",
+          key: "Department_Tracking_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Sales Reconciliation Required",
+          key: "Sales_Reconciliation_Required_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Factoring Account",
+          key: "Factoring_Account_id_2",
+          type: "dropdown",
+          options: [
+            "Provider Deducts Commission Only",
+            "Rapid Cash Account",
+            "Provider Deducts Fixed Percentage",
+            "No Factoring Account",
+          ],
+        },
+        {
+          name: "Payment Methods",
+          key: "Payment_Methods_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+      ],
+    },
+    {
+      id: 3, // Payroll
+      fields: [
+        {
+          name: "Payroll Frequency",
+          key: "Payroll_Frequency_id_3",
+          type: "dropdown",
+          options: [
+            "Weekly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+            "Weekly & Monthly",
+          ],
+        },
+        {
+          name: "Type of Payslip",
+          key: "Type_of_Payslip_id_3",
+          type: "dropdown",
+          options: ["Wages Only", "Wages/Pension"],
+        },
+        {
+          name: "Percentage of Variable Payslips",
+          key: "Percentage_of_Variable_Payslips_id_3",
+          type: "dropdown",
+          options: [
+            "0%",
+            "up to 25%",
+            "25.1 to 50%",
+            "50.1 to 75%",
+            "75.1 to 100%",
+          ],
+        },
+        { name: "Is CIS Required", key: "Is_CIS_Required_id_3", type: "dropdown", options: ["No", "Yes"] },
+        {
+          name: "CIS Frequency",
+          key: "CIS_Frequency_id_3",
+          type: "dropdown",
+          options: ["Weekly", "Monthly", "Weekly & Monthly", "Quarterly"],
+        },
+        {
+          name: "Number of Sub-contractors",
+          key: "Number_of_Sub_contractors_id_3",
+          type: "number",
+          min: 0,
+          max: 10000,
+        },
+      ],
+    },
+    {
+      id: 4, // Personal Tax Return
+      fields: [
+        {
+          name: "Whose Tax Return is it",
+          key: "Whose_Tax_Return_is_it_id_4",
+          type: "dropdown",
+          options: [
+            "Director",
+            "Sole Trader",
+            "Individual Earning more than £100k",
+            "Partner in Partnership",
+            "Landlord",
+            "Other",
+          ],
+        },
+        {
+          name: "Number of Income Sources",
+          key: "Number_of_Income_Sources_id_4",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9+"],
+        },
+        {
+          name: "If Landlord, Number of Properties",
+          key: "If_Landlord_Number_of_Properties_id_4",
+          type: "dropdown",
+          options: [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "30+",
+          ],
+        },
+        {
+          name: "If Sole Trader, Who is doing Bookkeeping",
+          key: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+      ],
+    },
+    {
+      id: 5, // Admin Support
+      fields: [],
+    },
+    {
+      id: 6, // Management Accounts
+      fields: [
+        {
+          name: "Management Accounts Frequency",
+          key: "Management_Accounts_Frequency_id_6",
+          type: "dropdown",
+          options: ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly"],
+        },
+      ],
+    },
+    {
+      id: 7, // Company Secretarial
+      fields: [],
+    },
+];
+
+
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  useEffect(() => {
+    console.log("jobData?.Service", jobData?.Service);
+    setServiceFieldsData(
+      serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+    );
+  }, [jobData?.Service]);
+
+  console.log("jobData", jobData);
 
   return (
     <div>
@@ -626,8 +1021,11 @@ const CreateJob = () => {
                   type="button "
                   className="btn p-0"
                   onClick={() => {
-                    sessionStorage.setItem('activeTab', location.state.activeTab);
-                    window.history.back()
+                    sessionStorage.setItem(
+                      "activeTab",
+                      location.state.activeTab
+                    );
+                    window.history.back();
                   }}
                 >
                   <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />{" "}
@@ -654,12 +1052,16 @@ const CreateJob = () => {
                                     <label className="form-label">
                                       {" "}
                                       Outbook Account Manager
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <input
                                       type="text"
                                       //   className="form-control"
-                                      className={errors["AccountManager"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["AccountManager"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Account Manager"
                                       disabled
                                       name="AccountManager"
@@ -680,11 +1082,15 @@ const CreateJob = () => {
                                   >
                                     <label className="form-label">
                                       Customer
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <input
                                       type="text"
-                                      className={errors["Customer"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["Customer"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Customer"
                                       disabled
                                       name="Customer"
@@ -702,12 +1108,15 @@ const CreateJob = () => {
                                     <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
-                                        <span className='text-danger'>*</span>
+                                        <span className="text-danger">*</span>
                                       </label>
 
                                       <select
-
-                                        className={errors["Client"] ? "error-field form-select" : "form-select"}
+                                        className={
+                                          errors["Client"]
+                                            ? "error-field form-select"
+                                            : "form-select"
+                                        }
                                         name="Client"
                                         id="Client"
                                         onChange={HandleChange}
@@ -736,15 +1145,18 @@ const CreateJob = () => {
                                     <div className="col-lg-4">
                                       <label className="form-label">
                                         Client
-                                        <span className='text-danger'>*</span>
+                                        <span className="text-danger">*</span>
                                       </label>
                                       <input
                                         type="text"
-                                        className={errors["Client"] ? "error-field form-control" : "form-control"}
+                                        className={
+                                          errors["Client"]
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
                                         placeholder="Client Job Code"
                                         name="Client"
                                         id="Client"
-
                                         onChange={HandleChange}
                                         value={jobData.Client}
                                         disabled
@@ -764,7 +1176,11 @@ const CreateJob = () => {
                                     </label>
                                     <input
                                       type="text"
-                                      className={errors["ClientJobCode"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["ClientJobCode"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Client Job Code"
                                       name="ClientJobCode"
                                       id="ClientJobCode"
@@ -783,10 +1199,14 @@ const CreateJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Customer Account Manager(Officer)
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <select
-                                      className={errors["CustomerAccountManager"] ? "error-field form-select" : "form-select"}
+                                      className={
+                                        errors["CustomerAccountManager"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
                                       name="CustomerAccountManager"
                                       id="CustomerAccountManager"
                                       onChange={HandleChange}
@@ -823,10 +1243,14 @@ const CreateJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Service
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <select
-                                      className={errors["Service"] ? "error-field form-select" : "form-select"}
+                                      className={
+                                        errors["Service"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
                                       name="Service"
                                       id="Service"
                                       onChange={HandleChange}
@@ -856,11 +1280,15 @@ const CreateJob = () => {
 
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
-                                      Job Type <span className='text-danger'>*</span>
+                                      Job Type{" "}
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <select
-                                      className={errors["JobType"] ? "error-field form-select  jobtype" : "form-select  jobtype"}
-
+                                      className={
+                                        errors["JobType"]
+                                          ? "error-field form-select  jobtype"
+                                          : "form-select  jobtype"
+                                      }
                                       name="JobType"
                                       id="JobType"
                                       onChange={(e) => {
@@ -891,9 +1319,10 @@ const CreateJob = () => {
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
-                                      <label className="form-label">Budgeted Time</label>
+                                      <label className="form-label">
+                                        Budgeted Time
+                                      </label>
                                       <div className="input-group">
-
                                         {/* Hours Input */}
                                         <div className="hours-div">
                                           <input
@@ -903,9 +1332,11 @@ const CreateJob = () => {
                                             onChange={(e) => {
                                               const value = e.target.value;
 
-
                                               // Only allow non-negative numbers for hours
-                                              if (value === "" || Number(value) >= 0) {
+                                              if (
+                                                value === "" ||
+                                                Number(value) >= 0
+                                              ) {
                                                 setBudgetedHours({
                                                   ...budgetedHours,
                                                   hours: value,
@@ -914,7 +1345,10 @@ const CreateJob = () => {
                                             }}
                                             value={budgetedHours?.hours || ""}
                                           />
-                                          <span className="input-group-text" id="basic-addon2">
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
                                             H
                                           </span>
                                         </div>
@@ -929,7 +1363,11 @@ const CreateJob = () => {
                                               const value = e.target.value;
 
                                               // Only allow minutes between 0 and 59
-                                              if (value === "" || (Number(value) >= 0 && Number(value) <= 59)) {
+                                              if (
+                                                value === "" ||
+                                                (Number(value) >= 0 &&
+                                                  Number(value) <= 59)
+                                              ) {
                                                 setBudgetedHours({
                                                   ...budgetedHours,
                                                   minutes: value,
@@ -938,22 +1376,27 @@ const CreateJob = () => {
                                             }}
                                             value={budgetedHours?.minutes || ""}
                                           />
-                                          <span className="input-group-text" id="basic-addon2">
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
                                             M
                                           </span>
                                         </div>
-
                                       </div>
                                     </div>
                                   </div>
-
 
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Reviewer
                                     </label>
                                     <select
-                                      className={errors["Reviewer"] ? "error-field form-select" : "form-select"}
+                                      className={
+                                        errors["Reviewer"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
@@ -965,7 +1408,10 @@ const CreateJob = () => {
                                             value={reviewer.reviewer_id}
                                             key={reviewer.reviewer_id}
                                           >
-                                            {reviewer.reviewer_name + " (" + reviewer?.reviewer_email + ")"}
+                                            {reviewer.reviewer_name +
+                                              " (" +
+                                              reviewer?.reviewer_email +
+                                              ")"}
                                           </option>
                                         )
                                       )}
@@ -982,12 +1428,15 @@ const CreateJob = () => {
                                       Allocated To
                                     </label>
                                     <select
-                                      className={errors["AllocatedTo"] ? "error-field form-select" : "form-select"}
+                                      className={
+                                        errors["AllocatedTo"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                    // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
-
+                                      // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(
@@ -996,7 +1445,10 @@ const CreateJob = () => {
                                             value={staff.allocated_id}
                                             key={staff.allocated_id}
                                           >
-                                            {staff.allocated_name +  " (" + staff?.allocated_email + ")"}
+                                            {staff.allocated_name +
+                                              " (" +
+                                              staff?.allocated_email +
+                                              ")"}
                                           </option>
                                         )
                                       )}
@@ -1015,7 +1467,11 @@ const CreateJob = () => {
                                     </label>
                                     <input
                                       type="date"
-                                      className={errors["AllocatedOn"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["AllocatedOn"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
                                       onChange={HandleChange}
@@ -1034,7 +1490,11 @@ const CreateJob = () => {
                                     </label>
                                     <input
                                       type="date"
-                                      className={errors["DateReceivedOn"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["DateReceivedOn"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
                                       onChange={HandleChange}
@@ -1346,7 +1806,10 @@ const CreateJob = () => {
                                     </div>
                                   </div>
 
-                                  <div id="invoice_type" className="col-lg-4 mb-3">
+                                  <div
+                                    id="invoice_type"
+                                    className="col-lg-4 mb-3"
+                                  >
                                     <label
                                       htmlFor="firstNameinput"
                                       className="form-label"
@@ -1362,11 +1825,17 @@ const CreateJob = () => {
                                       <option value="">
                                         Please Select Engagement Model
                                       </option>
-                                      {Object.keys(filteredData).map((key, index) => (
-                                        <option key={key} value={key}>
-                                          {RearrangeEngagementOptionArr[index]}
-                                        </option>
-                                      ))}
+                                      {Object.keys(filteredData).map(
+                                        (key, index) => (
+                                          <option key={key} value={key}>
+                                            {
+                                              RearrangeEngagementOptionArr[
+                                                index
+                                              ]
+                                            }
+                                          </option>
+                                        )
+                                      )}
                                     </select>
                                     {errors["EngagementModel"] && (
                                       <div className="error-text">
@@ -1378,6 +1847,63 @@ const CreateJob = () => {
                               </div>
                             </div>
                           </div>
+                          {serviceFieldsData?.length > 0 && (
+                            <div className="card card_shadow">
+                              <div className="card-header card-header-light-blue align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Other Data{" "}
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    {serviceFieldsData?.length > 0 &&
+                                      serviceFieldsData?.map((field, index) => (
+                                        <div
+                                          className="col-lg-4 mb-3"
+                                          key={index}
+                                        >
+                                          <label className="form-label">
+                                            {field.name}
+                                          </label>
+                                          {field.type === "dropdown" ? (
+                                            <select
+                                              className="form-control"
+                                              name={field.key}
+                                              onChange={(e) => HandleChange(e)}
+                                            >
+                                              <option value="">
+                                                Select {field.name}
+                                              </option>
+                                              {field.options?.map(
+                                                (option, i) => (
+                                                  <option
+                                                    value={option}
+                                                    key={i}
+                                                  >
+                                                    {option}
+                                                  </option>
+                                                )
+                                              )}
+                                            </select>
+                                          ) : (
+                                            <input
+                                              type={field.type || "text"}
+                                              className="form-control"
+                                              placeholder={field.key}
+                                              name={field.name}
+                                              min={field.min}
+                                              max={field.max}
+                                              onChange={(e) => HandleChange(e)}
+                                            />
+                                          )}
+                                        </div>
+                                      ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           <div className="col-lg-12">
                             <div className="card card_shadow">
@@ -1536,14 +2062,14 @@ const CreateJob = () => {
                                         {errors[
                                           "FilingWithCompaniesHouseRequired"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "FilingWithCompaniesHouseRequired"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -1631,14 +2157,14 @@ const CreateJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentRequired"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "OpeningBalanceAdjustmentRequired"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -1658,168 +2184,15 @@ const CreateJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentDate"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "OpeningBalanceAdjustmentDate"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="card card_shadow">
-                              <div className="card-header card-header-light-blue align-items-center d-flex">
-                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                  Other Data{" "}
-                                </h4>
-                              </div>
-                              <div className="card-body">
-                                <div className="" style={{ marginTop: 15 }}>
-                                  <div className="row">
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Number of Transactions{" "}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Number of Transactions"
-                                        name="NumberOfTransactions"
-                                        onChange={HandleChange}
-                                        value={jobData.NumberOfTransactions}
-                                      />
-                                      {errors["NumberOfTransactions"] && (
-                                        <div className="error-text">
-                                          {errors["NumberOfTransactions"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Number of Trial Balance Items
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Enter Trial Balance Items"
-                                        name="NumberOfTrialBalanceItems"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.NumberOfTrialBalanceItems
-                                        }
-                                      />
-                                      {errors["NumberOfTrialBalanceItems"] && (
-                                        <div className="error-text">
-                                          {errors["NumberOfTrialBalanceItems"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Turnover
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Enter Turnover"
-                                        name="Turnover"
-                                        onChange={HandleChange}
-                                        value={jobData.Turnover}
-                                      />
-                                      {errors["Turnover"] && (
-                                        <div className="error-text">
-                                          {errors["Turnover"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        No.Of Employees
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="No.Of Employees"
-                                        name="NoOfEmployees"
-                                        onChange={HandleChange}
-                                        value={jobData.NoOfEmployees}
-                                      />
-                                      {errors["NoOfEmployees"] && (
-                                        <div className="error-text">
-                                          {errors["NoOfEmployees"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3 ">
-                                      <label className="form-label">
-                                        VAT Reconciliation
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="VATReconciliation"
-                                        onChange={HandleChange}
-                                        value={jobData.VATReconciliation}
-                                      >
-                                        <option value="">
-                                          Please Select VAT Reconciliation
-                                        </option>
-                                        <option value="1">Yes</option>
-                                        <option value="0">No</option>
-                                      </select>
-                                      {errors["VATReconciliation"] && (
-                                        <div className="error-text">
-                                          {errors["VATReconciliation"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Bookkeeping?
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="Bookkeeping"
-                                        onChange={HandleChange}
-                                        value={jobData.Bookkeeping}
-                                      >
-                                        <option value="">
-                                          Please Select Bookkeeping
-                                        </option>
-                                        <option value="1">Yes</option>
-                                        <option value="0">No</option>
-                                      </select>
-                                      {errors["Bookkeeping"] && (
-                                        <div className="error-text">
-                                          {errors["Bookkeeping"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4">
-                                      <label className="form-label">
-                                        Processing Type
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="ProcessingType"
-                                        onChange={HandleChange}
-                                        value={jobData.ProcessingType}
-                                      >
-                                        <option value="">
-                                          Please Select Processing Type
-                                        </option>
-                                        <option value="1"> Manual </option>
-                                        <option value="2">Software</option>
-                                      </select>
-                                      {errors["ProcessingType"] && (
-                                        <div className="error-text">
-                                          {errors["ProcessingType"]}
-                                        </div>
-                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -1827,7 +2200,7 @@ const CreateJob = () => {
                             </div>
                           </div>
 
-                          {/* {jobData.EngagementModel !=
+                          {/* sssj  {jobData.EngagementModel !=
                             "fte_dedicated_staffing" && (
                               <div className="col-lg-12">
                                 <div className="col-lg-12">
@@ -2029,7 +2402,6 @@ const CreateJob = () => {
                               </div>
                             )} */}
 
-
                           <div className="col-lg-12">
                             <div className="card card_shadow">
                               <div className="card-header align-items-center d-flex card-header-light-blue">
@@ -2040,29 +2412,31 @@ const CreateJob = () => {
                               <div className="card-body">
                                 <div className="" style={{ marginTop: 15 }}>
                                   <div className="row">
-                                  <div className="mb-3 col-lg-12">
-                                    <textarea
-                                      type="text"
-                                      className={errors["notes"] ? "error-field form-control" : "form-control"}
-                                      placeholder="Enter Notes"
-                                      name="notes"
-                                      id="notes"
-                                      onChange={HandleChange}
-                                      value={jobData.notes}
-                                    />
-                                    {errors["notes"] && (
-                                      <div className="error-text">
-                                        {errors["notes"]}
-                                      </div>
-                                    )}
-                                  </div>
-                                   
+                                    <div className="mb-3 col-lg-12">
+                                      <textarea
+                                        type="text"
+                                        className={
+                                          errors["notes"]
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
+                                        placeholder="Enter Notes"
+                                        name="notes"
+                                        id="notes"
+                                        onChange={HandleChange}
+                                        value={jobData.notes}
+                                      />
+                                      {errors["notes"] && (
+                                        <div className="error-text">
+                                          {errors["notes"]}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-
                         </div>
                       </div>
                     </div>
@@ -2169,11 +2543,11 @@ const CreateJob = () => {
                                                       <td>
                                                         <div className="add">
                                                           {AddTaskArr &&
-                                                            AddTaskArr.find(
-                                                              (task) =>
-                                                                task.task_id ==
-                                                                checklist.task_id
-                                                            ) ? (
+                                                          AddTaskArr.find(
+                                                            (task) =>
+                                                              task.task_id ==
+                                                              checklist.task_id
+                                                          ) ? (
                                                             ""
                                                           ) : (
                                                             <button
@@ -2310,8 +2684,11 @@ const CreateJob = () => {
                                   type="text"
                                   placeholder="Enter Task name"
                                   name="taskname"
-                                  className={taskNameError ? "error-field form-control" : "form-control"}
-
+                                  className={
+                                    taskNameError
+                                      ? "error-field form-control"
+                                      : "form-control"
+                                  }
                                   onChange={handleChange1}
                                   value={taskName}
                                 />
@@ -2331,8 +2708,11 @@ const CreateJob = () => {
                                   <div className="hours-div">
                                     <input
                                       type="text"
-                                      className={BudgetedHoureError ? "error-field form-control" : "form-control"}
-
+                                      className={
+                                        BudgetedHoureError
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Hours"
                                       name="budgeted_hour"
                                       onChange={(e) => {
@@ -2345,8 +2725,11 @@ const CreateJob = () => {
                                   <div className="hours-div ">
                                     <input
                                       type="text"
-                                      className={BudgetedMinuteError ? "error-field form-control" : "form-control"}
-
+                                      className={
+                                        BudgetedMinuteError
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Minutes"
                                       name="budgeted_minute"
                                       onChange={(e) => {
