@@ -45,10 +45,10 @@ const createClient = async (client) => {
 
     if(client_type == "5"){
       //console.log('client', client)
-      let {service_address} = client;
+      let {service_address ,charity_commission_number} = client;
       const query = `
-      INSERT INTO clients (client_type,customer_id,staff_created_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes,service_address)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO clients (client_type,customer_id,staff_created_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes,service_address,charity_commission_number)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
           try {
             const [result] = await pool.execute(query, [
@@ -62,7 +62,8 @@ const createClient = async (client) => {
               vat_number,
               website,
               notes,
-              service_address
+              service_address,
+              charity_commission_number
             ]);
             client_id = result.insertId;
             const currentDate = new Date();
@@ -1073,10 +1074,6 @@ const getClient = async (client) => {
       }
 
     }
-
-
-
-
 
   } catch (err) {
     return { status: false, message: "Err Client Get" };
