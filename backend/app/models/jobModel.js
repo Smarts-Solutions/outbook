@@ -1412,16 +1412,6 @@ const getJobById = async (job) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
      client_job_task.time AS task_budgeted_hour,
      task.id AS task_id,
      task.name AS task_name
@@ -1590,6 +1580,7 @@ const getJobById = async (job) => {
           rows[0].If_Landlord_Number_of_Properties_id_4,
         If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
           rows[0].If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+        Management_Accounts_Frequency_id_6: rows[0].Management_Accounts_Frequency_id_6,
 
         tasks: {
           checklist_id: rows[0].checklist_id,
