@@ -288,6 +288,19 @@ const editMissingLog = async (missingLog) => {
 
   const missing_log_document = missingLog.files;
 
+
+
+  console.log("missingLog.body", missingLog.body)
+  console.log("missing_log", missing_log)
+  console.log("missingLog.body.missing_log_reviewed_date", missingLog.body.missing_log_reviewed_date)
+
+  const today = new Date();
+  today.setDate(today.getDate() + 2); 
+  console.log(today.toISOString().split('T')[0]);
+
+
+  return
+
   const [[existMissingLog]] = await pool.execute(
     "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
     , [id]);
