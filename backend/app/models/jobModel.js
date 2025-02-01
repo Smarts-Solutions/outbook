@@ -2240,6 +2240,12 @@ const updateJobStatus = async (job) => {
     `SELECT id , status_type FROM jobs WHERE id = ?`,
     [job_id]
   );
+   
+console.log("status_type ",status_type)
+console.log("job_id ",job_id)
+
+
+  
   try {
     if (parseInt(status_type) == 6) {
       const [ExistDraft] = await pool.execute(
@@ -2276,7 +2282,39 @@ const updateJobStatus = async (job) => {
           data: "W",
         };
       }
+    }else{
+      //  Missing Log
+      const [ExistMissingLog] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE missing_log_reviewed_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if(ExistMissingLog.length > 0){
+        return {
+          status: false,
+          message: "Please review the missing log.",
+          data: "W",
+        };
+      }
+
+     
+      // Query to 
+      const [ExistQuery] = await pool.execute(
+        `SELECT job_id FROM queries WHERE final_query_response_received_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if(ExistQuery.length > 0){
+        return {
+          status: false,
+          message: "Please review the query.",
+          data: "W",
+          };
+       }
+
     }
+
+    
 
     const query = `
          UPDATE jobs 
