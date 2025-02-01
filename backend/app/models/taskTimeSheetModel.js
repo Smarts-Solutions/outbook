@@ -327,11 +327,10 @@ const editMissingLog = async (missingLog) => {
   }
 
     
-    let date_new = new Date(date).toISOString().split("T")[0];
-    // console.log("date_new", date_new)
-  
+    let date_new_sla_deadline = new Date(date).toISOString().split("T")[0];
+  // console.log("date_new", date_new)
   // SLA Deadline Update date
-   await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new, job_id[0].job_id]);
+   await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new_sla_deadline, job_id[0].job_id]);
 
 
 
