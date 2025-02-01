@@ -333,7 +333,6 @@ const editMissingLog = async (missingLog) => {
    await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new_sla_deadline, job_id[0].job_id]);
 
 
-
   const [[existMissingLog]] = await pool.execute(
     "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
     , [id]);
