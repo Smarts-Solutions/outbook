@@ -787,6 +787,9 @@ const addDraft = async (draft) => {
   if([1, 2, 3].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, job_id]);
   }
+  else if([4].includes(Number(updated_amendment))){
+    const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, job_id]);
+  }
 
   let log_message= `sent the draft for job code:`
   if (parseInt(was_it_complete) === 1) {
@@ -896,6 +899,15 @@ const editDraft = async (draft) => {
   try {
 
     const [[rowJob]] = await pool.execute("SELECT job_id,DATE_FORMAT(draft_sent_on, '%Y-%m-%d') AS draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete,DATE_FORMAT(final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on FROM `drafts` WHERE id = ?", [id]);
+
+
+    if([1, 2, 3].includes(Number(updated_amendment))){
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, rowJob.job_id]);
+    }
+    else if([4].includes(Number(updated_amendment))){
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, rowJob.job_id]);
+    }
+
 
     if (parseInt(was_it_complete) === 1) {
       const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
