@@ -5,9 +5,9 @@ import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { QueryAction, AddQuery, EditQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import sweatalert from 'sweetalert2';
-import {convertDate } from '../../../Utils/Comman_function';
+import { convertDate } from '../../../Utils/Comman_function';
 
-const Queries = ({getAccessDataJob , goto}) => {
+const Queries = ({ getAccessDataJob, goto }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -148,6 +148,33 @@ const Queries = ({getAccessDataJob , goto}) => {
   const HandleEditQuery = async () => {
     const req = { action: "add", data: AllQueryInputdata }
     const data = { req: req, authToken: token }
+
+
+    if (parseInt(AllQueryInputdata.QueriesRemaining) == 0) {
+      sweatalert.fire({
+        icon: 'warning',
+        title: 'Warning...',
+        text: 'Change Queries Remaining to Yes',
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      return
+    }
+
+    if (AllQueryInputdata.FinalQueryResponseReceivedDate == null || AllQueryInputdata.FinalQueryResponseReceivedDate == "") {
+      sweatalert.fire({
+        icon: 'warning',
+        title: 'Warning...',
+        text: 'Change Final Query Response Reviewed Date is Required',
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      return
+    }
+
+
     await dispatch(EditQuery(data))
       .unwrap()
       .then((response) => {
@@ -181,14 +208,14 @@ const Queries = ({getAccessDataJob , goto}) => {
 
   const handleChange = (e) => {
     const { name } = e.target;
-  
+
     if (name === "QueryDocument") {
       const files = e.target.files;
       let fileArray;
-  
+
       if (files && typeof files[Symbol.iterator] === "function") {
         fileArray = Array.from(files);
-  
+
         const allowedTypes = [
           "application/pdf",
           "application/msword",
@@ -197,11 +224,11 @@ const Queries = ({getAccessDataJob , goto}) => {
           "image/jpg",
           "image/jpeg",
         ];
-  
+
         const validFiles = fileArray.filter((file) =>
           allowedTypes.includes(file.type)
         );
-  
+
         if (validFiles.length !== fileArray.length) {
           // Show warning alert
           sweatalert.fire({
@@ -209,9 +236,9 @@ const Queries = ({getAccessDataJob , goto}) => {
             title: "Warning",
             text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
           });
-  
-  
-          e.target.value = ""; 
+
+
+          e.target.value = "";
           return;
         } else {
           setAllQueryInputdata({
@@ -224,15 +251,15 @@ const Queries = ({getAccessDataJob , goto}) => {
       setAllQueryInputdata({ ...AllQueryInputdata, [name]: e.target.value });
     }
   };
-  
+
 
   const columns = [
-    { name: 'Query Title', selector: row => row.title, reorder: false,sortable: true },
-    { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date),reorder: false, sortable: true },
-    { name: 'Missing Queries Prepared Date', selector: row => convertDate(row.missing_queries_prepared_date),reorder: false, sortable: true },
-    { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), reorder: false,sortable: true },
-    { name: 'Last Chaser', selector: row => convertDate(row.last_chaser), reorder: false,sortable: true },
-    { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete",reorder: false, sortable: true },
+    { name: 'Query Title', selector: row => row.title, reorder: false, sortable: true },
+    { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date), reorder: false, sortable: true },
+    { name: 'Missing Queries Prepared Date', selector: row => convertDate(row.missing_queries_prepared_date), reorder: false, sortable: true },
+    { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), reorder: false, sortable: true },
+    { name: 'Last Chaser', selector: row => convertDate(row.last_chaser), reorder: false, sortable: true },
+    { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", reorder: false, sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -241,7 +268,7 @@ const Queries = ({getAccessDataJob , goto}) => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.status == 1 ? "" : goto!="report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ? 
+            row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => { setEditViewquery(true); setEditData(row) }}>
                 <i className="ti-pencil" />
               </button> : ""
@@ -267,7 +294,7 @@ const Queries = ({getAccessDataJob , goto}) => {
         <div className='col-md-4'>
           <div>
             {
-              draftStatus == 0 && goto!="report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN")?
+              draftStatus == 0 && goto != "report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
                 <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} >
                   <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
                 :
@@ -442,7 +469,7 @@ const Queries = ({getAccessDataJob , goto}) => {
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
-              Last Chaser 
+                Last Chaser
               </label>
               <input
                 type="date"
@@ -687,7 +714,7 @@ const Queries = ({getAccessDataJob , goto}) => {
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
-              Last Chaser
+                Last Chaser
               </label>
               <input
                 type="date"
