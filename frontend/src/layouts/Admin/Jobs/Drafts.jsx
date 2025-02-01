@@ -5,9 +5,9 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
-import {convertDate } from '../../../Utils/Comman_function';
+import { convertDate, validate } from '../../../Utils/Comman_function';
 
-const Drafts = ({ getAccessDataJob,  goto }) => {
+const Drafts = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation()
@@ -22,9 +22,9 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: new Date().toISOString().substr(0, 10),
     feedback_received: '0',
-    updated_amendments: '1',
+    updated_amendments: '4',
     final_draft_sent_on: new Date().toISOString().substr(0, 10),
-    was_it_complete: '0',
+    was_it_complete: '1',
     enter_feedback: null,
     id: null
   });
@@ -34,9 +34,9 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
       ...AllDraftInputdata,
       draft_sent_on: new Date().toISOString().substr(0, 10),
       feedback_received: '0',
-      updated_amendments: '1',
+      updated_amendments: '4',
       final_draft_sent_on: new Date().toISOString().substr(0, 10),
-      was_it_complete: '0',
+      was_it_complete: '1',
       enter_feedback: null,
       id: null
 
@@ -100,11 +100,30 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    validate(name, value);
     setAllDraftInputdata({ ...AllDraftInputdata, [name]: value });
 
   };
 
+  const validate = (name, value) => {
+    const error = { ...errors };
+    if (name === "enter_feedback") {
+      if (value === "") {
+        error.enter_feedback = "Enter Feedback is required";
+      } else {
+        error.enter_feedback = "";
+      }
+    }
+    setErrors({ ...error });
+  }
+
+
   const HandleSubmitDraft = async () => {
+
+    if ((AllDraftInputdata.enter_feedback == null || AllDraftInputdata.enter_feedback == "") && AllDraftInputdata.feedback_received == 1) {
+      setErrors({ enter_feedback: "Enter Feedback is required" });
+      return;
+    }
     const req = {
       job_id: location.state.job_id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
@@ -115,6 +134,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
       was_it_complete: AllDraftInputdata.was_it_complete,
     }
     const data = { req: req, authToken: token }
+
     await dispatch(AddDraft(data))
       .unwrap()
       .then((response) => {
@@ -130,7 +150,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
             timer: 3000
           });
           setTimeout(() => {
-           // window.location.reload();
+            // window.location.reload();
           }, 3000);
         }
         else {
@@ -158,6 +178,13 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
   }
 
   const HandleSubmitEditDraft = async () => {
+    if ((AllDraftInputdata.enter_feedback == null || AllDraftInputdata.enter_feedback == "") && AllDraftInputdata.feedback_received == 1) {
+      setErrors({ enter_feedback: "Enter Feedback is required" });
+
+      return;
+    }
+
+
     const req = {
       id: AllDraftInputdata.id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
@@ -166,7 +193,6 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
       was_it_complete: AllDraftInputdata.was_it_complete,
-
     }
     const data = { req: req, authToken: token }
     await dispatch(EditDraft(data))
@@ -190,7 +216,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
           }, 3000);
         }
         else {
-        
+
           response.data == "W" ?
             sweatalert.fire({
               icon: 'warning',
@@ -215,12 +241,12 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
   }
 
   const columns = [
-    { name: 'Draft Title', selector: row => row.title, sortable: true ,reorder: false,},
-    { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on),reorder: false, sortable: true },
-    { name: 'Final Draft Sent On', selector: row =>convertDate(row.final_draft_sent_on),reorder: false, sortable: true },
-    { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No",reorder: false, sortable: true },
+    { name: 'Draft Title', selector: row => row.title, sortable: true, reorder: false, },
+    { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on), reorder: false, sortable: true },
+    { name: 'Final Draft Sent On', selector: row => convertDate(row.final_draft_sent_on), reorder: false, sortable: true },
+    { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", reorder: false, sortable: true },
     { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", reorder: false, sortable: true },
-    { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", reorder: false,sortable: true },
+    { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", reorder: false, sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -229,7 +255,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.was_it_complete == 1 ? "" : goto!="report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+            row.was_it_complete == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
                 <i className="ti-pencil" />
               </button> : ""
@@ -244,6 +270,14 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
     },
   ];
 
+  useEffect(() => {
+    setAllDraftInputdata({
+      ...AllDraftInputdata,
+      was_it_complete: AllDraftInputdata.updated_amendments != 4 ? "0" : "1"
+    });
+
+  }, [AllDraftInputdata.updated_amendments]);
+
   return (
     <div className=''>
       <div className='row'>
@@ -254,7 +288,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
         </div>
         <div className='col-md-4'>
           {
-            goto!="report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <div>
+            goto != "report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <div>
               <button type="button" className="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>
                 <i className="fa-regular fa-plus pe-1"></i> Add Drafts</button>
             </div> : ""
@@ -328,7 +362,6 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.feedback_received}
                 >
-                  <option value="">Select</option>
                   <option value="1">Yes</option>
                   <option value="0">No</option>
                 </select>
@@ -340,60 +373,81 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
               </div>
             </div>
 
-            <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Updated/Amendments
-                </label>
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  style={{ color: "#8a8c8e !important" }}
-                  name="updated_amendments"
-                  id="updated_amendments"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.updated_amendments}
-                >
-                  <option value="" selected>Select</option>
-                  <option value="1">Amendment</option>
-                  <option value="2">Update</option>
-                  <option value="3">Both</option>
-                  <option value="4">None</option>
-                </select>
-                {errors["updated_amendments"] && (
-                  <div className="error-text">
-                    {errors["updated_amendments"]}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Was Draft Completed
-                </label>
-                <select
+            {AllDraftInputdata.feedback_received == 1 ?
+              <div className="col-lg-6">
+                <div className="mb-3">
+                  <label htmlFor="firstNameinput" className="form-label">
+                    Updated/Amendments
+                  </label>
+                  <select
+                    className="form-select"
+                    aria-label="Default select example"
+                    style={{ color: "#8a8c8e !important" }}
+                    name="updated_amendments"
+                    id="updated_amendments"
+                    onChange={(e) => handleInputChange(e)}
+                    value={AllDraftInputdata.updated_amendments}
+                  >
+                    <option value="1">Amendment</option>
+                    <option value="2">Update</option>
+                    <option value="3">Both</option>
+                    <option value="4">None</option>
+                  </select>
+                  {errors["updated_amendments"] && (
+                    <div className="error-text">
+                      {errors["updated_amendments"]}
+                    </div>
+                  )}
+                </div>
+              </div> : ""}
+            {
+              AllDraftInputdata.feedback_received == 1 ?
+                <div className="col-lg-6">
+                  <div className="mb-3">
+                    <label htmlFor="was_it_complete" className="form-label">
+                      Draft Completed
+                    </label>
+                    <div className="row">
+                      <div className=" col-lg-6 form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="was_it_complete"
+                          id="was_it_complete_yes"
+                          value="1"
 
-                  className="form-select DraftWasItComplete"
-                  aria-label="Default select example"
-                  style={{ color: "#8a8c8e !important" }}
-                  name="was_it_complete"
-                  id="was_it_complete"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.was_it_complete}
-                >
-                  <option value="1">Yes</option>
-                  <option value="0" selected>No</option>
-                </select>
-                {errors["was_it_complete"] && (
-                  <div className="error-text">
-                    {errors["was_it_complete"]}
-                  </div>
-                )}
-              </div>
-            </div>
+                          checked={AllDraftInputdata.was_it_complete === "1"}
+                          onChange={(e) => handleInputChange(e)}
+                        />
+                        <label className="form-check-label" htmlFor="was_it_complete_yes">
+                          Yes
+                        </label>
+                      </div>
+                      <div className="col-lg-6 form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="was_it_complete"
+                          id="was_it_complete_no"
+                          value="0"
 
-            {AllDraftInputdata?.was_it_complete == 1 ? <div className="col-lg-6">
+                          checked={AllDraftInputdata.was_it_complete === "0"}
+                          onChange={(e) => handleInputChange(e)}
+                        />
+                        <label className="form-check-label" htmlFor="was_it_complete_no">
+                          No
+                        </label>
+                      </div>
+                    </div>
+                    {errors["was_it_complete"] && (
+                      <div className="error-text">{errors["was_it_complete"]}</div>
+                    )}
+                  </div>
+                </div>
+                : ""
+            }
+
+            {AllDraftInputdata?.was_it_complete == 1 && AllDraftInputdata.feedback_received == 1 ? <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
                   Final Draft Sent On
@@ -415,30 +469,34 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
               </div>
             </div> : ""}
 
-
-            <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Enter Feedback
-                </label>
-                <textarea
-                  type="text"
-                  rows={4}
-                  className="form-control"
-                  placeholder="Enter Feedback"
-                  name="enter_feedback"
-                  id="enter_feedback"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.enter_feedback}
-                  defaultValue={""}
-                />
-                {errors["enter_feedback"] && (
-                  <div className="error-text">
-                    {errors["enter_feedback"]}
+            {
+              AllDraftInputdata.feedback_received == 1 ?
+                <div className="col-lg-6">
+                  <div className="mb-3">
+                    <label htmlFor="firstNameinput" className="form-label">
+                      Enter Feedback
+                    </label>
+                    <textarea
+                      type="text"
+                      rows={4}
+                      className="form-control"
+                      placeholder="Enter Feedback"
+                      name="enter_feedback"
+                      id="enter_feedback"
+                      onChange={(e) => handleInputChange(e)}
+                      value={AllDraftInputdata.enter_feedback}
+                      defaultValue={""}
+                    />
+                    {errors["enter_feedback"] && (
+                      <div className="error-text">
+                        {errors["enter_feedback"]}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div> : ""
+
+            }
+
 
 
           </div>
@@ -503,7 +561,6 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.feedback_received}
                 >
-                  <option value="">Select</option>
                   <option value="1">Yes</option>
                   <option value="0">No</option>
                 </select>
@@ -515,37 +572,40 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
               </div>
             </div>
 
-            <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Updated/Amendments
-                </label>
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  style={{ color: "#8a8c8e !important" }}
-                  name="updated_amendments"
-                  id="updated_amendments"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.updated_amendments}
-                >
+            {AllDraftInputdata.feedback_received == 1 ?
+              <div className="col-lg-6">
+                <div className="mb-3">
+                  <label htmlFor="firstNameinput" className="form-label">
+                    Updated/Amendments
+                  </label>
+                  <select
+                    className="form-select"
+                    aria-label="Default select example"
+                    style={{ color: "#8a8c8e !important" }}
+                    name="updated_amendments"
+                    id="updated_amendments"
+                    onChange={(e) => handleInputChange(e)}
+                    value={AllDraftInputdata.updated_amendments}
+                  >
 
-                  <option value="1">Amendment</option>
-                  <option value="2">Update</option>
-                  <option value="3">Both</option>
-                  <option value="4">None</option>
-                </select>
-                {errors["updated_amendments"] && (
-                  <div className="error-text">
-                    {errors["updated_amendments"]}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="col-lg-6">
-              <div className="mb-3">
+                    <option value="1">Amendment</option>
+                    <option value="2">Update</option>
+                    <option value="3">Both</option>
+                    <option value="4">None</option>
+                  </select>
+                  {errors["updated_amendments"] && (
+                    <div className="error-text">
+                      {errors["updated_amendments"]}
+                    </div>
+                  )}
+                </div>
+              </div> : ""}
+
+            {AllDraftInputdata.feedback_received == 1 ?
+              <div className="col-lg-6">
+                {/* <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
-                  Was Draft Completed
+                  Draft Completed
                 </label>
                 <select
                   className="form-select DraftWasItComplete"
@@ -565,10 +625,54 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
                     {errors["was_it_complete"]}
                   </div>
                 )}
-              </div>
-            </div>
+              </div> */}
 
-            {AllDraftInputdata?.was_it_complete == 1 ? <div className="col-lg-6">
+                <div className="col-lg-6">
+                  <div className="mb-3">
+                    <label htmlFor="was_it_complete" className="form-label">
+                      Draft Completed
+                    </label>
+                    <div className="row">
+                      <div className=" col-lg-6 form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="was_it_complete"
+                          id="was_it_complete_yes"
+                          value="1"
+
+                          checked={AllDraftInputdata.was_it_complete === "1"}
+                          onChange={(e) => handleInputChange(e)}
+                        />
+                        <label className="form-check-label" htmlFor="was_it_complete_yes">
+                          Yes
+                        </label>
+                      </div>
+                      <div className="col-lg-6 form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="was_it_complete"
+                          id="was_it_complete_no"
+                          value="0"
+
+                          checked={AllDraftInputdata.was_it_complete === "0"}
+                          onChange={(e) => handleInputChange(e)}
+                        />
+                        <label className="form-check-label" htmlFor="was_it_complete_no">
+                          No
+                        </label>
+                      </div>
+                    </div>
+                    {errors["was_it_complete"] && (
+                      <div className="error-text">{errors["was_it_complete"]}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              : ""}
+
+            {AllDraftInputdata?.was_it_complete == 1 && AllDraftInputdata.feedback_received == 1 ? <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
                   Final Draft Sent On
