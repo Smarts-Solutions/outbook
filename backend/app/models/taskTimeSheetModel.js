@@ -337,7 +337,7 @@ const editMissingLog = async (missingLog) => {
     "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
     , [id]);
 
-    
+
 
   try {
     const query = `
@@ -782,6 +782,12 @@ const getDraftSingleView = async (req, res) => {
 
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
+
+
+  if([1, 2, 3].includes(Number(updated_amendment))){
+    const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, job_id]);
+  }
+
   let log_message= `sent the draft for job code:`
   if (parseInt(was_it_complete) === 1) {
     const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
