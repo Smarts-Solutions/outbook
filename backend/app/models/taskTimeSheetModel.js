@@ -288,18 +288,52 @@ const editMissingLog = async (missingLog) => {
 
   const missing_log_document = missingLog.files;
 
+  const [job_id] = await pool.execute('SELECT missing_logs.job_id, jobs.service_id ,jobs.Bookkeeping_Frequency_id_2 FROM `missing_logs` JOIN `jobs` ON jobs.id = missing_logs.job_id  WHERE missing_logs.id = ?', [id]);
+
+  
+  // console.log("missing_log_reviewed_date", missing_log_reviewed_date)
+  // console.log("job_id[0].service_id", job_id[0].service_id)
+  // console.log("job_id[0].Bookkeeping_Frequency_id_2", job_id[0].Bookkeeping_Frequency_id_2)
+
+  
+
+  const date = new Date(missing_log_reviewed_date);
+  if ([1, 3, 4, 5, 6, 7, 8].includes(Number(job_id[0].service_id))) {
+    if (job_id[0].service_id == 1) {
+      date.setDate(date.getDate() + 28);
+    } else if (job_id[0].service_id == 4) {
+      date.setDate(date.getDate() + 5);
+    } else if (job_id[0].service_id == 3) {
+      date.setDate(date.getDate() + 5);
+    } else if (job_id[0].service_id == 8) {
+      date.setDate(date.getDate() + 10);
+    }
+  }
+ 
 
 
-  console.log("missingLog.body", missingLog.body)
-  console.log("missing_log", missing_log)
-  console.log("missingLog.body.missing_log_reviewed_date", missingLog.body.missing_log_reviewed_date)
+  if (Number(job_id[0].service_id) == 2) {
+    if (job_id[0].Bookkeeping_Frequency_id_2 == "Daily") {
+      date.setDate(date.getDate() + 1);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Weekly") {
+      date.setDate(date.getDate() + 3);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Monthly") {
+      date.setDate(date.getDate() + 10);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Quarterly") {
+      date.setDate(date.getDate() + 15);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Yearly") {
+      date.setDate(date.getDate() + 30);
+    }
+  }
 
-  const today = new Date();
-  today.setDate(today.getDate() + 2); 
-  console.log(today.toISOString().split('T')[0]);
+    
+    let date_new = new Date(date).toISOString().split("T")[0];
+    // console.log("date_new", date_new)
+  
+  // SLA Deadline Update date
+   await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new, job_id[0].job_id]);
 
 
-  return
 
   const [[existMissingLog]] = await pool.execute(
     "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
@@ -351,8 +385,6 @@ const editMissingLog = async (missingLog) => {
         );
       }
 
-
-      const [job_id] = await pool.execute('SELECT job_id FROM  `missing_logs` WHERE id = ?', [id]);
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id[0].job_id]);
     }
