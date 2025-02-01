@@ -1269,7 +1269,6 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         customer_engagement_model_id = existCustomer[0].id;
     }
 
-    //SNEH
 
 
     const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;

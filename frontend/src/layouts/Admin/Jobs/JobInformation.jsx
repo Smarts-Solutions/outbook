@@ -162,7 +162,65 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         InvoiceTime: response.data.invoice_hours,
                         InvoiceRemark: response.data.invoice_remark,
                         notes: response.data.notes,
-                        ...response.data
+                        Turnover_Period_id_0: response.data.Turnover_Period_id_0 ?? "",
+                        Turnover_Currency_id_0: response.data.Turnover_Currency_id_0 ?? "",
+                        Turnover_id_0: response.data.Turnover_id_0 ?? 0.0,
+                        VAT_Registered_id_0: response.data.VAT_Registered_id_0 ?? "",
+                        VAT_Frequency_id_0: response.data.VAT_Frequency_id_0 ?? "",
+                        Who_Did_The_Bookkeeping_id_1:
+                          response.data.Who_Did_The_Bookkeeping_id_1 ?? "",
+                        PAYE_Registered_id_1: response.data.PAYE_Registered_id_1 ?? "",
+                        Number_of_Trial_Balance_Items_id_1:
+                          response.data.Number_of_Trial_Balance_Items_id_1 ?? "",
+                        Bookkeeping_Frequency_id_2:
+                          response.data.Bookkeeping_Frequency_id_2 ?? "",
+                        Number_of_Total_Transactions_id_2:
+                          response.data.Number_of_Total_Transactions_id_2 ?? 0,
+                        Number_of_Bank_Transactions_id_2:
+                          response.data.Number_of_Bank_Transactions_id_2 ?? 0,
+                        Number_of_Purchase_Invoices_id_2:
+                          response.data.Number_of_Purchase_Invoices_id_2 ?? 0,
+                        Number_of_Sales_Invoices_id_2:
+                          response.data.Number_of_Sales_Invoices_id_2 ?? 0,
+                        Number_of_Petty_Cash_Transactions_id_2:
+                          response.data.Number_of_Petty_Cash_Transactions_id_2 ?? 0,
+                        Number_of_Journal_Entries_id_2:
+                          response.data.Number_of_Journal_Entries_id_2 ?? 0,
+                        Number_of_Other_Transactions_id_2:
+                          response.data.Number_of_Other_Transactions_id_2 ?? 0,
+                        Transactions_Posting_id_2:
+                          response.data.Transactions_Posting_id_2 ?? "",
+                        Quality_of_Paperwork_id_2:
+                          response.data.Quality_of_Paperwork_id_2 ?? "",
+                        Number_of_Integration_Software_Platforms_id_2:
+                          response.data.Number_of_Integration_Software_Platforms_id_2 ?? "",
+                        CIS_id_2: response.data.CIS_id_2 ?? "",
+                        Posting_Payroll_Journals_id_2:
+                          response.data.Posting_Payroll_Journals_id_2 ?? "",
+                        Department_Tracking_id_2: response.data.Department_Tracking_id_2 ?? "",
+                        Sales_Reconciliation_Required_id_2:
+                          response.data.Sales_Reconciliation_Required_id_2 ?? "",
+                        Factoring_Account_id_2: response.data.Factoring_Account_id_2 ?? "",
+                        Payment_Methods_id_2: response.data.Payment_Methods_id_2 ?? "",
+                        Payroll_Frequency_id_3: response.data.Payroll_Frequency_id_3 ?? "",
+                        Type_of_Payslip_id_3: response.data.Type_of_Payslip_id_3 ?? "",
+                        Percentage_of_Variable_Payslips_id_3:
+                          response.data.Percentage_of_Variable_Payslips_id_3 ?? "",
+                        Is_CIS_Required_id_3: response.data.Is_CIS_Required_id_3 ?? "",
+                        CIS_Frequency_id_3: response.data.CIS_Frequency_id_3 ?? "",
+                        Number_of_Sub_contractors_id_3:
+                          response.data.Number_of_Sub_contractors_id_3 ?? 0,
+                        Whose_Tax_Return_is_it_id_4:
+                          response.data.Whose_Tax_Return_is_it_id_4 ?? 0,
+                        Number_of_Income_Sources_id_4:
+                          response.data.Number_of_Income_Sources_id_4 ?? 0,
+                        If_Landlord_Number_of_Properties_id_4:
+                          response.data.If_Landlord_Number_of_Properties_id_4 ?? 0,
+                        If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+                          response.data.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 ??
+                          "",
+                        Management_Accounts_Frequency_id_6:
+                          response.data.Management_Accounts_Frequency_id_6 ?? "",
                     }));
                     setStatusId(response.data.status_type)
                 }
@@ -1427,7 +1485,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                             <select
                                               className="form-control"
                                               name={field.key}
-                                            //   onChange={(e) => HandleChange(e)}
+                                              disabled={true}
+
                                               value={JobInformationData[field.key]}
                                             >
                                               <option value="">
@@ -1452,7 +1511,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                               name={field.name}
                                               min={field.min}
                                               max={field.max}
-                                            //   onChange={(e) => HandleChange(e)}
+                                              disabled={true}
                                               value={JobInformationData[field.key]}
                                             />
                                           )}

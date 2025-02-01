@@ -168,7 +168,6 @@ const CreateJob = () => {
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
-          //  console.log("data checklist",response)
           if (response.status) {
             if (response.data.length > 0) {
               const isIncluded = response.data[0].client_type_id
@@ -268,7 +267,69 @@ const CreateJob = () => {
   const HandleChange = (e) => {
     let name = e.target.name;
     let value = e.target.value;
-    console.log( name, ":", value);
+
+    const date = new Date();
+    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+      if (value == 1) {
+        date.setDate(date.getDate() + 28);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 4) {
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 3) {
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 8) {
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
+    if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+      console.log(name, ":", value);
+      if (value == "Daily") {
+        date.setDate(date.getDate() + 1);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Weekly") {
+        date.setDate(date.getDate() + 3);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Monthly") {
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Quarterly") {
+        date.setDate(date.getDate() + 15);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Yearly") {
+        date.setDate(date.getDate() + 30);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
 
     if (
       name == "NumberOfTransactions" ||
@@ -455,9 +516,8 @@ const CreateJob = () => {
         checklist_id: getChecklistId,
         task: AddTaskArr,
       },
-      ...jobData
+      ...jobData,
     };
-    console.log("req",req)
     const data = { req: req, authToken: token };
     setIsSubmitted(true);
     const isValid = validateAllFields();
@@ -651,12 +711,12 @@ const CreateJob = () => {
           type: "dropdown",
           options: ["GBP", "USD", "INR", "EUR", "JPY", "SGD", "CNY", "Other"],
         },
-        { 
-          name: "Turnover", 
-          key: "Turnover_id_0", 
-          type: "number", 
-          min: 0, 
-          max: 1000000000 
+        {
+          name: "Turnover",
+          key: "Turnover_id_0",
+          type: "number",
+          min: 0,
+          max: 1000000000,
         },
         {
           name: "VAT Registered",
@@ -816,7 +876,12 @@ const CreateJob = () => {
           type: "dropdown",
           options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
         },
-        { name: "CIS", key: "CIS_id_2", type: "dropdown", options: ["No", "Yes"] },
+        {
+          name: "CIS",
+          key: "CIS_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
         {
           name: "Posting Payroll Journals",
           key: "Posting_Payroll_Journals_id_2",
@@ -887,7 +952,12 @@ const CreateJob = () => {
             "75.1 to 100%",
           ],
         },
-        { name: "Is CIS Required", key: "Is_CIS_Required_id_3", type: "dropdown", options: ["No", "Yes"] },
+        {
+          name: "Is CIS Required",
+          key: "Is_CIS_Required_id_3",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
         {
           name: "CIS Frequency",
           key: "CIS_Frequency_id_3",
@@ -997,18 +1067,14 @@ const CreateJob = () => {
       id: 7, // Company Secretarial
       fields: [],
     },
-];
-
+  ];
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   useEffect(() => {
-    console.log("jobData?.Service", jobData?.Service);
     setServiceFieldsData(
       serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
     );
   }, [jobData?.Service]);
-
-  console.log("jobData", jobData);
 
   return (
     <div>
