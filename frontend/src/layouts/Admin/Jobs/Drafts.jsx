@@ -22,9 +22,9 @@ const Drafts = ({ getAccessDataJob, goto }) => {
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: new Date().toISOString().substr(0, 10),
     feedback_received: '0',
-    updated_amendments: '4',
+    updated_amendments: '1',
     final_draft_sent_on: new Date().toISOString().substr(0, 10),
-    was_it_complete: '1',
+    was_it_complete: '0',
     enter_feedback: null,
     id: null
   });
@@ -34,9 +34,9 @@ const Drafts = ({ getAccessDataJob, goto }) => {
       ...AllDraftInputdata,
       draft_sent_on: new Date().toISOString().substr(0, 10),
       feedback_received: '0',
-      updated_amendments: '4',
+      updated_amendments: '1',
       final_draft_sent_on: new Date().toISOString().substr(0, 10),
-      was_it_complete: '1',
+      was_it_complete: '0',
       enter_feedback: null,
       id: null
 
