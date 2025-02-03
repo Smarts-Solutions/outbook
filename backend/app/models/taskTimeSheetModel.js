@@ -288,9 +288,55 @@ const editMissingLog = async (missingLog) => {
 
   const missing_log_document = missingLog.files;
 
+  const [job_id] = await pool.execute('SELECT missing_logs.job_id, jobs.service_id ,jobs.Bookkeeping_Frequency_id_2 FROM `missing_logs` JOIN `jobs` ON jobs.id = missing_logs.job_id  WHERE missing_logs.id = ?', [id]);
+
+  
+  // console.log("missing_log_reviewed_date", missing_log_reviewed_date)
+  // console.log("job_id[0].service_id", job_id[0].service_id)
+  // console.log("job_id[0].Bookkeeping_Frequency_id_2", job_id[0].Bookkeeping_Frequency_id_2)
+
+  
+
+  const date = new Date(missing_log_reviewed_date);
+  if ([1, 3, 4, 5, 6, 7, 8].includes(Number(job_id[0].service_id))) {
+    if (job_id[0].service_id == 1) {
+      date.setDate(date.getDate() + 28);
+    } else if (job_id[0].service_id == 4) {
+      date.setDate(date.getDate() + 5);
+    } else if (job_id[0].service_id == 3) {
+      date.setDate(date.getDate() + 5);
+    } else if (job_id[0].service_id == 8) {
+      date.setDate(date.getDate() + 10);
+    }
+  }
+ 
+
+
+  if (Number(job_id[0].service_id) == 2) {
+    if (job_id[0].Bookkeeping_Frequency_id_2 == "Daily") {
+      date.setDate(date.getDate() + 1);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Weekly") {
+      date.setDate(date.getDate() + 3);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Monthly") {
+      date.setDate(date.getDate() + 10);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Quarterly") {
+      date.setDate(date.getDate() + 15);
+    } else if (job_id[0].Bookkeeping_Frequency_id_2 == "Yearly") {
+      date.setDate(date.getDate() + 30);
+    }
+  }
+
+    
+    let date_new_sla_deadline = new Date(date).toISOString().split("T")[0];
+  // console.log("date_new", date_new)
+  // SLA Deadline Update date
+   await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new_sla_deadline, job_id[0].job_id]);
+
+
   const [[existMissingLog]] = await pool.execute(
     "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
     , [id]);
+
 
 
   try {
@@ -338,8 +384,6 @@ const editMissingLog = async (missingLog) => {
         );
       }
 
-
-      const [job_id] = await pool.execute('SELECT job_id FROM  `missing_logs` WHERE id = ?', [id]);
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id[0].job_id]);
     }
@@ -738,6 +782,15 @@ const getDraftSingleView = async (req, res) => {
 
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
+
+
+  if([1, 2, 3].includes(Number(updated_amendment))){
+    const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, job_id]);
+  }
+  else if([4].includes(Number(updated_amendment))){
+    const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, job_id]);
+  }
+
   let log_message= `sent the draft for job code:`
   if (parseInt(was_it_complete) === 1) {
     const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
@@ -846,6 +899,15 @@ const editDraft = async (draft) => {
   try {
 
     const [[rowJob]] = await pool.execute("SELECT job_id,DATE_FORMAT(draft_sent_on, '%Y-%m-%d') AS draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete,DATE_FORMAT(final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on FROM `drafts` WHERE id = ?", [id]);
+
+
+    if([1, 2, 3].includes(Number(updated_amendment))){
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, rowJob.job_id]);
+    }
+    else if([4].includes(Number(updated_amendment))){
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, rowJob.job_id]);
+    }
+
 
     if (parseInt(was_it_complete) === 1) {
       const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 

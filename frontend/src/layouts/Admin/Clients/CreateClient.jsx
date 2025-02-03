@@ -4901,13 +4901,14 @@ const CreateClient = () => {
                                                     name="notes"
                                                     id="notes"
                                                     value={
-                                                      getPartnershipDetails.notes
+                                                      getCharityIncorporatedOrganisation.notes
+                                                     
                                                     }
-                                                    onChange={(e) => handleChange3(e)}
+                                                    onChange={(e) => handleChange5(e)}
                                                   />
-                                                  {errors3["notes"] && (
+                                                  {errors5["notes"] && (
                                                     <div className="error-text">
-                                                      {errors3["notes"]}
+                                                      {errors5["notes"]}
                                                     </div>
                                                   )}
                                                 </div>
@@ -5487,6 +5488,7 @@ const CreateClient = () => {
                                                       id="notes"
                                                       value={
                                                         getAssociationDetails.notes
+                                                        
                                                       }
                                                       onChange={(e) => handleChange6(e)}
                                                     />
@@ -5505,7 +5507,6 @@ const CreateClient = () => {
                                       </div>
 
                                     ) :
-
                                       selectClientType == 7 ? (
                                         <div className="row ">
                                           <div className="col-lg-12">
