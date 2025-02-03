@@ -65,3 +65,18 @@ export async function GETPROFILE(data) {
         return await err;
     }
 }
+
+// /staff/portfolio
+export async function staffPortfolio(data) {
+    const token = JSON.parse(localStorage.getItem("token"));
+    try {
+        const res = await axios.post(`${Config.base_url}staff/portfolio`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

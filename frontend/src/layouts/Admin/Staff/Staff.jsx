@@ -10,11 +10,12 @@ import sweatalert from "sweetalert2";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import Select from 'react-select';
-import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
+import Select from "react-select";
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Validation_Message from "../../../Utils/Validation_Message";
-import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from 'react-icons/fa';
+import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { staffPortfolio } from "../../../Services/Staff/staff";
 const StaffPage = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -32,7 +33,6 @@ const StaffPage = () => {
     hours: "",
     minutes: "",
   });
-
 
   useEffect(() => {
     if (
@@ -63,7 +63,7 @@ const StaffPage = () => {
 
   const dispatch = useDispatch();
   const [addStaff, setAddStaff] = useState(false);
-  const [portfolio, setPortfolio] = useState(false);
+  const [portfolio, setPortfolio] = useState();
   const [editStaff, setEditStaff] = useState(false);
   const [editShowModel, setEditShowModel] = useState(false);
   const [editStaffData, setEditStaffData] = useState({});
@@ -80,6 +80,10 @@ const StaffPage = () => {
   });
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
 
+  const [AddCustomer, setAddCustomer] = useState([]);
+
+  console.log("AddCustomer", AddCustomer);
+
   useEffect(() => {
     staffData();
     roleData();
@@ -90,12 +94,6 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          // const filteredData = response.data.filter((item) => {
-          //   const itemDate = new Date(item.created_at);
-          //   const { startDate, endDate } = getDateRange(activeTab);
-          //   return itemDate >= startDate && itemDate <= endDate;
-          // });
-
           setStaffDataAll({ loading: false, data: response.data });
         } else {
           setStaffDataAll({ loading: false, data: [] });
@@ -209,11 +207,7 @@ const StaffPage = () => {
       reorder: false,
     },
     {
-      cell: (row) => (
-        <div title={row.email}>
-          {row.email}
-        </div>
-      ),
+      cell: (row) => <div title={row.email}>{row.email}</div>,
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
@@ -223,11 +217,20 @@ const StaffPage = () => {
     {
       name: "Phone",
       cell: (row) => (
-        <div title={row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
-          {row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
+        <div
+          title={
+            row.phone && row.phone_code
+              ? row.phone_code + "-" + row.phone
+              : " - "
+          }
+        >
+          {row.phone && row.phone_code
+            ? row.phone_code + "-" + row.phone
+            : " - "}
         </div>
       ),
-      selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
+      selector: (row) =>
+        row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
       width: "150px",
       reorder: false,
@@ -244,8 +247,9 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -269,35 +273,89 @@ const StaffPage = () => {
             >
               <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
             </button>
-            <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
-              <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
-                <FaPencilAlt />  Portfolio
+            <div
+              className="dropdown-menu custom-dropdown"
+              aria-labelledby="dropdownMenuButton"
+            >
+              <a
+                className="dropdown-item"
+                onClick={() => {
+                
+                  GetAllStaffPortfolio(row);
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <FaPencilAlt /> Portfolio
               </a>
-              <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
-                <FaBriefcase />  Edit
+              <a
+                className="dropdown-item"
+                onClick={() => {
+                  setEditShowModel(true);
+                  setEditStaff(true);
+                  setEditStaffData(row);
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <FaBriefcase /> Edit
               </a>
-              <a className="dropdown-item" onClick={() => { ServiceData(row); SetCompetancy(true) }} style={{ cursor: 'pointer' }} >
-                <FaPlus />  Competency
+              <a
+                className="dropdown-item"
+                onClick={() => {
+                  ServiceData(row);
+                  SetCompetancy(true);
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <FaPlus /> Competency
               </a>
               {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
-              <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() =>
-                navigate(`/admin/staff/viewlogs`, { state: { row: row } })
-              } >
-
-                <FaEye />  Logs
+              <a
+                className="dropdown-item"
+                style={{ cursor: "pointer" }}
+                onClick={() =>
+                  navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+                }
+              >
+                <FaEye /> Logs
               </a>
             </div>
           </div>
-        )
+        );
       },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
       reorder: false,
+    },
+  ];
 
+  const GetAllStaffPortfolio = async (row) => {
+    try {
+
+      const response = await staffPortfolio({
+        req: {
+          action: "get",
+          staff_id: row.id,
+        },
+        authToken: token,
+      });
+      if (response?.status && Array.isArray(response.data)) {
+        
+        setAddCustomer(
+          response.data.map((item) => ({
+            value: item.customer_id, 
+            label: item.trading_name, 
+          }))
+        );
+        setPortfolio(row);
+        GetAllCustomer();
+      } else {
+        console.warn("Invalid response format:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching staff portfolio:", error);
     }
-
-  ]
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -339,8 +397,9 @@ const StaffPage = () => {
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -354,7 +413,6 @@ const StaffPage = () => {
       )
         .unwrap()
         .then(async (response) => {
-
           if (response.status) {
             sweatalert.fire({
               icon: "success",
@@ -366,13 +424,11 @@ const StaffPage = () => {
             setTimeout(() => {
               setAddStaff(false);
               setEditStaff(false);
-              setEditStaffData({})
+              setEditStaffData({});
               SetRefresh(!refresh);
               formik.resetForm();
               window.location.reload();
-
-            }
-              , 1500);
+            }, 1500);
           } else {
             sweatalert.fire({
               icon: "error",
@@ -387,7 +443,6 @@ const StaffPage = () => {
         });
     },
   });
-
 
   const fields = [
     {
@@ -584,32 +639,51 @@ const StaffPage = () => {
     return `${monthDay} (${time.toUpperCase()})`;
   };
 
-
-
-
   const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
     "Last Name": item.last_name,
-    "Email": item.email,
-    "Phone": item.phone,
-    "Role": item.role_name,
-    "Status": item.status === "1" ? "Active" : "Inactive",
+    Email: item.email,
+    Phone: item.phone,
+    Role: item.role_name,
+    Status: item.status === "1" ? "Active" : "Inactive",
   }));
 
-
-  const [AddCustomer, setAddCustomer] = useState([]);
   const colourOptions = [
-    { value: 'ocean', label: 'Ocean' },
-    { value: 'blue', label: 'Blue' },
-    { value: 'purple', label: 'Purple' },
-    { value: 'red', label: 'Red' },
-    { value: 'orange', label: 'Orange' },
+    { value: "ocean", label: "Ocean" },
+    { value: "blue", label: "Blue" },
+    { value: "purple", label: "Purple" },
+    { value: "red", label: "Red" },
+    { value: "orange", label: "Orange" },
   ];
 
   const handleAddCustomer = (e) => {
     setAddCustomer(e);
-  }
+  };
 
+  const HandleChangeStaffPortfolio = async () => {
+    try {
+      const response = await staffPortfolio({
+        req: {
+          action: "update",
+          staff_id: portfolio?.id,
+          customer_id: AddCustomer.map((item) => item.value),
+        },
+        authToken: token,
+      });
+      if (response.status) {
+        sweatalert.fire({
+          icon: "success",
+          title: "Success",
+          text: response.message,
+          timer: 2000,
+        });
+        SetRefresh(!refresh);
+        setPortfolio(false);
+      }
+    } catch (error) {
+      return;
+    }
+  };
 
   return (
     <div>
@@ -624,11 +698,9 @@ const StaffPage = () => {
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
             <div className="row align-items-start">
-              <div className="col-md-6">
-              </div>
+              <div className="col-md-6"></div>
               <div className="col-md-4">
                 <div className="d-flex justify-content-end mb-4">
-
                   <div className="">
                     {showStaffInsertTab && (
                       <button
@@ -644,14 +716,12 @@ const StaffPage = () => {
                       </button>
                     )}
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div className="tab-content mt-minus-90" id="pills-tabContent">
-
           <div className="d-flex justify-content-end">
             <ExportToExcel
               className="btn btn-outline-info fw-bold float-end border-3 "
@@ -661,7 +731,11 @@ const StaffPage = () => {
           </div>
 
           {tabs.map((tab) => (
-            <div key={tab.id} className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""}`}
+            <div
+              key={tab.id}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
             >
@@ -691,7 +765,10 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Add"
-          closeBtn={(e) => { formik.resetForm(); setAddStaff(false) }}
+          closeBtn={(e) => {
+            formik.resetForm();
+            setAddStaff(false);
+          }}
         />
       </CommanModal>
 
@@ -701,9 +778,10 @@ const StaffPage = () => {
         hideBtn={false}
         btn_name="Save"
         title="Manage Portfolio"
-        handleClose={() => setPortfolio(false)}
+        handleClose={() => setPortfolio()}
         Submit_Function={() => {
-          setPortfolio(false);
+          // setPortfolio(false);
+          HandleChangeStaffPortfolio();
         }}
         Submit_Cancel_Function={() => {
           setPortfolio(false);
@@ -716,6 +794,7 @@ const StaffPage = () => {
                 name="colors"
                 className="basic-multi-select"
                 classNamePrefix="select"
+                value={AddCustomer}
                 options={allCustomerData.map((item) => ({
                   value: item.id,
                   label: item.customer_name,
@@ -723,7 +802,7 @@ const StaffPage = () => {
                 onChange={handleAddCustomer}
                 isMulti
               />
-            </div>  
+            </div>
           </div>
         </div>
       </CommanModal>
@@ -746,10 +825,13 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Update"
-          closeBtn={(e) => { formik.resetForm(); setEditStaff(false); setEditStaffData({}) }}
+          closeBtn={(e) => {
+            formik.resetForm();
+            setEditStaff(false);
+            setEditStaffData({});
+          }}
           additional_field={
             <div className="row mt-2 ">
-
               <label className="form-label">Weekly Timesheet Hours</label>
               <div className="input-group row">
                 {/* Hours Input */}
@@ -805,7 +887,6 @@ const StaffPage = () => {
                 </div>
               </div>
             </div>
-
           }
         />
       </CommanModal>

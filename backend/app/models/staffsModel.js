@@ -1,7 +1,7 @@
 const pool = require("../../app/config/database");
 const { SatffLogUpdateOperation } = require("../../app/utils/helper");
-const axios = require('axios');
-const qs = require('qs');
+const axios = require("axios");
+const qs = require("qs");
 
 const createStaff = async (staff) => {
   // console.log(staff);
@@ -23,7 +23,7 @@ const createStaff = async (staff) => {
   const [check] = await pool.execute(checkQuery, [email]);
 
   if (check.length > 0) {
-    return { status: false, message: 'Email Already Exists.' };
+    return { status: false, message: "Email Already Exists." };
   }
 
   const Role_query = `SELECT role ,hourminute FROM roles WHERE id = ?`;
@@ -63,10 +63,14 @@ const createStaff = async (staff) => {
       permission_type: "created",
       module_id: result.insertId,
     });
-    return { status: true, message: 'Staff created successfully.', data: result.insertId };
+    return {
+      status: true,
+      message: "Staff created successfully.",
+      data: result.insertId,
+    };
   } catch (err) {
-    console.error('Error creating data:', err);
-    return { status: false, message: 'Error Created Staff' };
+    console.error("Error creating data:", err);
+    return { status: false, message: "Error Created Staff" };
   }
 };
 
@@ -97,14 +101,13 @@ const deleteStaff = async (staffId) => {
 };
 
 const updateStaff = async (staff) => {
-
   const { id, ...fields } = staff;
   let email = fields.email;
 
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
   if (check.length > 0) {
-    return { status: false, message: 'Email Already Exists.' };
+    return { status: false, message: "Email Already Exists." };
   }
   // Create an array to hold the set clauses
   const setClauses = [];
@@ -152,10 +155,14 @@ const updateStaff = async (staff) => {
         module_id: staff.id,
       });
     }
-    return { status: true, message: 'staff updated successfully.', data: rows.affectedRows };
+    return {
+      status: true,
+      message: "staff updated successfully.",
+      data: rows.affectedRows,
+    };
   } catch (err) {
     console.log("Error updating staff:", err);
-    return { status: false, message: 'Error updating staff' };
+    return { status: false, message: "Error updating staff" };
   }
 };
 
@@ -209,7 +216,7 @@ const updateStaffwithLogin = async (staff) => {
     }
   } catch (err) {
     console.log("Error updating staff:", err);
-    return
+    return;
   }
 };
 
@@ -330,7 +337,7 @@ const status = async (id) => {
       throw err;
     }
   } else {
-    return
+    return;
   }
 };
 
@@ -340,28 +347,35 @@ const sharepoint_token = async () => {
     const [[result]] = await pool.execute(query);
     //console.log("result", result);
     if (result != undefined && result != null) {
-      if (result.access_token != null && result.access_token != "" && result.access_token != undefined) {
-        const TokenExpiry = await CheckExpirySharePointToken(result.access_token);
+      if (
+        result.access_token != null &&
+        result.access_token != "" &&
+        result.access_token != undefined
+      ) {
+        const TokenExpiry = await CheckExpirySharePointToken(
+          result.access_token
+        );
         if (TokenExpiry) {
-          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token, result.client_id, result.client_secret);
-          if(genrateAccessToken == "error"){
+          const genrateAccessToken = await genrateSharePointAccessToken(
+            result.refresh_token,
+            result.client_id,
+            result.client_secret
+          );
+          if (genrateAccessToken == "error") {
             return "sharepoint_token_not_found";
-          }else{
-          return genrateAccessToken;
+          } else {
+            return genrateAccessToken;
           }
         } else {
           return result.access_token;
         }
-
       } else {
         return "sharepoint_token_not_found";
       }
-
     } else {
       console.log(" sharepoint record not found:");
       return "sharepoint_token_not_found";
     }
-
   } catch (err) {
     console.log("Error sharepoint token data:", err);
     return "sharepoint_token_not_found";
@@ -380,7 +394,9 @@ const CheckExpirySharePointToken = async (token) => {
       }
 
       // Decode the Base64URL encoded payload
-      const decodedPayload = JSON.parse(Buffer.from(base64Payload, "base64url").toString("utf-8"));
+      const decodedPayload = JSON.parse(
+        Buffer.from(base64Payload, "base64url").toString("utf-8")
+      );
 
       const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
       if (decodedPayload.exp && decodedPayload.exp < currentTime) {
@@ -400,31 +416,35 @@ const CheckExpirySharePointToken = async (token) => {
   }
 };
 
-const genrateSharePointAccessToken = async (refresh_token, client_id, client_secret) => {
-
-  let token
+const genrateSharePointAccessToken = async (
+  refresh_token,
+  client_id,
+  client_secret
+) => {
+  let token;
   const data = qs.stringify({
-    'grant_type': 'refresh_token',
-    'client_id': client_id,
-    'client_secret': client_secret,
-    'refresh_token': refresh_token
+    grant_type: "refresh_token",
+    client_id: client_id,
+    client_secret: client_secret,
+    refresh_token: refresh_token,
   });
 
   let config = {
-    method: 'post',
+    method: "post",
     maxBodyLength: Infinity,
-    url: 'https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token',
+    url: "https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    data: data
+    data: data,
   };
 
-  await axios.request(config)
+  await axios
+    .request(config)
     .then((response) => {
-      if(response.data.access_token != undefined){
+      if (response.data.access_token != undefined) {
         token = response.data.access_token;
-      }else{
+      } else {
         token = "error";
       }
     })
@@ -432,8 +452,8 @@ const genrateSharePointAccessToken = async (refresh_token, client_id, client_sec
       token = "error";
     });
 
-    return token;
-}
+  return token;
+};
 
 const getSharePointToken = async (staff) => {
   const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
@@ -441,33 +461,82 @@ const getSharePointToken = async (staff) => {
     const [[result]] = await pool.execute(query);
     //console.log("result", result);
     if (result != undefined && result != null) {
-      if (result.access_token != null && result.access_token != "" && result.access_token != undefined) {
-        const TokenExpiry = await CheckExpirySharePointToken(result.access_token);
+      if (
+        result.access_token != null &&
+        result.access_token != "" &&
+        result.access_token != undefined
+      ) {
+        const TokenExpiry = await CheckExpirySharePointToken(
+          result.access_token
+        );
         if (TokenExpiry) {
-          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token, result.client_id, result.client_secret);
-          if(genrateAccessToken == "error"){
+          const genrateAccessToken = await genrateSharePointAccessToken(
+            result.refresh_token,
+            result.client_id,
+            result.client_secret
+          );
+          if (genrateAccessToken == "error") {
             return "sharepoint_token_not_found";
-          }else{
-          return genrateAccessToken;
+          } else {
+            return genrateAccessToken;
           }
         } else {
           return result.access_token;
         }
-
       } else {
         return "sharepoint_token_not_found";
       }
-
     } else {
       console.log(" sharepoint record not found:");
       return "sharepoint_token_not_found";
     }
-
   } catch (err) {
     console.log("Error sharepoint token data:", err);
     return "sharepoint_token_not_found";
   }
-}
+};
+
+const GetStaffPortfolio = async (staff) => {
+  console.log("staff_id", staff);
+  const id = staff.staff_id;
+
+  const query = `
+    SELECT sp.customer_id, c.trading_name 
+    FROM staff_portfolio sp
+    JOIN customers c ON sp.customer_id = c.id
+    WHERE sp.staff_id = ?
+  `;
+
+  try {
+    const [result] = await pool.execute(query, [id]);
+    return result;
+  } catch (err) {
+    console.error("Error selecting data:", err);
+    throw err;
+  }
+};
+
+
+const UpdateStaffPortfolio = async (staff) => {
+  try {
+
+    const DeleteQuery = `DELETE FROM staff_portfolio WHERE staff_id = ?`;
+    await pool.execute(DeleteQuery, [staff.staff_id]);
+
+    if (staff.customer_id && staff.customer_id.length > 0) {
+      const createdAt = new Date();
+      const values = staff.customer_id.map((customer_id) => [staff.staff_id, customer_id, createdAt]);
+
+      const query = `INSERT INTO staff_portfolio (staff_id, customer_id, createdAt) VALUES ?`;
+      await pool.query(query, [values]);
+    }
+
+    return { status: true, message: "Staff Portfolio updated successfully." };
+  } catch (error) {
+    console.error("Error updating staff portfolio:", error);
+    return { status: false, message: "Failed to update staff portfolio", error };
+  }
+};
 
 
 module.exports = {
@@ -485,5 +554,7 @@ module.exports = {
   managePortfolio,
   status,
   sharepoint_token,
-  getSharePointToken
+  getSharePointToken,
+  GetStaffPortfolio,
+  UpdateStaffPortfolio,
 };
