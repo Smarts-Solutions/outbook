@@ -333,6 +333,7 @@ const jobAdd = async (job) => {
   //CUS_CLI_00001
   const job_id = await generateNextUniqueCode(data);
 
+
   try {
     // Helper function to replace undefined with null
     const handleUndefined = (value) => (value === undefined ? null : value);
@@ -516,7 +517,6 @@ VALUES (
     // Apply the undefined check for each field
     const cleanedValues = values.map(handleUndefined);
 
-   
 
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);

@@ -22,6 +22,7 @@ const EditJob = () => {
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
 
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState({
     loading: false,
     data: {},
@@ -222,7 +223,8 @@ const EditJob = () => {
               status_type: response.data.status_type ?? null,
               notes: response.data.notes ?? "",
               Turnover_Period_id_0: response.data.Turnover_Period_id_0 ?? "",
-              Turnover_Currency_id_0: response.data.Turnover_Currency_id_0 ?? "",
+              Turnover_Currency_id_0:
+                response.data.Turnover_Currency_id_0 ?? "",
               Turnover_id_0: response.data.Turnover_id_0 ?? 0.0,
               VAT_Registered_id_0: response.data.VAT_Registered_id_0 ?? "",
               VAT_Frequency_id_0: response.data.VAT_Frequency_id_0 ?? "",
@@ -252,16 +254,20 @@ const EditJob = () => {
               Quality_of_Paperwork_id_2:
                 response.data.Quality_of_Paperwork_id_2 ?? "",
               Number_of_Integration_Software_Platforms_id_2:
-                response.data.Number_of_Integration_Software_Platforms_id_2 ?? "",
+                response.data.Number_of_Integration_Software_Platforms_id_2 ??
+                "",
               CIS_id_2: response.data.CIS_id_2 ?? "",
               Posting_Payroll_Journals_id_2:
                 response.data.Posting_Payroll_Journals_id_2 ?? "",
-              Department_Tracking_id_2: response.data.Department_Tracking_id_2 ?? "",
+              Department_Tracking_id_2:
+                response.data.Department_Tracking_id_2 ?? "",
               Sales_Reconciliation_Required_id_2:
                 response.data.Sales_Reconciliation_Required_id_2 ?? "",
-              Factoring_Account_id_2: response.data.Factoring_Account_id_2 ?? "",
+              Factoring_Account_id_2:
+                response.data.Factoring_Account_id_2 ?? "",
               Payment_Methods_id_2: response.data.Payment_Methods_id_2 ?? "",
-              Payroll_Frequency_id_3: response.data.Payroll_Frequency_id_3 ?? "",
+              Payroll_Frequency_id_3:
+                response.data.Payroll_Frequency_id_3 ?? "",
               Type_of_Payslip_id_3: response.data.Type_of_Payslip_id_3 ?? "",
               Percentage_of_Variable_Payslips_id_3:
                 response.data.Percentage_of_Variable_Payslips_id_3 ?? "",
@@ -555,11 +561,7 @@ const EditJob = () => {
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
       job_type_id: Number(jobData.JobType),
-      budgeted_hours: formatTime(
-        budgetedHours.hours,
-        budgetedHours.minutes
-    
-      ),
+      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
@@ -1202,13 +1204,11 @@ const EditJob = () => {
     },
   ];
 
-  const [serviceFieldsData, setServiceFieldsData] = useState([]);
   useEffect(() => {
     setServiceFieldsData(
       serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
     );
   }, [jobData?.Service]);
-
 
   console.log("jobData", jobData);
 
@@ -2409,8 +2409,8 @@ const EditJob = () => {
                                                 <input
                                                   type={field.type || "text"}
                                                   className="form-control"
-                                                  placeholder={field.key}
-                                                  name={field.name}
+                                                  placeholder={field.name}
+                                                  name={field.key}
                                                   min={field.min}
                                                   max={field.max}
                                                   onChange={(e) =>

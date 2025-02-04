@@ -56,6 +56,8 @@ const CreateJob = () => {
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
+  
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -79,7 +81,7 @@ const CreateJob = () => {
     DueOn: null,
     SubmissionDeadline: null,
     CustomerDeadlineDate: null,
-    SLADeadlineDate: null,
+    SLADeadlineDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0],
     InternalDeadlineDate: null,
     FilingWithCompaniesHouseRequired: "0",
     CompaniesHouseFilingDate: null,
@@ -101,6 +103,7 @@ const CreateJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
     notes: "",
+    Bookkeeping_Frequency_id_2:"Daily"
   });
 
   useEffect(() => {
@@ -297,7 +300,7 @@ const CreateJob = () => {
       }
     }
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
-      console.log(name, ":", value);
+    
       if (value == "Daily") {
         date.setDate(date.getDate() + 1);
         setJobData((prevState) => ({
@@ -485,10 +488,10 @@ const CreateJob = () => {
       due_on: jobData.DueOn,
       submission_deadline: jobData.SubmissionDeadline,
       customer_deadline_date: jobData.CustomerDeadlineDate,
-      //sla_deadline_date: jobData.SLADeadlineDate,
+    
 
-      sla_deadline_date: jobData.SLADeadlineDate
-        ? jobData.SLADeadlineDate
+      sla_deadline_date: jobData?.SLADeadlineDate
+        ? jobData?.SLADeadlineDate
         : new Date().toISOString().split("T")[0],
 
       internal_deadline_date: jobData.InternalDeadlineDate,
@@ -518,6 +521,8 @@ const CreateJob = () => {
       },
       ...jobData,
     };
+
+
     const data = { req: req, authToken: token };
     setIsSubmitted(true);
     const isValid = validateAllFields();
@@ -803,7 +808,7 @@ const CreateJob = () => {
           options: [
             "Daily",
             "Weekly",
-            "Fortnightly",
+            // "Fortnightly",
             "Monthly",
             "Quarterly",
             "Yearly",
@@ -1069,11 +1074,22 @@ const CreateJob = () => {
     },
   ];
 
-  const [serviceFieldsData, setServiceFieldsData] = useState([]);
   useEffect(() => {
     setServiceFieldsData(
       serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
     );
+
+
+    if(jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily"){
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+
+    }
+
   }, [jobData?.Service]);
 
   return (
@@ -1937,6 +1953,7 @@ const CreateJob = () => {
                                               className="form-control"
                                               name={field.key}
                                               onChange={(e) => HandleChange(e)}
+                                              value={jobData[field.key]}
                                             >
                                               <option value="">
                                                 Select {field.name}
