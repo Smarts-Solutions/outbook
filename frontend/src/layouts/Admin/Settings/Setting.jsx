@@ -817,7 +817,7 @@ const Setting = () => {
                     className="btn btn-sm btn-info text-white ms-2"
                     onClick={(e) => handleJobType(row)}
                   >
-                    <i className="fa fa-plus pe-1"></i>Add Job Type 2
+                    <i className="fa fa-plus pe-1"></i>Add Job Type
                   </button>
                 )}
               </div>  
