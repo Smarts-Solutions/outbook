@@ -1973,8 +1973,8 @@ const CreateJob = () => {
                                             <input
                                               type={field.type || "text"}
                                               className="form-control"
-                                              placeholder={field.key}
-                                              name={field.name}
+                                              placeholder={field.name}
+                                              name={field.key}
                                               min={field.min}
                                               max={field.max}
                                               onChange={(e) => HandleChange(e)}
