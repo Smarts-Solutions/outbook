@@ -5,19 +5,3 @@
 // export const base_url = `https://outbooks.tradestreet.in/backend/`;
 //  export const base_url = `${window.location.origin}/backend/`
 
-
-
- 
-
- 
-
- 
-
-
-
-
-
-
-
-
-
