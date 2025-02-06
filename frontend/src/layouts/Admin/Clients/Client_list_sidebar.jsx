@@ -1020,18 +1020,18 @@ const ClientLists = () => {
               <div className="report-data mt-4">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">{tab.title}</h3>
+                    <h3 className="mt-0">{tab?.title}</h3>
                   </div>
                   <div className="col-md-2">
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3 "
                       apiData={
-                        tab.title == "Clients" ? tab.data.map((item) => ({
-                          "Client Name": item.client_name,
-                          "Client Code": item.client_code,
+                        tab?.title == "Clients" ? tab?.data?.map((item) => ({
+                          "Client Name": item?.client_name,
+                          "Client Code": item?.client_code,
                           "Client Type Name": item.client_type_name,
                           "Status": item.status == 1 ? "Active" : "Deactive",
-                        })) : tab.title == "Jobs" ? tab.data.map((item) => ({
+                        })) : tab.title == "Jobs" ? tab?.data?.map((item) => ({
                           "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
                           "Client Name": item.client_trading_name,
                           "Job Type": item.job_type_name,
@@ -1040,7 +1040,7 @@ const ClientLists = () => {
                           "Client Job Code": item.client_job_code,
                           "Outbook Account Manager": item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name,
                           "Allocated To": item.allocated_id != null ? item.allocated_first_name + " " + item.allocated_last_name : "",
-                          "Timesheet": item.total_hours_status == 1 && item.total_hours != null ? item.total_hours.split(":")[0] + "h " + item.total_hours.split(":")[1] + "m" : "-",
+                          "Timesheet": item.total_hours_status == 1 && item.total_hours != null ? item.total_hours?.split(":")[0] + "h " + item.total_hours.split(":")[1] + "m" : "-",
                           "Invoicing": item.invoiced == 1 ? "YES" : "NO",
                         })) : tab.data
 
