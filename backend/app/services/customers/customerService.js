@@ -63,6 +63,10 @@ const customerUpdate = async (customer) => {
   return customerModel.customerUpdate(customer);
 };
 
+const deleteCustomer = async (customer) => {
+  return customerModel.deleteCustomer(customer);
+};
+
 const customerStatusUpdate = async (customer) => {
   return customerModel.customerStatusUpdate(customer);
 }
@@ -80,5 +84,6 @@ module.exports = {
   updateProcessCustomerFileAction,
   customerUpdate,
   customerStatusUpdate,
-  getcustomerschecklist
+  getcustomerschecklist,
+  deleteCustomer
 };

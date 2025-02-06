@@ -1018,21 +1018,7 @@ id DESC;`;
 
 }
 
-const deleteCustomer = async (customer) => {
-    // if(parseInt(customer_id)  > 0){
 
-    // }
-    // const { customer_id } = customer;
-
-    // try {
-    //     await pool.execute('DELETE FROM customers WHERE id = ?', [customer_id]);
-    //     await pool.execute('DELETE FROM customer_company_information WHERE customer_id = ?', [customer_id]);
-    // } catch (err) {
-
-    //     throw err;
-    // }
-
-}
 
 const updateProcessCustomerServices = async (customerProcessData) => {
 
@@ -3484,6 +3470,19 @@ const getcustomerschecklist = async (customer) => {
         console.log(err);
     }
 };
+
+const deleteCustomer = async (customer) => {
+    const { customer_id } = customer;
+    const query = `DELETE FROM customers WHERE id = ?`;
+    const [result] = await pool.execute(query, [customer_id]);
+    if (result.affectedRows > 0) {
+        return { status: true, message: 'Customer deleted successfully.' };
+    }
+    return { status: false, message: 'Error deleting customer.' };
+}
+
+
+
 
 module.exports = {
     createCustomer,
