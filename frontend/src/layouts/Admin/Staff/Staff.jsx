@@ -626,6 +626,9 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
+    
+    console.log("editStaffData", editStaffData);
+  
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
@@ -634,6 +637,7 @@ const StaffPage = () => {
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue("phone_code", editStaffData.phone_code || null);
+      formik.setFieldValue("staff_to", editStaffData.staff_to || '');
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],

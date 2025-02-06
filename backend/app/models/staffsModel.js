@@ -17,7 +17,10 @@ const createStaff = async (staff) => {
     created_by,
     StaffUserId,
     ip,
+    staff_to
   } = staff;
+
+
 
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
   const [check] = await pool.execute(checkQuery, [email]);
@@ -53,6 +56,18 @@ const createStaff = async (staff) => {
       created_by,
     ]);
 
+
+    if (staff_to != '' && staff_to != undefined) {
+      const staff_to_query =
+        `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`
+        ;
+      const [staff_to_result] = await pool.execute(staff_to_query, [
+        result.insertId,
+        staff_to
+      ]);
+
+    }
+
     const currentDate = new Date();
     await SatffLogUpdateOperation({
       staff_id: StaffUserId,
@@ -76,14 +91,14 @@ const createStaff = async (staff) => {
 
 const getStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone_code ,staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
+    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone_code ,staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role ,line_managers.staff_to FROM staffs JOIN roles ON staffs.role_id = roles.id LEFT JOIN line_managers ON line_managers.staff_by = staffs.id  ORDER BY staffs.id DESC"
   );
   return rows;
 };
 
 const getManagerStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email ,staffs.phone_code, staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id where staffs.role_id=4 AND staffs.status='1' ORDER BY staffs.id DESC"
+    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email ,staffs.phone_code, staffs.phone , staffs.status , roles.role_name , roles.role ,line_managers.staff_to FROM staffs JOIN roles ON staffs.role_id = roles.id LEFT JOIN line_managers ON line_managers.staff_by = staffs.id where staffs.role_id=4 AND staffs.status='1' ORDER BY staffs.id DESC"
   );
   return rows;
 };
@@ -104,6 +119,33 @@ const updateStaff = async (staff) => {
   const { id, ...fields } = staff;
   let email = fields.email;
 
+
+  // Line Manage Code
+  let staff_to = fields.staff_to;
+  if (staff_to != '' && staff_to != undefined) {
+    let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
+    let [staff_by_result] = await pool.execute(staff_by_query, [id]);
+    if (staff_by_result.length > 0) {
+      const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
+      const [staff_to_result] = await pool.execute(staff_to_query, [
+        staff_to,
+        id,
+      ]);
+
+    } else {
+      const staff_to_query = `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`;
+      const [staff_to_result] = await pool.execute(staff_to_query, [
+        id,
+        staff_to,
+      ]);
+
+    }
+
+  }
+  // End Line Manage Code
+
+
+
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
   if (check.length > 0) {
@@ -114,7 +156,7 @@ const updateStaff = async (staff) => {
   const values = [];
   // Iterate over the fields and construct the set clauses dynamically
   for (const [key, value] of Object.entries(fields)) {
-    if (key != "ip" && key != "StaffUserId") {
+    if (key != "ip" && key != "StaffUserId" && key != "staff_to") {
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
@@ -515,7 +557,6 @@ const GetStaffPortfolio = async (staff) => {
     throw err;
   }
 };
-
 
 const UpdateStaffPortfolio = async (staff) => {
   try {

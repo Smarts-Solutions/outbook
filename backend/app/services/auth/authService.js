@@ -16,6 +16,7 @@ const addStaff = async (staff) => {
     created_by,
     StaffUserId,
     ip,
+    staff_to
   } = staff;
   let password = "abc@123456";
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,6 +32,7 @@ const addStaff = async (staff) => {
     created_by,
     StaffUserId,
     ip,
+    staff_to
   });
 };
 
