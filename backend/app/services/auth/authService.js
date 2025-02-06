@@ -191,6 +191,10 @@ const UpdateStaffPortfolio = async (staff) => {
   return staffModel.UpdateStaffPortfolio(staff);
 }
 
+const deleteStaff = async (staff) => {
+  return staffModel.deleteStaffUpdateStaff(staff);
+}
+
 
 module.exports = {
   addStaff,
@@ -209,6 +213,7 @@ module.exports = {
   status,
   getSharePointToken,
   GetStaffPortfolio,
-  UpdateStaffPortfolio
+  UpdateStaffPortfolio,
+  deleteStaff
 
 };

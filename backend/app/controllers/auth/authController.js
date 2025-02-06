@@ -232,6 +232,17 @@ const HandelStaffPortfolio = async (req, res) => {
   }
 };
 
+const deleteStaff = async (req, res) => {
+  try {
+    const { ...staff } = req.body;
+    const data = await authService.deleteStaff(staff);
+    return res.send({ status: true, message: "Success.." });
+  } catch (error
+  ) {
+    return res.send({ status: false, message: error.message });
+  }
+}
+
 module.exports = {
   handleStaff,
   staffCompetency,
@@ -243,5 +254,6 @@ module.exports = {
   isLogOut,
   status,
   getSharePointToken,
-  HandelStaffPortfolio
+  HandelStaffPortfolio,
+  deleteStaff
 };

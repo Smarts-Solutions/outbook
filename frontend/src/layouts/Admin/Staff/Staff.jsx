@@ -15,7 +15,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { staffPortfolio } from "../../../Services/Staff/staff";
+import { staffPortfolio, DELETESTAFF } from "../../../Services/Staff/staff";
 const StaffPage = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -28,11 +28,60 @@ const StaffPage = () => {
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
   const [allCustomerData, setAllCustomerData] = useState([]);
+  const [deleteStaff, setDeleteStaff] = useState();
 
   const [budgetedHours, setBudgetedHours] = useState({
     hours: "",
     minutes: "",
   });
+  const [selectedStaff, setSelectedStaff] = useState(null);
+
+  const handleDeleteClick = async () => {
+    let data = {
+      delete_id: deleteStaff,
+      update_staff: selectedStaff,
+    };
+    const res = await DELETESTAFF(data);
+    console.log(res);
+    if (res?.status) {
+      await dispatch(
+        Staff({ req: { action: "delete", id: deleteStaff }, authToken: token })
+      )
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message,
+              timer: 2000,
+            });
+            setSelectedStaff(null);
+            SetRefresh(!refresh);
+            setDeleteStaff(false)
+
+          } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Oops...",
+              text: response.message,
+            });
+            setDeleteStaff(false)
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+    } else {
+      sweatalert.fire({
+        icon: "error",
+        title: "Oops...",
+        text: res.message,
+      });
+      setDeleteStaff("");
+    }
+  };
 
   useEffect(() => {
     if (
@@ -259,64 +308,76 @@ const StaffPage = () => {
       name: "Actions",
       cell: (row) => {
         return (
-          <div className="dropdown">
-            <button
-              className="btn "
-              type="button"
-              id="dropdownMenuButton"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
-            </button>
-            <div
-              className="dropdown-menu custom-dropdown"
-              aria-labelledby="dropdownMenuButton"
-            >
-              <a
-                className="dropdown-item"
-                onClick={() => {
-                
-                  GetAllStaffPortfolio(row);
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <FaPencilAlt /> Portfolio
-              </a>
-              <a
-                className="dropdown-item"
-                onClick={() => {
-                  setEditShowModel(true);
-                  setEditStaff(true);
-                  setEditStaffData(row);
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <FaBriefcase /> Edit
-              </a>
-              <a
-                className="dropdown-item"
-                onClick={() => {
-                  ServiceData(row);
-                  SetCompetancy(true);
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <FaPlus /> Competency
-              </a>
-              {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
-              <a
-                className="dropdown-item"
-                style={{ cursor: "pointer" }}
-                onClick={() =>
-                  navigate(`/admin/staff/viewlogs`, { state: { row: row } })
-                }
-              >
-                <FaEye /> Logs
-              </a>
+          <>
+            <div className="px-2">
+              {row?.is_disable == 0 && (
+                <button
+                  className="delete-icon dropdown-item  w-auto mb-2"
+                  onClick={() => setDeleteStaff(row?.id)}
+                >
+                  {" "}
+                  <i className="ti-trash text-danger" />
+                </button>
+              )}
             </div>
-          </div>
+            <div className="dropdown">
+              <button
+                className="btn "
+                type="button"
+                id="dropdownMenuButton"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              </button>
+              <div
+                className="dropdown-menu custom-dropdown"
+                aria-labelledby="dropdownMenuButton"
+              >
+                <a
+                  className="dropdown-item"
+                  onClick={() => {
+                    GetAllStaffPortfolio(row);
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <FaPencilAlt /> Portfolio
+                </a>
+                <a
+                  className="dropdown-item"
+                  onClick={() => {
+                    setEditShowModel(true);
+                    setEditStaff(true);
+                    setEditStaffData(row);
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <FaBriefcase /> Edit
+                </a>
+                <a
+                  className="dropdown-item"
+                  onClick={() => {
+                    ServiceData(row);
+                    SetCompetancy(true);
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <FaPlus /> Competency
+                </a>
+                {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
+                <a
+                  className="dropdown-item"
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+                  }
+                >
+                  <FaEye /> Logs
+                </a>
+              </div>
+            </div>
+          </>
         );
       },
       ignoreRowClick: true,
@@ -328,7 +389,6 @@ const StaffPage = () => {
 
   const GetAllStaffPortfolio = async (row) => {
     try {
-
       const response = await staffPortfolio({
         req: {
           action: "get",
@@ -337,11 +397,10 @@ const StaffPage = () => {
         authToken: token,
       });
       if (response?.status && Array.isArray(response.data)) {
-        
         setAddCustomer(
           response.data.map((item) => ({
-            value: item.customer_id, 
-            label: item.trading_name, 
+            value: item.customer_id,
+            label: item.trading_name,
           }))
         );
         setPortfolio(row);
@@ -396,8 +455,9 @@ const StaffPage = () => {
         status: values.status,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -426,9 +486,7 @@ const StaffPage = () => {
               SetRefresh(!refresh);
               formik.resetForm();
               window.location.reload();
-
-            }
-              , 1500);
+            }, 1500);
           } else {
             sweatalert.fire({
               icon: "error",
@@ -552,30 +610,30 @@ const StaffPage = () => {
       })
       .then(async (result) => {
         if (result.isConfirmed) {
-          await dispatch(
-            Staff({ req: { action: "delete", id: row.id }, authToken: token })
-          )
-            .unwrap()
-            .then(async (response) => {
-              if (response.status) {
-                sweatalert.fire({
-                  icon: "success",
-                  title: "Success",
-                  text: response.message,
-                  timer: 2000,
-                });
-                SetRefresh(!refresh);
-              } else {
-                sweatalert.fire({
-                  icon: "error",
-                  title: "Oops...",
-                  text: response.message,
-                });
-              }
-            })
-            .catch((error) => {
-              return;
-            });
+          // await dispatch(
+          //   Staff({ req: { action: "delete", id: row.id }, authToken: token })
+          // )
+          //   .unwrap()
+          //   .then(async (response) => {
+          //     if (response.status) {
+          //       sweatalert.fire({
+          //         icon: "success",
+          //         title: "Success",
+          //         text: response.message,
+          //         timer: 2000,
+          //       });
+          //       SetRefresh(!refresh);
+          //     } else {
+          //       sweatalert.fire({
+          //         icon: "error",
+          //         title: "Oops...",
+          //         text: response.message,
+          //       });
+          //     }
+          //   })
+          //   .catch((error) => {
+          //     return;
+          //   });
         }
       });
   };
@@ -994,6 +1052,57 @@ const StaffPage = () => {
             </div>
           </Row>
         </FormGroup>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={deleteStaff}
+        backdrop="static"
+        size="ms-5"
+        title="Delete Staff"
+        hideBtn={true}
+        handleClose={() => setDeleteStaff(false)}
+      >
+        <div className="modal-body">
+          <div className="mb-3">
+            <label htmlFor="staff-select" className="form-label">
+              Select Staff to Delete:
+            </label>
+            <select
+  id="staff-select"
+  value={selectedStaff || ""}
+  onChange={(e) => setSelectedStaff(e.target.value)}
+  className="form-select"
+>
+  <option value="" disabled>
+    Choose Staff
+  </option>
+  {staffDataAll?.data
+    ?.filter((staff) => staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2)
+    .map((staff) => (
+      <option key={staff.id} value={staff.id}>
+        {staff.first_name}
+      </option>
+    ))}
+</select>
+
+          </div>
+
+          {selectedStaff && (
+            <button
+              onClick={handleDeleteClick}
+              className="btn btn-danger w-100 mt-3"
+            >
+              Delete
+            </button>
+          )}
+
+          <button
+            onClick={() => setDeleteStaff(false)}
+            className="btn btn-secondary w-100 mt-2"
+          >
+            Cancel
+          </button>
+        </div>
       </CommanModal>
     </div>
   );

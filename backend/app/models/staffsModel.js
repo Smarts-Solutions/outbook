@@ -76,7 +76,7 @@ const createStaff = async (staff) => {
 
 const getStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone_code ,staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
+    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.is_disable , staffs.phone_code ,staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
   );
   return rows;
 };
@@ -89,15 +89,15 @@ const getManagerStaff = async () => {
 };
 
 const deleteStaff = async (staffId) => {
-  // const query = `
-  // DELETE FROM staffs WHERE id = ?
-  // `;
-  // try {
-  //     await pool.execute(query, [staffId]);
-  // } catch (err) {
-  //     console.error('Error deleting data:', err);
-  //     throw err;
-  // }
+  const query = `
+  DELETE FROM staffs WHERE id = ?
+  `;
+  try {
+    await pool.execute(query, [staffId]);
+  } catch (err) {
+    console.error("Error deleting data:", err);
+    throw err;
+  }
 };
 
 const updateStaff = async (staff) => {
@@ -516,16 +516,18 @@ const GetStaffPortfolio = async (staff) => {
   }
 };
 
-
 const UpdateStaffPortfolio = async (staff) => {
   try {
-
     const DeleteQuery = `DELETE FROM staff_portfolio WHERE staff_id = ?`;
     await pool.execute(DeleteQuery, [staff.staff_id]);
 
     if (staff.customer_id && staff.customer_id.length > 0) {
       const createdAt = new Date();
-      const values = staff.customer_id.map((customer_id) => [staff.staff_id, customer_id, createdAt]);
+      const values = staff.customer_id.map((customer_id) => [
+        staff.staff_id,
+        customer_id,
+        createdAt,
+      ]);
 
       const query = `INSERT INTO staff_portfolio (staff_id, customer_id, createdAt) VALUES ?`;
       await pool.query(query, [values]);
@@ -534,10 +536,87 @@ const UpdateStaffPortfolio = async (staff) => {
     return { status: true, message: "Staff Portfolio updated successfully." };
   } catch (error) {
     console.error("Error updating staff portfolio:", error);
-    return { status: false, message: "Failed to update staff portfolio", error };
+    return {
+      status: false,
+      message: "Failed to update staff portfolio",
+      error,
+    };
   }
 };
 
+const deleteStaffUpdateStaff = async (staff) => {
+  const { delete_id, update_staff } = staff;
+
+  if (delete_id == update_staff) {
+    return {
+      status: false,
+      message: "Staff cannot be deleted from the system.",
+    };
+  }
+
+  if (delete_id == 1 || delete_id == 2) {
+    return {
+      status: false,
+      message: "Staff cannot be deleted from the system.",
+    };
+  }
+
+  if (update_staff == 2 || update_staff == 2) {
+    return {
+      status: false,
+      message: "Staff cannot be deleted from the system.",
+    };
+  }
+
+  const queries = [
+    {
+      query:
+        "UPDATE clients SET staff_created_id = ? WHERE staff_created_id = ?",
+      params: [update_staff, delete_id],
+    },
+    {
+      query: "UPDATE customers SET staff_id = ? WHERE staff_id = ?",
+      params: [update_staff, delete_id],
+    },
+    {
+      query: "UPDATE jobs SET staff_created_id = ? WHERE staff_created_id = ?",
+      params: [update_staff, delete_id],
+    },
+    {
+      query: "UPDATE staff_competencies SET staff_id = ? WHERE staff_id = ?",
+      params: [update_staff, delete_id],
+    },
+    {
+      query: "UPDATE staff_portfolio SET staff_id = ? WHERE staff_id = ?",
+      params: [update_staff, delete_id],
+    },
+    {
+      query:
+        "UPDATE `line_managers` SET `staff_by` = ? WHERE `line_managers`.`id` = ?;",
+      params: [update_staff, delete_id],
+    },
+    {
+      query:
+        "UPDATE `line_managers` SET `staff_to` = ? WHERE `line_managers`.`id` = ?;",
+      params: [update_staff, delete_id],
+    },
+  ];
+
+  try {
+    for (const { query, params } of queries) {
+      await pool.execute(query, params);
+    }
+
+    console.log(
+      `Updated staff references from ${delete_id} to ${update_staff}`
+    );
+
+    return { status: true, message: "Staff updated successfully." };
+  } catch (err) {
+    console.error("Error updating staff references:", err);
+    return { status: false, message: "Error updating staff" };
+  }
+};
 
 module.exports = {
   createStaff,
@@ -557,4 +636,5 @@ module.exports = {
   getSharePointToken,
   GetStaffPortfolio,
   UpdateStaffPortfolio,
+  deleteStaffUpdateStaff,
 };
