@@ -705,6 +705,10 @@ const ClientLists = () => {
   };
 
   const GetAllClientData = async (id) => {
+
+     console.log("id", id)
+
+
     const req = { action: "get", customer_id: id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
@@ -877,8 +881,6 @@ const ClientLists = () => {
 
   const selectCustomerId = (id, name) => {
 
-    console.log("id", id);
-    console.log("name", name);
     if (id != "") {
       sessionStorage.setItem('customer_id_sidebar', id);
       setCustomerId(id);
