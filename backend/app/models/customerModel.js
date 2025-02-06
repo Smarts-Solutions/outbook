@@ -889,8 +889,7 @@ const getCustomer_dropdown = async (customer) => {
     SUBSTRING(customers.customer_code, 1, 15)
     ) AS customer_code
 FROM 
-    customers
-    
+    customers 
 ORDER BY 
 id DESC;`;
 

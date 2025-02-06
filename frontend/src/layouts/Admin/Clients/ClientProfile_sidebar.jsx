@@ -532,7 +532,9 @@ const ClientList = () => {
               }}
             >
               {customerDataAll &&
-                customerDataAll.map((val, index) => (
+                customerDataAll.map((val, index) => 
+                  Number(val.status) === 1 && Number(val.form_process) === 4 ?
+                  (
                   <option
                     key={index}
                     value={val.id}
@@ -540,7 +542,10 @@ const ClientList = () => {
                   >
                     {val.trading_name}
                   </option>
-                ))}
+                )
+                :null
+                
+                )}
             </select>
           </div>
 

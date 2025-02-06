@@ -25,11 +25,17 @@ const ClientLists = () => {
         if (response.status) {
           setCustomerData(response.data);
           if (response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
-            setCustomerId(customer_id_sidebar || response?.data[0]?.id);
-            GetAllClientData(customer_id_sidebar || response?.data[0]?.id);
-            setCustomerName(response?.data[0]?.trading_name);
-            setHararchyData({ customer: { id: customer_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name } });
+            const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
+            if(FilterCustomer.length > 0){
+            selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+            setCustomerId(customer_id_sidebar || FilterCustomer[0]?.id);
+            GetAllClientData(customer_id_sidebar || FilterCustomer[0]?.id);
+            setCustomerName(FilterCustomer[0]?.trading_name);
+            setHararchyData({ customer: { id: customer_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name } });
             setActiveTab("client");
+            }else{
+              setCustomerData([]);
+            }
           }
 
         } else {
@@ -870,6 +876,9 @@ const ClientLists = () => {
   };
 
   const selectCustomerId = (id, name) => {
+
+    console.log("id", id);
+    console.log("name", name);
     if (id != "") {
       sessionStorage.setItem('customer_id_sidebar', id);
       setCustomerId(id);
