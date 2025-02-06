@@ -3482,16 +3482,30 @@ const getcustomerschecklist = async (customer) => {
 
 const deleteCustomer = async (customer) => {
     const { customer_id } = customer;
-    console.log("customer_id ", customer_id)
 
-    await pool.execute(`DELETE FROM customer_company_information WHERE customer_id = ?`, [customer_id]);
+    try {
+        await pool.execute(`DELETE FROM customer_company_information WHERE customer_id = ?`, [customer_id]);
+  
+
     await pool.execute(`DELETE FROM customer_contact_details WHERE customer_id = ?`, [customer_id]);
     await pool.execute(`DELETE FROM customer_documents WHERE customer_id = ?`, [customer_id]);
+
+    
+     const [checklcustomerEngagementModelRowsistRows] = await pool.execute(`SELECT id FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
+
+     if(checklcustomerEngagementModelRowsistRows.length > 0){
+
+        for (const item of checklcustomerEngagementModelRowsistRows) {
+            await pool.execute(`DELETE FROM customer_engagement_fte WHERE customer_engagement_model_id = ?`, [item.id]);
+            await pool.execute(`DELETE FROM customer_engagement_percentage WHERE customer_engagement_model_id = ?`, [item.id]);
+            await pool.execute(`DELETE FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id = ?`, [item.id]);
+            await pool.execute(`DELETE FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ?`, [item.id]);
+            
+         }
+      }
     await pool.execute(`DELETE FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
-    await pool.execute(`DELETE FROM customer_engagement_fte WHERE customer_id = ?`, [customer_id]);
-    await pool.execute(`DELETE FROM customer_engagement_percentage WHERE customer_id = ?`, [customer_id]);
-    await pool.execute(`DELETE FROM customer_engagement_adhoc_hourly WHERE customer_id = ?`, [customer_id]);
-    await pool.execute(`DELETE FROM customer_engagement_customised_pricing WHERE customer_id = ?`, [customer_id]);
+
+
     await pool.execute(`DELETE FROM customer_paper_work WHERE customer_id = ?`, [customer_id]);
 
 
@@ -3514,7 +3528,7 @@ const deleteCustomer = async (customer) => {
 
 
     await pool.execute(`DELETE FROM customer_service_task WHERE customer_id = ?`, [customer_id]);
-    await pool.execute(`DELETE FROM customers WHERE id = ?`, [customer_id]);
+   const [result] = await pool.execute(`DELETE FROM customers WHERE id = ?`, [customer_id]);
 
     if (parseInt(customer_id) > 0) {
         const currentDate = new Date();
@@ -3535,7 +3549,15 @@ const deleteCustomer = async (customer) => {
     if (result.affectedRows > 0) {
         return { status: true, message: 'Customer deleted successfully.' };
     }
-    return { status: false, message: 'Error deleting customer.' };
+        
+    } catch (error) {
+        console.log("error ", error)
+        return { status: false, message: 'Error deleting customer.' };
+        
+    }
+
+    
+    
 }
 
 
