@@ -98,8 +98,7 @@ const updateStatusType = async (StatusType) => {
   const type = StatusType.type;
   // Create an array to hold the set clauses
   const setClauses = [];
-  const values = [];
-  // Iterate over the fields and construct the set clauses dynamically
+  const values = []; 
   for (const [key, value] of Object.entries(fields)) {
     if (key != "ip" && key != "StaffUserId") {
       setClauses.push(`${key} = ?`);

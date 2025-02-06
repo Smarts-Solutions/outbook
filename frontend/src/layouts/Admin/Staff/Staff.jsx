@@ -291,9 +291,8 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -453,9 +452,8 @@ const StaffPage = () => {
         status: values.status,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${
-          budgetedHours.minutes || "00"
-        }`,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
+          }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -588,7 +586,7 @@ const StaffPage = () => {
       col_size: 6,
       disable: false,
       options: staffDataAll.data
-        .filter((data) => data.role !== "ADMIN")
+        .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN"))
         .map((data) => ({
           label: `${data.first_name} ${data.last_name}`,
           value: data.id,
@@ -682,8 +680,7 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
-    console.log("editStaffData", editStaffData);
-
+    
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
@@ -805,9 +802,8 @@ const StaffPage = () => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
               id={tab.id}
               role="tabpanel"
             >
@@ -1055,6 +1051,7 @@ const StaffPage = () => {
         </FormGroup>
       </CommanModal>
 
+      {console.log("staffDataAll", staffDataAll)}
       <CommanModal
         isOpen={deleteStaff}
         backdrop="static"
@@ -1078,16 +1075,14 @@ const StaffPage = () => {
                 Choose Staff
               </option>
               {staffDataAll?.data
-                ?.filter(
-                  (staff) =>
-                    staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2
-                )
+                ?.filter((staff) => staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2 && staff.role !=="ADMIN" )
                 .map((staff) => (
                   <option key={staff.id} value={staff.id}>
                     {staff.first_name}
                   </option>
                 ))}
             </select>
+
           </div>
 
           {selectedStaff && (
