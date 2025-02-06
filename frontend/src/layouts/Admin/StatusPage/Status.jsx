@@ -97,22 +97,22 @@ const Status = () => {
       ),
       sortable: true,
     },
-    // {
-    //   name: "Actions",
-    //   cell: (row) => (
-    //     <div>
-    //       <button className="edit-icon" onClick={() => handleEdit(row)}>
-    //         <i className="ti-pencil" />
-    //       </button>
-    //       {/* <button className="delete-icon" onClick={() => handleDelete(row)}>
-    //         <i className="ti-trash text-danger" />
-    //       </button> */}
-    //     </div>
-    //   ),
-    //   ignoreRowClick: true,
-    //   allowOverflow: true,
-    //   button: true,
-    // },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div className="d-flex justify-content-end">
+          <button className="edit-icon" onClick={() => handleEdit(row)}>
+            <i className="ti-pencil" />
+          </button>
+         {row.is_disable=="0" && <button className="delete-icon" onClick={() => handleDelete(row)}>
+            <i className="ti-trash text-danger" />
+          </button>}
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
   ];
 
   const formatDate = (date) => {
