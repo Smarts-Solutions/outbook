@@ -80,7 +80,6 @@ const StaffPage = () => {
     data: [],
     staff_id: "",
   });
-  const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
 
   useEffect(() => {
     staffData();
@@ -395,6 +394,7 @@ const StaffPage = () => {
         phone_code: values.phone_code,
         role_id: values.role,
         status: values.status,
+        staff_to: values.staff_to,
         created_by: StaffUserId.id,
         hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
           }`,
@@ -661,8 +661,6 @@ const StaffPage = () => {
     Status: item.status === "1" ? "Active" : "Inactive",
   }));
 
-
-  const [AddCustomer, setAddCustomer] = useState([]);
   const colourOptions = [
     { value: "ocean", label: "Ocean" },
     { value: "blue", label: "Blue" },
