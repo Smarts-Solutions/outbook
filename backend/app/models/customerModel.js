@@ -880,6 +880,8 @@ const getCustomer_dropdown = async (customer) => {
         const query = `
     SELECT  
     customers.id AS id,
+    customers.status AS status,
+    customers.form_process AS form_process,
     customers.trading_name AS trading_name,
     CONCAT(
     'cust_', 
@@ -888,6 +890,7 @@ const getCustomer_dropdown = async (customer) => {
     ) AS customer_code
 FROM 
     customers
+    
 ORDER BY 
 id DESC;`;
 
@@ -904,6 +907,8 @@ id DESC;`;
             const query = `
             SELECT  
                 customers.id AS id,
+                customers.status AS status,
+                customers.form_process AS form_process,
                 customers.trading_name AS trading_name,
                 CONCAT(
                     'cust_', 
@@ -932,6 +937,8 @@ id DESC;`;
             const query = `
             SELECT  
             customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
             customers.trading_name AS trading_name,
             CONCAT(
             'cust_', 
@@ -966,6 +973,8 @@ id DESC;`;
             const query = `
             SELECT  
             customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
             customers.trading_name AS trading_name,
             CONCAT(
             'cust_', 
@@ -995,6 +1004,8 @@ id DESC;`;
             const query = `
             SELECT  
             id,
+            customers.status AS status,
+            customers.form_process AS form_process,
             trading_name
         FROM 
             customers
@@ -1255,7 +1266,6 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         customer_engagement_model_id = existCustomer[0].id;
     }
 
-    //SNEH
 
 
     const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;
@@ -3473,8 +3483,55 @@ const getcustomerschecklist = async (customer) => {
 
 const deleteCustomer = async (customer) => {
     const { customer_id } = customer;
-    const query = `DELETE FROM customers WHERE id = ?`;
-    const [result] = await pool.execute(query, [customer_id]);
+
+    await pool.execute(`DELETE FROM customer_company_information WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_contact_details WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_documents WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_engagement_fte WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_engagement_percentage WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_engagement_adhoc_hourly WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_engagement_customised_pricing WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customer_paper_work WHERE customer_id = ?`, [customer_id]);
+
+
+    const [checklistRows] = await pool.execute(`SELECT id FROM checklists WHERE customer_id = ?`, [customer_id]);
+    if (checklistRows.length > 0) {
+        for (const item of checklistRows) {
+            await pool.execute(`DELETE FROM checklist_tasks WHERE checklist_id = ?`, [item.id]);
+        }
+        await pool.execute(`DELETE FROM checklists WHERE customer_id = ?`, [customer_id]);
+    }
+
+
+    const [customerServicesRows] = await pool.execute(`SELECT id FROM customer_services WHERE customer_id = ?`, [customer_id]);
+    if (customerServicesRows.length > 0) {
+        for (const item of customerServicesRows) {
+            await pool.execute(`DELETE FROM customer_service_account_managers WHERE customer_service_id = ?`, [item.id]);
+        }
+        await pool.execute(`DELETE FROM customer_services WHERE customer_id = ?`, [customer_id]);
+    }
+
+
+    await pool.execute(`DELETE FROM customer_service_task WHERE customer_id = ?`, [customer_id]);
+    await pool.execute(`DELETE FROM customers WHERE id = ?`, [customer_id]);
+
+    if (parseInt(customer_id) > 0) {
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+          {
+            staff_id: customer.StaffUserId,
+            ip: customer.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `deleted customer. customer code :`,
+            permission_type: 'deleted',
+            module_id: customer_id,
+          }
+        );
+      }
+    
+
     if (result.affectedRows > 0) {
         return { status: true, message: 'Customer deleted successfully.' };
     }

@@ -22,23 +22,45 @@ const EditJob = () => {
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
 
-  const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: {} });
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  const [getJobDetails, setGetJobDetails] = useState({
+    loading: false,
+    data: {},
+  });
   const [errors, setErrors] = useState({});
   const [jobModalStatus, jobModalSetStatus] = useState(false);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [getChecklistId, setChecklistId] = useState("");
-  const [AllChecklist, setAllChecklist] = useState({ loading: false, data: [] });
-  const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] });
+  const [AllChecklist, setAllChecklist] = useState({
+    loading: false,
+    data: [],
+  });
+  const [AllChecklistData, setAllChecklistData] = useState({
+    loading: false,
+    data: [],
+  });
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [taskNameError, setTaskNameError] = useState("");
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [taskName, setTaskName] = useState("");
-  const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "", });
-  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" });
+  const [PreparationTimne, setPreparationTimne] = useState({
+    hours: "",
+    minutes: "",
+  });
+  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" });
-  const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" });
+  const [budgetedHours, setBudgetedHours] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" });
-  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" });
+  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
@@ -93,7 +115,6 @@ const EditJob = () => {
     notes: "",
   });
 
-
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id };
     const data = { req: req, authToken: token };
@@ -138,10 +159,13 @@ const EditJob = () => {
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
 
+            console.log("response.data", response.data);
+
             setJobData((prevState) => ({
               ...prevState,
-              AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
-                } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
+              AccountManager: `${
+                response.data.outbooks_acount_manager_first_name ?? ""
+              } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
               Customer: response.data.customer_trading_name ?? "",
               Client:
                 location.state.goto == "Customer"
@@ -198,6 +222,70 @@ const EditJob = () => {
               InvoiceRemark: response.data.invoice_remark ?? "",
               status_type: response.data.status_type ?? null,
               notes: response.data.notes ?? "",
+              Turnover_Period_id_0: response.data.Turnover_Period_id_0 ?? "",
+              Turnover_Currency_id_0:
+                response.data.Turnover_Currency_id_0 ?? "",
+              Turnover_id_0: response.data.Turnover_id_0 ?? 0.0,
+              VAT_Registered_id_0: response.data.VAT_Registered_id_0 ?? "",
+              VAT_Frequency_id_0: response.data.VAT_Frequency_id_0 ?? "",
+              Who_Did_The_Bookkeeping_id_1:
+                response.data.Who_Did_The_Bookkeeping_id_1 ?? "",
+              PAYE_Registered_id_1: response.data.PAYE_Registered_id_1 ?? "",
+              Number_of_Trial_Balance_Items_id_1:
+                response.data.Number_of_Trial_Balance_Items_id_1 ?? "",
+              Bookkeeping_Frequency_id_2:
+                response.data.Bookkeeping_Frequency_id_2 ?? "",
+              Number_of_Total_Transactions_id_2:
+                response.data.Number_of_Total_Transactions_id_2 ?? 0,
+              Number_of_Bank_Transactions_id_2:
+                response.data.Number_of_Bank_Transactions_id_2 ?? 0,
+              Number_of_Purchase_Invoices_id_2:
+                response.data.Number_of_Purchase_Invoices_id_2 ?? 0,
+              Number_of_Sales_Invoices_id_2:
+                response.data.Number_of_Sales_Invoices_id_2 ?? 0,
+              Number_of_Petty_Cash_Transactions_id_2:
+                response.data.Number_of_Petty_Cash_Transactions_id_2 ?? 0,
+              Number_of_Journal_Entries_id_2:
+                response.data.Number_of_Journal_Entries_id_2 ?? 0,
+              Number_of_Other_Transactions_id_2:
+                response.data.Number_of_Other_Transactions_id_2 ?? 0,
+              Transactions_Posting_id_2:
+                response.data.Transactions_Posting_id_2 ?? "",
+              Quality_of_Paperwork_id_2:
+                response.data.Quality_of_Paperwork_id_2 ?? "",
+              Number_of_Integration_Software_Platforms_id_2:
+                response.data.Number_of_Integration_Software_Platforms_id_2 ??
+                "",
+              CIS_id_2: response.data.CIS_id_2 ?? "",
+              Posting_Payroll_Journals_id_2:
+                response.data.Posting_Payroll_Journals_id_2 ?? "",
+              Department_Tracking_id_2:
+                response.data.Department_Tracking_id_2 ?? "",
+              Sales_Reconciliation_Required_id_2:
+                response.data.Sales_Reconciliation_Required_id_2 ?? "",
+              Factoring_Account_id_2:
+                response.data.Factoring_Account_id_2 ?? "",
+              Payment_Methods_id_2: response.data.Payment_Methods_id_2 ?? "",
+              Payroll_Frequency_id_3:
+                response.data.Payroll_Frequency_id_3 ?? "",
+              Type_of_Payslip_id_3: response.data.Type_of_Payslip_id_3 ?? "",
+              Percentage_of_Variable_Payslips_id_3:
+                response.data.Percentage_of_Variable_Payslips_id_3 ?? "",
+              Is_CIS_Required_id_3: response.data.Is_CIS_Required_id_3 ?? "",
+              CIS_Frequency_id_3: response.data.CIS_Frequency_id_3 ?? "",
+              Number_of_Sub_contractors_id_3:
+                response.data.Number_of_Sub_contractors_id_3 ?? 0,
+              Whose_Tax_Return_is_it_id_4:
+                response.data.Whose_Tax_Return_is_it_id_4 ?? 0,
+              Number_of_Income_Sources_id_4:
+                response.data.Number_of_Income_Sources_id_4 ?? 0,
+              If_Landlord_Number_of_Properties_id_4:
+                response.data.If_Landlord_Number_of_Properties_id_4 ?? 0,
+              If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+                response.data.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 ??
+                "",
+              Management_Accounts_Frequency_id_6:
+                response.data.Management_Accounts_Frequency_id_6 ?? "",
             }));
           }
 
@@ -233,21 +321,10 @@ const EditJob = () => {
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
       .then(async (response) => {
-        // if (response.status) {
-        //   setAllChecklist({
-        //     loading: true,
-        //     data: response.data,
-        //   });
-        // } else {
-        //   setAllChecklist({
-        //     loading: true,
-        //     data: [],
-        //   });
-        // }
         if (response.status) {
           setAllChecklistData({
             loading: true,
-            data: response.data
+            data: response.data,
           });
         } else {
           setAllChecklistData({
@@ -351,6 +428,69 @@ const EditJob = () => {
 
   const HandleChange = (e) => {
     const { name, value } = e.target;
+
+    const date = new Date();
+    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+      if (value == 1) {
+        date.setDate(date.getDate() + 28);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 4) {
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 3) {
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 8) {
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
+    if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+      console.log(name, ":", value);
+      if (value == "Daily") {
+        date.setDate(date.getDate() + 1);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Weekly") {
+        date.setDate(date.getDate() + 3);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Monthly") {
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Quarterly") {
+        date.setDate(date.getDate() + 15);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Yearly") {
+        date.setDate(date.getDate() + 30);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
     setJobData((prevState) => ({
       ...prevState,
       [name]: value,
@@ -411,6 +551,7 @@ const EditJob = () => {
   const handleSubmit = async () => {
     const req = {
       job_id: location.state.job_id,
+      ...jobData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
         getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
@@ -420,12 +561,7 @@ const EditJob = () => {
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
       job_type_id: Number(jobData.JobType),
-      budgeted_hours: formatTime(
-        budgetedHours.hours,
-        budgetedHours.minutes
-        // budgeted_hour_totalTime.hours,
-        // budgeted_hour_totalTime.minutes
-      ),
+      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
@@ -493,6 +629,7 @@ const EditJob = () => {
         task: AddTaskArr,
       },
     };
+    console.log("jobData", req);
 
     const data = { req: req, authToken: token };
     if (validate()) {
@@ -508,7 +645,7 @@ const EditJob = () => {
               timer: 1500,
             });
             setTimeout(() => {
-              sessionStorage.setItem('activeTab', location.state.activeTab);
+              sessionStorage.setItem("activeTab", location.state.activeTab);
               window.history.back();
             }, 1500);
           } else {
@@ -524,24 +661,23 @@ const EditJob = () => {
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-      .reduce((obj, key) => {
-        const keyMapping = {
-          "fte_dedicated_staffing": "Fte Dedicated Staffing",
-          "percentage_model": "Percentage Model",
-          "adhoc_payg_hourly": "Adhoc Payg Hourly",
-          "customised_pricing": "Customised Pricing"
-        };
+        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+        .reduce((obj, key) => {
+          const keyMapping = {
+            fte_dedicated_staffing: "Fte Dedicated Staffing",
+            percentage_model: "Percentage Model",
+            adhoc_payg_hourly: "Adhoc Payg Hourly",
+            customised_pricing: "Customised Pricing",
+          };
 
-        if (keyMapping[key]) {
-          RearrangeEngagementOptionArr.push(keyMapping[key]);
-        }
+          if (keyMapping[key]) {
+            RearrangeEngagementOptionArr.push(keyMapping[key]);
+          }
 
-        obj[key] = AllJobData.data.engagement_model[0][key];
-        return obj;
-      }, {})
+          obj[key] = AllJobData.data.engagement_model[0][key];
+          return obj;
+        }, {})
     : {};
-
 
   const openJobModal = (e) => {
     if (e.target.value != "") {
@@ -610,8 +746,8 @@ const EditJob = () => {
           : "Required",
       budgetedMinuteError:
         BudgetedHoursAddTask.minutes &&
-          BudgetedHoursAddTask.minutes >= 0 &&
-          BudgetedHoursAddTask.minutes <= 59
+        BudgetedHoursAddTask.minutes >= 0 &&
+        BudgetedHoursAddTask.minutes <= 59
           ? ""
           : "Required",
     };
@@ -694,7 +830,387 @@ const EditJob = () => {
     );
   }
 
+  const serviceFields = [
+    {
+      id: 0, // Common fields (default)
+      fields: [
+        {
+          name: "Turnover Period",
+          key: "Turnover_Period_id_0",
+          type: "dropdown",
+          options: ["Monthly", "Quarterly", "Yearly"],
+        },
+        {
+          name: "Turnover Currency",
+          key: "Turnover_Currency_id_0",
+          type: "dropdown",
+          options: ["GBP", "USD", "INR", "EUR", "JPY", "SGD", "CNY", "Other"],
+        },
+        {
+          name: "Turnover",
+          key: "Turnover_id_0",
+          type: "number",
+          min: 0,
+          max: 1000000000,
+        },
+        {
+          name: "VAT Registered",
+          key: "VAT_Registered_id_0",
+          type: "dropdown",
+          options: [
+            "No",
+            "Cash",
+            "Accrual",
+            "Flat Rate",
+            "TOMS",
+            "Margin",
+            "Other",
+          ],
+        },
+        {
+          name: "VAT Frequency",
+          key: "VAT_Frequency_id_0",
+          type: "dropdown",
+          options: ["Quarterly", "Monthly", "Yearly", "NA"],
+        },
+      ],
+    },
+    {
+      id: 1, // Accounts Production
+      fields: [
+        {
+          name: "Who Did The Bookkeeping",
+          key: "Who_Did_The_Bookkeeping_id_1",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+        {
+          name: "PAYE Registered",
+          key: "PAYE_Registered_id_1",
+          type: "dropdown",
+          options: [
+            "No",
+            "0",
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 50",
+            "51 to 100",
+            "100+",
+          ],
+        },
+        {
+          name: "Number of Trial Balance Items",
+          key: "Number_of_Trial_Balance_Items_id_1",
+          type: "dropdown",
+          options: [
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 30",
+            "31 to 40",
+            "41 to 50",
+            "51 to 75",
+            "75 to 100",
+            "101 to 200",
+            "201 to 300",
+            "301 to 400",
+            "401 to 500",
+            "500+",
+          ],
+        },
+      ],
+    },
+    {
+      id: 2, // Bookkeeping
+      fields: [
+        {
+          name: "Bookkeeping Frequency",
+          key: "Bookkeeping_Frequency_id_2",
+          type: "dropdown",
+          options: [
+            "Daily",
+            "Weekly",
+            "Fortnightly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+          ],
+        },
+        {
+          name: "Number of Total Transactions",
+          key: "Number_of_Total_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Bank Transactions",
+          key: "Number_of_Bank_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Purchase Invoices",
+          key: "Number_of_Purchase_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Sales Invoices",
+          key: "Number_of_Sales_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Petty Cash Transactions",
+          key: "Number_of_Petty_Cash_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Journal Entries",
+          key: "Number_of_Journal_Entries_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Other Transactions",
+          key: "Number_of_Other_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Transactions Posting",
+          key: "Transactions_Posting_id_2",
+          type: "dropdown",
+          options: ["Manual", "Dext", "Hubdoc", "Auto Entry", "Other"],
+        },
+        {
+          name: "Quality of Paperwork",
+          key: "Quality_of_Paperwork_id_2",
+          type: "dropdown",
+          options: ["Bad", "Good", "Excellent"],
+        },
+        {
+          name: "Number of Integration Software Platforms",
+          key: "Number_of_Integration_Software_Platforms_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+        {
+          name: "CIS",
+          key: "CIS_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Posting Payroll Journals",
+          key: "Posting_Payroll_Journals_id_2",
+          type: "dropdown",
+          options: ["Yes", "No"],
+        },
+        {
+          name: "Department Tracking",
+          key: "Department_Tracking_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Sales Reconciliation Required",
+          key: "Sales_Reconciliation_Required_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Factoring Account",
+          key: "Factoring_Account_id_2",
+          type: "dropdown",
+          options: [
+            "Provider Deducts Commission Only",
+            "Rapid Cash Account",
+            "Provider Deducts Fixed Percentage",
+            "No Factoring Account",
+          ],
+        },
+        {
+          name: "Payment Methods",
+          key: "Payment_Methods_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+      ],
+    },
+    {
+      id: 3, // Payroll
+      fields: [
+        {
+          name: "Payroll Frequency",
+          key: "Payroll_Frequency_id_3",
+          type: "dropdown",
+          options: [
+            "Weekly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+            "Weekly & Monthly",
+          ],
+        },
+        {
+          name: "Type of Payslip",
+          key: "Type_of_Payslip_id_3",
+          type: "dropdown",
+          options: ["Wages Only", "Wages/Pension"],
+        },
+        {
+          name: "Percentage of Variable Payslips",
+          key: "Percentage_of_Variable_Payslips_id_3",
+          type: "dropdown",
+          options: [
+            "0%",
+            "up to 25%",
+            "25.1 to 50%",
+            "50.1 to 75%",
+            "75.1 to 100%",
+          ],
+        },
+        {
+          name: "Is CIS Required",
+          key: "Is_CIS_Required_id_3",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "CIS Frequency",
+          key: "CIS_Frequency_id_3",
+          type: "dropdown",
+          options: ["Weekly", "Monthly", "Weekly & Monthly", "Quarterly"],
+        },
+        {
+          name: "Number of Sub-contractors",
+          key: "Number_of_Sub_contractors_id_3",
+          type: "number",
+          min: 0,
+          max: 10000,
+        },
+      ],
+    },
+    {
+      id: 4, // Personal Tax Return
+      fields: [
+        {
+          name: "Whose Tax Return is it",
+          key: "Whose_Tax_Return_is_it_id_4",
+          type: "dropdown",
+          options: [
+            "Director",
+            "Sole Trader",
+            "Individual Earning more than £100k",
+            "Partner in Partnership",
+            "Landlord",
+            "Other",
+          ],
+        },
+        {
+          name: "Number of Income Sources",
+          key: "Number_of_Income_Sources_id_4",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9+"],
+        },
+        {
+          name: "If Landlord, Number of Properties",
+          key: "If_Landlord_Number_of_Properties_id_4",
+          type: "dropdown",
+          options: [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "30+",
+          ],
+        },
+        {
+          name: "If Sole Trader, Who is doing Bookkeeping",
+          key: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+      ],
+    },
+    {
+      id: 5, // Admin Support
+      fields: [],
+    },
+    {
+      id: 6, // Management Accounts
+      fields: [
+        {
+          name: "Management Accounts Frequency",
+          key: "Management_Accounts_Frequency_id_6",
+          type: "dropdown",
+          options: ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly"],
+        },
+      ],
+    },
+    {
+      id: 7, // Company Secretarial
+      fields: [],
+    },
+  ];
 
+  useEffect(() => {
+    setServiceFieldsData(
+      serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+    );
+  }, [jobData?.Service]);
+
+  console.log("jobData", jobData);
 
   return (
     <div>
@@ -707,8 +1223,11 @@ const EditJob = () => {
                   type="button"
                   className="btn p-0"
                   onClick={() => {
-                    sessionStorage.setItem('activeTab', location.state.activeTab);
-                    window.history.back()
+                    sessionStorage.setItem(
+                      "activeTab",
+                      location.state.activeTab
+                    );
+                    window.history.back();
                   }}
                 >
                   <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
@@ -735,11 +1254,15 @@ const EditJob = () => {
                                     <label className="form-label">
                                       {" "}
                                       Outbook Account Manager
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <input
                                       type="text"
-                                      className={errors["AccountManager"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["AccountManager"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Account Manager"
                                       disabled
                                       name="AccountManager"
@@ -760,11 +1283,15 @@ const EditJob = () => {
                                   >
                                     <label className="form-label">
                                       Customer
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <input
                                       type="text"
-                                      className={errors["Customer"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["Customer"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Customer"
                                       disabled
                                       name="Customer"
@@ -782,10 +1309,14 @@ const EditJob = () => {
                                     <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
-                                        <span className='text-danger'>*</span>
+                                        <span className="text-danger">*</span>
                                       </label>
                                       <select
-                                        className={errors["Client"] ? "error-field form-select" : "form-select"}
+                                        className={
+                                          errors["Client"]
+                                            ? "error-field form-select"
+                                            : "form-select"
+                                        }
                                         name="Client"
                                         id="Client"
                                         onChange={HandleChange}
@@ -814,11 +1345,15 @@ const EditJob = () => {
                                     <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
-                                        <span className='text-danger'>*</span>
+                                        <span className="text-danger">*</span>
                                       </label>
                                       <input
                                         type="text"
-                                        className={errors["Client"] ? "error-field form-control" : "form-control"}
+                                        className={
+                                          errors["Client"]
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
                                         placeholder="Client Job Code"
                                         name="Client"
                                         id="Client"
@@ -840,7 +1375,11 @@ const EditJob = () => {
                                     </label>
                                     <input
                                       type="text"
-                                      className={errors["ClientJobCode"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["ClientJobCode"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Client Job Code"
                                       name="ClientJobCode"
                                       id="ClientJobCode"
@@ -859,11 +1398,14 @@ const EditJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Customer Account Manager(Officer)
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <select
-                                      className={errors["CustomerAccountManager"] ? "error-field form-select" : "form-select"}
-
+                                      className={
+                                        errors["CustomerAccountManager"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
                                       name="CustomerAccountManager"
                                       id="CustomerAccountManager"
                                       onChange={HandleChange}
@@ -901,10 +1443,14 @@ const EditJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Service
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <select
-                                      className={errors["Service"] ? "error-field form-select" : "form-select"}
+                                      className={
+                                        errors["Service"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
                                       name="Service"
                                       id="Service"
                                       onChange={HandleChange}
@@ -933,10 +1479,14 @@ const EditJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Job Type
-                                      <span className='text-danger'>*</span>
+                                      <span className="text-danger">*</span>
                                     </label>
                                     <select
-                                      className={errors["JobType"] ? "error-field form-select  jobtype" : "form-select  jobtype"}
+                                      className={
+                                        errors["JobType"]
+                                          ? "error-field form-select  jobtype"
+                                          : "form-select  jobtype"
+                                      }
                                       name="JobType"
                                       id="JobType"
                                       onChange={(e) => {
@@ -988,13 +1538,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.hours || ""}
-                                          // value={
-                                          //   budgeted_hour_totalTime !=
-                                          //     undefined
-                                          //     ? budgeted_hour_totalTime.hours
-                                          //     : "0"
-                                          // }
-
+                                            // value={
+                                            //   budgeted_hour_totalTime !=
+                                            //     undefined
+                                            //     ? budgeted_hour_totalTime.hours
+                                            //     : "0"
+                                            // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -1022,13 +1571,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.minutes || ""}
-                                          // value={
-                                          //   budgeted_hour_totalTime !=
-                                          //     undefined
-                                          //     ? budgeted_hour_totalTime.minutes
-                                          //     : "0"
-                                          // }
-
+                                            // value={
+                                            //   budgeted_hour_totalTime !=
+                                            //     undefined
+                                            //     ? budgeted_hour_totalTime.minutes
+                                            //     : "0"
+                                            // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -1050,7 +1598,22 @@ const EditJob = () => {
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
-                                      disabled={['ADMIN', 'SUPERADMIN'].includes(role) ? false : getJobDetails.data.staff_created_id != undefined ? getJobDetails.data.staff_created_id === staffCreatedId ? false : getJobDetails.data.customer_staff_id === staffCreatedId ? false : true : false}
+                                      disabled={
+                                        ["ADMIN", "SUPERADMIN"].includes(role)
+                                          ? false
+                                          : getJobDetails.data
+                                              .staff_created_id != undefined
+                                          ? getJobDetails.data
+                                              .staff_created_id ===
+                                            staffCreatedId
+                                            ? false
+                                            : getJobDetails.data
+                                                .customer_staff_id ===
+                                              staffCreatedId
+                                            ? false
+                                            : true
+                                          : false
+                                      }
                                     >
                                       <option value=""> Select Reviewer</option>
                                       {(AllJobData?.data?.reviewer || []).map(
@@ -1059,7 +1622,10 @@ const EditJob = () => {
                                             value={reviewer.reviewer_id}
                                             key={reviewer.reviewer_id}
                                           >
-                                             {reviewer.reviewer_name + " (" + reviewer?.reviewer_email + ")"}
+                                            {reviewer.reviewer_name +
+                                              " (" +
+                                              reviewer?.reviewer_email +
+                                              ")"}
                                           </option>
                                         )
                                       )}
@@ -1080,9 +1646,22 @@ const EditJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                      disabled={['ADMIN', 'SUPERADMIN'].includes(role) ? false : getJobDetails.data.staff_created_id != undefined ? getJobDetails.data.staff_created_id === staffCreatedId ? false : getJobDetails.data.customer_staff_id === staffCreatedId ? false : true : false}
-
-
+                                      disabled={
+                                        ["ADMIN", "SUPERADMIN"].includes(role)
+                                          ? false
+                                          : getJobDetails.data
+                                              .staff_created_id != undefined
+                                          ? getJobDetails.data
+                                              .staff_created_id ===
+                                            staffCreatedId
+                                            ? false
+                                            : getJobDetails.data
+                                                .customer_staff_id ===
+                                              staffCreatedId
+                                            ? false
+                                            : true
+                                          : false
+                                      }
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(
@@ -1091,7 +1670,10 @@ const EditJob = () => {
                                             value={staff.allocated_id}
                                             key={staff.allocated_id}
                                           >
-                                              {staff.allocated_name +  " (" + staff?.allocated_email + ")"}
+                                            {staff.allocated_name +
+                                              " (" +
+                                              staff?.allocated_email +
+                                              ")"}
                                           </option>
                                         )
                                       )}
@@ -1464,11 +2046,17 @@ const EditJob = () => {
                                       <option value="">
                                         Please Select Engagement Model
                                       </option>
-                                      {Object.keys(filteredData).map((key, index) => (
-                                        <option key={key} value={key}>
-                                          {RearrangeEngagementOptionArr[index]}
-                                        </option>
-                                      ))}
+                                      {Object.keys(filteredData).map(
+                                        (key, index) => (
+                                          <option key={key} value={key}>
+                                            {
+                                              RearrangeEngagementOptionArr[
+                                                index
+                                              ]
+                                            }
+                                          </option>
+                                        )
+                                      )}
                                     </select>
                                     {errors["EngagementModel"] && (
                                       <div className="error-text">
@@ -1638,14 +2226,14 @@ const EditJob = () => {
                                         {errors[
                                           "FilingWithCompaniesHouseRequired"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "FilingWithCompaniesHouseRequired"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -1733,14 +2321,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentRequired"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "OpeningBalanceAdjustmentRequired"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -1760,177 +2348,90 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentDate"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "OpeningBalanceAdjustmentDate"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                            <div className="card card_shadow">
-                              <div className="card-header align-items-center d-flex card-header-light-blue">
-                                <h4 className="card-title mb-0 flex-grow-1">
-                                  {" "}
-                                  Other Data{" "}
-                                </h4>
-                              </div>
-                              <div className="card-body">
-                                <div className="" style={{ marginTop: 15 }}>
-                                  <div className="row">
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Number of Transactions{" "}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Number of Transactions"
-                                        name="NumberOfTransactions"
-                                        onChange={HandleChange}
-                                        value={jobData.NumberOfTransactions}
-                                      />
-                                      {errors["NumberOfTransactions"] && (
-                                        <div className="error-text">
-                                          {errors["NumberOfTransactions"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Number of Trial Balance Items
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Number of Trial Balance Items"
-                                        name="NumberOfTrialBalanceItems"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.NumberOfTrialBalanceItems
-                                        }
-                                      />
-                                      {errors["NumberOfTrialBalanceItems"] && (
-                                        <div className="error-text">
-                                          {errors["NumberOfTrialBalanceItems"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Turnover
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Turnover"
-                                        name="Turnover"
-                                        onChange={HandleChange}
-                                        value={jobData.Turnover}
-                                      />
-                                      {errors["Turnover"] && (
-                                        <div className="error-text">
-                                          {errors["Turnover"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        {" "}
-                                        No.Of Employees{" "}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="No.Of Employees"
-                                        name="NoOfEmployees"
-                                        onChange={HandleChange}
-                                        value={jobData.NoOfEmployees}
-                                      />
-                                      {errors["NoOfEmployees"] && (
-                                        <div className="error-text">
-                                          {errors["NoOfEmployees"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        VAT Reconciliation
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="VATReconciliation"
-                                        onChange={HandleChange}
-                                        value={jobData.VATReconciliation}
-                                      >
-                                        <option value="">
-                                          Please Select VAT Reconciliation
-                                        </option>
-                                        <option value="1">Yes</option>
-                                        <option value="0">No</option>
-                                      </select>
-                                      {errors["VATReconciliation"] && (
-                                        <div className="error-text">
-                                          {errors["VATReconciliation"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Bookkeeping?
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="Bookkeeping"
-                                        onChange={HandleChange}
-                                        value={jobData.Bookkeeping}
-                                      >
-                                        <option value="">
-                                          Please Select Bookkeeping
-                                        </option>
-                                        <option value="1">Yes</option>
-                                        <option value="0">No</option>
-                                      </select>
-                                      {errors["Bookkeeping"] && (
-                                        <div className="error-text">
-                                          {errors["Bookkeeping"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Processing Type
-                                      </label>
-                                      <select
-                                        className="form-select invoice_type_dropdown"
-                                        name="ProcessingType"
-                                        onChange={HandleChange}
-                                        value={jobData.ProcessingType}
-                                      >
-                                        <option value="1"> Manual </option>
-                                        <option value="2">Software</option>
-                                      </select>
-                                      {errors["ProcessingType"] && (
-                                        <div className="error-text">
-                                          {errors["ProcessingType"]}
-                                        </div>
-                                      )}
+                            {serviceFieldsData?.length > 0 && (
+                              <div className="card card_shadow">
+                                <div className="card-header card-header-light-blue align-items-center d-flex">
+                                  <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                    Other Data{" "}
+                                  </h4>
+                                </div>
+                                <div className="card-body">
+                                  <div className="" style={{ marginTop: 15 }}>
+                                    <div className="row">
+                                      {serviceFieldsData?.length > 0 &&
+                                        serviceFieldsData?.map(
+                                          (field, index) => (
+                                            <div
+                                              className="col-lg-4 mb-3"
+                                              key={index}
+                                            >
+                                              <label className="form-label">
+                                                {field.name}
+                                              </label>
+                                              {field.type === "dropdown" ? (
+                                                <select
+                                                  className="form-control"
+                                                  name={field.key}
+                                                  onChange={(e) =>
+                                                    HandleChange(e)
+                                                  }
+                                                  value={jobData[field.key]}
+                                                >
+                                                  <option value="">
+                                                    Select {field.name}
+                                                  </option>
+                                                  {field.options?.map(
+                                                    (option, i) => (
+                                                      <option
+                                                        value={option}
+                                                        key={i}
+                                                      >
+                                                        {option}
+                                                      </option>
+                                                    )
+                                                  )}
+                                                </select>
+                                              ) : (
+                                                <input
+                                                  type={field.type || "text"}
+                                                  className="form-control"
+                                                  placeholder={field.name}
+                                                  name={field.key}
+                                                  min={field.min}
+                                                  max={field.max}
+                                                  onChange={(e) =>
+                                                    HandleChange(e)
+                                                  }
+                                                  value={jobData[field.key]}
+                                                />
+                                              )}
+                                            </div>
+                                          )
+                                        )}
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
                           </div>
 
-
                           {jobData.EngagementModel !=
-                            "fte_dedicated_staffing" &&  location?.state?.jab?.status_type==6 && (
+                            "fte_dedicated_staffing" &&
+                            location?.state?.jab?.status_type == 6 && (
                               <div className="col-lg-12">
                                 <div className="card card_shadow">
                                   <div className="card-header align-items-center d-flex card-header-light-blue">
@@ -2050,7 +2551,8 @@ const EditJob = () => {
                                                   className="form-control"
                                                   placeholder="Hours"
                                                   onChange={(e) => {
-                                                    const value = e.target.value;
+                                                    const value =
+                                                      e.target.value;
                                                     if (
                                                       value === "" ||
                                                       Number(value) >= 0
@@ -2076,7 +2578,8 @@ const EditJob = () => {
                                                   className="form-control"
                                                   placeholder="Minutes"
                                                   onChange={(e) => {
-                                                    const value = e.target.value;
+                                                    const value =
+                                                      e.target.value;
                                                     if (
                                                       value === "" ||
                                                       (Number(value) >= 0 &&
@@ -2250,11 +2753,11 @@ const EditJob = () => {
                                                               <td>
                                                                 <div className="add">
                                                                   {AddTaskArr &&
-                                                                    AddTaskArr.find(
-                                                                      (task) =>
-                                                                        task.task_id ==
-                                                                        checklist.task_id
-                                                                    ) ? (
+                                                                  AddTaskArr.find(
+                                                                    (task) =>
+                                                                      task.task_id ==
+                                                                      checklist.task_id
+                                                                  ) ? (
                                                                     ""
                                                                   ) : (
                                                                     <button
@@ -2311,17 +2814,17 @@ const EditJob = () => {
                                                               </td>
                                                               <td>
                                                                 {checklist.budgeted_hour !=
-                                                                  null
+                                                                null
                                                                   ? checklist.budgeted_hour.split(
-                                                                    ":"
-                                                                  )[0]
+                                                                      ":"
+                                                                    )[0]
                                                                   : "0"}
                                                                 h
                                                                 {checklist.budgeted_hour !=
-                                                                  null
+                                                                null
                                                                   ? checklist.budgeted_hour.split(
-                                                                    ":"
-                                                                  )[1]
+                                                                      ":"
+                                                                    )[1]
                                                                   : "0"}
                                                                 m
                                                               </td>
@@ -2494,7 +2997,11 @@ const EditJob = () => {
                                   <div className="mb-3 col-lg-12">
                                     <input
                                       type="text"
-                                      className={errors["notes"] ? "error-field form-control" : "form-control"}
+                                      className={
+                                        errors["notes"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
                                       placeholder="Enter Notes"
                                       name="notes"
                                       id="notes"
@@ -2517,8 +3024,11 @@ const EditJob = () => {
                               type="button"
                               className="btn btn-secondary"
                               onClick={() => {
-                                sessionStorage.setItem('activeTab', location.state.activeTab)
-                                window.history.back()
+                                sessionStorage.setItem(
+                                  "activeTab",
+                                  location.state.activeTab
+                                );
+                                window.history.back();
                               }}
                             >
                               <i className="fa fa-times"></i> Cancel

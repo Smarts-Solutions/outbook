@@ -540,14 +540,13 @@ const ClientEdit = () => {
       }));
     }
     if (location.state.row.client_type_name == "Charity Incorporated Organisation") {
-
       setCharityIncorporatedOrganisation((prevState) => ({
         ...prevState,
         charity_name: !getClientDetails.loading && getClientDetails.data.client.trading_name,
         TradingName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
-        charity_commission_number: !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        charity_commission_number: !getClientDetails.loading && getClientDetails.data.client.charity_commission_number,
         principal_office_address: !getClientDetails.loading && getClientDetails.data.client.trading_address,
-        service_address: !getClientDetails.loading && getClientDetails.data.client.trading_address,
+        service_address: !getClientDetails.loading && getClientDetails.data.client.service_address,
         VATRegistered: !getClientDetails.loading && getClientDetails.data.client.vat_registered,
         VATNumber: !getClientDetails.loading && getClientDetails.data.client.vat_number,
         Website: !getClientDetails.loading && getClientDetails.data.client.website,

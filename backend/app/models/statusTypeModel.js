@@ -207,6 +207,8 @@ const getMasterStatus = async (masterStatus) => {
     master_status.id AS id,
     master_status.name AS name,
     master_status.status_type_id AS status_type_id,
+    master_status.is_disable AS is_disable,
+    status_types.type AS status_type,
     status_types.type AS status_type,
     master_status.created_at AS created_at,
     master_status.updated_at AS updated_at

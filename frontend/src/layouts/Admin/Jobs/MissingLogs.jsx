@@ -7,6 +7,7 @@ import { GetMissingLog, AddMissionLog, EditMissingLog } from '../../../ReduxStor
 import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 import sweatalert from 'sweetalert2';
 import {convertDate } from '../../../Utils/Comman_function';
+import Swal from "sweetalert2";
 
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const location = useLocation();
@@ -55,6 +56,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
   };
 
   useEffect(() => {
+ 
     if (getEditData && showEditmissinglogsModal) {
       setMissionAllInputLogData({
         ...missionLogAllInputData,
@@ -213,9 +215,34 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
   }
 
   const handleEditSubmit = async (e) => {
-
+    
     const req = { action: "add", id: missionLogAllInputData.id, missionDetails: missionLogAllInputData }
     const data = { req: req, authToken: token }
+
+    if(parseInt(missionLogAllInputData.missing_log) == 0){
+     Swal.fire({
+      icon: 'warning',
+      title: 'Warning...',
+      text: 'Change Missing Log to Yes',
+      timerProgressBar: true,
+      showConfirmButton: true,
+      timer: 1500
+    });
+    return
+    }
+
+    if(missionLogAllInputData.missing_log_reviewed_date == null || missionLogAllInputData.missing_log_reviewed_date == ""){
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning...',
+        text: 'Missing Log Reviewed Date is Required',
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      return
+    }
+
     await dispatch(EditMissingLog(data))
       .unwrap()
       .then((response) => {
@@ -233,6 +260,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
         }
         else {
+
           sweatalert.fire({
             icon: 'error',
             title: response.message,
@@ -410,6 +438,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 disabled={true}
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_reviewed_by}
+                max={new Date().toISOString().split("T")[0]} 
               />
               {errors1["missing_log_reviewed_by"] && (
                 <div className="error-text">
@@ -545,8 +574,8 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
           setShowEditMissinglogsModal(false);
           resetForm();
         }}
-        Submit_Function={() => { handleEditSubmit(); resetForm() }}
-      >
+         Submit_Function={() => { handleEditSubmit(); }}
+       >
         <div className="row">
 
           <div className="col-lg-6">
@@ -635,6 +664,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 disabled={true}
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_reviewed_by}
+               
               />
               {errors1["missing_log_reviewed_by"] && (
                 <div className="error-text">
@@ -657,6 +687,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_reviewed_date"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_reviewed_date}
+                min={new Date().toISOString().split("T")[0]}
               />
               {errors1["missing_log_reviewed_date"] && (
                 <div className="error-text">

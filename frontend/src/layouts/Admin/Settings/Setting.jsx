@@ -721,7 +721,7 @@ const Setting = () => {
 
   const columnService = [
     {
-      name: "Service Name",
+      name: "Service Name ",
       selector: (row) => row.name,
       sortable: true,
       width: "50%",
@@ -762,16 +762,17 @@ const Setting = () => {
                   aria-labelledby="dropdownMenuButton"
                 >
                   <div className="px-2">
-                    {showSettingUpdateTab && (
+                    {row.is_disable == 0 && (
                       <button
                         className="edit-icon dropdown-item w-auto mb-2"
                         onClick={() => handleEdit(row, "4")}
+                        
                       >
                         {" "}
                         <i className="ti-pencil" />
                       </button>
                     )}
-                    {showSettingDeleteTab && (
+                    {row.is_disable == 0 && (
                       <button
                         className="delete-icon dropdown-item w-auto mb-2"
                         onClick={() => handleDelete(row, "4")}
@@ -785,7 +786,7 @@ const Setting = () => {
                         className="btn btn-sm btn-info text-white dropdown-item"
                         onClick={(e) => handleJobType(row)}
                       >
-                        <i className="fa fa-plus pe-1"></i>Add Job Type
+                        <i className="fa fa-plus pe-1"></i>Add Job Type 
                       </button>
                     )}
                   </div>
@@ -793,7 +794,7 @@ const Setting = () => {
               </div>
 
               <div className="d-lg-flex d-none">
-                {showSettingUpdateTab && (
+                {row.is_disable == 0 && (
                   <button
                     className="edit-icon"
                     onClick={() => handleEdit(row, "4")}
@@ -802,7 +803,7 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
-                {showSettingDeleteTab && (
+                {row.is_disable == 0 && (
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row, "4")}
@@ -819,7 +820,7 @@ const Setting = () => {
                     <i className="fa fa-plus pe-1"></i>Add Job Type
                   </button>
                 )}
-              </div>
+              </div>  
             </>
           ),
           ignoreRowClick: true,
