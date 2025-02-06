@@ -908,15 +908,13 @@ const ClientLists = () => {
                 }}
               >
                 {CustomerData &&
-                  CustomerData.map((val, index) => (
-                    <option
-                      key={index}
-                      value={val.id}
-                      selected={customerId == val.id}
-                    >
-                      {val.trading_name}
-                    </option>
-                  ))}
+                  CustomerData.map((val, index) =>
+                    Number(val.status) === 1 && Number(val.form_process) === 4 ? (
+                      <option key={index} value={val.id} selected={customerId === val.id}>
+                        {val.trading_name}
+                      </option>
+                    ) : null
+                  )}
               </select>
             </div>
 
