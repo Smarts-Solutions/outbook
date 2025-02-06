@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import ExportToExcel  from '../../../Components/ExtraComponents/ExportToExcel';
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status , deleteCustomer ,GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
@@ -251,7 +250,54 @@ const Customer = () => {
   ];
 
   const handleDelete = (row) => {
-    console.log("row", row);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this customer?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { customer_id: row.id };
+          const res = await dispatch(deleteCustomer({ req, authToken: token })).unwrap();
+
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetAllCustomerData(1, pageSize, '');
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while deleting the customer.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Customer was not deleted",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    });
+    
   };
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;

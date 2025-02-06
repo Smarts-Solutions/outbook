@@ -507,6 +507,7 @@ export async function EDIT_DRAFT(data, token) {
     return await err;
   }
 }
+
 export async function JOBDOCUMENT_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}JobDocumentAction`, data, {
@@ -558,6 +559,18 @@ export async function UPDATE_STATUS(data, token) {
 export async function getcustomerschecklist(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}getcustomerschecklist`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function delete_Customer(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}deleteCustomer`, data, {
       headers: header(token),
       data: {},
     });

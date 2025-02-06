@@ -32,6 +32,7 @@ import {
   UPDATE_STATUS,
   getcustomerschecklist,
   get_All_Customer_DropDown,
+  delete_Customer
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -158,8 +159,6 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk(
     }
   }
 );
-
-
 
 export const getAllCustomerDropDown = createAsyncThunk(
   "customerAction",
@@ -599,6 +598,25 @@ export const getcustomerschecklistApi = createAsyncThunk(
         StaffUserId: StaffUserId.id,
       };
       const res = await getcustomerschecklist(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const deleteCustomer = createAsyncThunk(
+  "deleteCustomer",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await delete_Customer(updatedReq, authToken);
       return await res;
     } catch (err) {
       throw err;
