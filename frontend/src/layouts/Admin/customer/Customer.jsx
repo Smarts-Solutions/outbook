@@ -211,33 +211,34 @@ const Customer = () => {
         return (
           <div style={{ textAlign: "center" }}>
             {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
-              <>
+              <div className="d-flex justify-content-center">
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
                 </button>
-                {/* <button
+
+               {row.form_process != "4" &&  <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
                   <i className="ti-trash text-danger " />
-                </button> */}
-              </>
+                </button>}
+              </div>
             ) : (
-              <>
+              <div className="d-flex justify-content-center">
                 {hasUpdateAccess && row.status == 1 && (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {/* {hasDeleteAccess && row.status==1 &&  (
+                {hasDeleteAccess && row.form_process != "4" &&  (
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row)}
                   >
                     <i className="ti-trash text-danger" />
                   </button>
-                )} */}
-              </>
+                )}
+              </div>
             )}
           </div>
         );
@@ -249,6 +250,9 @@ const Customer = () => {
     },
   ];
 
+  const handleDelete = (row) => {
+    console.log("row", row);
+  };
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
 
@@ -480,6 +484,9 @@ const Customer = () => {
                       
 
                       <Datatable columns={columns} data={filteredData1} />
+
+
+                     { console.log("filteredData1", filteredData1)}
 
                       {/* Pagination Controls */}
                       <ReactPaginate
