@@ -1,8 +1,7 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation } = require('../utils/helper'); 
+const { SatffLogUpdateOperation } = require("../utils/helper");
 
 const createStatusType = async (StatusType) => {
- 
   const { type } = StatusType;
   const checkQuery = `SELECT 1 FROM status_types WHERE type = ?`;
   const query = `
@@ -16,17 +15,15 @@ const createStatusType = async (StatusType) => {
     }
     const [result] = await pool.execute(query, [type]);
     const currentDate = new Date();
-        await SatffLogUpdateOperation(
-            {
-                staff_id: StatusType.StaffUserId,
-                ip: StatusType.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: "status types",
-                log_message: `created status types ${type}`,
-                permission_type: "created",
-                module_id:result.insertId
-            }
-        );
+    await SatffLogUpdateOperation({
+      staff_id: StatusType.StaffUserId,
+      ip: StatusType.ip,
+      date: currentDate.toISOString().split("T")[0],
+      module_name: "status types",
+      log_message: `created status types ${type}`,
+      permission_type: "created",
+      module_id: result.insertId,
+    });
     return {
       status: true,
       message: "Status Type created successfully.",
@@ -67,29 +64,29 @@ const getStatusTypeAll = async () => {
 };
 
 const deleteStatusType = async (StatusTypeId) => {
-  const [[existType]] = await pool.execute(`SELECT type FROM status_types WHERE id = ?`, [StatusTypeId.id]);
+  const [[existType]] = await pool.execute(
+    `SELECT type FROM status_types WHERE id = ?`,
+    [StatusTypeId.id]
+  );
 
-  if(parseInt(StatusTypeId.id) > 0){
+  if (parseInt(StatusTypeId.id) > 0) {
     const currentDate = new Date();
-    await SatffLogUpdateOperation(
-      {
-        staff_id: StatusTypeId.StaffUserId,
-        ip: StatusTypeId.ip,
-        date: currentDate.toISOString().split("T")[0],
-        module_name: "status types",
-        log_message: `deleted status types ${existType.type}`,
-        permission_type: "deleted",
-        module_id: StatusTypeId.id,
-      }
-    );
+    await SatffLogUpdateOperation({
+      staff_id: StatusTypeId.StaffUserId,
+      ip: StatusTypeId.ip,
+      date: currentDate.toISOString().split("T")[0],
+      module_name: "status types",
+      log_message: `deleted status types ${existType.type}`,
+      permission_type: "deleted",
+      module_id: StatusTypeId.id,
+    });
   }
   const query = `
     DELETE FROM status_types WHERE id = ?
     `;
-    
+
   try {
     await pool.execute(query, [StatusTypeId.id]);
-   
   } catch (err) {
     console.error("Error deleting data:", err);
     throw err;
@@ -125,28 +122,30 @@ const updateStatusType = async (StatusType) => {
       return { status: false, message: "Status Type already exists." };
     }
 
-    const [[existStatus]] = await pool.execute(`SELECT status FROM status_types WHERE id = ?`, [id]);
-    let status_change = "Deactivate"
-    if(StatusType.status == "1"){
-      status_change = "Activate"
+    const [[existStatus]] = await pool.execute(
+      `SELECT status FROM status_types WHERE id = ?`,
+      [id]
+    );
+    let status_change = "Deactivate";
+    if (StatusType.status == "1") {
+      status_change = "Activate";
     }
-    let log_message = existStatus.status === StatusType.status ?
-        `edited status types ${type}`:
-        `changes the status types status ${status_change} ${type}`
+    let log_message =
+      existStatus.status === StatusType.status
+        ? `edited status types ${type}`
+        : `changes the status types status ${status_change} ${type}`;
     const [result] = await pool.execute(query, values);
-    if(result.changedRows > 0){
+    if (result.changedRows > 0) {
       const currentDate = new Date();
-      await SatffLogUpdateOperation(
-        {
-          staff_id: StatusType.StaffUserId,
-          ip: StatusType.ip,
-          date: currentDate.toISOString().split("T")[0],
-          module_name: "status types",
-          log_message: log_message,
-          permission_type: "updated",
-          module_id: StatusType.id,
-        }
-      );
+      await SatffLogUpdateOperation({
+        staff_id: StatusType.StaffUserId,
+        ip: StatusType.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "status types",
+        log_message: log_message,
+        permission_type: "updated",
+        module_id: StatusType.id,
+      });
     }
     return {
       status: true,
@@ -158,8 +157,6 @@ const updateStatusType = async (StatusType) => {
     throw err;
   }
 };
-
-
 
 // Master Status
 const createMasterStatus = async (masterStatus) => {
@@ -175,20 +172,17 @@ const createMasterStatus = async (masterStatus) => {
       return { status: false, message: "Master Status already exists." };
     }
     const [result] = await pool.execute(query, [status_type_id, name]);
-   
-      const currentDate = new Date();
-      await SatffLogUpdateOperation(
-        {
-          staff_id: masterStatus.StaffUserId,
-          ip: masterStatus.ip,
-          date: currentDate.toISOString().split("T")[0],
-          module_name: "master status",
-          log_message: `created master status ${name}`,
-          permission_type: "created",
-          module_id: result.insertId,
-        }
-      );
-    
+
+    const currentDate = new Date();
+    await SatffLogUpdateOperation({
+      staff_id: masterStatus.StaffUserId,
+      ip: masterStatus.ip,
+      date: currentDate.toISOString().split("T")[0],
+      module_name: "master status",
+      log_message: `created master status ${name}`,
+      permission_type: "created",
+      module_id: result.insertId,
+    });
 
     return {
       status: true,
@@ -228,26 +222,44 @@ const getMasterStatus = async (masterStatus) => {
   }
 };
 
-const deleteMasterStatus = async (id) => {
+const deleteMasterStatus = async (data) => {
+  console.log("data=>", data);
+  const { id, replace_id } = data;
+
   const query = `
     DELETE FROM master_status WHERE id = ?
     `;
-  const [[existStatus]] = await pool.execute(`SELECT name FROM master_status WHERE id = ?`, [id.id]);
+  const [[existStatus]] = await pool.execute(
+    `SELECT name FROM master_status WHERE id = ?`,
+    [id]
+  );
+  await pool.execute(`UPDATE jobs SET status_type =? WHERE jobs.id = ?;`, [
+    id,
+    replace_id,
+  ]);
+
+  console.log("existStatus=>", existStatus);
 
   try {
-    await pool.execute(query, [id.id]);
-    const currentDate = new Date();
-    await SatffLogUpdateOperation(
-      {
+    if (existStatus) {
+      await pool.execute(query, [id]);
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
         staff_id: id.StaffUserId,
         ip: id.ip,
         date: currentDate.toISOString().split("T")[0],
         module_name: "master status",
         log_message: `deleted master status ${existStatus.name}`,
         permission_type: "deleted",
-        module_id: id.id,
-      }
-    );
+        module_id: id,
+        replace_id,
+      });
+    } else {
+      return {
+        status: false,
+        message: "Master Status not exists.",
+      };
+    }
   } catch (err) {
     console.error("Error deleting data:", err);
     throw err;
@@ -281,21 +293,19 @@ const updateMasterStatus = async (masterStatus) => {
     if (check.length > 0) {
       return { status: false, message: "Master Status already exists." };
     }
-    
+
     const [result] = await pool.execute(query, values);
-    if(result.changedRows){
+    if (result.changedRows) {
       const currentDate = new Date();
-      await SatffLogUpdateOperation(
-        {
-          staff_id: masterStatus.StaffUserId,
-          ip: masterStatus.ip,
-          date: currentDate.toISOString().split("T")[0],
-          module_name: "master status",
-          log_message: `edited master status ${name}`,
-          permission_type: "updated",
-          module_id: masterStatus.id,
-        }
-      );
+      await SatffLogUpdateOperation({
+        staff_id: masterStatus.StaffUserId,
+        ip: masterStatus.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "master status",
+        log_message: `edited master status ${name}`,
+        permission_type: "updated",
+        module_id: masterStatus.id,
+      });
     }
 
     return {

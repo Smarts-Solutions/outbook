@@ -58,21 +58,19 @@ const StaffPage = () => {
             });
             setSelectedStaff(null);
             SetRefresh(!refresh);
-            setDeleteStaff(false)
-
+            setDeleteStaff(false);
           } else {
             sweatalert.fire({
               icon: "error",
               title: "Oops...",
               text: response.message,
             });
-            setDeleteStaff(false)
+            setDeleteStaff(false);
           }
         })
         .catch((error) => {
           return;
         });
-
     } else {
       sweatalert.fire({
         icon: "error",
@@ -684,9 +682,8 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
-    
     console.log("editStaffData", editStaffData);
-  
+
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
@@ -695,7 +692,7 @@ const StaffPage = () => {
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue("phone_code", editStaffData.phone_code || null);
-      formik.setFieldValue("staff_to", editStaffData.staff_to || '');
+      formik.setFieldValue("staff_to", editStaffData.staff_to || "");
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],
@@ -1072,23 +1069,25 @@ const StaffPage = () => {
               Select Staff to Delete:
             </label>
             <select
-  id="staff-select"
-  value={selectedStaff || ""}
-  onChange={(e) => setSelectedStaff(e.target.value)}
-  className="form-select"
->
-  <option value="" disabled>
-    Choose Staff
-  </option>
-  {staffDataAll?.data
-    ?.filter((staff) => staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2)
-    .map((staff) => (
-      <option key={staff.id} value={staff.id}>
-        {staff.first_name}
-      </option>
-    ))}
-</select>
-
+              id="staff-select"
+              value={selectedStaff || ""}
+              onChange={(e) => setSelectedStaff(e.target.value)}
+              className="form-select"
+            >
+              <option value="" disabled>
+                Choose Staff
+              </option>
+              {staffDataAll?.data
+                ?.filter(
+                  (staff) =>
+                    staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2
+                )
+                .map((staff) => (
+                  <option key={staff.id} value={staff.id}>
+                    {staff.first_name}
+                  </option>
+                ))}
+            </select>
           </div>
 
           {selectedStaff && (

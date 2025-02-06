@@ -8,27 +8,30 @@ import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 import { fa_time } from "../../../Utils/Date_formet";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { convertDate } from '../../../Utils/Comman_function';
+import { convertDate } from "../../../Utils/Comman_function";
 
-import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 
 const Status = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [statusTypeDataAll, setStatusTypeDataAll] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
-  const [getStatsAdd, setStatsAdd] = useState({ statusname: "", statustype: "", });
+  const [getStatsAdd, setStatsAdd] = useState({
+    statusname: "",
+    statustype: "",
+  });
   const [editItem, setEditItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [getAccessData, setAccessData] = useState({ insert: 0 });
   const role = JSON.parse(localStorage.getItem("role"));
-
+  const [DeleteStatus, setDeleteStatus] = useState(false);
+  const [replaceStatue, setReplaceStatue] = useState(null);
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "status"
     )?.items || [];
-
 
   useEffect(() => {
     if (accessData.length === 0) return;
@@ -39,7 +42,6 @@ const Status = () => {
     });
   }, []);
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setStatsAdd((prevStatsAdd) => ({
@@ -48,25 +50,25 @@ const Status = () => {
     }));
   };
   const rows = [
-    { id: 1, status_type: 'completed' },
-    { id: 2, status_type: 'pending' },
-    { id: 3, status_type: 'hold' },
-    { id: 4, status_type: 'rejected' }
+    { id: 1, status_type: "completed" },
+    { id: 2, status_type: "pending" },
+    { id: 3, status_type: "hold" },
+    { id: 4, status_type: "rejected" },
   ];
 
   // Function to determine the CSS class based on status_type
   const getStatusClass = (status_type) => {
     switch (status_type) {
-      case 'completed':
-        return 'text-success';
-      case 'pending':
-        return 'text-warning';
-      case 'hold':
-        return 'text-primary';
-      case 'rejected':
-        return 'text-danger';
+      case "completed":
+        return "text-success";
+      case "pending":
+        return "text-warning";
+      case "hold":
+        return "text-primary";
+      case "rejected":
+        return "text-danger";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -74,7 +76,7 @@ const Status = () => {
     {
       name: "Detailed Status",
       selector: (row) => row.name,
-      cell: (row) => (<div title={row.name} >{row.name}</div>),
+      cell: (row) => <div title={row.name}>{row.name}</div>,
       sortable: true,
     },
     {
@@ -104,9 +106,15 @@ const Status = () => {
           <button className="edit-icon" onClick={() => handleEdit(row)}>
             <i className="ti-pencil" />
           </button>
-         {row.is_disable=="0" && <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash text-danger" />
-          </button>}
+          {/* {row.is_disable=="0" && <button className="delete-icon" onClick={() => handleDelete(row)}>  */}
+          {row.is_disable == "0" && (
+            <button
+              className="delete-icon"
+              onClick={() => setDeleteStatus(row)}
+            >
+              <i className="ti-trash text-danger" />
+            </button>
+          )}
         </div>
       ),
       ignoreRowClick: true,
@@ -115,9 +123,7 @@ const Status = () => {
     },
   ];
 
-  const formatDate = (date) => {
-    return date ? fa_time(date) : "N/A";
-  };
+ 
 
   const handleEdit = async (row) => {
     // Set the item to be edited
@@ -180,37 +186,29 @@ const Status = () => {
     }
   };
 
-  const handleDelete = (row) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const data = {
-          req: {
-            action: "delete",
-            id: row.id,
-          },
-          authToken: token,
-        };
-        await dispatch(MasterStatusData(data))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire("Deleted!", "Your file has been deleted.", "success");
-              GetStatus();
-            }
-          })
-          .catch((error) => {
-            return;
-          });
-      }
-    });
+  const handleDelete = async (row) => {
+    const data = {
+      req: {
+        action: "delete",
+        id: DeleteStatus.id,
+        replace_id: replaceStatue,
+      },
+      authToken: token,
+    };
+    await dispatch(MasterStatusData(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          Swal.fire("Deleted!", "Your file has been deleted.", "success");
+          GetStatus();
+          setDeleteStatus(false);
+          setReplaceStatue(null);
+
+        }
+      })
+      .catch((error) => {
+        return;
+      });
   };
 
   const GetStatus = async () => {
@@ -257,7 +255,6 @@ const Status = () => {
       return;
     }
 
-
     const data = {
       req: {
         action: editItem ? "update" : "add",
@@ -289,8 +286,7 @@ const Status = () => {
             });
             setEditItem(null);
           });
-        }
-        else {
+        } else {
           Swal.fire({
             icon: "error",
             title: "Failed !",
@@ -310,15 +306,15 @@ const Status = () => {
     statusTypeData();
   }, []);
 
-
   const exportData = statusDataAll.map((item) => ({
     "Status Name": item.name,
     "Status Type": item.status_type,
     "Created Date": convertDate(item.created_at),
     "Last Update On": convertDate(item.updated_at),
-   
   }));
 
+  console.log("DeleteStatus", DeleteStatus);
+  console.log("replaceStatue", replaceStatue);
 
   return (
     <div>
@@ -332,25 +328,26 @@ const Status = () => {
               <div className="col-12 col-sm-6">
                 <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                   <div>
-                    {
-                      getAccessData.insert === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-                        <button
-                          type="button"
-                          className="btn btn-info text-white float-md-end  "
-                          onClick={() => {
-                            setShowModal(true);
-                            setEditItem(null);
-                            setStatsAdd({
-                              statusname: "",
-                              statustype: "",
-                            });
-                          }}
-                        >
-                          <i className="fa fa-plus pe-1" /> Add Status
-                        </button>
-                      ) : <div className="mt-5"></div>
-                    }
-
+                    {getAccessData.insert === 1 ||
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN" ? (
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-md-end  "
+                        onClick={() => {
+                          setShowModal(true);
+                          setEditItem(null);
+                          setStatsAdd({
+                            statusname: "",
+                            statustype: "",
+                          });
+                        }}
+                      >
+                        <i className="fa fa-plus pe-1" /> Add Status
+                      </button>
+                    ) : (
+                      <div className="mt-5"></div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -358,13 +355,13 @@ const Status = () => {
           </div>
         </div>
         <div className="report-data mt-4 ">
-            <div className="d-flex justify-content-end">
-              <ExportToExcel
-                className="btn btn-outline-info fw-bold float-end border-3 "
-                apiData={exportData}
-                fileName={`Stauts`}
-              />
-            </div>
+          <div className="d-flex justify-content-end">
+            <ExportToExcel
+              className="btn btn-outline-info fw-bold float-end border-3 "
+              apiData={exportData}
+              fileName={`Stauts`}
+            />
+          </div>
 
           <div className="datatable-wrapper  ">
             <Datatable filter={true} columns={columns} data={statusDataAll} />
@@ -432,6 +429,56 @@ const Status = () => {
                 </div>
               </div>
             </form>
+          </div>
+        </CommanModal>
+
+        <CommanModal
+          isOpen={DeleteStatus}
+          backdrop="static"
+          size="ms-5"
+          title="Delete Status"
+          hideBtn={true}
+          handleClose={() => setDeleteStatus(false)}
+        >
+          <div className="modal-body">
+            <div className="mb-3">
+              <label htmlFor="staff-select" className="form-label">
+                Select Status to Replace:
+              </label>
+              <select
+                id="staff-select"
+                value={replaceStatue || ""}
+                onChange={(e) => setReplaceStatue(e.target.value)}
+                className="form-select"
+              >
+                <option value="" disabled>
+                  Choose Staff
+                </option>
+                {statusDataAll
+                  .filter((staff) => staff.id !== DeleteStatus?.id)
+                  .map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {replaceStatue && (
+              <button
+                onClick={handleDelete}
+                className="btn btn-danger w-100 mt-3"
+              >
+                Delete
+              </button>
+            )}
+
+            <button
+              onClick={() => setDeleteStatus(false)}
+              className="btn btn-secondary w-100 mt-2"
+            >
+              Cancel
+            </button>
           </div>
         </CommanModal>
       </div>
