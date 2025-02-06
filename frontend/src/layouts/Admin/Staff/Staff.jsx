@@ -73,12 +73,15 @@ const StaffPage = () => {
   const [refresh, SetRefresh] = useState(false);
   const [activeTab, setActiveTab] = useState("this-year");
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
+  const [AddCustomer, setAddCustomer] = useState([]);
   const [serviceDataAll, setServiceDataAll] = useState({
     loading: true,
     data: [],
     staff_id: "",
   });
-  const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
+
+  console.log("staffDataAll", staffDataAll);
 
   useEffect(() => {
     staffData();
@@ -309,6 +312,7 @@ const StaffPage = () => {
       // password: "",
       role: "3",
       status: "1",
+      staff_to: "",
     },
     validationSchema: Yup.object({
       first_name: Yup.string()
@@ -339,6 +343,7 @@ const StaffPage = () => {
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
+        staff_to: values.staff_to,
         hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
           }`,
       };
@@ -371,8 +376,7 @@ const StaffPage = () => {
               formik.resetForm();
               window.location.reload();
 
-            }
-              , 1500);
+            }, 1500);
           } else {
             sweatalert.fire({
               icon: "error",
@@ -447,7 +451,6 @@ const StaffPage = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      //  disable: editShowModel == true ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
@@ -469,6 +472,20 @@ const StaffPage = () => {
         { label: "Active", value: "1" },
         { label: "Inactive", value: "0" },
       ],
+    },
+    {
+      type: "select",
+      name: "staff_to",
+      label: "Line Manager",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: staffDataAll.data
+        .filter((data) => data.role !== "ADMIN")
+        .map((data) => ({
+          label: `${data.first_name} ${data.last_name}`,
+          value: data.id,
+        })),
     },
   ];
 
@@ -597,7 +614,6 @@ const StaffPage = () => {
   }));
 
 
-  const [AddCustomer, setAddCustomer] = useState([]);
   const colourOptions = [
     { value: 'ocean', label: 'Ocean' },
     { value: 'blue', label: 'Blue' },
@@ -723,7 +739,7 @@ const StaffPage = () => {
                 onChange={handleAddCustomer}
                 isMulti
               />
-            </div>  
+            </div>
           </div>
         </div>
       </CommanModal>
