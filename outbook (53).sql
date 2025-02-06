@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 01, 2025 at 12:58 PM
+-- Generation Time: Feb 06, 2025 at 12:45 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `clients` (
   UNIQUE KEY `client_code` (`client_code`),
   KEY `customer_id` (`customer_id`),
   KEY `client_industry_id` (`client_industry_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `clients`
@@ -118,7 +118,9 @@ CREATE TABLE IF NOT EXISTS `clients` (
 
 INSERT INTO `clients` (`id`, `client_type`, `customer_id`, `staff_created_id`, `client_industry_id`, `trading_name`, `client_code`, `trading_address`, `service_address`, `charity_commission_number`, `vat_registered`, `vat_number`, `website`, `notes`, `status`, `created_at`, `updated_at`) VALUES
 (1, '5', 1, 2, 0, 'Charity', '00001', 'a', '', 'abc', '0', '', '', '', '1', '2025-01-30 09:02:25', '2025-01-30 09:02:25'),
-(2, '1', 1, 2, 3, 'Cli2', '00002', 'd', NULL, NULL, '0', '', '', '', '1', '2025-01-30 09:08:41', '2025-01-30 09:08:41');
+(2, '1', 1, 2, 3, 'Cli2', '00002', 'd', NULL, NULL, '0', '', '', '', '1', '2025-01-30 09:08:41', '2025-01-30 09:08:41'),
+(3, '1', 2, 2, 0, 'Cli2g', '00003', 'gg', NULL, NULL, '0', '', '', '', '1', '2025-02-04 05:09:01', '2025-02-04 05:09:01'),
+(4, '1', 5, 5, 0, 'CLI-STAFF1', '00004', 'qa', NULL, NULL, '0', '', '', '', '1', '2025-02-06 11:20:55', '2025-02-06 11:20:55');
 
 -- --------------------------------------------------------
 
@@ -169,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `client_contact_details` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   KEY `role` (`role`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_contact_details`
@@ -177,7 +179,9 @@ CREATE TABLE IF NOT EXISTS `client_contact_details` (
 
 INSERT INTO `client_contact_details` (`id`, `client_id`, `role`, `first_name`, `last_name`, `email`, `alternate_email`, `phone_code`, `phone`, `alternate_phone_code`, `alternate_phone`, `residential_address`, `authorised_signatory_status`, `created_at`, `updated_at`) VALUES
 (1, 1, 0, 'a', 'a', '', '', '+44', '', '+44', '', NULL, '0', '2025-01-30 09:02:25', '2025-01-30 09:02:25'),
-(2, 2, 0, 'd', 'd', 's@gmail.com', NULL, '+44', '', NULL, NULL, 'd', '0', '2025-01-30 09:08:41', '2025-01-30 09:08:41');
+(2, 2, 0, 'd', 'd', 's@gmail.com', NULL, '+44', '', NULL, NULL, 'd', '0', '2025-01-30 09:08:41', '2025-01-30 09:08:41'),
+(3, 3, 0, 'g', 'g', 's@gmail.com', NULL, '+44', '', NULL, NULL, 'g', '0', '2025-02-04 05:09:01', '2025-02-04 05:09:01'),
+(4, 4, 0, 's', 's', 's@gmail.com', NULL, '+44', '2777777777', NULL, NULL, 's', '0', '2025-02-06 11:20:55', '2025-02-06 11:20:55');
 
 -- --------------------------------------------------------
 
@@ -378,14 +382,17 @@ CREATE TABLE IF NOT EXISTS `customers` (
   UNIQUE KEY `customer_code` (`customer_code`),
   KEY `staff_id` (`staff_id`),
   KEY `account_manager_id` (`account_manager_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customers`
 --
 
 INSERT INTO `customers` (`id`, `customer_type`, `staff_id`, `account_manager_id`, `trading_name`, `customer_code`, `trading_address`, `vat_registered`, `vat_number`, `website`, `customerJoiningDate`, `customerSource`, `customerSubSource`, `form_process`, `notes`, `status`, `created_at`, `updated_at`) VALUES
-(1, '1', 2, 11, 'CUS1', '00001', 's', '0', '', '', '2025-01-30', 5, 7, '4', '', '1', '2025-01-30 08:58:35', '2025-01-30 08:59:05');
+(1, '1', 2, 4, 'CUS1', '00001', 's', '0', '', '', '2025-01-30', 5, 7, '4', '', '1', '2025-01-30 08:58:35', '2025-02-06 07:26:09'),
+(2, '1', 2, 4, 'DDDD', '00002', 'ss', '0', '', '', '2025-02-04', 10, 14, '4', '', '1', '2025-02-04 05:08:03', '2025-02-06 09:27:18'),
+(5, '1', 5, 4, 'CUST-STAFF1', '00003', 'ok', '0', '', '', '2025-02-06', 10, 14, '4', '', '1', '2025-02-06 10:46:57', '2025-02-06 10:47:15'),
+(6, '1', 4, 4, 'CUST-4', '00004', 'a', '0', '0', '', '2025-02-06', 10, 14, '4', '', '1', '2025-02-06 11:34:48', '2025-02-06 11:35:07');
 
 -- --------------------------------------------------------
 
@@ -435,14 +442,17 @@ CREATE TABLE IF NOT EXISTS `customer_contact_details` (
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`),
   KEY `contact_person_role_id` (`contact_person_role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_contact_details`
 --
 
 INSERT INTO `customer_contact_details` (`id`, `customer_id`, `contact_person_role_id`, `first_name`, `last_name`, `email`, `alternate_email`, `phone_code`, `phone`, `alternate_phone`, `residential_address`, `authorised_signatory_status`, `created_at`, `updated_at`) VALUES
-(1, 1, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-01-30 08:58:35', '2025-01-30 08:58:35');
+(1, 1, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-01-30 08:58:35', '2025-01-30 08:58:35'),
+(2, 2, 0, 'ss', 'sss', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-02-04 05:08:03', '2025-02-04 05:08:03'),
+(5, 5, 0, 's', 's', 's@gmail.com', NULL, '+44', '2777777777', NULL, 's', '1', '2025-02-06 10:46:57', '2025-02-06 10:46:57'),
+(6, 6, 0, 's', 's', 's@gmail.com', NULL, '+44', '7777777777', NULL, 'z', '1', '2025-02-06 11:34:48', '2025-02-06 11:34:48');
 
 -- --------------------------------------------------------
 
@@ -567,14 +577,17 @@ CREATE TABLE IF NOT EXISTS `customer_engagement_model` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_engagement_model`
 --
 
 INSERT INTO `customer_engagement_model` (`id`, `customer_id`, `fte_dedicated_staffing`, `percentage_model`, `adhoc_payg_hourly`, `customised_pricing`, `created_at`, `updated_at`) VALUES
-(1, 1, '0', '1', '0', '0', '2025-01-30 08:59:03', '2025-01-30 08:59:03');
+(1, 1, '0', '1', '0', '0', '2025-01-30 08:59:03', '2025-01-30 08:59:03'),
+(2, 2, '0', '1', '0', '0', '2025-02-04 05:08:19', '2025-02-04 05:08:19'),
+(3, 5, '0', '1', '0', '0', '2025-02-06 10:47:13', '2025-02-06 10:47:13'),
+(4, 6, '0', '1', '0', '0', '2025-02-06 11:35:05', '2025-02-06 11:35:05');
 
 -- --------------------------------------------------------
 
@@ -596,14 +609,17 @@ CREATE TABLE IF NOT EXISTS `customer_engagement_percentage` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `customer_engagement_model_id` (`customer_engagement_model_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_engagement_percentage`
 --
 
 INSERT INTO `customer_engagement_percentage` (`id`, `customer_engagement_model_id`, `total_outsourcing`, `accountants`, `bookkeepers`, `payroll_experts`, `tax_experts`, `admin_staff`, `created_at`, `updated_at`) VALUES
-(1, 1, '1.00', '1.00', '1.00', '1.00', '1.00', '1.00', '2025-01-30 08:59:03', '2025-01-30 08:59:03');
+(1, 1, '1.00', '1.00', '1.00', '1.00', '1.00', '1.00', '2025-01-30 08:59:03', '2025-01-30 08:59:03'),
+(2, 2, '22.00', '22.00', '22.00', '22.00', '22.00', '22.00', '2025-02-04 05:08:19', '2025-02-04 05:08:19'),
+(3, 3, '4.00', '4.00', '4.00', '4.00', '4.00', '4.00', '2025-02-06 10:47:13', '2025-02-06 10:47:13'),
+(4, 4, '1.00', '1.00', '1.00', '1.00', '1.00', '1.00', '2025-02-06 11:35:05', '2025-02-06 11:35:05');
 
 -- --------------------------------------------------------
 
@@ -643,7 +659,7 @@ CREATE TABLE IF NOT EXISTS `customer_services` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `customer_id` (`customer_id`,`service_id`),
   KEY `service_id` (`service_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_services`
@@ -653,7 +669,12 @@ INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `c
 (1, 1, 1, '1', '2025-01-30 08:58:44', '2025-01-30 08:58:44'),
 (2, 1, 7, '1', '2025-01-30 08:58:44', '2025-01-30 08:58:44'),
 (3, 1, 6, '1', '2025-01-30 08:58:44', '2025-01-30 08:58:44'),
-(4, 1, 2, '1', '2025-02-01 06:20:02', '2025-02-01 06:20:02');
+(4, 1, 2, '1', '2025-02-01 06:20:02', '2025-02-01 06:20:02'),
+(5, 2, 3, '1', '2025-02-04 05:08:07', '2025-02-04 05:08:07'),
+(6, 2, 2, '1', '2025-02-04 05:09:30', '2025-02-04 05:09:30'),
+(7, 5, 3, '1', '2025-02-06 10:47:02', '2025-02-06 10:47:02'),
+(8, 6, 1, '1', '2025-02-06 11:34:52', '2025-02-06 11:34:52'),
+(9, 6, 2, '1', '2025-02-06 11:34:52', '2025-02-06 11:34:52');
 
 -- --------------------------------------------------------
 
@@ -676,10 +697,15 @@ CREATE TABLE IF NOT EXISTS `customer_service_account_managers` (
 --
 
 INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account_manager_id`, `created_at`, `updated_at`) VALUES
-(1, 11, '2025-02-01 06:20:02', '2025-02-01 06:20:02'),
-(2, 11, '2025-02-01 06:20:02', '2025-02-01 06:20:02'),
-(3, 11, '2025-02-01 06:20:02', '2025-02-01 06:20:02'),
-(4, 11, '2025-02-01 06:20:02', '2025-02-01 06:20:02');
+(1, 4, '2025-02-01 06:20:02', '2025-02-06 07:26:50'),
+(2, 4, '2025-02-01 06:20:02', '2025-02-06 07:26:50'),
+(3, 4, '2025-02-01 06:20:02', '2025-02-06 07:26:50'),
+(4, 4, '2025-02-01 06:20:02', '2025-02-06 07:26:50'),
+(5, 4, '2025-02-04 05:09:30', '2025-02-06 07:26:50'),
+(6, 4, '2025-02-04 05:09:30', '2025-02-06 07:26:50'),
+(7, 4, '2025-02-06 10:47:02', '2025-02-06 10:47:02'),
+(8, 4, '2025-02-06 11:34:52', '2025-02-06 11:34:52'),
+(9, 4, '2025-02-06 11:34:52', '2025-02-06 11:34:52');
 
 -- --------------------------------------------------------
 
@@ -815,7 +841,7 @@ CREATE TABLE IF NOT EXISTS `drafts` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `drafts`
@@ -825,6 +851,7 @@ INSERT INTO `drafts` (`id`, `job_id`, `draft_sent_on`, `draft_title`, `final_dra
 (1, 1, '2025-02-01', 'D_00001', '2025-02-01', '0', '4', NULL, '1', '2025-02-01 11:19:53', '2025-02-01 11:19:53'),
 (2, 1, '2025-02-01', 'D_00002', '2025-02-01', '1', '4', 'okkk', '1', '2025-02-01 11:20:46', '2025-02-01 12:24:00'),
 (3, 1, '2025-02-01', 'D_00003', '2025-02-01', '1', '4', 'okkk', '1', '2025-02-01 11:22:40', '2025-02-01 11:23:04'),
+(5, 2, '2025-02-06', 'D_00001', NULL, '0', '1', 'sss', '0', '2025-02-06 12:17:52', '2025-02-06 12:38:53'),
 (4, 1, '2025-02-01', 'D_00004', NULL, '0', '1', NULL, '0', '2025-02-01 12:05:49', '2025-02-01 12:05:49');
 
 -- --------------------------------------------------------
@@ -987,14 +1014,15 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`),
   KEY `currency` (`currency`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `jobs`
 --
 
 INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Bookkeeping_Frequency_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Management_Accounts_Frequency_id_6`, `created_at`, `updated_at`) VALUES
-(1, 2, '00001', 11, 1, 2, '', 1, 2, 2, '24:24', 0, 0, '2025-01-30', '2025-01-30', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-01-26', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 21, NULL, '1', NULL, '', '', 0, '', '', '', '', '', 'Daily', 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '0', '0', '0', '', '', '2025-01-30 09:09:00', '2025-02-01 12:05:49');
+(1, 2, '00001', 11, 1, 2, '', 1, 2, 2, '24:24', 0, 0, '2025-01-30', '2025-01-30', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-01-26', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 21, NULL, '1', NULL, '', '', 0, '', '', '', '', '', 'Daily', 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '0', '0', '0', '', '', '2025-01-30 09:09:00', '2025-02-01 12:05:49'),
+(2, 2, '00002', 11, 2, 3, '', 2, 2, 4, '00:00', 0, 0, '2025-02-04', '2025-02-04', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-02-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 21, NULL, '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-02-04 05:14:36', '2025-02-06 12:17:52');
 
 -- --------------------------------------------------------
 
@@ -1033,7 +1061,7 @@ CREATE TABLE IF NOT EXISTS `job_types` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `service_id` (`service_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `job_types`
@@ -1041,7 +1069,35 @@ CREATE TABLE IF NOT EXISTS `job_types` (
 
 INSERT INTO `job_types` (`id`, `service_id`, `type`, `status`, `created_at`, `updated_at`) VALUES
 (1, 7, 'VAT1', '1', '2025-01-30 08:57:18', '2025-01-30 08:57:18'),
-(2, 7, 'VAT2', '1', '2025-01-30 08:57:26', '2025-01-30 08:57:26');
+(2, 7, 'VAT2', '1', '2025-01-30 08:57:26', '2025-01-30 08:57:26'),
+(3, 3, 'V3', '1', '2025-02-04 05:12:37', '2025-02-04 05:12:37'),
+(4, 2, 'V4', '1', '2025-02-04 05:14:10', '2025-02-04 05:14:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `line_managers`
+--
+
+DROP TABLE IF EXISTS `line_managers`;
+CREATE TABLE IF NOT EXISTS `line_managers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_by` int(11) NOT NULL,
+  `staff_to` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `staff_by` (`staff_by`),
+  KEY `staff_to` (`staff_to`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `line_managers`
+--
+
+INSERT INTO `line_managers` (`id`, `staff_by`, `staff_to`, `created_at`, `updated_at`) VALUES
+(1, 5, 4, '2025-02-06 07:27:58', '2025-02-06 07:27:58'),
+(2, 6, 5, '2025-02-06 07:28:28', '2025-02-06 11:30:04');
 
 -- --------------------------------------------------------
 
@@ -1055,6 +1111,7 @@ CREATE TABLE IF NOT EXISTS `master_status` (
   `name` varchar(100) NOT NULL,
   `status_type_id` int(11) NOT NULL,
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -1066,28 +1123,28 @@ CREATE TABLE IF NOT EXISTS `master_status` (
 -- Dumping data for table `master_status`
 --
 
-INSERT INTO `master_status` (`id`, `name`, `status_type_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'To Be Started - Not Yet Allocated Internally', 1, '1', '2024-08-27 11:42:24', '2024-09-10 11:26:30'),
-(2, 'WIP – Missing Paperwork', 1, '1', '2024-08-27 11:53:06', '2024-09-10 11:26:08'),
-(3, 'WIP – Processing', 1, '1', '2024-08-27 11:53:06', '2024-09-10 11:26:11'),
-(4, 'WIP – In Queries', 1, '1', '2024-08-27 11:53:06', '2024-11-11 12:45:02'),
-(5, 'WIP – To Be Reviewed', 1, '1', '2024-08-27 11:53:06', '2024-09-10 11:26:15'),
-(6, 'Complete', 2, '1', '2024-09-24 13:07:54', '2024-11-11 12:44:38'),
-(7, 'No Longer Active', 3, '1', '2024-11-10 22:47:22', '2024-11-10 22:47:22'),
-(8, 'Duplicate', 3, '1', '2024-11-10 22:48:56', '2024-11-10 22:48:56'),
-(9, 'Awaiting Paperwork/Accounts/VAT', 7, '1', '2024-11-10 22:49:22', '2024-11-10 22:49:22'),
-(10, 'Client Not Responding', 7, '1', '2024-11-10 22:49:41', '2024-11-10 22:49:41'),
-(11, 'Waiting for Credentials', 7, '1', '2024-11-10 22:49:57', '2024-11-10 22:49:57'),
-(12, 'Bookkeeping Not Completed', 7, '1', '2024-11-10 22:50:12', '2024-11-10 22:50:12'),
-(13, 'To Be Reviewed', 1, '1', '2024-11-10 22:51:55', '2024-11-10 22:51:55'),
-(14, 'Customer Reviewed & To be Updated', 1, '1', '2024-11-10 22:52:10', '2024-11-10 22:52:10'),
-(15, 'Customer Processing', 1, '1', '2024-11-10 22:52:24', '2024-11-10 22:52:24'),
-(16, 'Draft Sent', 2, '1', '2024-11-10 22:52:52', '2024-11-10 22:52:52'),
-(17, 'Update Sent', 2, '1', '2024-11-10 22:53:06', '2024-11-10 22:53:06'),
-(18, 'Filed with Companies House and HMRC', 2, '1', '2024-11-10 22:53:20', '2024-11-10 22:53:20'),
-(19, 'Filed with Companies House', 2, '1', '2024-11-10 22:53:35', '2024-11-10 22:53:35'),
-(20, 'Filed with HMRC', 2, '1', '2024-11-10 22:53:48', '2024-11-10 22:53:48'),
-(21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '2025-02-01 11:28:00', '2025-02-01 11:28:00');
+INSERT INTO `master_status` (`id`, `name`, `status_type_id`, `status`, `is_disable`, `created_at`, `updated_at`) VALUES
+(1, 'To Be Started - Not Yet Allocated Internally', 1, '1', '1', '2024-08-27 11:42:24', '2025-02-06 08:43:02'),
+(2, 'WIP – Missing Paperwork', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:07'),
+(3, 'WIP – Processing', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:11'),
+(4, 'WIP – In Queries', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:15'),
+(5, 'WIP – To Be Reviewed', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:19'),
+(6, 'Complete', 2, '1', '1', '2024-09-24 13:07:54', '2025-02-06 08:43:24'),
+(7, 'No Longer Active', 3, '1', '0', '2024-11-10 22:47:22', '2025-02-06 08:42:56'),
+(8, 'Duplicate', 3, '1', '0', '2024-11-10 22:48:56', '2025-02-06 08:42:56'),
+(9, 'Awaiting Paperwork/Accounts/VAT', 7, '1', '0', '2024-11-10 22:49:22', '2025-02-06 08:42:56'),
+(10, 'Client Not Responding', 7, '1', '0', '2024-11-10 22:49:41', '2025-02-06 08:42:56'),
+(11, 'Waiting for Credentials', 7, '1', '0', '2024-11-10 22:49:57', '2025-02-06 08:42:56'),
+(12, 'Bookkeeping Not Completed', 7, '1', '0', '2024-11-10 22:50:12', '2025-02-06 08:42:56'),
+(13, 'To Be Reviewed', 1, '1', '0', '2024-11-10 22:51:55', '2025-02-06 08:42:56'),
+(14, 'Customer Reviewed & To be Updated', 1, '1', '0', '2024-11-10 22:52:10', '2025-02-06 08:42:56'),
+(15, 'Customer Processing', 1, '1', '0', '2024-11-10 22:52:24', '2025-02-06 08:42:56'),
+(16, 'Draft Sent', 2, '1', '0', '2024-11-10 22:52:52', '2025-02-06 08:42:56'),
+(17, 'Update Sent', 2, '1', '0', '2024-11-10 22:53:06', '2025-02-06 08:42:56'),
+(18, 'Filed with Companies House and HMRC', 2, '1', '0', '2024-11-10 22:53:20', '2025-02-06 08:42:56'),
+(19, 'Filed with Companies House', 2, '1', '0', '2024-11-10 22:53:35', '2025-02-06 08:42:56'),
+(20, 'Filed with HMRC', 2, '1', '0', '2024-11-10 22:53:48', '2025-02-06 08:42:56'),
+(21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '1', '2025-02-01 11:28:00', '2025-02-06 08:43:32');
 
 -- --------------------------------------------------------
 
@@ -1265,24 +1322,26 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `role` varchar(100) NOT NULL,
   `hourminute` varchar(100) DEFAULT NULL,
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `role_name` (`role_name`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `roles`
 --
 
-INSERT INTO `roles` (`id`, `role_name`, `role`, `hourminute`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Super Admin', 'SUPERADMIN', NULL, '1', '2024-06-28 11:59:13', '2024-06-28 11:59:13'),
-(2, 'Admin', 'ADMIN', '125:59', '1', '2024-06-28 11:59:22', '2024-10-19 12:27:52'),
-(3, 'Processor', 'PROCESSOR', '232:59', '1', '2024-06-28 12:05:34', '2024-10-19 12:27:25'),
-(4, 'Manager', 'MANAGER', '2:5', '1', '2024-09-07 09:17:08', '2024-11-26 09:08:09'),
-(5, 'Leadership', 'LEADERSHIP', NULL, '1', '2024-09-07 09:17:08', '2024-09-07 09:17:08'),
-(6, 'Reviewer', 'REVIEWER', NULL, '1', '2024-09-07 09:17:38', '2024-09-07 09:17:38'),
-(8, 'Management', 'MANAGEMENT', NULL, '1', '2024-10-14 09:00:37', '2024-10-14 09:00:37');
+INSERT INTO `roles` (`id`, `role_name`, `role`, `hourminute`, `status`, `is_disable`, `created_at`, `updated_at`) VALUES
+(1, 'Super Admin', 'SUPERADMIN', NULL, '1', '1', '2024-06-28 11:59:13', '2025-02-06 12:43:48'),
+(2, 'Admin', 'ADMIN', '125:59', '1', '1', '2024-06-28 11:59:22', '2025-02-06 12:43:48'),
+(3, 'Processor', 'PROCESSOR', '232:59', '1', '1', '2024-06-28 12:05:34', '2025-02-06 12:43:48'),
+(4, 'Manager', 'MANAGER', '2:5', '1', '1', '2024-09-07 09:17:08', '2025-02-06 12:43:48'),
+(5, 'Leadership', 'LEADERSHIP', NULL, '1', '1', '2024-09-07 09:17:08', '2025-02-06 12:43:48'),
+(6, 'Reviewer', 'REVIEWER', NULL, '1', '1', '2024-09-07 09:17:38', '2025-02-06 12:43:48'),
+(8, 'Management', 'MANAGEMENT', NULL, '1', '0', '2024-10-14 09:00:37', '2025-02-06 12:43:55'),
+(9, 'DEMO', 'DEMO', '00:00', '1', '0', '2025-02-06 05:19:54', '2025-02-06 12:43:58');
 
 -- --------------------------------------------------------
 
@@ -1369,7 +1428,11 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `created_at`, `updat
 (6, 2, '2024-11-27 05:41:29', '2024-11-27 05:41:29'),
 (3, 13, '2024-11-27 09:53:42', '2024-11-27 09:53:42'),
 (3, 2, '2024-11-28 06:30:30', '2024-11-28 06:30:30'),
-(4, 14, '2024-12-18 05:23:30', '2024-12-18 05:23:30');
+(4, 14, '2024-12-18 05:23:30', '2024-12-18 05:23:30'),
+(9, 29, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 30, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 31, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 32, '2025-02-06 05:19:55', '2025-02-06 05:19:55');
 
 -- --------------------------------------------------------
 
@@ -1381,13 +1444,13 @@ DROP TABLE IF EXISTS `services`;
 CREATE TABLE IF NOT EXISTS `services` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `is_disable` enum('0','1') NOT NULL COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: deactive, 1: active',
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `services`
@@ -1401,7 +1464,8 @@ INSERT INTO `services` (`id`, `name`, `is_disable`, `status`, `created_at`, `upd
 (5, 'Admin Support', '1', '1', '2025-01-28 03:39:08', '2025-01-28 11:20:21'),
 (6, 'Management Accounts', '1', '1', '2025-01-28 03:39:40', '2025-01-28 03:40:11'),
 (7, 'Company Secretarial', '1', '1', '2025-01-28 03:39:46', '2025-01-28 03:39:54'),
-(8, 'VAT Returns', '1', '1', '2025-01-28 09:23:31', '2025-02-01 06:48:09');
+(8, 'VAT Returns', '1', '1', '2025-01-28 09:23:31', '2025-02-01 06:48:09'),
+(9, 'demo', '0', '1', '2025-02-06 05:16:27', '2025-02-06 05:16:27');
 
 -- --------------------------------------------------------
 
@@ -1446,6 +1510,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
   `password` varchar(255) NOT NULL,
   `hourminute` varchar(100) DEFAULT NULL,
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
   `created_by` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1453,36 +1518,19 @@ CREATE TABLE IF NOT EXISTS `staffs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `role_id` (`role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staffs`
 --
 
-INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `created_by`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '152:00', '1', 2, '2024-06-28 12:02:41', '2024-10-19 04:51:50', ''),
-(2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', 2, '2024-07-08 07:25:41', '2025-02-01 05:01:29', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTczODM4NjA4OSwiZXhwIjoxNzM4NDIyMDg5fQ.s69sm0XUUfzcqgkoY7fRK3tsHUpCMWdc8V3Wdy1l8Nw'),
-(3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$UGh8LOFOP9Kwtha4kypOcuJL.YZYwwyRsSrzaYsRvMiBiwMomGvdW', '659:00', '1', 2, '2024-07-08 07:25:41', '2024-10-19 04:51:50', ''),
-(8, 4, 'acoountman', 'acoountman', 'acoountman@gmail.com', NULL, '9999999999', '$2a$10$abrYqdRDzY07Yu8vORWA3eUvE3K9FnQKR.nqePvVfqN9k2TAvtKjK', NULL, '1', 2, '2024-07-26 08:46:29', '2024-10-19 04:51:50', ''),
-(4, 3, 'staff', 'staff', 'staff@gmail.com', NULL, '1777777777', '$2a$10$FETqQjI42Df/K7GU.fum5erlyaa3LQnmQZ3CwLEQFp1CfurCVdAfi', '00:00', '1', 2, '2024-07-19 06:37:13', '2024-12-11 09:10:10', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTczMzkwODIxMCwiZXhwIjoxNzMzOTQ0MjEwfQ.iO1TEXpTDNAi4VX9Xz-VDZy7LyOrDYgorbY3_5pc2rc'),
-(7, 4, 'acoount', 'acoount', 'acoount@gmail.com', NULL, '1777777777', '$2a$10$CoAMpwxr5Tx04j6.ywgdYu3ns1l3dpyU2UcXCvcxiEyE00EI4atRy', NULL, '1', 2, '2024-07-26 08:43:27', '2024-12-19 07:18:26', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTczNDU5MjcwNiwiZXhwIjoxNzM0NjI4NzA2fQ.JZSFMeZx06gICeRetBFAY9nVuC2sYgVnqe8Qq55e7DI'),
-(5, 4, 'staff manager', 'staff manager', 'manager@gmail.com', NULL, '2777777777', '$2a$10$2q5nkq8dmkEcp9KKm3OD8uLx/eKTlNkVPghc.JrxnHuwZKlxx7A1e', '00:00', '1', 2, '2024-07-19 06:38:54', '2024-12-24 10:52:19', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTczNTAzNzUzOSwiZXhwIjoxNzM1MDczNTM5fQ.P-1UFo2bJjCPhZCYVsy7_2kHCiwVnh_okYSJ_0ar4fc'),
-(6, 3, 'Nikita ', 'bhagat', 'nikitabhagat.wpress@gmail.com', NULL, '5777777777', '$2a$10$hZQV8T6L43QGp4UdLPSg6uIbRjn0EMmH.mNwhkXarfZZcuZiGQY6e', NULL, '1', 2, '2024-07-23 10:49:54', '2024-12-24 10:52:57', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTczNTAzNzU3NywiZXhwIjoxNzM1MDczNTc3fQ.DxczUpOFcO7F4TzFKPRhzQxO3PMLhvaJvOl_vCYkK1M'),
-(9, 6, 'shk', 'hu', 'shk@gmail.com', NULL, '2777777777', '$2a$10$pQglX9nzdX2dvIfXMonuzehw80FpkoJAbebLlwXGFSkZS3wrX0Blm', NULL, '1', 2, '2024-08-12 10:16:58', '2024-12-25 08:47:27', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjksImlhdCI6MTczNTExNjQ0NywiZXhwIjoxNzM1MTUyNDQ3fQ.IE-SH30CFOPCC5rYiqmehinGLRdGmZ87518rdhsqjus'),
-(10, 4, 'MAN1', 'HHH', 'manager123@gmail.com', NULL, '2777777777', '$2a$10$WPF17rTpySsZZGC0j5DkL.qugfrxlSQeS501lc2y1QdJG3yXpPk7u', '00:00', '1', 2, '2024-08-30 15:38:39', '2024-12-18 05:20:05', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3MzQ0OTkyMDUsImV4cCI6MTczNDUzNTIwNX0.MAkDMR2W2u8ElgkHM8XWCdJgzrNXrYHWL9vx_Fpnip0'),
-(11, 4, 'sss', 'sss', 'manager321@gmail.com', NULL, '2777777777', '$2a$10$fAHBQSPBkevIqYs56JHe6u406HYDg5.qR1Iyj9Y/3azC8p911zfBO', NULL, '1', 2, '2024-08-30 15:42:49', '2024-12-17 05:22:39', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJpYXQiOjE3MzQ0MTI5NTksImV4cCI6MTczNDQ0ODk1OX0.gudiwYqEC-myB2f4tDMlnBRVdy1g8etjv2woteY3iwo'),
-(12, 6, 'SSSSFGGG', 'DDFSFSF', 'd@gmail.com', NULL, '2777777777', '$2a$10$YLRIgHsYJitN0F.uj5TaMuKL/WHoodK.omh.OlfOYkCrEtd9rlyHm', NULL, '1', 2, '2024-09-24 12:27:05', '2024-12-17 11:29:25', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3MzQ0MzQ5NjUsImV4cCI6MTczNDQ3MDk2NX0.T4J2E0ChZPzeS2AinKD7CnRcBxFJO_Bh7YUew7Lc_Kw'),
-(13, 6, 'ADADADAD', 'WDFWFDWD', 'dddd@gmail.com', NULL, '1777777777', '$2a$10$IL1VLs6U4La8m4duHyskyOdhd3BajI.IiEEpPjN9DVBPTQg1fbOMa', '00:00', '0', 2, '2024-09-25 06:40:45', '2024-11-29 10:28:38', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3MzI3MDQ3ODMsImV4cCI6MTczMjc0MDc4M30.mBP7xzXtG2Z8JwD7tKqZ7_8BqKWWkq_sricTH-l0mWg'),
-(14, 6, 'dascfascsac', 'ascs', 'ddddd@outbooks.com', NULL, '2777777777', '$2a$10$6Aj2UC5FgZIS5Xz01HaV2.3wOpwIAVKZyQRX2lkyzvT0G71IVdtmu', NULL, '1', 2, '2024-09-25 06:44:20', '2024-10-19 04:51:50', ''),
-(15, 8, 'mmm', 'hhh', 'm1@gmail.com', NULL, '2777777777', '$2a$10$S.FjUmFEDx9IXCSMFrUq/utYyaht64BhoyvdW/uOmiYXU5Zlif95y', '00:00', '0', 2, '2024-10-14 09:01:44', '2024-11-29 05:57:54', ''),
-(16, 8, 'SA', 'ss', 'su@gmail.com', NULL, '2777777777', '$2a$10$ekMKJcAGvIiNIUrg0E3W5uZdoQsDrZUaZyw/p4XLb9/nS7WCJS3OK', NULL, '1', 2, '2024-10-15 08:48:32', '2024-10-19 04:51:50', ''),
-(17, 8, 'am', 'ddddddd', 'am@gmail.com', NULL, '2777777777', '$2a$10$lHTJ1oq6ESX/pzbzZZtkCuq5AEco8HaPoEtx2ajUt96gq6GezvWPu', NULL, '1', 2, '2024-10-15 08:50:42', '2024-10-19 04:51:50', ''),
-(18, 8, 'aj', 'ssss', 'shakirpnp@gmail.com', NULL, '2777777777', '$2a$10$lQDJwmTJHLByytnG0SaIcOskd3II2HWFL5nYzNK29G3JV3G6nUwmW', '252:22', '1', 2, '2024-10-15 08:51:45', '2024-11-26 04:49:42', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE4LCJpYXQiOjE3Mjk4NTk3NzEsImV4cCI6MTcyOTg5NTc3MX0.rR7-mr7eEFRiRbJmuCftHkYKCbMvroZ2u7vq43ZYIb8'),
-(19, 8, 'MANAGE', 'MENT', 's@gmail.com', '+44', NULL, '$2a$10$UVUudz4lLxSF.uJcDGXaduY8EgyPLRMHqzO/lhZVl1BcNnju5P6Ua', '25:22', '1', 2, '2024-11-26 07:16:00', '2024-12-17 11:54:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE5LCJpYXQiOjE3MzQ0MzY0ODcsImV4cCI6MTczNDQ3MjQ4N30.ehUGsFTpn4mqar7hDD6Rf-CbnVEhWBnbN9ixA6aMj5E'),
-(20, 3, 'SSS_FF', 'ss', 's1@gmail.com', '+44', '', '$2a$10$3JPRW9DUe1S23inz6dW8TuBnpTdMAxl6auGF/pFKZfc6QTx.B1NKa', '232:59', '1', 2, '2024-11-28 13:31:30', '2024-11-28 13:31:30', NULL),
-(21, 3, 'New', 'Staff', 'sssssss@gmail.com', '+44', '', '$2a$10$lNvVe6vzqMr/eJfTbAFmZer81v9nQZHPUgxKbYkSNwcEnMBQWJGk.', '232:59', '1', 2, '2024-12-11 09:11:12', '2024-12-11 09:11:28', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIxLCJpYXQiOjE3MzM5MDgyODgsImV4cCI6MTczMzk0NDI4OH0.OeIPsdJWOaEfqMJU35Q7q3YxzA5-kk6gDD5JV4I91X4'),
-(22, 4, 'DDDDD', 'ss', 'stry@gmail.com', '+44', '', '$2a$10$D1t7Ba6GCJCrQmECpOh/DeB//qiWFp/wPKqVXDkDASBw1Nlxqjw92', '2:5', '1', 2, '2024-12-12 05:05:08', '2024-12-27 09:24:38', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIyLCJpYXQiOjE3MzUyOTE0NzgsImV4cCI6MTczNTMyNzQ3OH0.H1fEYPKUKoGX3P58LCGUqOG7gZw9qvUYj3c4rEG8kas'),
-(23, 8, 'SMN', 'sss', 'ssaadad@gmail.com', '+44', '', '$2a$10$sG1ulgYGXUmtaLfF/VhGSeMbGdig9NCEiH/oS2hv/0a1vczdd65jy', NULL, '1', 2, '2024-12-26 12:08:29', '2024-12-26 12:09:08', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIzLCJpYXQiOjE3MzUyMTQ5NDgsImV4cCI6MTczNTI1MDk0OH0.H79lEKAF3oo1dpU_jiUe7PNOx5YMPfTBaTy9YEkrQ2k');
+INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `created_at`, `updated_at`, `login_auth_token`) VALUES
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '152:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-02-06 08:46:04', ''),
+(2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-06 10:56:32', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTczODgzOTM5MiwiZXhwIjoxNzM4ODc1MzkyfQ.cmD7ivpZ0nM_4J3IugrfEGw2MnjZTBBSWfuccUnnEK8'),
+(3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$UGh8LOFOP9Kwtha4kypOcuJL.YZYwwyRsSrzaYsRvMiBiwMomGvdW', '659:00', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-06 08:46:14', ''),
+(4, 4, 'Account ', 'manager', 'manager@gmail.com', '+44', '2777777777', '$2a$10$KY9n668xQ3ouvmiea6GPo.7lzJzORursb57YiMObW3cQ8TZeadrWy', '2:5', '1', '0', 2, '2025-02-06 07:25:43', '2025-02-06 11:33:44', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTczODg0MTYyNCwiZXhwIjoxNzM4ODc3NjI0fQ.mnCCCW_ldSK7TigCqFfP86mX6NylkWd5X6OK-kSWuPs'),
+(5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 2, '2025-02-06 07:27:58', '2025-02-06 10:46:12', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTczODgzODc3MiwiZXhwIjoxNzM4ODc0NzcyfQ.CWK50J0fJHeO13M8kcycFoczGHIGqBOxeX1j2bK1vH8'),
+(6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 2, '2025-02-06 07:28:28', '2025-02-06 11:21:42', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTczODgzOTA3MCwiZXhwIjoxNzM4ODc1MDcwfQ.qWJynNlsCzvHZ0l_Vps-2tnf0uDEAmbOqg5pWIE-BZk');
 
 -- --------------------------------------------------------
 
@@ -1521,7 +1569,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=86 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -1567,7 +1615,67 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (37, 2, '2025-02-01', 'job', 1, 'completed the draft job code:', 'Admin Amit Amit completed the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:23:19', '2025-02-01 11:23:19'),
 (38, 2, '2025-02-01', 'job', 1, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 12:05:49', '2025-02-01 12:05:49'),
 (39, 2, '2025-02-01', 'job', 1, 'edited the draft job code:', 'Admin Amit Amit edited the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 12:23:33', '2025-02-01 12:23:33'),
-(40, 2, '2025-02-01', 'job', 1, 'completed the draft job code:', 'Admin Amit Amit completed the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 12:24:00', '2025-02-01 12:24:00');
+(40, 2, '2025-02-01', 'job', 1, 'completed the draft job code:', 'Admin Amit Amit completed the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 12:24:00', '2025-02-01 12:24:00'),
+(41, 2, '2025-02-03', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-03 07:16:20', '2025-02-03 07:16:20'),
+(42, 2, '2025-02-03', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-03 08:27:43', '2025-02-03 08:27:43'),
+(43, 2, '2025-02-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-04 05:05:07', '2025-02-04 05:05:07'),
+(44, 2, '2025-02-04', 'customer', 2, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_DDD_00002(DDDD)', 'created', '122.168.114.106', '2025-02-04 05:08:03', '2025-02-04 05:08:03'),
+(45, 2, '2025-02-04', 'customer', 2, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-04 05:08:07', '2025-02-04 05:08:07'),
+(46, 2, '2025-02-04', 'client', 3, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_DDD_Cli_00003(Cli2g)', 'created', '122.168.114.106', '2025-02-04 05:09:01', '2025-02-04 05:09:01'),
+(47, 2, '2025-02-04', 'customer', 2, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-04 05:09:30', '2025-02-04 05:09:30'),
+(48, 2, '2025-02-04', 'job types', 3, 'created job types V3', 'Admin Amit Amit created job types V3 ', 'created', '122.168.114.106', '2025-02-04 05:12:37', '2025-02-04 05:12:37'),
+(49, 2, '2025-02-04', 'job types', 4, 'created job types V4', 'Admin Amit Amit created job types V4 ', 'created', '122.168.114.106', '2025-02-04 05:14:10', '2025-02-04 05:14:10'),
+(50, 2, '2025-02-04', 'job', 2, 'created job code:', 'Admin Amit Amit created job code: DDD_Cli_V4_00002', 'created', '122.168.114.106', '2025-02-04 05:14:36', '2025-02-04 05:14:36'),
+(51, 2, '2025-02-05', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-05 12:52:48', '2025-02-05 12:52:48'),
+(52, 2, '2025-02-06', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-06 05:15:05', '2025-02-06 05:15:05'),
+(53, 2, '2025-02-06', 'services', 9, 'created services demo', 'Admin Amit Amit created services demo ', 'created', '122.168.114.106', '2025-02-06 05:16:27', '2025-02-06 05:16:27'),
+(54, 2, '2025-02-06', 'role', 9, 'created role DEMO', 'Admin Amit Amit created role DEMO ', 'created', '122.168.114.106', '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(55, 2, '2025-02-06', 'staff', 24, 'created staff SSSS ssss', 'Admin Amit Amit created staff SSSS ssss ', 'created', '122.168.114.106', '2025-02-06 05:20:27', '2025-02-06 05:20:27'),
+(56, 2, '2025-02-06', 'staff', 26, 'created staff GGGGGG ssss', 'Admin Amit Amit created staff GGGGGG ssss ', 'created', '122.168.114.106', '2025-02-06 06:56:40', '2025-02-06 06:56:40'),
+(57, 2, '2025-02-06', 'staff', 4, 'created staff Account  manager', 'Admin Amit Amit created staff Account  manager ', 'created', '122.168.114.106', '2025-02-06 07:25:43', '2025-02-06 07:25:43'),
+(58, 2, '2025-02-06', 'staff', 5, 'created staff STAFF  ONE', 'Admin Amit Amit created staff STAFF  ONE ', 'created', '122.168.114.106', '2025-02-06 07:27:58', '2025-02-06 07:27:58'),
+(59, 2, '2025-02-06', 'staff', 6, 'created staff STAFF TWO', 'Admin Amit Amit created staff STAFF TWO ', 'created', '122.168.114.106', '2025-02-06 07:28:28', '2025-02-06 07:28:28'),
+(60, 2, '2025-02-06', 'staff', 5, 'edited staff STAFF ONE', 'Admin Amit Amit edited staff STAFF ONE ', 'updated', '122.168.114.106', '2025-02-06 08:22:59', '2025-02-06 08:22:59'),
+(61, 2, '2025-02-06', 'customer', 3, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_CUS_00003(CUST3)', 'created', '122.168.114.106', '2025-02-06 08:27:22', '2025-02-06 08:27:22'),
+(62, 2, '2025-02-06', 'customer', 2, 'changes the status Deactivate customer code :', 'Admin Amit Amit changes the status Deactivate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:12:45', '2025-02-06 09:12:45'),
+(63, 2, '2025-02-06', 'customer', 2, 'changes the status Activate customer code :', 'Admin Amit Amit changes the status Activate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:12:51', '2025-02-06 09:12:51'),
+(64, 2, '2025-02-06', 'customer', 2, 'changes the status Deactivate customer code :', 'Admin Amit Amit changes the status Deactivate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:27:07', '2025-02-06 09:27:07'),
+(65, 2, '2025-02-06', 'customer', 2, 'changes the status Activate customer code :', 'Admin Amit Amit changes the status Activate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:27:18', '2025-02-06 09:27:18'),
+(66, 2, '2025-02-06', 'client', 3, 'deleted customer. customer code :', 'Admin Amit Amit deleted customer. customer code : cli_DDD_Cli_00003(Cli2g)', 'deleted', '122.168.114.106', '2025-02-06 10:09:58', '2025-02-06 10:09:58'),
+(67, 2, '2025-02-06', 'customer', 4, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_ada_00003(adad)', 'created', '122.168.114.106', '2025-02-06 10:12:35', '2025-02-06 10:12:35'),
+(68, 2, '2025-02-06', 'client', 4, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-02-06 10:12:41', '2025-02-06 10:12:41'),
+(69, 5, '2025-02-06', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', NULL, '2025-02-06 10:46:12', '2025-02-06 10:46:12'),
+(70, 5, '2025-02-06', 'customer', 5, 'created customer profile. customer code :', 'Processor STAFF ONE created customer profile. customer code : cust_CUS_00003(CUST-STAFF1)', 'created', NULL, '2025-02-06 10:46:57', '2025-02-06 10:46:57'),
+(71, 5, '2025-02-06', 'customer', 5, ' edited the service details and added an additional service while editing the customer code :', 'Processor STAFF ONE  edited the service details and added an additional service while editing the customer code : cust_CUS_00003(CUST-STAFF1)', 'updated', NULL, '2025-02-06 10:47:02', '2025-02-06 10:47:02'),
+(72, 6, '2025-02-06', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '103.103.213.217', '2025-02-06 10:48:10', '2025-02-06 10:48:10'),
+(73, 2, '2025-02-06', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-02-06 10:48:33', '2025-02-06 10:48:33'),
+(74, 6, '2025-02-06', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-02-06 10:48:48', '2025-02-06 10:48:48'),
+(75, 6, '2025-02-06', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-02-06 10:51:10', '2025-02-06 10:51:10'),
+(76, 2, '2025-02-06', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-06 10:56:32', '2025-02-06 10:56:32'),
+(77, 5, '2025-02-06', 'client', 4, 'created client profile. client code :', 'Processor STAFF ONE created client profile. client code : cli_CUS_CLI_00004(CLI-STAFF1)', 'created', '122.168.114.106', '2025-02-06 11:20:55', '2025-02-06 11:20:55'),
+(78, 2, '2025-02-06', 'staff', 6, 'edited staff STAFF TWO', 'Admin Amit Amit edited staff STAFF TWO ', 'updated', '122.168.114.106', '2025-02-06 11:21:42', '2025-02-06 11:21:42'),
+(79, 6, '2025-02-06', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', NULL, '2025-02-06 11:33:33', '2025-02-06 11:33:33'),
+(80, 4, '2025-02-06', '-', 0, ' Logged In', 'Manager Account  manager  Logged In ', '-', NULL, '2025-02-06 11:33:44', '2025-02-06 11:33:44'),
+(81, 4, '2025-02-06', 'customer', 6, 'created customer profile. customer code :', 'Manager Account  manager created customer profile. customer code : cust_CUS_00004(CUST-4)', 'created', NULL, '2025-02-06 11:34:48', '2025-02-06 11:34:48'),
+(82, 4, '2025-02-06', 'customer', 6, ' edited the service details and added an additional service while editing the customer code :', 'Manager Account  manager  edited the service details and added an additional service while editing the customer code : cust_CUS_00004(CUST-4)', 'updated', NULL, '2025-02-06 11:34:52', '2025-02-06 11:34:52'),
+(83, 2, '2025-02-06', 'job', 2, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: DDD_Cli_V4_00002', 'created', '122.168.114.106', '2025-02-06 12:17:52', '2025-02-06 12:17:52'),
+(84, 2, '2025-02-06', 'job', 2, 'edited the draft job code:', 'Admin Amit Amit edited the draft job code: DDD_Cli_V4_00002', 'updated', '122.168.114.106', '2025-02-06 12:38:38', '2025-02-06 12:38:38'),
+(85, 2, '2025-02-06', 'job', 2, 'edited the draft job code:', 'Admin Amit Amit edited the draft job code: DDD_Cli_V4_00002', 'updated', '122.168.114.106', '2025-02-06 12:38:53', '2025-02-06 12:38:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_portfolio`
+--
+
+DROP TABLE IF EXISTS `staff_portfolio`;
+CREATE TABLE IF NOT EXISTS `staff_portfolio` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
