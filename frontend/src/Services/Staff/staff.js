@@ -80,3 +80,17 @@ export async function staffPortfolio(data) {
         return await err;
     }
 }
+
+export async function DELETESTAFF(data) {
+    const token = JSON.parse(localStorage.getItem("token"));
+    try {
+        const res = await axios.post(`${Config.base_url}staff/delete`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

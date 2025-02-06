@@ -16,6 +16,8 @@ router.post('/status', authController.status);
 router.post('/getSharePointToken', authController.getSharePointToken);
 router.post('/staff/portfolio',verifyToken, authController.HandelStaffPortfolio);
 
+router.post('/staff/delete',verifyToken, authController.deleteStaff);
+
 
 
 
