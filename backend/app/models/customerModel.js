@@ -3482,6 +3482,7 @@ const getcustomerschecklist = async (customer) => {
 
 const deleteCustomer = async (customer) => {
     const { customer_id } = customer;
+    console.log("customer_id ", customer_id)
 
     await pool.execute(`DELETE FROM customer_company_information WHERE customer_id = ?`, [customer_id]);
     await pool.execute(`DELETE FROM customer_contact_details WHERE customer_id = ?`, [customer_id]);

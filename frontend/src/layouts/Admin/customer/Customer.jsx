@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import ExportToExcel  from '../../../Components/ExtraComponents/ExportToExcel';
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status , deleteCustomer ,GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
@@ -209,12 +208,9 @@ const Customer = () => {
         const hasUpdateAccess = getAccessData.update === 1;
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
-          <div style={{ textAlign: "center" }}>
+          <div style={{ width: "50px" }}>
             {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
-              <div className="d-flex justify-content-center">
-                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil text-primary" />
-                </button>
+              <div className="d-flex justify-content-end">
 
                {row.form_process != "4" &&  <button
                   className="delete-icon "
@@ -222,20 +218,23 @@ const Customer = () => {
                 >
                   <i className="ti-trash text-danger " />
                 </button>}
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
+                </button>
               </div>
             ) : (
-              <div className="d-flex justify-content-center">
+              <div className="d-flex justify-content-end">
+                {hasDeleteAccess && row.form_process != "4" &&  (
+                  <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row)}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
                 {hasUpdateAccess && row.status == 1 && (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
-                  </button>
-                )}
-                {hasDeleteAccess && row.form_process != "4" &&  (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -251,7 +250,54 @@ const Customer = () => {
   ];
 
   const handleDelete = (row) => {
-    console.log("row", row);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this customer?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { customer_id: row.id };
+          const res = await dispatch(deleteCustomer({ req, authToken: token })).unwrap();
+
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetAllCustomerData(1, pageSize, '');
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while deleting the customer.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Customer was not deleted",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    });
+    
   };
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
@@ -484,9 +530,6 @@ const Customer = () => {
                       
 
                       <Datatable columns={columns} data={filteredData1} />
-
-
-                     { console.log("filteredData1", filteredData1)}
 
                       {/* Pagination Controls */}
                       <ReactPaginate
