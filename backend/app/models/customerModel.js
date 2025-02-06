@@ -397,6 +397,17 @@ const getCustomer = async (customer) => {
     const offset = (page - 1) * limit;
     const search = customer.search || "";
 
+
+
+
+    // Line Manager
+    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
+    let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+    if (LineManageStaffId.length ==  0) {
+        LineManageStaffId.push(staff_id);
+    }
+
     const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -483,6 +494,7 @@ LIMIT ? OFFSET ?
     let total = 0;
     if (rows.length > 0) {
 
+        console.log('rows[0].role_id ---- ', rows[0].role_id);
         // Allocated to
         if (rows[0].role_id == 3) {
             const countQuery = `SELECT COUNT(*) AS total_count
@@ -500,7 +512,7 @@ LIMIT ? OFFSET ?
                     LEFT JOIN
                         customer_company_information ON customers.id = customer_company_information.customer_id
                     WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ?)` : 'jobs.allocated_to = ? OR customers.staff_id = ?'}
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}
                     GROUP BY 
                         CASE 
                             WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -553,7 +565,7 @@ LIMIT ? OFFSET ?
             LEFT JOIN
                 customer_company_information ON customers.id = customer_company_information.customer_id
             WHERE 
-                ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ?)` : 'jobs.allocated_to = ? OR customers.staff_id = ?'}
+                ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -576,6 +588,7 @@ LIMIT ? OFFSET ?
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
+
             const countQuery = `SELECT COUNT(*) AS total_count
             FROM (
                 SELECT 
@@ -595,10 +608,10 @@ LIMIT ? OFFSET ?
                 WHERE 
          ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
-                OR customers.staff_id = ?)` :
+                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` :
                     `customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
-            OR customers.staff_id = ?`}
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})`}
             GROUP BY 
                 customers.id
         ) AS result`;
@@ -652,10 +665,10 @@ LIMIT ? OFFSET ?
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
-                OR customers.staff_id = ?)` :
+                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` :
                     `customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
-            OR customers.staff_id = ?`}
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})`}
 
         GROUP BY 
         customers.id
@@ -675,6 +688,7 @@ LIMIT ? OFFSET ?
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
+
             const countQuery = `
             SELECT COUNT(*) AS total_count
             FROM (
@@ -691,7 +705,7 @@ LIMIT ? OFFSET ?
                 LEFT JOIN 
                     customer_company_information ON customers.id = customer_company_information.customer_id
                 WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?)` : 'jobs.reviewer = ? OR customers.staff_id = ?'}
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}
                 GROUP BY 
                     CASE 
                         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -706,6 +720,10 @@ LIMIT ? OFFSET ?
             }
 
             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+
+
+
+
             const query = `
             SELECT  
             customers.id AS id,
@@ -742,7 +760,9 @@ LIMIT ? OFFSET ?
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?)` : 'jobs.reviewer = ? OR customers.staff_id = ?'} 
+        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?  OR customers.staff_id IN (${LineManageStaffId}))`
+                    : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'
+                } 
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -760,7 +780,11 @@ LIMIT ? OFFSET ?
 
             const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated
+
+            console.log('resultAllocated ---- ', resultAllocated);
             total = total_count;
+
+            console.log('total ---- ', total);
 
         }
         else {
@@ -778,7 +802,7 @@ LIMIT ? OFFSET ?
                 LEFT JOIN
                     customer_company_information ON customers.id = customer_company_information.customer_id
                 WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ?` : 'customers.staff_id = ?'}    
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}    
             ) AS result;`;
 
             let queryDataCount = [staff_id];
@@ -821,7 +845,7 @@ LIMIT ? OFFSET ?
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE 
-            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ?` : 'customers.staff_id = ?'}    
+            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}    
         ORDER BY 
             customers.id DESC
             LIMIT ? OFFSET ?;
@@ -861,6 +885,16 @@ LIMIT ? OFFSET ?
 
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
+
+   
+    // Line Manager
+    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+    let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+    if (LineManageStaffId.length ==  0) {
+        LineManageStaffId.push(StaffUserId);
+    }
+
     const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -903,6 +937,8 @@ id DESC;`;
         // Allocated to
         if (rows[0].role_id == 3) {
 
+           
+
             const query = `
             SELECT  
                 customers.id AS id,
@@ -919,7 +955,7 @@ id DESC;`;
             LEFT JOIN
                 jobs ON jobs.customer_id = customers.id
             WHERE 
-                jobs.allocated_to = ? OR customers.staff_id = ?
+                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -954,6 +990,7 @@ id DESC;`;
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
             OR customers.staff_id = ?
+            OR customers.staff_id IN (${LineManageStaffId})
 
         GROUP BY 
         customers.id
@@ -985,7 +1022,7 @@ id DESC;`;
         LEFT JOIN 
             jobs ON jobs.customer_id = customers.id
         WHERE 
-         jobs.reviewer = ? OR customers.staff_id = ?
+         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -1009,7 +1046,7 @@ id DESC;`;
         FROM 
             customers
         WHERE 
-            staff_id = ? 
+            staff_id = ? OR staff_id IN (${LineManageStaffId})
         ORDER BY 
             id DESC;
             `;
@@ -1027,8 +1064,6 @@ id DESC;`;
     }
 
 }
-
-
 
 const updateProcessCustomerServices = async (customerProcessData) => {
 
@@ -3485,79 +3520,79 @@ const deleteCustomer = async (customer) => {
 
     try {
         await pool.execute(`DELETE FROM customer_company_information WHERE customer_id = ?`, [customer_id]);
-  
-
-    await pool.execute(`DELETE FROM customer_contact_details WHERE customer_id = ?`, [customer_id]);
-    await pool.execute(`DELETE FROM customer_documents WHERE customer_id = ?`, [customer_id]);
-
-    
-     const [checklcustomerEngagementModelRowsistRows] = await pool.execute(`SELECT id FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
-
-     if(checklcustomerEngagementModelRowsistRows.length > 0){
-
-        for (const item of checklcustomerEngagementModelRowsistRows) {
-            await pool.execute(`DELETE FROM customer_engagement_fte WHERE customer_engagement_model_id = ?`, [item.id]);
-            await pool.execute(`DELETE FROM customer_engagement_percentage WHERE customer_engagement_model_id = ?`, [item.id]);
-            await pool.execute(`DELETE FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id = ?`, [item.id]);
-            await pool.execute(`DELETE FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ?`, [item.id]);
-            
-         }
-      }
-    await pool.execute(`DELETE FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
 
 
-    await pool.execute(`DELETE FROM customer_paper_work WHERE customer_id = ?`, [customer_id]);
+        await pool.execute(`DELETE FROM customer_contact_details WHERE customer_id = ?`, [customer_id]);
+        await pool.execute(`DELETE FROM customer_documents WHERE customer_id = ?`, [customer_id]);
 
 
-    const [checklistRows] = await pool.execute(`SELECT id FROM checklists WHERE customer_id = ?`, [customer_id]);
-    if (checklistRows.length > 0) {
-        for (const item of checklistRows) {
-            await pool.execute(`DELETE FROM checklist_tasks WHERE checklist_id = ?`, [item.id]);
+        const [checklcustomerEngagementModelRowsistRows] = await pool.execute(`SELECT id FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
+
+        if (checklcustomerEngagementModelRowsistRows.length > 0) {
+
+            for (const item of checklcustomerEngagementModelRowsistRows) {
+                await pool.execute(`DELETE FROM customer_engagement_fte WHERE customer_engagement_model_id = ?`, [item.id]);
+                await pool.execute(`DELETE FROM customer_engagement_percentage WHERE customer_engagement_model_id = ?`, [item.id]);
+                await pool.execute(`DELETE FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id = ?`, [item.id]);
+                await pool.execute(`DELETE FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ?`, [item.id]);
+
+            }
         }
-        await pool.execute(`DELETE FROM checklists WHERE customer_id = ?`, [customer_id]);
-    }
+        await pool.execute(`DELETE FROM customer_engagement_model WHERE customer_id = ?`, [customer_id]);
 
 
-    const [customerServicesRows] = await pool.execute(`SELECT id FROM customer_services WHERE customer_id = ?`, [customer_id]);
-    if (customerServicesRows.length > 0) {
-        for (const item of customerServicesRows) {
-            await pool.execute(`DELETE FROM customer_service_account_managers WHERE customer_service_id = ?`, [item.id]);
+        await pool.execute(`DELETE FROM customer_paper_work WHERE customer_id = ?`, [customer_id]);
+
+
+        const [checklistRows] = await pool.execute(`SELECT id FROM checklists WHERE customer_id = ?`, [customer_id]);
+        if (checklistRows.length > 0) {
+            for (const item of checklistRows) {
+                await pool.execute(`DELETE FROM checklist_tasks WHERE checklist_id = ?`, [item.id]);
+            }
+            await pool.execute(`DELETE FROM checklists WHERE customer_id = ?`, [customer_id]);
         }
-        await pool.execute(`DELETE FROM customer_services WHERE customer_id = ?`, [customer_id]);
-    }
 
 
-    await pool.execute(`DELETE FROM customer_service_task WHERE customer_id = ?`, [customer_id]);
-   const [result] = await pool.execute(`DELETE FROM customers WHERE id = ?`, [customer_id]);
+        const [customerServicesRows] = await pool.execute(`SELECT id FROM customer_services WHERE customer_id = ?`, [customer_id]);
+        if (customerServicesRows.length > 0) {
+            for (const item of customerServicesRows) {
+                await pool.execute(`DELETE FROM customer_service_account_managers WHERE customer_service_id = ?`, [item.id]);
+            }
+            await pool.execute(`DELETE FROM customer_services WHERE customer_id = ?`, [customer_id]);
+        }
 
-    if (parseInt(customer_id) > 0) {
-        const currentDate = new Date();
-        await SatffLogUpdateOperation(
-          {
-            staff_id: customer.StaffUserId,
-            ip: customer.ip,
-            date: currentDate.toISOString().split('T')[0],
-            module_name: 'client',
-            log_message: `deleted customer. customer code :`,
-            permission_type: 'deleted',
-            module_id: customer_id,
-          }
-        );
-      }
-    
 
-    if (result.affectedRows > 0) {
-        return { status: true, message: 'Customer deleted successfully.' };
-    }
-        
+        await pool.execute(`DELETE FROM customer_service_task WHERE customer_id = ?`, [customer_id]);
+        const [result] = await pool.execute(`DELETE FROM customers WHERE id = ?`, [customer_id]);
+
+        if (parseInt(customer_id) > 0) {
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: customer.StaffUserId,
+                    ip: customer.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: 'client',
+                    log_message: `deleted customer. customer code :`,
+                    permission_type: 'deleted',
+                    module_id: customer_id,
+                }
+            );
+        }
+
+
+        if (result.affectedRows > 0) {
+            return { status: true, message: 'Customer deleted successfully.' };
+        }
+
     } catch (error) {
         console.log("error ", error)
         return { status: false, message: 'Error deleting customer.' };
-        
+
     }
 
-    
-    
+
+
 }
 
 
