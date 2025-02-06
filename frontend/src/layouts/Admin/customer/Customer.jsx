@@ -208,12 +208,9 @@ const Customer = () => {
         const hasUpdateAccess = getAccessData.update === 1;
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
-          <div style={{ textAlign: "center" }}>
+          <div style={{ width: "50px" }}>
             {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
-              <div className="d-flex justify-content-center">
-                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil text-primary" />
-                </button>
+              <div className="d-flex justify-content-end">
 
                {row.form_process != "4" &&  <button
                   className="delete-icon "
@@ -221,20 +218,23 @@ const Customer = () => {
                 >
                   <i className="ti-trash text-danger " />
                 </button>}
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
+                </button>
               </div>
             ) : (
-              <div className="d-flex justify-content-center">
+              <div className="d-flex justify-content-end">
+                {hasDeleteAccess && row.form_process != "4" &&  (
+                  <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row)}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
                 {hasUpdateAccess && row.status == 1 && (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
-                  </button>
-                )}
-                {hasDeleteAccess && row.form_process != "4" &&  (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -530,9 +530,6 @@ const Customer = () => {
                       
 
                       <Datatable columns={columns} data={filteredData1} />
-
-
-                     { console.log("filteredData1", filteredData1)}
 
                       {/* Pagination Controls */}
                       <ReactPaginate
