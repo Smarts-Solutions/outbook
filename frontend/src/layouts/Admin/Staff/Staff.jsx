@@ -722,9 +722,8 @@ const StaffPage = () => {
   };
   const getCustomersName = async (id) => {
     if (!id) return;
-
     try {
-      const req = { action: "get_dropdown", staff_id: deleteStaff.id };
+      const req = { action: "get_dropdown_delete", staff_id: deleteStaff.id };
       const data = { req, authToken: token };
 
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
@@ -1089,15 +1088,13 @@ const StaffPage = () => {
                   className="dropdown-item"
                   onClick={() =>{  setSelectedStaff(staff);setDropdownOpen(!dropdownOpen);}}
                 >
-                  {staff.first_name}
+                  {staff.first_name + " " + staff.last_name}
                 </button>
               </li>
             ))}
         </ul>
       )}
     </div>
-
-    
     </div>
 
    

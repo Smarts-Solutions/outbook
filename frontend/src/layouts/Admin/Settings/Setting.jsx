@@ -2912,7 +2912,6 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
-
         <CommonModal
           isOpen={deleteStatus}
           backdrop="static"
@@ -2924,7 +2923,7 @@ const Setting = () => {
           <div className="modal-body">
             <div className="text-start mb-3">
               <h5 className="text-danger fw-bold">
-                <i className="bi bi-trash3"></i> Delete Status:{" "}
+                <i className="bi bi-trash3"></i> Delete Role:{" "}
                 <span className="text-dark">{deleteStatus?.role_name}</span>
               </h5>
             </div>
@@ -2943,7 +2942,7 @@ const Setting = () => {
                   Choose Role
                 </option>
                 {roleDataAll.data
-                  .filter((staff) => staff.id !== deleteStatus?.id)
+                  .filter((staff) => staff.id !== deleteStatus?.id && staff.role!="ADMIN" && staff.role != "SUPERADMIN")
                   .map((staff, index) => (
                     <option key={staff.id} value={staff.id}>
                       {staff.role_name}
@@ -2971,10 +2970,10 @@ const Setting = () => {
             {StaffRoleDAta.length > 0 && (
               <div className="mb-4">
                 <h6 className="fw-bold text-primary">
-                  <i className="bi bi-people"></i> Job Assigned:
+                  <i className="bi bi-people"></i> Staff Assigned:
                 </h6>
                 <ul className="list-group">
-                  <label className="">Job ID</label>
+                  <label className="">Staff Name</label>
                   {StaffRoleDAta.map((customer) => (
                     <li
                       key={customer.job_id}
