@@ -2329,7 +2329,6 @@ const Setting = () => {
     }
   }
 
-  console.log("replaceStatue", replaceStatue);
 
   return (
     <>
