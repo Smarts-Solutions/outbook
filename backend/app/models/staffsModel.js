@@ -17,10 +17,8 @@ const createStaff = async (staff) => {
     created_by,
     StaffUserId,
     ip,
-    staff_to
+    staff_to,
   } = staff;
-
-
 
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
   const [check] = await pool.execute(checkQuery, [email]);
@@ -56,16 +54,12 @@ const createStaff = async (staff) => {
       created_by,
     ]);
 
-
-    if (staff_to != '' && staff_to != undefined) {
-      const staff_to_query =
-        `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`
-        ;
+    if (staff_to != "" && staff_to != undefined) {
+      const staff_to_query = `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`;
       const [staff_to_result] = await pool.execute(staff_to_query, [
         result.insertId,
-        staff_to
+        staff_to,
       ]);
-
     }
 
     const currentDate = new Date();
@@ -119,10 +113,9 @@ const updateStaff = async (staff) => {
   const { id, ...fields } = staff;
   let email = fields.email;
 
-
   // Line Manage Code
   let staff_to = fields.staff_to;
-  if (staff_to != '' && staff_to != undefined) {
+  if (staff_to != "" && staff_to != undefined) {
     let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
     let [staff_by_result] = await pool.execute(staff_by_query, [id]);
     if (staff_by_result.length > 0) {
@@ -131,20 +124,15 @@ const updateStaff = async (staff) => {
         staff_to,
         id,
       ]);
-
     } else {
       const staff_to_query = `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`;
       const [staff_to_result] = await pool.execute(staff_to_query, [
         id,
         staff_to,
       ]);
-
     }
-
   }
   // End Line Manage Code
-
-
 
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
@@ -660,6 +648,48 @@ const deleteStaffUpdateStaff = async (staff) => {
   }
 };
 
+const GetStaffByRoleId = async (data) => {
+  const { role_id } = data;
+
+  const [rows] = await pool.execute(
+    "SELECT id , first_name , last_name , email , phone , phone_code , status FROM staffs WHERE role_id = ?",
+    [role_id]
+  );
+  return { status: true, message: "Staff Get successfully.", data: rows };
+};
+
+const GetStaffAndDelete = async (data) => {
+  try {
+    console.log("data--", data);
+
+    const { id, replace_id } = data;
+
+    if (id == replace_id) {
+      return {
+        status: false,
+        message: "Staff cannot be deleted from the system.",
+      };
+    }
+
+    if (id == 1 || id == 2 || id == 3 || id == 4 || id == 5 || id == 6) {
+      return {
+        status: false,
+        message: "Staff cannot be deleted from the system.",
+      };
+    }
+
+    const UpdateStaff = `UPDATE staffs SET role_id = ? WHERE role_id = ?;`;
+    const [result] = await pool.execute(UpdateStaff, [replace_id, id]);
+
+    const DeleteQuery = `DELETE FROM roles WHERE id = ?`;
+    await pool.execute(DeleteQuery, [id]);
+
+    return { status: true, message: "Staff updated successfully." };
+  } catch (error) {
+    return { status: false, message: "Error deleting staff" };
+  }
+};
+
 module.exports = {
   createStaff,
   getStaff,
@@ -679,4 +709,6 @@ module.exports = {
   GetStaffPortfolio,
   UpdateStaffPortfolio,
   deleteStaffUpdateStaff,
+  GetStaffByRoleId,
+  GetStaffAndDelete,
 };

@@ -18,6 +18,8 @@ import { useDispatch, useSelector } from "react-redux";
 import sweatalert from "sweetalert2";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
+import { use } from "react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -28,6 +30,9 @@ const Setting = () => {
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewData, setViewData] = useState({});
+  const [deleteStatus, setDeleteStatus] = useState();
+  const [StaffRoleDAta, setStaffRoleData] = useState([]);
+
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
   );
@@ -97,6 +102,7 @@ const Setting = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+  const [replaceStatue, setReplaceStatue] = useState(null);
 
   const [getAccessDataSetting, setAccessDataSetting] = useState({
     insert: 0,
@@ -621,7 +627,7 @@ const Setting = () => {
                 {row?.is_disable == 0 && (
                   <button
                     className="delete-icon"
-                    // onClick={() => setDeleteStatus(row)}
+                    onClick={() => setDeleteStatus(row)}
                   >
                     <i className="ti-trash text-danger" />
                   </button>
@@ -2269,6 +2275,62 @@ const Setting = () => {
     { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
   ];
 
+  useEffect(() => {
+    GetStaffroleWise();
+  }, [deleteStatus]);
+
+  const GetStaffroleWise = async () => {
+    try {
+      const req = { action: "get", role_id: deleteStatus?.id };
+      const data = { req: req, authToken: token };
+      const res = await dispatch(GetStaffByRole(data)).unwrap();
+      
+      if (res.status) {
+        setStaffRoleData(res.data.data);
+      } else {
+        setStaffRoleData([]);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const roledeleteUpdatestaff = async () => {
+    try {
+
+      let data = { 
+        req: { action: "delete", id: deleteStatus?.id ,replace_id:replaceStatue},
+        authToken: token 
+      };
+      const response = await dispatch(GetStaffByRole(data)).unwrap();
+      if (response.status) {
+        sweatalert.fire({
+          title: response.message,
+          icon: "success",
+          timer: 2000,
+        });
+        GetStaffroleWise();
+        setDeleteStatus("");
+        setReplaceStatue("");
+        setStaffRoleData([]);
+        setTimeout(() => {
+          roleData({ action: "getAll" });
+        }, 2000);
+      } else {
+        sweatalert.fire({
+          title: response.message,
+          icon: "error",
+          timer: 2000,
+        });
+      }
+      
+    } catch (error) {
+      
+    }
+  }
+
+  console.log("replaceStatue", replaceStatue);
+
   return (
     <>
       <div>
@@ -2851,6 +2913,82 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
+
+        <CommonModal
+          isOpen={deleteStatus}
+          backdrop="static"
+          size="ms-5"
+          title="Delete Role"
+          hideBtn={true}
+          handleClose={() => setDeleteStatus(false)}
+        >
+          <div className="modal-body">
+            <div className="text-start mb-3">
+              <h5 className="text-danger fw-bold">
+                <i className="bi bi-trash3"></i> Delete Status:{" "}
+                <span className="text-dark">{deleteStatus?.role_name}</span>
+              </h5>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="staff-select" className="form-label">
+                Select Role to Replace:
+              </label>
+              <select
+                id="staff-select"
+                value={replaceStatue || ""}
+                onChange={(e) => setReplaceStatue(e.target.value)}
+                className="form-select"
+              >
+                <option value="" disabled>
+                  Choose Role
+                </option>
+                {roleDataAll.data
+                  .filter((staff) => staff.id !== deleteStatus?.id)
+                  .map((staff, index) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.role_name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {replaceStatue && (
+              <button
+                onClick={roledeleteUpdatestaff}
+                className="btn btn-danger w-100 mt-3"
+              >
+                Delete
+              </button>
+            )}
+
+            <button
+              onClick={() => setDeleteStatus(false)}
+              className="btn btn-secondary w-100 mt-2"
+            >
+              Cancel
+            </button>
+
+            {StaffRoleDAta.length > 0 && (
+              <div className="mb-4">
+                <h6 className="fw-bold text-primary">
+                  <i className="bi bi-people"></i> Job Assigned:
+                </h6>
+                <ul className="list-group">
+                  <label className="">Job ID</label>
+                  {StaffRoleDAta.map((customer) => (
+                    <li
+                      key={customer.job_id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span className="text-dark">{`${customer?.first_name} ${customer.last_name}`} </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </CommonModal>
       </div>
     </>
   );
