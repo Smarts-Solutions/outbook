@@ -2240,9 +2240,6 @@ const updateJobStatus = async (job) => {
     `SELECT id , status_type FROM jobs WHERE id = ?`,
     [job_id]
   );
-   
-console.log("status_type ",status_type)
-console.log("job_id ",job_id)
 
 
   
@@ -2353,6 +2350,32 @@ console.log("job_id ",job_id)
   }
 };
 
+  const GetJobStatus = async (job) => {
+  const { status_id } = job;
+    try{
+console.log("status_id",status_id)  
+
+      const query =`SELECT job_id  FROM jobs WHERE status_type = ?`;
+      const [result] = await pool.execute(query, [status_id]);
+
+      if (result.length > 0) {
+        return {
+          status: true,
+          message: "Success.",
+          data: result,
+        };
+      }
+      else{
+        return { status: false, message: "No job found with the given status_id." };
+      }
+
+    }catch{
+      console.log(err);
+      return { status: false, message: "Error getting job status." };
+    }
+
+  }
+
 module.exports = {
   getAddJobData,
   jobAdd,
@@ -2364,4 +2387,5 @@ module.exports = {
   deleteJobById,
   getJobTimeLine,
   updateJobStatus,
+  GetJobStatus
 };

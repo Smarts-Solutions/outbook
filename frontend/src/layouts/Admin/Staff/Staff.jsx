@@ -43,7 +43,7 @@ const StaffPage = () => {
   const handleDeleteClick = async () => {
     let data = {
       delete_id: deleteStaff.id,
-      update_staff: selectedStaff,
+      update_staff: selectedStaff?.id,
     };
     const res = await DELETESTAFF(data);
     console.log(res);
@@ -1049,7 +1049,7 @@ const StaffPage = () => {
 >
   <div className="modal-body">
     {/* Staff Deletion Title */}
-    <div className="text-center mb-3">
+    <div className="text-start mb-3">
       <h5 className="text-danger fw-bold">
         <i className="bi bi-trash3"></i> Delete Staff:{" "}
         <span className="text-dark">
@@ -1070,7 +1070,7 @@ const StaffPage = () => {
         type="button"
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >
-        Choose Staff
+        Choose Staff {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
       </button>
 
       {dropdownOpen && (
@@ -1078,7 +1078,7 @@ const StaffPage = () => {
           className="dropdown-menu show w-100"
           style={{ maxHeight: "200px", overflowY: "auto" }}
         >
-          {[...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data]
+          {staffDataAll?.data
             ?.filter(
               (staff) =>
                 staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
@@ -1087,7 +1087,7 @@ const StaffPage = () => {
               <li key={staff.id}>
                 <button
                   className="dropdown-item"
-                  onClick={() =>{  setSelectedStaff(staff.id);setDropdownOpen(!dropdownOpen);}}
+                  onClick={() =>{  setSelectedStaff(staff);setDropdownOpen(!dropdownOpen);}}
                 >
                   {staff.first_name}
                 </button>
@@ -1097,26 +1097,7 @@ const StaffPage = () => {
       )}
     </div>
 
-      {/* <select
-        id="staff-select"
-        value={selectedStaff || ""}
-        onChange={(e) => setSelectedStaff(e.target.value)}
-        className="form-select border border-dark"
-      >
-        <option value="" disabled>
-          Choose Staff
-        </option>
-        {[...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data]
-          ?.filter(
-            (staff) =>
-              staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
-          )
-          .map((staff) => (
-            <option key={staff.id} value={staff.id}>
-              {staff.first_name}
-            </option>
-          ))}
-      </select> */}
+    
     </div>
 
    

@@ -11,6 +11,9 @@ import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { convertDate } from "../../../Utils/Comman_function";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import { use } from "react";
+
+import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const Status = () => {
   const dispatch = useDispatch();
@@ -27,6 +30,7 @@ const Status = () => {
   const role = JSON.parse(localStorage.getItem("role"));
   const [DeleteStatus, setDeleteStatus] = useState(false);
   const [replaceStatue, setReplaceStatue] = useState(null);
+  const [JobData, setJobData] = useState([]);
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -123,8 +127,6 @@ const Status = () => {
     },
   ];
 
- 
-
   const handleEdit = async (row) => {
     // Set the item to be edited
     setEditItem(row);
@@ -203,7 +205,6 @@ const Status = () => {
           GetStatus();
           setDeleteStatus(false);
           setReplaceStatue(null);
-
         }
       })
       .catch((error) => {
@@ -313,8 +314,28 @@ const Status = () => {
     "Last Update On": convertDate(item.updated_at),
   }));
 
-  console.log("DeleteStatus", DeleteStatus);
-  console.log("replaceStatue", replaceStatue);
+  const JobDetails = async () => {
+    const req = { action: "getByStatus", status_id: DeleteStatus?.id };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setJobData(response.data);
+        } else {
+          setJobData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+    if (DeleteStatus?.id) {
+      JobDetails();
+    }
+  }, [DeleteStatus]);
 
   return (
     <div>
@@ -441,6 +462,13 @@ const Status = () => {
           handleClose={() => setDeleteStatus(false)}
         >
           <div className="modal-body">
+            <div className="text-start mb-3">
+              <h5 className="text-danger fw-bold">
+                <i className="bi bi-trash3"></i> Delete Status:{" "}
+                <span className="text-dark">{DeleteStatus?.name}</span>
+              </h5>
+            </div>
+
             <div className="mb-3">
               <label htmlFor="staff-select" className="form-label">
                 Select Status to Replace:
@@ -479,6 +507,25 @@ const Status = () => {
             >
               Cancel
             </button>
+
+            {JobData.length > 0 && (
+              <div className="mb-4">
+                <h6 className="fw-bold text-primary">
+                  <i className="bi bi-people"></i> Job Assigned:
+                </h6>
+                <ul className="list-group">
+                  <label className="">Job ID</label>
+                  {JobData.map((customer) => (
+                    <li
+                      key={customer.job_id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span className="text-dark">{customer?.job_id} </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </CommanModal>
       </div>
