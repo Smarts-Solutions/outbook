@@ -16,6 +16,9 @@ import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { staffPortfolio, DELETESTAFF } from "../../../Services/Staff/staff";
+import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { use } from "react";
+
 const StaffPage = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -29,7 +32,8 @@ const StaffPage = () => {
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
   const [allCustomerData, setAllCustomerData] = useState([]);
   const [deleteStaff, setDeleteStaff] = useState();
-
+  const [deleteStaffCustomer, setDeleteStaffCustomer] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [budgetedHours, setBudgetedHours] = useState({
     hours: "",
     minutes: "",
@@ -38,14 +42,17 @@ const StaffPage = () => {
 
   const handleDeleteClick = async () => {
     let data = {
-      delete_id: deleteStaff,
+      delete_id: deleteStaff.id,
       update_staff: selectedStaff,
     };
     const res = await DELETESTAFF(data);
     console.log(res);
     if (res?.status) {
       await dispatch(
-        Staff({ req: { action: "delete", id: deleteStaff }, authToken: token })
+        Staff({
+          req: { action: "delete", id: deleteStaff.id },
+          authToken: token,
+        })
       )
         .unwrap()
         .then(async (response) => {
@@ -310,7 +317,7 @@ const StaffPage = () => {
               {row?.is_disable == 0 && (
                 <button
                   className="delete-icon dropdown-item  w-auto mb-2"
-                  onClick={() => setDeleteStaff(row?.id)}
+                  onClick={() => setDeleteStaff(row)}
                 >
                   {" "}
                   <i className="ti-trash text-danger" />
@@ -594,46 +601,6 @@ const StaffPage = () => {
     },
   ];
 
-  const DeleteStaff = async (row) => {
-    sweatalert
-      .fire({
-        title: "Are you sure?",
-        text: "You will not be able to recover this record!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "No, keep it",
-      })
-      .then(async (result) => {
-        if (result.isConfirmed) {
-          // await dispatch(
-          //   Staff({ req: { action: "delete", id: row.id }, authToken: token })
-          // )
-          //   .unwrap()
-          //   .then(async (response) => {
-          //     if (response.status) {
-          //       sweatalert.fire({
-          //         icon: "success",
-          //         title: "Success",
-          //         text: response.message,
-          //         timer: 2000,
-          //       });
-          //       SetRefresh(!refresh);
-          //     } else {
-          //       sweatalert.fire({
-          //         icon: "error",
-          //         title: "Oops...",
-          //         text: response.message,
-          //       });
-          //     }
-          //   })
-          //   .catch((error) => {
-          //     return;
-          //   });
-        }
-      });
-  };
-
   const handleCheckboxChange = (event, id) => {
     const { checked } = event.target;
 
@@ -753,6 +720,27 @@ const StaffPage = () => {
       return;
     }
   };
+  const getCustomersName = async (id) => {
+    if (!id) return;
+
+    try {
+      const req = { action: "get_dropdown", staff_id: deleteStaff.id };
+      const data = { req, authToken: token };
+
+      const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+      if (response.status) {
+        setDeleteStaffCustomer(response.data);
+      } else {
+        setDeleteStaffCustomer([]);
+      }
+    } catch (error) {
+      console.error("Error fetching customer names:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCustomersName(deleteStaff?.id);
+  }, [deleteStaff?.id, token]); // Ensure token is included if it might change
 
   return (
     <div>
@@ -1051,57 +1039,125 @@ const StaffPage = () => {
         </FormGroup>
       </CommanModal>
 
-      {console.log("staffDataAll", staffDataAll)}
-      <CommanModal
-        isOpen={deleteStaff}
-        backdrop="static"
-        size="ms-5"
-        title="Delete Staff"
-        hideBtn={true}
-        handleClose={() => setDeleteStaff(false)}
+    <CommanModal
+  isOpen={deleteStaff}
+  backdrop="static"
+  size="ms-5"
+  title="Delete Staff"
+  hideBtn={true}
+  handleClose={() => {setDeleteStaff(false);setSelectedStaff(null);}}
+>
+  <div className="modal-body">
+    {/* Staff Deletion Title */}
+    <div className="text-center mb-3">
+      <h5 className="text-danger fw-bold">
+        <i className="bi bi-trash3"></i> Delete Staff:{" "}
+        <span className="text-dark">
+          {deleteStaff?.first_name + " " + deleteStaff?.last_name}
+        </span>
+      </h5>
+    </div>
+
+    {/* Select Staff to Replace */}
+    <div className="mb-4">
+      <label htmlFor="staff-select" className="form-label fw-semibold">
+        <i className="bi bi-person-fill"></i> Select Staff to Replace:
+      </label>
+
+      <div className="dropdown">
+      <button
+        className="btn btn-dark dropdown-toggle w-100"
+        type="button"
+        onClick={() => setDropdownOpen(!dropdownOpen)}
       >
-        <div className="modal-body">
-          <div className="mb-3">
-            <label htmlFor="staff-select" className="form-label">
-              Select Staff to Delete:
-            </label>
-            <select
-              id="staff-select"
-              value={selectedStaff || ""}
-              onChange={(e) => setSelectedStaff(e.target.value)}
-              className="form-select"
-            >
-              <option value="" disabled>
-                Choose Staff
-              </option>
-              {staffDataAll?.data
-                ?.filter((staff) => staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2 && staff.role !=="ADMIN" )
-                .map((staff) => (
-                  <option key={staff.id} value={staff.id}>
-                    {staff.first_name}
-                  </option>
-                ))}
-            </select>
+        Choose Staff
+      </button>
 
-          </div>
+      {dropdownOpen && (
+        <ul
+          className="dropdown-menu show w-100"
+          style={{ maxHeight: "200px", overflowY: "auto" }}
+        >
+          {[...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data]
+            ?.filter(
+              (staff) =>
+                staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
+            )
+            .map((staff) => (
+              <li key={staff.id}>
+                <button
+                  className="dropdown-item"
+                  onClick={() =>{  setSelectedStaff(staff.id);setDropdownOpen(!dropdownOpen);}}
+                >
+                  {staff.first_name}
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+    </div>
 
-          {selectedStaff && (
-            <button
-              onClick={handleDeleteClick}
-              className="btn btn-danger w-100 mt-3"
-            >
-              Delete
-            </button>
-          )}
+      {/* <select
+        id="staff-select"
+        value={selectedStaff || ""}
+        onChange={(e) => setSelectedStaff(e.target.value)}
+        className="form-select border border-dark"
+      >
+        <option value="" disabled>
+          Choose Staff
+        </option>
+        {[...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data,...staffDataAll?.data]
+          ?.filter(
+            (staff) =>
+              staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
+          )
+          .map((staff) => (
+            <option key={staff.id} value={staff.id}>
+              {staff.first_name}
+            </option>
+          ))}
+      </select> */}
+    </div>
 
-          <button
-            onClick={() => setDeleteStaff(false)}
-            className="btn btn-secondary w-100 mt-2"
-          >
-            Cancel
-          </button>
-        </div>
-      </CommanModal>
+   
+
+    {/* Buttons */}
+    <div className="d-grid gap-2">
+      {selectedStaff && (
+        <button onClick={handleDeleteClick} className="btn btn-danger">
+          <i className="bi bi-trash"></i> Delete
+        </button>
+      )}
+      <button
+        onClick={() => {setDeleteStaff(false);setSelectedStaff(null);}}
+        className="btn btn-secondary"
+      >
+        <i className="bi bi-x-circle"></i> Cancel
+      </button>
+    </div>
+
+
+     {/* Customers List */}
+     {deleteStaffCustomer.length > 0 && (
+      <div className="mb-4">
+        <h6 className="fw-bold text-primary">
+          <i className="bi bi-people"></i> Customers Assigned:
+        </h6>
+        <ul className="list-group">
+          {deleteStaffCustomer.map((customer) => (
+            <li key={customer.id} className="list-group-item d-flex justify-content-between align-items-center">
+              <span className="text-dark">
+                {customer?.trading_name}{" "}
+                <span className="badge bg-secondary">{customer?.customer_code}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</CommanModal>
+
     </div>
   );
 };
