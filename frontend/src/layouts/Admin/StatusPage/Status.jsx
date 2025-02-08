@@ -189,6 +189,7 @@ const Status = () => {
   };
 
   const handleDelete = async (row) => {
+
     const data = {
       req: {
         action: "delete",
@@ -320,6 +321,8 @@ const Status = () => {
     await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
+
+        console.log("JobData -- ", response);
         if (response.status) {
           setJobData(response.data);
         } else {
@@ -469,7 +472,12 @@ const Status = () => {
               </h5>
             </div>
 
-            <div className="mb-3">
+
+           {
+            JobData.length > 0 ?
+
+             <>
+             <div className="mb-3">
               <label htmlFor="staff-select" className="form-label">
                 Select Status to Replace:
               </label>
@@ -480,7 +488,7 @@ const Status = () => {
                 className="form-select"
               >
                 <option value="" disabled>
-                  Choose Staff
+                  Choose Status
                 </option>
                 {statusDataAll
                   .filter((staff) => staff.id !== DeleteStatus?.id)
@@ -520,12 +528,35 @@ const Status = () => {
                       key={customer.job_id}
                       className="list-group-item d-flex justify-content-between align-items-center"
                     >
-                      <span className="text-dark">{customer?.job_id} </span>
+                     <span className="text-dark">Customer : {customer?.customer_name} , Client : {customer?.client_name} , Job Code : {customer?.job_code_id}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+             
+             </>
+            :
+
+            <>
+            <button
+              onClick={handleDelete}
+              className="btn btn-danger w-100 mt-3"
+            >
+              Delete
+            </button>
+            </>
+
+
+           }
+
+
+
+
+            
+
+
+
           </div>
         </CommanModal>
       </div>

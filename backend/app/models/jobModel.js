@@ -603,8 +603,8 @@ const getJobByCustomer = async (job) => {
   try {
     const [ExistStaff] = await pool.execute(
       'SELECT id , role_id  FROM staffs WHERE id = "' +
-        StaffUserId +
-        '" LIMIT 1'
+      StaffUserId +
+      '" LIMIT 1'
     );
     let result = [];
     if (ExistStaff.length > 0) {
@@ -912,8 +912,8 @@ const getJobByClient = async (job) => {
   try {
     const [ExistStaff] = await pool.execute(
       'SELECT id , role_id  FROM staffs WHERE id = "' +
-        StaffUserId +
-        '" LIMIT 1'
+      StaffUserId +
+      '" LIMIT 1'
     );
     let result = [];
     if (ExistStaff.length > 0) {
@@ -1731,7 +1731,7 @@ const jobUpdate = async (job) => {
       }
     }
 
-  const query = `
+    const query = `
          UPDATE jobs 
          SET account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
              service_id = ?, job_type_id = ?, budgeted_hours = ?, reviewer = ?, allocated_to = ?, allocated_on = ?, 
@@ -1780,100 +1780,100 @@ const jobUpdate = async (job) => {
          WHERE id = ?
        `;
 
-       const sanitizeParams = (params) => {
-  return params.map(param => param === undefined ? null : param);
-};
+    const sanitizeParams = (params) => {
+      return params.map(param => param === undefined ? null : param);
+    };
 
-   const params = [
-  account_manager_id,
-  customer_id,
-  client_id,
-  client_job_code,
-  customer_contact_details_id,
-  service_id,
-  job_type_id,
-  budgeted_hours,
-  reviewer,
-  allocated_to,
-  allocated_on,
-  date_received_on,
-  year_end,
-  total_preparation_time,
-  review_time,
-  feedback_incorporation_time,
-  total_time,
-  engagement_model,
-  expected_delivery_date,
-  due_on,
-  submission_deadline,
-  customer_deadline_date,
-  sla_deadline_date,
-  internal_deadline_date,
-  filing_Companies_required,
-  filing_Companies_date,
-  filing_hmrc_required,
-  filing_hmrc_date,
-  opening_balance_required,
-  opening_balance_date,
-  number_of_transaction,
-  number_of_balance_items,
-  turnover,
-  number_of_employees,
-  vat_reconciliation,
-  bookkeeping,
-  processing_type,
-  invoiced,
-  currency,
-  invoice_value,
-  invoice_date,
-  invoice_hours,
-  invoice_remark,
-  status_type_update,
-  notes,
-  job.Turnover_Period_id_0,
-  job.Turnover_Currency_id_0,
-  job.Turnover_id_0,
-  job.VAT_Registered_id_0,
-  job.VAT_Frequency_id_0,
-  job.Who_Did_The_Bookkeeping_id_1,
-  job.PAYE_Registered_id_1,
-  job.Number_of_Trial_Balance_Items_id_1,
-  job.Bookkeeping_Frequency_id_2,
-  job.Number_of_Total_Transactions_id_2,
-  job.Number_of_Bank_Transactions_id_2,
-  job.Number_of_Purchase_Invoices_id_2,
-  job.Number_of_Sales_Invoices_id_2,
-  job.Number_of_Petty_Cash_Transactions_id_2,
-  job.Number_of_Journal_Entries_id_2,
-  job.Number_of_Other_Transactions_id_2,
-  job.Transactions_Posting_id_2,
-  job.Quality_of_Paperwork_id_2,
-  job.Number_of_Integration_Software_Platforms_id_2,
-  job.CIS_id_2,
-  job.Posting_Payroll_Journals_id_2,
-  job.Department_Tracking_id_2,
-  job.Sales_Reconciliation_Required_id_2,
-  job.Factoring_Account_id_2,
-  job.Payment_Methods_id_2,
-  job.Payroll_Frequency_id_3,
-  job.Type_of_Payslip_id_3,
-  job.Percentage_of_Variable_Payslips_id_3,
-  job.Is_CIS_Required_id_3,
-  job.CIS_Frequency_id_3,
-  job.Number_of_Sub_contractors_id_3,
-  job.Whose_Tax_Return_is_it_id_4,
-  job.Number_of_Income_Sources_id_4,
-  job.If_Landlord_Number_of_Properties_id_4,
-  job.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
-  job.Management_Accounts_Frequency_id_6,
-  job_id
-];
+    const params = [
+      account_manager_id,
+      customer_id,
+      client_id,
+      client_job_code,
+      customer_contact_details_id,
+      service_id,
+      job_type_id,
+      budgeted_hours,
+      reviewer,
+      allocated_to,
+      allocated_on,
+      date_received_on,
+      year_end,
+      total_preparation_time,
+      review_time,
+      feedback_incorporation_time,
+      total_time,
+      engagement_model,
+      expected_delivery_date,
+      due_on,
+      submission_deadline,
+      customer_deadline_date,
+      sla_deadline_date,
+      internal_deadline_date,
+      filing_Companies_required,
+      filing_Companies_date,
+      filing_hmrc_required,
+      filing_hmrc_date,
+      opening_balance_required,
+      opening_balance_date,
+      number_of_transaction,
+      number_of_balance_items,
+      turnover,
+      number_of_employees,
+      vat_reconciliation,
+      bookkeeping,
+      processing_type,
+      invoiced,
+      currency,
+      invoice_value,
+      invoice_date,
+      invoice_hours,
+      invoice_remark,
+      status_type_update,
+      notes,
+      job.Turnover_Period_id_0,
+      job.Turnover_Currency_id_0,
+      job.Turnover_id_0,
+      job.VAT_Registered_id_0,
+      job.VAT_Frequency_id_0,
+      job.Who_Did_The_Bookkeeping_id_1,
+      job.PAYE_Registered_id_1,
+      job.Number_of_Trial_Balance_Items_id_1,
+      job.Bookkeeping_Frequency_id_2,
+      job.Number_of_Total_Transactions_id_2,
+      job.Number_of_Bank_Transactions_id_2,
+      job.Number_of_Purchase_Invoices_id_2,
+      job.Number_of_Sales_Invoices_id_2,
+      job.Number_of_Petty_Cash_Transactions_id_2,
+      job.Number_of_Journal_Entries_id_2,
+      job.Number_of_Other_Transactions_id_2,
+      job.Transactions_Posting_id_2,
+      job.Quality_of_Paperwork_id_2,
+      job.Number_of_Integration_Software_Platforms_id_2,
+      job.CIS_id_2,
+      job.Posting_Payroll_Journals_id_2,
+      job.Department_Tracking_id_2,
+      job.Sales_Reconciliation_Required_id_2,
+      job.Factoring_Account_id_2,
+      job.Payment_Methods_id_2,
+      job.Payroll_Frequency_id_3,
+      job.Type_of_Payslip_id_3,
+      job.Percentage_of_Variable_Payslips_id_3,
+      job.Is_CIS_Required_id_3,
+      job.CIS_Frequency_id_3,
+      job.Number_of_Sub_contractors_id_3,
+      job.Whose_Tax_Return_is_it_id_4,
+      job.Number_of_Income_Sources_id_4,
+      job.If_Landlord_Number_of_Properties_id_4,
+      job.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+      job.Management_Accounts_Frequency_id_6,
+      job_id
+    ];
 
-// Sanitize the parameters
-const sanitizedParams = sanitizeParams(params);
+    // Sanitize the parameters
+    const sanitizedParams = sanitizeParams(params);
 
-// Execute the query with sanitized parameters
-const [result] = await pool.execute(query, sanitizedParams);
+    // Execute the query with sanitized parameters
+    const [result] = await pool.execute(query, sanitizedParams);
 
     if (result.affectedRows > 0) {
       if (tasks.task.length > 0) {
@@ -1904,8 +1904,8 @@ const [result] = await pool.execute(query, sanitizedParams);
           const deleteQuery = `
     DELETE FROM client_job_task 
     WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
-      .map(() => "?")
-      .join(",")})
+              .map(() => "?")
+              .join(",")})
 `;
           await pool.execute(deleteQuery, [
             job_id,
@@ -1974,20 +1974,20 @@ const [result] = await pool.execute(query, sanitizedParams);
         if (
           ExistJob.client_job_code !== client_job_code ||
           ExistJob.customer_contact_details_id !==
-            customer_contact_details_id ||
+          customer_contact_details_id ||
           ExistJob.service_id !== service_id ||
           ExistJob.job_type_id !== job_type_id ||
           ExistJob.budgeted_hours.split(":").slice(0, 2).join(":") !==
-            budgeted_hours ||
+          budgeted_hours ||
           ExistJob.reviewer !== reviewer ||
           ExistJob.allocated_to !== allocated_to ||
           ExistJob.allocated_on !== allocated_on ||
           ExistJob.date_received_on !== date_received_on ||
           ExistJob.year_end !== year_end ||
           ExistJob.total_preparation_time.split(":").slice(0, 2).join(":") !==
-            total_preparation_time ||
+          total_preparation_time ||
           ExistJob.review_time.split(":").slice(0, 2).join(":") !==
-            review_time ||
+          review_time ||
           ExistJob.feedback_incorporation_time
             .split(":")
             .slice(0, 2)
@@ -2042,7 +2042,7 @@ const [result] = await pool.execute(query, sanitizedParams);
           ExistJob.invoice_value !== invoice_value ||
           ExistJob.invoice_date !== invoice_date ||
           ExistJob.invoice_hours.split(":").slice(0, 2).join(":") !==
-            invoice_hours ||
+          invoice_hours ||
           ExistJob.invoice_remark != invoice_remark
         ) {
           job_heading_name.push("edited the job invoice data");
@@ -2100,8 +2100,8 @@ const [result] = await pool.execute(query, sanitizedParams);
           const msgLog =
             job_heading_name.length > 1
               ? job_heading_name.slice(0, -1).join(", ") +
-                " and " +
-                job_heading_name.slice(-1)
+              " and " +
+              job_heading_name.slice(-1)
               : job_heading_name[0];
           const currentDate = new Date();
           await SatffLogUpdateOperation({
@@ -2242,7 +2242,7 @@ const updateJobStatus = async (job) => {
   );
 
 
-  
+
   try {
     if (parseInt(status_type) == 6) {
       const [ExistDraft] = await pool.execute(
@@ -2279,14 +2279,14 @@ const updateJobStatus = async (job) => {
           data: "W",
         };
       }
-    }else{
+    } else {
       //  Missing Log
       const [ExistMissingLog] = await pool.execute(
         `SELECT job_id FROM missing_logs WHERE missing_log_reviewed_date IS NULL AND job_id = ? LIMIT 1`,
         [job_id]
       );
 
-      if(ExistMissingLog.length > 0){
+      if (ExistMissingLog.length > 0) {
         return {
           status: false,
           message: "Please review the missing log.",
@@ -2294,24 +2294,24 @@ const updateJobStatus = async (job) => {
         };
       }
 
-     
+
       // Query to 
       const [ExistQuery] = await pool.execute(
         `SELECT job_id FROM queries WHERE final_query_response_received_date IS NULL AND job_id = ? LIMIT 1`,
         [job_id]
       );
 
-      if(ExistQuery.length > 0){
+      if (ExistQuery.length > 0) {
         return {
           status: false,
           message: "Please review the query.",
           data: "W",
-          };
-       }
+        };
+      }
 
     }
 
-    
+
 
     const query = `
          UPDATE jobs 
@@ -2350,31 +2350,48 @@ const updateJobStatus = async (job) => {
   }
 };
 
-  const GetJobStatus = async (job) => {
+const GetJobStatus = async (job) => {
   const { status_id } = job;
-    try{
-console.log("status_id",status_id)  
+  try {
+// console.log("status_id",status_id)  
 
-      const query =`SELECT job_id  FROM jobs WHERE status_type = ?`;
-      const [result] = await pool.execute(query, [status_id]);
+    const query = `SELECT 
+        jobs.job_id AS job_id,
+        customers.trading_name AS customer_name,
+        clients.trading_name AS client_name,
+        CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      ) AS job_code_id
+        FROM jobs
+        LEFT JOIN
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+         job_types ON jobs.job_type_id = job_types.id
+        WHERE jobs.status_type = ?`;
+    const [result] = await pool.execute(query, [status_id]);
 
-      if (result.length > 0) {
-        return {
-          status: true,
-          message: "Success.",
-          data: result,
-        };
-      }
-      else{
-        return { status: false, message: "No job found with the given status_id." };
-      }
-
-    }catch{
-      console.log(err);
-      return { status: false, message: "Error getting job status." };
+    if (result.length > 0) {
+      return {
+        status: true,
+        message: "Success.",
+        data: result,
+      };
+    }
+    else {
+      return { status: false, message: "No job found with the given status_id." };
     }
 
+  } catch {
+    console.log("DDD",err);
+    return { status: false, message: "Error getting job status." };
   }
+
+}
 
 module.exports = {
   getAddJobData,
