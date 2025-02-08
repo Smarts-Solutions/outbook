@@ -353,8 +353,8 @@ const Status = () => {
                 <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                   <div>
                     {getAccessData.insert === 1 ||
-                    role === "ADMIN" ||
-                    role === "SUPERADMIN" ? (
+                      role === "ADMIN" ||
+                      role === "SUPERADMIN" ? (
                       <button
                         type="button"
                         className="btn btn-info text-white float-md-end  "
@@ -473,87 +473,89 @@ const Status = () => {
             </div>
 
 
-           {
-            JobData.length > 0 ?
+            {
+              JobData.length > 0 ?
 
-             <>
-             <div className="mb-3">
-              <label htmlFor="staff-select" className="form-label">
-                Select Status to Replace:
-              </label>
-              <select
-                id="staff-select"
-                value={replaceStatue || ""}
-                onChange={(e) => setReplaceStatue(e.target.value)}
-                className="form-select"
-              >
-                <option value="" disabled>
-                  Choose Status
-                </option>
-                {statusDataAll
-                  .filter((staff) => staff.id !== DeleteStatus?.id)
-                  .map((staff) => (
-                    <option key={staff.id} value={staff.id}>
-                      {staff.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {replaceStatue && (
-              <button
-                onClick={handleDelete}
-                className="btn btn-danger w-100 mt-3"
-              >
-                Delete
-              </button>
-            )}
-
-            <button
-              onClick={() => setDeleteStatus(false)}
-              className="btn btn-secondary w-100 mt-2"
-            >
-              Cancel
-            </button>
-
-            {JobData.length > 0 && (
-              <div className="mb-4">
-                <h6 className="fw-bold text-primary">
-                  <i className="bi bi-people"></i> Job Assigned:
-                </h6>
-                <ul className="list-group">
-                  <label className="">Job ID</label>
-                  {JobData.map((customer) => (
-                    <li
-                      key={customer.job_id}
-                      className="list-group-item d-flex justify-content-between align-items-center"
+                <>
+                  <div className="mb-3">
+                    <label htmlFor="staff-select" className="form-label">
+                      Select Status to Replace:
+                    </label>
+                    <select
+                      id="staff-select"
+                      value={replaceStatue || ""}
+                      onChange={(e) => setReplaceStatue(e.target.value)}
+                      className="form-select"
                     >
-                     <span className="text-dark">Customer : {customer?.customer_name} , Client : {customer?.client_name} , Job Code : {customer?.job_code_id}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-             
-             </>
-            :
+                      <option value="" disabled>
+                        Choose Status
+                      </option>
+                      {statusDataAll
+                        .filter((staff) => staff.id !== DeleteStatus?.id)
+                        .map((staff) => (
+                          <option key={staff.id} value={staff.id}>
+                            {staff.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
 
-            <>
-            <button
-              onClick={handleDelete}
-              className="btn btn-danger w-100 mt-3"
-            >
-              Delete
-            </button>
-            </>
+                  {replaceStatue && (
+                    <button
+                      onClick={handleDelete}
+                      className="btn btn-danger w-100 mt-3"
+                    >
+                      Delete
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setDeleteStatus(false)}
+                    className="btn btn-secondary w-100 mt-2"
+                  >
+                    Cancel
+                  </button>
+
+                  {JobData.length > 0 && (
+                    <div className="mb-4">
+                      <h6 className="fw-bold text-primary">
+                        <i className="bi bi-people"></i> Job Assigned:
+                      </h6>
+                      <ul className="list-group">
+                        <label className="">Job ID</label>
+                        {JobData.map((customer) => (
+                          <li
+                            key={customer.job_id}
+                            className="list-group-item d-flex justify-content-between align-items-center"
+                          >
+                            {/* <span className="text-dark">Customer : {customer?.customer_name} , Client : {customer?.client_name} , Job Code : {customer?.job_code_id}</span> */}
+                            <div className="pop-boxx1 d-flex justify-content-between align-items-center"><span>{customer?.customer_name}</span> <span>{customer?.client_name}</span> <span>{customer?.job_code_id}</span></div>
+
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                </>
+                :
+
+                <>
+                  <button
+                    onClick={handleDelete}
+                    className="btn btn-danger w-100 mt-3"
+                  >
+                    Delete
+                  </button>
+                </>
 
 
-           }
+            }
 
 
 
 
-            
+
 
 
 

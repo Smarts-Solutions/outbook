@@ -4773,4 +4773,12 @@ tbody.list.form-check-all tr:last-child td {
   justify-content: center;
 }
 
+.pop-boxx1 span {
+  border: 1px solid #ccc;
+  padding: 5px 20px;
  
+  border-radius: 4px;
+}
+.pop-boxx1{
+  width:100%;
+}
