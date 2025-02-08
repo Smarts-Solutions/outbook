@@ -41,9 +41,11 @@ const StaffPage = () => {
   const [selectedStaff, setSelectedStaff] = useState(null);
 
   const handleDeleteClick = async () => {
+
     let data = {
       delete_id: deleteStaff.id,
       update_staff: selectedStaff?.id,
+      role: deleteStaff.role,
     };
     const res = await DELETESTAFF(data);
     console.log(res);
@@ -741,6 +743,10 @@ const StaffPage = () => {
     getCustomersName(deleteStaff?.id);
   }, [deleteStaff?.id, token]); // Ensure token is included if it might change
 
+
+  console.log("staffDataAll?.data", staffDataAll?.data);
+  console.log("deleteStaff?.id", deleteStaff);
+
   return (
     <div>
       <div className="container-fluid">
@@ -1077,11 +1083,27 @@ const StaffPage = () => {
           className="dropdown-menu show w-100"
           style={{ maxHeight: "200px", overflowY: "auto" }}
         >
-          {staffDataAll?.data
-            ?.filter(
-              (staff) =>
-                staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
-            )
+          {
+          staffDataAll?.data
+            // ?.filter(
+            //   (staff) =>
+            //     staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
+            // )
+            ?.filter((staff) => {
+                if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
+                  return (
+                    staff.role?.toUpperCase() === "MANAGER" && 
+                    staff.id !== deleteStaff?.id && 
+                    staff.id !== 1 &&
+                    staff.id !== 2
+                  );
+                }
+                return (
+                  staff.id !== deleteStaff?.id &&
+                  staff.id !== 1 &&
+                  staff.id !== 2
+                );
+              })
             .map((staff) => (
               <li key={staff.id}>
                 <button
