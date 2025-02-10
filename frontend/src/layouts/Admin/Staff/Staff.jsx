@@ -649,12 +649,7 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
-<<<<<<<<< Temporary merge branch 1
-=========
-
->>>>>>>>> Temporary merge branch 2
-    console.log("editStaffData", editStaffData);
-
+    
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
@@ -1049,49 +1044,80 @@ const StaffPage = () => {
         </FormGroup>
       </CommanModal>
 
-      {console.log("staffDataAll", staffDataAll)}
-      <CommanModal
-        isOpen={deleteStaff}
-        backdrop="static"
-        size="ms-5"
-        title="Delete Staff"
-        hideBtn={true}
-        handleClose={() => setDeleteStaff(false)}
-      >
-        <div className="modal-body">
-          <div className="mb-3">
-            <label htmlFor="staff-select" className="form-label">
-              Select Staff to Delete:
-            </label>
-            <select
-              id="staff-select"
-              value={selectedStaff || ""}
-              onChange={(e) => setSelectedStaff(e.target.value)}
-              className="form-select"
-            >
-              <option value="" disabled>
-                Choose Staff
-              </option>
-              {staffDataAll?.data
-<<<<<<<<< Temporary merge branch 1
-                ?.filter(
-                  (staff) =>
-                    staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2
-                )
-=========
-                ?.filter((staff) => staff.id !== deleteStaff && staff.id !== 1 && staff.id !== 2 && staff.role !=="ADMIN" )
->>>>>>>>> Temporary merge branch 2
-                .map((staff) => (
-                  <option key={staff.id} value={staff.id}>
-                    {staff.first_name}
-                  </option>
-                ))}
-            </select>
-<<<<<<<<< Temporary merge branch 1
-=========
+    <CommanModal
+  isOpen={deleteStaff}
+  backdrop="static"
+  size="ms-5"
+  title="Delete Staff"
+  hideBtn={true}
+  handleClose={() => {setDeleteStaff(false);setSelectedStaff(null);}}
+>
+  <div className="modal-body">
+    {/* Staff Deletion Title */}
+    <div className="text-start mb-3">
+      <h5 className="text-danger fw-bold">
+        <i className="bi bi-trash3"></i> Delete Staff:{" "}
+        <span className="text-dark">
+          {deleteStaff?.first_name + " " + deleteStaff?.last_name}
+        </span>
+      </h5>
+    </div>
 
->>>>>>>>> Temporary merge branch 2
-          </div>
+    {/* Select Staff to Replace */}
+    <div className="mb-4">
+      <label htmlFor="staff-select" className="form-label fw-semibold">
+        <i className="bi bi-person-fill"></i> Select Staff to Replace:
+      </label>
+
+      <div className="dropdown">
+      <button
+        className="btn btn-info dropdown-toggle w-100"
+        type="button"
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+      >
+        Choose Staff {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
+      </button>
+
+      {dropdownOpen && (
+        <ul
+          className="dropdown-menu show w-100"
+          style={{ maxHeight: "200px", overflowY: "auto" }}
+        >
+          {
+          staffDataAll?.data
+            // ?.filter(
+            //   (staff) =>
+            //     staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
+            // )
+            ?.filter((staff) => {
+                if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
+                  return (
+                    staff.role?.toUpperCase() === "MANAGER" && 
+                    staff.id !== deleteStaff?.id && 
+                    staff.id !== 1 &&
+                    staff.id !== 2
+                  );
+                }
+                return (
+                  staff.id !== deleteStaff?.id &&
+                  staff.id !== 1 &&
+                  staff.id !== 2
+                );
+              })
+            .map((staff) => (
+              <li key={staff.id}>
+                <button
+                  className="dropdown-item"
+                  onClick={() =>{  setSelectedStaff(staff);setDropdownOpen(!dropdownOpen);}}
+                >
+                  {staff.first_name + " " + staff.last_name}
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+    </div>
+    </div>
 
    
 
