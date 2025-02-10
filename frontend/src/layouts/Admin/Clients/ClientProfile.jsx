@@ -11,7 +11,7 @@ import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
-import {allowedTypes } from "../../../Utils/Comman_function";
+import { allowedTypes } from "../../../Utils/Comman_function";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +79,7 @@ const ClientList = () => {
     await dispatch(ClientAction(data))
       .unwrap()
       .then((response) => {
-        console.log("response-client ", response.data.client_documents);
+        console.log("response-client ", response.data);
         if (response.status) {
           setClientDetails({
             loading: false,
@@ -573,9 +573,9 @@ const ClientList = () => {
             <i className="ti-trash text-danger" />
           </button>
 
-          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url,sharepoint_token, row.original_name)}>
-          <i className="ti-download" />
-        </button>
+          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
+            <i className="ti-download" />
+          </button>
 
         </div>
       ),
@@ -588,7 +588,7 @@ const ClientList = () => {
 
   ];
 
- 
+
   const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
     console.log("sharePointFileUrl", sharePointFileUrl);
     console.log("accessToken", accessToken);
@@ -603,18 +603,18 @@ const ClientList = () => {
       });
 
       console.log("response", response);
-  
+
       // Check if the response is OK
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-  
+
       // Convert the response to a Blob (binary data)
       const fileBlob = await response.blob();
-  
+
       // Create a URL for the Blob
       const fileURL = window.URL.createObjectURL(fileBlob);
-  
+
       // Create a temporary <a> element to trigger the download
       const downloadLink = document.createElement('a');
       downloadLink.href = fileURL;
@@ -625,21 +625,8 @@ const ClientList = () => {
       console.error('Error downloading the file:', error);
     }
   };
-  
-  
-  // const openAndDownloadFile = (url, filename = '') => {
-  //   // Open the file in a new tab
-  //   window.open(url, '_blank');
-  
-  //   // Create a temporary link to trigger download
-  //   const link = document.createElement('a');
-  //   link.href = url;
-  //   link.target = '_blank'; // Open in a new tab
-  //   link.download = filename || ''; // Specify a filename here if needed
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
+
+
 
   const removeItem = async (file, type) => {
     if (type == 1) {
@@ -730,7 +717,7 @@ const ClientList = () => {
   };
 
   function handleEdit(row) {
-    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab , job : row } });
+    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab, job: row } });
   }
 
   const handleDelete = async (row, type) => {
@@ -962,6 +949,8 @@ const ClientList = () => {
             </div>
           )}
 
+          {console.log("getClientDetails sssss", getClientDetails?.data?.client?.client_type)}
+
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">
               <div className="report-data">
@@ -977,9 +966,13 @@ const ClientList = () => {
                           </div>
                           <div className="dastyle-profile_user-detail">
                             <h5 className="dastyle-user-name">
-                              {clientInformationData.first_name +
-                                " " +
-                                clientInformationData.last_name}
+
+                              {getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
+                                getClientDetails?.data?.member_details?.[0].first_name + " " + getClientDetails?.data?.member_details?.[0].last_name :
+                                getClientDetails?.data?.client?.client_type == 7 ?
+                                  getClientDetails?.data?.beneficiaries_details?.[0].first_name + " " + getClientDetails?.data?.beneficiaries_details?.[0].last_name :
+
+                                  clientInformationData.first_name + " " + clientInformationData.last_name}
                             </h5>
                             <p className="mb-0 dastyle-user-name-post">
                               Client Code: {informationData.client_code}
@@ -992,18 +985,25 @@ const ClientList = () => {
                           <li className="">
                             <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
                             <b>Phone : </b>
-                            {clientInformationData &&
-                              clientInformationData.phone &&
-                              clientInformationData.phone_code +
-                              " " +
-                              clientInformationData.phone || 'NA'}
+                            {getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
+                              getClientDetails?.data?.member_details?.[0].phone_code + " " + getClientDetails?.data?.member_details?.[0].phone || 'NA' :
+                              getClientDetails?.data?.client?.client_type == 7 ?
+                                getClientDetails?.data?.beneficiaries_details?.[0].phone_code + " " + getClientDetails?.data?.beneficiaries_details?.[0].phone || 'NA' :
+                                clientInformationData.phone_code + " " + clientInformationData.phone || 'NA'}
+
 
                           </li>
                           <li className="mt-2">
                             <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
                             <b>Email : </b>{" "}
-                            {clientInformationData && clientInformationData.email || 'NA'}
+                            {
+                              getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
+                                getClientDetails?.data?.member_details?.[0].email || 'NA' :
+                                getClientDetails?.data?.client?.client_type == 7 ?
+                                  getClientDetails?.data?.beneficiaries_details?.[0].email || 'NA' :
+                                  clientInformationData.email || 'NA'}
                           </li>
+
                         </ul>
                       </div>
 
@@ -1034,26 +1034,12 @@ const ClientList = () => {
                           {informationData && informationData.client_type == 1
                             ? "Sole Trader"
                             : informationData.client_type == 2
-                              ? "Company" : informationData.client_type == 3 ? "Partnership" : ""
+                              ? "Company" : informationData.client_type == 3 ? "Partnership" :  getClientDetails?.data?.client?.client_type==5 ? "Charity Incorporated Organisation Information" :  getClientDetails?.data?.client?.client_type==6 ? "Unincorporated Association Information" : getClientDetails?.data?.client?.client_type==7 ?  "Trust" : ""
 
                           }
                         </h4>
                       </div>
-                      {/* <div className="col-4">
-                <div className="float-end">
-                  <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
-                    <i className="fa-regular fa-pencil me-2" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-0 btn btn-danger text-white float-end fw-bold ms-1"
-                  >
-                    <i className="fa-regular fa-trash me-2" />
-                    Delete
-                  </button>
-                </div>
-              </div> */}
+
                     </div>
 
                     {informationData.client_type == 1 ? (
@@ -1137,6 +1123,150 @@ const ClientList = () => {
                         </div>
                       </div>
                     ) : informationData.client_type == 3 ? (
+                      <div className="card-body pt-3">
+                        <div className="row">
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
+                                <p className="font-14  ml-3">
+
+                                </p>
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Registered :</b> {informationData &&
+                                  informationData.vat_registered == "0"
+                                  ? "No"
+                                  : "Yes"}
+
+                              </li>
+                              <li className="mb-4">
+                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
+
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    ) : informationData.client_type == 4 ? (
+                      <div className="card-body pt-3">
+                        <div className="row">
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
+                                <p className="font-14  ml-3">
+
+                                </p>
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Registered :</b> {informationData &&
+                                  informationData.vat_registered == "0"
+                                  ? "No"
+                                  : "Yes"}
+
+                              </li>
+                              <li className="mb-4">
+                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
+
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    ) : informationData.client_type == 5 ? (
+                      <div className="card-body pt-3">
+                        <div className="row">
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
+                                <p className="font-14  ml-3">
+
+                                </p>
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Registered :</b> {informationData &&
+                                  informationData.vat_registered == "0"
+                                  ? "No"
+                                  : "Yes"}
+
+                              </li>
+                              <li className="mb-4">
+                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
+
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    ) : informationData.client_type == 6 ? (
+                      <div className="card-body pt-3">
+                        <div className="row">
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
+                                <p className="font-14  ml-3">
+
+                                </p>
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Registered :</b> {informationData &&
+                                  informationData.vat_registered == "0"
+                                  ? "No"
+                                  : "Yes"}
+
+                              </li>
+                              <li className="mb-4">
+                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
+
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4">
+                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
+                              </li>
+                              <li className="mb-4">
+                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    ) : informationData.client_type == 7 ? (
                       <div className="card-body pt-3">
                         <div className="row">
                           <div className="col-lg-6">

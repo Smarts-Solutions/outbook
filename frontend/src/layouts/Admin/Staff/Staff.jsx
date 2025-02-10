@@ -1071,7 +1071,7 @@ const StaffPage = () => {
 
       <div className="dropdown">
       <button
-        className="btn btn-dark dropdown-toggle w-100"
+        className="btn btn-info dropdown-toggle w-100"
         type="button"
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >

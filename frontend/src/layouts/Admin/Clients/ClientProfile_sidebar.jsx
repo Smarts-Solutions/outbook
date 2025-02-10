@@ -717,6 +717,8 @@ const ClientList = () => {
             </div>
           )}
 
+
+
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">
               <div className="report-data">

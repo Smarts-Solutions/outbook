@@ -783,13 +783,17 @@ const getDraftSingleView = async (req, res) => {
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
 
-
+  
+  
+  
   if([1, 2, 3].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, job_id]);
   }
   else if([4].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, job_id]);
   }
+
+  const [DraftSentStatus] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [7, job_id]);
 
   let log_message= `sent the draft for job code:`
   if (parseInt(was_it_complete) === 1) {

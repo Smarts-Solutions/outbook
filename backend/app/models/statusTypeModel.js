@@ -281,6 +281,8 @@ const updateMasterStatus = async (masterStatus) => {
   }
   values.push(id);
 
+
+  console.log("values" , values)
   const query = `
     UPDATE master_status
     SET ${setClauses.join(", ")}
