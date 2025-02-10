@@ -22,6 +22,7 @@ const EditJob = () => {
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
 
+
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState({
     loading: false,
@@ -159,7 +160,6 @@ const EditJob = () => {
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
 
-            console.log("response.data", response.data);
 
             setJobData((prevState) => ({
               ...prevState,
@@ -458,7 +458,7 @@ const EditJob = () => {
       }
     }
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
-      console.log(name, ":", value);
+      
       if (value == "Daily") {
         date.setDate(date.getDate() + 1);
         setJobData((prevState) => ({
@@ -629,7 +629,6 @@ const EditJob = () => {
         task: AddTaskArr,
       },
     };
-    console.log("jobData", req);
 
     const data = { req: req, authToken: token };
     if (validate()) {
@@ -1210,7 +1209,7 @@ const EditJob = () => {
     );
   }, [jobData?.Service]);
 
-  console.log("jobData", jobData);
+  console.log("jobData", jobData?.status_type);
 
   return (
     <div>
@@ -2431,7 +2430,7 @@ const EditJob = () => {
 
                           {jobData.EngagementModel !=
                             "fte_dedicated_staffing" &&
-                           ( location?.state?.jab?.status_type == 6 ||  location?.state?.jab?.status_type == 7)  && (
+                           ( jobData?.status_type == 6 ||  jobData?.status_type == 7)  && (
                               <div className="col-lg-12">
                                 <div className="card card_shadow">
                                   <div className="card-header align-items-center d-flex card-header-light-blue">
