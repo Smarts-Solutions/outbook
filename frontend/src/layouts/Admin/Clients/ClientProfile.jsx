@@ -11,7 +11,7 @@ import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
-import {allowedTypes } from "../../../Utils/Comman_function";
+import { allowedTypes } from "../../../Utils/Comman_function";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +79,7 @@ const ClientList = () => {
     await dispatch(ClientAction(data))
       .unwrap()
       .then((response) => {
-        console.log("response-client ", response.data.client_documents);
+        console.log("response-client ", response.data);
         if (response.status) {
           setClientDetails({
             loading: false,
@@ -573,9 +573,9 @@ const ClientList = () => {
             <i className="ti-trash text-danger" />
           </button>
 
-          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url,sharepoint_token, row.original_name)}>
-          <i className="ti-download" />
-        </button>
+          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
+            <i className="ti-download" />
+          </button>
 
         </div>
       ),
@@ -588,7 +588,7 @@ const ClientList = () => {
 
   ];
 
- 
+
   const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
     console.log("sharePointFileUrl", sharePointFileUrl);
     console.log("accessToken", accessToken);
@@ -603,18 +603,18 @@ const ClientList = () => {
       });
 
       console.log("response", response);
-  
+
       // Check if the response is OK
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-  
+
       // Convert the response to a Blob (binary data)
       const fileBlob = await response.blob();
-  
+
       // Create a URL for the Blob
       const fileURL = window.URL.createObjectURL(fileBlob);
-  
+
       // Create a temporary <a> element to trigger the download
       const downloadLink = document.createElement('a');
       downloadLink.href = fileURL;
@@ -625,21 +625,8 @@ const ClientList = () => {
       console.error('Error downloading the file:', error);
     }
   };
-  
-  
-  // const openAndDownloadFile = (url, filename = '') => {
-  //   // Open the file in a new tab
-  //   window.open(url, '_blank');
-  
-  //   // Create a temporary link to trigger download
-  //   const link = document.createElement('a');
-  //   link.href = url;
-  //   link.target = '_blank'; // Open in a new tab
-  //   link.download = filename || ''; // Specify a filename here if needed
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
+
+
 
   const removeItem = async (file, type) => {
     if (type == 1) {
@@ -730,7 +717,7 @@ const ClientList = () => {
   };
 
   function handleEdit(row) {
-    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab , job : row } });
+    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab, job: row } });
   }
 
   const handleDelete = async (row, type) => {
@@ -962,6 +949,8 @@ const ClientList = () => {
             </div>
           )}
 
+          {console.log("getClientDetails sssss", getClientDetails?.data?.client?.client_type)}
+
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">
               <div className="report-data">
@@ -977,9 +966,13 @@ const ClientList = () => {
                           </div>
                           <div className="dastyle-profile_user-detail">
                             <h5 className="dastyle-user-name">
-                              {clientInformationData.first_name +
-                                " " +
-                                clientInformationData.last_name}
+
+                              {getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
+                                getClientDetails?.data?.member_details?.[0].first_name + " " + getClientDetails?.data?.member_details?.[0].last_name :
+                                getClientDetails?.data?.client?.client_type == 7 ?
+                                getClientDetails?.data?.beneficiaries_details?.[0].first_name + " " + getClientDetails?.data?.beneficiaries_details?.[0].last_name :
+
+                                clientInformationData.first_name + " " + clientInformationData.last_name}
                             </h5>
                             <p className="mb-0 dastyle-user-name-post">
                               Client Code: {informationData.client_code}
