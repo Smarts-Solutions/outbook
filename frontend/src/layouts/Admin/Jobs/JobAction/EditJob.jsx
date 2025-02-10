@@ -2431,7 +2431,7 @@ const EditJob = () => {
 
                           {jobData.EngagementModel !=
                             "fte_dedicated_staffing" &&
-                            location?.state?.jab?.status_type == 6 && (
+                           ( location?.state?.jab?.status_type == 6 ||  location?.state?.jab?.status_type == 7)  && (
                               <div className="col-lg-12">
                                 <div className="card card_shadow">
                                   <div className="card-header align-items-center d-flex card-header-light-blue">
