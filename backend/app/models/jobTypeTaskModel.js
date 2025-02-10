@@ -223,8 +223,6 @@ const getTask = async (task) => {
 
 const addChecklist = async (checklist) => {
 
-
-
   const {
     service_id,
     job_type_id,
