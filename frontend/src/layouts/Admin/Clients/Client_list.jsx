@@ -801,6 +801,8 @@ const ClientList = () => {
     },
   ];
 
+
+  console.log("getJobDetails" , getJobDetails)
   const tabs1 = [
     {
       key: "client",

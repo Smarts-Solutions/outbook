@@ -129,10 +129,11 @@ const Status = () => {
 
   const handleEdit = async (row) => {
     // Set the item to be edited
+    console.log("row", row);
     setEditItem(row);
     setStatsAdd({
-      statusname: row.name, // Adjust field names as needed
-      statustype: row.status_type, // Adjust field names as needed
+      statusname: row.name,  
+      statustype: row.status_type_id, 
     });
 
     // Show the modal
@@ -140,7 +141,6 @@ const Status = () => {
   };
 
   const handleEdit1 = async (row) => {
-    // Validation before making API request
     if (!getStatsAdd.statusname || !getStatsAdd.statustype) {
       Swal.fire({
         icon: "error",
