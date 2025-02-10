@@ -619,6 +619,10 @@ const deleteStaffUpdateStaff = async (staff) => {
       params: [update_staff, delete_id],
     },
     {
+      query: "UPDATE jobs SET account_manager_id = ? WHERE account_manager_id = ?",
+      params: [update_staff, delete_id],
+    },
+    {
       query: "UPDATE staff_competencies SET staff_id = ? WHERE staff_id = ?",
       params: [update_staff, delete_id],
     },
