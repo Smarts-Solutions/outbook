@@ -398,8 +398,6 @@ const getCustomer = async (customer) => {
     const search = customer.search || "";
 
 
-
-
     // Line Manager
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
@@ -407,6 +405,8 @@ const getCustomer = async (customer) => {
     if (LineManageStaffId.length ==  0) {
         LineManageStaffId.push(staff_id);
     }
+
+    let ConditionLineManager = '';
 
     const QueryRole = `
   SELECT
@@ -495,6 +495,8 @@ LIMIT ? OFFSET ?
     if (rows.length > 0) {
 
         console.log('rows[0].role_id ---- ', rows[0].role_id);
+        console.log('staff_id ---- ', staff_id);
+        console.log('LineManageStaffId ---- ', LineManageStaffId);
         // Allocated to
         if (rows[0].role_id == 3) {
             const countQuery = `SELECT COUNT(*) AS total_count
@@ -886,7 +888,6 @@ LIMIT ? OFFSET ?
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
 
-   
     // Line Manager
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
@@ -936,8 +937,6 @@ id DESC;`;
     if (rows.length > 0) {
         // Allocated to
         if (rows[0].role_id == 3) {
-
-           
 
             const query = `
             SELECT  
@@ -1002,7 +1001,6 @@ id DESC;`;
             result = resultAllocated;
 
         }
-
         // Reviewer
         else if (rows[0].role_id == 6) {
 
