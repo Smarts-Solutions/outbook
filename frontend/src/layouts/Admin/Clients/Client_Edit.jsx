@@ -4232,7 +4232,7 @@ const ClientEdit = () => {
                                             <div className="row">
                                               <div className="col-lg-12">
                                                 <div>
-                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Members {index + 1}</h4>
                                                 </div>
                                                 <div
                                                   className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -4632,7 +4632,7 @@ const ClientEdit = () => {
                                             <div className="row">
                                               <div className="col-lg-12">
                                                 <div>
-                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Trustee {index + 1}</h4>
                                                 </div>
                                                 <div
                                                   className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -5220,7 +5220,7 @@ const ClientEdit = () => {
                                             <div className="row">
                                               <div className="col-lg-12">
                                                 <div>
-                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Members {index + 1}</h4>
                                                 </div>
                                                 <div
                                                   className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -5802,7 +5802,7 @@ const ClientEdit = () => {
                                             <div className="row">
                                               <div className="col-lg-12">
                                                 <div>
-                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Beneficiaries {index + 1}</h4>
                                                 </div>
                                                 <div
                                                   className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -6199,7 +6199,7 @@ const ClientEdit = () => {
                                             <div className="row">
                                               <div className="col-lg-12">
                                                 <div>
-                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                  <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Trustees {index + 1}</h4>
                                                 </div>
                                                 <div
                                                   className="form-check form-switch form-switch-md d-flex justify-content-end"
