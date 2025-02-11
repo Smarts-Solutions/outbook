@@ -706,7 +706,6 @@ const ClientLists = () => {
 
   const GetAllClientData = async (id) => {
 
-     console.log("id", id)
 
 
     const req = { action: "get", customer_id: id };

@@ -114,12 +114,7 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,folder_pat
 export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, folder_path, fileName, accessToken) => {
   try {
 
-    console.log("site_ID",site_ID);
-    console.log("drive_ID",drive_ID);
-    console.log("folder_ID",folder_ID);
-    console.log("folder_path",folder_path);
-    console.log("fileName",fileName);
-    console.log("accessToken",accessToken);
+   
     // const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${fileName}`;
     // Construct the file path
   //  const filePath = `${folder_path}/${fileName}`; 
@@ -147,7 +142,7 @@ export const SiteUrlFolderPath = async () => {
     let folderPath = "/OutBook"
     let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
     const TokenExpire =  await SharePointTokenExpire(sharepoint_token);
-    // console.log("TokenExpire",TokenExpire);
+  
     if (TokenExpire) { 
      const newSharePointToken = await ActivityLogData();
      if(newSharePointToken == "error"){
@@ -175,7 +170,6 @@ const ActivityLogData = async () => {
       })
       .catch((error) => {
         Token = "error";
-       // console.log(error);
       });
 
       return Token;
@@ -186,10 +180,10 @@ const SharePointTokenExpire = async (token) => {
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Math.floor(Date.now() / 1000);
     if (decodedToken.exp && decodedToken.exp < currentTime) {
-     //console.log("Token Expired");
+    
      return true;
     }else{
-     //console.log("Token Not Expired");
+    
      return false;
     }
   }else{

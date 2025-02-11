@@ -802,7 +802,6 @@ const ClientList = () => {
   ];
 
 
-  console.log("getJobDetails" , getJobDetails)
   const tabs1 = [
     {
       key: "client",
@@ -865,7 +864,6 @@ const ClientList = () => {
     await dispatch(GET_CUSTOMER_DATA(data1))
       .unwrap()
       .then((response) => {
-        console.log("response", response);
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
           setCustomerDetails({

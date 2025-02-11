@@ -83,7 +83,6 @@ export async function ADD_SERVICES(data, token) {
 export async function ADD_PEPPER_WORK(data, token) {
   try {
     
-    // console.log("data--",data); 
     // const formData = new FormData();
     // data.fileData.forEach((file, index) => {
     //   formData.append("files[]", file);
@@ -105,7 +104,6 @@ export async function ADD_PEPPER_WORK(data, token) {
       },
       data: data,
     };
-console.log("config",config); 
     const res = await axios.request(config);
     return res?.data;
 
