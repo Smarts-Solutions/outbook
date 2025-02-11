@@ -100,7 +100,6 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,file, acce
         "Content-Type": "application/json",
       },
     });
-    //  console.log("response",response);
     return response.data.webUrl;
   } catch (err) {
     console.log("Error uploading file:", err);

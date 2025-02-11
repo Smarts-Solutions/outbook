@@ -91,7 +91,7 @@ const Timesheet = () => {
   };
 
   const handleChangeTaskType = async (e) => {
-    console.log(typeof e.target.value);
+   
     if(e.target.value === "1"){
       TaskType.current = "1"
     }
@@ -100,7 +100,7 @@ const Timesheet = () => {
     }
     const req = { staff_id: staffDetails.id, task_type: e.target.value };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-    console.log("res", res)
+  
     if (res.status) {
       setJobData(res.data)
     } else {

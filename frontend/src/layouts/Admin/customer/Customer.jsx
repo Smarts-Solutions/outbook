@@ -376,6 +376,8 @@ const Customer = () => {
   };
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
+    console.log("limit", limit)
+    console.log("page", page)
     const req = { action: 'get', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
 
@@ -545,6 +547,7 @@ const Customer = () => {
                       />
                     </div>
                     <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
+                      
                       <option value={5}>5</option>
                       <option value={10}>10</option>
                       <option value={20}>20</option>

@@ -680,9 +680,9 @@ const Timesheet = () => {
   // };
 
   // // Example usage
-  // console.log("weekDays.monday ", weekDays);
+ 
   // if (weekDays.monday !== "") {
-  //     console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
+
   // }
 
   const dayMonthFormatDate = (dateString) => {

@@ -48,7 +48,7 @@ const StaffPage = () => {
       role: deleteStaff.role,
     };
     const res = await DELETESTAFF(data);
-    console.log(res);
+    
     if (res?.status) {
       await dispatch(
         Staff({
@@ -744,8 +744,6 @@ const StaffPage = () => {
   }, [deleteStaff?.id, token]); // Ensure token is included if it might change
 
 
-  console.log("staffDataAll?.data", staffDataAll?.data);
-  console.log("deleteStaff?.id", deleteStaff);
 
   return (
     <div>

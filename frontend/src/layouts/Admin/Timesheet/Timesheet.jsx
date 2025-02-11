@@ -744,10 +744,6 @@ const Timesheet = () => {
       (parseFloat(updatedRows[index].sunday_hours) || 0);
     updatedRows[index].total_hours = sum;
 
-    // console.log("updatedRows[index].total_hours ",updatedRows[index].total_hours)
-    // console.log("updatedRows[index] ",updatedRows[index])
-    // console.log("updatedRows[index] staffs_hourminute ",updatedRows[index].staffs_hourminute)
-    // console.log("updatedRows[index] staffs_hourminute parsfloat",parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute)))
 
     // warning total hours
     if (

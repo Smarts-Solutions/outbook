@@ -971,16 +971,19 @@ const CreateClient = () => {
   };
 
   const validate5 = (name, value) => {
+
+
     const newErrors = { ...errors5 }
 
-    console.log(name, value)
     if (!value?.trim()) {
       switch (name) {
         case "charity_name":
-          newErrors[name] = "Please enter charity_name";
+          newErrors[name] = "Please enter charity name";
           break;
+
         case "charity_commission_number":
           newErrors[name] = "Please enter Charity Commission Number";
+          break;
         case "VATRegistered":
           newErrors[name] = "Please Enter VAT Registered";
           break;
@@ -4095,7 +4098,7 @@ const CreateClient = () => {
                                                     <div className="row">
                                                       <div className="col-lg-12">
                                                         <div>
-                                                          <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                          <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Members {index + 1}</h4>
                                                         </div>
                                                         <div
                                                           className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -4496,7 +4499,7 @@ const CreateClient = () => {
                                                     <div className="row">
                                                       <div className="col-lg-12">
                                                         <div>
-                                                          <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                          <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Trustee {index + 1}</h4>
                                                         </div>
                                                         <div
                                                           className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -5085,7 +5088,7 @@ const CreateClient = () => {
                                                       <div className="row">
                                                         <div className="col-lg-12">
                                                           <div>
-                                                            <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                            <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Members {index + 1}</h4>
                                                           </div>
                                                           <div
                                                             className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -5670,7 +5673,7 @@ const CreateClient = () => {
                                                         <div className="row">
                                                           <div className="col-lg-12">
                                                             <div>
-                                                              <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                              <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Beneficiaries {index + 1}</h4>
                                                             </div>
                                                             <div
                                                               className="form-check form-switch form-switch-md d-flex justify-content-end"
@@ -6067,7 +6070,7 @@ const CreateClient = () => {
                                                         <div className="row">
                                                           <div className="col-lg-12">
                                                             <div>
-                                                              <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                              <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Trustees {index + 1}</h4>
                                                             </div>
                                                             <div
                                                               className="form-check form-switch form-switch-md d-flex justify-content-end"
