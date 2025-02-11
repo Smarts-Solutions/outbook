@@ -1,0 +1,134 @@
+{   
+    "record_type" : "1",    //1 or 2 // 1 quote ,2 = contract 
+    "request_type" :"1" ,// same agent user 1 =  add , 2 = edit
+    "data": {
+        "quote_id": 13,
+        "contract_id": 13,
+        "one_off": "1",
+        "recurring": "1",
+        "discount": "7.69",
+        "threshold_discount": "4.62",
+        "premium": "0.00",
+        "yearly_cost": 630.01,
+        "payment_fee": 0,
+        "payment_type": "Paypal",
+        "net_20_vat": 325.39,
+        "net_no_vat": 304.62,
+        "vat": 65.08,
+        "total_including_vat": 695.09,
+        "status": "3",
+        "status_discount": "1",
+        "payment_frequency": "yearly",
+
+        
+       "crm_quote_id":""  ,  // edit time CRM primary id send
+       "crm_contract_id":""   // edit time CRM primary id send
+    },
+    "client": {
+        "id": 52,
+        "crm_record_id": "3475529"
+    },
+    "user": {
+        "id": 1,
+        "crm_user_id": "1"
+    },
+    "agent": {
+        "id": 1,
+        "company_id": 14,
+         "agent_db":""
+    },
+
+    // SERVICE Add chargebasis rule
+    "package": {
+        "id": 5,
+        "agent_id": 1,
+        "name": "Package 3",
+        "status": "1",
+        "description": "",
+        "default_price": 600,
+        "threshold_price": 620,
+        "min_price": 550,
+        "cost_service_price": 650,
+        "default_discount": "7.69",
+        "sales_discount": null,
+        "threshold_discount": "4.62",
+        "max_discount": "15.38",
+        "final_package_price": 650,
+        "servicetype_id": null,
+        "createdAt": "2025-02-07T05:41:50.000Z",
+        "updatedAt": "2025-02-07T05:41:50.000Z",
+        "services": [
+            {
+                "id": 6,
+                "agent_id": 1,
+                "name": "SERVICE- 9",
+                "servicetype_id": 1,
+                "price_type": "1",
+                "price": 200,
+                "tag": "",
+                "vat": "1",
+                "status": "1",
+                "createdAt": "2025-02-07T05:40:43.000Z",
+                "updatedAt": "2025-02-07T09:21:41.000Z",
+                "ServiceType": {
+                    "id": 1,
+                    "name": "Recurring"
+                }
+            },
+            {
+                "id": 5,
+                "agent_id": 1,
+                "name": "SERVICE- 5",
+                "servicetype_id": 2,
+                "price_type": "2",
+                "price": 330,
+                "tag": "",
+                "vat": "0",
+                "status": "1",
+                "createdAt": "2025-02-03T11:21:52.000Z",
+                "updatedAt": "2025-02-08T12:33:16.000Z",
+                "ServiceType": {
+                    "id": 2,
+                    "name": "One-off"
+                }
+            },
+            {
+                "id": 4,
+                "agent_id": 1,
+                "name": "SERVICE-4",
+                "servicetype_id": 1,
+                "price_type": "2",
+                "price": 120,
+                "tag": "",
+                "vat": "1",
+                "status": "1",
+                "createdAt": "2025-01-30T11:32:29.000Z",
+                "updatedAt": "2025-01-30T11:32:29.000Z",
+                "ServiceType": {
+                    "id": 1,
+                    "name": "Recurring"
+                }
+            }
+        ]
+    },
+    "singleservice": [
+        {
+            "id": 11,
+            "agent_id": 1,
+            "name": "SER-PER1",
+            "servicetype_id": 3,
+            "price_type": "2",
+            "price": 30,
+            "tag": "",
+            "vat": "1",
+            "status": "1",
+            "createdAt": "2025-02-08T12:55:21.000Z",
+            "updatedAt": "2025-02-10T08:42:26.000Z",
+            "ServiceType": {
+                "id": 3,
+                "name": "Both"
+            }
+            
+        }
+    ]
+}
