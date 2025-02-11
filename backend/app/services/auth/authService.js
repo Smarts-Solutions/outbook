@@ -197,6 +197,13 @@ const deleteStaff = async (staff) => {
   return staffModel.deleteStaffUpdateStaff(staff);
 }
 
+const GetStaffByRole = async (staff) => {
+  return staffModel.GetStaffByRoleId(staff);
+}
+const GetStaffAndDeleteData = async (staff) => {
+  return staffModel.GetStaffAndDelete(staff);
+}
+
 
 module.exports = {
   addStaff,
@@ -216,6 +223,8 @@ module.exports = {
   getSharePointToken,
   GetStaffPortfolio,
   UpdateStaffPortfolio,
-  deleteStaff
+  deleteStaff,
+  GetStaffByRole,
+  GetStaffAndDeleteData
 
 };

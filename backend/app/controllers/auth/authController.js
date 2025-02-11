@@ -37,24 +37,20 @@ const handleStaff = async (req, res) => {
           res.status(200).json({ status: false, message: result.message });
           break;
         } else {
-          res
-            .status(200)
-            .json({
-              status: true,
-              message: result.message,
-              userId: result.data,
-            });
+          res.status(200).json({
+            status: true,
+            message: result.message,
+            userId: result.data,
+          });
           break;
         }
       case "portfolio":
         result = await authService.managePortfolio(staff);
-        res
-          .status(200)
-          .json({
-            status: true,
-            message: "All Customer get successfully",
-            data: result,
-          });
+        res.status(200).json({
+          status: true,
+          message: "All Customer get successfully",
+          data: result,
+        });
         break;
       default:
         res.status(400).json({ status: false, message: "Invalid action" });
@@ -199,28 +195,23 @@ const HandelStaffPortfolio = async (req, res) => {
   try {
     let result;
     switch (action) {
-    
-
       case "get":
         result = await authService.GetStaffPortfolio(staff);
-        console.log("result",result);
+        console.log("result", result);
         res.status(200).json({ status: true, data: result });
         break;
 
-     
       case "update":
         result = await authService.UpdateStaffPortfolio(staff);
         if (!result.status) {
           res.status(200).json({ status: false, message: result.message });
           break;
         } else {
-          res
-            .status(200)
-            .json({
-              status: true,
-              message: result.message,
-              userId: result.data,
-            });
+          res.status(200).json({
+            status: true,
+            message: result.message,
+            userId: result.data,
+          });
           break;
         }
 
@@ -237,13 +228,36 @@ const deleteStaff = async (req, res) => {
     const { ...staff } = req.body;
     const data = await authService.deleteStaff(staff);
     return res.send({ status: true, message: "Success.." });
-  } catch (error
-  ) {
+  } catch (error) {
     return res.send({ status: false, message: error.message });
   }
-}
+};
+
+const GetStaffByRole = async (req, res) => {
+  const { action, ...staff } = req.body.req;
+
+  try {
+    let result;
+    switch (action) {
+      case "get":
+        result = await authService.GetStaffByRole(staff);
+        res.status(200).json({ status: true, data: result });
+        break;
+      case "delete":
+        result = await authService.GetStaffAndDeleteData(staff);
+        res.status(200).json({ status: true, data: result });
+        break;
+
+      default:
+        res.status(400).json({ status: false, message: "Invalid action" });
+    }
+  } catch (error) {
+    return res.send({ status: false, message: error.message });
+  }
+};
 
 module.exports = {
+  GetStaffByRole,
   handleStaff,
   staffCompetency,
   login,
@@ -255,5 +269,5 @@ module.exports = {
   status,
   getSharePointToken,
   HandelStaffPortfolio,
-  deleteStaff
+  deleteStaff,
 };

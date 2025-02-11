@@ -14,6 +14,9 @@ const customerAction = async (customer) => {
   else if(action === "get_dropdown"){
     return customerModel.getCustomer_dropdown(customer);
   }
+  else if(action === "get_dropdown_delete"){
+    return customerModel.getCustomer_dropdown_delete(customer);
+  }
   else if(action === "delete"){
     return customerModel.deleteCustomer(customer);
   }else{

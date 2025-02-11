@@ -42,15 +42,11 @@ async function getAccessToken() {
   data.append('client_secret', clientSecret);
   data.append('scope', 'https://graph.microsoft.com/.default');
 
-  console.log('data ---- ',data)
-  console.log('tokenUrl ---- ',tokenUrl)
 
   try {
     const response = await axios.post(tokenUrl, data);
     return response.data.access_token;
   } catch (error) {
-    console.log('Error getting access token:');
-    console.log('Error getting access token:', error.response.data);
     return 
     //throw error;
   }
@@ -60,7 +56,6 @@ async function getAccessToken() {
 // Step 2: Upload the image to SharePoint library
 async function uploadImage(imagePath) {
 
-    console.log('imagePath ---- ',imagePath)
     return;
   const accessToken = await getAccessToken();
   

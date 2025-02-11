@@ -18,6 +18,8 @@ router.post('/staff/portfolio',verifyToken, authController.HandelStaffPortfolio)
 
 router.post('/staff/delete',verifyToken, authController.deleteStaff);
 
+router.post('/getstaff/role', authController.GetStaffByRole);
+
 
 
 

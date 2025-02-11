@@ -3,15 +3,25 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { JobAction, Update_Status, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  JobAction,
+  Update_Status,
+  GET_CUSTOMER_DATA,
+  DELETE_CUSTOMER_FILE,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
-
+import {
+  fetchSiteAndDriveInfo,
+  createFolderIfNotExists,
+  uploadFileToFolder,
+  SiteUrlFolderPath,
+  deleteFileFromFolder,
+} from "../../../Utils/graphAPI";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -22,10 +32,12 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-  const [hararchyData, setHararchyData] = useState({ customer: location.state });
+  const [hararchyData, setHararchyData] = useState({
+    customer: location.state,
+  });
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectStatusIs, setStatusId] = useState('')
-  const [statusDataAll, setStatusDataAll] = useState([])
+  const [selectStatusIs, setStatusId] = useState("");
+  const [statusDataAll, setStatusDataAll] = useState([]);
   const [fileState, setFileState] = useState([]);
   const [siteUrl, setSiteUrl] = useState("");
   const [sharepoint_token, setSharepoint_token] = useState("");
@@ -34,9 +46,19 @@ const ClientList = () => {
     loading: true,
     data: [],
   });
-  const [getAccessDataClient, setAccessDataClient] = useState({ insert: 0, update: 0, delete: 0, client: 0, });
-  const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, job: 0, });
-  const [activeTab, setActiveTab] = useState('');
+  const [getAccessDataClient, setAccessDataClient] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    client: 0,
+  });
+  const [getAccessDataJob, setAccessDataJob] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    job: 0,
+  });
+  const [activeTab, setActiveTab] = useState("");
   const role = JSON.parse(localStorage.getItem("role"));
 
   const [getAccessDataCustomer, setAccessDataCustomer] = useState({
@@ -74,23 +96,27 @@ const ClientList = () => {
   }, []);
 
   useEffect(() => {
-    const retrievedData = sessionStorage.getItem('activeTab');
-    const retrievedData1 = sessionStorage.getItem('activeTab1');
+    const retrievedData = sessionStorage.getItem("activeTab");
+    const retrievedData1 = sessionStorage.getItem("activeTab1");
     if (retrievedData && retrievedData !== "clear") {
       setActiveTab(retrievedData);
-      sessionStorage.setItem('activeTab1', "clear");
-    }
-    else if (retrievedData1 == "clear") {
+      sessionStorage.setItem("activeTab1", "clear");
+    } else if (retrievedData1 == "clear") {
       setActiveTab(retrievedData);
-    }
-    else {
+    } else {
       setActiveTab(
-        (getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "client" :
-          (getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "job" :
-            "documents")
+        (getAccessDataClient && getAccessDataClient.client == 1) ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN"
+          ? "client"
+          : (getAccessDataJob && getAccessDataJob.job == 1) ||
+            role === "ADMIN" ||
+            role === "SUPERADMIN"
+          ? "job"
+          : "documents"
+      );
     }
   }, [getAccessDataJob, getAccessDataClient]);
-
 
   const initialTabs = [
     { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
@@ -143,16 +169,13 @@ const ClientList = () => {
     if (activeTab !== "") {
       if (activeTab === "checklist") {
         getCheckListData();
-      }
-      else if (activeTab === "client") {
+      } else if (activeTab === "client") {
         GetAllClientData();
-      }
-      else if (activeTab === "job") {
+      } else if (activeTab === "job") {
         GetAllClientData();
         JobDetails();
       }
     }
-
   }, [activeTab]);
 
   useEffect(() => {
@@ -170,11 +193,23 @@ const ClientList = () => {
 
   useEffect(() => {
     let tabsData = [];
-    if ((getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN") {
-      tabsData.push({ id: "client", label: "Client", icon: "fa-solid fa-user" });
+    if (
+      (getAccessDataClient && getAccessDataClient.client == 1) ||
+      role === "ADMIN" ||
+      role === "SUPERADMIN"
+    ) {
+      tabsData.push({
+        id: "client",
+        label: "Client",
+        icon: "fa-solid fa-user",
+      });
     }
-    if ((getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN") {
-      tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" })
+    if (
+      (getAccessDataJob && getAccessDataJob.job == 1) ||
+      role === "ADMIN" ||
+      role === "SUPERADMIN"
+    ) {
+      tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
     }
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
@@ -184,17 +219,18 @@ const ClientList = () => {
       name: "Client Name",
       cell: (row) => (
         <div>
-          {
-            getAccessDataJob.job === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <a
-                onClick={() => HandleClientView(row)}
-                style={{ cursor: "pointer", color: "#26bdf0" }}
-              >
-                {row.client_name}
-              </a>
-            ) : row.client_name
-          }
-
+          {getAccessDataJob.job === 1 ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.client_name}
+            </a>
+          ) : (
+            row.client_name
+          )}
         </div>
       ),
       selector: (row) => row.trading_name,
@@ -204,9 +240,7 @@ const ClientList = () => {
     {
       name: "Client Code",
       cell: (row) => (
-        <div title={row.client_code || "-"}>
-          {row.client_code || "-"}
-        </div>
+        <div title={row.client_code || "-"}>{row.client_code || "-"}</div>
       ),
       selector: (row) => row.client_code || "-",
       sortable: true,
@@ -222,41 +256,54 @@ const ClientList = () => {
     },
     {
       name: "Status",
-      selector: (row) => (<div>
-        <span
-          className={` ${row.status === "1" ? "text-success" : "text-danger"
+      selector: (row) => (
+        <div>
+          <span
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
-        >
-          {row.status === "1" ? "Active" : "Deactive"}
-        </span>
-      </div>),
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
       sortable: true,
-      width: '130px',
+      width: "130px",
       reorder: false,
     },
     {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {
-            getAccessDataClient.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button className="edit-icon" onClick={() =>
-                navigate("/admin/client/edit", { state: { row, id: location.state.id, activeTab: activeTab } })}>
-                <i className="ti-pencil" />
-              </button>
-            ) : null
-          }
-          {
-            getAccessDataClient.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "client")}
-              >
-                {" "}
-                <i className="ti-trash text-danger" />
-              </button>
-            ) : null
-          }
+          {getAccessDataClient.update === 1 ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN" ? (
+            <button
+              className="edit-icon"
+              onClick={() =>
+                navigate("/admin/client/edit", {
+                  state: { row, id: location.state.id, activeTab: activeTab },
+                })
+              }
+            >
+              <i className="ti-pencil" />
+            </button>
+          ) : null}
+          {getAccessDataClient.delete === 1 ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN" ? (
+            <>
+              {row?.Delete_Status == null && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "client")}
+                >
+                  {" "}
+                  <i className="ti-trash text-danger" />
+                </button>
+              )}
+            </>
+          ) : null}
         </div>
       ),
       ignoreRowClick: true,
@@ -287,9 +334,7 @@ const ClientList = () => {
     {
       name: "Client Name",
       cell: (row) => (
-        <div
-          title={row.client_trading_name || "-"}
-        >
+        <div title={row.client_trading_name || "-"}>
           {row.client_trading_name || "-"}
         </div>
       ),
@@ -300,11 +345,7 @@ const ClientList = () => {
     {
       name: "Job Type",
       cell: (row) => (
-        <div
-          title={row.job_type_name || "-"}
-        >
-          {row.job_type_name || "-"}
-        </div>
+        <div title={row.job_type_name || "-"}>{row.job_type_name || "-"}</div>
       ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
@@ -313,13 +354,19 @@ const ClientList = () => {
     {
       name: "Status",
       cell: (row) => (
-        <div >
+        <div>
           <div>
             <select
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
-              disabled={getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+              disabled={
+                getAccessDataJob.update === 1 ||
+                role === "ADMIN" ||
+                role === "SUPERADMIN"
+                  ? false
+                  : true
+              }
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -339,9 +386,11 @@ const ClientList = () => {
 
       cell: (row) => (
         <div
-          title={row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name || "-"}
+          title={
+            row.account_manager_officer_first_name +
+              " " +
+              row.account_manager_officer_last_name || "-"
+          }
         >
           {row.account_manager_officer_first_name +
             " " +
@@ -350,17 +399,15 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name || "-",
+          " " +
+          row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
     {
       name: "Client Job Code",
       cell: (row) => (
-        <div
-          title={row.client_job_code || "-"}
-        >
+        <div title={row.client_job_code || "-"}>
           {row.client_job_code || "-"}
         </div>
       ),
@@ -372,9 +419,11 @@ const ClientList = () => {
       name: "Outbook Account Manager",
       cell: (row) => (
         <div
-          title={row.outbooks_acount_manager_first_name +
-            " " +
-            row.outbooks_acount_manager_last_name || "-"}
+          title={
+            row.outbooks_acount_manager_first_name +
+              " " +
+              row.outbooks_acount_manager_last_name || "-"
+          }
         >
           {row.outbooks_acount_manager_first_name +
             " " +
@@ -383,8 +432,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-        " " +
-        row.outbooks_acount_manager_last_name || "-",
+          " " +
+          row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -401,18 +450,29 @@ const ClientList = () => {
       name: "Timesheet",
       cell: (row) => (
         <div
-          title={row.total_hours_status == "1" && row.total_hours != null ?
-            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-            : "-"}
+          title={
+            row.total_hours_status == "1" && row.total_hours != null
+              ? row.total_hours.split(":")[0] +
+                "h " +
+                row.total_hours.split(":")[1] +
+                "m"
+              : "-"
+          }
         >
-          {row.total_hours_status == "1" && row.total_hours != null ?
-            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          {row.total_hours_status == "1" && row.total_hours != null
+            ? row.total_hours.split(":")[0] +
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
-        row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+        row.total_hours_status == "1" && row.total_hours != null
+          ? row.total_hours.split(":")[0] +
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -427,25 +487,39 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {
-            getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button className="edit-icon" onClick={() =>
+          {getAccessDataJob.update === 1 ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN" ? (
+            <button
+              className="edit-icon"
+              onClick={() =>
                 navigate("/admin/job/edit", {
-                  state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab, jab: row },
-                })}>
-                <i className="ti-pencil" />
+                  state: {
+                    job_id: row.job_id,
+                    goto: "Customer",
+                    activeTab: activeTab,
+                    jab: row,
+                  },
+                })
+              }
+            >
+              <i className="ti-pencil" />
+            </button>
+          ) : null}
+          {row.timesheet_job_id == null ? (
+            getAccessDataJob.delete === 1 ||
+            role === "ADMIN" ||
+            role === "SUPERADMIN" ? (
+              <button
+                className="delete-icon"
+                onClick={() => handleDelete(row, "job")}
+              >
+                <i className="ti-trash text-danger" />
               </button>
             ) : null
-          }
-          {
-            row.timesheet_job_id == null ?
-              getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-                <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
-                  <i className="ti-trash text-danger" />
-                </button>
-              ) : null : ""
-          }
-
+          ) : (
+            ""
+          )}
         </div>
       ),
       ignoreRowClick: true,
@@ -493,9 +567,7 @@ const ClientList = () => {
     {
       name: "File Name",
       cell: (row) => (
-        <div title={row.original_name || "-"}>
-          {row.original_name || "-"}
-        </div>
+        <div title={row.original_name || "-"}>{row.original_name || "-"}</div>
       ),
       selector: (row) => row.original_name || "-",
       sortable: true,
@@ -505,9 +577,7 @@ const ClientList = () => {
     {
       name: "File Type",
       cell: (row) => (
-        <div title={row.file_type || "-"}>
-          {row.file_type || "-"}
-        </div>
+        <div title={row.file_type || "-"}>{row.file_type || "-"}</div>
       ),
       selector: (row) => row.file_type || "-",
       sortable: true,
@@ -519,13 +589,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.file_size || "-"}>
           {row.file_size < 1024 * 1024
-            ? `${(
-              row.file_size / 1024
-            ).toFixed(2)} KB`
-            : `${(
-              row.file_size /
-              (1024 * 1024)
-            ).toFixed(2)} MB` || "-"}
+            ? `${(row.file_size / 1024).toFixed(2)} KB`
+            : `${(row.file_size / (1024 * 1024)).toFixed(2)} MB` || "-"}
         </div>
       ),
       selector: (row) => row.file_size || "-",
@@ -540,7 +605,6 @@ const ClientList = () => {
           <button className="delete-icon" onClick={() => removeItem(row, 2)}>
             <i className="ti-trash text-danger" />
           </button>
-
         </div>
       ),
       ignoreRowClick: true,
@@ -548,8 +612,6 @@ const ClientList = () => {
       button: true,
       reorder: false,
     },
-
-
   ];
 
   const removeItem = async (file, type) => {
@@ -557,7 +619,13 @@ const ClientList = () => {
       return;
     }
 
-    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    const invalidTokens = [
+      "",
+      "sharepoint_token_not_found",
+      "error",
+      undefined,
+      null,
+    ];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
         icon: "warning",
@@ -567,11 +635,10 @@ const ClientList = () => {
       return;
     }
 
-
-    let customer_name = "DEMO"
+    let customer_name = "DEMO";
     if (customerDetails.data.customer != undefined) {
       // customer_name = customerDetails.data.customer.trading_name;
-      customer_name = 'CUST' + customerDetails.data.customer.customer_id;
+      customer_name = "CUST" + customerDetails.data.customer.customer_id;
     }
     let fileName = file.name;
     if (type == 2) {
@@ -579,7 +646,6 @@ const ClientList = () => {
     }
 
     if (fileName != undefined) {
-
       const req = {
         action: "delete",
         customer_id: location.state.id,
@@ -601,7 +667,9 @@ const ClientList = () => {
         .then(async (result) => {
           if (result.isConfirmed) {
             try {
-              const response = await dispatch(DELETE_CUSTOMER_FILE(data)).unwrap();
+              const response = await dispatch(
+                DELETE_CUSTOMER_FILE(data)
+              ).unwrap();
               if (response.status) {
                 sweatalert.fire({
                   title: "Deleted!",
@@ -609,13 +677,29 @@ const ClientList = () => {
                   icon: "success",
                 });
                 setFileState((prevFiles) =>
-                  prevFiles.filter((data) => data.customer_paper_work_id !== file.customer_paper_work_id)
+                  prevFiles.filter(
+                    (data) =>
+                      data.customer_paper_work_id !==
+                      file.customer_paper_work_id
+                  )
                 );
-                const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-                const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
-                const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
+                const { site_ID, drive_ID, folder_ID } =
+                  await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+                const folderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  folder_ID,
+                  customer_name,
+                  sharepoint_token
+                );
+                const deleteFile = await deleteFileFromFolder(
+                  site_ID,
+                  drive_ID,
+                  folderId,
+                  fileName,
+                  sharepoint_token
+                );
                 return;
-
               }
             } catch (error) {
               return;
@@ -629,70 +713,74 @@ const ClientList = () => {
 
   const handleStatusChange = (e, row) => {
     const Id = e.target.value;
-    sweatalert.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const req = { job_id: row.job_id, status_type: Number(Id) };
-          const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "No, cancel",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const req = { job_id: row.job_id, status_type: Number(Id) };
+            const res = await dispatch(
+              Update_Status({ req, authToken: token })
+            ).unwrap();
 
-          if (res.status) {
-            sweatalert.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
+            if (res.status) {
+              sweatalert.fire({
+                title: "Success",
+                text: res.message,
+                icon: "success",
+                timer: 1000,
+                showConfirmButton: false,
+              });
 
-            setStatusId(Id);
-            JobDetails();
-          } else if (res.data === "W") {
-            sweatalert.fire({
-              title: "Warning",
-              text: res.message,
-              icon: "warning",
-              confirmButtonText: "Ok",
-              timer: 1000,
-              timerProgressBar: true,
-            });
-          } else {
+              setStatusId(Id);
+              JobDetails();
+            } else if (res.data === "W") {
+              sweatalert.fire({
+                title: "Warning",
+                text: res.message,
+                icon: "warning",
+                confirmButtonText: "Ok",
+                timer: 1000,
+                timerProgressBar: true,
+              });
+            } else {
+              sweatalert.fire({
+                title: "Error",
+                text: res.message,
+                icon: "error",
+                confirmButtonText: "Ok",
+                timer: 1000,
+                timerProgressBar: true,
+              });
+            }
+          } catch (error) {
             sweatalert.fire({
               title: "Error",
-              text: res.message,
+              text: "An error occurred while updating the status.",
               icon: "error",
               confirmButtonText: "Ok",
               timer: 1000,
               timerProgressBar: true,
             });
           }
-        } catch (error) {
+        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
           sweatalert.fire({
-            title: "Error",
-            text: "An error occurred while updating the status.",
+            title: "Cancelled",
+            text: "Status change was not performed",
             icon: "error",
             confirmButtonText: "Ok",
             timer: 1000,
             timerProgressBar: true,
           });
         }
-      } else if (result.dismiss === sweatalert.DismissReason.cancel) {
-        sweatalert.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
-          icon: "error",
-          confirmButtonText: "Ok",
-          timer: 1000,
-          timerProgressBar: true,
-        });
-      }
-    });
+      });
   };
 
   const GetStatus = async () => {
@@ -718,8 +806,8 @@ const ClientList = () => {
         <div>
           <a
             title={row.check_list_name}
-          // onClick={() => HandleClientView(row)}
-          // style={{ cursor: "pointer", color: "#26bdf0" }}
+            // onClick={() => HandleClientView(row)}
+            // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.check_list_name}
           </a>
@@ -731,37 +819,21 @@ const ClientList = () => {
 
     {
       name: "Service Type",
-      cell: (row) => (
-        <div
-          title={row.service_name}
-        >
-          {row.service_name}
-        </div>
-      ),
+      cell: (row) => <div title={row.service_name}>{row.service_name}</div>,
       selector: (row) => row.service_name,
       sortable: true,
     },
     {
       name: "Job Type",
-      cell: (row) => (
-        <div
-          title={row.job_type_type}
-        >
-          {row.job_type_type}
-        </div>
-      ),
-      selector: (row) => row.job_type_type, sortable: true,
-      width: "200px"
-    }
-    ,
+      cell: (row) => <div title={row.job_type_type}>{row.job_type_type}</div>,
+      selector: (row) => row.job_type_type,
+      sortable: true,
+      width: "200px",
+    },
     {
       name: "Client Type",
       cell: (row) => (
-        <div
-          title={row.client_type_type}
-        >
-          {row.client_type_type}
-        </div>
+        <div title={row.client_type_type}>{row.client_type_type}</div>
       ),
       selector: (row) => row.client_type_type,
       sortable: true,
@@ -772,27 +844,39 @@ const ClientList = () => {
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
       sortable: true,
       width: "150px",
-
     },
     {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {
-            (getAccessDataCustomer.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
-              <button className="edit-icon" onClick={() =>
+          {getAccessDataCustomer.update === 1 ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN" ? (
+            <button
+              className="edit-icon"
+              onClick={() =>
                 navigate("/admin/edit/checklist", {
-                  state: { id: location.state.id, checklist_id: row.checklists_id, activeTab: activeTab },
-                })}>
-                <i className="ti-pencil" />
-              </button> : null
-          }
-          {
-            (getAccessDataCustomer.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
-              <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
-                <i className="ti-trash text-danger" />
-              </button> : null
-          }
+                  state: {
+                    id: location.state.id,
+                    checklist_id: row.checklists_id,
+                    activeTab: activeTab,
+                  },
+                })
+              }
+            >
+              <i className="ti-pencil" />
+            </button>
+          ) : null}
+          {getAccessDataCustomer.delete === 1 ||
+          role === "ADMIN" ||
+          role === "SUPERADMIN" ? (
+            <button
+              className="delete-icon"
+              onClick={() => ChecklistDelete(row)}
+            >
+              <i className="ti-trash text-danger" />
+            </button>
+          ) : null}
         </div>
       ),
       ignoreRowClick: true,
@@ -801,8 +885,6 @@ const ClientList = () => {
     },
   ];
 
-
-  console.log("getJobDetails" , getJobDetails)
   const tabs1 = [
     {
       key: "client",
@@ -865,7 +947,6 @@ const ClientList = () => {
     await dispatch(GET_CUSTOMER_DATA(data1))
       .unwrap()
       .then((response) => {
-        console.log("response", response);
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
           setCustomerDetails({
@@ -879,7 +960,6 @@ const ClientList = () => {
             loading: true,
             data: [],
           });
-
         }
       })
       .catch((error) => {
@@ -927,13 +1007,18 @@ const ClientList = () => {
                 // client_type_type: item.client_type_type,
                 status: item.status,
                 checklists_id: item.checklists_id,
-                client_type_type: item.checklists_client_type_id.split(",").map(id => {
-                  let matchedItem = Array.find(item => item.id === Number(id));
-                  return matchedItem ? matchedItem.name : null;
-                }).filter(name => name !== null).join(", ")
+                client_type_type: item.checklists_client_type_id
+                  .split(",")
+                  .map((id) => {
+                    let matchedItem = Array.find(
+                      (item) => item.id === Number(id)
+                    );
+                    return matchedItem ? matchedItem.name : null;
+                  })
+                  .filter((name) => name !== null)
+                  .join(", "),
               };
             });
-
 
             setCheckList(data);
             setCheckList1(data);
@@ -983,81 +1068,94 @@ const ClientList = () => {
   };
 
   const handleDelete = async (row, type) => {
-    sweatalert.fire({
-      title: "Are you sure?",
-      text: "Do you want to delete this " + type + "?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const req = {
-          action: "delete",
-          ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
-        };
-        const data = { req: req, authToken: token };
-        await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
-          .unwrap()
-          .then(async (response) => {
-            if (response.status) {
-              sweatalert.fire({
-                title: type + " deleted successfully",
-                icon: "success",
-                showCancelButton: false,
-                showConfirmButton: false,
-                timer: 1500,
-              });
-              JobDetails()
-              GetAllClientData();
-            } else {
-              sweatalert.fire({
-                title: "Failed",
-                icon: "error",
-                showCancelButton: false,
-                showConfirmButton: false,
-                timer: 1500,
-              });
-            }
-          })
-          .catch((error) => {
-            return;
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this " + type + "?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          const req = {
+            action: "delete",
+            ...(type === "job"
+              ? { job_id: row.job_id }
+              : { client_id: row.id }),
+          };
+          const data = { req: req, authToken: token };
+          await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
+            .unwrap()
+            .then(async (response) => {
+              if (response.status) {
+                sweatalert.fire({
+                  title: type + " deleted successfully",
+                  icon: "success",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                JobDetails();
+                GetAllClientData();
+              } else {
+                sweatalert.fire({
+                  title: "Failed",
+                  icon: "error",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+              }
+            })
+            .catch((error) => {
+              return;
+            });
+        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
+          sweatalert.fire({
+            title: "Cancelled",
+            text: type + " was not deleted",
+            icon: "error",
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
           });
-      } else if (result.dismiss === sweatalert.DismissReason.cancel) {
-        sweatalert.fire({
-          title: "Cancelled",
-          text: type + " was not deleted",
-          icon: "error",
-          confirmButtonText: "Ok",
-          timer: 1000,
-          timerProgressBar: true,
-        });
-      }
-    });
+        }
+      });
   };
 
   const HandleClientView = (row) => {
-    setHararchyData(prevState => {
+    setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
-        client: row
+        client: row,
       };
-      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData, activeTab: activeTab } });
+      navigate("/admin/client/profile", {
+        state: { Client_id: row.id, data: updatedData, activeTab: activeTab },
+      });
       return updatedData;
     });
   };
 
   const HandleJobView = (row) => {
-    setHararchyData(prevState => {
+    setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
-        job: row
+        job: row,
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, timesheet_job_id: row?.timesheet_job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
+      navigate("/admin/job/logs", {
+        state: {
+          job_id: row.job_id,
+          timesheet_job_id: row?.timesheet_job_id,
+          goto: "Customer",
+          data: updatedData,
+          activeTab: activeTab,
+        },
+      });
       return updatedData;
     });
   };
-
 
   return (
     <div className="container-fluid">
@@ -1074,8 +1172,9 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
+                        className={`nav-link ${
+                          activeTab === tab.id ? "active" : ""
+                        }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1094,9 +1193,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                 {activeTab === "client" ||
-                  activeTab === "checklist" ||
-                  activeTab === "" ||
-                  activeTab === "job" ? (
+                activeTab === "checklist" ||
+                activeTab === "" ||
+                activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
@@ -1106,37 +1205,66 @@ const ClientList = () => {
                     >
                       <i className="fa fa-arrow-left pe-1" /> Back
                     </div>
-                    {
-                      (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" ? (
-                        <>
-                          <div className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
-                            onClick={() => navigate("/admin/addclient", { state: { id: location.state.id, activeTab: activeTab } })} >
-                            <i className="fa fa-plus pe-1" /> Add Client
-                          </div>
-                        </>
-                      ) : (ClientData?.length > 0 && (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
-                        <>
-
-                          <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
-                            navigate("/admin/createjob", {
-                              state: { customer_id: location.state.id, goto: "Customer", activeTab: activeTab },
+                    {(getAccessDataClient.insert === 1 ||
+                      role === "ADMIN" ||
+                      role === "SUPERADMIN") &&
+                    activeTab === "client" ? (
+                      <>
+                        <div
+                          className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
+                          onClick={() =>
+                            navigate("/admin/addclient", {
+                              state: {
+                                id: location.state.id,
+                                activeTab: activeTab,
+                              },
                             })
-                          } >
-                            <i className="fa fa-plus pe-1" /> Create Job
-                          </div>
-                        </>
-                      ) : (getAccessDataCustomer.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "checklist" ? (
-                        <>
-                          <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
-                            navigate("/admin/create/checklist", { state: { id: location.state.id, activeTab: activeTab } })
-                          } >
-                            <i className="fa fa-plus pe-1" /> Add Checklist
-                          </div>
-                        </>
-                      ) : (
-                        null
-                      )}
-
+                          }
+                        >
+                          <i className="fa fa-plus pe-1" /> Add Client
+                        </div>
+                      </>
+                    ) : ClientData?.length > 0 &&
+                      (getAccessDataJob.insert == 1 ||
+                        role === "ADMIN" ||
+                        role === "SUPERADMIN") &&
+                      activeTab === "job" ? (
+                      <>
+                        <div
+                          className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                          onClick={() =>
+                            navigate("/admin/createjob", {
+                              state: {
+                                customer_id: location.state.id,
+                                goto: "Customer",
+                                activeTab: activeTab,
+                              },
+                            })
+                          }
+                        >
+                          <i className="fa fa-plus pe-1" /> Create Job
+                        </div>
+                      </>
+                    ) : (getAccessDataCustomer.insert === 1 ||
+                        role === "ADMIN" ||
+                        role === "SUPERADMIN") &&
+                      activeTab === "checklist" ? (
+                      <>
+                        <div
+                          className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                          onClick={() =>
+                            navigate("/admin/create/checklist", {
+                              state: {
+                                id: location.state.id,
+                                activeTab: activeTab,
+                              },
+                            })
+                          }
+                        >
+                          <i className="fa fa-plus pe-1" /> Add Checklist
+                        </div>
+                      </>
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -1145,19 +1273,30 @@ const ClientList = () => {
         </div>
       </div>
 
-      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
+      <Hierarchy
+        show={["Customer", activeTab]}
+        active={1}
+        data={hararchyData}
+        NumberOfActive={
+          activeTab == "client"
+            ? ClientData?.length
+            : activeTab == "job"
+            ? getJobDetails?.length
+            : ""
+        }
+      />
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
-              }`}
+            className={`tab-pane fade ${
+              activeTab == tab.key ? "show active" : ""
+            }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
           >
-
             <div className="report-data mt-4">
               <div className="d-flex justify-content-between align-items-center">
                 <div className="tab-title">
@@ -1178,7 +1317,6 @@ const ClientList = () => {
               </div>
 
               <div className="datatable-wrapper">
-                
                 {tab.data && tab.data.length > 0 ? (
                   <Datatable
                     columns={tab.columns}
@@ -1202,7 +1340,6 @@ const ClientList = () => {
               </div>
             </div>
           </div>
-
         ))}
       </div>
     </div>

@@ -29,7 +29,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
-    missing_log: "0",
+    missing_log: "1",
     missing_log_sent_on: new Date().toISOString().substr(0, 10),
     missing_log_prepared_date: null,
     missing_log_reviewed_by: null,
@@ -44,7 +44,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
   const resetForm = () => {
     setMissionAllInputLogData({
       ...missionLogAllInputData,
-      missing_log: "0",
+      missing_log: "1",
       missing_log_sent_on: new Date().toISOString().substr(0, 10),
       missing_log_prepared_date: null,
       missing_log_reviewed_date: null,
@@ -366,8 +366,8 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log}
               >
-                <option value="1" >Yes</option>
-                <option value="0" selected>No</option>
+                <option value="1" selected >Yes</option>
+                {/* <option value="0" selected>No</option> */}
               </select>
               {errors1["missing_log"] && (
                 <div className="error-text">
@@ -594,7 +594,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 value={missionLogAllInputData.missing_log}
               >
                 <option value="1" selected>Yes</option>
-                <option value="0">No</option>
+                {/* <option value="0">No</option> */}
               </select>
               {errors1["missing_log"] && (
                 <div className="error-text">

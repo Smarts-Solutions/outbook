@@ -222,8 +222,14 @@ const getMasterStatus = async (masterStatus) => {
 };
 
 const deleteMasterStatus = async (data) => {
-  console.log("data=>", data);
+  // console.log("data=>", data);
   const { id, replace_id } = data;
+  if(parseInt(id) > 0 && parseInt(replace_id)){
+    await pool.execute(`UPDATE jobs SET status_type = ? WHERE status_type = ?;`, [
+      replace_id,
+      id,
+    ]);
+  }
 
   const query = `
     DELETE FROM master_status WHERE id = ?
@@ -232,13 +238,8 @@ const deleteMasterStatus = async (data) => {
     `SELECT name FROM master_status WHERE id = ?`,
     [id]
   );
-  await pool.execute(`UPDATE jobs SET status_type =? WHERE jobs.id = ?;`, [
-    id,
-    replace_id,
-  ]);
-
-  console.log("existStatus=>", existStatus);
-
+  
+  // console.log("existStatus=>", existStatus);
   try {
     if (existStatus) {
       await pool.execute(query, [id]);

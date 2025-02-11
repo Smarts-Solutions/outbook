@@ -31,9 +31,14 @@ const ClientList = () => {
         if (response.status) {
           setCustomerDataAll(response.data);
           if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-            setCustomerDetails({ id: cust_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name });
-            setHararchyData({ customer: { id: cust_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name }, client: { id: '', client_name: '' } });
-            GetAllClientData(cust_id_sidebar || response?.data[0]?.id, response?.data[0]?.trading_name);
+
+            const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
+            if(FilterCustomer.length > 0){
+            selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+            setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
+            setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
+            GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+            }
 
           }
         } else {
@@ -532,7 +537,9 @@ const ClientList = () => {
               }}
             >
               {customerDataAll &&
-                customerDataAll.map((val, index) => (
+                customerDataAll.map((val, index) => 
+                  Number(val.status) === 1 && Number(val.form_process) === 4 ?
+                  (
                   <option
                     key={index}
                     value={val.id}
@@ -540,7 +547,10 @@ const ClientList = () => {
                   >
                     {val.trading_name}
                   </option>
-                ))}
+                )
+                :null
+                
+                )}
             </select>
           </div>
 

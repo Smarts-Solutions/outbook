@@ -245,7 +245,9 @@ const Drafts = ({ getAccessDataJob, goto }) => {
     { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on), reorder: false, sortable: true },
     { name: 'Final Draft Sent On', selector: row => convertDate(row.final_draft_sent_on), reorder: false, sortable: true },
     { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", reorder: false, sortable: true },
-    { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", reorder: false, sortable: true },
+    { name: 'Updated/Amendments', selector: row =>  row.feedback_received == 1 ? row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None"
+      :""
+      , reorder: false, sortable: true },
     { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", reorder: false, sortable: true },
     {
       name: "Actions",
