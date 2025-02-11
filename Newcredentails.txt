@@ -1,94 +1,92 @@
-                                                                                        
-                                                                                            
 185.209.75.87	@9@1vyk9B5He	      pnp.tradestreet.in    		1			mongodb://tradestreet:MWQ5RP%26kT567Gy%26Maa@185.209.75.87:27017/     mongodb://tradestreet:MWQ5RP%26kT567Gy%26Maa@185.209.75.87:27017/																
 185.209.75.198	O^c&6f6L1q4p	      offline-test-server     		0																			
 5.178.98.2	    $v%3Dka0L23g	      segment.pnpuniverse.com    	1																																									
 217.145.69.48	mF#^Wt9572rc	      Trustalgo    					0																
 217.145.69.45	hK@400k!0boV	      newpenal.pandpinfotech.com   	1																				
-185.209.75.31	7!Rf&q52q2oM	       inspirealgoresearch    		0    																			
-217.145.69.40	lLE30r#@hd46	        software.oneplanetitsolution.com  																					
-217.145.69.39	ji43O4%1z&Rs	       auto.finbytech.com   																					
-217.145.69.76	#S3dp4@dd65C	       software.danoneitsolution.com   																					
+185.209.75.31	7!Rf&q52q2oM	      inspirealgoresearch    		0    																			
+217.145.69.40	lLE30r#@hd46	      software.oneplanetitsolution.com  																					
+217.145.69.39	ji43O4%1z&Rs	      auto.finbytech.com   																					
+217.145.69.76	#S3dp4@dd65C	      software.danoneitsolution.com   																					
 185.209.75.61	3!6Y1fI$znd4	      software.itevolve.in    																					
 217.145.69.44	o$Al4qw7&28W	      software.algokuber.com    																					
-217.145.69.46	E4qf6hl95&J$	       finnshri   																					
-217.145.69.48	@36zgCT@6wm4	          																					
-185.209.75.2	jod0E44bR^5%	          																					
-185.209.75.6	3IdZ!0z3wh@2	          																					
-185.209.75.5	G3D%8vc6gv&3	          																					
-185.209.75.9	06h&baF$49Nl	          																					
-185.209.75.10	2x0hM5!H#z2j	          																					
-185.209.75.11	3bu7uP8$5L%l	          																					
-185.209.75.12	t57El8a3%t#Y	          																					
-185.209.75.14	81t8o7^$LfkM	          																					
-185.209.75.15	58&&Y78rdJoq	          																					
-185.209.75.21	DO@@baj80p27	          																					
-185.209.75.22	4c3$^t9b8tSO	          																					
-185.209.75.23	u#9daOa344S#	          																					
-185.209.75.28	$1pl7^1iFk9I	          																					
-185.209.75.29	KWg#h0t1b^39	          																					
-185.209.75.30	z#t#3g39G2Rq	          																					
-185.209.75.62	hxy72$D1Uz#8	          																					
-185.209.75.64	8^ecGG7s9&t7	          																					
-185.209.75.66	Tl7Eny8%9c#5	          																					
-185.209.75.67	t67&PwY6&2wp	          																					
-185.209.75.68	v3Rd6B3@b4!g	          																					
-185.209.75.69	7X1hbyJq@@20	          																					
-185.209.75.65	NBw4n3%9h@5j	          																					
-185.209.75.70	Vu0&i38nzC3&	          																					
-185.209.75.180	gfZ#O5b4r6^0	          																					
-185.209.75.181	436ehhA^a$J7	          																					
-185.209.75.182	i8&k&S21d8Ad	          																					
-185.209.75.183	K0&j5Dgv&p70	          																					
-185.209.75.184	w0Km33!gB#6s	          																					
-185.209.75.185	L&1j%va8b53K	          																					
-185.209.75.186	vDc9a&N7f09$	          																					
-185.209.75.187	X^s1n$r0A0b0	          																					
-185.209.75.188	&&337dv5sIvI	          																					
-185.209.75.189	61Nqth30aE&#	          																					
-185.209.75.250	G11&d#86dwfH	          																					
-185.209.75.251	ZLs6wi0l&8!8	          																					
-185.209.75.252	#Kh57mxe2&2K	          																					
-185.209.75.253	j!LeZ38a3x0^	          																					
-185.209.75.254	gv8Y64@nJ0l@	          																					
-185.209.75.190	#48Glzya5S8!	          																					
-185.209.75.191	&v91gzq^62BU	          																					
-185.209.75.192	d27%2nRp%T9q	          																					
-185.209.75.194	4r4#4&R4Hcly	          																					
-185.209.75.193	250KPoa3yu@!	          																					
-185.209.75.195	&Gm4fC&v62h3	          																					
-185.209.75.196	z2J6e5#e%4aM	          																					
+217.145.69.46	E4qf6hl95&J$	      finnshri   																					
+217.145.69.48	@36zgCT@6wm4	      Trustalgo   																					
+185.209.75.2	jod0E44bR^5%	      linkupinfotech-newalgo    																					
+185.209.75.6	3IdZ!0z3wh@2	      connect-box    																					
+185.209.75.5	G3D%8vc6gv&3	      believetechnology    																					
+185.209.75.9	06h&baF$49Nl	      software.growskyinfotech.com    																					
+185.209.75.10	2x0hM5!H#z2j	      software.corebizinfotech.com    																					
+185.209.75.11	3bu7uP8$5L%l	      software.inspirealgo.com   																					
+185.209.75.12	t57El8a3%t#Y	      software.uniquetechnology.in   																					
+185.209.75.14	81t8o7^$LfkM	      software.reliablealgo.com    																					
+185.209.75.15	58&&Y78rdJoq	      software.researchfactory.in    																					
+185.209.75.21	DO@@baj80p27	      software.sumedhainn.com   																					
+185.209.75.22	4c3$^t9b8tSO	      software.fincapex.com   																					
+185.209.75.23	u#9daOa344S#	      software.tradeonn.com    																					
+185.209.75.28	$1pl7^1iFk9I	      software.linkupinfotech.com    																					
+185.209.75.29	KWg#h0t1b^39	      software.metaprogramming.in    																					
+185.209.75.30	z#t#3g39G2Rq	      software.fincodify.com    																					
+185.209.75.62	hxy72$D1Uz#8	      software.invicontechnology.com    																					
+185.209.75.64	8^ecGG7s9&t7	      software.sstechnologiess.com    																					
+185.209.75.66	Tl7Eny8%9c#5	      ccconnect-newalgo    																					
+185.209.75.67	t67&PwY6&2wp	      software.thinkaumatictechnology.com    																					
+185.209.75.68	v3Rd6B3@b4!g	      trade.visionresearchandsolution.com    																					
+185.209.75.69	7X1hbyJq@@20	      software.smartwavetechnology.in    																					
+185.209.75.65	NBw4n3%9h@5j	      skwinvestmentadviser-newalgo    																					
+185.209.75.70	Vu0&i38nzC3&	      software.inspirealgoresearch.com   																					
+185.209.75.180	gfZ#O5b4r6^0	      inteltrade360-newalgo    																					
+185.209.75.181	436ehhA^a$J7	      software.fintechit.in     																					
+185.209.75.182	i8&k&S21d8Ad	      software.thrivinginfotech.com     																					
+185.209.75.183	K0&j5Dgv&p70	      software.growingtech.in    																					
+185.209.75.184	w0Km33!gB#6s	      software.visioncodesoftware.com    																					
+185.209.75.185	L&1j%va8b53K	      trade.brightextech.com    																					
+185.209.75.186	vDc9a&N7f09$	      software.shinesofttrade.in    																					
+185.209.75.187	X^s1n$r0A0b0	      algorun-newalgo   																					
+185.209.75.188	&&337dv5sIvI	      algorun-newalgo    																					
+185.209.75.189	61Nqth30aE&#	      connect.thealgo.services    																					
+185.209.75.250	G11&d#86dwfH	      software.visionalgotech.com     																					
+185.209.75.251	ZLs6wi0l&8!8	      software.brillianttechit.com     																					
+185.209.75.252	#Kh57mxe2&2K	      newtimetechnologies-newalgo     																					
+185.209.75.253	j!LeZ38a3x0^	      software.levelxtechnologies.com     																					
+185.209.75.254	gv8Y64@nJ0l@	      software.darixosolution.com     																					
+185.209.75.190	#48Glzya5S8!	      unitythesmartalgo-newalgo      																					
+185.209.75.191	&v91gzq^62BU	      tools-easytrades      																					
+185.209.75.192	d27%2nRp%T9q	      connect.easytrades.in      																					
+185.209.75.194	4r4#4&R4Hcly	      software.visionmatictechnology.com       																					
+185.209.75.193	250KPoa3yu@!          smartstox
+185.209.75.195	&Gm4fC&v62h3	      software.growfuturetechnology.com      																					
+185.209.75.196	z2J6e5#e%4aM	      software.one-algo.com       																					
                                                                                                       
-185.209.75.199	i#P8F7u59iw^	          																					
-217.145.69.26	ri!9#x8t36IO	          																					
-217.145.69.24	#49pOz!6Dn4s	          																					
-217.145.69.27	a@Df588Oq3@n	          																					
-217.145.69.28	Rbc2!RQv4&s7J1%$          																						
-217.145.69.31	04^1q%ebsHV2	          																					
-217.145.69.25	9d4b5i^h@A6O	          																					
-185.209.75.88	R$M0ez6zn56%	          																					
-185.209.75.89	FmTb!y4001f^	          																					
-185.209.75.90	t5m#$Nx1r99C	          																					
-217.145.69.135	8Ls@j4l&7z0H	          																					
-217.145.69.136	9h2#1g9x%UgU	          																					
-217.145.69.137	^4ZPnem#s937	          																					
-217.145.69.141	evu5r8QZ7@^5	          																					
-217.145.69.138	Z@3&rz437kpP	          																					
-217.145.69.140	Pu44kU1%&5uu	          																					
-217.145.69.143	jTz51&q5W0j&	          																					
-217.145.69.144	^pk4#lB9r5I5	          																					
-217.145.69.145	0843z%Rv^Lhs	          																					
-217.145.69.147	L!Ocp6jv^315	          																					
-217.145.69.151	1$j2&eWw7w3O	          																					
-217.145.69.149	%aPYy5s^0q51	          																					
-217.145.69.152	qq@4V$5s6r4A	          																					
-185.209.75.71	Y7w92Cnxl9&!	          																					
-217.145.69.57	98%pI0Q2ip&l	          																					
-217.145.69.72	4KV@8c2d!g6b	          																					
-217.145.69.37	7f01tE&&bUx0	          																					
-217.145.69.77	9mW^B@v4y3z1	          																					
-217.145.69.43	D9l9^b5Lf3%i	          																					
-217.145.69.30	78&42ocCodY#	          																					
-217.145.69.32	!!3fgrl06IJ1	          																					
-5.178.98.3	    ggI15u5$&kK4	          																					
+185.209.75.199	i#P8F7u59iw^	      software.techspiresolution.com      																					
+217.145.69.26	ri!9#x8t36IO	      software.sewintechnology.com      																					
+217.145.69.24	#49pOz!6Dn4s	      software.vintyaitsolutions.com      																					
+217.145.69.27	a@Df588Oq3@n	      software.algosparks.in     																					
+217.145.69.28	Rbc2!RQv4&s7J1%$      software.techelitesolution.in     																						
+217.145.69.31	04^1q%ebsHV2	      software.technofin.tech    																					
+217.145.69.25	9d4b5i^h@A6O	      software.mgautosoftware.com    																					
+185.209.75.88	R$M0ez6zn56%	      evolgo-newalgo     																					
+185.209.75.89	FmTb!y4001f^	      software.growonntechnologies.com     																					
+185.209.75.90	t5m#$Nx1r99C	      software.sarathiresearch.com     																					
+217.145.69.135	8Ls@j4l&7z0H	      software.inovateinfotech.com     																					
+217.145.69.136	9h2#1g9x%UgU	      algomoneybooster     																					
+217.145.69.137	^4ZPnem#s937	      software.algobliss.com     																					
+217.145.69.141	evu5r8QZ7@^5	      software.eaglesofttech.com     																					
+217.145.69.138	Z@3&rz437kpP	      software.idealalgo.com     																					
+217.145.69.140	Pu44kU1%&5uu	      algomoneybooster     																					
+217.145.69.143	jTz51&q5W0j&	      algoweb     																					
+217.145.69.144	^pk4#lB9r5I5	      software.alcrafttechnology.com     																					
+217.145.69.145	0843z%Rv^Lhs	      software.celestialai.in     																					
+217.145.69.147	L!Ocp6jv^315	      software.dynamictechsolution.com     																					
+217.145.69.151	1$j2&eWw7w3O	      app.nextbrand.tech     																					
+217.145.69.149	%aPYy5s^0q51	      software.realcloudtechnology.com     																					
+217.145.69.152	qq@4V$5s6r4A	      software.moneyplatform.co.in     																					
+185.209.75.71	Y7w92Cnxl9&!	      software.infraitsolution.com     																					
+217.145.69.57	98%pI0Q2ip&l	      software.allrobosolution.com     																					
+217.145.69.72	4KV@8c2d!g6b	      trade.allianceaiinfotech.com     																					
+217.145.69.37	7f01tE&&bUx0	      software.techntown.com      																					
+217.145.69.77	9mW^B@v4y3z1	      software.infovatetechnoconsultancy.com      																					
+217.145.69.43	D9l9^b5Lf3%i	      skyiqinfotech     																					
+217.145.69.30	78&42ocCodY#	      signal    																					
+217.145.69.32	!!3fgrl06IJ1	      outbooks.tradestreet.in       																					
+5.178.98.3	    ggI15u5$&kK4	      test-ankit      																					
                                      
