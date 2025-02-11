@@ -397,9 +397,6 @@ const getCustomer = async (customer) => {
     const offset = (page - 1) * limit;
     const search = customer.search || "";
 
-
-
-
     // Line Manager
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
@@ -493,10 +490,6 @@ LIMIT ? OFFSET ?
     let result = []
     let total = 0;
     if (rows.length > 0) {
-
-        console.log('rows[0].role_id ---- ', rows[0].role_id);
-        console.log('LineManageStaffId ---- ', LineManageStaffId);
-        console.log('staff_id ---- ', staff_id);
         // Allocated to
         if (rows[0].role_id == 3) {
             const countQuery = `SELECT COUNT(*) AS total_count
@@ -996,8 +989,13 @@ id DESC;`;
                 customers
             LEFT JOIN
                 jobs ON jobs.customer_id = customers.id
+            LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+            LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_id    
             WHERE 
-                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -1028,11 +1026,16 @@ id DESC;`;
             customer_services ON customer_services.customer_id = customers.id
         LEFT JOIN 
             customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+            LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_id
         WHERE 
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
             OR customers.staff_id = ?
-            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
 
         GROUP BY 
         customers.id
@@ -1062,8 +1065,13 @@ id DESC;`;
             customers
         LEFT JOIN 
             jobs ON jobs.customer_id = customers.id
+            LEFT JOIN
+                 staff_portfolio ON staff_portfolio.customer_id = customers.id
+            LEFT JOIN 
+                customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                OR sp_customers.staff_id = staff_portfolio.staff_id
         WHERE 
-         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -1086,8 +1094,13 @@ id DESC;`;
             trading_name
         FROM 
             customers
+        LEFT JOIN 
+            staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+            OR sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
-            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId})
+            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
         ORDER BY 
             id DESC;
             `;
@@ -1152,8 +1165,13 @@ const getCustomer_dropdown_delete = async (customer) => {
                 customers
             LEFT JOIN
                 jobs ON jobs.customer_id = customers.id
+            LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_id    
             WHERE 
-                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -1184,11 +1202,16 @@ const getCustomer_dropdown_delete = async (customer) => {
             customer_services ON customer_services.customer_id = customers.id
         LEFT JOIN 
             customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+        LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
             OR customers.staff_id = ?
-            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
 
         GROUP BY 
         customers.id
@@ -1219,8 +1242,13 @@ const getCustomer_dropdown_delete = async (customer) => {
             customers
         LEFT JOIN 
             jobs ON jobs.customer_id = customers.id
+        LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
-         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -1243,8 +1271,13 @@ const getCustomer_dropdown_delete = async (customer) => {
             trading_name
         FROM 
             customers
+        LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
-            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId})
+            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
         ORDER BY 
             id DESC;
             `;
