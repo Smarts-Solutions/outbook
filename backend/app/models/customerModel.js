@@ -404,7 +404,7 @@ const getCustomer = async (customer) => {
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-    if (LineManageStaffId.length ==  0) {
+    if (LineManageStaffId.length == 0) {
         LineManageStaffId.push(staff_id);
     }
 
@@ -706,8 +706,13 @@ LIMIT ? OFFSET ?
                     staffs AS staff2 ON customers.account_manager_id = staff2.id
                 LEFT JOIN 
                     customer_company_information ON customers.id = customer_company_information.customer_id
+                LEFT JOIN 
+                  staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  OR sp_customers.staff_id = staff_portfolio.staff_i
                 WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId}))` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'}
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
                 GROUP BY 
                     CASE 
                         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -762,8 +767,13 @@ LIMIT ? OFFSET ?
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?  OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId})`
-                    : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'
+        LEFT JOIN 
+           staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+           customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+           OR sp_customers.staff_id = staff_portfolio.staff_id      
+        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`
+                    : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'
                 } 
          GROUP BY 
     CASE 
@@ -779,10 +789,16 @@ LIMIT ? OFFSET ?
             if (search) {
                 queryData = [staff_id, staff_id, staff_id, limit, offset];
             }
+            try {
+                const [resultAllocated] = await pool.execute(query, queryData);
+                result = resultAllocated
 
-            const [resultAllocated] = await pool.execute(query, queryData);
-            result = resultAllocated
-            total = total_count;
+                console.log('resultAllocated ---- ', resultAllocated);
+                total = total_count;
+            } catch (error) {
+                console.log('error ---- ', error);
+            }
+
 
         }
         else {
@@ -884,12 +900,12 @@ LIMIT ? OFFSET ?
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
 
-   
+
     // Line Manager
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-    if (LineManageStaffId.length ==  0) {
+    if (LineManageStaffId.length == 0) {
         LineManageStaffId.push(StaffUserId);
     }
 
@@ -1067,7 +1083,7 @@ const getCustomer_dropdown_delete = async (customer) => {
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-    if (LineManageStaffId.length ==  0) {
+    if (LineManageStaffId.length == 0) {
         LineManageStaffId.push(StaffUserId);
     }
 
@@ -1085,7 +1101,7 @@ const getCustomer_dropdown_delete = async (customer) => {
   LIMIT 1
   `
     const [rows] = await pool.execute(QueryRole);
-   
+
     let result = []
     if (rows.length > 0) {
         // Allocated to
