@@ -607,6 +607,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 const getClient = async (client) => {
   const { customer_id, StaffUserId } = client;
+ 
+  console.log('customer_id', customer_id)
+  console.log('StaffUserId', StaffUserId)
+
 
   try {
     const QueryRole = `
@@ -661,6 +665,8 @@ const getClient = async (client) => {
       return { status: true, message: "success.", data: result };
     }
 
+    console.log('rows[0].role_id', rows[0].role_id)
+
     const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "' + StaffUserId + '" LIMIT 1');
 
     if (existStaffbyCustomer.length > 0) {
@@ -668,6 +674,7 @@ const getClient = async (client) => {
       const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
       if (rows.length > 0) {
+
         // Allocated to
         if (rows[0].role_id == 3) {
           const query = `
@@ -849,7 +856,8 @@ const getClient = async (client) => {
           );
           return { status: true, message: "success.", data: uniqueData };
 
-        } else {
+        }
+         else {
           const query = `
           SELECT  
               clients.id AS id,
@@ -883,14 +891,13 @@ const getClient = async (client) => {
             `;
           const [result] = await pool.execute(query, [customer_id]);
           return { status: true, message: "success.", data: result };
-        }
+         }
 
       }
 
 
     } else {
-
-
+   
       const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
       if (rows.length > 0) {
@@ -1070,6 +1077,42 @@ const getClient = async (client) => {
           return { status: true, message: "success.", data: uniqueData };
 
         }
+         
+        else {
+          const query = `
+          SELECT  
+              clients.id AS id,
+              clients.trading_name AS client_name,
+              clients.status AS status,
+              client_types.type AS client_type_name,
+              client_contact_details.email AS email,
+              client_contact_details.phone_code AS phone_code,
+              client_contact_details.phone AS phone,
+              CONCAT(
+                  'cli_', 
+                  SUBSTRING(customers.trading_name, 1, 3), '_',
+                  SUBSTRING(clients.trading_name, 1, 3), '_',
+                  SUBSTRING(clients.client_code, 1, 15)
+                  ) AS client_code
+          FROM 
+              clients
+          JOIN 
+             customers ON customers.id = clients.customer_id    
+          JOIN 
+              client_types ON client_types.id = clients.client_type
+          LEFT JOIN 
+              client_contact_details ON client_contact_details.id = (
+                  SELECT MIN(cd.id)
+                  FROM client_contact_details cd
+                  WHERE cd.client_id = clients.id
+              )
+          WHERE clients.customer_id = ?
+       ORDER BY 
+          clients.id DESC;
+            `;
+          const [result] = await pool.execute(query, [customer_id]);
+          return { status: true, message: "success.", data: result };
+         }
 
       }
 
