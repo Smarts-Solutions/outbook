@@ -495,6 +495,8 @@ LIMIT ? OFFSET ?
     if (rows.length > 0) {
 
         console.log('rows[0].role_id ---- ', rows[0].role_id);
+        console.log('LineManageStaffId ---- ', LineManageStaffId);
+        console.log('staff_id ---- ', staff_id);
         // Allocated to
         if (rows[0].role_id == 3) {
             const countQuery = `SELECT COUNT(*) AS total_count
@@ -512,7 +514,7 @@ LIMIT ? OFFSET ?
                     LEFT JOIN
                         customer_company_information ON customers.id = customer_company_information.customer_id
                     WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})  OR customers.account_manager_id IN (${LineManageStaffId}))` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'}
                     GROUP BY 
                         CASE 
                             WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -565,7 +567,7 @@ LIMIT ? OFFSET ?
             LEFT JOIN
                 customer_company_information ON customers.id = customer_company_information.customer_id
             WHERE 
-                ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}
+                ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId}))` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'}
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -608,10 +610,10 @@ LIMIT ? OFFSET ?
                 WHERE 
          ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
-                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` :
+                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}))` :
                     `customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
-            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})`}
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})`}
             GROUP BY 
                 customers.id
         ) AS result`;
@@ -665,10 +667,10 @@ LIMIT ? OFFSET ?
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
-                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` :
+                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}))` :
                     `customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
-            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})`}
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})`}
 
         GROUP BY 
         customers.id
@@ -705,7 +707,7 @@ LIMIT ? OFFSET ?
                 LEFT JOIN 
                     customer_company_information ON customers.id = customer_company_information.customer_id
                 WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}))` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId}))` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'}
                 GROUP BY 
                     CASE 
                         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -760,8 +762,8 @@ LIMIT ? OFFSET ?
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?  OR customers.staff_id IN (${LineManageStaffId}))`
-                    : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'
+        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?  OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId})`
+                    : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'
                 } 
          GROUP BY 
     CASE 
@@ -780,11 +782,7 @@ LIMIT ? OFFSET ?
 
             const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated
-
-            console.log('resultAllocated ---- ', resultAllocated);
             total = total_count;
-
-            console.log('total ---- ', total);
 
         }
         else {
@@ -802,7 +800,7 @@ LIMIT ? OFFSET ?
                 LEFT JOIN
                     customer_company_information ON customers.id = customer_company_information.customer_id
                 WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}    
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'}    
             ) AS result;`;
 
             let queryDataCount = [staff_id];
@@ -845,7 +843,7 @@ LIMIT ? OFFSET ?
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE 
-            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ')'}    
+            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ')'}    
         ORDER BY 
             customers.id DESC
             LIMIT ? OFFSET ?;
@@ -937,8 +935,6 @@ id DESC;`;
         // Allocated to
         if (rows[0].role_id == 3) {
 
-           
-
             const query = `
             SELECT  
                 customers.id AS id,
@@ -955,7 +951,7 @@ id DESC;`;
             LEFT JOIN
                 jobs ON jobs.customer_id = customers.id
             WHERE 
-                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})
+                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -990,7 +986,7 @@ id DESC;`;
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
             OR customers.staff_id = ?
-            OR customers.staff_id IN (${LineManageStaffId})
+            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
 
         GROUP BY 
         customers.id
@@ -1002,7 +998,6 @@ id DESC;`;
             result = resultAllocated;
 
         }
-
         // Reviewer
         else if (rows[0].role_id == 6) {
 
@@ -1022,7 +1017,7 @@ id DESC;`;
         LEFT JOIN 
             jobs ON jobs.customer_id = customers.id
         WHERE 
-         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})
+         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -1046,7 +1041,7 @@ id DESC;`;
         FROM 
             customers
         WHERE 
-            staff_id = ? OR staff_id IN (${LineManageStaffId})
+            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId})
         ORDER BY 
             id DESC;
             `;
@@ -1096,8 +1091,6 @@ const getCustomer_dropdown_delete = async (customer) => {
         // Allocated to
         if (rows[0].role_id == 3) {
 
-           
-
             const query = `
             SELECT  
                 customers.id AS id,
@@ -1114,7 +1107,7 @@ const getCustomer_dropdown_delete = async (customer) => {
             LEFT JOIN
                 jobs ON jobs.customer_id = customers.id
             WHERE 
-                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})
+                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
             GROUP BY 
                 CASE 
                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -1149,7 +1142,7 @@ const getCustomer_dropdown_delete = async (customer) => {
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
             OR customers.staff_id = ?
-            OR customers.staff_id IN (${LineManageStaffId})
+            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
 
         GROUP BY 
         customers.id
@@ -1181,7 +1174,7 @@ const getCustomer_dropdown_delete = async (customer) => {
         LEFT JOIN 
             jobs ON jobs.customer_id = customers.id
         WHERE 
-         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})
+         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -1205,7 +1198,7 @@ const getCustomer_dropdown_delete = async (customer) => {
         FROM 
             customers
         WHERE 
-            staff_id = ? OR staff_id IN (${LineManageStaffId})
+            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId})
         ORDER BY 
             id DESC;
             `;

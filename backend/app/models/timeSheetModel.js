@@ -14,7 +14,6 @@ const getTimesheet = async (Timesheet) => {
   const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
   const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
 
-
   try {
 
     const query = `
@@ -303,7 +302,7 @@ const getTimesheetTaskType = async (Timesheet) => {
           if (rows[0].role_id == 3) {
             const query = `${Query_Select}
         WHERE 
-            jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId})
+            jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId})
         GROUP BY 
             CASE 
                 WHEN jobs.allocated_to = ? THEN jobs.customer_id
@@ -321,7 +320,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 
             const query = `${Query_Select}
-                WHERE jobs.account_manager_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId})
+                WHERE jobs.account_manager_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId})
                 GROUP BY 
             CASE 
                 WHEN jobs.account_manager_id = ? THEN jobs.customer_id
@@ -345,7 +344,7 @@ const getTimesheetTaskType = async (Timesheet) => {
           else if (rows[0].role_id == 6) {
 
             const query = `${Query_Select}
-                WHERE jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId})
+                WHERE jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId})
                  GROUP BY 
             CASE 
                 WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -371,7 +370,7 @@ const getTimesheetTaskType = async (Timesheet) => {
                     staffs AS staff2 ON customers.account_manager_id = staff2.id
                 LEFT JOIN 
                     customer_company_information ON customers.id = customer_company_information.customer_id
-                WHERE customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId})  
+                WHERE customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId})  
                 ORDER BY 
                     customers.id DESC;
                     `;
@@ -1408,9 +1407,6 @@ const getStaffHourMinute = async (Timesheet) => {
     return { status: false, message: "Err getStaffHourMinute Data View Get", error: err.message };
   }
 }
-
-
-
 
 module.exports = {
   getTimesheet,

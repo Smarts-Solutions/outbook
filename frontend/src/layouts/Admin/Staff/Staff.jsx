@@ -595,7 +595,7 @@ const StaffPage = () => {
       col_size: 6,
       disable: false,
       options: staffDataAll.data
-        .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN"))
+        .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN" && data.id !== editStaffData.id))
         .map((data) => ({
           label: `${data.first_name} ${data.last_name}`,
           value: data.id,
