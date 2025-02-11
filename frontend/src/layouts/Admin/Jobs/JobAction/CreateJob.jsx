@@ -103,7 +103,8 @@ const CreateJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
     notes: "",
-    Bookkeeping_Frequency_id_2:"Daily"
+    Bookkeeping_Frequency_id_2:"Daily",
+
   });
 
   useEffect(() => {
@@ -808,7 +809,6 @@ const CreateJob = () => {
           options: [
             "Daily",
             "Weekly",
-            // "Fortnightly",
             "Monthly",
             "Quarterly",
             "Yearly",
@@ -1091,6 +1091,53 @@ const CreateJob = () => {
     }
 
   }, [jobData?.Service]);
+
+
+
+  useEffect(() => {
+    console.log("UPDATE ALL DEFAULT FEILDS");
+    setJobData((prevState) => ({
+      ...prevState,
+      Turnover_Period_id_0: "Monthly",
+      Turnover_Currency_id_0: "GBP",
+      Turnover_id_0: 0,
+      VAT_Registered_id_0: "No",
+      VAT_Frequency_id_0: "Quarterly",
+      Who_Did_The_Bookkeeping_id_1: "Outbooks",
+      PAYE_Registered_id_1: "No",
+      Number_of_Trial_Balance_Items_id_1: "1 to 5",
+      Bookkeeping_Frequency_id_2: "Daily",
+      Number_of_Total_Transactions_id_2: 0,
+      Number_of_Bank_Transactions_id_2: 0,
+      Number_of_Purchase_Invoices_id_2: 0,
+      Number_of_Sales_Invoices_id_2: 0,
+      Number_of_Petty_Cash_Transactions_id_2: 0,
+      Number_of_Journal_Entries_id_2: 0,
+      Number_of_Other_Transactions_id_2: 0,
+      Transactions_Posting_id_2: "Manual",
+      Quality_of_Paperwork_id_2: "Bad",
+      Number_of_Integration_Software_Platforms_id_2: "1",
+      CIS_id_2: "No",
+      Posting_Payroll_Journals_id_2: "Yes",
+      Department_Tracking_id_2: "No",
+      Sales_Reconciliation_Required_id_2: "No",
+      Factoring_Account_id_2: "Provider Deducts Commission Only",
+      Payment_Methods_id_2: "1",
+      Payroll_Frequency_id_3: "Weekly",
+      Type_of_Payslip_id_3: "Wages Only",
+      Percentage_of_Variable_Payslips_id_3: "0%",
+      Is_CIS_Required_id_3: "No",
+      CIS_Frequency_id_3: "Weekly",
+      Number_of_Sub_contractors_id_3: 0,
+      Whose_Tax_Return_is_it_id_4: "Director",
+      Number_of_Income_Sources_id_4: "1",
+      If_Landlord_Number_of_Properties_id_4: "1",
+      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
+      Management_Accounts_Frequency_id_6: "Quarterly",
+
+
+    }));
+  }, []);
 
   return (
     <div>
@@ -1955,9 +2002,6 @@ const CreateJob = () => {
                                               onChange={(e) => HandleChange(e)}
                                               value={jobData[field.key]}
                                             >
-                                              <option value="">
-                                                Select {field.name}
-                                              </option>
                                               {field.options?.map(
                                                 (option, i) => (
                                                   <option
@@ -1978,6 +2022,8 @@ const CreateJob = () => {
                                               min={field.min}
                                               max={field.max}
                                               onChange={(e) => HandleChange(e)}
+                                              value={jobData[field.key]}
+
                                             />
                                           )}
                                         </div>
