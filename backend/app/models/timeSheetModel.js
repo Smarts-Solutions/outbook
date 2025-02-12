@@ -1228,14 +1228,14 @@ const saveTimesheet = async (Timesheet) => {
           INSERT INTO timesheet (
             staff_id, task_type, customer_id, client_id, job_id, task_id, monday_date, monday_hours,
             tuesday_date, tuesday_hours, wednesday_date, wednesday_hours, thursday_date, thursday_hours,
-            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours,remark
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ?)`;
+            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours,remark ,submit_status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ? , ?)`;
 
           const insertValues = [
             staff_id, row.task_type, customer_id, client_id, row.job_id, row.task_id,
             row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
             wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark
+            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark , row.submit_status
           ];
           await pool.query(insertQuery, insertValues);
 
