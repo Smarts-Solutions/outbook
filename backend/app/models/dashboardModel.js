@@ -7,7 +7,17 @@ const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
   const { startDate, endDate } = await getDateRange(date_filter);
 
+  // Line Manager
+  const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
+  let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
+  if (LineManageStaffId.length == 0) {
+      LineManageStaffId.push(staff_id);
+  }
+
+ 
+  console.log("staff_id ", staff_id);
+  console.log("LineManageStaffId ", LineManageStaffId);
 
   try {
     const QueryRole = `
@@ -109,7 +119,8 @@ SELECT
     clients.id AS client_id,
     clients.created_at AS client_created_at,
     jobs.created_at AS job_created_at,
-    customers.created_at AS customer_created_at
+    customers.created_at AS customer_created_at,
+    sp_customers.id AS sp_customer_id
 FROM 
     customers
 LEFT JOIN 
@@ -125,7 +136,13 @@ LEFT JOIN
 LEFT JOIN 
     customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id    
 LEFT JOIN 
-    customer_company_information ON customers.id = customer_company_information.customer_id;
+    customer_company_information ON customers.id = customer_company_information.customer_id
+LEFT JOIN
+    staff_portfolio ON staff_portfolio.customer_id = customers.id
+LEFT JOIN
+    customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+    OR sp_customers.staff_id = staff_portfolio.staff_id
+    ;
 `;
       // Check if view exists
       const [checkViewResult] = await pool.execute(checkViewQuery);
@@ -151,20 +168,20 @@ LEFT JOIN
       if (rows[0].role_id == 3) {
         // query += ' AND allocated_to = ? OR staff_id = ?';
         // params.push(staff_id, staff_id);
-        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (allocated_to = '+staff_id+' OR staff_id = '+staff_id+') AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (allocated_to = '+staff_id+' OR staff_id = '+staff_id+' OR staff_id IN("'+LineManageStaffId+'") OR account_manager_id IN("'+LineManageStaffId+'") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
       }
       // Account Manager Role
       else if (rows[0].role_id == 4) {
         //  query += ' AND  account_manager_id = ? OR a_account_manager_id = ?  OR staff_id = ?';
         //  params.push(staff_id, staff_id, staff_id);
-        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (account_manager_id = '+staff_id+' OR a_account_manager_id = '+staff_id+'  OR staff_id = '+staff_id+') AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (account_manager_id = '+staff_id+' OR a_account_manager_id = '+staff_id+'  OR staff_id = '+staff_id+' OR staff_id IN("'+LineManageStaffId+'") OR account_manager_id IN("'+LineManageStaffId+'") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
 
       }
       // Reviewer Role
       else if (rows[0].role_id == 6) {
         // query += ' AND reviewer = ? OR staff_id = ?';
         // params.push(staff_id, staff_id);
-        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (reviewer = '+staff_id+' OR staff_id = '+staff_id+') AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (reviewer = '+staff_id+' OR staff_id = '+staff_id+' OR staff_id IN("'+LineManageStaffId+'") OR account_manager_id IN("'+LineManageStaffId+'") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
       }
 
 
@@ -225,17 +242,44 @@ LEFT JOIN
     
       const query = `
   SELECT
-    (SELECT COUNT(*) FROM customers WHERE staff_id = ${staff_id} AND created_at BETWEEN ? AND ?) AS customer,
-    (SELECT GROUP_CONCAT(id) FROM customers WHERE staff_id = ${staff_id} AND created_at BETWEEN ? AND ?) AS customer_ids,
+    (SELECT COUNT(*) FROM customers 
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = customers.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE (customers.staff_id = ${staff_id} OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId})) AND customers.created_at BETWEEN ? AND ?) AS customer,
+
+    (SELECT GROUP_CONCAT(customers.id) FROM customers
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = customers.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE (customers.staff_id = ${staff_id} OR customers.staff_id IN(${LineManageStaffId})  OR customers.account_manager_id IN(${LineManageStaffId})
+    ) AND customers.created_at BETWEEN ? AND ?) AS customer_ids,
 
     (SELECT COUNT(*) 
      FROM clients c
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE cu.staff_id = ${staff_id} AND cu.created_at BETWEEN ? AND ?) AS client,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE (cu.staff_id = ${staff_id}  OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND cu.created_at BETWEEN ? AND ?) AS client,
+
+
     (SELECT GROUP_CONCAT(c.id) 
      FROM clients c
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE cu.staff_id = ${staff_id} AND cu.created_at BETWEEN ? AND ?) AS client_ids,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND cu.created_at BETWEEN ? AND ?) AS client_ids,
+
 
      (SELECT COUNT(*) FROM staffs WHERE created_by = ${staff_id} AND created_at BETWEEN ? AND ?) AS staff,
      (SELECT GROUP_CONCAT(id) FROM staffs WHERE created_by = ${staff_id} AND created_at BETWEEN ? AND ?) AS staff_ids,
@@ -244,34 +288,64 @@ LEFT JOIN
      FROM jobs j
      JOIN clients c ON j.client_id = c.id
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS job,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS job,
     (SELECT GROUP_CONCAT(j.id) 
      FROM jobs j
      JOIN clients c ON j.client_id = c.id
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS job_ids,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS job_ids,
 
     (SELECT COUNT(*) 
      FROM jobs j
      JOIN clients c ON j.client_id = c.id
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE j.status_type != '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS pending_job,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE j.status_type != '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS pending_job,
     (SELECT GROUP_CONCAT(j.id) 
      FROM jobs j
      JOIN clients c ON j.client_id = c.id
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE j.status_type != '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS pending_job_ids,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE j.status_type != '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS pending_job_ids,
 
     (SELECT COUNT(*) 
      FROM jobs j
      JOIN clients c ON j.client_id = c.id
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE j.status_type = '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS completed_job,
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE j.status_type = '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS completed_job,
     (SELECT GROUP_CONCAT(j.id) 
      FROM jobs j
      JOIN clients c ON j.client_id = c.id
      JOIN customers cu ON c.customer_id = cu.id
-     WHERE j.status_type = '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS completed_job_ids
+     LEFT JOIN
+     staff_portfolio ON staff_portfolio.customer_id = cu.id
+     LEFT JOIN 
+     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+     OR sp_customers.staff_id = staff_portfolio.staff_id
+     WHERE j.status_type = '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS completed_job_ids
 `;
 
       const [rowAllCounts] = await pool.execute(query, [

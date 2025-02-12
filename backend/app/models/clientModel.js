@@ -915,6 +915,8 @@ ORDER BY
                   WHERE cd.client_id = clients.id
               )
           WHERE clients.customer_id = ?
+          GROUP BY
+    clients.id
        ORDER BY 
           clients.id DESC;
             `;
@@ -1177,6 +1179,8 @@ ORDER BY
                   WHERE cd.client_id = clients.id
               )
           WHERE clients.customer_id = ?
+          GROUP BY
+    clients.id
        ORDER BY 
           clients.id DESC;
             `;
