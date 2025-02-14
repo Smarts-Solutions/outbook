@@ -406,10 +406,10 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               AllDraftInputdata.feedback_received == 1 ?
                 <div className="col-lg-6">
                   <div className="mb-3">
-                    <label htmlFor="was_it_complete" className="form-label">
+                    <label htmlFor="was_it_complete mx-1" className="form-label">
                       Draft Completed
                     </label>
-                    <div className="row">
+                    <div className="row mt-2 mx-1">
                       <div className=" col-lg-6 form-check">
                         <input
                           className="form-check-input"
@@ -634,8 +634,8 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     <label htmlFor="was_it_complete" className="form-label">
                       Draft Completed
                     </label>
-                    <div className="row">
-                      <div className=" col-lg-6 form-check">
+                    <div className="row mt-2 mx-1">
+                      <div className=" col-lg-6  form-check">
                         <input
                           className="form-check-input"
                           type="radio"
