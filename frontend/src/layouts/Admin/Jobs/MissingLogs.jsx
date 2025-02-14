@@ -114,7 +114,10 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
       "image/png",
       "image/jpg",
       "image/jpeg",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
+
+    console.log(fileArray);
 
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)
