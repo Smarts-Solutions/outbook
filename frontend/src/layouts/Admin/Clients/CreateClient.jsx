@@ -4473,7 +4473,7 @@ const CreateClient = () => {
                                                     <i className="fa fa-plus pe-1">
                                                       {" "}
                                                     </i>
-                                                    Add Partner
+                                                    Add Member
                                                   </button>
                                                 </div>
                                               </div>
@@ -4874,7 +4874,7 @@ const CreateClient = () => {
                                                     <i className="fa fa-plus pe-1">
                                                       {" "}
                                                     </i>
-                                                    Add Partner
+                                                    Add Trustee
                                                   </button>
                                                 </div>
                                               </div>
@@ -5461,7 +5461,7 @@ const CreateClient = () => {
                                                       <i className="fa fa-plus pe-1">
                                                         {" "}
                                                       </i>
-                                                      Add Partner
+                                                      Add Member
                                                     </button>
                                                   </div>
                                                 </div>
@@ -6046,7 +6046,7 @@ const CreateClient = () => {
                                                         <i className="fa fa-plus pe-1">
                                                           {" "}
                                                         </i>
-                                                        Add Partner
+                                                        Add Beneficiary
                                                       </button>
                                                     </div>
                                                   </div>
@@ -6443,7 +6443,7 @@ const CreateClient = () => {
                                                         <i className="fa fa-plus pe-1">
                                                           {" "}
                                                         </i>
-                                                        Add Partner
+                                                        Add Trustee
                                                       </button>
                                                     </div>
                                                   </div>

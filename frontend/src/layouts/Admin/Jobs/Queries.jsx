@@ -410,6 +410,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                 name="QuerySentDate"
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.QuerySentDate}
+                min={new Date().toISOString().split("T")[0]}
               />
               {errors1["QuerySentDate"] && (
                 <div className="error-text">
