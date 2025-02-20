@@ -475,7 +475,6 @@ const Status = () => {
 
             {
               JobData.length > 0 ?
-
                 <>
                   <div className="mb-3">
                     <label htmlFor="staff-select" className="form-label">

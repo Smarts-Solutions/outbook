@@ -2927,7 +2927,11 @@ const Setting = () => {
                 <span className="text-dark">{deleteStatus?.role_name}</span>
               </h5>
             </div>
-
+           
+           {
+            StaffRoleDAta.length > 0 ?
+            <>
+            
             <div className="mb-3">
               <label htmlFor="staff-select" className="form-label">
                 Select Role to Replace:
@@ -2985,6 +2989,20 @@ const Setting = () => {
                 </ul>
               </div>
             )}
+             
+            </>
+              
+            :
+            <button
+                onClick={roledeleteUpdatestaff}
+                className="btn btn-danger w-100 mt-3"
+              >
+                Delete
+              </button>
+
+           }
+
+           
           </div>
         </CommonModal>
       </div>
