@@ -577,3 +577,20 @@ export async function delete_Customer(data, token) {
     return await err;
   }
 }
+
+export async function UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY(data, token) {
+  try {
+
+    const res = await axios.post(`${Config.base_url}uploadDocumentMissingLogAndQuery`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  }
+  catch (err
+  ) {
+    return
+    await err
+  }
+}
+

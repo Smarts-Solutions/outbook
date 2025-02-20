@@ -90,6 +90,10 @@ const editMissingLog = async(missingLog) => {
   return taskTimeSheetModel.editMissingLog(missingLog);
 }
 
+const uploadDocumentMissingLogAndQuery = async (missingLog) => {
+  return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(missingLog);
+}
+
 //Queries
 const addQuerie = async(querie) => {
   return taskTimeSheetModel.addQuerie(querie);
@@ -183,5 +187,6 @@ module.exports = {
   jobDocumentAction,
   addJobDocument,
   editDraft,
-  getJobTimeLine
+  getJobTimeLine,
+  uploadDocumentMissingLogAndQuery
  };

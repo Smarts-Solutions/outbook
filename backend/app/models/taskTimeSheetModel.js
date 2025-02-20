@@ -235,6 +235,11 @@ const getMissingLog = async (missingLog) => {
     DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on,
     DATE_FORMAT(missing_logs.last_chaser, '%Y-%m-%d') AS last_chaser,
     missing_logs.status AS status,
+    missing_logs_documents.file_name AS file_name,
+    missing_logs_documents.original_name AS original_name,
+    missing_logs_documents.file_type AS file_type,
+    missing_logs_documents.file_size AS file_size,
+    missing_logs_documents.web_url AS web_url,
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_', 
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -245,6 +250,7 @@ const getMissingLog = async (missingLog) => {
     JOIN jobs ON jobs.id = missing_logs.job_id
     JOIN customers ON customers.id = jobs.customer_id
     JOIN clients ON clients.id = jobs.client_id
+    LEFT JOIN missing_logs_documents ON missing_logs_documents.missing_log_id = missing_logs.id
     WHERE 
     missing_logs.job_id = ?
     ORDER BY
@@ -279,8 +285,8 @@ const getMissingLog = async (missingLog) => {
 }
 
 const editMissingLog = async (missingLog) => {
-  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by,last_chaser,status } = missingLog.body;
-  
+  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by,last_chaser,status  } = missingLog.body;
+
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
@@ -424,6 +430,31 @@ const editMissingLog = async (missingLog) => {
   }
 }
 
+const uploadDocumentMissingLogAndQuery = async (missingLog) => {
+  const { id, type , uploadedFiles} = missingLog.body;
+   
+  if (uploadedFiles && uploadedFiles.length > 0) {
+
+    for (let file of uploadedFiles) {
+        const web_url = file.web_url;
+        const update = type === 'missing_log' ? `UPDATE missing_logs_documents SET web_url = ? WHERE missing_log_id = ?` : `UPDATE queries_documents SET web_url = ? WHERE query_id = ?`
+
+        try {
+          const [result] = await pool.execute(update, [
+            web_url,
+            id
+            ]);
+          } catch (error) {
+            console.log('Error inserting file:', error);
+          }      
+    }
+  }
+
+  return { status: true, message: 'Success.' };
+
+
+}
+
 const getMissingLogSingleView = async (missingLog) => {
   const { id } = missingLog;
   try {
@@ -553,6 +584,11 @@ const getQuerie = async (querie) => {
       queries.response AS response,
       DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
       queries.status AS status,
+      queries_documents.file_name AS file_name,
+      queries_documents.original_name AS original_name,
+      queries_documents.file_type AS file_type,
+      queries_documents.file_size AS file_size,
+      queries_documents.web_url AS web_url,
       CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_', 
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -563,7 +599,8 @@ const getQuerie = async (querie) => {
       queries
     JOIN jobs ON jobs.id = queries.job_id
     JOIN customers ON customers.id = jobs.customer_id
-    JOIN clients ON clients.id = jobs.client_id 
+    JOIN clients ON clients.id = jobs.client_id
+    LEFT JOIN queries_documents ON queries_documents.query_id = queries.id
      WHERE 
       queries.job_id = ?
      ORDER BY
@@ -1171,7 +1208,8 @@ module.exports = {
   getJobDocument,
   deleteJobDocument,
   editDraft,
-  addedJobDocument
+  addedJobDocument,
+  uploadDocumentMissingLogAndQuery
   
 
 };
