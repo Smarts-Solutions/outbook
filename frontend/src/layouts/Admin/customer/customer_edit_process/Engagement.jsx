@@ -39,17 +39,20 @@ const Engagement = () => {
   });
 
   const [formValues1, setFormValues1] = useState({
-    accountants: "",
-    feePerAccountant: "",
-    bookkeepers: "",
-    feePerBookkeeper: "",
-    payrollExperts: "",
-    feePerPayrollExpert: "",
-    taxExperts: "",
-    feePerTaxExpert: "",
-    numberOfAdmin: "",
-    feePerAdmin: "",
+    accountants: null,
+    feePerAccountant: null,
+    bookkeepers: null,
+    feePerBookkeeper: null,
+    payrollExperts: null,
+    feePerPayrollExpert: null,
+    taxExperts: null,
+    feePerTaxExpert: null,
+    numberOfAdmin: null,
+    feePerAdmin: null,
   });
+
+
+  console.log("formValues1", formValues1)
 
   const [formValues2, setFormValues2] = useState({
     total_outsourcing: null,
@@ -62,13 +65,12 @@ const Engagement = () => {
   });
 
 
-  console.log("formValues2", formValues2)
   const [formValues3, setFormValues3] = useState({
-    adhoc_accountants: "",
-    adhoc_bookkeepers: "",
-    adhoc_payroll_experts: "",
-    adhoc_tax_experts: "",
-    adhoc_admin_staff: "",
+    adhoc_accountants: null,
+    adhoc_bookkeepers: null,
+    adhoc_payroll_experts: null,
+    adhoc_tax_experts: null,
+    adhoc_admin_staff: null,
   });
 
   const [jobEntries, setJobEntries] = useState([
@@ -166,8 +168,7 @@ const Engagement = () => {
           feePerAccountant: customerDetails.data.fte_dedicated_staffing.fee_per_accountant==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_accountant,
           bookkeepers: customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers,
           feePerBookkeeper: customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper,
-          payrollExperts: customerDetails.data.fte_dedicated_staffing
-          .number_of_payroll_experts==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts,
+          payrollExperts: customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts,
           feePerPayrollExpert: customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert,
           taxExperts: customerDetails.data.fte_dedicated_staffing.number_of_tax_experts==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_tax_experts,
           feePerTaxExpert: customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert,
@@ -187,22 +188,27 @@ const Engagement = () => {
       }
       if (customer_engagement_model_status.adhoc_payg_hourly === "1") {
         setFormValues3({
-          adhoc_accountants: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_accountants
-          ),
-          adhoc_bookkeepers: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers
-          ),
-          adhoc_payroll_experts: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts
-          ),
-          adhoc_tax_experts: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts
-          ),
-          adhoc_admin_staff: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff
-          ),
+          adhoc_accountants: customerDetails.data.adhoc_payg_hourly.adhoc_accountants == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_accountants,
+          adhoc_bookkeepers: customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers,
+          adhoc_payroll_experts: customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts,
+          adhoc_tax_experts: customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts,
+          adhoc_admin_staff: customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff,
         });
+          //   customerDetails.data.adhoc_payg_hourly.adhoc_accountants
+          // ),
+          // adhoc_bookkeepers: Number(
+          //   customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers
+          // ),
+          // adhoc_payroll_experts: Number(
+          //   customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts
+          // ),
+          // adhoc_tax_experts: Number(
+          //   customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts
+          // ),
+          // adhoc_admin_staff: Number(
+          //   customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff
+          // ),
+        // });
       }
 
       if (customer_engagement_model_status.customised_pricing === "1") {
@@ -218,8 +224,7 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-
-  console.log("customerDetails", customerDetails)
+ 
   useEffect(() => {
 
     if (formState1.customerSource) {
@@ -312,12 +317,14 @@ const Engagement = () => {
     if (isSubmitting) {
 
       for (const key in FTEDedicatedErrorMessages) {
-        if (!formValues1[key] || formValues1[key] == 0) {
+        if (formValues1[key]==null || formValues1[key] === "" || formValues1[key] < 0) {
+          console.log("formValues2[key]", formValues2[key])
+
           newErrors[key] = FTEDedicatedErrorMessages[key];
         }
       }
     } else {
-      if (!value) {
+      if (value==null || value === "" || value < 0) {
         if (FTEDedicatedErrorMessages[name]) {
           newErrors[name] = FTEDedicatedErrorMessages[name];
         }
@@ -344,9 +351,7 @@ const Engagement = () => {
     const newErrors = { ...errors2 };
     if (isSubmitting) {
       for (const key in PercentageModelErrorMessages) {
-        console.log("formValues2[key]", formValues2[key])
         if (formValues2[key] == null || formValues2[key] === "" || formValues2[key] < 0) {
-
           newErrors[key] = PercentageModelErrorMessages[key];
         }
       }
@@ -362,7 +367,6 @@ const Engagement = () => {
     setErrors2(newErrors);
 
 
-    console.log("newErrors", newErrors)
     if (Object.keys(newErrors).length == 6) {
       Swal.fire({
         icon: "warning",
@@ -609,7 +613,6 @@ const Engagement = () => {
       };
     }
 
-    console.log("formValues2", formValues2)
     if (checkboxStates[1] === 1) {
       req = {
         ...req,
@@ -622,7 +625,6 @@ const Engagement = () => {
       };
     }
 
-    console.log("req", req)
 
     if (checkboxStates[2] === 1) {
       req = {
@@ -823,16 +825,9 @@ const Engagement = () => {
                                   <label className="form-label label-height">
                                     {field.label}
                                   </label>
-
-                                  {/* <label
-                                    className="form-label label_bottom"
-                                    style={{ color: "#A2A0A0 !important" }}
-                                  >
-                                    {field.feeName}
-                                  </label> */}
+                                  
                                   <input
                                     type="text"
-                                    // className={errors1[field.name] ? "error-field form-control" : "form-control"}
                                     className={"form-control"}
                                     name={field.name}
                                     id={field.name}
@@ -840,11 +835,7 @@ const Engagement = () => {
                                     value={formValues1[field.name]}
                                     onChange={(e) => handleChange1(e)}
                                   />
-                                  {/* {errors1[field.name] && (
-                                    <div className="error-text">
-                                      {errors1[field.name]}
-                                    </div>
-                                  )} */}
+                                 
                                 </div>
                               </div>
                             ))}
