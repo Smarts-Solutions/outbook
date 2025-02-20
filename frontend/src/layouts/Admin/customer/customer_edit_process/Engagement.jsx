@@ -164,16 +164,16 @@ const Engagement = () => {
 
       if (customer_engagement_model_status.fte_dedicated_staffing === "1") {
         setFormValues1({
-          accountants: customerDetails.data.fte_dedicated_staffing.number_of_accountants==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_accountants,
-          feePerAccountant: customerDetails.data.fte_dedicated_staffing.fee_per_accountant==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_accountant,
-          bookkeepers: customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers,
-          feePerBookkeeper: customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper,
-          payrollExperts: customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts,
-          feePerPayrollExpert: customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert,
-          taxExperts: customerDetails.data.fte_dedicated_staffing.number_of_tax_experts==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_tax_experts,
-          feePerTaxExpert: customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert,
-          numberOfAdmin: customerDetails.data.fte_dedicated_staffing.number_of_admin_staff==null ? null : customerDetails.data.fte_dedicated_staffing.number_of_admin_staff,
-          feePerAdmin: customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff==null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff,
+          accountants: customerDetails.data.fte_dedicated_staffing.number_of_accountants == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_accountants,
+          feePerAccountant: customerDetails.data.fte_dedicated_staffing.fee_per_accountant == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_accountant,
+          bookkeepers: customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers,
+          feePerBookkeeper: customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper,
+          payrollExperts: customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts,
+          feePerPayrollExpert: customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert,
+          taxExperts: customerDetails.data.fte_dedicated_staffing.number_of_tax_experts == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_tax_experts,
+          feePerTaxExpert: customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert,
+          numberOfAdmin: customerDetails.data.fte_dedicated_staffing.number_of_admin_staff == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_admin_staff,
+          feePerAdmin: customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff,
         });
       }
       if (customer_engagement_model_status.percentage_model === "1") {
@@ -194,21 +194,7 @@ const Engagement = () => {
           adhoc_tax_experts: customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts,
           adhoc_admin_staff: customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff,
         });
-          //   customerDetails.data.adhoc_payg_hourly.adhoc_accountants
-          // ),
-          // adhoc_bookkeepers: Number(
-          //   customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers
-          // ),
-          // adhoc_payroll_experts: Number(
-          //   customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts
-          // ),
-          // adhoc_tax_experts: Number(
-          //   customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts
-          // ),
-          // adhoc_admin_staff: Number(
-          //   customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff
-          // ),
-        // });
+
       }
 
       if (customer_engagement_model_status.customised_pricing === "1") {
@@ -224,7 +210,7 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
- 
+
   useEffect(() => {
 
     if (formState1.customerSource) {
@@ -317,14 +303,14 @@ const Engagement = () => {
     if (isSubmitting) {
 
       for (const key in FTEDedicatedErrorMessages) {
-        if (formValues1[key]==null || formValues1[key] === "" || formValues1[key] < 0) {
-          console.log("formValues2[key]", formValues2[key])
+        if (formValues1[key] == null || formValues1[key] === "" || formValues1[key] < 0) {
+
 
           newErrors[key] = FTEDedicatedErrorMessages[key];
         }
       }
     } else {
-      if (value==null || value === "" || value < 0) {
+      if (value == null || value === "" || value < 0) {
         if (FTEDedicatedErrorMessages[name]) {
           newErrors[name] = FTEDedicatedErrorMessages[name];
         }
@@ -384,12 +370,13 @@ const Engagement = () => {
     const newErrors = { ...errors3 };
     if (isSubmitting) {
       for (const key in AdhocPAYGHourlyErrorMessages) {
-        if (!formValues3[key]) {
+        if (formValues3[key] == null || formValues3[key]==undefined || formValues3[key] === "" || formValues3[key] < 7 || formValues3[key] > 25) {
+
           newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
         }
       }
     } else {
-      if (!value || value < 7 || value > 25) {
+      if (value == null || value == undefined || value == "" || value < 7 || value > 25) {
         if (AdhocPAYGHourlyErrorMessages[name]) {
           newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
         }
@@ -597,21 +584,23 @@ const Engagement = () => {
     };
 
 
-    if (checkboxStates[null] === 1) {
+    if (checkboxStates[0] === 1) {
       req = {
         ...req,
-        number_of_accountants: formValues1.accountants || null,
-        fee_per_accountant: formValues1.feePerAccountant || null,
-        number_of_bookkeepers: formValues1.bookkeepers || null,
-        fee_per_bookkeeper: formValues1.feePerBookkeeper || null,
-        number_of_payroll_experts: formValues1.payrollExperts || null,
-        fee_per_payroll_expert: formValues1.feePerPayrollExpert || null,
-        number_of_tax_experts: formValues1.taxExperts || null,
-        fee_per_tax_expert: formValues1.feePerTaxExpert || null,
-        number_of_admin_staff: formValues1.numberOfAdmin || null,
-        fee_per_admin_staff: formValues1.feePerAdmin || null,
+        number_of_accountants: formValues1.accountants === 0 ? 0 : formValues1.accountants || null,
+        fee_per_accountant: formValues1.feePerAccountant === 0 ? 0 : formValues1.feePerAccountant || null,
+        number_of_bookkeepers: formValues1.bookkeepers === 0 ? 0 : formValues1.bookkeepers || null,
+        fee_per_bookkeeper: formValues1.feePerBookkeeper === 0 ? 0 : formValues1.feePerBookkeeper || null,
+        number_of_payroll_experts: formValues1.payrollExperts === 0 ? 0 : formValues1.payrollExperts || null,
+        fee_per_payroll_expert: formValues1.feePerPayrollExpert === 0 ? 0 : formValues1.feePerPayrollExpert || null,
+        number_of_tax_experts: formValues1.taxExperts === 0 ? 0 : formValues1.taxExperts || null,
+        fee_per_tax_expert: formValues1.feePerTaxExpert === 0 ? 0 : formValues1.feePerTaxExpert || null,
+        number_of_admin_staff: formValues1.numberOfAdmin === 0 ? 0 : formValues1.numberOfAdmin || null,
+        fee_per_admin_staff: formValues1.feePerAdmin === 0 ? 0 : formValues1.feePerAdmin || null,
       };
     }
+
+
 
     if (checkboxStates[1] === 1) {
       req = {
@@ -648,6 +637,7 @@ const Engagement = () => {
     if (!validateForm()) {
       return;
     }
+
 
 
     const data = { req: req, authToken: token };
@@ -825,7 +815,7 @@ const Engagement = () => {
                                   <label className="form-label label-height">
                                     {field.label}
                                   </label>
-                                  
+
                                   <input
                                     type="text"
                                     className={"form-control"}
@@ -835,7 +825,7 @@ const Engagement = () => {
                                     value={formValues1[field.name]}
                                     onChange={(e) => handleChange1(e)}
                                   />
-                                 
+
                                 </div>
                               </div>
                             ))}
