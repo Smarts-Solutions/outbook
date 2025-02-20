@@ -144,6 +144,7 @@ const getMissingLog =async(req,res)=>{
 const editMissingLog = async(req,res) =>{
   try {
     const { ...missingLog } = req;
+ 
     const result = await jobService.editMissingLog(missingLog);
     if(!result.status){
      return  res.status(200).json({ status: false, message: result.message });  
@@ -153,6 +154,22 @@ const editMissingLog = async(req,res) =>{
  } catch (error) {
    res.status(500).json({ status:false, message: error.message});
  }
+}
+
+const uploadDocumentMissingLogAndQuery = async (req,res) => {
+  try {
+    const { ...missingLog } = req;
+    const result = await jobService.uploadDocumentMissingLogAndQuery(missingLog);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });  
+      }
+      else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+      }
+  }
+  catch (error) {
+    res.status(500).json({ status:false, message: error.message});
+  }
 }
 
 //Queries
@@ -308,5 +325,6 @@ module.exports = {
   jobDocumentAction,
   addJobDocument,
   editDraft,
-  getJobTimeLine
+  getJobTimeLine,
+  uploadDocumentMissingLogAndQuery
 };

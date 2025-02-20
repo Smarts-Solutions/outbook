@@ -32,7 +32,8 @@ import {
   UPDATE_STATUS,
   getcustomerschecklist,
   get_All_Customer_DropDown,
-  delete_Customer
+  delete_Customer,
+  UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -407,6 +408,19 @@ export const EditMissingLog = createAsyncThunk(
         StaffUserId: StaffUserId.id,
       };
       const res = await EDIT_MISSION_LOG(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const UploadDocumentMissingLogAndQuery = createAsyncThunk(
+  "uploadDocumentMissingLogAndQuery",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY(req, authToken);
       return await res;
     } catch (err) {
       throw err;
