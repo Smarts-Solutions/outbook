@@ -4606,7 +4606,7 @@ const ClientEdit = () => {
                                             <i className="fa fa-plus pe-1">
                                               {" "}
                                             </i>
-                                            Add Partner
+                                            Add Member
                                           </button>
                                         </div>
                                       </div>
@@ -4620,7 +4620,7 @@ const ClientEdit = () => {
                                 <div className="card card_shadow">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                      Trustee Details
+                                      Trustees Details
                                     </h4>
                                   </div>
                                   <div className="card-body">
@@ -5007,7 +5007,7 @@ const ClientEdit = () => {
                                             <i className="fa fa-plus pe-1">
                                               {" "}
                                             </i>
-                                            Add Partner
+                                            Add Trustee
                                           </button>
                                         </div>
                                       </div>
@@ -5593,7 +5593,7 @@ const ClientEdit = () => {
                                             <i className="fa fa-plus pe-1">
                                               {" "}
                                             </i>
-                                            Add Partner
+                                            Add Member
                                           </button>
                                         </div>
                                       </div>
@@ -6175,7 +6175,7 @@ const ClientEdit = () => {
                                             <i className="fa fa-plus pe-1">
                                               {" "}
                                             </i>
-                                            Add Partner
+                                            Add Beneficiary
                                           </button>
                                         </div>
                                       </div>
@@ -6572,7 +6572,7 @@ const ClientEdit = () => {
                                             <i className="fa fa-plus pe-1">
                                               {" "}
                                             </i>
-                                            Add Partner
+                                            Add Trustee
                                           </button>
                                         </div>
                                       </div>

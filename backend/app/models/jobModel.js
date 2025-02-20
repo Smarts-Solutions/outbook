@@ -678,7 +678,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id = ?)
+        AND jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
@@ -756,7 +756,7 @@ const getJobByCustomer = async (job) => {
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id = ? OR (jobs.staff_created_id = ? AND jobs.customer_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id = ?)
+        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id = ? OR (jobs.staff_created_id = ? AND jobs.customer_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
         GROUP BY 
         jobs.id 
         ORDER BY 
@@ -835,7 +835,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.reviewer = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id = ?)
+        AND jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
         GROUP BY jobs.id 
         ORDER BY 
          jobs.id DESC;
@@ -905,7 +905,7 @@ const getJobByCustomer = async (job) => {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id = ?)
+        jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
@@ -1006,7 +1006,7 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id 
      AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
@@ -1083,7 +1083,7 @@ const getJobByClient = async (job) => {
    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
    WHERE 
    jobs.client_id = clients.id AND
-   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
    GROUP BY 
    jobs.id
     ORDER BY
@@ -1161,7 +1161,7 @@ const getJobByClient = async (job) => {
      jobs.client_id = clients.id 
      AND
      (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
-     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
@@ -1237,7 +1237,7 @@ const getJobByClient = async (job) => {
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE 
      jobs.client_id = clients.id AND
-     jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+     jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;

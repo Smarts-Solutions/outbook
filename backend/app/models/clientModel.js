@@ -602,10 +602,7 @@ const getClient = async (client) => {
     const [rows] = await pool.execute(QueryRole);
 
     // Condition with Admin And SuperAdmin
-    if (
-      rows.length > 0 &&
-      (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")
-    ) {
+    if (rows.length > 0 &&(rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
       const query = `
    SELECT  
     clients.id AS id,
@@ -638,11 +635,12 @@ LEFT JOIN
     )
 WHERE 
     clients.customer_id = ?
+GROUP BY
+    clients.id    
 ORDER BY 
     clients.id DESC;
     `;
       const [result] = await pool.execute(query, [customer_id]);
-
       return { status: true, message: "success.", data: result };
     }
 
@@ -732,6 +730,8 @@ ORDER BY
           );
           return { status: true, message: "success.", data: uniqueData };
         }
+
+        
         // Account Manger
         else if (rows[0].role_id == 4) {
           const query = `
@@ -789,7 +789,6 @@ ORDER BY
             StaffUserId,
             customer_id,
           ]);
-          console.log("resultAccounrManage", resultAccounrManage);
           if (resultAccounrManage.length == 0) {
             return {
               status: true,
@@ -916,6 +915,8 @@ ORDER BY
                   WHERE cd.client_id = clients.id
               )
           WHERE clients.customer_id = ?
+          GROUP BY
+    clients.id
        ORDER BY 
           clients.id DESC;
             `;
@@ -1178,6 +1179,8 @@ ORDER BY
                   WHERE cd.client_id = clients.id
               )
           WHERE clients.customer_id = ?
+          GROUP BY
+    clients.id
        ORDER BY 
           clients.id DESC;
             `;
@@ -2423,7 +2426,6 @@ const clientUpdate = async (client) => {
       }
     }
   } else {
-    console.log("client_type ELSEE", client_type);
     try {
       const query = `
          UPDATE clients
