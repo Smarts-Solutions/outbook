@@ -127,6 +127,23 @@ export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, fileNam
   }
 };
 
+export const deleteFolderFromFolder = async (site_ID, drive_ID, folder_ID, accessToken) => {
+  try {
+    const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}`;
+
+    const response = await axios.delete(deleteUrl, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (err) {
+    console.error("Error deleting folder:", err.response ? err.response.data : err.message);
+    return "";
+  }
+};
+
 
 export const SiteUrlFolderPath = async () => {
     let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";

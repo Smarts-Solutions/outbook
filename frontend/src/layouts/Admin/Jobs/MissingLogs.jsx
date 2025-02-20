@@ -8,7 +8,7 @@ import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 import sweatalert from 'sweetalert2';
 import { convertDate, allowedTypes } from '../../../Utils/Comman_function';
 import Swal from "sweetalert2";
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
+import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder ,deleteFolderFromFolder } from "../../../Utils/graphAPI";
 
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -314,8 +314,80 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
     await dispatch(EditMissingLog(data))
       .unwrap()
-      .then((response) => {
+      .then(async(response) => {
         if (response.status) {
+
+          if (missionLogAllInputData.missing_log_document != null && missionLogAllInputData.missing_log_document != undefined) {
+            setIsLoading(true);
+            const invalidValues = [undefined, null, "", 0, "0"];
+            let job_name = "JOB_DEMO"
+            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
+              job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
+            }
+
+
+            let missing_log = "missing_log"
+            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
+              missing_log = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id + '_MISSING_LOG_'+missionLogAllInputData.id;
+            }
+
+
+            const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+
+            const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+
+            const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, missing_log, sharepoint_token);
+
+            await deleteFolderFromFolder(site_ID, drive_ID, subfolderId , sharepoint_token);
+
+
+          
+            const uploadedFilesArray = [];
+            const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+
+            if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
+              if (missionLogAllInputData.missing_log_document.length > 0) {
+                // Fetch site and drive details
+                
+
+                // Check if 'missing_log' folder exists, get its ID
+                const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+
+              
+                const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, missing_log, sharepoint_token);
+
+                
+                for (const file of missionLogAllInputData.missing_log_document) {
+                  const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, subfolderId, file, sharepoint_token);
+                  const uploadedFileInfo = {
+                    web_url: uploadDataUrl,
+                    filename: file.lastModified + '-' + file.name,
+                    originalname: file.name,
+                    mimetype: file.type,
+                    size: file.size
+                  };
+                  uploadedFilesArray.push(uploadedFileInfo);
+                }
+              }
+            }
+
+        
+            const req = { action: "add", id: missionLogAllInputData.id, uploadedFiles: uploadedFilesArray , type: "missing_log" }
+            const data = { req: req, authToken: token }
+
+            await dispatch(UploadDocumentMissingLogAndQuery(data))
+            .unwrap()
+            .then((response) => {
+              setIsLoading(false);
+            })
+            .catch((err) => {
+              setIsLoading(false);
+              return;
+            })
+
+          }
+
+          setIsLoading(false);
           GetMissingLogDetails()
           setShowEditMissinglogsModal(false);
           resetForm();

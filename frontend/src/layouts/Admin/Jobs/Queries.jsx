@@ -3,11 +3,11 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { QueryAction, AddQuery, EditQuery ,UploadDocumentMissingLogAndQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { QueryAction, AddQuery, EditQuery, UploadDocumentMissingLogAndQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import sweatalert from 'sweetalert2';
 import { convertDate } from '../../../Utils/Comman_function';
 
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
+import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder ,deleteFolderFromFolder } from "../../../Utils/graphAPI";
 
 const Queries = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -134,7 +134,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
 
     await dispatch(AddQuery(data))
       .unwrap()
-      .then(async(response) => {
+      .then(async (response) => {
         if (response.status) {
 
           if (AllQueryInputdata.QueryDocument != null) {
@@ -228,7 +228,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
     const req = { action: "add", data: AllQueryInputdata }
     const data = { req: req, authToken: token }
 
-
     if (parseInt(AllQueryInputdata.QueriesRemaining) == 0) {
       sweatalert.fire({
         icon: 'warning',
@@ -256,8 +255,76 @@ const Queries = ({ getAccessDataJob, goto }) => {
 
     await dispatch(EditQuery(data))
       .unwrap()
-      .then((response) => {
+      .then(async (response) => {
         if (response.status) {
+
+
+          if (AllQueryInputdata.QueryDocument != null && AllQueryInputdata.QueryDocument != undefined) {
+            setIsLoading(true);
+            const invalidValues = [undefined, null, "", 0, "0"];
+            let job_name = "JOB_DEMO"
+            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
+              job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
+            }
+
+
+            let query_log = "query_log"
+            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
+              query_log = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id + '_QUERY_LOG_' + AllQueryInputdata.id;
+            }
+
+            // Fetch site and drive details
+            const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+
+            const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+
+            const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, query_log, sharepoint_token);
+
+            await deleteFolderFromFolder(site_ID, drive_ID, subfolderId, sharepoint_token);
+
+            const uploadedFilesArray = [];
+            const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+
+            if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
+              if (AllQueryInputdata.QueryDocument.length > 0) {
+
+
+                // Check if 'query_log' folder exists, get its ID
+                const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+
+                const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, query_log, sharepoint_token);
+
+
+                for (const file of AllQueryInputdata.QueryDocument) {
+                  const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, subfolderId, file, sharepoint_token);
+                  const uploadedFileInfo = {
+                    web_url: uploadDataUrl,
+                    filename: file.lastModified + '-' + file.name,
+                    originalname: file.name,
+                    mimetype: file.type,
+                    size: file.size
+                  };
+                  uploadedFilesArray.push(uploadedFileInfo);
+                }
+              }
+            }
+
+
+            const req = { action: "add", id: AllQueryInputdata.id, uploadedFiles: uploadedFilesArray, type: "query_log" }
+            const data = { req: req, authToken: token }
+
+            await dispatch(UploadDocumentMissingLogAndQuery(data))
+              .unwrap()
+              .then((response) => {
+                setIsLoading(false);
+              })
+              .catch((err) => {
+                setIsLoading(false);
+                return;
+              })
+          }
+
+          setIsLoading(false);
           setEditViewquery(false)
           GetQueryAllList()
           resetForm()
@@ -331,7 +398,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
     }
   };
 
-
   const columns = [
     { name: 'Query Title', selector: row => row.title, reorder: false, sortable: true },
     { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date), reorder: false, sortable: true },
@@ -339,39 +405,41 @@ const Queries = ({ getAccessDataJob, goto }) => {
     { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), reorder: false, sortable: true },
     { name: 'Last Chaser', selector: row => convertDate(row.last_chaser), reorder: false, sortable: true },
     { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", reorder: false, sortable: true },
-    { name: 'File', selector: row => row.web_url != null ? 
-      
-      row.file_type.startsWith("image/") ? (
+    {
+      name: 'File', selector: row => row.web_url != null ?
 
-        <img
-          src={row.web_url}
-          alt="preview"
-          style={{
-            width: "50px",
-            height: "50px",
-          }}
-        />
-      ) : row.file_type === "application/pdf" ? (
+        row.file_type.startsWith("image/") ? (
 
-        <i
-          className="fa fa-file-pdf"
-          style={{
-            fontSize: "24px",
-            color: "#FF0000",
-          }}
-        ></i>
-      ) : (
+          <img
+            src={row.web_url}
+            alt="preview"
+            style={{
+              width: "50px",
+              height: "50px",
+            }}
+          />
+        ) : row.file_type === "application/pdf" ? (
 
-        <i
-          className="fa fa-file"
-          style={{
-            fontSize: "24px",
-            color: "#000",
-          }}
-        ></i>
-      )
-      
-      : "", reorder: false, sortable: true },
+          <i
+            className="fa fa-file-pdf"
+            style={{
+              fontSize: "24px",
+              color: "#FF0000",
+            }}
+          ></i>
+        ) : (
+
+          <i
+            className="fa fa-file"
+            style={{
+              fontSize: "24px",
+              color: "#000",
+            }}
+          ></i>
+        )
+
+        : "", reorder: false, sortable: true
+    },
     {
       name: "Actions",
       cell: (row) => (

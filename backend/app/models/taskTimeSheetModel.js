@@ -395,7 +395,22 @@ const editMissingLog = async (missingLog) => {
     }
 
     if (missing_log_document.length > 0) {
+     
+
+
       for (let file of missing_log_document) {
+
+        let [existFile] = await pool.execute(`SELECT file_name FROM missing_logs_documents WHERE missing_log_id = ?`, [id]);
+        if (existFile.length > 0) {
+          await deleteUploadFile(existFile[0].file_name);
+          const UpdateQuery = `UPDATE missing_logs_documents SET file_name = ?, original_name = ?, file_type = ?, file_size = ? WHERE missing_log_id = ?`
+          const [result] = await pool.execute(UpdateQuery, [file.filename, file.originalname, file.mimetype, file.size, id]);
+
+        }
+
+
+       else{
+
         const file_name = file.filename;
         const original_name = file.originalname;
         const file_type = file.mimetype;
@@ -420,6 +435,10 @@ const editMissingLog = async (missingLog) => {
         } catch (error) {
           console.log('Error inserting file:', error);
         }
+      }
+
+
+
       }
     }
 
@@ -730,12 +749,19 @@ const editQuerie = async (query) => {
 
     if (query_document.length > 0) {
       for (let file of query_document) {
+
         const file_name = file.filename;
         const original_name = file.originalname;
         const file_type = file.mimetype;
         const file_size = file.size;
 
 
+        const [existFile] = await pool.execute(`SELECT file_name FROM queries_documents WHERE query_id = ?`, [id]);
+        if (existFile.length > 0) {
+          await deleteUploadFile(existFile[0].file_name);
+          const [result] = await pool.execute(`UPDATE queries_documents SET file_name = ?, original_name
+          = ?, file_type = ?, file_size = ? WHERE query_id = ?`, [file_name, original_name, file_type, file_size, id]);
+        } else {
         const insertQuery = `
             INSERT INTO queries_documents (
                 query_id, file_name , original_name, file_type, file_size 
@@ -743,6 +769,8 @@ const editQuerie = async (query) => {
         `;
         const [rows] = await pool.execute(insertQuery, [id, file_name, original_name
           , file_type, file_size]);
+
+        }
       }
     }
     return { status: true, message: 'Success.', data: rows };
@@ -820,9 +848,7 @@ const getDraftSingleView = async (req, res) => {
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
 
-  
-  
-  
+
   if([1, 2, 3].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, job_id]);
   }
