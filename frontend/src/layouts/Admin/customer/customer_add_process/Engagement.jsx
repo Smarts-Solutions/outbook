@@ -27,31 +27,31 @@ const Engagement = () => {
   });
 
   const [formValues1, setFormValues1] = useState({
-    accountants: "",
-    feePerAccountant: "",
-    bookkeepers: "",
-    feePerBookkeeper: "",
-    payrollExperts: "",
-    feePerPayrollExpert: "",
-    taxExperts: "",
-    feePerTaxExpert: "",
-    numberOfAdmin: "",
-    feePerAdmin: "",
+    accountants: null,
+    feePerAccountant: null,
+    bookkeepers: null,
+    feePerBookkeeper: null,
+    payrollExperts: null,
+    feePerPayrollExpert: null,
+    taxExperts: null,
+    feePerTaxExpert: null,
+    numberOfAdmin: null,
+    feePerAdmin: null,
   });
   const [formValues2, setFormValues2] = useState({
-    total_outsourcing: "",
-    accountants: "",
-    bookkeepers: "",
-    payroll_experts: "",
-    tax_experts: "",
-    admin_staff: "",
+    total_outsourcing: null,
+    accountants: null,
+    bookkeepers: null,
+    payroll_experts: null,
+    tax_experts: null,
+    admin_staff: null,
   });
   const [formValues3, setFormValues3] = useState({
-    adhoc_accountants: "",
-    adhoc_bookkeepers: "",
-    adhoc_payroll_experts: "",
-    adhoc_tax_experts: "",
-    adhoc_admin_staff: "",
+    adhoc_accountants: null,
+    adhoc_bookkeepers: null,
+    adhoc_payroll_experts: null,
+    adhoc_tax_experts: null,
+    adhoc_admin_staff: null,
   });
   const [jobEntries, setJobEntries] = useState([
     { minimum_number_of_jobs: "", job_type_id: "", service_id: "", cost_per_job: "" },
@@ -188,12 +188,12 @@ const Engagement = () => {
     if (isSubmitting) {
 
       for (const key in FTEDedicatedErrorMessages) {
-        if (!formValues1[key] || formValues1[key] == 0) {
+        if (formValues1[key] == null || formValues1[key] === "" || formValues1[key] < 0) {
           newErrors[key] = FTEDedicatedErrorMessages[key];
         }
       }
     } else {
-      if (!value) {
+      if (value == null || value === "" || value < 0) {
         if (FTEDedicatedErrorMessages[name]) {
           newErrors[name] = FTEDedicatedErrorMessages[name];
         }
@@ -220,12 +220,12 @@ const Engagement = () => {
     const newErrors = { ...errors2 };
     if (isSubmitting) {
       for (const key in PercentageModelErrorMessages) {
-        if (!formValues2[key]) {
+        if (formValues2[key] == null || formValues2[key] === "" || formValues2[key] < 0) {
           newErrors[key] = PercentageModelErrorMessages[key];
         }
       }
     } else {
-      if (!value) {
+      if (value == undefined || value == null || value == "") {
         if (PercentageModelErrorMessages[name]) {
           newErrors[name] = PercentageModelErrorMessages[name];
         }
@@ -252,12 +252,13 @@ const Engagement = () => {
     const newErrors = { ...errors3 };
     if (isSubmitting) {
       for (const key in AdhocPAYGHourlyErrorMessages) {
-        if (!formValues3[key]) {
+        if (formValues3[key]==null || formValues3[key]==undefined || formValues3[key] === "" || formValues3[key] < 7 || formValues3[key] > 25) {
+
           newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
         }
       }
     } else {
-      if (!value || value < 7 || value > 25) {
+      if (value==null || value==undefined || value=="" || value < 7 || value > 25) {
         if (AdhocPAYGHourlyErrorMessages[name]) {
           newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
         }
@@ -393,48 +394,48 @@ const Engagement = () => {
     let req = {
       customer_id: address,
       pageStatus: "3",
-      fte_dedicated_staffing: checkboxStates[0].toString() || 0,
-      percentage_model: checkboxStates[1].toString() || 0,
-      adhoc_payg_hourly: checkboxStates[2].toString() || 0,
-      customised_pricing: checkboxStates[3].toString() || 0,
+      fte_dedicated_staffing: checkboxStates[0].toString() || null,
+      percentage_model: checkboxStates[1].toString() || null,
+      adhoc_payg_hourly: checkboxStates[2].toString() || null,
+      customised_pricing: checkboxStates[3].toString() || null,
       ...formState1,
     };
 
     if (checkboxStates[0] === 1) {
       req = {
         ...req,
-        number_of_accountants: formValues1.accountants || 0,
-        fee_per_accountant: formValues1.feePerAccountant || 0,
-        number_of_bookkeepers: formValues1.bookkeepers || 0,
-        fee_per_bookkeeper: formValues1.feePerBookkeeper || 0,
-        number_of_payroll_experts: formValues1.payrollExperts || 0,
-        fee_per_payroll_expert: formValues1.feePerPayrollExpert || 0,
-        number_of_tax_experts: formValues1.taxExperts || 0,
-        fee_per_tax_expert: formValues1.feePerTaxExpert || 0,
-        number_of_admin_staff: formValues1.numberOfAdmin || 0,
-        fee_per_admin_staff: formValues1.feePerAdmin || 0,
+        number_of_accountants: formValues1.accountants === 0 ? 0 : formValues1.accountants || null,
+        fee_per_accountant: formValues1.feePerAccountant === 0 ? 0 : formValues1.feePerAccountant || null,
+        number_of_bookkeepers: formValues1.bookkeepers === 0 ? 0 : formValues1.bookkeepers || null,
+        fee_per_bookkeeper: formValues1.feePerBookkeeper === 0 ? 0 : formValues1.feePerBookkeeper || null,
+        number_of_payroll_experts: formValues1.payrollExperts === 0 ? 0 : formValues1.payrollExperts || null,
+        fee_per_payroll_expert: formValues1.feePerPayrollExpert === 0 ? 0 : formValues1.feePerPayrollExpert || null,
+        number_of_tax_experts: formValues1.taxExperts === 0 ? 0 : formValues1.taxExperts || null,
+        fee_per_tax_expert: formValues1.feePerTaxExpert === 0 ? 0 : formValues1.feePerTaxExpert || null,
+        number_of_admin_staff: formValues1.numberOfAdmin === 0 ? 0 : formValues1.numberOfAdmin || null,
+        fee_per_admin_staff: formValues1.feePerAdmin === 0 ? 0 : formValues1.feePerAdmin || null,
       };
     }
     if (checkboxStates[1] === 1) {
       req = {
         ...req,
-        total_outsourcing: formValues2.total_outsourcing || 0,
-        accountants: formValues2.accountants || 0,
-        bookkeepers: formValues2.bookkeepers || 0,
-        payroll_experts: formValues2.payroll_experts || 0,
-        tax_experts: formValues2.tax_experts || 0,
-        admin_staff: formValues2.admin_staff || 0,
+        total_outsourcing: formValues2.total_outsourcing || null,
+        accountants: formValues2.accountants || null,
+        bookkeepers: formValues2.bookkeepers || null,
+        payroll_experts: formValues2.payroll_experts || null,
+        tax_experts: formValues2.tax_experts || null,
+        admin_staff: formValues2.admin_staff || null,
       };
     }
 
     if (checkboxStates[2] === 1) {
       req = {
         ...req,
-        adhoc_accountants: formValues3.adhoc_accountants || 0,
-        adhoc_bookkeepers: formValues3.adhoc_bookkeepers || 0,
-        adhoc_payroll_experts: formValues3.adhoc_payroll_experts || 0,
-        adhoc_tax_experts: formValues3.adhoc_tax_experts || 0,
-        adhoc_admin_staff: formValues3.adhoc_admin_staff || 0,
+        adhoc_accountants: formValues3.adhoc_accountants || null,
+        adhoc_bookkeepers: formValues3.adhoc_bookkeepers || null,
+        adhoc_payroll_experts: formValues3.adhoc_payroll_experts || null,
+        adhoc_tax_experts: formValues3.adhoc_tax_experts || null,
+        adhoc_admin_staff: formValues3.adhoc_admin_staff || null,
       };
     }
     if (checkboxStates[3] === 1) {
@@ -509,78 +510,35 @@ const Engagement = () => {
 
       if (customer_engagement_model_status.fte_dedicated_staffing === "1") {
         setFormValues1({
-          accountants: Number(
-            customerDetails.data.fte_dedicated_staffing.number_of_accountants
-          ),
-          feePerAccountant: Number(
-            customerDetails.data.fte_dedicated_staffing.fee_per_accountant
-          ),
-          bookkeepers: Number(
-            customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers
-          ),
-          feePerBookkeeper: Number(
-            customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper
-          ),
-          payrollExperts: Number(
-            customerDetails.data.fte_dedicated_staffing
-              .number_of_payroll_experts
-          ),
-          feePerPayrollExpert: Number(
-            customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert
-          ),
-          taxExperts: Number(
-            customerDetails.data.fte_dedicated_staffing.number_of_tax_experts
-          ),
-          feePerTaxExpert: Number(
-            customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert
-          ),
-          numberOfAdmin: Number(
-            customerDetails.data.fte_dedicated_staffing.number_of_admin_staff
-          ),
-          feePerAdmin: Number(
-            customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff
-          ),
+          accountants: customerDetails.data.fte_dedicated_staffing.number_of_accountants == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_accountants,
+          feePerAccountant: customerDetails.data.fte_dedicated_staffing.fee_per_accountant == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_accountant,
+          bookkeepers: customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers,
+          feePerBookkeeper: customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper,
+          payrollExperts: customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts,
+          feePerPayrollExpert: customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert,
+          taxExperts: customerDetails.data.fte_dedicated_staffing.number_of_tax_experts == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_tax_experts,
+          feePerTaxExpert: customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert,
+          numberOfAdmin: customerDetails.data.fte_dedicated_staffing.number_of_admin_staff == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_admin_staff,
+          feePerAdmin: customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff,
         });
       }
       if (customer_engagement_model_status.percentage_model === "1") {
         setFormValues2({
-          total_outsourcing: Number(
-            customerDetails.data.percentage_model.total_outsourcing
-          ),
-          accountants: Number(
-            customerDetails.data.percentage_model.accountants
-          ),
-          bookkeepers: Number(
-            customerDetails.data.percentage_model.bookkeepers
-          ),
-          payroll_experts: Number(
-            customerDetails.data.percentage_model.payroll_experts
-          ),
-          tax_experts: Number(
-            customerDetails.data.percentage_model.tax_experts
-          ),
-          admin_staff: Number(
-            customerDetails.data.percentage_model.admin_staff
-          ),
+          total_outsourcing: customerDetails.data.percentage_model.total_outsourcing == null ? null : customerDetails.data.percentage_model.total_outsourcing,
+          accountants: customerDetails.data.percentage_model.accountants == null ? null : customerDetails.data.percentage_model.accountants,
+          bookkeepers: customerDetails.data.percentage_model.bookkeepers == null ? null : customerDetails.data.percentage_model.bookkeepers,
+          payroll_experts: customerDetails.data.percentage_model.payroll_experts == null ? null : customerDetails.data.percentage_model.payroll_experts,
+          tax_experts: customerDetails.data.percentage_model.tax_experts == null ? null : customerDetails.data.percentage_model.tax_experts,
+          admin_staff: customerDetails.data.percentage_model.admin_staff == null ? null : customerDetails.data.percentage_model.admin_staff,
         });
       }
       if (customer_engagement_model_status.adhoc_payg_hourly === "1") {
         setFormValues3({
-          adhoc_accountants: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_accountants
-          ),
-          adhoc_bookkeepers: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers
-          ),
-          adhoc_payroll_experts: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts
-          ),
-          adhoc_tax_experts: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts
-          ),
-          adhoc_admin_staff: Number(
-            customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff
-          ),
+          adhoc_accountants: customerDetails.data.adhoc_payg_hourly.adhoc_accountants == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_accountants,
+          adhoc_bookkeepers: customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers,
+          adhoc_payroll_experts: customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts,
+          adhoc_tax_experts: customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts,
+          adhoc_admin_staff: customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff,
         });
       }
 

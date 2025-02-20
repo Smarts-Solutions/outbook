@@ -3220,10 +3220,12 @@ WHERE service_id = ${service_id} AND customer_id = 0;
     else if (pageStatus === "3") {
 
         const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing, customerJoiningDate, customerSource, customerSubSource } = customer;
+        console.log("customer", customer)
 
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
         let customer_engagement_model_id;
+
         if (existCustomer.length === 0) {
             const insertCustomer = `INSERT INTO customer_engagement_model (customer_id) VALUES (?)`;
             const [result] = await pool.execute(insertCustomer, [customer_id]);
@@ -3268,6 +3270,12 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                 fee_per_admin_staff
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
+
+        console.log("insertQuery", insertQuery)
+        console.log("customer_engagement_model_id", customer_engagement_model_id)
+        console.log("number_of_accountants", number_of_accountants)
+        console.log("fee_per_accountant", fee_per_accountant)
+        console.log("number_of_bookkeepers", number_of_bookkeepers)
                 const [result] = await pool.execute(insertQuery, [
                     customer_engagement_model_id,
                     number_of_accountants,

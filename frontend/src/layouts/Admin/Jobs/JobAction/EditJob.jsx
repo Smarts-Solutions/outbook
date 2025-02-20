@@ -1117,7 +1117,7 @@ const EditJob = () => {
           name: "Type of Payslip",
           key: "Type_of_Payslip_id_3",
           type: "dropdown",
-          options: ["Wages Only", "Wages/Pension"],
+          options: ["Wages Only", "Wages Pension"],
         },
         {
           name: "Percentage of Variable Payslips",
