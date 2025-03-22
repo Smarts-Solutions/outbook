@@ -10,7 +10,6 @@ const pool = require('../config/database');
         let permission_type = logData.permission_type;
         let ip = logData.ip;
         let module_id = logData.module_id ? logData.module_id : 0;
-
         const query = `
         INSERT INTO staff_logs (staff_id,date,module_name,module_id,log_message,permission_type,ip)
         VALUES (?, ?, ?, ?, ?, ?, ?)
