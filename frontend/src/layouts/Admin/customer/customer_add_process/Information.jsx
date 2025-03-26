@@ -204,11 +204,6 @@ const Information = ({ id, pageStatus }) => {
       if (getSearchDetails[0].address_snippet)
         delete newErrors["TradingAddress"];
 
-
-
-
-
-
       setErrors2(newErrors);
     }
   }, [getSearchDetails]);
@@ -1677,14 +1672,15 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <span style={{ color: "red" }}> *</span>
                                 <input
-                                  type="text"
+                                  type="date"
                                   className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
 
                                   placeholder="Enter Incorporation Date"
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
-                                  value={convertDate(getCompanyDetails?.IncorporationDate)}
+                                  //value={convertDate(getCompanyDetails?.IncorporationDate)}
+                                  defaultValue={getCompanyDetails?.IncorporationDate}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">

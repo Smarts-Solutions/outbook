@@ -2425,16 +2425,17 @@ const CreateClient = () => {
                                                 </span>
                                               </label>
                                               <input
-                                                type="text"
+                                                type="date"
                                                 className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
 
                                                 placeholder="Incorporation Date"
                                                 name="IncorporationDate"
                                                 id="IncorporationDate"
                                                 onChange={(e) => handleChange2(e)}
-                                                value={
-                                                  convertDate(getCompanyDetails.IncorporationDate)
-                                                }
+                                                // value={
+                                                //   convertDate(getCompanyDetails.IncorporationDate)
+                                                // }
+                                               defaultValue={getCompanyDetails?.IncorporationDate}
                                               // disabled
                                               />
                                               {errors2["IncorporationDate"] && (

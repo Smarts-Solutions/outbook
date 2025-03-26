@@ -1516,14 +1516,15 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
 
                                 <input
-                                  type="text"
+                                  type="date"
                                   className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
 
                                   placeholder="Enter Incorporation Date"
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
-                                  value={convertDate(getCompanyDetails?.IncorporationDate)}
+                                  // value={convertDate(getCompanyDetails?.IncorporationDate)}
+                                  defaultValue={getCompanyDetails?.IncorporationDate}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">

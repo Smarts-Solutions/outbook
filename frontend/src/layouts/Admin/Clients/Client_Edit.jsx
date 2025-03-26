@@ -2456,15 +2456,16 @@ const ClientEdit = () => {
                                               <span style={{ color: "red" }}>*</span>
                                             </label>
                                             <input
-                                              type="text"
+                                              type="date"
                                               className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
                                               placeholder="07-01-2023"
                                               name="IncorporationDate"
                                               id="IncorporationDate"
                                               onChange={(e) => handleInputsChange(e, 2)}
-                                              value={
-                                                convertDate(getCompanyDetails.IncorporationDate)
-                                              }
+                                              // value={
+                                              //   convertDate(getCompanyDetails.IncorporationDate)
+                                              // }
+                                              defaultValue={getCompanyDetails?.IncorporationDate}
                                             // disabled
                                             />
                                             {errors2["IncorporationDate"] && (
