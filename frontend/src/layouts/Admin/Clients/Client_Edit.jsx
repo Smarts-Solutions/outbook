@@ -2465,7 +2465,7 @@ const ClientEdit = () => {
                                               // value={
                                               //   convertDate(getCompanyDetails.IncorporationDate)
                                               // }
-                                              defaultValue={getCompanyDetails?.IncorporationDate}
+                                              value={getCompanyDetails?.IncorporationDate}
                                             // disabled
                                             />
                                             {errors2["IncorporationDate"] && (

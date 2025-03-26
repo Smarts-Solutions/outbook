@@ -1524,7 +1524,7 @@ const Information = ({ id, pageStatus }) => {
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
                                   // value={convertDate(getCompanyDetails?.IncorporationDate)}
-                                  defaultValue={getCompanyDetails?.IncorporationDate}
+                                  value={getCompanyDetails?.IncorporationDate}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">
