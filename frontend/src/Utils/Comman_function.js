@@ -138,33 +138,45 @@ const RemoveErrorFromErrors = (name, setErrors) => {
 }
 
 export const validate = (name, value, errors, setErrors) => {
+   console.log("value ",value)
   const newErrors = { ...errors };
-  if (value != '' && !value?.trim() && ClientErrorMessages[name]) { 
+  // if (value != ''  && !value?.trim() && ClientErrorMessages[name]) { 
+  //   if (name === "email" || name === "phone") {
+  //     delete newErrors[name]; 
+  //     RemoveErrorFromErrors(name, setErrors);  
+  //   } else {
+  //     newErrors[name] = ClientErrorMessages[name];   
+  //   }
+  // }
+  if (value != ''&& typeof value === "string" && value.trim() === "" && ClientErrorMessages[name]) { 
     if (name === "email" || name === "phone") {
-      delete newErrors[name]; 
-      RemoveErrorFromErrors(name, setErrors);  
+      delete newErrors[name];
+      RemoveErrorFromErrors(name, setErrors);
     } else {
-      newErrors[name] = ClientErrorMessages[name];   
+      newErrors[name] = ClientErrorMessages[name];
     }
-  } else { 
+  }
+  
+  else { 
+   
     switch (name) {
-      case "email":
-        if (!Email_regex(value)) {
-          newErrors[name] = "Please enter a valid email";
-        } else {
-          delete newErrors[name];   
-          RemoveErrorFromErrors(name, setErrors);  
-        }
-        break;
+      // case "email":
+      //   if (!Email_regex(value)) {
+      //     newErrors[name] = "Please enter a valid email";
+      //   } else {
+      //     delete newErrors[name];   
+      //     RemoveErrorFromErrors(name, setErrors);  
+      //   }
+      //   break;
 
-      case "phone":
-        if (!/^\d{9,12}$/.test(value)) {
-          newErrors[name] = "Phone number must be between 9 to 12 digits";
-        } else {
-          delete newErrors[name];  
-          RemoveErrorFromErrors(name, setErrors);
-        }
-        break;
+      // case "phone":
+      //   if (!/^\d{9,12}$/.test(value)) {
+      //     newErrors[name] = "Phone number must be between 9 to 12 digits";
+      //   } else {
+      //     delete newErrors[name];  
+      //     RemoveErrorFromErrors(name, setErrors);
+      //   }
+      //   break;
 
       case "VATNumber":
         if (!/^[0-9+]*$/.test(value)) {

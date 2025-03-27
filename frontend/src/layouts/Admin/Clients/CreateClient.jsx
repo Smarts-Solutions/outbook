@@ -1457,6 +1457,10 @@ const CreateClient = () => {
   };
 
   const handleSubmit = async () => {
+
+        
+
+
     if (selectClientType == 1 && validateAllFields(1)) {
       const req = {
         client_type: "1",

@@ -619,7 +619,7 @@ const ClientEdit = () => {
     }
     if (location?.state?.row?.client_type_name == "Trust") {
 
-      console.log("!get", !getClientDetails.loading && getClientDetails.data.client)
+      
       setTrust((prevState) => ({
         ...prevState,
         TrustName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
@@ -1221,6 +1221,8 @@ const ClientEdit = () => {
   };
 
   const validateAllFields = (type) => {
+
+     
     let isValid = true;
     for (const key in ClientTypeArr[type - 1]) {
       if (!validate(key, ClientTypeArr[type - 1][key], errorsArr[type - 1], setErrorsArr[type - 1])) {
@@ -1341,7 +1343,8 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
-
+    
+    
     switch (field) {
       case "first_name":
       case "last_name":
@@ -1517,6 +1520,13 @@ const ClientEdit = () => {
   };
 
   const handleUpdate = async () => {
+    
+
+    console.log("selectClientType", selectClientType)
+    console.log("validateAllFields(1)", validateAllFields(1))
+
+
+
     if (selectClientType == 1 && validateAllFields(1)) {
       const req = {
         client_type: "1",
@@ -5661,7 +5671,7 @@ const ClientEdit = () => {
                                               *
                                             </span>
                                           </label>
-                                          {console.log("sss", getTrust.TrustName)}
+                                         
                                           <input
                                             type="text"
                                             className={errors7["TrustName"] ? "error-field form-control" : "form-control"}

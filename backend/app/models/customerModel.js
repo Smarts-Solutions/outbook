@@ -1086,27 +1086,34 @@ id DESC;`;
 
         }
         else {
-            const query = `
-            SELECT  
-            id,
-            customers.status AS status,
-            customers.form_process AS form_process,
-            trading_name
-        FROM 
-            customers
-        LEFT JOIN 
-            staff_portfolio ON staff_portfolio.customer_id = customers.id
-        LEFT JOIN 
-            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            OR sp_customers.staff_id = staff_portfolio.staff_id    
-        WHERE 
-            staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
-        ORDER BY 
-            id DESC;
-            `;
-            const [result1] = await pool.execute(query, [StaffUserId]);
-            result = result1
-        }
+         
+                    const query = `
+                     SELECT  
+                    customers.id AS id,
+                    customers.status AS status,
+                    customers.form_process AS form_process,
+                    customers.trading_name AS trading_name,
+                    CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                    ) AS customer_code
+                FROM 
+                    customers
+                LEFT JOIN 
+                    staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                    customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                    OR sp_customers.staff_id = staff_portfolio.staff_id    
+                WHERE 
+                    customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+                ORDER BY 
+                    id DESC;
+                    `;
+        
+                    const [result1] = await pool.execute(query, [StaffUserId]);
+                    result = result1
+                }
     }
     try {
 
