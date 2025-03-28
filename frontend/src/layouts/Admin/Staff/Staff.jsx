@@ -94,7 +94,7 @@ const StaffPage = () => {
     if (
       accessData &&
       accessData.length > 0 &&
-      role !== "ADMIN" &&
+     // role !== "ADMIN" &&
       role !== "SUPERADMIN"
     ) {
       accessData &&
@@ -147,6 +147,9 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
+          
+          console.log("response.data ", response.data);
+
           setStaffDataAll({ loading: false, data: response.data });
         } else {
           setStaffDataAll({ loading: false, data: [] });
