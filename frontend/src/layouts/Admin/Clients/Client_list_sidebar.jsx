@@ -227,14 +227,13 @@ const ClientLists = () => {
       });
     }
     if (
-      (getAccessDataJob && getAccessDataJob.job == 1) ||
-      role === "ADMIN" ||
-      role === "SUPERADMIN"
-    ) {
+      (getAccessDataJob && getAccessDataJob.job == 1) ||role === "ADMIN" ||role === "SUPERADMIN" ) {
+       if(customerId != ""){ 
       tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
+       }
     }
     setTabs([...tabsData, ...initialTabs]);
-  }, [getAccessDataJob, getAccessDataClient, ClientData]);
+  }, [getAccessDataJob, getAccessDataClient, ClientData , customerId]);
 
   const ClientListColumns = [
     {
