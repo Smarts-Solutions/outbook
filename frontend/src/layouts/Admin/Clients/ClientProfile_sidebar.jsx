@@ -16,12 +16,14 @@ const ClientList = () => {
 
 
   useEffect(() => {
+    GetAllJobListByCustomer("");
     GetAllCustomer();
     GetStatus();
   }, []);
 
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState({ id: cust_id_sidebar || "", trading_name: "" });
+
 
   const GetAllCustomer = async () => {
     const req = { action: "get_dropdown" };
@@ -30,17 +32,17 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerDataAll(response.data);
-          if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+          // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
 
-            const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
-            if(FilterCustomer.length > 0){
-            selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-            setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
-            setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
-            GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-            }
+          //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
+          //   if(FilterCustomer.length > 0){
+          //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+          //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
+          //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
+          //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+          //   }
 
-          }
+          // }
         } else {
           setCustomerDataAll(response.data);
         }
@@ -457,6 +459,23 @@ const ClientList = () => {
       });
   };
 
+  const GetAllJobListByCustomer = async (customer_id) => {
+    const req = { action: "getByCustomer", customer_id: customer_id };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCustomerData(response.data);
+        } else {
+          setCustomerData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
   const handleCreateJob = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
@@ -476,6 +495,7 @@ const ClientList = () => {
       setActiveTab("NoOfJobs");
       GetAllClientData(id, name);
     } else {
+      GetAllJobListByCustomer("");
       setCustomerData([]);
       setClientData([]);
       setCustomerDetails({ id: '', trading_name: '' });
@@ -536,7 +556,7 @@ const ClientList = () => {
                 selectCustomerId(selectedId, selectedCustomer?.trading_name);
               }}
             > 
-            
+            <option value="">Select Customer</option>  
               {customerDataAll &&
                 customerDataAll.map((val, index) => 
                   Number(val.status) === 1 && Number(val.form_process) === 4 ?
@@ -555,8 +575,16 @@ const ClientList = () => {
             </select>
           </div>
 
+    
+          
 
-          <div className="form-group col-md-4 mb-0">
+
+          {
+            customerDetails.id != "" ?
+             <>
+
+
+<div className="form-group col-md-4 mb-0">
             <label className="form-label mb-2">Select Client</label>
             {
               clientData.length == 0 ?
@@ -592,7 +620,11 @@ const ClientList = () => {
 
 
 
-          <div className="page-title-box pt-2">
+
+
+
+
+             <div className="page-title-box pt-2">
             <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
               <div className=" col-md-6 col-lg-8">
                 <ul
@@ -644,6 +676,10 @@ const ClientList = () => {
           </div>
 
           <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={activeTab == 'NoOfJobs' ? customerData.length : ""} />
+             </>
+            :""
+          }
+          
 
         </div>
 

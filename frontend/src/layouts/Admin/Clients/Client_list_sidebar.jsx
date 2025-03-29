@@ -232,6 +232,8 @@ const ClientLists = () => {
       tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
        }
     }
+
+    // console.log("tabsData", tabsData);
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData , customerId]);
 
@@ -979,6 +981,7 @@ const ClientLists = () => {
       setHararchyData({ customer: { id: id, trading_name: name } });
       setActiveTab("client");
     } else {
+      setGetJobDetails([]);
       setCustomerId("");
       setCustomerName("");
       GetAllClientData("");

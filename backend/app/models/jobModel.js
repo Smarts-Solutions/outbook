@@ -2,6 +2,7 @@ const pool = require("../config/database");
 const {
   SatffLogUpdateOperation,
   generateNextUniqueCode,
+  getAllCustomerIds,
 } = require("../../app/utils/helper");
 
 const getAddJobData = async (job) => {
@@ -599,7 +600,21 @@ VALUES (
 };
 
 const getJobByCustomer = async (job) => {
-  const { customer_id, StaffUserId } = job;
+  let { customer_id, StaffUserId } = job;
+
+  let customerCheck = customer_id
+  customer_id = [Number(customer_id)]
+  let placeholders = customer_id.map(() => "?").join(", ");
+
+  if (customerCheck == "") {
+    const allCustomer = await getAllCustomerIds(StaffUserId);
+    let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
+    customer_id = allCustomerIds;
+    placeholders = customer_id.map(() => "?").join(", ");
+  }
+
+  console.log("placeholders jobs", placeholders);
+  console.log("customer_id jobs", customer_id);
 
   // Line Manager
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
@@ -678,7 +693,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
+        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN (${placeholders}))
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
@@ -686,8 +701,8 @@ const getJobByCustomer = async (job) => {
         const [rows] = await pool.execute(query, [
           ExistStaff[0].id,
           ExistStaff[0].id,
-          customer_id,
-          customer_id,
+          ...customer_id,
+          ...customer_id,
         ]);
         result = rows;
       }
@@ -756,7 +771,7 @@ const getJobByCustomer = async (job) => {
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id = ? OR (jobs.staff_created_id = ? AND jobs.customer_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
+        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id = ? AND jobs.customer_id IN (${placeholders})) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN(${placeholders}))
         GROUP BY 
         jobs.id 
         ORDER BY 
@@ -764,10 +779,10 @@ const getJobByCustomer = async (job) => {
         `;
         const [rows] = await pool.execute(query, [
           ExistStaff[0].id,
-          customer_id,
+          ...customer_id,
           ExistStaff[0].id,
-          customer_id,
-          customer_id
+          ...customer_id,
+          ...customer_id,
         ]);
         result = rows;
       }
@@ -835,7 +850,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.reviewer = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
+        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN(${placeholders}))
         GROUP BY jobs.id 
         ORDER BY 
          jobs.id DESC;
@@ -843,8 +858,8 @@ const getJobByCustomer = async (job) => {
         const [rows] = await pool.execute(query, [
           ExistStaff[0].id,
           ExistStaff[0].id,
-          customer_id,
-          customer_id,
+          ...customer_id,
+          ...customer_id,
         ]);
         result = rows;
       } else {
@@ -905,12 +920,12 @@ const getJobByCustomer = async (job) => {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        jobs.customer_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id = ?)
+        jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN (${placeholders}))
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [customer_id , customer_id]);
+        const [rows] = await pool.execute(query, [...customer_id , ...customer_id]);
         result = rows;
       }
     }

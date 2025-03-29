@@ -586,15 +586,14 @@ const getClient = async (client) => {
   let placeholders = customer_id.map(() => "?").join(", ");
 
   if (customerCheck == "") {
-    console.log("FFFFFFFFFFFFFFFF");
     const allCustomer = await getAllCustomerIds(StaffUserId);
     let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
     customer_id = allCustomerIds;
     placeholders = customer_id.map(() => "?").join(", ");
   }
 
-  console.log("placeholders", placeholders);
-  console.log("customer_id", customer_id);
+  // console.log("placeholders", placeholders);
+  // console.log("customer_id", customer_id);
 
 
   try {

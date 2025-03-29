@@ -804,9 +804,7 @@ LIMIT ? OFFSET ?
             }
             try {
                 const [resultAllocated] = await pool.execute(query, queryData);
-                result = resultAllocated
-
-                console.log('resultAllocated ---- ', resultAllocated);
+                result = resultAllocated;
                 total = total_count;
             } catch (error) {
                 console.log('error ---- ', error);
