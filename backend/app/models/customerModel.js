@@ -922,8 +922,6 @@ LIMIT ? OFFSET ?
 
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
-
-
     // Line Manager
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);

@@ -1,9 +1,6 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-const {
-  SatffLogUpdateOperation,
-  generateNextUniqueCode,
-} = require("../../app/utils/helper");
+const { SatffLogUpdateOperation, generateNextUniqueCode, getAllCustomerIds } = require("../../app/utils/helper");
 
 const createClient = async (client) => {
   // client Code(cli_CUS_CLI_00001)
@@ -293,7 +290,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             : detail.phone_code;
         let alternate_phone_code =
           detail.alternate_phone_code == undefined ||
-          detail.alternate_phone_code == ""
+            detail.alternate_phone_code == ""
             ? ""
             : detail.alternate_phone_code;
         let phone = detail.phone;
@@ -366,7 +363,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -412,7 +409,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -459,7 +456,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -506,7 +503,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -552,7 +549,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -583,7 +580,22 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
-  const { customer_id, StaffUserId } = client;
+  let { customer_id, StaffUserId } = client;
+  let customerCheck = customer_id
+  customer_id = [Number(customer_id)]
+  let placeholders = customer_id.map(() => "?").join(", ");
+
+  if (customerCheck == "") {
+    console.log("FFFFFFFFFFFFFFFF");
+    const allCustomer = await getAllCustomerIds(StaffUserId);
+    let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
+    customer_id = allCustomerIds;
+    placeholders = customer_id.map(() => "?").join(", ");
+  }
+
+  console.log("placeholders", placeholders);
+  console.log("customer_id", customer_id);
+
 
   try {
     const QueryRole = `
@@ -602,7 +614,7 @@ const getClient = async (client) => {
     const [rows] = await pool.execute(QueryRole);
 
     // Condition with Admin And SuperAdmin
-    if (rows.length > 0 &&(rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
       const query = `
    SELECT  
     clients.id AS id,
@@ -634,104 +646,119 @@ LEFT JOIN
         WHERE cd.client_id = clients.id
     )
 WHERE 
-    clients.customer_id = ?
+    clients.customer_id IN (${customer_id})
 GROUP BY
     clients.id    
 ORDER BY 
     clients.id DESC;
     `;
-      const [result] = await pool.execute(query, [customer_id]);
+      const [result] = await pool.execute(query);
+      console.log("result", result.length);
       return { status: true, message: "success.", data: result };
     }
 
 
     const [existStaffbyCustomer] = await pool.execute(
       'SELECT id  FROM customers WHERE id = "' +
-        customer_id +
-        '" AND staff_id = "' +
-        StaffUserId +
-        '" LIMIT 1'
+      customer_id +
+      '" AND staff_id = "' +
+      StaffUserId +
+      '" LIMIT 1'
     );
 
     if (existStaffbyCustomer.length > 0) {
       const [rows] = await pool.execute(
         'SELECT id , role_id  FROM staffs WHERE id = "' +
-          StaffUserId +
-          '" LIMIT 1'
+        StaffUserId +
+        '" LIMIT 1'
       );
 
       if (rows.length > 0) {
         // Allocated to
         if (rows[0].role_id == 3) {
           const query = `
-           SELECT  
-          clients.customer_id AS customer_id,
-          clients.id AS id,
-              jobs.id AS Delete_Status,
+  SELECT  
+    clients.customer_id AS customer_id,
+    clients.id AS id,
+    jobs.id AS Delete_Status,
+    clients.trading_name AS client_name,
+    clients.status AS status,
+    client_types.type AS client_type_name,
+    client_contact_details.email AS email,
+    client_contact_details.phone_code AS phone_code,
+    client_contact_details.phone AS phone,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code
+  FROM 
+    clients
+  JOIN 
+    customers ON customers.id = clients.customer_id    
+  JOIN 
+    client_types ON client_types.id = clients.client_type
+  LEFT JOIN 
+    client_contact_details ON client_contact_details.id = (
+      SELECT MIN(cd.id)
+      FROM client_contact_details cd
+      WHERE cd.client_id = clients.id
+    )
+  LEFT JOIN
+    jobs ON jobs.client_id = clients.id
+  LEFT JOIN 
+    staffs ON customers.staff_id = staffs.id   
+  WHERE 
+    (
+      jobs.allocated_to = ? 
+      OR clients.customer_id IN (${placeholders})  
+      OR clients.staff_created_id = ?
+    )
+    AND (
+      jobs.client_id = clients.id 
+      OR clients.staff_created_id = ?
+    )
+    AND (
+      jobs.allocated_to = ? 
+      OR clients.staff_created_id = ?
+    )
+    OR clients.customer_id IN (${placeholders})
+  GROUP BY 
+    CASE 
+      WHEN jobs.allocated_to = ? THEN jobs.client_id
+      ELSE clients.id
+    END
+  ORDER BY 
+    clients.id DESC
+`;
 
-          clients.trading_name AS client_name,
-          clients.status AS status,
-          client_types.type AS client_type_name,
-          client_contact_details.email AS email,
-          client_contact_details.phone_code AS phone_code,
-          client_contact_details.phone AS phone,
-          CONCAT(
-              'cli_', 
-              SUBSTRING(customers.trading_name, 1, 3), '_',
-              SUBSTRING(clients.trading_name, 1, 3), '_',
-              SUBSTRING(clients.client_code, 1, 15)
-              ) AS client_code
-        FROM 
-            clients
-        JOIN 
-          customers ON customers.id = clients.customer_id    
-        JOIN 
-            client_types ON client_types.id = clients.client_type
-            LEFT JOIN 
-            client_contact_details ON client_contact_details.id = (
-                SELECT MIN(cd.id)
-                FROM client_contact_details cd
-                WHERE cd.client_id = clients.id
-            )
-        LEFT JOIN
-          jobs ON jobs.client_id = clients.id
-        LEFT JOIN 
-          staffs ON customers.staff_id = staffs.id   
-        WHERE 
-          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
-        GROUP BY 
-        CASE 
-            WHEN jobs.allocated_to = ? THEN jobs.client_id
-            ELSE clients.id
-        END
-        ORDER BY 
-        clients.id DESC
-            `;
-          const [resultAllocated] = await pool.execute(query, [
+          const queryParams = [
             StaffUserId,
-            customer_id,
+            ...customer_id,   // For clients.customer_id IN (...)
             StaffUserId,
             StaffUserId,
             StaffUserId,
             StaffUserId,
-            customer_id,
+            ...customer_id,   // For OR clients.customer_id IN (...)
             StaffUserId,
-          ]);
-          if (resultAllocated.length == 0) {
-            return { status: true, message: "success.", data: resultAllocated };
-          }
-          const filteredData = resultAllocated.filter(
-            (item) => parseInt(item.customer_id) === parseInt(customer_id)
+          ];
+
+          const [resultAllocated] = await pool.execute(query, queryParams);
+
+          // Filter data based on customer_id
+          const filteredData = resultAllocated.filter((item) =>
+            customer_id.includes(parseInt(item.customer_id))
           );
 
+          // Deduplicate by client ID
           const uniqueData = filteredData.filter(
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
           );
+
           return { status: true, message: "success.", data: uniqueData };
         }
-
-        
         // Account Manger
         else if (rows[0].role_id == 4) {
           const query = `
@@ -773,7 +800,7 @@ ORDER BY
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
         ORDER BY 
         clients.id DESC
             `;
@@ -785,9 +812,9 @@ ORDER BY
             StaffUserId,
             StaffUserId,
             StaffUserId,
-            customer_id,
+            ...customer_id, 
             StaffUserId,
-            customer_id,
+            ...customer_id, 
           ]);
           if (resultAccounrManage.length == 0) {
             return {
@@ -797,8 +824,9 @@ ORDER BY
             };
           }
 
-          const filteredData = resultAccounrManage.filter(
-            (item) => parseInt(item.customer_id) === parseInt(customer_id)
+          // Filter data based on customer_id
+          const filteredData = resultAccounrManage.filter((item) =>
+            customer_id.includes(parseInt(item.customer_id))
           );
 
           const uniqueData = filteredData.filter(
@@ -844,7 +872,7 @@ ORDER BY
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+          (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -857,12 +885,12 @@ ORDER BY
           try {
             const [resultReviewer] = await pool.execute(query, [
               StaffUserId,
-              customer_id,
+              ...customer_id, 
               StaffUserId,
               StaffUserId,
               StaffUserId,
               StaffUserId,
-              customer_id,
+              ...customer_id,
               StaffUserId,
             ]);
           } catch (error) {
@@ -873,8 +901,8 @@ ORDER BY
             return { status: true, message: "success.", data: resultReviewer };
           }
 
-          const filteredData = resultReviewer.filter(
-            (item) => parseInt(item.customer_id) === parseInt(customer_id)
+          const filteredData = resultReviewer.filter((item) =>
+            customer_id.includes(parseInt(item.customer_id))
           );
 
           const uniqueData = filteredData.filter(
@@ -914,21 +942,23 @@ ORDER BY
                   FROM client_contact_details cd
                   WHERE cd.client_id = clients.id
               )
-          WHERE clients.customer_id = ?
+          WHERE clients.customer_id IN (${placeholders})
           GROUP BY
     clients.id
        ORDER BY 
           clients.id DESC;
             `;
-          const [result] = await pool.execute(query, [customer_id]);
+          const [result] = await pool.execute(query , [
+            ...customer_id,
+          ]);
           return { status: true, message: "success.", data: result };
         }
       }
     } else {
       const [rows] = await pool.execute(
         'SELECT id , role_id  FROM staffs WHERE id = "' +
-          StaffUserId +
-          '" LIMIT 1'
+        StaffUserId +
+        '" LIMIT 1'
       );
 
       if (rows.length > 0) {
@@ -969,7 +999,7 @@ ORDER BY
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id   
         WHERE 
-          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+          (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -980,21 +1010,20 @@ ORDER BY
             `;
           const [resultAllocated] = await pool.execute(query, [
             StaffUserId,
-            customer_id,
+            ...customer_id, 
             StaffUserId,
             StaffUserId,
             StaffUserId,
             StaffUserId,
-            customer_id,
+            ...customer_id, 
             StaffUserId,
           ]);
           if (resultAllocated.length == 0) {
             return { status: true, message: "success.", data: resultAllocated };
           }
-          const filteredData = resultAllocated.filter(
-            (item) => parseInt(item.customer_id) === parseInt(customer_id)
+          const filteredData = resultAllocated.filter((item) =>
+            customer_id.includes(parseInt(item.customer_id))
           );
-
           const uniqueData = filteredData.filter(
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
@@ -1042,7 +1071,7 @@ ORDER BY
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
         ORDER BY 
         clients.id DESC
             `;
@@ -1054,9 +1083,9 @@ ORDER BY
             StaffUserId,
             StaffUserId,
             StaffUserId,
-            customer_id,
+            ...customer_id,
             StaffUserId,
-            customer_id,
+            ...customer_id,
           ]);
           if (resultAccounrManage.length == 0) {
             return {
@@ -1066,8 +1095,8 @@ ORDER BY
             };
           }
 
-          const filteredData = resultAccounrManage.filter(
-            (item) => parseInt(item.customer_id) === parseInt(customer_id)
+          const filteredData = resultAccounrManage.filter((item) =>
+            customer_id.includes(parseInt(item.customer_id))
           );
 
           const uniqueData = filteredData.filter(
@@ -1113,7 +1142,7 @@ ORDER BY
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+          (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -1125,12 +1154,12 @@ ORDER BY
 
           const [resultReviewer] = await pool.execute(query, [
             StaffUserId,
-            customer_id,
+            ...customer_id,
             StaffUserId,
             StaffUserId,
             StaffUserId,
             StaffUserId,
-            customer_id,
+            ...customer_id,
             StaffUserId,
           ]);
 
@@ -1138,9 +1167,10 @@ ORDER BY
             return { status: true, message: "success.", data: resultReviewer };
           }
 
-          const filteredData = resultReviewer.filter(
-            (item) => parseInt(item.customer_id) === parseInt(customer_id)
+          const filteredData = resultReviewer.filter((item) =>
+            customer_id.includes(parseInt(item.customer_id))
           );
+
           const uniqueData = filteredData.filter(
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
@@ -1178,13 +1208,13 @@ ORDER BY
                   FROM client_contact_details cd
                   WHERE cd.client_id = clients.id
               )
-          WHERE clients.customer_id = ?
+          WHERE clients.customer_id IN (${placeholders})
           GROUP BY
     clients.id
        ORDER BY 
           clients.id DESC;
             `;
-          const [result] = await pool.execute(query, [customer_id]);
+          const [result] = await pool.execute(query, [...customer_id]);
           return { status: true, message: "success.", data: result };
         }
       }
@@ -1193,6 +1223,632 @@ ORDER BY
     return { status: false, message: "Err Client Get" };
   }
 };
+
+// const getClient = async (client) => {
+//   let { customer_id, StaffUserId } = client;
+//   let customerCheck = customer_id
+//    customer_id = [Number(customer_id)]
+//    let placeholders = customer_id.map(() => "?").join(", ");
+
+//    if(customerCheck == ""){
+//     console.log("FFFFFFFFFFFFFFFF");
+//     const allCustomer = await getAllCustomerIds(StaffUserId);
+//     let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
+//     customer_id = allCustomerIds;
+//     placeholders = customer_id.map(() => "?").join(", ");
+//   }
+
+//   console.log("placeholders", placeholders);
+//   console.log("customer_id", customer_id);
+
+
+//   try {
+//     const QueryRole = `
+//   SELECT
+//     staffs.id AS id,
+//     staffs.role_id AS role_id,
+//     roles.role AS role_name
+//   FROM
+//     staffs
+//   JOIN
+//     roles ON roles.id = staffs.role_id
+//   WHERE
+//     staffs.id = ${StaffUserId}
+//   LIMIT 1
+//   `;
+//     const [rows] = await pool.execute(QueryRole);
+
+//     // Condition with Admin And SuperAdmin
+//     if (rows.length > 0 &&(rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+//       const query = `
+//    SELECT  
+//     clients.id AS id,
+//     clients.trading_name AS client_name,
+//     clients.status AS status,
+//     client_types.type AS client_type_name,
+//     client_contact_details.email AS email,
+//     client_contact_details.phone_code AS phone_code,
+//     client_contact_details.phone AS phone,
+//     jobs.id AS Delete_Status,
+//     CONCAT(
+//         'cli_', 
+//         SUBSTRING(customers.trading_name, 1, 3), '_',
+//         SUBSTRING(clients.trading_name, 1, 3), '_',
+//         SUBSTRING(clients.client_code, 1, 15)
+//     ) AS client_code
+// FROM 
+//     clients
+// JOIN 
+//     customers ON customers.id = clients.customer_id    
+// JOIN 
+//     client_types ON client_types.id = clients.client_type
+// LEFT JOIN 
+//     jobs ON clients.id = jobs.client_id  -- Corrected LEFT JOIN condition
+// LEFT JOIN 
+//     client_contact_details ON client_contact_details.id = (
+//         SELECT MIN(cd.id)
+//         FROM client_contact_details cd
+//         WHERE cd.client_id = clients.id
+//     )
+// WHERE 
+//     clients.customer_id IN (${customer_id})
+// GROUP BY
+//     clients.id    
+// ORDER BY 
+//     clients.id DESC;
+//     `;
+//       const [result] = await pool.execute(query);
+//       console.log("result", result.length);
+//       return { status: true, message: "success.", data: result  };
+//     }
+
+
+//     const [existStaffbyCustomer] = await pool.execute(
+//       'SELECT id  FROM customers WHERE id = "' +
+//         customer_id +
+//         '" AND staff_id = "' +
+//         StaffUserId +
+//         '" LIMIT 1'
+//     );
+
+//     if (existStaffbyCustomer.length > 0) {
+//       const [rows] = await pool.execute(
+//         'SELECT id , role_id  FROM staffs WHERE id = "' +
+//           StaffUserId +
+//           '" LIMIT 1'
+//       );
+
+//       if (rows.length > 0) {
+//         // Allocated to
+//         if (rows[0].role_id == 3) {
+//           const query = `
+//            SELECT  
+//           clients.customer_id AS customer_id,
+//           clients.id AS id,
+//               jobs.id AS Delete_Status,
+
+//           clients.trading_name AS client_name,
+//           clients.status AS status,
+//           client_types.type AS client_type_name,
+//           client_contact_details.email AS email,
+//           client_contact_details.phone_code AS phone_code,
+//           client_contact_details.phone AS phone,
+//           CONCAT(
+//               'cli_', 
+//               SUBSTRING(customers.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.client_code, 1, 15)
+//               ) AS client_code
+//         FROM 
+//             clients
+//         JOIN 
+//           customers ON customers.id = clients.customer_id    
+//         JOIN 
+//             client_types ON client_types.id = clients.client_type
+//             LEFT JOIN 
+//             client_contact_details ON client_contact_details.id = (
+//                 SELECT MIN(cd.id)
+//                 FROM client_contact_details cd
+//                 WHERE cd.client_id = clients.id
+//             )
+//         LEFT JOIN
+//           jobs ON jobs.client_id = clients.id
+//         LEFT JOIN 
+//           staffs ON customers.staff_id = staffs.id   
+//         WHERE 
+//           (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+//         GROUP BY 
+//         CASE 
+//             WHEN jobs.allocated_to = ? THEN jobs.client_id
+//             ELSE clients.id
+//         END
+//         ORDER BY 
+//         clients.id DESC
+//             `;
+//           const [resultAllocated] = await pool.execute(query, [
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//           ]);
+//           if (resultAllocated.length == 0) {
+//             return { status: true, message: "success.", data: resultAllocated };
+//           }
+//           const filteredData = resultAllocated.filter(
+//             (item) => parseInt(item.customer_id) === parseInt(customer_id)
+//           );
+
+//           const uniqueData = filteredData.filter(
+//             (value, index, self) =>
+//               index === self.findIndex((t) => t.id === value.id)
+//           );
+//           return { status: true, message: "success.", data: uniqueData };
+//         }
+//         // Account Manger
+//         else if (rows[0].role_id == 4) {
+//           const query = `
+//            SELECT  
+//           clients.customer_id AS customer_id,
+//           clients.id AS id,
+//           clients.trading_name AS client_name,
+//           clients.status AS status,
+//     jobs.id AS Delete_Status,
+
+//           client_types.type AS client_type_name,
+//           client_contact_details.email AS email,
+//           client_contact_details.phone_code AS phone_code,
+//           client_contact_details.phone AS phone,
+//           CONCAT(
+//               'cli_', 
+//               SUBSTRING(customers.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.client_code, 1, 15)
+//               ) AS client_code
+//         FROM 
+//             clients
+//         JOIN 
+//           customers ON customers.id = clients.customer_id    
+//         JOIN 
+//             client_types ON client_types.id = clients.client_type
+//             LEFT JOIN 
+//             client_contact_details ON client_contact_details.id = (
+//                 SELECT MIN(cd.id)
+//                 FROM client_contact_details cd
+//                 WHERE cd.client_id = clients.id
+//             )
+//         LEFT JOIN
+//           jobs ON jobs.client_id = clients.id
+//         LEFT JOIN 
+//           staffs ON customers.staff_id = staffs.id
+//         LEFT JOIN 
+//           customer_services ON customer_services.customer_id = customers.id
+//         LEFT JOIN 
+//           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
+//           WHERE 
+//           (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
+//         ORDER BY 
+//         clients.id DESC
+//             `;
+
+//           //   WHERE
+//           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+
+//           const [resultAccounrManage] = await pool.execute(query, [
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//             customer_id,
+//           ]);
+//           if (resultAccounrManage.length == 0) {
+//             return {
+//               status: true,
+//               message: "success.",
+//               data: resultAccounrManage,
+//             };
+//           }
+
+//           const filteredData = resultAccounrManage.filter(
+//             (item) => parseInt(item.customer_id) === parseInt(customer_id)
+//           );
+
+//           const uniqueData = filteredData.filter(
+//             (value, index, self) =>
+//               index === self.findIndex((t) => t.id === value.id)
+//           );
+//           return { status: true, message: "success.", data: uniqueData };
+//         }
+//         // Reviewer
+//         else if (rows[0].role_id == 6) {
+//           const query = `
+//            SELECT  
+//           clients.customer_id AS customer_id,
+//           clients.id AS id,
+//               jobs.id AS Delete_Status,
+
+//           clients.trading_name AS client_name,
+//           clients.status AS status,
+//           client_types.type AS client_type_name,
+//           client_contact_details.email AS email,
+//           client_contact_details.phone_code AS phone_code,
+//           client_contact_details.phone AS phone,
+//           CONCAT(
+//               'cli_', 
+//               SUBSTRING(customers.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.client_code, 1, 15)
+//               ) AS client_code
+//         FROM 
+//             clients
+//         JOIN 
+//           customers ON customers.id = clients.customer_id   
+//         JOIN
+//             client_types ON client_types.id = clients.client_type
+//             LEFT JOIN 
+//             client_contact_details ON client_contact_details.id = (
+//                 SELECT MIN(cd.id)
+//                 FROM client_contact_details cd
+//                 WHERE cd.client_id = clients.id
+//             )
+//         LEFT JOIN
+//           jobs ON jobs.client_id = clients.id 
+//         LEFT JOIN 
+//           staffs ON customers.staff_id = staffs.id
+//         WHERE 
+//           (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+//         GROUP BY
+//         CASE 
+//             WHEN jobs.reviewer = ? THEN jobs.client_id 
+//             ELSE clients.id
+//         END
+//         ORDER BY 
+//         clients.id DESC
+//             `;
+
+//           try {
+//             const [resultReviewer] = await pool.execute(query, [
+//               StaffUserId,
+//               customer_id,
+//               StaffUserId,
+//               StaffUserId,
+//               StaffUserId,
+//               StaffUserId,
+//               customer_id,
+//               StaffUserId,
+//             ]);
+//           } catch (error) {
+//             console.log("error", error);
+//           }
+
+//           if (resultReviewer.length == 0) {
+//             return { status: true, message: "success.", data: resultReviewer };
+//           }
+
+//           const filteredData = resultReviewer.filter(
+//             (item) => parseInt(item.customer_id) === parseInt(customer_id)
+//           );
+
+//           const uniqueData = filteredData.filter(
+//             (value, index, self) =>
+//               index === self.findIndex((t) => t.id === value.id)
+//           );
+//           return { status: true, message: "success.", data: uniqueData };
+//         } else {
+//           const query = `
+//           SELECT  
+//               clients.id AS id,
+//               clients.trading_name AS client_name,
+//               clients.status AS status,
+//                   jobs.id AS Delete_Status,
+
+//               client_types.type AS client_type_name,
+//               client_contact_details.email AS email,
+//               client_contact_details.phone_code AS phone_code,
+//               client_contact_details.phone AS phone,
+//               CONCAT(
+//                   'cli_', 
+//                   SUBSTRING(customers.trading_name, 1, 3), '_',
+//                   SUBSTRING(clients.trading_name, 1, 3), '_',
+//                   SUBSTRING(clients.client_code, 1, 15)
+//                   ) AS client_code
+//           FROM 
+//               clients
+//           JOIN 
+//              customers ON customers.id = clients.customer_id    
+//           JOIN 
+//               client_types ON client_types.id = clients.client_type
+//               LEFT JOIN    jobs ON jobs.client_id = clients.id
+
+//           LEFT JOIN 
+//               client_contact_details ON client_contact_details.id = (
+//                   SELECT MIN(cd.id)
+//                   FROM client_contact_details cd
+//                   WHERE cd.client_id = clients.id
+//               )
+//           WHERE clients.customer_id = ?
+//           GROUP BY
+//     clients.id
+//        ORDER BY 
+//           clients.id DESC;
+//             `;
+//           const [result] = await pool.execute(query, [customer_id]);
+//           return { status: true, message: "success.", data: result };
+//         }
+//       }
+//     } else {
+//       const [rows] = await pool.execute(
+//         'SELECT id , role_id  FROM staffs WHERE id = "' +
+//           StaffUserId +
+//           '" LIMIT 1'
+//       );
+
+//       if (rows.length > 0) {
+//         // Allocated to
+//         if (rows[0].role_id == 3) {
+//           const query = `
+//            SELECT  
+//           clients.customer_id AS customer_id,
+//           clients.id AS id,
+//               jobs.id AS Delete_Status,
+
+//           clients.trading_name AS client_name,
+//           clients.status AS status,
+//           client_types.type AS client_type_name,
+//           client_contact_details.email AS email,
+//           client_contact_details.phone_code AS phone_code,
+//           client_contact_details.phone AS phone,
+//           CONCAT(
+//               'cli_', 
+//               SUBSTRING(customers.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.client_code, 1, 15)
+//               ) AS client_code
+//         FROM 
+//             clients
+//         JOIN 
+//           customers ON customers.id = clients.customer_id    
+//         JOIN 
+//             client_types ON client_types.id = clients.client_type
+//             LEFT JOIN 
+//             client_contact_details ON client_contact_details.id = (
+//                 SELECT MIN(cd.id)
+//                 FROM client_contact_details cd
+//                 WHERE cd.client_id = clients.id
+//             )
+//         LEFT JOIN
+//           jobs ON jobs.client_id = clients.id
+//         LEFT JOIN 
+//           staffs ON customers.staff_id = staffs.id   
+//         WHERE 
+//           (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+//         GROUP BY 
+//         CASE 
+//             WHEN jobs.allocated_to = ? THEN jobs.client_id
+//             ELSE clients.id
+//         END
+//         ORDER BY 
+//         clients.id DESC
+//             `;
+//           const [resultAllocated] = await pool.execute(query, [
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//           ]);
+//           if (resultAllocated.length == 0) {
+//             return { status: true, message: "success.", data: resultAllocated };
+//           }
+//           const filteredData = resultAllocated.filter(
+//             (item) => parseInt(item.customer_id) === parseInt(customer_id)
+//           );
+
+//           const uniqueData = filteredData.filter(
+//             (value, index, self) =>
+//               index === self.findIndex((t) => t.id === value.id)
+//           );
+//           return { status: true, message: "success.", data: uniqueData };
+//         }
+//         // Account Manger
+//         else if (rows[0].role_id == 4) {
+//           const query = `
+//            SELECT  
+//           clients.customer_id AS customer_id,
+//           clients.id AS id,
+//               jobs.id AS Delete_Status,
+
+//           clients.trading_name AS client_name,
+//           clients.status AS status,
+//           client_types.type AS client_type_name,
+//           client_contact_details.email AS email,
+//           client_contact_details.phone_code AS phone_code,
+//           client_contact_details.phone AS phone,
+//           CONCAT(
+//               'cli_', 
+//               SUBSTRING(customers.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.client_code, 1, 15)
+//               ) AS client_code
+//         FROM 
+//             clients
+//         JOIN 
+//           customers ON customers.id = clients.customer_id    
+//         JOIN 
+//             client_types ON client_types.id = clients.client_type
+//             LEFT JOIN 
+//             client_contact_details ON client_contact_details.id = (
+//                 SELECT MIN(cd.id)
+//                 FROM client_contact_details cd
+//                 WHERE cd.client_id = clients.id
+//             )
+//         LEFT JOIN
+//           jobs ON jobs.client_id = clients.id
+//         LEFT JOIN 
+//           staffs ON customers.staff_id = staffs.id
+//         LEFT JOIN 
+//           customer_services ON customer_services.customer_id = customers.id
+//         LEFT JOIN 
+//           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
+//           WHERE 
+//           (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
+//         ORDER BY 
+//         clients.id DESC
+//             `;
+
+//           //   WHERE
+//           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+
+//           const [resultAccounrManage] = await pool.execute(query, [
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//             customer_id,
+//           ]);
+//           if (resultAccounrManage.length == 0) {
+//             return {
+//               status: true,
+//               message: "success.",
+//               data: resultAccounrManage,
+//             };
+//           }
+
+//           const filteredData = resultAccounrManage.filter(
+//             (item) => parseInt(item.customer_id) === parseInt(customer_id)
+//           );
+
+//           const uniqueData = filteredData.filter(
+//             (value, index, self) =>
+//               index === self.findIndex((t) => t.id === value.id)
+//           );
+//           return { status: true, message: "success.", data: uniqueData };
+//         }
+//         // Reviewer
+//         else if (rows[0].role_id == 6) {
+//           const query = `
+//            SELECT  
+//           clients.customer_id AS customer_id,
+//           clients.id AS id,
+//               jobs.id AS Delete_Status,
+
+//           clients.trading_name AS client_name,
+//           clients.status AS status,
+//           client_types.type AS client_type_name,
+//           client_contact_details.email AS email,
+//           client_contact_details.phone_code AS phone_code,
+//           client_contact_details.phone AS phone,
+//           CONCAT(
+//               'cli_', 
+//               SUBSTRING(customers.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.trading_name, 1, 3), '_',
+//               SUBSTRING(clients.client_code, 1, 15)
+//               ) AS client_code
+//         FROM 
+//             clients
+//         JOIN 
+//           customers ON customers.id = clients.customer_id   
+//         JOIN
+//             client_types ON client_types.id = clients.client_type
+//             LEFT JOIN 
+//             client_contact_details ON client_contact_details.id = (
+//                 SELECT MIN(cd.id)
+//                 FROM client_contact_details cd
+//                 WHERE cd.client_id = clients.id
+//             )
+//         LEFT JOIN
+//           jobs ON jobs.client_id = clients.id 
+//         LEFT JOIN 
+//           staffs ON customers.staff_id = staffs.id
+//         WHERE 
+//           (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
+//         GROUP BY
+//         CASE 
+//             WHEN jobs.reviewer = ? THEN jobs.client_id 
+//             ELSE clients.id
+//         END
+//         ORDER BY 
+//         clients.id DESC
+//             `;
+
+//           const [resultReviewer] = await pool.execute(query, [
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             StaffUserId,
+//             customer_id,
+//             StaffUserId,
+//           ]);
+
+//           if (resultReviewer.length == 0) {
+//             return { status: true, message: "success.", data: resultReviewer };
+//           }
+
+//           const filteredData = resultReviewer.filter(
+//             (item) => parseInt(item.customer_id) === parseInt(customer_id)
+//           );
+//           const uniqueData = filteredData.filter(
+//             (value, index, self) =>
+//               index === self.findIndex((t) => t.id === value.id)
+//           );
+//           return { status: true, message: "success.", data: uniqueData };
+//         } else {
+//           const query = `
+//           SELECT  
+//               clients.id AS id,
+//               clients.trading_name AS client_name,
+//               clients.status AS status,
+//                   jobs.id AS Delete_Status,
+
+//               client_types.type AS client_type_name,
+//               client_contact_details.email AS email,
+//               client_contact_details.phone_code AS phone_code,
+//               client_contact_details.phone AS phone,
+//               CONCAT(
+//                   'cli_', 
+//                   SUBSTRING(customers.trading_name, 1, 3), '_',
+//                   SUBSTRING(clients.trading_name, 1, 3), '_',
+//                   SUBSTRING(clients.client_code, 1, 15)
+//                   ) AS client_code
+//           FROM 
+//               clients
+//           JOIN 
+//              customers ON customers.id = clients.customer_id    
+//           JOIN 
+//               client_types ON client_types.id = clients.client_type
+//               LEFT JOIN     jobs ON jobs.client_id = clients.id
+
+//           LEFT JOIN 
+//               client_contact_details ON client_contact_details.id = (
+//                   SELECT MIN(cd.id)
+//                   FROM client_contact_details cd
+//                   WHERE cd.client_id = clients.id
+//               )
+//           WHERE clients.customer_id = ?
+//           GROUP BY
+//     clients.id
+//        ORDER BY 
+//           clients.id DESC;
+//             `;
+//           const [result] = await pool.execute(query, [customer_id]);
+//           return { status: true, message: "success.", data: result };
+//         }
+//       }
+//     }
+//   } catch (err) {
+//     return { status: false, message: "Err Client Get" };
+//   }
+// };
 
 const getByidClient = async (client) => {
   const { client_id } = client;
@@ -2579,8 +3235,8 @@ const clientUpdate = async (client) => {
 
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -2652,8 +3308,8 @@ const clientUpdate = async (client) => {
         const msgLog =
           model_name.length > 1
             ? model_name.slice(0, -1).join(", ") +
-              " and " +
-              model_name.slice(-1)
+            " and " +
+            model_name.slice(-1)
             : model_name[0];
 
         const currentDate = new Date();
@@ -2693,8 +3349,8 @@ const clientUpdate = async (client) => {
       for (const detail of contactDetails) {
         let customer_contact_person_role_id =
           detail.customer_contact_person_role_id == null ||
-          detail.customer_contact_person_role_id == "" ||
-          detail.customer_contact_person_role_id == undefined
+            detail.customer_contact_person_role_id == "" ||
+            detail.customer_contact_person_role_id == undefined
             ? 0
             : detail.customer_contact_person_role_id;
 
@@ -2709,7 +3365,7 @@ const clientUpdate = async (client) => {
         let phone = detail.phone;
         let alternate_phone_code =
           detail.alternate_phone_code == undefined ||
-          detail.alternate_phone_code == ""
+            detail.alternate_phone_code == ""
             ? ""
             : detail.alternate_phone_code;
         let alternate_phone = detail.alternate_phone;
@@ -2783,8 +3439,8 @@ const clientUpdate = async (client) => {
         const msgLog =
           model_name.length > 1
             ? model_name.slice(0, -1).join(", ") +
-              " and " +
-              model_name.slice(-1)
+            " and " +
+            model_name.slice(-1)
             : model_name[0];
 
         const currentDate = new Date();
@@ -2882,8 +3538,8 @@ const clientUpdate = async (client) => {
         for (const detail of member_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -2898,7 +3554,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -2976,8 +3632,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3018,8 +3674,8 @@ const clientUpdate = async (client) => {
         for (const detail of trustee_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3034,7 +3690,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3112,8 +3768,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3155,8 +3811,8 @@ const clientUpdate = async (client) => {
         for (const detail of member_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3171,7 +3827,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3249,8 +3905,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3293,8 +3949,8 @@ const clientUpdate = async (client) => {
         for (const detail of beneficiaries_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3309,7 +3965,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3387,8 +4043,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3429,8 +4085,8 @@ const clientUpdate = async (client) => {
         for (const detail of trustee_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3445,7 +4101,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3523,8 +4179,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();

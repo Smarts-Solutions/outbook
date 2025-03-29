@@ -29,32 +29,29 @@ const ClientLists = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerData(response.data);
-          if (
-            response?.data[0]?.id != "" &&
-            response?.data[0]?.id != undefined
-          ) {
-            const FilterCustomer = response.data.filter(
-              (item) => item.status === "1" && item.form_process === "4"
-            );
-            if (FilterCustomer.length > 0) {
-              selectCustomerId(
-                FilterCustomer[0]?.id,
-                FilterCustomer[0]?.trading_name
-              );
-              setCustomerId(customer_id_sidebar || FilterCustomer[0]?.id);
-              GetAllClientData(customer_id_sidebar || FilterCustomer[0]?.id);
-              setCustomerName(FilterCustomer[0]?.trading_name);
-              setHararchyData({
-                customer: {
-                  id: customer_id_sidebar || FilterCustomer[0]?.id,
-                  trading_name: FilterCustomer[0]?.trading_name,
-                },
-              });
-              setActiveTab("client");
-            } else {
-              setCustomerData([]);
-            }
-          }
+          // if (response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
+          //   const FilterCustomer = response.data.filter(
+          //     (item) => item.status === "1" && item.form_process === "4"
+          //   );
+          //   if (FilterCustomer.length > 0) {
+          //     selectCustomerId(
+          //       FilterCustomer[0]?.id,
+          //       FilterCustomer[0]?.trading_name
+          //     );
+          //     setCustomerId(customer_id_sidebar || FilterCustomer[0]?.id);
+          //     GetAllClientData(customer_id_sidebar || FilterCustomer[0]?.id);
+          //     setCustomerName(FilterCustomer[0]?.trading_name);
+          //     setHararchyData({
+          //       customer: {
+          //         id: customer_id_sidebar || FilterCustomer[0]?.id,
+          //         trading_name: FilterCustomer[0]?.trading_name,
+          //       },
+          //     });
+          //     setActiveTab("client");
+          //   } else {
+          //     setCustomerData([]);
+          //   }
+          // }
         } else {
           setCustomerData([]);
         }
@@ -974,6 +971,7 @@ const ClientLists = () => {
   };
 
   const selectCustomerId = (id, name) => {
+   
     if (id != "") {
       sessionStorage.setItem("customer_id_sidebar", id);
       setCustomerId(id);
@@ -983,6 +981,8 @@ const ClientLists = () => {
       setActiveTab("client");
     } else {
       setCustomerId("");
+      setCustomerName("");
+      GetAllClientData("");
       setClientData([]);
       setHararchyData({ customer: { id: "", trading_name: "" } });
     }
@@ -1009,6 +1009,7 @@ const ClientLists = () => {
                   selectCustomerId(selectedId, selectedCustomer?.trading_name);
                 }}
               >
+                <option value="">Select Customer</option>
                 {CustomerData &&
                   CustomerData.map((val, index) =>
                     Number(val.status) === 1 &&
@@ -1123,8 +1124,10 @@ const ClientLists = () => {
             </div>
           </div>
         </div>
-
-        <Hierarchy
+        
+        {
+          customerId != "" ?
+          <Hierarchy
           show={["Customer", activeTab]}
           active={1}
           data={hararchyData}
@@ -1136,7 +1139,9 @@ const ClientLists = () => {
               : ""
           }
         />
-
+          :""
+        }
+       
         <div className="tab-content" id="pills-tabContent">
           {tabs1.map((tab) => (
             <div

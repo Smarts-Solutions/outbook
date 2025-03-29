@@ -535,7 +535,8 @@ const ClientList = () => {
                 const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
                 selectCustomerId(selectedId, selectedCustomer?.trading_name);
               }}
-            >
+            > 
+            
               {customerDataAll &&
                 customerDataAll.map((val, index) => 
                   Number(val.status) === 1 && Number(val.form_process) === 4 ?
