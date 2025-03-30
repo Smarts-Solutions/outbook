@@ -341,7 +341,7 @@ const ClientEdit = () => {
           : location.state.row.client_type_name == "Partnership" ? 3
             : location.state.row.client_type_name == "Individual" ? 4
               : location.state.row.client_type_name == "Charity Incorporated Organisation" ? 5
-                : location.state.row.client_type_name == "Unincorporated Association" ? 6
+                : location.state.row.client_type_name == "Charity Unincorporated Association" ? 6
                   : 7
     );
     CountryData();
@@ -589,7 +589,7 @@ const ClientEdit = () => {
       }
 
     }
-    if (location?.state?.row?.client_type_name == "Unincorporated Association") {
+    if (location?.state?.row?.client_type_name == "Charity Unincorporated Association") {
       setAssociationDetails((prevState) => ({
         ...prevState,
         AssociationName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
@@ -1911,7 +1911,7 @@ const ClientEdit = () => {
                                       <option value={3}>Partnership</option>
                                       <option value={4}>Individual</option>
                                       <option value={5}>Charity Incorporated Organisation</option>
-                                      <option value={6}>Unincorporated Association</option>
+                                      <option value={6}>Charity Unincorporated Association</option>
                                       <option value={7}>Trust</option>
                                     </select>
                                   </div>

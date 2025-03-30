@@ -1034,7 +1034,7 @@ const ClientList = () => {
                           {informationData && informationData.client_type == 1
                             ? "Sole Trader"
                             : informationData.client_type == 2
-                              ? "Company" : informationData.client_type == 3 ? "Partnership" :  getClientDetails?.data?.client?.client_type==5 ? "Charity Incorporated Organisation Information" :  getClientDetails?.data?.client?.client_type==6 ? "Unincorporated Association Information" : getClientDetails?.data?.client?.client_type==7 ?  "Trust" : ""
+                              ? "Company" : informationData.client_type == 3 ? "Partnership" :  getClientDetails?.data?.client?.client_type==5 ? "Charity Incorporated Organisation Information" :  getClientDetails?.data?.client?.client_type==6 ? "Charity Unincorporated Association Information" : getClientDetails?.data?.client?.client_type==7 ?  "Trust" : ""
 
                           }
                         </h4>

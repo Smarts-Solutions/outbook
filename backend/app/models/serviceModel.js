@@ -27,9 +27,32 @@ const createServices = async (Services) => {
                 module_id:result.insertId
             }
         );
+
+       if(result.insertId > 0){
+            const service_id = result.insertId
+            const type = name
+            const queryJobType = `
+            INSERT INTO job_types (service_id,type)
+            VALUES (?,?)
+            `;
+            const [resultJobType] = await pool.execute(queryJobType, [service_id, type]);
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: Services.StaffUserId,
+                    ip: Services.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: "job_types",
+                    log_message: `created job type ${type}`,
+                    permission_type: "created",
+                    module_id:resultJobType.insertId
+                }
+            );
+        }
+
         return {status: true ,message: 'Service created successfully.' , data : result.insertId};
     } catch (err) {
-        console.error('Error inserting data:', err);
+        console.log('Error inserting data:', err);
         throw err;
     }
 };
@@ -44,7 +67,7 @@ const getServices = async () => {
         const [result] = await pool.execute(query);
         return result;
     } catch (err) {
-        console.error('Error selecting data:', err);
+        console.log('Error selecting data:', err);
         throw err;
     }
 }
@@ -59,7 +82,7 @@ const getServicesAll = async () => {
         const [result] = await pool.execute(query);
         return result;
     } catch (err) {
-        console.error('Error selecting data:', err);
+        console.log('Error selecting data:', err);
         throw err;
     }
 }
@@ -90,7 +113,7 @@ const deleteServices = async (ServicesId) => {
         await pool.execute(query, [ServicesId.id]);
         
     } catch (err) {
-        console.error('Error deleting data:', err);
+        console.log('Error deleting data:', err);
         throw err;
     }
 };
@@ -153,7 +176,7 @@ const updateServices = async (Services) => {
         }
         return {status: true ,message: 'Service updated successfully.' , data : result.affectedRows};
     } catch (err) {
-        console.error('Error updating data:', err);
+        console.log('Error updating data:', err);
         throw err;
     }
 };

@@ -1858,7 +1858,7 @@ const CreateClient = () => {
                                       <option value={3}>Partnership</option>
                                       <option value={4}>Individual</option>
                                       <option value={5}>Charity Incorporated Organisation</option>
-                                      <option value={6}>Unincorporated Association</option>
+                                      <option value={6}>Charity Unincorporated Association</option>
                                       <option value={7}>Trust</option>
                                     </select>
                                   </div>
