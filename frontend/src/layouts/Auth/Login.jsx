@@ -78,6 +78,7 @@ const Login = () => {
             });
           setTimeout(() => {
             navigate("/admin/dashboard");
+            window.location.reload();
           }, 1000);
 
         } else {
@@ -134,6 +135,7 @@ const Login = () => {
               });
 
             navigate("/admin/dashboard");
+            window.location.reload();
           } else {
             sweatalert.fire({
               title: response.message,

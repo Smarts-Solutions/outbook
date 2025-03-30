@@ -111,6 +111,7 @@ const Admin_Route = () => {
 
               if (settingView && settingView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "customer") {
               const customerView = item.items.find(
@@ -119,12 +120,14 @@ const Admin_Route = () => {
 
               if (customerView && customerView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "staff") {
               const staffView = item.items.find((item) => item.type === "view");
 
               if (staffView && staffView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "status") {
               const statusView = item.items.find(
@@ -133,6 +136,7 @@ const Admin_Route = () => {
 
               if (statusView && statusView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "report") {
               const reportView = item.items.find(
@@ -141,6 +145,7 @@ const Admin_Route = () => {
 
               if (reportView && reportView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             }
           }
