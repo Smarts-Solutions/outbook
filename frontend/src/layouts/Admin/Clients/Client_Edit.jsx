@@ -5075,7 +5075,7 @@ const ClientEdit = () => {
                                 <div className="card card_shadow ">
                                   <div className="card-header  card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                      Unincorporated Association Information
+                                      Charity Unincorporated Association Information
                                     </h4>
                                   </div>
                                   {/* end card header */}

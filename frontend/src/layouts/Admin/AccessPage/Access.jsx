@@ -25,7 +25,7 @@ const Access = () => {
                 setRoleDataAll({ loading: false, data: [] });
             }
         } catch (error) {
-          
+
             setRoleDataAll({ loading: false, data: [] });
         }
     };
@@ -62,10 +62,10 @@ const Access = () => {
         try {
             const req = { "action": "get", "role_id": val.id };
             const data = { req, authToken: token };
-         
+
             const response = await dispatch(GetAccess(data)).unwrap();
             if (response.status) {
-               
+
                 const assignedItems = response.data.filter((item) => {
                     item.items.forEach((data) => {
                         if (data.is_assigned === 1) {
@@ -80,19 +80,19 @@ const Access = () => {
                 setAccessData({ loading: false, data: [] });
             }
         } catch (error) {
-           
+
             setAccessData({ loading: false, data: [] });
         }
     }
 
-    const AccordionItem = ({ section, TradingName, role_id }) => {  
+    const AccordionItem = ({ section, TradingName, role_id }) => {
         return (
             <div>
                 <h4 className="card-title fs-16  mb-3 flex-grow-1" style={{ marginBottom: '20px !important' }}>
                     {section.permission_name}
                 </h4>
 
-               
+
                 <div className="row ">
                     {section.items.map((item, id) => (
                         <CheckboxItem
@@ -102,7 +102,7 @@ const Access = () => {
                             title={section.title}
                             TradingName={TradingName}
                             role_id={role_id}
-                            
+
                         />
                     ))}
                 </div>
@@ -151,7 +151,7 @@ const Access = () => {
                 });
             }
         } catch (error) {
-          
+
             Swal.fire({
                 title: 'Error!',
                 text: 'An error occurred while updating permissions. Please try again later.',
@@ -165,23 +165,23 @@ const Access = () => {
     useEffect(() => {
         roleData()
     }, []);
-    
-  
- 
+
+
+
 
     return (
 
         <div className='container-fluid'>
             <div className='content-title'>
                 <div className='tab-title'>
-                            <h3 className='mt-0'>Access</h3>
-                        </div>
-                </div> 
-                <div className='report-data mt-4'>
-                <div className="tab-title"><h3>Set Default Access</h3></div> 
-                    <div className='mt-3'>
+                    <h3 className='mt-0'>Access</h3>
+                </div>
+            </div>
+            <div className='report-data mt-4'>
+                <div className="tab-title"><h3>Set Default Access</h3></div>
+                <div className='mt-3'>
                     <div className="accordion" id="default-accordion-example">
-                                    {roleDataAll.data && roleDataAll.data.map((val, index) => (
+                        {/* {roleDataAll.data && roleDataAll.data.map((val, index) => (
                                         <div className="accordion-item mt-2" key={index}>
                                             <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
                                                 <button
@@ -210,19 +210,51 @@ const Access = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
+                                    ))} */}
+                        {roleDataAll.data && roleDataAll.data
+                            .filter(val => val.role_name.toUpperCase() !== "ADMIN") // Filter out "admin"
+                            .map((val, index) => (
+                                <div className="accordion-item mt-2" key={index}>
+                                    <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
+                                        <button
+                                            className="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target={`#collapse${index}`}
+                                            aria-expanded="true"
+                                            aria-controls={`collapse${index}`}>
+                                            {val.role_name}
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id={`collapse${index}`}
+                                        className="accordion-collapse collapse"
+                                        aria-labelledby={`heading${index}`}
+                                        data-bs-parent="#default-accordion-example">
+                                        <div className="accordion-body">
+                                            <div className="row">
+                                                {accessData && accessData.data.map((section, index) => (
+                                                    <div key={index} className="col-lg-2 col-md-6">
+                                                        <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                        {/* <Datatable filter={true} columns={[
+                            ))}
+                    </div>
+                    {/* <Datatable filter={true} columns={[
                             { name: 'Role Name', selector: row => row.role_name, sortable: true },
                         ]} data={roleDataAll.data} /> */}
-                    </div>
-                    <div className="modal-footer"> 
-                       <button type="button" className="btn btn-outline-success mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
-                    </div>
                 </div>
+                <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-success mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
+                </div>
+            </div>
 
 
-            
+
         </div>
 
     );
