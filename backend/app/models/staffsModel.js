@@ -403,7 +403,7 @@ const sharepoint_token = async () => {
         return "sharepoint_token_not_found";
       }
     } else {
-      console.log(" sharepoint record not found:");
+      console.log("sharepoint_token_not_found");
       return "sharepoint_token_not_found";
     }
   } catch (err) {
@@ -496,15 +496,11 @@ const getSharePointToken = async (staff) => {
         result.access_token != "" &&
         result.access_token != undefined
       ) {
-        const TokenExpiry = await CheckExpirySharePointToken(
-          result.access_token
-        );
+        const TokenExpiry = await CheckExpirySharePointToken(result.access_token );
+
         if (TokenExpiry) {
-          const genrateAccessToken = await genrateSharePointAccessToken(
-            result.refresh_token,
-            result.client_id,
-            result.client_secret
-          );
+          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token,result.client_id,result.client_secret);
+
           if (genrateAccessToken == "error") {
             return "sharepoint_token_not_found";
           } else {

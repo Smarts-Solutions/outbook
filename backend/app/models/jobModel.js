@@ -613,7 +613,6 @@ const getJobByCustomer = async (job) => {
     placeholders = customer_id.map(() => "?").join(", ");
   }
 
-
   // Line Manager
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
   let LineManageStaffId = LineManage?.map(item => item.staff_to);
