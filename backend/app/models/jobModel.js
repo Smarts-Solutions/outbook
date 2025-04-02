@@ -613,8 +613,6 @@ const getJobByCustomer = async (job) => {
     placeholders = customer_id.map(() => "?").join(", ");
   }
 
-  console.log("placeholders jobs", placeholders);
-  console.log("customer_id jobs", customer_id);
 
   // Line Manager
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
@@ -693,7 +691,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN (${placeholders}))
+        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN (${placeholders}))
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
@@ -771,7 +769,7 @@ const getJobByCustomer = async (job) => {
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id = ? AND jobs.customer_id IN (${placeholders})) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN(${placeholders}))
+        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id = ? AND jobs.customer_id IN (${placeholders})) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders}))
         GROUP BY 
         jobs.id 
         ORDER BY 
@@ -850,7 +848,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.reviewer = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN(${placeholders}))
+        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders}))
         GROUP BY jobs.id 
         ORDER BY 
          jobs.id DESC;
@@ -920,7 +918,7 @@ const getJobByCustomer = async (job) => {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.customer_id IN (${placeholders}))
+        jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN (${placeholders}))
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
@@ -944,10 +942,11 @@ const getJobByClient = async (job) => {
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
   let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-  if (LineManageStaffId.length ==  0) {
+  if (LineManageStaffId.length == 0) {
       LineManageStaffId.push(StaffUserId);
   }
-
+  
+  console.log("LineManageStaffId", LineManageStaffId);
 
   try {
     const [ExistStaff] = await pool.execute(
@@ -1021,7 +1020,7 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id 
      AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
+     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
@@ -1098,7 +1097,7 @@ const getJobByClient = async (job) => {
    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
    WHERE 
    jobs.client_id = clients.id AND
-   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
    GROUP BY 
    jobs.id
     ORDER BY
@@ -1176,7 +1175,7 @@ const getJobByClient = async (job) => {
      jobs.client_id = clients.id 
      AND
      (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
-     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
+     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
@@ -1252,7 +1251,7 @@ const getJobByClient = async (job) => {
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE 
      jobs.client_id = clients.id AND
-     jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) OR jobs.client_id = ?)
+     jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;

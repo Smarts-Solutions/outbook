@@ -981,6 +981,7 @@ const ClientLists = () => {
       setHararchyData({ customer: { id: id, trading_name: name } });
       setActiveTab("client");
     } else {
+      sessionStorage.removeItem("customer_id_sidebar");
       setGetJobDetails([]);
       setCustomerId("");
       setCustomerName("");
@@ -1019,7 +1020,7 @@ const ClientLists = () => {
                       <option
                         key={index}
                         value={val.id}
-                        selected={customerId === val.id}
+                        selected={Number(customerId) === Number(val.id)}
                       >
                         {val.trading_name}
                       </option>

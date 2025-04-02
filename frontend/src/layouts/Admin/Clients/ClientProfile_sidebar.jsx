@@ -14,15 +14,51 @@ const ClientList = () => {
   const cust_id_sidebar = sessionStorage.getItem('cust_id_sidebar');
   const cli_id_sidebar = sessionStorage.getItem('cli_id_sidebar');
 
+  const cust_id_sidebar_name = sessionStorage.getItem('cust_id_sidebar_name');
+  const cli_id_sidebar_name = sessionStorage.getItem('cli_id_sidebar_name');
 
-  useEffect(() => {
-    GetAllJobListByCustomer("");
-    GetAllCustomer();
-    GetStatus();
-  }, []);
+
 
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState({ id: cust_id_sidebar || "", trading_name: "" });
+
+
+  useEffect(() => {
+
+    GetAllJobListByCustomer("");
+    GetAllCustomer();
+    GetStatus();
+    if (![undefined,"", null].includes(cust_id_sidebar) && ![undefined,"", null].includes(cli_id_sidebar)) {
+     getAllClientData1(cust_id_sidebar,cust_id_sidebar_name, cli_id_sidebar ,cli_id_sidebar_name);
+     setHararchyData({ customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name }, client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name } });
+    }
+  }, []);
+
+  
+  
+    const getAllClientData1 = async (customer_id ,customer_name, client_id ,client_name) => {
+      const req = { action: "get", customer_id: customer_id };
+      const data = { req: req, authToken: token };
+      await dispatch(ClientAction(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            setClientData(response.data);
+            GetClientDetails(client_id);
+            GetAllJobList(client_id);
+            setClientDetailSingle({ id: client_id, client_name: client_name });
+
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    };
+
+
+
+
+
 
 
   const GetAllCustomer = async () => {
@@ -62,12 +98,24 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setClientData(response.data);
+      
           if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-            setClientDetailSingle({ id: cli_id_sidebar || response?.data[0]?.id, client_name: response?.data[0]?.client_name });
-            setHararchyData({ customer: { id: id, trading_name: name }, client: { id: cli_id_sidebar || response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
-            GetAllJobList(cli_id_sidebar || response?.data[0]?.id);
-            GetClientDetails(cli_id_sidebar || response?.data[0]?.id);
+
+            sessionStorage.setItem('cli_id_sidebar',response?.data[0]?.id);
+            sessionStorage.setItem('cli_id_sidebar_name',response?.data[0]?.client_name);
+            
+            setClientDetailSingle({ id:response?.data[0]?.id, client_name: response?.data[0]?.client_name });
+            setHararchyData({ customer: { id: id, trading_name: name }, client: { id:response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
+            GetAllJobList(response?.data[0]?.id);
+            GetClientDetails(response?.data[0]?.id);
             setActiveTab("NoOfJobs");
+          }
+          if(response.data.length == 0){
+            sessionStorage.remove('cli_id_sidebar');
+            setClientDetailSingle({ id: '', client_name: '' });
+            setHararchyData({ customer: { id: id, trading_name: name }, client: { id: '', client_name: '' } });
+            GetAllJobList("");
+            GetClientDetails("");
           }
         } else {
           setClientData([]);
@@ -488,6 +536,7 @@ const ClientList = () => {
   const selectCustomerId = (id, name) => {
     if (id != "") {
       sessionStorage.setItem('cust_id_sidebar', id);
+      sessionStorage.setItem('cust_id_sidebar_name', name);
       setCustomerData([]);
       setCustomerDetails({ id: id, trading_name: name });
       setHararchyData({ customer: { id: id, trading_name: name }, client: { id: '', client_name: '' } });
@@ -495,6 +544,7 @@ const ClientList = () => {
       setActiveTab("NoOfJobs");
       GetAllClientData(id, name);
     } else {
+     // sessionStorage.remove('cust_id_sidebar');
       GetAllJobListByCustomer("");
       setCustomerData([]);
       setClientData([]);
@@ -510,12 +560,14 @@ const ClientList = () => {
   const selectClientId = (id, name) => {
     if (id != "") {
       sessionStorage.setItem('cli_id_sidebar', id);
+      sessionStorage.setItem('cli_id_sidebar_name', name);
       GetAllJobList(id);
       GetClientDetails(id);
       setClientDetailSingle({ id: id, client_name: name });
       setHararchyData({ customer: customerDetails, client: { id: id, client_name: name } });
       setActiveTab("NoOfJobs");
     } else {
+      sessionStorage.remove('cli_id_sidebar');
       setClientDetailSingle({ id: '', client_name: '' });
       setHararchyData({ customer: customerDetails, client: { id: '', client_name: '' } });
       setClientDetails({ loading: false, data: [], });
@@ -564,7 +616,7 @@ const ClientList = () => {
                   <option
                     key={index}
                     value={val.id}
-                    selected={customerDetails.id == val.id}
+                    selected={Number(customerDetails.id) == Number(val.id)}
                   >
                     {val.trading_name}
                   </option>
