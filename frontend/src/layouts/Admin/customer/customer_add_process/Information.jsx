@@ -38,7 +38,9 @@ const Information = ({ id, pageStatus }) => {
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
+   
 
+  console.log("ManagerType", ManagerType);
 
 
   // state for sole trader
