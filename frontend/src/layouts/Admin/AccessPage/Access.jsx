@@ -15,6 +15,7 @@ const Access = () => {
     const [modalOpen, setOpenModalOpen] = useState(false);
 
 
+    console.log("checkboxState", checkboxState);
 
     const roleData = async () => {
         try {
@@ -30,11 +31,42 @@ const Access = () => {
         }
     };
 
-    const CheckboxItem = ({ id, label, role_id }) => {
+    const CheckboxItem = ({ id, label, role_id, permission_name }) => {
+
+
+
 
         const handleChange = (event) => {
             const checked = event.target.checked;
-            setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked }]);
+
+            // console.log("checked", checked);
+            // console.log("label", label);
+            // console.log("id", id);
+            // console.log("role_id", role_id);
+            // console.log("permission_name", permission_name);
+
+            // setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked , permission_name: permission_name}]);
+
+            setCheckboxState(prevState => {
+                let updatedState = prevState.filter(item => !(item.permission_id === id && item.role_id === role_id));
+        
+                // Add the updated permission
+                updatedState.push({ permission_id: id, role_id: role_id, is_assigned: checked, permission_name });
+        
+                // If "all clients" is unchecked, also uncheck "all jobs"
+                if (permission_name === "all clients" && !checked) {
+                    updatedState = updatedState.map(item => 
+                        item.permission_name === "all jobs" ? { ...item, is_assigned: false } : item
+                    );
+                }
+                else if (permission_name === "all jobs" && checked) {  
+                    updatedState = updatedState.map(item =>
+                        item.permission_name === "all clients" ? { ...item, is_assigned: true } : item
+                    );
+                }
+        
+                return updatedState;
+            });
         };
 
         const isChecked = checkboxState.some(item => item.permission_id === id && item.role_id === role_id && item.is_assigned);
@@ -69,7 +101,7 @@ const Access = () => {
                 const assignedItems = response.data.filter((item) => {
                     item.items.forEach((data) => {
                         if (data.is_assigned === 1) {
-                            setCheckboxState(prevState => [...prevState, { permission_id: data.id, role_id: val.id, is_assigned: data.is_assigned === 1 }]);
+                            setCheckboxState(prevState => [...prevState, { permission_id: data.id, role_id: val.id, is_assigned: data.is_assigned === 1 , permission_name: item.permission_name }]);
                         }
                     });
                 });
@@ -100,6 +132,7 @@ const Access = () => {
                             id={item.id}
                             label={item.type}
                             title={section.title}
+                            permission_name={section.permission_name}
                             TradingName={TradingName}
                             role_id={role_id}
 
@@ -182,35 +215,35 @@ const Access = () => {
                 <div className='mt-3'>
                     <div className="accordion" id="default-accordion-example">
                         {roleDataAll.data && roleDataAll.data.map((val, index) => (
-                                        <div className="accordion-item mt-2" key={index}>
-                                            <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
-                                                <button
-                                                    className=" accordion-button collapsed"
-                                                    type="button"
-                                                    data-bs-toggle="collapse"
-                                                    data-bs-target={`#collapse${index}`}
-                                                    aria-expanded="true"
-                                                    aria-controls={`collapse${index}`}>
-                                                    {val.role_name}
-                                                </button>
-                                            </h2>
-                                            <div
-                                                id={`collapse${index}`}
-                                                className="accordion-collapse collapse"
-                                                aria-labelledby={`heading${index}`}
-                                                data-bs-parent="#default-accordion-example">
-                                                <div className="accordion-body">
-                                                    <div className="row">
-                                                        {accessData && accessData.data.map((section, index) => (
-                                                            <div key={index} className="col-lg-2 col-md-6">
-                                                                <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                            <div className="accordion-item mt-2" key={index}>
+                                <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
+                                    <button
+                                        className=" accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target={`#collapse${index}`}
+                                        aria-expanded="true"
+                                        aria-controls={`collapse${index}`}>
+                                        {val.role_name}
+                                    </button>
+                                </h2>
+                                <div
+                                    id={`collapse${index}`}
+                                    className="accordion-collapse collapse"
+                                    aria-labelledby={`heading${index}`}
+                                    data-bs-parent="#default-accordion-example">
+                                    <div className="accordion-body">
+                                        <div className="row">
+                                            {accessData && accessData.data.map((section, index) => (
+                                                <div key={index} className="col-lg-2 col-md-6">
+                                                    <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
                                                 </div>
-                                            </div>
+                                            ))}
                                         </div>
-                                    ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                         {/* {roleDataAll.data && roleDataAll.data
                             .filter(val => val.role_name.toUpperCase() !== "ADMIN") // Filter out "admin"
                             .map((val, index) => (
