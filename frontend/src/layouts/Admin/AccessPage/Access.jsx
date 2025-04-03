@@ -181,7 +181,7 @@ const Access = () => {
                 <div className="tab-title"><h3>Set Default Access</h3></div>
                 <div className='mt-3'>
                     <div className="accordion" id="default-accordion-example">
-                        {/* {roleDataAll.data && roleDataAll.data.map((val, index) => (
+                        {roleDataAll.data && roleDataAll.data.map((val, index) => (
                                         <div className="accordion-item mt-2" key={index}>
                                             <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
                                                 <button
@@ -210,8 +210,8 @@ const Access = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    ))} */}
-                        {roleDataAll.data && roleDataAll.data
+                                    ))}
+                        {/* {roleDataAll.data && roleDataAll.data
                             .filter(val => val.role_name.toUpperCase() !== "ADMIN") // Filter out "admin"
                             .map((val, index) => (
                                 <div className="accordion-item mt-2" key={index}>
@@ -242,7 +242,7 @@ const Access = () => {
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            ))} */}
                     </div>
                     {/* <Datatable filter={true} columns={[
                             { name: 'Role Name', selector: row => row.role_name, sortable: true },

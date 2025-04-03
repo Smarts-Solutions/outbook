@@ -56,7 +56,7 @@ const CreateJob = () => {
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
-  
+
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [jobData, setJobData] = useState({
     AccountManager: "",
@@ -103,7 +103,7 @@ const CreateJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
     notes: "",
-    Bookkeeping_Frequency_id_2:"Daily",
+    Bookkeeping_Frequency_id_2: "Daily",
 
   });
 
@@ -130,9 +130,12 @@ const CreateJob = () => {
             loading: true,
             data: response.data,
           });
+
           setJobData((prevState) => ({
             ...prevState,
             Service: response.data?.services?.[0]?.service_id,
+            CustomerAccountManager:response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id.toString() || "",
+            EngagementModel : Object.entries(response.data?.engagement_model[0]).find(([key, value]) => value === "1")?.[0] || "",
           }));
         } else {
           setAllJobData({
@@ -301,7 +304,7 @@ const CreateJob = () => {
       }
     }
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
-    
+
       if (value == "Daily") {
         date.setDate(date.getDate() + 1);
         setJobData((prevState) => ({
@@ -489,7 +492,7 @@ const CreateJob = () => {
       due_on: jobData.DueOn,
       submission_deadline: jobData.SubmissionDeadline,
       customer_deadline_date: jobData.CustomerDeadlineDate,
-    
+
 
       sla_deadline_date: jobData?.SLADeadlineDate
         ? jobData?.SLADeadlineDate
@@ -556,22 +559,22 @@ const CreateJob = () => {
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-        .reduce((obj, key) => {
-          const keyMapping = {
-            fte_dedicated_staffing: "Fte Dedicated Staffing",
-            percentage_model: "Percentage Model",
-            adhoc_payg_hourly: "Adhoc Payg Hourly",
-            customised_pricing: "Customised Pricing",
-          };
+      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+      .reduce((obj, key) => {
+        const keyMapping = {
+          fte_dedicated_staffing: "Fte Dedicated Staffing",
+          percentage_model: "Percentage Model",
+          adhoc_payg_hourly: "Adhoc Payg Hourly",
+          customised_pricing: "Customised Pricing",
+        };
 
-          if (keyMapping[key]) {
-            RearrangeEngagementOptionArr.push(keyMapping[key]);
-          }
+        if (keyMapping[key]) {
+          RearrangeEngagementOptionArr.push(keyMapping[key]);
+        }
 
-          obj[key] = AllJobData.data.engagement_model[0][key];
-          return obj;
-        }, {})
+        obj[key] = AllJobData.data.engagement_model[0][key];
+        return obj;
+      }, {})
     : {};
 
   const totalHours =
@@ -657,8 +660,8 @@ const CreateJob = () => {
           : "Required",
       budgetedMinuteError:
         BudgetedHoursAddTask.minutes &&
-        BudgetedHoursAddTask.minutes >= 0 &&
-        BudgetedHoursAddTask.minutes <= 59
+          BudgetedHoursAddTask.minutes >= 0 &&
+          BudgetedHoursAddTask.minutes <= 59
           ? ""
           : "Required",
     };
@@ -1080,7 +1083,7 @@ const CreateJob = () => {
     );
 
 
-    if(jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily"){
+    if (jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily") {
       const date = new Date();
       date.setDate(date.getDate() + 1);
       setJobData((prevState) => ({
@@ -1138,6 +1141,9 @@ const CreateJob = () => {
 
     }));
   }, []);
+
+
+  console.log("jobData", jobData);
 
   return (
     <div>
@@ -1362,6 +1368,7 @@ const CreateJob = () => {
                                         </option>
                                       ))}
                                     </select>
+                                   
                                     {errors["CustomerAccountManager"] && (
                                       <div className="error-text">
                                         {errors["CustomerAccountManager"]}
@@ -1565,7 +1572,7 @@ const CreateJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                      // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+                                    // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(
@@ -1959,7 +1966,7 @@ const CreateJob = () => {
                                           <option key={key} value={key}>
                                             {
                                               RearrangeEngagementOptionArr[
-                                                index
+                                              index
                                               ]
                                             }
                                           </option>
@@ -2191,14 +2198,14 @@ const CreateJob = () => {
                                         {errors[
                                           "FilingWithCompaniesHouseRequired"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "FilingWithCompaniesHouseRequired"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -2286,14 +2293,14 @@ const CreateJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentRequired"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "OpeningBalanceAdjustmentRequired"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -2313,14 +2320,14 @@ const CreateJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentDate"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "OpeningBalanceAdjustmentDate"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                   </div>
@@ -2672,11 +2679,11 @@ const CreateJob = () => {
                                                       <td>
                                                         <div className="add">
                                                           {AddTaskArr &&
-                                                          AddTaskArr.find(
-                                                            (task) =>
-                                                              task.task_id ==
-                                                              checklist.task_id
-                                                          ) ? (
+                                                            AddTaskArr.find(
+                                                              (task) =>
+                                                                task.task_id ==
+                                                                checklist.task_id
+                                                            ) ? (
                                                             ""
                                                           ) : (
                                                             <button

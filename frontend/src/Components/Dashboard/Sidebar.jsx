@@ -190,7 +190,6 @@ const Sidebar = () => {
 
            
             {((updatedShowTab && updatedShowTab.status) ||
-                    role === "ADMIN" ||
                     role === "SUPERADMIN") && (
                     <li
                       className={activeLink === "/admin/status" ? "active" : ""}
@@ -227,7 +226,7 @@ const Sidebar = () => {
                     </li>
                   )}
 
-                  {(role === "ADMIN" || role === "SUPERADMIN") && (
+                  {(role === "SUPERADMIN") && (
                     <li
                       className={activeLink === "/admin/access" ? "active" : ""}
                     >
