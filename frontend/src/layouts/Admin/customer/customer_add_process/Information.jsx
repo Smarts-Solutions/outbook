@@ -21,6 +21,7 @@ const Information = ({ id, pageStatus }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const newCustomerId = localStorage.getItem("newCustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState([]);
@@ -39,10 +40,6 @@ const Information = ({ id, pageStatus }) => {
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
    
-
-  console.log("ManagerType", ManagerType);
-
-
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -121,6 +118,10 @@ const Information = ({ id, pageStatus }) => {
       phone_code: "+44",
     },
   ]);
+
+
+  console.log("contacts1", contacts1);
+  console.log("contacts", contacts);
 
   // state for company contact errors
   const [errors, setErrors] = useState([
@@ -338,7 +339,7 @@ const Information = ({ id, pageStatus }) => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        customer_contact_person_role_id: "",
+        customer_contact_person_role_id: personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "",
         phone: "",
         email: "",
         phone_code: "+44",
@@ -372,7 +373,7 @@ const Information = ({ id, pageStatus }) => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        customer_contact_person_role_id: "",
+        customer_contact_person_role_id: personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "",
         phone: "",
         email: "",
         phone_code: "+44",
@@ -406,6 +407,9 @@ const Information = ({ id, pageStatus }) => {
       ).unwrap();
       if (response.status) {
         setStaffDataAll(response.data);
+        if(role == "MANAGER" && response.data.length > 0){
+          setManagerType(staffDetails.id)
+        }
       } else {
         setStaffDataAll([]);
       }
@@ -1102,6 +1106,9 @@ const Information = ({ id, pageStatus }) => {
       .then(async (response) => {
         if (response.status) {
           setIncorporationDataAll(response.data);
+          if(response.data.length > 0){
+            setCompanyDetails({ ...getCompanyDetails, IncorporationIn: (response.data[0].id).toString() });
+          }
         } else {
           setIncorporationDataAll([]);
         }
@@ -1110,7 +1117,30 @@ const Information = ({ id, pageStatus }) => {
         return;
       });
   };
+ 
 
+  // set customer type function
+  const setCustomerTypeFun = (e) => {
+    setCustomerType(e.target.value);
+    if (e.target.value == 2) {
+     
+      setContacts(prevContacts =>
+        prevContacts.map(contact => ({
+            ...contact,
+            customer_contact_person_role_id:personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "", 
+        }))
+    );
+  
+    } else if (e.target.value == 3) {
+      
+      setContacts1(prevContacts =>
+        prevContacts.map(contact => ({
+            ...contact,
+            customer_contact_person_role_id:personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "", 
+        }))
+    );
+    }
+  }
 
   return (
     <>
@@ -1141,7 +1171,7 @@ const Information = ({ id, pageStatus }) => {
                             id="customerType"
                             autoFocus
                             className="form-select "
-                            onChange={(e) => setCustomerType(e.target.value)}
+                            onChange={(e) => setCustomerTypeFun(e)}
                             value={customerType}
                             disabled={!['', null, undefined].includes(newCustomerId)}
                           >

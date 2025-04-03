@@ -446,7 +446,6 @@ const Engagement = () => {
     }
 
 
-    console.log("req", req);
     if (!validateForm()) {
       return;
     }
@@ -563,6 +562,9 @@ const Engagement = () => {
       .then(async (response) => {
         if (response.status) {
           setCoustomerSource(response.data);
+          if(response.data.length > 0){
+           await customerSubSourceData(response.data[0].id);
+          }
         }
       })
       .catch((error) => {
@@ -570,23 +572,29 @@ const Engagement = () => {
       });
   };
 
-  useEffect(() => {
-    if (formState1.customerSource) {
-      customerSubSourceData();
-    }
-  }, [formState1]);
+ 
+  // useEffect(() => {
+  //   if (formState1.customerSource) {
+  //     customerSubSourceData();
+  //   }
+  // }, [formState1]);
 
-  const customerSubSourceData = async () => {
+  const customerSubSourceData = async (customerSource) => {
     const req = {
       action: "getAll",
-      customer_source_id: formState1.customerSource,
+      customer_source_id: customerSource,
     };
+
     const data = { req: req, authToken: token };
     await dispatch(customerSubSourceApi(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
           setCoustomerSubSource(response.data);
+
+          if(response.data.length > 0){
+            setFormState1({ ...formState1, customerSubSource : (response.data[0].id).toString() ,customerSource : customerSource.toString() });
+          }
         } else {
           setCoustomerSubSource([]);
         }
@@ -602,6 +610,10 @@ const Engagement = () => {
       ...formState1,
       [name]: value,
     }));
+
+    if (name === "customerSource") {
+      customerSubSourceData(value);
+      }
 
     setFormErrors((prevErrors) => ({
       ...prevErrors,

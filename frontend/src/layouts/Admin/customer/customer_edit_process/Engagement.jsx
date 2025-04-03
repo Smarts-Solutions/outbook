@@ -250,7 +250,6 @@ const Engagement = () => {
   const handleChange2 = (e) => {
     const { name, value } = e.target;
     if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      console.log("value", value)
       validate2(name, value);
       setFormValues2({ ...formValues2, [name]: value });
     }
