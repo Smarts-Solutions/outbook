@@ -45,28 +45,46 @@ const Access = () => {
             // console.log("role_id", role_id);
             // console.log("permission_name", permission_name);
 
-            // setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked , permission_name: permission_name}]);
+            setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked , permission_name: permission_name}]);
 
-            setCheckboxState(prevState => {
-                let updatedState = prevState.filter(item => !(item.permission_id === id && item.role_id === role_id));
+            // setCheckboxState(prevState => {
+            //     let updatedState = prevState.filter(item => !(item.permission_id === id && item.role_id === role_id));
         
-                // Add the updated permission
-                updatedState.push({ permission_id: id, role_id: role_id, is_assigned: checked, permission_name });
+            //     // Add the updated permission
+            //     updatedState.push({ permission_id: id, role_id: role_id, is_assigned: checked, permission_name });
         
-                // If "all clients" is unchecked, also uncheck "all jobs"
-                if (permission_name === "all clients" && !checked) {
-                    updatedState = updatedState.map(item => 
-                        item.permission_name === "all jobs" ? { ...item, is_assigned: false } : item
-                    );
-                }
-                else if (permission_name === "all jobs" && checked) {  
-                    updatedState = updatedState.map(item =>
-                        item.permission_name === "all clients" ? { ...item, is_assigned: true } : item
-                    );
-                }
+            //     // If "all clients" is unchecked, also uncheck "all jobs"
+            //     if (permission_name === "all clients" && !checked) {
+            //         updatedState = updatedState.map(item => 
+            //             item.permission_name === "all jobs" ? { ...item, is_assigned: false } : item
+            //         );
+            //     }
+            //     else if (permission_name === "all jobs" && checked) {  
+            //         const allClientsExist = updatedState.some(item => item.permission_name === "all clients");
+            
+            //         if (allClientsExist) {
+            //             updatedState = updatedState.map(item =>
+            //                 item.permission_name === "all clients" ? { ...item, is_assigned: true } : item
+            //             );
+            //         } else {
+            //             // Find permission_id for "all clients"
+            //             const allClientsPermission = prevState.find(item => item.permission_name === "all clients");
+
+                    
+            //            console.log("prevState", prevState);
+            //             if (allClientsPermission) {
+            //                 updatedState.push({
+            //                     permission_id: allClientsPermission.permission_id,
+            //                     role_id: role_id,
+            //                     is_assigned: true,
+            //                     permission_name: "all clients"
+            //                 });
+            //             }
+            //         }
+            //     }
         
-                return updatedState;
-            });
+            //     return updatedState;
+            // });
         };
 
         const isChecked = checkboxState.some(item => item.permission_id === id && item.role_id === role_id && item.is_assigned);
