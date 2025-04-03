@@ -120,8 +120,7 @@ const Information = ({ id, pageStatus }) => {
   ]);
 
 
-  console.log("contacts1", contacts1);
-  console.log("contacts", contacts);
+
 
   // state for company contact errors
   const [errors, setErrors] = useState([

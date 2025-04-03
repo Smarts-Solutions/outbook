@@ -37,6 +37,9 @@ const CreateClient = () => {
       .then(async (response) => {
         if (response.status) {
           setIncorporationDataAll(response.data);
+          if (response.data.length > 0) {
+            await getClientIndustry1(response.data[0].id);
+          }
         } else {
           setIncorporationDataAll([]);
         }
@@ -323,7 +326,7 @@ const CreateClient = () => {
       email: "",
       alternate_email: "",
     },
-    
+
   ]);
 
   const [contactsErrors, setContactsErrors] = useState([
@@ -418,7 +421,7 @@ const CreateClient = () => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         phone_code: "+44",
         email: "",
@@ -437,7 +440,7 @@ const CreateClient = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -467,7 +470,7 @@ const CreateClient = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -497,7 +500,7 @@ const CreateClient = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -527,7 +530,7 @@ const CreateClient = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -558,7 +561,7 @@ const CreateClient = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -588,7 +591,7 @@ const CreateClient = () => {
         authorised_signatory_status: true,
         first_name: "",
         last_name: "",
-        role: "",
+        role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0].id).toString() : "",
         phone: "",
         alternate_phone: "",
         phone_code: "+44",
@@ -1111,6 +1114,13 @@ const CreateClient = () => {
       .then((response) => {
         if (response.status) {
           setClientIndustry(response.data);
+          if (response.data.length > 0) {
+
+            setPartnershipDetails({ ...getPartnershipDetails, ClientIndustry: (response.data[0].id).toString() });
+
+            setSoleTraderDetails({ ...getSoleTraderDetails, IndustryType: (response.data[0].id).toString() });
+            setCompanyDetails({ ...getCompanyDetails, ClientIndustry: (response.data[0].id).toString(), IncorporationIn: incorporationDataAll[0].id });
+          }
         } else {
           setClientIndustry(response.data);
         }
@@ -1119,6 +1129,26 @@ const CreateClient = () => {
         return;
       });
   };
+
+  const getClientIndustry1 = async (incorporation_id) => {
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(GetClientIndustry(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          if (response.data.length > 0) {
+            setCompanyDetails({ ...getCompanyDetails, ClientIndustry: (response.data[0].id).toString(), IncorporationIn: incorporation_id.toString() });
+          }
+        } else {
+          setClientIndustry(response.data);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
 
   const CountryData = async (req) => {
     const data = { req: { action: "get" }, authToken: token };
@@ -1458,7 +1488,7 @@ const CreateClient = () => {
 
   const handleSubmit = async () => {
 
-        
+
 
 
     if (selectClientType == 1 && validateAllFields(1)) {
@@ -1802,6 +1832,65 @@ const CreateClient = () => {
 
   };
 
+  const setSelectClientTypeFun = (e) => {
+    setSelectClientType(e.target.value);
+    if (e.target.value == 2) {
+      setContacts(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+    } else if (e.target.value == 3) {
+      setContacts1(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+    }
+    else if (e.target.value == 5) {
+      setContactsMembers(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+      setContactsTrustee(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+
+    }
+    else if (e.target.value == 6) {
+      setContactsMembersUnincorporated(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+    }
+    else if (e.target.value == 7) {
+      setContactsMembersTrust(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+      setContactsTrustTrustee(prevContacts =>
+        prevContacts.map(contact => ({
+          ...contact,
+          role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
+        }))
+      );
+    }
+
+  }
+
+
+
   return (
     <div>
       <div className="container-fluid mt-4">
@@ -1850,7 +1939,7 @@ const CreateClient = () => {
                                       className="form-select "
                                       value={selectClientType}
                                       onChange={(e) =>
-                                        setSelectClientType(e.target.value)
+                                        setSelectClientTypeFun(e)
                                       }
                                     >
                                       <option value={1}>Sole Trader</option>
@@ -2439,7 +2528,7 @@ const CreateClient = () => {
                                                 // value={
                                                 //   convertDate(getCompanyDetails.IncorporationDate)
                                                 // }
-                                               value={getCompanyDetails?.IncorporationDate}
+                                                value={getCompanyDetails?.IncorporationDate}
                                               // disabled
                                               />
                                               {errors2["IncorporationDate"] && (
@@ -3211,7 +3300,7 @@ const CreateClient = () => {
                                       <div className="card-body">
                                         <div className="row">
                                           {contacts1.map((contact, index) => (
-                                            <div className="col-xxl-12 col-lg-12">
+                                            <div className="col-xxl-12 col-lg-12" key={index}>
                                               <div className="card pricing-box p-3 m-2 mt-0">
                                                 <div className="row">
                                                   <div className="col-lg-12">
@@ -3265,7 +3354,7 @@ const CreateClient = () => {
                                                         name="first_name"
                                                         id={`first_name-${index}`}
                                                         value={
-                                                          contacts1?.first_name
+                                                          contact?.first_name
                                                         }
                                                         maxLength={50}
                                                         onChange={(e) =>
@@ -3307,7 +3396,7 @@ const CreateClient = () => {
                                                         name="last_name"
                                                         id={`last_name-${index}`}
                                                         value={
-                                                          contacts1?.last_name
+                                                          contact?.last_name
                                                         }
                                                         onChange={(e) =>
                                                           handleChange4(
@@ -3339,7 +3428,7 @@ const CreateClient = () => {
                                                       <select
                                                         className="form-select"
                                                         id={`role-${index}`}
-                                                        value={contacts1?.role}
+                                                        value={contact?.role}
                                                         onChange={(e) =>
                                                           handleChange4(
                                                             index,
@@ -3417,7 +3506,7 @@ const CreateClient = () => {
                                                             name="phone"
                                                             id={`phone-${index}`}
                                                             value={
-                                                              contacts1.phone
+                                                              contact.phone
                                                             }
                                                             onChange={(e) =>
                                                               handleChange4(
@@ -3485,7 +3574,7 @@ const CreateClient = () => {
                                                             name="alternate_phone"
                                                             id={`alternate_phone-${index}`}
                                                             value={
-                                                              contacts1.alternate_phone
+                                                              contact.alternate_phone
                                                             }
                                                             onChange={(e) =>
                                                               handleChange4(
@@ -3521,7 +3610,7 @@ const CreateClient = () => {
                                                         placeholder="Enter Email"
                                                         name="email"
                                                         id={`email-${index}`}
-                                                        value={contacts1.email}
+                                                        value={contact.email}
                                                         onChange={(e) =>
                                                           handleChange4(
                                                             index,
@@ -3555,7 +3644,7 @@ const CreateClient = () => {
                                                         name="alternate_email"
                                                         id={`alternate_email-${index}`}
                                                         value={
-                                                          contacts1.alternate_email
+                                                          contact.alternate_email
                                                         }
                                                         onChange={(e) =>
                                                           handleChange4(
@@ -4122,7 +4211,7 @@ const CreateClient = () => {
                                                                     )
                                                                   }
                                                                   disabled={
-                                                                    contacts1.length ===
+                                                                    contactsMembers.length ===
                                                                     1
                                                                   }
                                                                 >
@@ -4152,7 +4241,7 @@ const CreateClient = () => {
                                                             name="first_name"
                                                             id={`first_name-${index}`}
                                                             value={
-                                                              contacts1?.first_name
+                                                              contact?.first_name
                                                             }
                                                             maxLength={50}
                                                             onChange={(e) =>
@@ -4194,7 +4283,7 @@ const CreateClient = () => {
                                                             name="last_name"
                                                             id={`last_name-${index}`}
                                                             value={
-                                                              contacts1?.last_name
+                                                              contact?.last_name
                                                             }
                                                             onChange={(e) =>
                                                               handleChangeMember(
@@ -4226,7 +4315,7 @@ const CreateClient = () => {
                                                           <select
                                                             className="form-select"
                                                             id={`role-${index}`}
-                                                            value={contacts1?.role}
+                                                            value={contact?.role}
                                                             onChange={(e) =>
                                                               handleChangeMember(
                                                                 index,
@@ -4304,7 +4393,7 @@ const CreateClient = () => {
                                                                 name="phone"
                                                                 id={`phone-${index}`}
                                                                 value={
-                                                                  contacts1.phone
+                                                                  contact.phone
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeMember(
@@ -4372,7 +4461,7 @@ const CreateClient = () => {
                                                                 name="alternate_phone"
                                                                 id={`alternate_phone-${index}`}
                                                                 value={
-                                                                  contacts1.alternate_phone
+                                                                  contact.alternate_phone
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeMember(
@@ -4408,7 +4497,7 @@ const CreateClient = () => {
                                                             placeholder="Enter Email"
                                                             name="email"
                                                             id={`email-${index}`}
-                                                            value={contacts1.email}
+                                                            value={contact.email}
                                                             onChange={(e) =>
                                                               handleChangeMember(
                                                                 index,
@@ -4442,7 +4531,7 @@ const CreateClient = () => {
                                                             name="alternate_email"
                                                             id={`alternate_email-${index}`}
                                                             value={
-                                                              contacts1.alternate_email
+                                                              contact.alternate_email
                                                             }
                                                             onChange={(e) =>
                                                               handleChangeMember(
@@ -4523,7 +4612,7 @@ const CreateClient = () => {
                                                                     )
                                                                   }
                                                                   disabled={
-                                                                    contacts1.length ===
+                                                                    contactsTrustee.length ===
                                                                     1
                                                                   }
                                                                 >
@@ -4553,7 +4642,7 @@ const CreateClient = () => {
                                                             name="first_name"
                                                             id={`first_name-${index}`}
                                                             value={
-                                                              contacts1?.first_name
+                                                              contact?.first_name
                                                             }
                                                             maxLength={50}
                                                             onChange={(e) =>
@@ -4595,7 +4684,7 @@ const CreateClient = () => {
                                                             name="last_name"
                                                             id={`last_name-${index}`}
                                                             value={
-                                                              contacts1?.last_name
+                                                              contact?.last_name
                                                             }
                                                             onChange={(e) =>
                                                               handleChangeTrustee(
@@ -4627,7 +4716,7 @@ const CreateClient = () => {
                                                           <select
                                                             className="form-select"
                                                             id={`role-${index}`}
-                                                            value={contacts1?.role}
+                                                            value={contact?.role}
                                                             onChange={(e) =>
                                                               handleChangeTrustee(
                                                                 index,
@@ -4705,7 +4794,7 @@ const CreateClient = () => {
                                                                 name="phone"
                                                                 id={`phone-${index}`}
                                                                 value={
-                                                                  contacts1.phone
+                                                                  contact.phone
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeTrustee(
@@ -4773,7 +4862,7 @@ const CreateClient = () => {
                                                                 name="alternate_phone"
                                                                 id={`alternate_phone-${index}`}
                                                                 value={
-                                                                  contacts1.alternate_phone
+                                                                  contact.alternate_phone
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeTrustee(
@@ -4809,7 +4898,7 @@ const CreateClient = () => {
                                                             placeholder="Enter Email"
                                                             name="email"
                                                             id={`email-${index}`}
-                                                            value={contacts1.email}
+                                                            value={contact.email}
                                                             onChange={(e) =>
                                                               handleChangeTrustee(
                                                                 index,
@@ -4843,7 +4932,7 @@ const CreateClient = () => {
                                                             name="alternate_email"
                                                             id={`alternate_email-${index}`}
                                                             value={
-                                                              contacts1.alternate_email
+                                                              contact.alternate_email
                                                             }
                                                             onChange={(e) =>
                                                               handleChangeTrustee(
@@ -4910,7 +4999,7 @@ const CreateClient = () => {
                                                     id="notes"
                                                     value={
                                                       getCharityIncorporatedOrganisation.notes
-                                                     
+
                                                     }
                                                     onChange={(e) => handleChange5(e)}
                                                   />
@@ -4937,7 +5026,7 @@ const CreateClient = () => {
                                           <div className="card card_shadow ">
                                             <div className="card-header  card-header-light-blue align-items-center d-flex">
                                               <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                              Charity Unincorporated Association Information
+                                                Charity Unincorporated Association Information
                                               </h4>
                                             </div>
                                             {/* end card header */}
@@ -5112,7 +5201,7 @@ const CreateClient = () => {
                                                                       )
                                                                     }
                                                                     disabled={
-                                                                      contacts1.length ===
+                                                                      contactsMembersUnincorporated.length ===
                                                                       1
                                                                     }
                                                                   >
@@ -5142,7 +5231,7 @@ const CreateClient = () => {
                                                               name="first_name"
                                                               id={`first_name-${index}`}
                                                               value={
-                                                                contacts1?.first_name
+                                                                contact?.first_name
                                                               }
                                                               maxLength={50}
                                                               onChange={(e) =>
@@ -5183,7 +5272,7 @@ const CreateClient = () => {
                                                               name="last_name"
                                                               id={`last_name-${index}`}
                                                               value={
-                                                                contacts1?.last_name
+                                                                contact?.last_name
                                                               }
                                                               onChange={(e) =>
                                                                 handleChangeMemberUnincorporated(
@@ -5214,7 +5303,7 @@ const CreateClient = () => {
                                                             <select
                                                               className="form-select"
                                                               id={`role-${index}`}
-                                                              value={contacts1?.role}
+                                                              value={contact?.role}
                                                               onChange={(e) =>
                                                                 handleChangeMemberUnincorporated(
                                                                   index,
@@ -5292,7 +5381,7 @@ const CreateClient = () => {
                                                                   name="phone"
                                                                   id={`phone-${index}`}
                                                                   value={
-                                                                    contacts1.phone
+                                                                    contact.phone
                                                                   }
                                                                   onChange={(e) =>
                                                                     handleChangeMemberUnincorporated(
@@ -5360,7 +5449,7 @@ const CreateClient = () => {
                                                                   name="alternate_phone"
                                                                   id={`alternate_phone-${index}`}
                                                                   value={
-                                                                    contacts1.alternate_phone
+                                                                    contact.alternate_phone
                                                                   }
                                                                   onChange={(e) =>
                                                                     handleChangeMemberUnincorporated(
@@ -5396,7 +5485,7 @@ const CreateClient = () => {
                                                               placeholder="Enter Email"
                                                               name="email"
                                                               id={`email-${index}`}
-                                                              value={contacts1.email}
+                                                              value={contact.email}
                                                               onChange={(e) =>
                                                                 handleChangeMemberUnincorporated(
                                                                   index,
@@ -5430,7 +5519,7 @@ const CreateClient = () => {
                                                               name="alternate_email"
                                                               id={`alternate_email-${index}`}
                                                               value={
-                                                                contacts1.alternate_email
+                                                                contact.alternate_email
                                                               }
                                                               onChange={(e) =>
                                                                 handleChangeMemberUnincorporated(
@@ -5496,7 +5585,7 @@ const CreateClient = () => {
                                                       id="notes"
                                                       value={
                                                         getAssociationDetails.notes
-                                                        
+
                                                       }
                                                       onChange={(e) => handleChange6(e)}
                                                     />
@@ -5696,7 +5785,7 @@ const CreateClient = () => {
                                                                       )
                                                                     }
                                                                     disabled={
-                                                                      contacts1.length ===
+                                                                      contactsMembersTrust.length ===
                                                                       1
                                                                     }
                                                                   >
@@ -5726,7 +5815,7 @@ const CreateClient = () => {
                                                                 name="first_name"
                                                                 id={`first_name-${index}`}
                                                                 value={
-                                                                  contacts1?.first_name
+                                                                  contact?.first_name
                                                                 }
                                                                 maxLength={50}
                                                                 onChange={(e) =>
@@ -5768,7 +5857,7 @@ const CreateClient = () => {
                                                                 name="last_name"
                                                                 id={`last_name-${index}`}
                                                                 value={
-                                                                  contacts1?.last_name
+                                                                  contact?.last_name
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeTrust(
@@ -5800,7 +5889,7 @@ const CreateClient = () => {
                                                               <select
                                                                 className="form-select"
                                                                 id={`role-${index}`}
-                                                                value={contacts1?.role}
+                                                                value={contact?.role}
                                                                 onChange={(e) =>
                                                                   handleChangeTrust(
                                                                     index,
@@ -5878,7 +5967,7 @@ const CreateClient = () => {
                                                                     name="phone"
                                                                     id={`phone-${index}`}
                                                                     value={
-                                                                      contacts1.phone
+                                                                      contact.phone
                                                                     }
                                                                     onChange={(e) =>
                                                                       handleChangeTrust(
@@ -5946,7 +6035,7 @@ const CreateClient = () => {
                                                                     name="alternate_phone"
                                                                     id={`alternate_phone-${index}`}
                                                                     value={
-                                                                      contacts1.alternate_phone
+                                                                      contact.alternate_phone
                                                                     }
                                                                     onChange={(e) =>
                                                                       handleChangeTrust(
@@ -5982,7 +6071,7 @@ const CreateClient = () => {
                                                                 placeholder="Enter Email"
                                                                 name="email"
                                                                 id={`email-${index}`}
-                                                                value={contacts1.email}
+                                                                value={contact.email}
                                                                 onChange={(e) =>
                                                                   handleChangeTrust(
                                                                     index,
@@ -6016,7 +6105,7 @@ const CreateClient = () => {
                                                                 name="alternate_email"
                                                                 id={`alternate_email-${index}`}
                                                                 value={
-                                                                  contacts1.alternate_email
+                                                                  contact.alternate_email
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeTrust(
@@ -6093,7 +6182,7 @@ const CreateClient = () => {
                                                                       )
                                                                     }
                                                                     disabled={
-                                                                      contacts1.length ===
+                                                                      contactsTrustTrustee.length ===
                                                                       1
                                                                     }
                                                                   >
@@ -6123,7 +6212,7 @@ const CreateClient = () => {
                                                                 name="first_name"
                                                                 id={`first_name-${index}`}
                                                                 value={
-                                                                  contacts1?.first_name
+                                                                  contact?.first_name
                                                                 }
                                                                 maxLength={50}
                                                                 onChange={(e) =>
@@ -6165,7 +6254,7 @@ const CreateClient = () => {
                                                                 name="last_name"
                                                                 id={`last_name-${index}`}
                                                                 value={
-                                                                  contacts1?.last_name
+                                                                  contact?.last_name
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeTrustTrustee(
@@ -6197,7 +6286,7 @@ const CreateClient = () => {
                                                               <select
                                                                 className="form-select"
                                                                 id={`role-${index}`}
-                                                                value={contacts1?.role}
+                                                                value={contact?.role}
                                                                 onChange={(e) =>
                                                                   handleChangeTrustTrustee(
                                                                     index,
@@ -6275,7 +6364,7 @@ const CreateClient = () => {
                                                                     name="phone"
                                                                     id={`phone-${index}`}
                                                                     value={
-                                                                      contacts1.phone
+                                                                      contact.phone
                                                                     }
                                                                     onChange={(e) =>
                                                                       handleChangeTrustTrustee(
@@ -6343,7 +6432,7 @@ const CreateClient = () => {
                                                                     name="alternate_phone"
                                                                     id={`alternate_phone-${index}`}
                                                                     value={
-                                                                      contacts1.alternate_phone
+                                                                      contact.alternate_phone
                                                                     }
                                                                     onChange={(e) =>
                                                                       handleChangeTrustTrustee(
@@ -6379,7 +6468,7 @@ const CreateClient = () => {
                                                                 placeholder="Enter Email"
                                                                 name="email"
                                                                 id={`email-${index}`}
-                                                                value={contacts1.email}
+                                                                value={contact.email}
                                                                 onChange={(e) =>
                                                                   handleChangeTrustTrustee(
                                                                     index,
@@ -6413,7 +6502,7 @@ const CreateClient = () => {
                                                                 name="alternate_email"
                                                                 id={`alternate_email-${index}`}
                                                                 value={
-                                                                  contacts1.alternate_email
+                                                                  contact.alternate_email
                                                                 }
                                                                 onChange={(e) =>
                                                                   handleChangeTrustTrustee(
