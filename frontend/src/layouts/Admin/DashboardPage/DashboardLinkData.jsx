@@ -25,6 +25,7 @@ const JobStatus = () => {
     insert: 0,
     update: 0,
     delete: 0,
+    view: 0,
     client: 0,
   });
 
@@ -40,11 +41,12 @@ const JobStatus = () => {
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, client: 0 };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
     accessData1.forEach((item) => {
       if (item.type === "view") updatedAccess.client = item.is_assigned;
@@ -52,7 +54,7 @@ const JobStatus = () => {
 
     setAccessData(updatedAccess);
   }, []);
-
+  
   const GetLinkedData = async () => {
     const data = {
       req: {
@@ -274,7 +276,7 @@ const JobStatus = () => {
             whiteSpace: "nowrap",
           }}
         >
-          {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
+          {(role === "SUPERADMIN") && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -368,7 +370,7 @@ const JobStatus = () => {
     //   cell: (row) => (
     //     <div>
     //       {
-    //         role === "ADMIN" || role === "SUPERADMIN" ? (
+    //         role === "SUPERADMIN" ? (
     //           <a
     //             // onClick={() => HandleClientView(row)}
     //             style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -512,7 +514,7 @@ const JobStatus = () => {
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
-                  {(role === "ADMIN" || role === "SUPERADMIN" || getAccessData.insert === 1) && location?.state?.req?.heading == "Customers" ? (
+                  {(role === "SUPERADMIN" || (getAccessData.insert === 1 && getAccessData.view === 1)) && location?.state?.req?.heading == "Customers" ? (
                     <div className="ms-2">
                       <Link
                         to="/admin/addcustomer"
@@ -535,13 +537,19 @@ const JobStatus = () => {
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
-          <Datatable
+           {
+             role === "SUPERADMIN" || getAccessData.view == 1 ?
+            <Datatable
             filter={true}
             columns={location?.state?.req?.key == "client" ? ClientListColumns :
               location?.state?.req?.key == "customer" ? columnsCustomer :
                 location?.state?.req?.key == "staff" ? columnsStaff :
                   JobColumns
             } data={allLinkedData && allLinkedData} />
+            :""
+           }
+          
+
         </div>
       </div>
     </div>
