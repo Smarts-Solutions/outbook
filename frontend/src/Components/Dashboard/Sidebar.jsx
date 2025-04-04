@@ -15,8 +15,6 @@ const Sidebar = () => {
     },
   });
 
-  console.log("updatedShowTab --- ", updatedShowTab);
-
   // Update active link when location changes
   useEffect(() => {
     setActiveLink(location.pathname);

@@ -27,7 +27,14 @@ const JobStatus = () => {
     delete: 0,
     view: 0,
     client: 0,
+    job: 0,
+    all_customers: 0,
+    all_clients: 0,
+    all_jobs: 0,
+    staff: 0
   });
+
+
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -39,9 +46,34 @@ const JobStatus = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
+  const accessDataJob =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "job"
+    )?.items || [];
+
+  const accessDataAllCustomer =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_customers"
+    )?.items || [];
+
+  const accessDataAllJob =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_jobs"
+    )?.items || [];
+
+  const accessDataClients =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_clients"
+    )?.items || [];
+
+  const accessDataStaff =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "staff"
+    )?.items || [];
+
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, client: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, client: 0, job: 0, all_customers: 0, all_clients: 0, all_jobs: 0, staff: 0 };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -52,9 +84,29 @@ const JobStatus = () => {
       if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
 
+    accessDataJob.forEach((item) => {
+      if (item.type === "view") updatedAccess.job = item.is_assigned;
+    });
+
+    accessDataAllCustomer.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_customers = item.is_assigned;
+    });
+    accessDataAllJob.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
+    });
+    accessDataClients.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
+    });
+    accessDataStaff.forEach((item) => {
+      if (item.type === "view") updatedAccess.staff = item.is_assigned;
+    });
+
     setAccessData(updatedAccess);
   }, []);
-  
+
+
+  console.log("getAccessData", getAccessData);
+
   const GetLinkedData = async () => {
     const data = {
       req: {
@@ -359,7 +411,7 @@ const JobStatus = () => {
           </div>
         </div>
       ),
-      selector: (row) => row.status=="1" ? 1 : 0,
+      selector: (row) => row.status == "1" ? 1 : 0,
       sortable: true,
     },
   ];
@@ -537,18 +589,55 @@ const JobStatus = () => {
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
-           {
-             role === "SUPERADMIN" || getAccessData.view == 1 ?
-            <Datatable
-            filter={true}
-            columns={location?.state?.req?.key == "client" ? ClientListColumns :
-              location?.state?.req?.key == "customer" ? columnsCustomer :
-                location?.state?.req?.key == "staff" ? columnsStaff :
-                  JobColumns
-            } data={allLinkedData && allLinkedData} />
-            :""
-           }
-          
+
+          {
+            role === "SUPERADMIN" ? (
+              <Datatable
+                filter={true}
+                columns={
+                  location?.state?.req?.key === "client" ? ClientListColumns :
+                    location?.state?.req?.key === "customer" ? columnsCustomer :
+                      location?.state?.req?.key === "staff" ? columnsStaff :
+                        JobColumns
+                }
+                data={allLinkedData || []}
+              />
+            ) : (
+              <>
+                {((getAccessData.view === 1 || getAccessData.all_customers === 1) && location?.state?.req?.key === "customer") && (
+                  <Datatable
+                    filter={true}
+                    columns={columnsCustomer}
+                    data={allLinkedData || []}
+                  />
+                )}
+
+                {((getAccessData.client === 1 || getAccessData.all_clients === 1) && location?.state?.req?.key === "client") && (
+                  <Datatable
+                    filter={true}
+                    columns={ClientListColumns}
+                    data={allLinkedData || []}
+                  />
+                )}
+
+                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "client") && (
+                  <Datatable
+                    filter={true}
+                    columns={JobColumns}
+                    data={allLinkedData || []}
+                  />
+                )}
+                  
+                  {((getAccessData.staff === 1) && location?.state?.req?.key === "staff") && (
+                    <Datatable
+                      filter={true}
+                      columns={columnsStaff}
+                      data={allLinkedData || []}
+                    />
+                  )}
+              </>
+            )
+          }
 
         </div>
       </div>
