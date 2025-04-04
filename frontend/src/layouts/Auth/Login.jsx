@@ -44,7 +44,7 @@ const Login = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          accessDataFetch(response.data.staffDetails, response.data.token);
+          await accessDataFetch(response.data.staffDetails, response.data.token);
           localStorage.setItem(
             "staffDetails",
             JSON.stringify(response.data.staffDetails)
@@ -85,6 +85,8 @@ const Login = () => {
           localStorage.removeItem("staffDetails");
           localStorage.removeItem("token");
           localStorage.removeItem("role");
+          localStorage.removeItem("accessData");
+          localStorage.removeItem("updatedShowTab");
           sessionStorage.clear();
           sweatalert.fire({
             title: response.message,
@@ -111,6 +113,9 @@ const Login = () => {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
+
+            await accessDataFetch(response.data.staffDetails, response.data.token);
+            
             localStorage.setItem(
               "staffDetails",
               JSON.stringify(response.data.staffDetails)
@@ -178,7 +183,13 @@ const Login = () => {
             staff: false,
             status: false,
             report: false,
-            timesheet: false
+            timesheet: false,
+            job: false,
+            client: false,
+            all_customers: false,
+            all_clients: false,
+            all_jobs: false,
+
           };
 
           response.data.forEach((item) => {
@@ -210,12 +221,48 @@ const Login = () => {
               updatedShowTab.timesheet =
                 timesheetView && timesheetView.is_assigned === 1;
             }
+            else if (item.permission_name === "job") {
+              const jobView = item.items.find((item) => item.type === "view");
+              updatedShowTab.job = jobView && jobView.is_assigned === 1;
+            } else if (item.permission_name === "client") {
+              const clientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.client =
+                clientView && clientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.report =
+              reportView && reportView.is_assigned === 1;
+            }
+              
+            else if (item.permission_name === "all_customers") {
+              const allCustomerView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_customers =
+                allCustomerView && allCustomerView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_clients") {
+              const allClientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_clients =
+                allClientView && allClientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_jobs") {
+              const allJobsView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_jobs =
+                allJobsView && allJobsView.is_assigned === 1;
+            }
           });
-
-          localStorage.setItem(
-            "updatedShowTab",
-            JSON.stringify(updatedShowTab)
-          );
+          
+          localStorage.setItem("updatedShowTab",JSON.stringify(updatedShowTab));
         });
       }
     } catch (error) {
@@ -226,7 +273,81 @@ const Login = () => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleSubmitLogin();
+      ```javascript
+const handleSubmitLogin = async () => {
+  const emailError = validateEmail(Email);
+  const passwordError = validatePassword(password);
+
+  if (emailError || passwordError) {
+    setErrorEmail(emailError);
+    setErrorPassword(passwordError);
+    return;
+  }
+
+  const req = { email: Email, password: password };
+
+  try {
+    const response = await dispatch(SignIn(req)).unwrap();
+    if (response.status) {
+      await accessDataFetch(response.data.staffDetails, response.data.token);
+
+      localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
+      localStorage.setItem("token", JSON.stringify(response.data.token));
+      localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
+      localStorage.setItem("role", JSON.stringify(response.data.staffDetails.role));
+
+      sweatalert.fire({
+        title: "Login Successfully",
+        icon: "success",
+        timer: 1000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      const req_auth_token = {
+        id: response.data.staffDetails.id,
+        login_auth_token: response.data.token,
+      };
+      await dispatch(LoginAuthToken(req_auth_token)).unwrap();
+
+      setTimeout(() => {
+        navigate("/admin/dashboard");
+        window.location.reload();
+      }, 1000);
+    } else {
+      localStorage.removeItem("staffDetails");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      sessionStorage.clear();
+      sweatalert.fire({
+        title: response.message,
+        icon: "error",
+        timer: 1000,
+        showConfirmButton: true,
+        timerProgressBar: true,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const validateEmail = (email) => {
+  if (email === "") {
+    return EMPTY_EMAIL_ERROR;
+  } else if (!Email_regex(email)) {
+    return INVALID_EMAIL_ERROR;
+  }
+  return "";
+};
+
+const validatePassword = (password) => {
+  if (password === "") {
+    return PASSWORD_ERROR;
+  }
+  return "";
+};
+```
     }
 }
 
@@ -392,7 +513,7 @@ const Login = () => {
       <div className="toggle row align-items-center mx-auto">
         <div className="toggle-panel col-md-6">
           <h1>Welcome Back!</h1>
-          <p>Enter your Personal details to use all of site features</p>
+          <p>Enter your Personal details to use all_of site features</p>
           <button className="hidden" id="login">Sign In</button>
         </div>
         <div className="toggle-panel  col-md-6">

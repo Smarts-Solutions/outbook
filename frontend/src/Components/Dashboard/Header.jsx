@@ -66,6 +66,8 @@ const Header = () => {
     localStorage.removeItem("currentStep");
     localStorage.removeItem("coustomerId");
     localStorage.removeItem("sharepoint_token");
+    localStorage.removeItem("accessData");
+    localStorage.removeItem("updatedShowTab");
     sessionStorage.clear();
     
     const req = { id: staffDetails.id};

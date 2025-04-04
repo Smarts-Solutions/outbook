@@ -420,7 +420,7 @@ const getDashboardActivityLog = async (dashboard) => {
   let MatchCondition = `WHERE
     staff_logs.staff_id = ${staff_id}`
 
-  if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+  if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
     MatchCondition = ''
   }
 

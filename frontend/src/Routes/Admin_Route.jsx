@@ -187,6 +187,48 @@ const Admin_Route = () => {
               updatedShowTab.timesheet =
                 timesheetView && timesheetView.is_assigned === 1;
             }
+            else if (item.permission_name === "job") {
+              const jobView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.job =
+                jobView && jobView.is_assigned === 1;
+            }
+            else if (item.permission_name === "client") {
+              const clientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.client =
+                clientView && clientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+                );
+              updatedShowTab.report =
+                reportView && reportView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_customers") {
+              const allCustomerView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_customers =
+                allCustomerView && allCustomerView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_clients") {
+              const allClientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_clients =
+                allClientView && allClientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_jobs") {
+              const allJobView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_jobs =
+                allJobView && allJobView.is_assigned === 1;
+            }
           });
 
           localStorage.setItem(
