@@ -618,6 +618,7 @@ const StaffPage = () => {
   };
 
   const handleUpdate = async () => {
+
     try {
       const response = await dispatch(
         Competency({

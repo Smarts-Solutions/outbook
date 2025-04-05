@@ -113,12 +113,21 @@ const updateStaff = async (staff) => {
   const { id, ...fields } = staff;
   let email = fields.email;
 
+
+
+
   // Line Manage Code
   let staff_to = fields.staff_to;
   if (staff_to != "" && staff_to != undefined) {
     let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
     let [staff_by_result] = await pool.execute(staff_by_query, [id]);
     if (staff_by_result.length > 0) {
+
+      console.log("staff_by_result", staff_by_result);
+      console.log("staff_to", staff_to);
+      console.log("staff_by", id);
+
+
       const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
       const [staff_to_result] = await pool.execute(staff_to_query, [
         staff_to,
@@ -131,6 +140,9 @@ const updateStaff = async (staff) => {
         staff_to,
       ]);
     }
+  }
+  else{
+    await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
 
@@ -572,6 +584,10 @@ const UpdateStaffPortfolio = async (staff) => {
 
 const deleteStaffUpdateStaff = async (staff) => {
   const { delete_id, update_staff ,role} = staff;
+
+
+ 
+ 
 
     if(role.toUpperCase() === "MANAGER"){
       await pool.execute(`UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`, [update_staff, delete_id]);

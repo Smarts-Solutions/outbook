@@ -243,8 +243,12 @@ WHERE
 
   }
 
-  const getAllCustomerIds = async (StaffUserId) => {
+  const getAllCustomerIds = async (StaffUserId , module_type) => {
     // Line Manager
+    let rolePermissionId = 34;
+    if(module_type == "job"){
+        rolePermissionId = 35;
+    }
     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
@@ -266,8 +270,14 @@ WHERE
   LIMIT 1
   `
     const [rows] = await pool.execute(QueryRole);
+
+
+  
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , rolePermissionId]);
+
+
     // Condition with Admin And SuperAdmin
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
         const query = `
     SELECT  
     customers.id AS id,
@@ -313,7 +323,7 @@ id DESC;`;
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
             LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
             WHERE 
                 jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
             GROUP BY 
@@ -350,7 +360,7 @@ id DESC;`;
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
         WHERE 
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
@@ -389,7 +399,7 @@ id DESC;`;
                  staff_portfolio ON staff_portfolio.customer_id = customers.id
             LEFT JOIN 
                 customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                OR sp_customers.staff_id = staff_portfolio.staff_id
+                AND sp_customers.staff_id = staff_portfolio.staff_id
         WHERE 
          jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
          GROUP BY 
@@ -423,7 +433,7 @@ id DESC;`;
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            OR sp_customers.staff_id = staff_portfolio.staff_id    
+            AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
         ORDER BY 

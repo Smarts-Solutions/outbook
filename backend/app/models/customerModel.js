@@ -419,11 +419,14 @@ const getCustomer = async (customer) => {
   LIMIT 1
   `
     const [rows] = await pool.execute(QueryRole);
+
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 33]);
+
+
     // Condition with Admin And SuperAdmin
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
         const countQuery = `SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
-
         const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
 
         const query = `
@@ -510,7 +513,7 @@ LIMIT ? OFFSET ?
                         staff_portfolio ON staff_portfolio.customer_id = customers.id
                    LEFT JOIN 
                        customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                       OR sp_customers.staff_id = staff_portfolio.staff_id    
+                       AND sp_customers.staff_id = staff_portfolio.staff_id    
                     WHERE 
                     ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})  OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
                     GROUP BY 
@@ -568,7 +571,7 @@ LIMIT ? OFFSET ?
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
             WHERE 
                 ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
             GROUP BY 
@@ -614,7 +617,7 @@ LIMIT ? OFFSET ?
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id   
+                  AND sp_customers.staff_id = staff_portfolio.staff_id   
                 WHERE 
          ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
@@ -631,8 +634,6 @@ LIMIT ? OFFSET ?
                 queryDataCount = [staff_id, staff_id, staff_id];
             }
             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
-
-
             const query = `
             SELECT  
             customers.id AS id,
@@ -676,7 +677,7 @@ LIMIT ? OFFSET ?
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            OR sp_customers.staff_id = staff_portfolio.staff_id  
+            AND sp_customers.staff_id = staff_portfolio.staff_id  
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
@@ -723,7 +724,7 @@ LIMIT ? OFFSET ?
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
                 WHERE 
                     ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
                 GROUP BY 
@@ -740,10 +741,6 @@ LIMIT ? OFFSET ?
             }
 
             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
-
-
-
-
             const query = `
             SELECT  
             customers.id AS id,
@@ -784,7 +781,7 @@ LIMIT ? OFFSET ?
            staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-           OR sp_customers.staff_id = staff_portfolio.staff_id      
+           AND sp_customers.staff_id = staff_portfolio.staff_id      
         WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`
                     : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'
                 } 
@@ -813,6 +810,9 @@ LIMIT ? OFFSET ?
 
         }
         else {
+
+            console.log('else condition');
+            console.log('LineManageStaffId', LineManageStaffId);
             const countQuery = `
             SELECT COUNT(*) AS total_count
             FROM (
@@ -830,7 +830,7 @@ LIMIT ? OFFSET ?
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id  
+                  AND sp_customers.staff_id = staff_portfolio.staff_id  
                 WHERE 
                     ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}    
             ) AS result;`;
@@ -878,7 +878,7 @@ LIMIT ? OFFSET ?
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            OR sp_customers.staff_id = staff_portfolio.staff_id    
+            AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}    
         ORDER BY 
@@ -942,8 +942,11 @@ const getCustomer_dropdown = async (customer) => {
   LIMIT 1
   `
     const [rows] = await pool.execute(QueryRole);
+
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 33]);
+
     // Condition with Admin And SuperAdmin
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
         const query = `
     SELECT  
     customers.id AS id,
@@ -989,7 +992,7 @@ id DESC;`;
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
             LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
             WHERE 
                 jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
             GROUP BY 
@@ -1026,7 +1029,7 @@ id DESC;`;
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
         WHERE 
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
@@ -1065,7 +1068,7 @@ id DESC;`;
                  staff_portfolio ON staff_portfolio.customer_id = customers.id
             LEFT JOIN 
                 customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                OR sp_customers.staff_id = staff_portfolio.staff_id
+                AND sp_customers.staff_id = staff_portfolio.staff_id
         WHERE 
          jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
          GROUP BY 
@@ -1099,7 +1102,7 @@ id DESC;`;
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            OR sp_customers.staff_id = staff_portfolio.staff_id    
+            AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
         ORDER BY 
@@ -1171,7 +1174,7 @@ const getCustomer_dropdown_delete = async (customer) => {
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
             WHERE 
                 jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
             GROUP BY 
@@ -1208,7 +1211,7 @@ const getCustomer_dropdown_delete = async (customer) => {
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
@@ -1248,7 +1251,7 @@ const getCustomer_dropdown_delete = async (customer) => {
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
          jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
          GROUP BY 
@@ -1277,7 +1280,7 @@ const getCustomer_dropdown_delete = async (customer) => {
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
         ORDER BY 
