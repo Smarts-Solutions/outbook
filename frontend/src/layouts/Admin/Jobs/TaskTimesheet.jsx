@@ -205,7 +205,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       cell: (row) => (
         <div>
           {
-            goto!="report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+            goto!="report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") && (
               <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
                 <i className="fa fa-eye fs-6 text-warning" />
               </button>)
@@ -380,7 +380,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
           <div className="col-md-4">
             <div>
               {
-                goto!="report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                goto!="report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") && (
                   <button type="button"
                     onClick={() => { handleTimeSheetView(location.state.job_id); setAddjobtimesheet(true) }}
                     className="btn btn-info text-white float-end ms-2">

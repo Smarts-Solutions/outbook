@@ -813,7 +813,7 @@ console.log("========", selectStatusIs);
             {goto !== "report" && (
               <>
                 {(getAccessDataJob.update === 1 ||
-                  role === "ADMIN" ||
+                  
                   role === "SUPERADMIN") && (
                   <div className="w-auto">
                     <select
@@ -831,7 +831,7 @@ console.log("========", selectStatusIs);
                 )}
 
                 {(getAccessDataJob.update === 1 ||
-                  role === "ADMIN" ||
+                  
                   role === "SUPERADMIN") && (
                   <button className="edit-icon" onClick={handleJobEdit}>
                     <i className="ti-pencil text-primary" />
@@ -840,7 +840,7 @@ console.log("========", selectStatusIs);
 
                 {location.state.timesheet_job_id == null
                   ? (getAccessDataJob.delete === 1 ||
-                      role === "ADMIN" ||
+                      
                       role === "SUPERADMIN") && (
                       <button className="delete-icon" onClick={handleDelete}>
                         <i className="ti-trash text-danger" />

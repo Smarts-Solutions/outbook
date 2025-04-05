@@ -1418,7 +1418,7 @@ const Setting = () => {
                 </button>
 
                 {getAccessDataSetting.update === 1 ||
-                role === "ADMIN" ||
+                
                 role === "SUPERADMIN" ? (
                   <button
                     className="edit-icon dropdown-item w-auto mb-2"
@@ -1436,7 +1436,7 @@ const Setting = () => {
                   </button>
                 ) : null}
                 {getAccessDataSetting.delete === 1 ||
-                role === "ADMIN" ||
+                
                 role === "SUPERADMIN" ? (
                   <button
                     className="delete-icon dropdown-item w-auto mb-2"
@@ -1461,7 +1461,7 @@ const Setting = () => {
             </button>
 
             {getAccessDataSetting.update === 1 ||
-            role === "ADMIN" ||
+            
             role === "SUPERADMIN" ? (
               <button
                 className="edit-icon"
@@ -1479,7 +1479,7 @@ const Setting = () => {
               </button>
             ) : null}
             {getAccessDataSetting.delete === 1 ||
-            role === "ADMIN" ||
+            
             role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"

@@ -448,7 +448,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+            row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => { setEditViewquery(true); setEditData(row) }}>
                 <i className="ti-pencil" />
               </button> : ""
@@ -483,7 +483,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
           <div className='col-md-4'>
             <div>
               {
-                draftStatus == 0 && goto != "report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+                draftStatus == 0 && goto != "report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") ?
                   <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} >
                     <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
                   :

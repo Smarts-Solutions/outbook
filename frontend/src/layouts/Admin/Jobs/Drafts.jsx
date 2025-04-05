@@ -257,7 +257,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.was_it_complete == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+            row.was_it_complete == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
                 <i className="ti-pencil" />
               </button> : ""
@@ -290,7 +290,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
         </div>
         <div className='col-md-4'>
           {
-            goto != "report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <div>
+            goto != "report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") ? <div>
               <button type="button" className="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>
                 <i className="fa-regular fa-plus pe-1"></i> Add Drafts</button>
             </div> : ""

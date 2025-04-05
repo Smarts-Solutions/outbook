@@ -74,7 +74,7 @@ const Customer = () => {
 
           }}
         >
-          {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
+          {(role === "SUPERADMIN") && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -209,7 +209,7 @@ const Customer = () => {
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
           <div style={{ width: "50px" }}>
-            {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
+            {(role === "SUPERADMIN") && row.status == 1 ? (
               <div className="d-flex justify-content-end">
 
                {row.form_process != "4" &&  <button
@@ -464,7 +464,7 @@ const Customer = () => {
               <h3 className="mt-0">Customers</h3>
             </div>
           </div>
-          {role === "ADMIN" || role === "SUPERADMIN" ? (
+          {role === "SUPERADMIN" ? (
             <div className="col-md-6 col-sm-7">
               <Link
                 to="/admin/addcustomer"

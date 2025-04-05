@@ -304,7 +304,7 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {
-            getAccessDataJob.view == 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
+            getAccessDataJob.view == 1 ||  role === "SUPERADMIN" ? (
               <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
                 {row.job_code_id}
               </a>
@@ -345,7 +345,7 @@ const ClientList = () => {
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
-              disabled={getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+              disabled={getAccessDataJob.update === 1 ||  role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -421,14 +421,14 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(getAccessDataJob.update == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+          {(getAccessDataJob.update == 1 ||  role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
           )}
           {
             row.timesheet_job_id == null ?
-              (getAccessDataJob.delete == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+              (getAccessDataJob.delete == 1 ||  role === "SUPERADMIN") && (
                 <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
                   <i className="ti-trash text-danger" />
                 </button>
@@ -709,7 +709,7 @@ const ClientList = () => {
                 <>
                   <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                     {
-                      ((getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && clientData.length > 0) && (
+                      ((getAccessDataJob.insert == 1 ||  role === "SUPERADMIN") && clientData.length > 0) && (
                         <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
                           <i className="fa fa-plus pe-1" /> Create Job
                         </div>

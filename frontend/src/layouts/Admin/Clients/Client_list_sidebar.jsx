@@ -128,11 +128,11 @@ const ClientLists = () => {
     } else {
       setActiveTab(
         (getAccessDataClient && getAccessDataClient.client == 1) ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob && getAccessDataJob.job == 1) ||
-            role === "ADMIN" ||
+            
             role === "SUPERADMIN"
           ? "job"
           : "documents"
@@ -217,7 +217,7 @@ const ClientLists = () => {
     let tabsData = [];
     if (
       (getAccessDataClient && getAccessDataClient.client == 1) ||
-      role === "ADMIN" ||
+      
       role === "SUPERADMIN"
     ) {
       tabsData.push({
@@ -227,7 +227,7 @@ const ClientLists = () => {
       });
     }
     if (
-      (getAccessDataJob && getAccessDataJob.job == 1) ||role === "ADMIN" ||role === "SUPERADMIN" ) {
+      (getAccessDataJob && getAccessDataJob.job == 1) ||role === "SUPERADMIN" ) {
        if(customerId != ""){ 
       tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
        }
@@ -243,7 +243,7 @@ const ClientLists = () => {
       cell: (row) => (
         <div>
           {getAccessDataJob.job === 1 ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
@@ -299,7 +299,7 @@ const ClientLists = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataClient.update === 1 ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
@@ -313,7 +313,7 @@ const ClientLists = () => {
             </button>
           ) : null}
           {getAccessDataClient.delete === 1 ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN" ? (
             <>
               {row?.Delete_Status == null && (
@@ -385,7 +385,7 @@ const ClientLists = () => {
               onChange={(e) => handleStatusChange(e, row)}
               disabled={
                 getAccessDataJob.update === 1 ||
-                role === "ADMIN" ||
+                
                 role === "SUPERADMIN"
                   ? false
                   : true
@@ -511,7 +511,7 @@ const ClientLists = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataJob.update === 1 ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
@@ -530,7 +530,7 @@ const ClientLists = () => {
           ) : null}
           {row.timesheet_job_id == null ? (
             getAccessDataJob.delete === 1 ||
-            role === "ADMIN" ||
+            
             role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"
@@ -690,7 +690,7 @@ const ClientLists = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataCustomer.update === 1 ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
@@ -708,7 +708,7 @@ const ClientLists = () => {
             </button>
           ) : null}
           {getAccessDataCustomer.delete === 1 ||
-          role === "ADMIN" ||
+          
           role === "SUPERADMIN" ? (
             <button
               className="delete-icon"
@@ -1066,7 +1066,7 @@ const ClientLists = () => {
                   activeTab === "job" ? (
                     <>
                       {(getAccessDataClient.insert === 1 ||
-                        role === "ADMIN" ||
+                        
                         role === "SUPERADMIN") &&
                       activeTab === "client" &&
                       customerId != "" ? (
@@ -1084,7 +1084,7 @@ const ClientLists = () => {
                         </>
                       ) : ClientData?.length > 0 &&
                         (getAccessDataJob.insert == 1 ||
-                          role === "ADMIN" ||
+                          
                           role === "SUPERADMIN") &&
                         activeTab === "job" ? (
                         <>
@@ -1104,7 +1104,7 @@ const ClientLists = () => {
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
-                          role === "ADMIN" ||
+                          
                           role === "SUPERADMIN") &&
                         activeTab === "checklist" ? (
                         <>

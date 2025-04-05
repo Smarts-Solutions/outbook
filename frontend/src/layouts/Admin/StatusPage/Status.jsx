@@ -353,7 +353,7 @@ const Status = () => {
                 <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                   <div>
                     {getAccessData.insert === 1 ||
-                      role === "ADMIN" ||
+                      
                       role === "SUPERADMIN" ? (
                       <button
                         type="button"

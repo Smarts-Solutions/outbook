@@ -1572,7 +1572,7 @@ const CreateJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                    // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+                                    // disabled={ role === "SUPERADMIN" ? false : true}
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(

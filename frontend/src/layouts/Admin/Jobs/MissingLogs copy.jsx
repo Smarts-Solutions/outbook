@@ -469,7 +469,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+            row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => {
                 setShowEditMissinglogsModal(true);
                 setEditData(row)
@@ -506,7 +506,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
         <div className='col-md-4'>
           <div>
             {
-              draftStatus == 0 && goto != "report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
+              draftStatus == 0 && goto != "report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
                 <i className="fa-regular fa-plus pe-1"></i> Add Missing Logs
               </button> : ""
             }
