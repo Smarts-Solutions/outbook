@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 22, 2025 at 11:43 AM
+-- Generation Time: Apr 05, 2025 at 12:01 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `clients` (
   UNIQUE KEY `client_code` (`client_code`),
   KEY `customer_id` (`customer_id`),
   KEY `client_industry_id` (`client_industry_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `clients`
@@ -124,7 +124,14 @@ INSERT INTO `clients` (`id`, `client_type`, `customer_id`, `staff_created_id`, `
 (5, '1', 8, 7, 0, 'f4-cli', '00005', 's', NULL, NULL, '0', '', '', '', '1', '2025-02-08 05:27:53', '2025-02-08 05:27:53'),
 (6, '5', 8, 2, 0, 'AAA', '00006', 'ss', '', 's', '0', '', '', '', '1', '2025-02-10 11:45:33', '2025-02-10 11:45:33'),
 (7, '6', 8, 2, 0, 'UNA', '00007', 'a', NULL, NULL, '0', '', '', '', '1', '2025-02-10 11:46:31', '2025-02-10 11:46:31'),
-(8, '7', 8, 2, 0, 'TRUST', '00008', 'a', NULL, NULL, '0', '', '', '', '1', '2025-02-10 11:47:41', '2025-02-10 11:47:41');
+(8, '7', 8, 2, 0, 'TRUST', '00008', 'a', NULL, NULL, '0', '', '', '', '1', '2025-02-10 11:47:41', '2025-02-10 11:47:41'),
+(9, '2', 8, 2, 0, 'G T SCARLET LIMITED_00009', '00009', '156 Newton Road, Torquay, England, TQ2 7AQ', NULL, NULL, '0', '', '', '', '1', '2025-03-26 10:10:13', '2025-03-26 10:10:13'),
+(10, '1', 8, 2, 0, 'sss', '000010', 'ss', NULL, NULL, '0', '', '', '', '1', '2025-03-27 06:18:25', '2025-03-27 06:18:25'),
+(11, '3', 8, 2, 3, 'ddddd', '000011', 'dd', NULL, NULL, '0', '', '', '', '1', '2025-03-27 06:55:28', '2025-03-27 06:55:28'),
+(12, '1', 5, 2, 3, 'sssssssssss', '000012', 'ss', NULL, NULL, '0', '', '', '', '1', '2025-04-02 06:13:37', '2025-04-02 06:13:37'),
+(13, '1', 6, 1, 0, 'fgff', '000013', 'f', NULL, NULL, '0', '', '', '', '1', '2025-04-02 07:13:52', '2025-04-02 07:13:52'),
+(14, '4', 6, 1, 0, 'SFD', '000014', NULL, NULL, NULL, '1', NULL, NULL, '', '1', '2025-04-02 12:21:40', '2025-04-02 12:21:40'),
+(15, '1', 19, 1, 3, 'AA', '000015', 'A', NULL, NULL, '0', '', '', '', '1', '2025-04-03 10:30:20', '2025-04-03 10:30:20');
 
 -- --------------------------------------------------------
 
@@ -147,7 +154,14 @@ CREATE TABLE IF NOT EXISTS `client_company_information` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_company_information`
+--
+
+INSERT INTO `client_company_information` (`id`, `client_id`, `company_name`, `entity_type`, `company_status`, `company_number`, `registered_office_address`, `incorporation_date`, `incorporation_in`, `created_at`, `updated_at`) VALUES
+(1, 9, 'G T SCARLET LIMITED', 'ltd', 'active', '05303995', '156 Newton Road, Torquay, England, TQ2 7AQ', '2004-12-03', '1', '2025-03-26 10:10:13', '2025-03-26 10:10:13');
 
 -- --------------------------------------------------------
 
@@ -175,7 +189,7 @@ CREATE TABLE IF NOT EXISTS `client_contact_details` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   KEY `role` (`role`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_contact_details`
@@ -189,7 +203,15 @@ INSERT INTO `client_contact_details` (`id`, `client_id`, `role`, `first_name`, `
 (5, 5, 0, 's', 's', 's@gmail.com', NULL, '+44', '2777777777', NULL, NULL, 's', '0', '2025-02-08 05:27:53', '2025-02-08 05:27:53'),
 (6, 6, 0, 's', 's', '', '', '+44', '', '+44', '', NULL, '0', '2025-02-10 11:45:33', '2025-02-10 11:45:33'),
 (7, 7, 0, 's', 'ss', '', '', '+44', '', '+44', '', NULL, '0', '2025-02-10 11:46:31', '2025-02-10 11:46:31'),
-(8, 8, 0, 'ss', 'ss', '', '', '+44', '', '+44', '', NULL, '0', '2025-02-10 11:47:41', '2025-02-10 11:47:41');
+(8, 8, 0, 'ss', 'ss', '', '', '+44', '', '+44', '', NULL, '0', '2025-02-10 11:47:41', '2025-02-10 11:47:41'),
+(9, 9, 0, 'Gary John', 'THOMAS', '', NULL, '+44', '', NULL, NULL, NULL, '0', '2025-03-26 10:10:13', '2025-03-26 10:10:13'),
+(10, 10, 0, 'ss', 'ss', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-03-27 06:18:25', '2025-03-27 06:18:25'),
+(11, 11, 0, 'ddd', 'dddddddddd', '', '', '+44', '', '+44', '', NULL, '0', '2025-03-27 06:55:28', '2025-03-27 06:55:28'),
+(12, 11, 0, 'dddddd', 'ddddddddddd', '', '', '+44', '', '+44', '', NULL, '0', '2025-03-27 06:55:28', '2025-03-27 06:55:28'),
+(13, 12, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-04-02 06:13:37', '2025-04-02 06:13:37'),
+(14, 13, 0, 'f', 'f', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-04-02 07:13:52', '2025-04-02 07:13:52'),
+(15, 14, 0, 'ss', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-04-02 12:21:40', '2025-04-02 12:21:40'),
+(16, 15, 0, 'A', 'A', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-04-03 10:30:20', '2025-04-03 10:30:20');
 
 -- --------------------------------------------------------
 
@@ -210,7 +232,14 @@ CREATE TABLE IF NOT EXISTS `client_documents` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_documents`
+--
+
+INSERT INTO `client_documents` (`id`, `client_id`, `file_name`, `original_name`, `file_type`, `file_size`, `web_url`, `created_at`, `updated_at`) VALUES
+(1, 12, '1729316168785-Activity.PNG', 'Activity.PNG', 'image/png', 54446, 'https://outbooksglobal.sharepoint.com/sites/SharePointOnlineforJobManagement/Shared%20Documents/JobManagement/CLIENT_DEMO/Activity.PNG', '2025-04-02 11:57:23', '2025-04-02 11:57:23');
 
 -- --------------------------------------------------------
 
@@ -257,7 +286,7 @@ CREATE TABLE IF NOT EXISTS `client_job_task` (
   UNIQUE KEY `job_id` (`job_id`,`client_id`,`task_id`),
   KEY `client_id` (`client_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_job_task`
@@ -266,7 +295,8 @@ CREATE TABLE IF NOT EXISTS `client_job_task` (
 INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_status`, `time`, `created_at`, `updated_at`) VALUES
 (1, 1, 2, 1, NULL, '12:12', '2025-01-30 09:09:00', '2025-01-30 09:09:00'),
 (3, 4, 2, 1, NULL, '12:12', '2025-02-10 13:14:57', '2025-02-10 13:14:57'),
-(4, 4, 2, 2, NULL, '12:12', '2025-02-10 13:14:57', '2025-02-10 13:14:57');
+(4, 4, 2, 2, NULL, '12:12', '2025-02-10 13:14:57', '2025-02-10 13:14:57'),
+(5, 6, 2, 1, NULL, '12:12', '2025-04-03 10:52:43', '2025-04-03 10:52:43');
 
 -- --------------------------------------------------------
 
@@ -394,7 +424,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   UNIQUE KEY `customer_code` (`customer_code`),
   KEY `staff_id` (`staff_id`),
   KEY `account_manager_id` (`account_manager_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customers`
@@ -407,7 +437,12 @@ INSERT INTO `customers` (`id`, `customer_type`, `staff_id`, `account_manager_id`
 (6, '1', 10, 10, 'CUST-4', '00004', 'a', '0', '0', '', '2025-02-06', 10, 14, '4', '', '1', '2025-02-06 11:34:48', '2025-02-11 05:08:53'),
 (7, '1', 7, 10, 'CUS-9', '00005', 'AA', '0', '', '', '2025-02-07', 10, 14, '4', '', '1', '2025-02-07 13:20:42', '2025-02-08 11:36:52'),
 (8, '1', 7, 10, 'f45cust', '00006', 's', '0', '', '', '2025-02-08', 10, 14, '4', '', '1', '2025-02-08 05:26:20', '2025-02-20 06:49:02'),
-(9, '2', 2, 11, 'F A B AUDIO VISUAL LIMITED_00007', '00007', '85 Great Portland Street, First Floor, London, England, W1W 7LT', '0', '', '', '2025-02-19', 3, 2, '3', '', '1', '2025-02-19 12:32:09', '2025-02-19 12:35:34');
+(15, '1', 1, 10, 'Adad', '00007', '', '0', '', '', NULL, NULL, NULL, '1', '', '1', '2025-04-03 07:27:38', '2025-04-03 07:27:38'),
+(16, '1', 1, 10, 'aaaaaa', '00008', '', '0', '', '', NULL, NULL, NULL, '1', '', '1', '2025-04-03 08:24:59', '2025-04-03 08:24:59'),
+(17, '1', 1, 10, 'sds', '00009', '', '0', '', '', '2025-04-03', 7, 11, '4', '', '1', '2025-04-03 08:31:15', '2025-04-03 08:34:03'),
+(18, '1', 10, 10, 'fh', '000010', '', '0', '', '', '2025-04-03', 10, 14, '4', '', '1', '2025-04-03 08:39:08', '2025-04-03 08:39:19'),
+(19, '3', 1, 10, 'SHKKK', '000011', 's', '0', '', '', '2025-04-03', 10, 14, '4', '', '1', '2025-04-03 10:29:53', '2025-04-03 10:30:02'),
+(20, '1', 1, 11, 'asad', '000012', 'dd', '0', '', '', '2025-04-03', 10, 14, '4', '', '1', '2025-04-03 10:57:27', '2025-04-03 10:57:41');
 
 -- --------------------------------------------------------
 
@@ -430,14 +465,7 @@ CREATE TABLE IF NOT EXISTS `customer_company_information` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `customer_company_information`
---
-
-INSERT INTO `customer_company_information` (`id`, `customer_id`, `company_name`, `entity_type`, `company_status`, `company_number`, `registered_office_address`, `incorporation_date`, `incorporation_in`, `created_at`, `updated_at`) VALUES
-(1, 9, 'F A B AUDIO VISUAL LIMITED', 'ltd', 'active', '04388526', '85 Great Portland Street, First Floor, London, England, W1W 7LT', '2002-03-06', '1', '2025-02-19 12:32:09', '2025-02-19 12:32:09');
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -464,7 +492,7 @@ CREATE TABLE IF NOT EXISTS `customer_contact_details` (
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`),
   KEY `contact_person_role_id` (`contact_person_role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_contact_details`
@@ -477,7 +505,13 @@ INSERT INTO `customer_contact_details` (`id`, `customer_id`, `contact_person_rol
 (6, 6, 0, 's', 's', 's@gmail.com', NULL, '+44', '7777777777', NULL, 'z', '1', '2025-02-06 11:34:48', '2025-02-06 11:34:48'),
 (7, 7, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-02-07 13:20:42', '2025-02-07 13:20:42'),
 (8, 8, 0, 's', 's', 's@gmail.com', NULL, '+44', '2777777777', NULL, 's', '1', '2025-02-08 05:26:20', '2025-02-08 05:26:20'),
-(9, 9, NULL, 'Phillip John', 'WARRIS', 's@gmail.com', NULL, '+44', '', NULL, NULL, '1', '2025-02-19 12:32:09', '2025-02-19 12:35:54');
+(15, 15, 0, 'SDD', 'scvs', 's@gmail.com', NULL, '+44', '', NULL, 'ada', '1', '2025-04-03 07:27:38', '2025-04-03 07:27:38'),
+(16, 16, 0, 'aa', 'aa', 's@gmail.com', NULL, '+44', '', NULL, 'ssss', '1', '2025-04-03 08:24:59', '2025-04-03 08:24:59'),
+(17, 17, 0, 'dsd', 'sfs', 's@gmail.com', NULL, '+44', '', NULL, 'sdfasf', '1', '2025-04-03 08:31:15', '2025-04-03 08:31:15'),
+(18, 18, 0, 'fhfh', 'fh', 's@gmail.com', NULL, '+44', '', NULL, 'fh', '1', '2025-04-03 08:39:08', '2025-04-03 08:39:08'),
+(19, 19, 2, 'sh', 'hu', 's@gmail.com', NULL, '+44', '', NULL, NULL, '0', '2025-04-03 10:29:53', '2025-04-03 10:29:53'),
+(20, 19, 2, 'shk', 'huk', 's@gmail.com', NULL, '+44', '', NULL, NULL, '0', '2025-04-03 10:29:53', '2025-04-03 10:29:53'),
+(21, 20, 0, 'adad', 'dad', 's@gmail.com', NULL, '+44', '', NULL, 'ada', '1', '2025-04-03 10:57:27', '2025-04-03 10:57:27');
 
 -- --------------------------------------------------------
 
@@ -494,7 +528,15 @@ CREATE TABLE IF NOT EXISTS `customer_contact_person_role` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_contact_person_role`
+--
+
+INSERT INTO `customer_contact_person_role` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'RoleName1', '1', '2025-04-03 05:06:14', '2025-04-03 05:06:14'),
+(2, 'RoleName2', '1', '2025-04-03 05:06:22', '2025-04-03 05:06:22');
 
 -- --------------------------------------------------------
 
@@ -582,7 +624,16 @@ CREATE TABLE IF NOT EXISTS `customer_engagement_fte` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `customer_engagement_model_id` (`customer_engagement_model_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_engagement_fte`
+--
+
+INSERT INTO `customer_engagement_fte` (`id`, `customer_engagement_model_id`, `number_of_accountants`, `fee_per_accountant`, `number_of_bookkeepers`, `fee_per_bookkeeper`, `number_of_payroll_experts`, `fee_per_payroll_expert`, `number_of_tax_experts`, `fee_per_tax_expert`, `number_of_admin_staff`, `fee_per_admin_staff`, `created_at`, `updated_at`) VALUES
+(1, 8, 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-03 08:33:36', '2025-04-03 08:33:36'),
+(2, 9, 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-03 08:39:17', '2025-04-03 08:39:17'),
+(4, 11, 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-03 10:57:40', '2025-04-03 10:57:40');
 
 -- --------------------------------------------------------
 
@@ -602,7 +653,7 @@ CREATE TABLE IF NOT EXISTS `customer_engagement_model` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_engagement_model`
@@ -615,7 +666,10 @@ INSERT INTO `customer_engagement_model` (`id`, `customer_id`, `fte_dedicated_sta
 (4, 6, '0', '1', '0', '0', '2025-02-06 11:35:05', '2025-02-06 11:35:05'),
 (5, 7, '0', '1', '0', '0', '2025-02-07 13:21:40', '2025-02-07 13:21:40'),
 (6, 8, '0', '1', '0', '0', '2025-02-08 05:26:33', '2025-02-08 05:26:33'),
-(7, 9, '0', '1', '0', '0', '2025-02-19 12:35:34', '2025-02-19 12:35:34');
+(8, 17, '1', '0', '0', '0', '2025-04-03 08:33:36', '2025-04-03 08:33:36'),
+(9, 18, '1', '0', '0', '0', '2025-04-03 08:39:17', '2025-04-03 08:39:17'),
+(10, 19, '0', '1', '0', '0', '2025-04-03 10:30:01', '2025-04-03 10:48:40'),
+(11, 20, '1', '0', '0', '0', '2025-04-03 10:57:40', '2025-04-03 10:57:40');
 
 -- --------------------------------------------------------
 
@@ -637,7 +691,7 @@ CREATE TABLE IF NOT EXISTS `customer_engagement_percentage` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `customer_engagement_model_id` (`customer_engagement_model_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_engagement_percentage`
@@ -650,7 +704,7 @@ INSERT INTO `customer_engagement_percentage` (`id`, `customer_engagement_model_i
 (4, 4, '1.00', '1.00', '1.00', '1.00', '1.00', '1.00', '2025-02-06 11:35:05', '2025-02-06 11:35:05'),
 (5, 5, '1.00', '1.00', '1.00', '1.00', '1.00', '1.00', '2025-02-07 13:21:40', '2025-02-07 13:21:40'),
 (6, 6, '1.00', NULL, '1.00', '1.00', '1.00', '1.00', '2025-02-08 05:26:33', '2025-02-20 08:40:59'),
-(7, 7, '0.00', '0.00', NULL, '0.00', '0.00', '0.00', '2025-02-19 12:35:34', '2025-02-19 13:26:00');
+(8, 10, '1.00', NULL, NULL, NULL, NULL, NULL, '2025-04-03 10:48:40', '2025-04-03 10:48:40');
 
 -- --------------------------------------------------------
 
@@ -697,7 +751,7 @@ CREATE TABLE IF NOT EXISTS `customer_services` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `customer_id` (`customer_id`,`service_id`),
   KEY `service_id` (`service_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_services`
@@ -715,7 +769,12 @@ INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `c
 (9, 6, 2, '1', '2025-02-06 11:34:52', '2025-02-06 11:34:52'),
 (10, 7, 3, '1', '2025-02-07 13:20:46', '2025-02-07 13:20:46'),
 (11, 8, 3, '1', '2025-02-08 05:26:22', '2025-02-08 05:26:22'),
-(12, 9, 4, '1', '2025-02-19 12:32:13', '2025-02-19 12:32:13');
+(17, 15, 1, '1', '2025-04-03 07:27:41', '2025-04-03 07:27:41'),
+(18, 16, 1, '1', '2025-04-03 08:25:03', '2025-04-03 08:25:03'),
+(19, 17, 1, '1', '2025-04-03 08:31:20', '2025-04-03 08:31:20'),
+(20, 18, 2, '1', '2025-04-03 08:39:11', '2025-04-03 08:39:11'),
+(21, 19, 1, '1', '2025-04-03 10:29:55', '2025-04-03 10:29:55'),
+(22, 20, 1, '1', '2025-04-03 10:57:30', '2025-04-03 10:57:30');
 
 -- --------------------------------------------------------
 
@@ -749,7 +808,12 @@ INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account
 (9, 10, '2025-02-06 11:34:52', '2025-02-08 11:36:52'),
 (10, 10, '2025-02-07 13:20:46', '2025-02-08 11:36:52'),
 (11, 10, '2025-02-20 08:40:51', '2025-02-20 08:40:51'),
-(12, 11, '2025-02-19 13:21:34', '2025-02-19 13:21:34');
+(17, 10, '2025-04-03 07:27:41', '2025-04-03 07:27:41'),
+(18, 10, '2025-04-03 08:29:26', '2025-04-03 08:29:26'),
+(19, 10, '2025-04-03 08:34:11', '2025-04-03 08:34:11'),
+(20, 10, '2025-04-03 08:39:50', '2025-04-03 08:39:50'),
+(21, 10, '2025-04-03 10:48:33', '2025-04-03 10:48:33'),
+(22, 11, '2025-04-03 10:57:30', '2025-04-03 10:57:30');
 
 -- --------------------------------------------------------
 
@@ -886,7 +950,7 @@ CREATE TABLE IF NOT EXISTS `drafts` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `drafts`
@@ -900,7 +964,8 @@ INSERT INTO `drafts` (`id`, `job_id`, `draft_sent_on`, `draft_title`, `final_dra
 (4, 1, '2025-02-01', 'D_00004', NULL, '0', '1', NULL, '0', '2025-02-01 12:05:49', '2025-02-01 12:05:49'),
 (6, 1, '2025-02-10', 'D_00005', NULL, '0', '1', NULL, '0', '2025-02-10 07:23:21', '2025-02-10 07:23:21'),
 (7, 3, '2025-02-10', 'D_00001', NULL, '0', '1', NULL, '0', '2025-02-10 09:50:12', '2025-02-10 09:50:12'),
-(8, 1, '2025-02-10', 'D_00006', NULL, '0', '1', NULL, '0', '2025-02-10 09:55:36', '2025-02-10 09:55:36');
+(8, 1, '2025-02-10', 'D_00006', NULL, '0', '1', NULL, '0', '2025-02-10 09:55:36', '2025-02-10 09:55:36'),
+(9, 6, '2025-04-05', 'D_00001', '2025-04-05', '1', '1', 'a', '1', '2025-04-05 06:05:17', '2025-04-05 06:05:17');
 
 -- --------------------------------------------------------
 
@@ -1062,7 +1127,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`),
   KEY `currency` (`currency`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `jobs`
@@ -1072,7 +1137,9 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (1, 2, '00001', 11, 1, 2, '', 1, 2, 2, '24:24', 0, 0, '2025-01-30', '2025-01-30', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-01-26', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 7, NULL, '1', NULL, '', '', 0, '', '', '', '', '', 'Daily', 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '0', '0', '0', '', '', '2025-01-30 09:09:00', '2025-02-10 09:55:36'),
 (2, 2, '00002', 11, 2, 3, '', 2, 2, 4, '00:00', 0, 0, '2025-02-04', '2025-02-04', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-02-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 21, NULL, '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-02-04 05:14:36', '2025-02-06 12:17:52'),
 (3, 7, '00003', 4, 8, 5, '', 8, 3, 3, '00:00', 0, 0, '2025-02-08', '2025-02-08', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-02-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 8, NULL, '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-02-08 05:28:09', '2025-02-10 11:21:13'),
-(4, 2, '00004', 10, 1, 2, '', 1, 2, 4, '24:24', 0, 0, '2025-02-10', '2025-02-10', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-02-21', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 4, NULL, '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-02-10 13:14:57', '2025-02-20 11:24:54');
+(4, 2, '00004', 10, 1, 2, '', 1, 2, 4, '24:24', 0, 0, '2025-02-10', '2025-02-10', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-02-21', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 4, NULL, '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-02-10 13:14:57', '2025-02-20 11:24:54'),
+(5, 1, '00005', 10, 2, 3, '', 2, 3, 3, '00:00', 0, 0, '2025-04-02', '2025-04-02', '', '00:00', '00:00', '00:00', '00:00', '', NULL, NULL, NULL, NULL, '2025-04-03', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-04-02 08:35:25', '2025-04-02 08:35:25'),
+(6, 1, '00006', 10, 1, 2, '', 1, 7, 2, '12:12', 0, 0, '2025-04-03', '2025-04-03', '', '00:00', '00:00', '00:00', '00:00', 'percentage_model', NULL, NULL, NULL, NULL, '2025-04-04', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 6, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-04-03 10:52:43', '2025-04-05 06:05:17');
 
 -- --------------------------------------------------------
 
@@ -1157,8 +1224,7 @@ INSERT INTO `line_managers` (`id`, `staff_by`, `staff_to`, `created_at`, `update
 (2, 6, 5, '2025-02-06 07:28:28', '2025-02-06 11:30:04'),
 (3, 8, 7, '2025-02-08 05:24:21', '2025-02-08 05:24:21'),
 (4, 10, 11, '2025-02-08 06:53:36', '2025-02-10 12:11:07'),
-(5, 11, 10, '2025-02-10 11:53:22', '2025-02-10 11:53:22'),
-(6, 7, 10, '2025-02-10 12:02:07', '2025-02-11 05:37:54');
+(5, 11, 10, '2025-02-10 11:53:22', '2025-02-10 11:53:22');
 
 -- --------------------------------------------------------
 
@@ -1278,7 +1344,7 @@ CREATE TABLE IF NOT EXISTS `permissions` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=285 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `permissions`
@@ -1316,7 +1382,10 @@ INSERT INTO `permissions` (`id`, `permission_name`, `type`, `created_at`, `updat
 (29, 'timesheet', 'insert', '2024-07-09 01:29:27', '2024-09-24 07:03:59'),
 (30, 'timesheet', 'update', '2024-07-09 01:29:27', '2024-09-24 07:05:21'),
 (31, 'timesheet', 'delete', '2024-07-09 01:29:27', '2024-09-24 07:05:28'),
-(32, 'timesheet', 'view', '2024-07-09 01:29:27', '2024-09-24 07:05:32');
+(32, 'timesheet', 'view', '2024-07-09 01:29:27', '2024-09-24 07:05:32'),
+(33, 'all_customers', 'view', '2024-07-09 01:29:27', '2025-04-04 06:42:58'),
+(34, 'all_clients', 'view', '2024-07-09 01:29:27', '2025-04-04 06:43:09'),
+(35, 'all_jobs', 'view', '2024-07-09 01:29:27', '2025-04-04 06:43:18');
 
 -- --------------------------------------------------------
 
@@ -1513,7 +1582,36 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `created_at`, `updat
 (10, 29, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
 (10, 30, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
 (10, 31, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
-(10, 32, '2025-02-20 11:49:19', '2025-02-20 11:49:19');
+(10, 32, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(2, 9, '2025-03-29 05:15:44', '2025-03-29 05:15:44'),
+(2, 10, '2025-03-29 05:15:44', '2025-03-29 05:15:44'),
+(2, 11, '2025-03-29 05:15:44', '2025-03-29 05:15:44'),
+(2, 24, '2025-04-05 06:13:37', '2025-04-05 06:13:37'),
+(2, 2, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 3, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 33, '2025-04-05 06:24:20', '2025-04-05 06:24:20'),
+(2, 5, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 6, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 7, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 14, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 15, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 34, '2025-04-05 06:46:16', '2025-04-05 06:46:16'),
+(2, 17, '2025-04-05 06:59:52', '2025-04-05 06:59:52'),
+(2, 18, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 19, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 21, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 22, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 23, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 12, '2025-04-05 06:04:34', '2025-04-05 06:04:34'),
+(2, 25, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 26, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 27, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 35, '2025-04-05 06:57:22', '2025-04-05 06:57:22'),
+(2, 29, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 30, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 31, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 8, '2025-04-05 06:13:37', '2025-04-05 06:13:37'),
+(2, 285, '2025-04-03 11:47:39', '2025-04-03 11:47:39');
 
 -- --------------------------------------------------------
 
@@ -1571,7 +1669,7 @@ CREATE TABLE IF NOT EXISTS `sharepoint_token` (
 --
 
 INSERT INTO `sharepoint_token` (`id`, `access_token`, `refresh_token`, `client_id`, `client_secret`, `created_at`, `updated_at`) VALUES
-(1, 'eyJ0eXAiOiJKV1QiLCJub25jZSI6Ik5CZE5XNEV5TTZlcEI4YWxlVmR2eWFwU0RFNUt0a2tDTDlPSTQ1OG4tYUEiLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NzMxMTg3LCJuYmYiOjE3MzU3MzExODcsImV4cCI6MTczNTczNjI5MSwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQVF5dVlLWmh2VlYzcVpDWFJhRHplQWZpQnMwcjRqcEhlT3lkU242enpXaUJROXhPMmhSd0QzbTdqNUprRTNFZ3QiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiZTg3M2Y2OWYtYTE5NS00N2EwLTljYWUtYjc3MDc1MDQ5NzlhIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6InplNFA3T3NYQkVhdzBsa1JOSGhQQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDE0IiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.X8g-2_Kro89Ui4QJfI3cB_WTeRy3OBicxv6rzIqDyFe2f8oPQsrQv_oYBIvFmrGsnaqNBxMACE0oG2oY9WSShwCC3_b7uju_hjGQOXSifmShSWzAIRczdrrB57HXA6txxyCl9YGDoiwc7WVv1wckQ9cz5TupsISLHl83gPsAsg6SFGGJA6N6V5PNBHXVQCUKRFYS4hwUR0HyRDhSdVqYInAiML0QAcNw8kuZ0Tu0i8Jot3iPKMf-ablFuduBFvAurvCbl4ovj-qlE7Lvul6qtrB1xOBDfa6twjpKnFkBWEGnONMd39jqthCSzh-xzA1Qp8Sn5WCFtczuMyK1spUY6w', '1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8j5F-GZwVFOh_by_NPXfxUEByMvJcplAKWNhsPQtT40epQO-lc2g1x_FflTMS94BxphBD7OSKaLes4Iyx5IjdwcpAxXB1ZZos6FvTEMe8zQ8rEVnwawlow-mIjikU01Dw7bfxMH2PdnoU-mgSszjmGfSCZfRhQpqEd0SqPznBomn7CEuHDGWqfzh-h3eqAy9mK-YtzjWSQoPceC3-ohC6gNctmAf-WxI0QyERB8xCi1oRd0U3u5by1UQtqWqo80L5T8t8iqOAhV8n6brsSmt-ZlB28bY-HQYeQ6R8G8K0US_3rWtKIBTF5ZDljnzsu_SYjb_zO9NNj8B9-L-aIRz4truIfgvhVVXParWf6MjICTJ2Tq8wKa5nZcgo6UFnS0J-u8ixeRZkjSo8Uz__Oh3pXfkeZvoRrlWITUuMkJDJt-wHvq_Y5Eq0GxMWEWBoQZDTRm5T2ZgXCSImwnePGmerSpLfODswuph2akuhs9ub7Va_feoDRZDahnmh6FCqOX98mjEBUC4k3yiZYI_ZbhZnURL_A7z_kPBcX02Hmr5-n5jVHhZHFJbFzW53DMZ3Fcxd6k8WCOKjWatwXwpeAFmpqnGBUedZL8W0D95Dny7z_qk94eemwpu_aZQl5sETFYpAJ1XU9c-HzEAzK02ppsoLBTHNV76PQ0H-Yhetvt2vF6mHcj6NpYaGM5BM3RTvq-SmXp7vdkb5Rps4Sj4jv9YdhI1Mg0odiz8pPuLbBAHyMppB4mznvsus', '9185857f-7365-4d35-b00a-5a31dcdd58d2', 'aCE8Q~nIMereO8MzR6cDsf4QUjJIGLhuBMlcPc-t', '2025-01-01 06:43:05', '2025-01-07 06:42:40');
+(1, 'eyJ0eXAiOiJKV1QiLCJub25jZSI6Ik5CZE5XNEV5TTZlcEI4YWxlVmR2eWFwU0RFNUt0a2tDTDlPSTQ1OG4tYUEiLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NzMxMTg3LCJuYmYiOjE3MzU3MzExODcsImV4cCI6MTczNTczNjI5MSwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQVF5dVlLWmh2VlYzcVpDWFJhRHplQWZpQnMwcjRqcEhlT3lkU242enpXaUJROXhPMmhSd0QzbTdqNUprRTNFZ3QiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiZTg3M2Y2OWYtYTE5NS00N2EwLTljYWUtYjc3MDc1MDQ5NzlhIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6InplNFA3T3NYQkVhdzBsa1JOSGhQQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDE0IiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.X8g-2_Kro89Ui4QJfI3cB_WTeRy3OBicxv6rzIqDyFe2f8oPQsrQv_oYBIvFmrGsnaqNBxMACE0oG2oY9WSShwCC3_b7uju_hjGQOXSifmShSWzAIRczdrrB57HXA6txxyCl9YGDoiwc7WVv1wckQ9cz5TupsISLHl83gPsAsg6SFGGJA6N6V5PNBHXVQCUKRFYS4hwUR0HyRDhSdVqYInAiML0QAcNw8kuZ0Tu0i8Jot3iPKMf-ablFuduBFvAurvCbl4ovj-qlE7Lvul6qtrB1xOBDfa6twjpKnFkBWEGnONMd39jqthCSzh-xzA1Qp8Sn5WCFtczuMyK1spUY6w', '1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAABVrSpeuWamRam2jAF1XRQEAwDs_wUA9P-ImAq-al0Pv8qPtr24oU8OC0RVtMptaC6RWDPE0h0Q3O1l40oQP4gbdE6kxC_YpjBQKzklOY5-hmhZMWtnZk7Dgt1yZAlZG--izlK5TtBMW3TRg54nTdd99IvEhYpVZVjn6VS_c0TxMgqbuEds3mBbRCQy5IVwwRdqWkYnix4ryMPFZWcOvcTpxeahHNXvSjORokPsRROeq8muUnl2Xxs-47Ycltaik0v6Yy6yCIBNGMoxyFF3PpMbbniAvnW-_vfPRSjfLxUwBT7jLqUDYuZMh30ffK7MB7ftMfzWwEi4cc_xpiUjz6e_Wuc6aFSh37wgb7DZauGp-AFsqXOD-OzoQ1ns4awvqAQ_yGJVsrcNWS_8p_aXOr4XeuILfY-hXiwAGtt4_6SuSzzXAOGdWoaCNce6XfIgW2auB0qazKy3UxDd1aq6xxoHunEPZlxpgMHkhC7I1lA6rZZFGV9yz_mkildQxWwu4PiKNLyRNw7vq6-6zeJqnBznzQqAjxlnHoKHvXAEI62f9CkUN4SH1RuDoIU7pUJw3g0xL7yvd07wUtgTldw8dI_Vsa6ihStoTaAu9WMDVt-Ym86vLd5qLBfWqPD9GLX96vic_oodTWt-Ock8_0JuQKisPpc0sQCifCtyNP_bS3H69ARR8c9h12zaLOj4UUmHgbDgfM887pTnVQknR_9FoB22ZCzIYFvvDzKu0p9Eq9iUhDUcROSf7G7Xaw6l52pHKXdyTZat-rZw0g9TGuwFUsA0XFT-z3I1zcGvB1lOVfMr1pwA-FhekoZImJ7L1-hluVnwVI95DzbTZzFYG890', '9185857f-7365-4d35-b00a-5a31dcdd58d2', 'aCE8Q~nIMereO8MzR6cDsf4QUjJIGLhuBMlcPc-t', '2025-01-01 06:43:05', '2025-04-02 11:56:08');
 
 -- --------------------------------------------------------
 
@@ -1606,14 +1704,14 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '152:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-02-06 08:46:04', ''),
-(2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-20 05:50:00', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0MDAzMDYwMCwiZXhwIjoxNzQwMDY2NjAwfQ.gJHePzBxYuhVD14KDRKyrK61JtEB74oQkEOPgHSjFZY'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '152:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-04-05 05:02:24', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0MzgyOTM0NCwiZXhwIjoxNzQzODY1MzQ0fQ.mHSmcJxPsMCgw7qsNeT_UUc_90IzXMajIJH2PGHUf6A'),
+(2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, '2024-07-08 07:25:41', '2025-04-05 05:12:00', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0MzgyOTkyMCwiZXhwIjoxNzQzODY1OTIwfQ.5qV9pm5ioFNjNizVptYZ3rk-4rTJA-g-0CmB9yvPL6Y'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$UGh8LOFOP9Kwtha4kypOcuJL.YZYwwyRsSrzaYsRvMiBiwMomGvdW', '659:00', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-06 08:46:14', ''),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 2, '2025-02-06 07:27:58', '2025-02-06 10:46:12', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTczODgzODc3MiwiZXhwIjoxNzM4ODc0NzcyfQ.CWK50J0fJHeO13M8kcycFoczGHIGqBOxeX1j2bK1vH8'),
-(6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 2, '2025-02-06 07:28:28', '2025-02-12 10:07:09', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTczOTM1NDgyOSwiZXhwIjoxNzM5MzkwODI5fQ.KXIH35Jy2ipU8mah1rWNOKXCj5hTFbeA7Lj2oA0rqDQ'),
+(6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 2, '2025-02-06 07:28:28', '2025-04-05 07:26:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc0MzgzODAxNCwiZXhwIjoxNzQzODc0MDE0fQ.JOv3mdCpY2lC3K1ncCZBN7IHTxBSL4vkFeN3UzCIdIM'),
 (11, 4, 'STAFF', 'SIX', 'sss@gmail.com', '+44', '2777777777', '$2a$10$a7sfTgDavJUrU.8kFfbKIe0525d3EF4yABvGUlcZAxV/Amy1qgCVa', '2:5', '1', '0', 2, '2025-02-08 11:43:22', '2025-02-11 04:52:40', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJpYXQiOjE3MzkyNDk1NjAsImV4cCI6MTczOTI4NTU2MH0.42AWkdJ5EM5VAsOlAMU0LlNeB2eGFX2UhbhX0hVvMU8'),
-(7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 2, '2025-02-07 12:50:36', '2025-02-12 10:06:18', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTczOTM1NDc3OCwiZXhwIjoxNzM5MzkwNzc4fQ.cuCw4gyw950Xzz2HbbtvOZnr3eUPowLT7i4ylWv59pY'),
-(10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 2, '2025-02-08 11:36:28', '2025-02-11 04:54:53', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3MzkyNDk2OTMsImV4cCI6MTczOTI4NTY5M30.sixHOWcVUysT70nNGOOO05Lj1KIbd0_pGGzejz6v9Xc');
+(7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 1, '2025-02-07 12:50:36', '2025-04-05 09:34:11', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc0Mzg0NDkxNCwiZXhwIjoxNzQzODgwOTE0fQ.n4z-9sn0kOJtK1tFhurXsYHQ1Weh5suYbYUxTeKbkbo'),
+(10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 2, '2025-02-08 11:36:28', '2025-04-03 04:50:46', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NDM2NTU4NDYsImV4cCI6MTc0MzY5MTg0Nn0.6mYVNzn0kJbLOB4Ypu-cMDndmXDXZWt9TTRG57JyafA');
 
 -- --------------------------------------------------------
 
@@ -1652,7 +1750,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=193 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=377 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -1850,7 +1948,192 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (189, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 10:00:56', '2025-02-20 10:00:56'),
 (190, 2, '2025-02-20', 'job', 4, 'edited the missing logs job code:', 'Admin Amit Amit edited the missing logs job code: CUS_Cli_V4_00004', 'updated', '122.168.114.106', '2025-02-20 10:37:37', '2025-02-20 10:37:37'),
 (191, 2, '2025-02-20', 'job', 4, 'edited the queries job code:', 'Admin Amit Amit edited the queries job code: CUS_Cli_V4_00004', 'updated', '122.168.114.106', '2025-02-20 11:24:54', '2025-02-20 11:24:54'),
-(192, 2, '2025-02-20', 'role', 10, 'created role DEMO1', 'Admin Amit Amit created role DEMO1 ', 'created', '122.168.114.106', '2025-02-20 11:49:19', '2025-02-20 11:49:19');
+(192, 2, '2025-02-20', 'role', 10, 'created role DEMO1', 'Admin Amit Amit created role DEMO1 ', 'created', '122.168.114.106', '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(193, 2, '2025-03-26', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '103.103.213.217', '2025-03-26 09:44:36', '2025-03-26 09:44:36'),
+(194, 2, '2025-03-26', 'customer', 10, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_HEA_00008(HEAVEN RETAIL LIMITED_00008)', 'created', '103.103.213.217', '2025-03-26 09:55:47', '2025-03-26 09:55:47'),
+(195, 2, '2025-03-26', 'client', 9, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f45_G T_00009(G T SCARLET LIMITED_00009)', 'created', '103.103.213.217', '2025-03-26 10:10:13', '2025-03-26 10:10:13'),
+(196, 2, '2025-03-27', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '103.103.213.217', '2025-03-27 05:52:43', '2025-03-27 05:52:43'),
+(197, 2, '2025-03-27', 'client', 10, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f45_sss_000010(sss)', 'created', '103.103.213.217', '2025-03-27 06:18:25', '2025-03-27 06:18:25'),
+(198, 2, '2025-03-27', 'client', 11, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f45_ddd_000011(ddddd)', 'created', '103.103.213.217', '2025-03-27 06:55:28', '2025-03-27 06:55:28'),
+(199, 2, '2025-03-28', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '103.103.213.217', '2025-03-28 06:47:08', '2025-03-28 06:47:08'),
+(200, 2, '2025-03-29', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-03-29 05:13:34', '2025-03-29 05:13:34'),
+(201, 2, '2025-03-29', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-insert, staff-update, staff-delete, staff-view) ', 'Admin Amit Amit  updated the access for ADMIN. Access Changes Add Permission (staff-insert, staff-update, staff-delete, staff-view)  ', 'updated', '122.168.114.106', '2025-03-29 05:15:44', '2025-03-29 05:15:44'),
+(202, 2, '2025-03-29', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-insert, customer-update, customer-delete, customer-view, status-insert, status-update, status-delete, status-view, client-insert, client-update, client-delete, client-view, job-insert, job-update, job-delete, job-view, setting-insert, setting-update, setting-delete, setting-view, report-insert, report-update, report-delete, report-view, timesheet-insert, timesheet-update, timesheet-delete, timesheet-view) ', 'Admin Amit Amit  updated the access for ADMIN. Access Changes Add Permission (customer-insert, customer-update, customer-delete, customer-view, status-insert, status-update, status-delete, status-view, client-insert, client-update, client-delete, client-view, job-insert, job-update, job-delete, job-view, setting-insert, setting-update, setting-delete, setting-view, report-insert, report-update, report-delete, report-view, timesheet-insert, timesheet-update, timesheet-delete, timesheet-view)  ', 'updated', '122.168.114.106', '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(203, 6, '2025-03-29', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-03-29 05:18:24', '2025-03-29 05:18:24'),
+(204, 2, '2025-04-02', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-02 05:41:53', '2025-04-02 05:41:53'),
+(205, 2, '2025-04-02', 'client', 12, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_CUS_sss_000012(sssssssssss)', 'created', '122.168.114.106', '2025-04-02 06:13:37', '2025-04-02 06:13:37'),
+(206, 2, '2025-04-02', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-02 06:22:33', '2025-04-02 06:22:33'),
+(207, 2, '2025-04-02', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-02 06:22:33', '2025-04-02 06:22:33'),
+(208, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-04-02 07:13:21', '2025-04-02 07:13:21'),
+(209, 1, '2025-04-02', 'client', 13, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_CUS_fgf_000013(fgff)', 'created', '122.168.114.106', '2025-04-02 07:13:52', '2025-04-02 07:13:52'),
+(210, 1, '2025-04-02', 'job', 5, 'created job code:', 'Super Admin System Super Super Admin created job code: DDD_Cli_V3_00005', 'created', '122.168.114.106', '2025-04-02 08:35:25', '2025-04-02 08:35:25'),
+(211, 1, '2025-04-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-04-02 08:50:31', '2025-04-02 08:50:31'),
+(212, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-02 08:50:38', '2025-04-02 08:50:38'),
+(213, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-02 11:56:48', '2025-04-02 11:56:48'),
+(214, 1, '2025-04-02', 'client', 14, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_CUS_SFD_000014(SFD)', 'created', '122.168.114.106', '2025-04-02 12:21:40', '2025-04-02 12:21:40'),
+(215, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-04-02 12:35:17', '2025-04-02 12:35:17'),
+(216, 10, '2025-04-02', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-04-02 13:23:45', '2025-04-02 13:23:45'),
+(217, 1, '2025-04-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-03 04:50:09', '2025-04-03 04:50:09'),
+(218, 10, '2025-04-03', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', '122.168.114.106', '2025-04-03 04:50:46', '2025-04-03 04:50:46'),
+(219, 10, '2025-04-03', 'customer', 11, 'created customer profile. customer code :', 'Manager STAFF FIVE created customer profile. customer code : cust_ads_00009(ads)', 'created', '122.168.114.106', '2025-04-03 04:55:52', '2025-04-03 04:55:52'),
+(220, 10, '2025-04-03', 'customer', 11, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF FIVE  edited the service details and added an additional service while editing the customer code : cust_ads_00009(ads)', 'updated', '122.168.114.106', '2025-04-03 04:57:07', '2025-04-03 04:57:07'),
+(221, 1, '2025-04-03', 'customer contact person role', 1, 'created customer contact person role RoleName1', 'Super Admin System Super Super Admin created customer contact person role RoleName1 ', 'created', '122.168.114.106', '2025-04-03 05:06:14', '2025-04-03 05:06:14'),
+(222, 1, '2025-04-03', 'customer contact person role', 2, 'created customer contact person role RoleName2', 'Super Admin System Super Super Admin created customer contact person role RoleName2 ', 'created', '122.168.114.106', '2025-04-03 05:06:22', '2025-04-03 05:06:22'),
+(223, 1, '2025-04-03', 'customer', 12, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_S L_000010(S LIMITED_000010)', 'created', '122.168.114.106', '2025-04-03 05:51:23', '2025-04-03 05:51:23'),
+(224, 1, '2025-04-03', 'customer', 12, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_S L_000010(S LIMITED_000010)', 'updated', '122.168.114.106', '2025-04-03 05:51:29', '2025-04-03 05:51:29');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(225, 1, '2025-04-03', 'customer', 13, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_DDD_000011(DDDDaxaxaax)', 'created', '122.168.114.106', '2025-04-03 06:00:40', '2025-04-03 06:00:40'),
+(226, 1, '2025-04-03', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_DDD_000011(DDDDaxaxaax)', 'updated', '122.168.114.106', '2025-04-03 06:00:42', '2025-04-03 06:00:42'),
+(227, 1, '2025-04-03', 'client', 13, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_fgf_000013(fgff)', 'deleted', '122.168.114.106', '2025-04-03 06:04:56', '2025-04-03 06:04:56'),
+(228, 1, '2025-04-03', 'client', 12, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_sss_000012(sssssssssss)', 'deleted', '122.168.114.106', '2025-04-03 06:05:00', '2025-04-03 06:05:00'),
+(229, 1, '2025-04-03', 'client', 11, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_f45_ddd_000011(ddddd)', 'deleted', '122.168.114.106', '2025-04-03 06:05:03', '2025-04-03 06:05:03'),
+(230, 1, '2025-04-03', 'client', 10, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_f45_sss_000010(sss)', 'deleted', '122.168.114.106', '2025-04-03 06:05:06', '2025-04-03 06:05:06'),
+(231, 1, '2025-04-03', 'client', 9, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_f45_G T_00009(G T SCARLET LIMITED_00009)', 'deleted', '122.168.114.106', '2025-04-03 06:05:09', '2025-04-03 06:05:09'),
+(232, 1, '2025-04-03', 'customer', 14, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_DFG_00007(DFGGG)', 'created', '122.168.114.106', '2025-04-03 06:06:07', '2025-04-03 06:06:07'),
+(233, 1, '2025-04-03', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_DFG_00007(DFGGG)', 'updated', '122.168.114.106', '2025-04-03 06:06:10', '2025-04-03 06:06:10'),
+(234, 1, '2025-04-03', 'client', 14, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_SFD_000014(SFD)', 'deleted', '122.168.114.106', '2025-04-03 07:26:29', '2025-04-03 07:26:29'),
+(235, 1, '2025-04-03', 'customer', 15, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_Ada_00007(Adad)', 'created', '122.168.114.106', '2025-04-03 07:27:38', '2025-04-03 07:27:38'),
+(236, 1, '2025-04-03', 'customer', 15, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_Ada_00007(Adad)', 'updated', '122.168.114.106', '2025-04-03 07:27:41', '2025-04-03 07:27:41'),
+(237, 1, '2025-04-03', 'customer', 16, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_aaa_00008(aaaaaa)', 'created', '122.168.114.106', '2025-04-03 08:24:59', '2025-04-03 08:24:59'),
+(238, 1, '2025-04-03', 'customer', 16, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_aaa_00008(aaaaaa)', 'updated', '122.168.114.106', '2025-04-03 08:25:03', '2025-04-03 08:25:03'),
+(239, 1, '2025-04-03', 'customer', 17, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_sds_00009(sds)', 'created', '122.168.114.106', '2025-04-03 08:31:15', '2025-04-03 08:31:15'),
+(240, 1, '2025-04-03', 'customer', 17, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_sds_00009(sds)', 'updated', '122.168.114.106', '2025-04-03 08:31:20', '2025-04-03 08:31:20'),
+(241, 10, '2025-04-03', 'customer', 18, 'created customer profile. customer code :', 'Manager STAFF FIVE created customer profile. customer code : cust_fh_000010(fh)', 'created', '122.168.114.106', '2025-04-03 08:39:08', '2025-04-03 08:39:08'),
+(242, 10, '2025-04-03', 'customer', 18, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF FIVE  edited the service details and added an additional service while editing the customer code : cust_fh_000010(fh)', 'updated', '122.168.114.106', '2025-04-03 08:39:11', '2025-04-03 08:39:11'),
+(243, 1, '2025-04-03', 'customer', 19, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_000011(SHKKK)', 'created', '122.168.114.106', '2025-04-03 10:29:53', '2025-04-03 10:29:53'),
+(244, 1, '2025-04-03', 'customer', 19, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_000011(SHKKK)', 'updated', '122.168.114.106', '2025-04-03 10:29:55', '2025-04-03 10:29:55'),
+(245, 1, '2025-04-03', 'client', 15, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SHK_AA_000015(AA)', 'created', '122.168.114.106', '2025-04-03 10:30:20', '2025-04-03 10:30:20'),
+(246, 1, '2025-04-03', 'customer', 19, 'added Percentage Model and Removed FTE/Dedicated Staffing (engagement model) customer code :', 'Super Admin System Super Super Admin added Percentage Model and Removed FTE/Dedicated Staffing (engagement model) customer code : cust_SHK_000011(SHKKK)', 'updated', '122.168.114.106', '2025-04-03 10:48:40', '2025-04-03 10:48:40'),
+(247, 1, '2025-04-03', 'job', 6, 'created job code:', 'Super Admin System Super Super Admin created job code: CUS_Cli_VAT2_00006', 'created', '122.168.114.106', '2025-04-03 10:52:43', '2025-04-03 10:52:43'),
+(248, 1, '2025-04-03', 'customer', 20, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_asa_000012(asad)', 'created', '122.168.114.106', '2025-04-03 10:57:27', '2025-04-03 10:57:27'),
+(249, 1, '2025-04-03', 'customer', 20, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_asa_000012(asad)', 'updated', '122.168.114.106', '2025-04-03 10:57:30', '2025-04-03 10:57:30'),
+(250, 1, '2025-04-03', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-04-03 11:14:41', '2025-04-03 11:14:41'),
+(251, 2, '2025-04-03', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-03 11:14:57', '2025-04-03 11:14:57'),
+(252, 10, '2025-04-03', '-', 0, ' Logged Out', 'Manager STAFF FIVE  Logged Out ', '-', '122.168.114.106', '2025-04-03 11:15:18', '2025-04-03 11:15:18'),
+(253, 1, '2025-04-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-03 11:15:39', '2025-04-03 11:15:39'),
+(254, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (status-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (status-view) ', 'updated', '122.168.114.106', '2025-04-03 11:17:02', '2025-04-03 11:17:02'),
+(255, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (status-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (status-view)  ', 'updated', '122.168.114.106', '2025-04-03 11:17:16', '2025-04-03 11:17:16'),
+(256, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view) ', 'updated', '122.168.114.106', '2025-04-03 11:41:07', '2025-04-03 11:41:07'),
+(257, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (timesheet-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (timesheet-view)  ', 'updated', '122.168.114.106', '2025-04-03 11:41:39', '2025-04-03 11:41:39'),
+(258, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (All Customer-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (All Customer-insert)  ', 'updated', '122.168.114.106', '2025-04-03 11:47:39', '2025-04-03 11:47:39'),
+(259, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (status-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (status-view) ', 'updated', '122.168.114.106', '2025-04-03 12:58:37', '2025-04-03 12:58:37'),
+(260, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (status-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (status-view)  ', 'updated', '122.168.114.106', '2025-04-03 12:59:11', '2025-04-03 12:59:11'),
+(261, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-04 04:55:20', '2025-04-04 04:55:21'),
+(262, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 04:55:39', '2025-04-04 04:55:39'),
+(263, 1, '2025-04-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-04 04:56:06', '2025-04-04 04:56:06'),
+(264, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-04 05:18:41', '2025-04-04 05:18:41'),
+(265, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 05:46:35', '2025-04-04 05:46:35'),
+(266, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) Remove Permission (staff-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view) Remove Permission (staff-view) ', 'updated', '122.168.114.106', '2025-04-04 05:47:02', '2025-04-04 05:47:02'),
+(267, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-04-04 05:47:16', '2025-04-04 05:47:16'),
+(268, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view, setting-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view, setting-view) ', 'updated', '122.168.114.106', '2025-04-04 05:47:41', '2025-04-04 05:47:41'),
+(269, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all customers-view)  ', 'updated', '122.168.114.106', '2025-04-04 06:12:19', '2025-04-04 06:12:19'),
+(270, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:23:37', '2025-04-04 06:23:37'),
+(271, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:23:47', '2025-04-04 06:23:47'),
+(272, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:25:02', '2025-04-04 06:25:02'),
+(273, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:25:12', '2025-04-04 06:25:12'),
+(274, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:26:08', '2025-04-04 06:26:08'),
+(275, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:26:14', '2025-04-04 06:26:14'),
+(276, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:26:45', '2025-04-04 06:26:45'),
+(277, 1, '2025-04-04', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:31:32', '2025-04-04 06:31:32'),
+(278, 1, '2025-04-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-04 06:31:33', '2025-04-04 06:31:33'),
+(279, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:33:33', '2025-04-04 06:33:33'),
+(280, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:34:06', '2025-04-04 06:34:06'),
+(281, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:35:51', '2025-04-04 06:35:51'),
+(282, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:35:58', '2025-04-04 06:35:58'),
+(283, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:36:33', '2025-04-04 06:36:33'),
+(284, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:36:40', '2025-04-04 06:36:40'),
+(285, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:37:43', '2025-04-04 06:37:43'),
+(286, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:37:54', '2025-04-04 06:37:54'),
+(287, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:39:08', '2025-04-04 06:39:08'),
+(288, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:39:23', '2025-04-04 06:39:23'),
+(289, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:39:31', '2025-04-04 06:39:31'),
+(290, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:39:36', '2025-04-04 06:39:36'),
+(291, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:39:48', '2025-04-04 06:39:48'),
+(292, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:45:03', '2025-04-04 06:45:03'),
+(293, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:45:11', '2025-04-04 06:45:11'),
+(294, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:48:05', '2025-04-04 06:48:05'),
+(295, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:48:12', '2025-04-04 06:48:12'),
+(296, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:49:46', '2025-04-04 06:49:46'),
+(297, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:49:53', '2025-04-04 06:49:53'),
+(298, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:50:24', '2025-04-04 06:50:24'),
+(299, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:50:29', '2025-04-04 06:50:29'),
+(300, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:58:55', '2025-04-04 06:58:55'),
+(301, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:59:00', '2025-04-04 06:59:00'),
+(302, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-04 07:01:41', '2025-04-04 07:01:41'),
+(303, 1, '2025-04-04', 'permission', 3, ' updated the access for PROCESSOR. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for PROCESSOR. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-04 07:03:18', '2025-04-04 07:03:18'),
+(304, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-04 07:03:29', '2025-04-04 07:03:29'),
+(305, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-04 07:03:49', '2025-04-04 07:03:49'),
+(306, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view) ', 'updated', '122.168.114.106', '2025-04-04 07:08:33', '2025-04-04 07:08:33'),
+(307, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (report-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (report-view)  ', 'updated', '122.168.114.106', '2025-04-04 07:08:44', '2025-04-04 07:08:44'),
+(308, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view) ', 'updated', '122.168.114.106', '2025-04-04 07:09:33', '2025-04-04 07:09:33'),
+(309, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-insert) ', 'updated', '122.168.114.106', '2025-04-04 09:28:32', '2025-04-04 09:28:32'),
+(310, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:35:52', '2025-04-04 09:35:52'),
+(311, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-insert)  ', 'updated', '122.168.114.106', '2025-04-04 09:36:03', '2025-04-04 09:36:03'),
+(312, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:37:20', '2025-04-04 09:37:20'),
+(313, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (client-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (client-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:43:11', '2025-04-04 09:43:11'),
+(314, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view, customer-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view, customer-insert) ', 'updated', '122.168.114.106', '2025-04-04 09:43:40', '2025-04-04 09:43:40'),
+(315, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:56:41', '2025-04-04 09:56:41'),
+(316, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 10:07:43', '2025-04-04 10:07:43'),
+(317, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view)  ', 'updated', '122.168.114.106', '2025-04-04 10:09:13', '2025-04-04 10:09:13'),
+(318, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 10:15:44', '2025-04-04 10:15:44'),
+(319, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 10:15:45', '2025-04-04 10:15:45'),
+(320, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-04 10:15:59', '2025-04-04 10:15:59'),
+(321, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-04 10:34:43', '2025-04-04 10:34:43'),
+(322, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (staff-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (staff-view) ', 'updated', '122.168.114.106', '2025-04-04 10:36:29', '2025-04-04 10:36:29'),
+(323, 1, '2025-04-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-05 05:02:24', '2025-04-05 05:02:24'),
+(324, 2, '2025-04-05', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-05 05:12:00', '2025-04-05 05:12:00'),
+(325, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 05:15:00', '2025-04-05 05:15:00'),
+(326, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 05:57:09', '2025-04-05 05:57:09'),
+(327, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:04:34', '2025-04-05 06:04:34'),
+(328, 2, '2025-04-05', 'job', 6, 'completed the draft for job code:', 'Admin Amit Amit completed the draft for job code: CUS_Cli_VAT2_00006', 'created', '122.168.114.106', '2025-04-05 06:05:17', '2025-04-05 06:05:17'),
+(329, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view, status-view, job-view, setting-view, customer-insert, all_customers-view, all_clients-view, all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view, status-view, job-view, setting-view, customer-insert, all_customers-view, all_clients-view, all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:13:37', '2025-04-05 06:13:37'),
+(330, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-insert) ', 'updated', '122.168.114.106', '2025-04-05 06:14:13', '2025-04-05 06:14:13'),
+(331, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-05 06:15:56', '2025-04-05 06:15:56'),
+(332, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 06:16:15', '2025-04-05 06:16:15'),
+(333, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:16:32', '2025-04-05 06:16:32'),
+(334, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (client-view, client-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (client-view, client-insert) ', 'updated', '122.168.114.106', '2025-04-05 06:16:53', '2025-04-05 06:16:53'),
+(335, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 06:23:48', '2025-04-05 06:23:48'),
+(336, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-view) ', 'updated', '122.168.114.106', '2025-04-05 06:24:04', '2025-04-05 06:24:04'),
+(337, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:24:20', '2025-04-05 06:24:20'),
+(338, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 06:28:44', '2025-04-05 06:28:44'),
+(339, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:28:52', '2025-04-05 06:28:52'),
+(340, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 06:45:51', '2025-04-05 06:45:51'),
+(341, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:46:16', '2025-04-05 06:46:16'),
+(342, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:46:32', '2025-04-05 06:46:32'),
+(343, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view) ', 'updated', '122.168.114.106', '2025-04-05 06:48:52', '2025-04-05 06:48:52'),
+(344, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:49:37', '2025-04-05 06:49:37'),
+(345, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (job-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (job-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:53:48', '2025-04-05 06:53:48'),
+(346, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-view) ', 'updated', '122.168.114.106', '2025-04-05 06:54:12', '2025-04-05 06:54:12'),
+(347, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view) ', 'updated', '122.168.114.106', '2025-04-05 06:54:25', '2025-04-05 06:54:25'),
+(348, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:57:22', '2025-04-05 06:57:22'),
+(349, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (job-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (job-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:58:44', '2025-04-05 06:58:44'),
+(350, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-view) ', 'updated', '122.168.114.106', '2025-04-05 06:59:26', '2025-04-05 06:59:26'),
+(351, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-insert) ', 'updated', '122.168.114.106', '2025-04-05 06:59:41', '2025-04-05 06:59:41'),
+(352, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (job-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (job-insert)  ', 'updated', '122.168.114.106', '2025-04-05 06:59:52', '2025-04-05 06:59:52'),
+(353, 2, '2025-04-05', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-05 07:11:52', '2025-04-05 07:11:52'),
+(354, 6, '2025-04-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-04-05 07:12:31', '2025-04-05 07:12:31'),
+(355, 6, '2025-04-05', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-04-05 07:12:40', '2025-04-05 07:12:40'),
+(356, 6, '2025-04-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-04-05 07:16:39', '2025-04-05 07:16:39'),
+(357, 6, '2025-04-05', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-04-05 07:26:42', '2025-04-05 07:26:42'),
+(358, 6, '2025-04-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-04-05 07:26:54', '2025-04-05 07:26:54'),
+(359, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 07:30:25', '2025-04-05 07:30:25'),
+(360, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 08:40:54', '2025-04-05 08:40:54'),
+(361, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 08:41:58', '2025-04-05 08:41:58'),
+(362, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes Add Permission (all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes Add Permission (all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-05 08:57:04', '2025-04-05 08:57:04'),
+(363, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 09:09:36', '2025-04-05 09:09:36'),
+(364, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 09:17:47', '2025-04-05 09:17:47'),
+(365, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view) ', 'updated', '122.168.114.106', '2025-04-05 09:18:08', '2025-04-05 09:18:08'),
+(366, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 09:19:57', '2025-04-05 09:19:57'),
+(367, 7, '2025-04-05', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-04-05 09:21:54', '2025-04-05 09:21:54'),
+(368, 1, '2025-04-05', 'staff', 7, 'edited staff STAFF FOUR', 'Super Admin System Super Super Admin edited staff STAFF FOUR ', 'updated', '122.168.114.106', '2025-04-05 09:26:10', '2025-04-05 09:26:10'),
+(369, 1, '2025-04-05', 'staff', 7, 'changes the staff status Deactivate STAFF FOUR', 'Super Admin System Super Super Admin changes the staff status Deactivate STAFF FOUR ', 'updated', '122.168.114.106', '2025-04-05 09:33:50', '2025-04-05 09:33:50'),
+(370, 1, '2025-04-05', 'staff', 7, 'changes the staff status Activate STAFF FOUR', 'Super Admin System Super Super Admin changes the staff status Activate STAFF FOUR ', 'updated', '122.168.114.106', '2025-04-05 09:34:11', '2025-04-05 09:34:11'),
+(371, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 10:16:59', '2025-04-05 10:16:59'),
+(372, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 10:19:40', '2025-04-05 10:19:40'),
+(373, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 10:20:07', '2025-04-05 10:20:07'),
+(374, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 10:50:19', '2025-04-05 10:50:19'),
+(375, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 11:24:53', '2025-04-05 11:24:53'),
+(376, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 11:25:19', '2025-04-05 11:25:19');
 
 -- --------------------------------------------------------
 
