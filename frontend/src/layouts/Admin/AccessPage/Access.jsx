@@ -47,9 +47,6 @@ const Access = () => {
 
             // setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked , permission_name: permission_name}]);
 
-
-
-
             setCheckboxState(prevState => {
                 let updatedState = prevState.filter(item => !(item.permission_id === id && item.role_id === role_id));
                 updatedState.push({ permission_id: id, role_id: role_id, is_assigned: checked, permission_name });
