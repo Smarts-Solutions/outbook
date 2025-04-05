@@ -25,6 +25,7 @@ const Customer = () => {
     update: 0,
     delete: 0,
     client: 0,
+    all_clients: 0,
   });
 
 
@@ -38,6 +39,11 @@ const Customer = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
+    const accessDataAllClients=
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_clients"
+    )?.items || [];
+
 
 
 
@@ -47,7 +53,7 @@ const Customer = () => {
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 ,all_clients: 0 };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -56,6 +62,10 @@ const Customer = () => {
     accessData1.forEach((item) => {
       if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
+
+    accessDataAllClients.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
+    } );
 
     setAccessData(updatedAccess);
   }, []);
@@ -83,7 +93,7 @@ const Customer = () => {
               {row.trading_name}
             </a>
           ) : (
-            getAccessData.client == 1 && row.status == 1 ? <a
+            (getAccessData.client == 1 || getAccessData.all_clients) && row.status == 1 ? <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
               title={row.trading_name}

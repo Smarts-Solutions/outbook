@@ -83,12 +83,14 @@ const ClientLists = () => {
     update: 0,
     delete: 0,
     client: 0,
+    all_clients: 0,
   });
   const [getAccessDataJob, setAccessDataJob] = useState({
     insert: 0,
     update: 0,
     delete: 0,
     job: 0,
+    all_jobs: 0,
   });
   const [activeTab, setActiveTab] = useState("");
   const role = JSON.parse(localStorage.getItem("role"));
@@ -98,6 +100,7 @@ const ClientLists = () => {
     update: 0,
     delete: 0,
     view: 0,
+    all_customers: 0,
   });
 
   const accessDataCustomer =
@@ -105,14 +108,23 @@ const ClientLists = () => {
       (item) => item.permission_name === "customer"
     )?.items || [];
 
+    const accessDataCustomerAll =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_customers"
+    )?.items || [];
+
   useEffect(() => {
     if (accessDataCustomer.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 ,all_customers: 0 };
     accessDataCustomer.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
       if (item.type === "view") updatedAccess.view = item.is_assigned;
+    });
+    accessDataCustomerAll.forEach((item) => {
+      if (item.type === "view")
+        updatedAccess.all_customers = item.is_assigned;
     });
     setAccessDataCustomer(updatedAccess);
   }, []);
@@ -127,11 +139,11 @@ const ClientLists = () => {
       setActiveTab(retrievedData);
     } else {
       setActiveTab(
-        (getAccessDataClient && getAccessDataClient.client == 1) ||
+        (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1) ) ||
           
           role === "SUPERADMIN"
           ? "client"
-          : (getAccessDataJob && getAccessDataJob.job == 1) ||
+          : (getAccessDataJob && (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
             
             role === "SUPERADMIN"
           ? "job"
@@ -153,31 +165,52 @@ const ClientLists = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
+    const accessDataClientAll =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_clients"
+    )?.items || [];
+
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "job"
     )?.items || [];
 
+    const accessDataJobAll =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_jobs"
+    )?.items || [];
+
+
   useEffect(() => {
     if (accessDataClient.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 , all_clients: 0};
     accessDataClient.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
       if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
+
+    accessDataClientAll.forEach((item) => {
+      if (item.type === "view")
+        updatedAccess.all_clients = item.is_assigned;
+    });
     setAccessDataClient(updatedAccess);
   }, []);
 
   useEffect(() => {
     if (accessDataJob.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, job: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, job: 0 , all_jobs: 0};
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
       if (item.type === "view") updatedAccess.job = item.is_assigned;
+    });
+
+    accessDataJobAll.forEach((item) => {
+      if (item.type === "view")
+        updatedAccess.all_jobs = item.is_assigned;
     });
     setAccessDataJob(updatedAccess);
   }, []);
@@ -216,7 +249,7 @@ const ClientLists = () => {
   useEffect(() => {
     let tabsData = [];
     if (
-      (getAccessDataClient && getAccessDataClient.client == 1) ||
+      (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1)) ||
       
       role === "SUPERADMIN"
     ) {
@@ -227,7 +260,7 @@ const ClientLists = () => {
       });
     }
     if (
-      (getAccessDataJob && getAccessDataJob.job == 1) ||role === "SUPERADMIN" ) {
+      (getAccessDataJob && (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||role === "SUPERADMIN" ) {
        if(customerId != ""){ 
       tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
        }
@@ -242,7 +275,7 @@ const ClientLists = () => {
       name: "Client Name",
       cell: (row) => (
         <div>
-          {getAccessDataJob.job === 1 ||
+          {(getAccessDataJob.job === 1 || getAccessDataJob.all_jobs == 1)  ||
           
           role === "SUPERADMIN" ? (
             <a
