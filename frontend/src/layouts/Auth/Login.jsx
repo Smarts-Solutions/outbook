@@ -273,83 +273,9 @@ const Login = () => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      ```javascript
-const handleSubmitLogin = async () => {
-  const emailError = validateEmail(Email);
-  const passwordError = validatePassword(password);
-
-  if (emailError || passwordError) {
-    setErrorEmail(emailError);
-    setErrorPassword(passwordError);
-    return;
-  }
-
-  const req = { email: Email, password: password };
-
-  try {
-    const response = await dispatch(SignIn(req)).unwrap();
-    if (response.status) {
-      await accessDataFetch(response.data.staffDetails, response.data.token);
-
-      localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
-      localStorage.setItem("token", JSON.stringify(response.data.token));
-      localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
-      localStorage.setItem("role", JSON.stringify(response.data.staffDetails.role));
-
-      sweatalert.fire({
-        title: "Login Successfully",
-        icon: "success",
-        timer: 1000,
-        showConfirmButton: false,
-        timerProgressBar: true,
-      });
-
-      const req_auth_token = {
-        id: response.data.staffDetails.id,
-        login_auth_token: response.data.token,
-      };
-      await dispatch(LoginAuthToken(req_auth_token)).unwrap();
-
-      setTimeout(() => {
-        navigate("/admin/dashboard");
-        window.location.reload();
-      }, 1000);
-    } else {
-      localStorage.removeItem("staffDetails");
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      sessionStorage.clear();
-      sweatalert.fire({
-        title: response.message,
-        icon: "error",
-        timer: 1000,
-        showConfirmButton: true,
-        timerProgressBar: true,
-      });
+      handleSubmitLogin();
     }
-  } catch (error) {
-    console.error(error);
   }
-};
-
-const validateEmail = (email) => {
-  if (email === "") {
-    return EMPTY_EMAIL_ERROR;
-  } else if (!Email_regex(email)) {
-    return INVALID_EMAIL_ERROR;
-  }
-  return "";
-};
-
-const validatePassword = (password) => {
-  if (password === "") {
-    return PASSWORD_ERROR;
-  }
-  return "";
-};
-```
-    }
-}
 
   return (
     <div className="account-body accountbg">
