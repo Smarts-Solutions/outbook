@@ -81,6 +81,15 @@ const Access = () => {
                         );
                     }
                 }
+                else if (permission_name === "all_customers" && !checked) {
+                    updatedState = updatedState.map(item =>
+                        item.permission_name === "all_clients" ? { ...item, is_assigned: false } : item
+                    );
+                    updatedState = updatedState.map(item =>
+                        item.permission_name === "all_jobs" ? { ...item, is_assigned: false } : item
+                    );
+
+                }
 
                 return updatedState;
             });
