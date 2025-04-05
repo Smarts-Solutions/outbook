@@ -26,15 +26,11 @@ const Access = () => {
                 setRoleDataAll({ loading: false, data: [] });
             }
         } catch (error) {
-
             setRoleDataAll({ loading: false, data: [] });
         }
     };
 
     const CheckboxItem = ({ id, label, role_id, permission_name }) => {
-
-
-
 
         const handleChange = (event) => {
             const checked = event.target.checked;
