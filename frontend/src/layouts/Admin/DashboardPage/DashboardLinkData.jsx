@@ -550,6 +550,10 @@ const JobStatus = () => {
 
   ]
 
+
+  console.log("allLinkedData", allLinkedData);
+  console.log("location", location?.state?.req?.key);
+
   return (
     <div>
       <div className='report-data mt-5'>
@@ -620,21 +624,37 @@ const JobStatus = () => {
                   />
                 )}
 
-                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "client") && (
+                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "job") && (
                   <Datatable
                     filter={true}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
                 )}
-                  
-                  {((getAccessData.staff === 1) && location?.state?.req?.key === "staff") && (
-                    <Datatable
-                      filter={true}
-                      columns={columnsStaff}
-                      data={allLinkedData || []}
-                    />
-                  )}
+
+                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "pending_job") && (
+                  <Datatable
+                    filter={true}
+                    columns={JobColumns}
+                    data={allLinkedData || []}
+                  />
+                )}
+
+                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "completed_job") && (
+                  <Datatable
+                    filter={true}
+                    columns={JobColumns}
+                    data={allLinkedData || []}
+                  />
+                )}
+
+                {((getAccessData.staff === 1) && location?.state?.req?.key === "staff") && (
+                  <Datatable
+                    filter={true}
+                    columns={columnsStaff}
+                    data={allLinkedData || []}
+                  />
+                )}
               </>
             )
           }
