@@ -142,6 +142,7 @@ const StaffPage = () => {
     roleData();
   }, [refresh, activeTab]);
 
+
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
@@ -567,7 +568,7 @@ const StaffPage = () => {
       label: "Role",
       label_size: 12,
       col_size: 6,
-      disable: false,
+      disable: editStaff ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
