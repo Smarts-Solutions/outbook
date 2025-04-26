@@ -568,7 +568,7 @@ const StaffPage = () => {
       label: "Role",
       label_size: 12,
       col_size: 6,
-      disable: editStaff ? true : false,
+      //disable: editStaff ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {

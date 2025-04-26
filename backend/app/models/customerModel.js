@@ -398,14 +398,17 @@ const getCustomer = async (customer) => {
     const search = customer.search || "";
 
     // Line Manager
-    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
+    const LineManageQuery = `
+    SELECT staff_to FROM line_managers WHERE staff_by = ?
+    `
+    const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
     let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
     if (LineManageStaffId.length == 0) {
         LineManageStaffId.push(staff_id);
     }
 
-    const QueryRole = `
+    const QueryRole =`
   SELECT
     staffs.id AS id,
     staffs.role_id AS role_id,
@@ -420,13 +423,18 @@ const getCustomer = async (customer) => {
   `
     const [rows] = await pool.execute(QueryRole);
 
-    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 33]);
+    
+    const RoleAccessQuery = `
+    SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?
+    `
+    const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id , 33]);
 
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
-        const countQuery = `SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
+        const countQuery = `
+        SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
         const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
 
         const query = `
@@ -467,12 +475,12 @@ LEFT JOIN
     customers.trading_name LIKE ?
 ORDER BY 
     customers.id DESC
-LIMIT ? OFFSET ?
-    ;
-    `;
+LIMIT ? OFFSET ?`;
 
-        const searchQuery = `%${search}%`;
-        const [result] = await pool.execute(query, [searchQuery, limit, offset]);
+    
+        try {
+        
+        const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
 
         return {
             status: true,
@@ -487,6 +495,12 @@ LIMIT ? OFFSET ?
             },
 
         };
+        } catch (error) {
+            return {   status: false, message: 'Error fetching customers', error: error.message };
+           // console.log('error ---- JJJ ', error);
+            
+        }
+       
 
         // return { status: true, message: 'Success..', data: result };
     }
@@ -495,7 +509,8 @@ LIMIT ? OFFSET ?
     if (rows.length > 0) {
         // Allocated to
         if (rows[0].role_id == 3) {
-            const countQuery = `SELECT COUNT(*) AS total_count
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
                 FROM (
                     SELECT  
                         customers.id AS id
@@ -597,7 +612,8 @@ LIMIT ? OFFSET ?
         // Account Manger
         else if (rows[0].role_id == 4) {
 
-            const countQuery = `SELECT COUNT(*) AS total_count
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
             FROM (
                 SELECT 
                     customers.id
@@ -915,7 +931,7 @@ LIMIT ? OFFSET ?
         console.error('Error selecting data:', err);
         return { status: true, message: 'Error selecting data', data: err };
     }
-
+        
 }
 
 const getCustomer_dropdown = async (customer) => {
