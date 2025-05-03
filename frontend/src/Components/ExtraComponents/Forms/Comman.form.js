@@ -178,8 +178,41 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) 
-              : field.type === "checkbox" ? (
+              ) : field.type === "select3" ? (
+                <>
+                  <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
+                    <div className=" row mb-3">
+                      <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
+                        {field.label}
+                       
+                      </label>
+                      <div className={`col-lg-${title === "addgroup" ? 12 : 12}`}  >
+                        <select
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
+                          id={field.name}
+                          autoFocus={index === 0 ? true : false}
+                          style={{ background: field.disable ? "#eeeeee" : "" }}
+                          {...formik.getFieldProps(field.name)}
+                          disabled={field.disable}
+                        >
+                          <option value="" selected disable={field.disable}>  Please Select {field.label} </option>
+                          {field.options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : field.type === "checkbox" ? (
                 <>
                   {field.options && field.options.length > 0 ? (
                     <>
@@ -522,6 +555,45 @@ const ReusableForm = ({
                         <input
                           type="text"
                           className={formik.touched[field.name] && formik.errors[field.name] ? "error-field form-control" : "form-control"}
+                          style={{ background: field.disable ? "#eeeeee" : "" }}
+                          id={field.name}
+                          placeholder={`Enter ${field.label}`}
+                          {...formik.getFieldProps(field.name)}
+                          defaultValue=""
+                          autoFocus={index === 0 ? true : false}
+                          maxLength={50}
+                          readOnly={field.disable}
+                          autoComplete="new-email"
+                        />
+                        <div className="invalid-feedback">
+                          Please enter {field.label}
+                        </div>
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) :
+              field.type === "text6" ? (
+                <>
+                  <div className={`col-lg-${field.col_size}`}>
+                    <div className="mb-3 row flex-column">
+                      <label
+                        className={`col-lg-${field.label_size}`}
+                        htmlFor={field.name}
+                      >
+                        {field.label}
+                        <span className="text-danger">*</span>
+                      </label>
+                      <div>
+                        <input
+                          type="text"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "error-field form-control" : "form-control text-capitalize"}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           id={field.name}
                           placeholder={`Enter ${field.label}`}

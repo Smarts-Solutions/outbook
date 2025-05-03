@@ -513,7 +513,7 @@ const StaffPage = () => {
 
   const fields = [
     {
-      type: "text5",
+      type: "text6",
       name: "first_name",
       label: "First Name",
       label_size: 12,
@@ -522,7 +522,7 @@ const StaffPage = () => {
       placeholder: "Enter First Name",
     },
     {
-      type: "text5",
+      type: "text6",
       name: "last_name",
       label: "Last Name",
       label_size: 12,
@@ -592,7 +592,7 @@ const StaffPage = () => {
       ],
     },
     {
-      type: "select",
+      type: "select3",
       name: "staff_to",
       label: "Line Manager",
       label_size: 12,
