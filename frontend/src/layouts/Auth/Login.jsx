@@ -332,8 +332,6 @@ const Login = () => {
            
           </div>
 
-
-
          {/*  Login  with Email and Password*/}
  
           {/* <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
@@ -451,7 +449,6 @@ const Login = () => {
           </div>  */}
          
         </div>
-       
       </div>
       {/* <div className="container" id="container">
     <div className="form-container sign-up">
