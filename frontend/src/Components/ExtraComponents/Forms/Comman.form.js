@@ -593,7 +593,6 @@ const ReusableForm = ({
                       <div>
                         <input
                           type="text"
-                          className={formik.touched[field.name] && formik.errors[field.name] ? "error-field form-control" : "form-control text-capitalize"}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           id={field.name}
                           placeholder={`Enter ${field.label}`}
