@@ -16,7 +16,10 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import sweatalert from "sweetalert2";
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
+import { use } from "react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -27,6 +30,9 @@ const Setting = () => {
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewData, setViewData] = useState({});
+  const [deleteStatus, setDeleteStatus] = useState();
+  const [StaffRoleDAta, setStaffRoleData] = useState([]);
+
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
   );
@@ -96,6 +102,7 @@ const Setting = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+  const [replaceStatue, setReplaceStatue] = useState(null);
 
   const [getAccessDataSetting, setAccessDataSetting] = useState({
     insert: 0,
@@ -616,6 +623,15 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
+
+                {row?.is_disable == 0 && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => setDeleteStatus(row)}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
               </div>
             ),
             ignoreRowClick: true,
@@ -722,7 +738,7 @@ const Setting = () => {
 
   const columnService = [
     {
-      name: "Service Name",
+      name: "Service Name ",
       selector: (row) => row.name,
       sortable: true,
       width: "50%",
@@ -764,7 +780,7 @@ const Setting = () => {
                     aria-labelledby="dropdownMenuButton"
                   >
                     <div className="px-2">
-                      {showSettingUpdateTab && (
+                      {row.is_disable == 0 && (
                         <button
                           className="edit-icon dropdown-item w-auto mb-2"
                           onClick={() => handleEdit(row, "4")}
@@ -773,7 +789,7 @@ const Setting = () => {
                           <i className="ti-pencil" />
                         </button>
                       )}
-                      {showSettingDeleteTab && (
+                      {row.is_disable == 0 && (
                         <button
                           className="delete-icon dropdown-item w-auto mb-2"
                           onClick={() => handleDelete(row, "4")}
@@ -795,7 +811,7 @@ const Setting = () => {
                 </div>
 
                 <div className="d-lg-flex d-none">
-                  {showSettingUpdateTab && (
+                  {row.is_disable == 0 && (
                     <button
                       className="edit-icon"
                       onClick={() => handleEdit(row, "4")}
@@ -804,7 +820,7 @@ const Setting = () => {
                       <i className="ti-pencil" />
                     </button>
                   )}
-                  {showSettingDeleteTab && (
+                  {row.is_disable == 0 && (
                     <button
                       className="delete-icon"
                       onClick={() => handleDelete(row, "4")}
@@ -1402,7 +1418,7 @@ const Setting = () => {
                 </button>
 
                 {getAccessDataSetting.update === 1 ||
-                role === "ADMIN" ||
+                
                 role === "SUPERADMIN" ? (
                   <button
                     className="edit-icon dropdown-item w-auto mb-2"
@@ -1420,7 +1436,7 @@ const Setting = () => {
                   </button>
                 ) : null}
                 {getAccessDataSetting.delete === 1 ||
-                role === "ADMIN" ||
+                
                 role === "SUPERADMIN" ? (
                   <button
                     className="delete-icon dropdown-item w-auto mb-2"
@@ -1445,7 +1461,7 @@ const Setting = () => {
             </button>
 
             {getAccessDataSetting.update === 1 ||
-            role === "ADMIN" ||
+            
             role === "SUPERADMIN" ? (
               <button
                 className="edit-icon"
@@ -1463,7 +1479,7 @@ const Setting = () => {
               </button>
             ) : null}
             {getAccessDataSetting.delete === 1 ||
-            role === "ADMIN" ||
+            
             role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"
@@ -2259,6 +2275,61 @@ const Setting = () => {
     { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
   ];
 
+  useEffect(() => {
+    GetStaffroleWise();
+  }, [deleteStatus]);
+
+  const GetStaffroleWise = async () => {
+    try {
+      const req = { action: "get", role_id: deleteStatus?.id };
+      const data = { req: req, authToken: token };
+      const res = await dispatch(GetStaffByRole(data)).unwrap();
+      
+      if (res.status) {
+        setStaffRoleData(res.data.data);
+      } else {
+        setStaffRoleData([]);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const roledeleteUpdatestaff = async () => {
+    try {
+
+      let data = { 
+        req: { action: "delete", id: deleteStatus?.id ,replace_id:replaceStatue},
+        authToken: token 
+      };
+      const response = await dispatch(GetStaffByRole(data)).unwrap();
+      if (response.status) {
+        sweatalert.fire({
+          title: response.message,
+          icon: "success",
+          timer: 2000,
+        });
+        GetStaffroleWise();
+        setDeleteStatus("");
+        setReplaceStatue("");
+        setStaffRoleData([]);
+        setTimeout(() => {
+          roleData({ action: "getAll" });
+        }, 2000);
+      } else {
+        sweatalert.fire({
+          title: response.message,
+          icon: "error",
+          timer: 2000,
+        });
+      }
+      
+    } catch (error) {
+      
+    }
+  }
+
+
   return (
     <>
       <div>
@@ -2310,25 +2381,39 @@ const Setting = () => {
                 getShowTabId === "1" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className="col-lg-6 d-flex align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Staff Role</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "1")}
                       >
-                        {" "}
                         <i className="fa fa-plus" /> Add Staff Role
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={roleDataAll?.data?.map((data) => {
+                      return {
+                        id: data.id,
+                        role_name: data.role_name,
+                        hourminute: data.hourminute,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Role Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+
+                <div className=" col-lg-12 datatable-wrapper">
                   <Datatable
                     filter={true}
                     columns={columnRoles}
@@ -2343,13 +2428,15 @@ const Setting = () => {
                 getShowTabId === "2" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className=" col-lg-6 d-flex  align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Customer Contact Person Role</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2360,6 +2447,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={personRoleDataAll?.data?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.name,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Customer Contact Person Role Data`}
+                  />
                 </div>
                 <div className="datatable-wrapper">
                   <Datatable
@@ -2376,13 +2474,15 @@ const Setting = () => {
                 getShowTabId === "3" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className=" col-lg-6 d-flex  align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Job Status Name</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2392,8 +2492,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={statusTypeDataAll?.data?.map((data) => {
+                      return {
+                        id: data.id,
+                        type: data.type,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Status Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className=" col-lg-12 datatable-wrapper">
                   <Datatable
                     filter={true}
                     columns={columnStatusType}
@@ -2408,13 +2519,15 @@ const Setting = () => {
                 getShowTabId === "4" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className=" col-lg-6 d-lg-flex  align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Services</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2424,8 +2537,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={serviceDataAll?.data?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.name,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Service Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className=" col-lg-12 datatable-wrapper">
                   <Datatable
                     filter={true}
                     columns={columnService}
@@ -2440,13 +2564,15 @@ const Setting = () => {
                 getShowTabId === "5" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className="col-lg-6 d-lg-flex align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Client Industry</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2456,8 +2582,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={clientIndustryDataAll?.data?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.business_type,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Client Industry Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className="col-lg-12 datatable-wrapper">
                   <Datatable
                     filter={true}
                     columns={columnClientIndustry}
@@ -2472,13 +2609,15 @@ const Setting = () => {
                 getShowTabId === "6" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className="col-lg-6 d-lg-flex align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Country</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2488,8 +2627,21 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={countryDataAll?.data?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.name,
+                        code: data.code,
+                        currency: data.currency,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Country Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className="col-lg-12 datatable-wrapper">
                   <Datatable
                     filter={true}
                     columns={columnCountry}
@@ -2504,13 +2656,15 @@ const Setting = () => {
                 getShowTabId === "7" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row ">
+                <div className="d-lg-flex col-lg-6 align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Incorporation</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2520,8 +2674,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={incorporationDataAll?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.name,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Incorporation Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className="datatable-wrapper col-lg-12">
                   <Datatable
                     filter={true}
                     columns={columnincorporation}
@@ -2536,13 +2701,15 @@ const Setting = () => {
                 getShowTabId === "8" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className="d-lg-flex col-lg-6 align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Customer Source</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2552,8 +2719,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={customerSourceDataDataAll?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.name,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Customer Source Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className="datatable-wrapper col-lg-12">
                   <Datatable
                     filter={true}
                     columns={columnCustomerSource}
@@ -2568,13 +2746,15 @@ const Setting = () => {
                 getShowTabId === "9" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-lg-flex justify-content-between align-items-center ">
+              <div className="report-data row">
+                <div className="d-lg-flex col-lg-6 align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">CheckList</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2584,8 +2764,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={getCheckList?.map((data) => {
+                      return {
+                        id: data.checklists_id,
+                        name: data.checklist_name,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`CheckList Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className="datatable-wrapper col-lg-12">
                   <Datatable
                     filter={true}
                     columns={CheckListColumns}
@@ -2600,13 +2791,15 @@ const Setting = () => {
                 getShowTabId === "10" ? "show active" : ""
               }`}
             >
-              <div className="report-data">
-                <div className="d-block d-lg-flex justify-content-between align-items-center">
+              <div className="report-data row">
+                <div className=" col-lg-6 d-block d-lg-flex align-items-center">
                   <div className="tab-title">
                     <h3 className="mt-0">Internal Job/Project</h3>
                   </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
                   {!showSettingInsertTab ? null : (
-                    <div>
+                    <div className="mx-2">
                       <button
                         type="button"
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
@@ -2616,8 +2809,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={InternalAllData?.map((data) => {
+                      return {
+                        id: data.id,
+                        name: data.name,
+                        status: data.status == 1 ? "Active" : "Inactive",
+                      };
+                    })}
+                    fileName={`Internal Job/Project Data`}
+                  />
                 </div>
-                <div className="datatable-wrapper">
+                <div className="datatable-wrapper col-lg-12">
                   <Datatable
                     filter={true}
                     columns={InternalColumns}
@@ -2708,6 +2912,99 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
+        <CommonModal
+          isOpen={deleteStatus}
+          backdrop="static"
+          size="ms-5"
+          title="Delete Role"
+          hideBtn={true}
+          handleClose={() => setDeleteStatus(false)}
+        >
+          <div className="modal-body">
+            <div className="text-start mb-3">
+              <h5 className="text-danger fw-bold">
+                <i className="bi bi-trash3"></i> Delete Role:{" "}
+                <span className="text-dark">{deleteStatus?.role_name}</span>
+              </h5>
+            </div>
+           
+           {
+            StaffRoleDAta.length > 0 ?
+            <>
+            
+            <div className="mb-3">
+              <label htmlFor="staff-select" className="form-label">
+                Select Role to Replace:
+              </label>
+              <select
+                id="staff-select"
+                value={replaceStatue || ""}
+                onChange={(e) => setReplaceStatue(e.target.value)}
+                className="form-select"
+              >
+                <option value="" disabled>
+                  Choose Role
+                </option>
+                {roleDataAll.data
+                  .filter((staff) => staff.id !== deleteStatus?.id && staff.role!="ADMIN" && staff.role != "SUPERADMIN")
+                  .map((staff, index) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.role_name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {replaceStatue && (
+              <button
+                onClick={roledeleteUpdatestaff}
+                className="btn btn-danger w-100 mt-3"
+              >
+                Delete
+              </button>
+            )}
+
+            <button
+              onClick={() => setDeleteStatus(false)}
+              className="btn btn-secondary w-100 mt-2"
+            >
+              Cancel
+            </button>
+
+            {StaffRoleDAta.length > 0 && (
+              <div className="mb-4">
+                <h6 className="fw-bold text-primary">
+                  <i className="bi bi-people"></i> Staff Assigned:
+                </h6>
+                <ul className="list-group">
+                  <label className="">Staff Name</label>
+                  {StaffRoleDAta.map((customer) => (
+                    <li
+                      key={customer.job_id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span className="text-dark">{`${customer?.first_name} ${customer.last_name}`} </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+             
+            </>
+              
+            :
+            <button
+                onClick={roledeleteUpdatestaff}
+                className="btn btn-danger w-100 mt-3"
+              >
+                Delete
+              </button>
+
+           }
+
+           
+          </div>
+        </CommonModal>
       </div>
     </>
   );

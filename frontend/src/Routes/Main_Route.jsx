@@ -47,6 +47,7 @@ const Main_Route = () => {
           !location.pathname.startsWith("/admin")
         ) {  
           navigate("/admin/dashboard");
+          window.location.reload();
         }
         break;
       default:
@@ -57,6 +58,7 @@ const Main_Route = () => {
         ) {
           // navigate("/staff/dashboard");
           navigate("/admin/dashboard");
+          window.location.reload();
         }
         break;
     }

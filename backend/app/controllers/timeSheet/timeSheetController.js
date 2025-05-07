@@ -5,7 +5,6 @@ const getTimesheet = async (req, res) => {
      const { ...Timesheet } = req.body;
     
        const result = await timeSheetService.getTimesheet(Timesheet);
-      console.log(result);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
         }else{

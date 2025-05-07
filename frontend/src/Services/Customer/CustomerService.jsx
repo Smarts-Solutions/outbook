@@ -82,18 +82,17 @@ export async function ADD_SERVICES(data, token) {
 // Get All Customer Services
 export async function ADD_PEPPER_WORK(data, token) {
   try {
-    const formData = new FormData();
+    
+    // const formData = new FormData();
+    // data.fileData.forEach((file, index) => {
+    //   formData.append("files[]", file);
+    // });
 
-
-    data.fileData.forEach((file, index) => {
-      formData.append("files[]", file);
-    });
-
-    for (const key in data) {
-      if (key !== "fileData" && data[key] !== undefined) {
-        formData.append(key, data[key]);
-      }
-    }
+    // for (const key in data) {
+    //   if (key !== "fileData" && data[key] !== undefined) {
+    //     formData.append(key, data[key]);
+    //   }
+    // }
 
     let config = {
       method: "post",
@@ -101,13 +100,13 @@ export async function ADD_PEPPER_WORK(data, token) {
       url: `${Config.base_url}updateProcessCustomerFile`,
       headers: {
         Authorization: token,
-        "Content-Type": "multipart/form-data",
+        // "Content-Type": "multipart/form-data",
       },
-      data: formData,
+      data: data,
     };
-
     const res = await axios.request(config);
     return res?.data;
+
   } catch (err) {
     return err;
   }
@@ -295,6 +294,7 @@ export async function ADD_MISSION_LOG(data, token) {
     formData.append('missing_log_reviewed_by', staffDetails.id);  
     formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
     // formData.append('missing_paperwork_received_on', data.missionDetails.missing_paperwork_received_on);
+    formData.append('last_chaser', data.missionDetails.last_chaser);
     formData.append('status', data.missionDetails.status);
     formData.append('StaffUserId', data.StaffUserId);
     formData.append('ip', data.ip);
@@ -337,6 +337,7 @@ export async function EDIT_MISSION_LOG(data, token) {
     formData.append('missing_log_reviewed_by', staffDetails.id);  
     // formData.append('missing_paperwork', data.missionDetails.missing_log_paperwork);
     formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
+    formData.append('last_chaser', data.missionDetails.last_chaser);
     formData.append('status', data.missionDetails.status); 
     if (Array.isArray(data.missionDetails.missing_log_document)) {
       data.missionDetails.missing_log_document.forEach((file) => {
@@ -393,7 +394,8 @@ export async function ADD_QUERY(data, token) {
     formData.append('response_received', data.data.ResponseReceived);
     // formData.append('response', data.data.Response);
     formData.append('status', data.data.status);
-    formData.append('final_query_response_received_date',data.data.FinalQueryResponseReceivedDate);  
+    formData.append('final_query_response_received_date',data.data.FinalQueryResponseReceivedDate);
+    formData.append('last_chaser', data.data.last_chaser);  
     if (Array.isArray(data.data.QueryDocument)) {
       data.data.QueryDocument.forEach((file) => {
         formData.append('files[]', file);
@@ -434,6 +436,7 @@ export async function EDIT_QUERY(data, token) {
     formData.append('reviewed_by', data.data.ReviewedBy); 
     formData.append('missing_queries_prepared_date', data.data.MissingQueriesPreparedDate);
     formData.append('query_sent_date', data.data.QuerySentDate);
+    formData.append('last_chaser', data.data.last_chaser);
     formData.append('response_received', data.data.ResponseReceived);
     // formData.append('response', data.data.Response);
     formData.append('status', data.data.status);
@@ -502,6 +505,7 @@ export async function EDIT_DRAFT(data, token) {
     return await err;
   }
 }
+
 export async function JOBDOCUMENT_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}JobDocumentAction`, data, {
@@ -561,3 +565,32 @@ export async function getcustomerschecklist(data, token) {
     return await err;
   }
 }
+
+export async function delete_Customer(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}deleteCustomer`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY(data, token) {
+  try {
+
+    const res = await axios.post(`${Config.base_url}uploadDocumentMissingLogAndQuery`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  }
+  catch (err
+  ) {
+    return
+    await err
+  }
+}
+

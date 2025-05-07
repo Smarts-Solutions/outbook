@@ -13,6 +13,12 @@ router.post('/staffCompetency',verifyToken, authController.staffCompetency);
 router.post('/profile',verifyToken, authController.profile);
 router.post('/isLogOut', authController.isLogOut);
 router.post('/status', authController.status);
+router.post('/getSharePointToken', authController.getSharePointToken);
+router.post('/staff/portfolio',verifyToken, authController.HandelStaffPortfolio);
+
+router.post('/staff/delete',verifyToken, authController.deleteStaff);
+
+router.post('/getstaff/role', authController.GetStaffByRole);
 
 
 

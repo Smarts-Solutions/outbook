@@ -15,6 +15,7 @@ router.post('/updateProcessCustomerFile',verifyToken, uploadMultiple, customerCo
 router.post('/updateProcessCustomerFileAction',verifyToken, customerController.updateProcessCustomerFileAction);
 router.post('/customerUpdate',verifyToken, customerController.customerUpdate);
 router.post('/customerStatusUpdate',verifyToken, customerController.customerStatusUpdate);
+router.post('/deleteCustomer',verifyToken, customerController.deleteCustomer);
 
 
 router.post('/getcustomerschecklist',verifyToken, customerController.getcustomerschecklist);

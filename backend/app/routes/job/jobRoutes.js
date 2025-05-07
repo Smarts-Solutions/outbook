@@ -24,6 +24,9 @@ router.post('/jobTimeSheet',verifyToken, jobController.jobTimeSheet);
 router.post('/addMissingLog',verifyToken , uploadMultiple , jobController.addMissingLog);
 router.post('/getMissingLog',verifyToken, jobController.getMissingLog);
 router.post('/editMissingLog',verifyToken , uploadMultiple , jobController.editMissingLog);
+router.post('/uploadDocumentMissingLogAndQuery',verifyToken , uploadMultiple , jobController.uploadDocumentMissingLogAndQuery);
+
+
 
 //Queries
 router.post('/getQuerie',verifyToken, jobController.getQuerie);

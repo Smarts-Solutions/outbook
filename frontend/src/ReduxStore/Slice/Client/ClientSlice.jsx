@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT } from "../../../Services/Client/ClientService";
+import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT ,add_Client_Document ,delete_Client_File } from "../../../Services/Client/ClientService";
 const token = localStorage.getItem("token");
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
@@ -44,6 +44,36 @@ export const Add_Client = createAsyncThunk("addClient", async (req) => {
     throw err;
   }
 });
+
+
+export const addClientDocument = createAsyncThunk("addClientDocument", async (req) => {
+  const authToken = token;
+  try { 
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    console.log("updatedReq", updatedReq)
+    const res = await add_Client_Document(updatedReq, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const deleteClientFile = createAsyncThunk("deleteClientFile", async (req) => {
+  const authToken = token;
+  try { 
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await delete_Client_File(updatedReq, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
 
 export const Edit_Client = createAsyncThunk("clientUpdate", async (req) => {
   const authToken = token;

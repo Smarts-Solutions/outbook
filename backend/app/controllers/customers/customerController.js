@@ -64,8 +64,10 @@ const updateProcessCustomer = async (req, res) => {
 const updateProcessCustomerFile = async (req, res) => {
   try {
       const customer_id = req.body.customer_id
+      const uploadedFiles = req.body.uploadedFiles
       const customerProcessDataFiles = req.files;
-      const data = await customerService.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
+
+      const data = await customerService.updateProcessCustomerFile(customerProcessDataFiles , customer_id ,uploadedFiles);
       if(data != undefined){
        return res.status(200).json({ status:true,message: "Customer details have been saved successfully!",data : data});
       }else{
@@ -137,6 +139,23 @@ const getcustomerschecklist = async (req, res) => {
     }
 }
 
+const deleteCustomer = async (req, res) => {
+  try {
+     const { ...customer } = req.body;
+    
+      const result = await customerService.deleteCustomer(customer);
+      if(!result.status){
+        return  res.status(200).json({ status: false, message: result.message });  
+        }else{
+        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        }
+    } catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
+
+
+
 
 
 module.exports = {
@@ -148,5 +167,6 @@ module.exports = {
   updateProcessCustomerFileAction,
   customerUpdate,
   customerStatusUpdate,
-  getcustomerschecklist
+  getcustomerschecklist,
+  deleteCustomer
 };

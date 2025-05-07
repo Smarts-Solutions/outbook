@@ -111,6 +111,7 @@ const Admin_Route = () => {
 
               if (settingView && settingView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "customer") {
               const customerView = item.items.find(
@@ -119,12 +120,14 @@ const Admin_Route = () => {
 
               if (customerView && customerView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "staff") {
               const staffView = item.items.find((item) => item.type === "view");
 
               if (staffView && staffView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "status") {
               const statusView = item.items.find(
@@ -133,6 +136,7 @@ const Admin_Route = () => {
 
               if (statusView && statusView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             } else if (item.permission_name === "report") {
               const reportView = item.items.find(
@@ -141,6 +145,7 @@ const Admin_Route = () => {
 
               if (reportView && reportView.is_assigned === 0) {
                 navigate("/admin/dashboard");
+                window.location.reload();
               }
             }
           }
@@ -181,6 +186,48 @@ const Admin_Route = () => {
               );
               updatedShowTab.timesheet =
                 timesheetView && timesheetView.is_assigned === 1;
+            }
+            else if (item.permission_name === "job") {
+              const jobView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.job =
+                jobView && jobView.is_assigned === 1;
+            }
+            else if (item.permission_name === "client") {
+              const clientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.client =
+                clientView && clientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+                );
+              updatedShowTab.report =
+                reportView && reportView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_customers") {
+              const allCustomerView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_customers =
+                allCustomerView && allCustomerView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_clients") {
+              const allClientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_clients =
+                allClientView && allClientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_jobs") {
+              const allJobView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_jobs =
+                allJobView && allJobView.is_assigned === 1;
             }
           });
 

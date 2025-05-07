@@ -11,7 +11,7 @@ import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA, GetOfficerDetails} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm ,convertDate } from '../../../../Utils/Comman_function'
 import { use } from "react";
 
 const Information = ({ id, pageStatus }) => {
@@ -21,6 +21,7 @@ const Information = ({ id, pageStatus }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const newCustomerId = localStorage.getItem("newCustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState([]);
@@ -38,9 +39,7 @@ const Information = ({ id, pageStatus }) => {
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
-
-
-
+   
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -54,6 +53,7 @@ const Information = ({ id, pageStatus }) => {
     email: "",
     residentialAddress: "",
     phone_code: "+44",
+    notes: "",
   });
 
   // state for partnership
@@ -63,6 +63,7 @@ const Information = ({ id, pageStatus }) => {
     VATRegistered: "0",
     VATNumber: "",
     Website: "",
+    notes: "",
   });
 
   // state for company
@@ -80,6 +81,7 @@ const Information = ({ id, pageStatus }) => {
     Website: "",
     TradingName: "",
     TradingAddress: "",
+    notes: "",
   });
 
   // state for company contact
@@ -116,6 +118,9 @@ const Information = ({ id, pageStatus }) => {
       phone_code: "+44",
     },
   ]);
+
+
+
 
   // state for company contact errors
   const [errors, setErrors] = useState([
@@ -201,11 +206,6 @@ const Information = ({ id, pageStatus }) => {
       if (getSearchDetails[0].address_snippet)
         delete newErrors["TradingAddress"];
 
-
-
-
-
-
       setErrors2(newErrors);
     }
   }, [getSearchDetails]);
@@ -229,6 +229,7 @@ const Information = ({ id, pageStatus }) => {
           vatNumber:
             customerDetails?.customer && customerDetails?.customer?.vat_number,
           website: customerDetails?.customer && customerDetails?.customer?.website,
+          notes: customerDetails?.customer && customerDetails?.customer?.notes,
           first_name:
             customerDetails?.contact_details &&
             customerDetails?.contact_details[0]?.first_name,
@@ -285,6 +286,7 @@ const Information = ({ id, pageStatus }) => {
           VATNumber:
             customerDetails?.customer && customerDetails?.customer?.vat_number,
           Website: customerDetails?.customer && customerDetails?.customer?.website,
+          notes: customerDetails?.customer && customerDetails?.customer?.notes,
 
           TradingName:
             customerDetails?.customer && customerDetails?.customer?.trading_name,
@@ -307,6 +309,7 @@ const Information = ({ id, pageStatus }) => {
           VATNumber:
             customerDetails?.customer && customerDetails?.customer?.vat_number,
           Website: customerDetails?.customer && customerDetails?.customer?.website,
+          notes: customerDetails?.customer && customerDetails?.customer?.notes,
         }));
         setContacts1(customerDetails && customerDetails?.contact_details);
 
@@ -335,7 +338,7 @@ const Information = ({ id, pageStatus }) => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        customer_contact_person_role_id: "",
+        customer_contact_person_role_id: personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "",
         phone: "",
         email: "",
         phone_code: "+44",
@@ -369,7 +372,7 @@ const Information = ({ id, pageStatus }) => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        customer_contact_person_role_id: "",
+        customer_contact_person_role_id: personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "",
         phone: "",
         email: "",
         phone_code: "+44",
@@ -403,6 +406,9 @@ const Information = ({ id, pageStatus }) => {
       ).unwrap();
       if (response.status) {
         setStaffDataAll(response.data);
+        if(role == "MANAGER" && response.data.length > 0){
+          setManagerType(staffDetails.id)
+        }
       } else {
         setStaffDataAll([]);
       }
@@ -846,6 +852,7 @@ const Information = ({ id, pageStatus }) => {
           account_manager_id: ManagerType,
           CustomerType: customerType,
           staff_id: staffDetails.id,
+          notes: getSoleTraderDetails?.notes,
         };
 
         await AddCustomerFun(req);
@@ -904,6 +911,7 @@ const Information = ({ id, pageStatus }) => {
             Registered_Office_Addres: getCompanyDetails?.RegisteredOfficeAddress,
             Incorporation_Date: getCompanyDetails?.IncorporationDate,
             Incorporation_in: getCompanyDetails?.IncorporationIn,
+            notes: getCompanyDetails?.notes,
           };
 
           await AddCustomerFun(req);
@@ -960,6 +968,7 @@ const Information = ({ id, pageStatus }) => {
             VAT_Registered: getPartnershipDetails?.VATRegistered,
             VAT_Number: getPartnershipDetails?.VATNumber,
             Website: getPartnershipDetails?.Website,
+            notes: getPartnershipDetails?.notes,
             contactDetails: contacts1,
           };
 
@@ -1096,6 +1105,9 @@ const Information = ({ id, pageStatus }) => {
       .then(async (response) => {
         if (response.status) {
           setIncorporationDataAll(response.data);
+          if(response.data.length > 0){
+            setCompanyDetails({ ...getCompanyDetails, IncorporationIn: (response.data[0].id).toString() });
+          }
         } else {
           setIncorporationDataAll([]);
         }
@@ -1104,12 +1116,30 @@ const Information = ({ id, pageStatus }) => {
         return;
       });
   };
+ 
 
-
-
-
-
-
+  // set customer type function
+  const setCustomerTypeFun = (e) => {
+    setCustomerType(e.target.value);
+    if (e.target.value == 2) {
+     
+      setContacts(prevContacts =>
+        prevContacts.map(contact => ({
+            ...contact,
+            customer_contact_person_role_id:personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "", 
+        }))
+    );
+  
+    } else if (e.target.value == 3) {
+      
+      setContacts1(prevContacts =>
+        prevContacts.map(contact => ({
+            ...contact,
+            customer_contact_person_role_id:personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "", 
+        }))
+    );
+    }
+  }
 
   return (
     <>
@@ -1140,7 +1170,7 @@ const Information = ({ id, pageStatus }) => {
                             id="customerType"
                             autoFocus
                             className="form-select "
-                            onChange={(e) => setCustomerType(e.target.value)}
+                            onChange={(e) => setCustomerTypeFun(e)}
                             value={customerType}
                             disabled={!['', null, undefined].includes(newCustomerId)}
                           >
@@ -1179,7 +1209,7 @@ const Information = ({ id, pageStatus }) => {
                                 <option key={data?.id} value={data?.id}>
                                   {capitalizeFirstLetter(data?.first_name) +
                                     " " +
-                                    capitalizeFirstLetter(data?.last_name)}
+                                    capitalizeFirstLetter(data?.last_name) +  " (" + data?.email + ")"}
                                 </option>
                               ))}
                           </Field>
@@ -1201,7 +1231,7 @@ const Information = ({ id, pageStatus }) => {
             <section>
               {customerType == 1 ? (
                 <div className="row mt-3">
-                  <div className="col-lg-12">
+                   <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className="card-header card-header-light-blue step-card-header  align-items-center d-flex">
                         <h4 className="card-title mb-0 flex-grow-1">
@@ -1312,7 +1342,7 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="card">
+                     <div className="card">
                       <div className="card-header card-header-light-blue step-card-header mb-3 ">
                         <h4
                           className="card-title mb-0 flex-grow-1"
@@ -1474,6 +1504,42 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="card">
+                      <div className="card-header card-header-light-blue step-card-header mb-3 ">
+                        <h4
+                          className="card-title mb-0 flex-grow-1"
+                          style={{ marginBottom: "15px !important" }}
+                        >
+                          Notes
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="mb-3">
+    
+                              <textarea
+                                type="text"
+                                className={errors1["notes"] && errors1["notes"] ? "error-field form-control" : "form-control"}
+                                placeholder="Enter Notes"
+                                name="notes"
+                                id="notes"
+                                value={getSoleTraderDetails?.notes}
+                                onChange={(e) => handleChange1(e)}
+                              />
+                              {errors1["notes"] && (
+                                <div className="error-text">
+                                  {errors1["notes"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               ) : customerType == 2 ? (
@@ -1637,13 +1703,14 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <span style={{ color: "red" }}> *</span>
                                 <input
-                                  type="text"
+                                  type="date"
                                   className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
 
                                   placeholder="Enter Incorporation Date"
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
+                                  //value={convertDate(getCompanyDetails?.IncorporationDate)}
                                   value={getCompanyDetails?.IncorporationDate}
                                 />
                                 {errors2["IncorporationDate"] && (
@@ -1671,14 +1738,12 @@ const Information = ({ id, pageStatus }) => {
                                 /> */}
 
                                 <select
-
                                   className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
-
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails?.IncorporationIn}
-                                >
+                                  >
                                   <option value="">
                                     Please Select Incorporation In
                                   </option>
@@ -1847,7 +1912,6 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>
-
                   <div className="col-lg-12">
                     <div className="card card_shadow">
                       <div className="card-header step-card-header card-header-light-blue   align-items-center d-flex">
@@ -2115,11 +2179,42 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>{" "}
-                  {/* end col */}
+
+                  <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className="card-header step-card-header card-header-light-blue ">
+                        <h4 className="card-title">Notes</h4>
+                      </div>
+                      {/* end card header */}
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="mb-3">
+                              <textarea
+                                type="text"
+                                className={errors2["notes"] ? "error-field form-control" : "form-control"}
+                                placeholder="Enter Notes"
+                                name="notes"
+                                id="notes"
+                                onChange={(e) => handleChange2(e)}
+                                value={getCompanyDetails?.notes}
+                              />
+                              {errors2["notes"] && (
+                                <div className="error-text">
+                                  {errors2["notes"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
               ) : customerType == 3 ? (
                 <div className="row mt-3">
+
                   <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
@@ -2535,6 +2630,42 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>
+
+                  
+                  <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Notes
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="mb-3">
+                              <textarea
+                                type="text"
+                                className={errors3["notes"] ? "error-field form-control" : "form-control"}
+
+                                placeholder="Enter Notes"
+                                name="notes"
+                                id="notes"
+                                value={getPartnershipDetails?.notes}
+                                onChange={(e) => handleChange3(e)}
+                                ref={(el) => (refs.current["notes"] = el)}
+                              />
+                              {errors3["notes"] && (
+                                <div className="error-text">
+                                  {errors3["notes"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                
 
                 </div>
               ) : (

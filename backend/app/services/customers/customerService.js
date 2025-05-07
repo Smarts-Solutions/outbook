@@ -14,6 +14,9 @@ const customerAction = async (customer) => {
   else if(action === "get_dropdown"){
     return customerModel.getCustomer_dropdown(customer);
   }
+  else if(action === "get_dropdown_delete"){
+    return customerModel.getCustomer_dropdown_delete(customer);
+  }
   else if(action === "delete"){
     return customerModel.deleteCustomer(customer);
   }else{
@@ -44,8 +47,8 @@ const updateProcessCustomer = async (customerProcessData) => {
 
 };
 
-const updateProcessCustomerFile = async (customerProcessDataFiles , customer_id) => {
-  return customerModel.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
+const updateProcessCustomerFile = async (customerProcessDataFiles , customer_id ,uploadedFiles) => {
+  return customerModel.updateProcessCustomerFile(customerProcessDataFiles , customer_id ,uploadedFiles);
 };
 
 const updateProcessCustomerFileAction = async (customerProcessData) => {
@@ -61,6 +64,10 @@ const updateProcessCustomerFileAction = async (customerProcessData) => {
 
 const customerUpdate = async (customer) => {
   return customerModel.customerUpdate(customer);
+};
+
+const deleteCustomer = async (customer) => {
+  return customerModel.deleteCustomer(customer);
 };
 
 const customerStatusUpdate = async (customer) => {
@@ -80,5 +87,6 @@ module.exports = {
   updateProcessCustomerFileAction,
   customerUpdate,
   customerStatusUpdate,
-  getcustomerschecklist
+  getcustomerschecklist,
+  deleteCustomer
 };

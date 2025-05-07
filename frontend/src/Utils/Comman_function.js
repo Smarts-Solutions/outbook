@@ -138,33 +138,45 @@ const RemoveErrorFromErrors = (name, setErrors) => {
 }
 
 export const validate = (name, value, errors, setErrors) => {
+   console.log("value ",value)
   const newErrors = { ...errors };
-  if (value != '' && !value?.trim() && ClientErrorMessages[name]) { 
+  // if (value != ''  && !value?.trim() && ClientErrorMessages[name]) { 
+  //   if (name === "email" || name === "phone") {
+  //     delete newErrors[name]; 
+  //     RemoveErrorFromErrors(name, setErrors);  
+  //   } else {
+  //     newErrors[name] = ClientErrorMessages[name];   
+  //   }
+  // }
+  if (value != ''&& typeof value === "string" && value.trim() === "" && ClientErrorMessages[name]) { 
     if (name === "email" || name === "phone") {
-      delete newErrors[name]; 
-      RemoveErrorFromErrors(name, setErrors);  
+      delete newErrors[name];
+      RemoveErrorFromErrors(name, setErrors);
     } else {
-      newErrors[name] = ClientErrorMessages[name];   
+      newErrors[name] = ClientErrorMessages[name];
     }
-  } else { 
+  }
+  
+  else { 
+   
     switch (name) {
-      case "email":
-        if (!Email_regex(value)) {
-          newErrors[name] = "Please enter a valid email";
-        } else {
-          delete newErrors[name];   
-          RemoveErrorFromErrors(name, setErrors);  
-        }
-        break;
+      // case "email":
+      //   if (!Email_regex(value)) {
+      //     newErrors[name] = "Please enter a valid email";
+      //   } else {
+      //     delete newErrors[name];   
+      //     RemoveErrorFromErrors(name, setErrors);  
+      //   }
+      //   break;
 
-      case "phone":
-        if (!/^\d{9,12}$/.test(value)) {
-          newErrors[name] = "Phone number must be between 9 to 12 digits";
-        } else {
-          delete newErrors[name];  
-          RemoveErrorFromErrors(name, setErrors);
-        }
-        break;
+      // case "phone":
+      //   if (!/^\d{9,12}$/.test(value)) {
+      //     newErrors[name] = "Phone number must be between 9 to 12 digits";
+      //   } else {
+      //     delete newErrors[name];  
+      //     RemoveErrorFromErrors(name, setErrors);
+      //   }
+      //   break;
 
       case "VATNumber":
         if (!/^[0-9+]*$/.test(value)) {
@@ -192,8 +204,6 @@ export const validate = (name, value, errors, setErrors) => {
   return Object.keys(newErrors).length === 0;
 };
 
-
-
 export async function GET_IP(data, token) {
   try {
     const res = await axios.get(`https://api.ipify.org?format=json`)
@@ -213,3 +223,26 @@ export const convertDate = (date) => {
   }
   return "";
 }
+
+export const allowedTypes = 
+  [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "message/rfc822", // For .eml
+    "application/vnd.ms-outlook", // For .msg
+    "application/mbox", // For .mbox
+    "application/vnd.ms-outlook-pst", // For .pst
+    "application/vnd.ms-outlook-ost", // For .ost
+    "text/vcard", // For .vcf
+    "text/calendar", // For .ics
+    "application/vnd.ms-outlook-template", // For .oft
+    "text/csv", // For .csv
+    "application/vnd.ms-excel", // For .xls
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" // For .xlsx
+
+  ]
+

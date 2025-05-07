@@ -82,7 +82,7 @@ const getRoleAll = async () => {
 };
 
 const staffRole = async () => {
-    const query = `SELECT * FROM roles WHERE status = '1' AND role NOT IN ('ADMIN','SUPERADMIN');`;
+    const query = `SELECT * FROM roles WHERE status = '1' AND role NOT IN ('SUPERADMIN');`;
 
     try {
         const [result] = await pool.execute(query);

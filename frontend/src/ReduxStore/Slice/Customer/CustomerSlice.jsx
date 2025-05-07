@@ -32,6 +32,8 @@ import {
   UPDATE_STATUS,
   getcustomerschecklist,
   get_All_Customer_DropDown,
+  delete_Customer,
+  UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -127,6 +129,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk(
         ...req,
         ip: IP_Data,
         customer_id: req.customer_id,
+        uploadedFiles: req.uploadedFiles,
         StaffUserId: StaffUserId.id,
       };
       const res = await ADD_PEPPER_WORK(updatedReq, req.authToken);
@@ -157,8 +160,6 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk(
     }
   }
 );
-
-
 
 export const getAllCustomerDropDown = createAsyncThunk(
   "customerAction",
@@ -414,6 +415,19 @@ export const EditMissingLog = createAsyncThunk(
   }
 );
 
+export const UploadDocumentMissingLogAndQuery = createAsyncThunk(
+  "uploadDocumentMissingLogAndQuery",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY(req, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
 export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
   try {
     const { req, authToken } = data;
@@ -598,6 +612,25 @@ export const getcustomerschecklistApi = createAsyncThunk(
         StaffUserId: StaffUserId.id,
       };
       const res = await getcustomerschecklist(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const deleteCustomer = createAsyncThunk(
+  "deleteCustomer",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await delete_Customer(updatedReq, authToken);
       return await res;
     } catch (err) {
       throw err;

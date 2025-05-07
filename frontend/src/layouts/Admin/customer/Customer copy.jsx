@@ -72,7 +72,7 @@ const Customer = () => {
 
           }}
         >
-          {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
+          {( role === "SUPERADMIN") && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -207,7 +207,7 @@ const Customer = () => {
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
           <div style={{ textAlign: "center" }}>
-            {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
+            {( role === "SUPERADMIN") && row.status == 1 ? (
               <>
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
@@ -393,7 +393,7 @@ const Customer = () => {
               <h3 className="mt-0">Customers</h3>
             </div>
           </div>
-          {role === "ADMIN" || role === "SUPERADMIN" ? (
+          { role === "SUPERADMIN" ? (
             <div className="col-md-4">
               <Link
                 to="/admin/addcustomer"

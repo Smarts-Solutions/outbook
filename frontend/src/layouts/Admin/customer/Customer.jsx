@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-// import Datatable from "../../../Components/ExtraComponents/Datatable";
+import ExportToExcel  from '../../../Components/ExtraComponents/ExportToExcel';
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { getDateRange } from "../../../Utils/Comman_function";
+import { Update_Customer_Status , deleteCustomer ,GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
+
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -18,13 +17,15 @@ const Customer = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [activeTab, setActiveTab] = useState("this-year");
   const role = JSON.parse(localStorage.getItem("role"));
-
+  const [filteredData1, setFilteredData1] = useState([])
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [getAccessData, setAccessData] = useState({
     insert: 0,
     update: 0,
     delete: 0,
     client: 0,
+    all_clients: 0,
   });
 
 
@@ -38,6 +39,11 @@ const Customer = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
+    const accessDataAllClients=
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_clients"
+    )?.items || [];
+
 
 
 
@@ -47,7 +53,7 @@ const Customer = () => {
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 ,all_clients: 0 };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -56,6 +62,10 @@ const Customer = () => {
     accessData1.forEach((item) => {
       if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
+
+    accessDataAllClients.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
+    } );
 
     setAccessData(updatedAccess);
   }, []);
@@ -74,7 +84,7 @@ const Customer = () => {
 
           }}
         >
-          {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
+          {(role === "SUPERADMIN") && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -83,7 +93,7 @@ const Customer = () => {
               {row.trading_name}
             </a>
           ) : (
-            getAccessData.client == 1 && row.status == 1 ? <a
+            (getAccessData.client == 1 || getAccessData.all_clients) && row.status == 1 ? <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
               title={row.trading_name}
@@ -208,35 +218,36 @@ const Customer = () => {
         const hasUpdateAccess = getAccessData.update === 1;
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
-          <div style={{ textAlign: "center" }}>
-            {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
-              <>
-                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil text-primary" />
-                </button>
-                {/* <button
+          <div style={{ width: "50px" }}>
+            {(role === "SUPERADMIN") && row.status == 1 ? (
+              <div className="d-flex justify-content-end">
+
+               {row.form_process != "4" &&  <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
                   <i className="ti-trash text-danger " />
-                </button> */}
-              </>
+                </button>}
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
+                </button>
+              </div>
             ) : (
-              <>
+              <div className="d-flex justify-content-end">
+                {hasDeleteAccess && row.form_process != "4" &&  (
+                  <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row)}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
                 {hasUpdateAccess && row.status == 1 && (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {/* {hasDeleteAccess && row.status==1 &&  (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )} */}
-              </>
+              </div>
             )}
           </div>
         );
@@ -248,6 +259,56 @@ const Customer = () => {
     },
   ];
 
+  const handleDelete = (row) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this customer?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { customer_id: row.id };
+          const res = await dispatch(deleteCustomer({ req, authToken: token })).unwrap();
+
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetAllCustomerData(1, pageSize, '');
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while deleting the customer.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Customer was not deleted",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    });
+    
+  };
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
 
@@ -300,37 +361,6 @@ const Customer = () => {
     });
   };
 
-  const [selectedTab, setSelectedTab] = useState('this-year');
-
-  const tabs = [
-    { id: 'this-week', label: 'This Week' },
-    { id: 'last-week', label: 'Last Week' },
-    { id: 'this-month', label: 'This Month' },
-    { id: 'last-month', label: 'Last Month' },
-    { id: 'last-quarter', label: 'Last Quarter' },
-    { id: 'this-6-months', label: 'This 6 Months' },
-    { id: 'last-6-months', label: 'Last 6 Months' },
-    { id: 'this-year', label: 'This Year' },
-    { id: 'last-year', label: 'Last Year' },
-    { id: 'custom', label: 'Custom' }
-  ];
-
-  useEffect(() => {
-    //  GetAllCustomerData();
-  }, []);
-
-  useEffect(() => {
-    //  GetAllCustomerData();
-  }, [selectedTab]);
-
-  const handleTabChange = (event) => {
-    setSelectedTab(event.target.value);
-  };
-
-
-
-  ////////////////////////////////////
-
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -356,22 +386,23 @@ const Customer = () => {
   };
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
+    console.log("limit", limit)
+    console.log("page", page)
     const req = { action: 'get', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
 
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
-
       if (response.status) {
-        const filteredData = response.data.data.filter((item) => {
-          const itemDate = new Date(item.created_at);
-          const { startDate, endDate } = getDateRange(selectedTab);
-          return itemDate >= startDate && itemDate <= endDate;
-        });
+        // const filteredData = response.data.data.filter((item) => {
+        //   const itemDate = new Date(item.created_at);
+        //   const { startDate, endDate } = getDateRange(selectedTab);
+        //   return itemDate >= startDate && itemDate <= endDate;
+        // });
 
-        setFilteredData(filteredData);
+
+        setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
-        // setCustomerData(response.data.pagination.totalItems);
 
       } else {
         setFilteredData([]);
@@ -380,6 +411,13 @@ const Customer = () => {
       console.error('Error fetching customer data:', error);
     }
   };
+
+
+  useEffect(() => {
+    const StatusfilterData = filteredData.filter((item) => (item.status == statusFilter || statusFilter == ""))
+    setFilteredData1(StatusfilterData);
+
+  }, [filteredData, statusFilter]);
 
 
   const handleSearch = (event) => {
@@ -417,6 +455,16 @@ const Customer = () => {
     navigate("/admin/editcustomer", { state: row });
   };
 
+
+  const exportData = filteredData.map((item) => ({
+    "Trading Name": item.trading_name,
+    "Customer Code": item.customer_code,
+    "Type": item.customer_type === '1'  ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
+    "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+    "Status": item.status == 1 ? "Active" : "Deactive",
+  }));
+
+
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -426,7 +474,7 @@ const Customer = () => {
               <h3 className="mt-0">Customers</h3>
             </div>
           </div>
-          {role === "ADMIN" || role === "SUPERADMIN" ? (
+          {role === "SUPERADMIN" ? (
             <div className="col-md-6 col-sm-7">
               <Link
                 to="/admin/addcustomer"
@@ -461,8 +509,6 @@ const Customer = () => {
               </div>
 
               <div className="col-12">
-
-
                 {/* Tab content */}
                 <div className="tab-content mt-minus-60" id="pills-tabContent">
                   <div className="card-datatable">
@@ -478,9 +524,24 @@ const Customer = () => {
                             onChange={(e) => handleSearchChange(e.target.value)}
                           />
                         </div>
+                        <div className="col-md-2">
+                          <select className="form-select form-control" onChange={(e) => setStatusFilter(e.target.value)} >
+                            <option value="">All</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                          </select>
+                        </div>
+                        <div className="col-md-2">
+                        <ExportToExcel
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        apiData={exportData}
+                        fileName={"Customer Details"}
+                      />
+                        </div>
                       </div>
+                      
 
-                      <Datatable columns={columns} data={filteredData} />
+                      <Datatable columns={columns} data={filteredData1} />
 
                       {/* Pagination Controls */}
                       <ReactPaginate
@@ -496,6 +557,7 @@ const Customer = () => {
                       />
                     </div>
                     <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
+                      
                       <option value={5}>5</option>
                       <option value={10}>10</option>
                       <option value={20}>20</option>

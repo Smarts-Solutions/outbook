@@ -3,7 +3,7 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
 import { convertDate } from "../../../Utils/Comman_function";
-
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 const JobStatus = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -111,7 +111,7 @@ const JobStatus = () => {
     },
     {
       name: "Companies House Due Date",
-      
+
       selector: (row) => convertDate(row.filing_Companies_date),
       reorder: false,
       sortable: true,
@@ -154,17 +154,49 @@ const JobStatus = () => {
     },
   ];
 
+
+  const exportData = JobStatusData.map((item) => {
+    return {
+      "Job Id": item.job_code_id,
+      "Customer Name": item.customer_trading_name,
+      "Account Manager": item.account_manager_name,
+      "Clients": item.client_trading_name,
+      "Service Type": item.service_name,
+      "Job Type": item.job_type_name,
+      "Status": item.status,
+      "Allocated To": item.allocated_name,
+      "Received On": item.reviewer_name,
+      "Companies House Due Date": convertDate(item.filing_Companies_date),
+      "Internal Deadline": convertDate(item.internal_deadline_date),
+      "Customer Deadline": convertDate(item.customer_deadline_date),
+      "Initial Query Sent Date": convertDate(item.query_sent_date),
+      "Final Query Response Received Date": convertDate(
+        item.final_query_response_received_date
+      ),
+      "First Draft Sent": convertDate(item.draft_sent_on),
+      "Final Draft Sent": convertDate(item.final_draft_sent_on),
+    };
+  });
+
+
   return (
     <div>
       <div className="report-data">
         <div className="row">
-          <div className="col-md-7 mb-5">
+          <div className="col-md-7 mb-2">
             <div className="tab-title">
               <h3>Job Status Report</h3>
             </div>
           </div>
         </div>
         <div className="datatable-wrapper mt-minus">
+          <div className="d-flex justify-content-end mb-3">
+            <ExportToExcel
+              className="btn btn-outline-info fw-bold float-end border-3 "
+              apiData={exportData}
+              fileName={`Job Status Report`}
+            />
+          </div>
           <Datatable
             filter={true}
             columns={columns}

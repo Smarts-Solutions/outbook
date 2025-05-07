@@ -29,6 +29,9 @@ const jobAction = async (job) => {
   else if(action === "delete"){
     return jobModel.deleteJobById(job);
   }
+  if(action === "getByStatus"){
+    return jobModel.GetJobStatus(job);
+  }
   else{
     return { status: false, message: 'Error getting job.' };
   }
@@ -87,6 +90,10 @@ const editMissingLog = async(missingLog) => {
   return taskTimeSheetModel.editMissingLog(missingLog);
 }
 
+const uploadDocumentMissingLogAndQuery = async (missingLog) => {
+  return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(missingLog);
+}
+
 //Queries
 const addQuerie = async(querie) => {
   return taskTimeSheetModel.addQuerie(querie);
@@ -140,6 +147,9 @@ const jobDocumentAction = async (jobDocument) => {
   else if(action === "delete"){
     return taskTimeSheetModel.deleteJobDocument(jobDocument);
   }
+  else if(action === "add"){
+    return taskTimeSheetModel.addedJobDocument(jobDocument);
+  }
   else{
     return { status: false, message: 'Error getting Job Document.' };
   }
@@ -177,5 +187,6 @@ module.exports = {
   jobDocumentAction,
   addJobDocument,
   editDraft,
-  getJobTimeLine
+  getJobTimeLine,
+  uploadDocumentMissingLogAndQuery
  };

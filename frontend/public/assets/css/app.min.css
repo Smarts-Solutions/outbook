@@ -4758,3 +4758,29 @@ button.btn.dropdown-toggle.btn-light {
 tbody.list.form-check-all tr:last-child td {
   border: none;
 }
+
+.loader-overlay {
+  display: flex;
+  background: #e7eaeb3d;
+  position: fixed;
+  bottom: 0;
+  backdrop-filter: blur(3px);
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 9998;
+  align-items: center;
+  justify-content: center;
+}
+
+.pop-boxx1 span {
+  border: 1px solid #ccc;
+  padding: 5px 20px;
+ 
+  border-radius: 4px;
+}
+.pop-boxx1{
+  width:100%;
+}
+
+.my-redius{border-radius: 21px !important;}

@@ -10,7 +10,6 @@ const pool = require('../config/database');
         let permission_type = logData.permission_type;
         let ip = logData.ip;
         let module_id = logData.module_id ? logData.module_id : 0;
-
         const query = `
         INSERT INTO staff_logs (staff_id,date,module_name,module_id,log_message,permission_type,ip)
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -66,7 +65,7 @@ const pool = require('../config/database');
     } catch (error) {
         console.log("error  - Logs create", error)
     }
-  };
+  }
 
   async function generateNextUniqueCode(data) {
     let table = data.table;
@@ -192,7 +191,7 @@ const pool = require('../config/database');
   
   
     return { startDate, endDate };
-  };
+  }
 
   const JobTaskNameWithId = async (data) => {
        let job_id = data.job_id;
@@ -243,6 +242,220 @@ WHERE
 
 
   }
+
+  const getAllCustomerIds = async (StaffUserId , module_type) => {
+    // Line Manager
+    let rolePermissionId = 34;
+    if(module_type == "job"){
+        rolePermissionId = 35;
+    }
+    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+    let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+    if (LineManageStaffId.length == 0) {
+        LineManageStaffId.push(StaffUserId);
+    }
+
+    const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+
+
+  
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , rolePermissionId]);
+
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+        const query = `
+    SELECT  
+    customers.id AS id,
+    customers.status AS status,
+    customers.form_process AS form_process,
+    customers.trading_name AS trading_name,
+    CONCAT(
+    'cust_', 
+    SUBSTRING(customers.trading_name, 1, 3), '_',
+    SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers 
+ORDER BY 
+id DESC;`;
+
+        const [result] = await pool.execute(query);
+
+        return { status: true, message: 'Success..', data: result };
+    }
+    let result = []
+
+    if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+
+            const query = `
+            SELECT  
+                customers.id AS id,
+                customers.status AS status,
+                customers.form_process AS form_process,
+                customers.trading_name AS trading_name,
+                CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
+            FROM 
+                customers
+            LEFT JOIN
+                jobs ON jobs.customer_id = customers.id
+            LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+            LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id    
+            WHERE 
+                jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+            GROUP BY 
+                CASE 
+                    WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                    ELSE customers.id
+                END
+            ORDER BY 
+                customers.id DESC`;
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        LEFT JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+            LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
+        WHERE 
+            customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?
+            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+
+        GROUP BY 
+        customers.id
+        ORDER BY 
+        customers.id DESC
+           ;
+            `;
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated;
+
+        }
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            jobs ON jobs.customer_id = customers.id
+            LEFT JOIN
+                 staff_portfolio ON staff_portfolio.customer_id = customers.id
+            LEFT JOIN 
+                customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                AND sp_customers.staff_id = staff_portfolio.staff_id
+        WHERE 
+         jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+         GROUP BY 
+    CASE 
+        WHEN jobs.reviewer = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
+        ORDER BY 
+            customers.id DESC;
+            `;
+
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated
+
+        }
+        else {
+            const query = `
+                SELECT  
+            customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+            AND sp_customers.staff_id = staff_portfolio.staff_id    
+        WHERE 
+            customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+        ORDER BY 
+            id DESC;
+            `;
+
+            const [result1] = await pool.execute(query, [StaffUserId]);
+            result = result1
+            }
+     }
+    try {
+
+        return { status: true, message: 'Success..', data: result };
+
+    } catch (err) {
+        console.error('Error selecting getCustomer_dropdown  data:', err);
+        return { status: true, message: 'Error selecting getCustomer_dropdown data', data: err };
+    }
+
+}
+  
+
     
   
-  module.exports = { SatffLogUpdateOperation ,generateNextUniqueCode ,generateNextUniqueCodeJobLogTitle ,getDateRange ,JobTaskNameWithId };
+  module.exports = { SatffLogUpdateOperation ,generateNextUniqueCode ,generateNextUniqueCodeJobLogTitle ,getDateRange ,JobTaskNameWithId ,getAllCustomerIds };

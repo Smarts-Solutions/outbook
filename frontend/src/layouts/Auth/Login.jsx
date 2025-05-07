@@ -44,12 +44,13 @@ const Login = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          accessDataFetch(response.data.staffDetails, response.data.token);
+          await accessDataFetch(response.data.staffDetails, response.data.token);
           localStorage.setItem(
             "staffDetails",
             JSON.stringify(response.data.staffDetails)
           );
           localStorage.setItem("token", JSON.stringify(response.data.token));
+          localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
           localStorage.setItem(
             "role",
             JSON.stringify(response.data.staffDetails.role)
@@ -77,12 +78,15 @@ const Login = () => {
             });
           setTimeout(() => {
             navigate("/admin/dashboard");
+            window.location.reload();
           }, 1000);
 
         } else {
           localStorage.removeItem("staffDetails");
           localStorage.removeItem("token");
           localStorage.removeItem("role");
+          localStorage.removeItem("accessData");
+          localStorage.removeItem("updatedShowTab");
           sessionStorage.clear();
           sweatalert.fire({
             title: response.message,
@@ -109,11 +113,15 @@ const Login = () => {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
+
+            await accessDataFetch(response.data.staffDetails, response.data.token);
+            
             localStorage.setItem(
               "staffDetails",
               JSON.stringify(response.data.staffDetails)
             );
             localStorage.setItem("token", JSON.stringify(response.data.token));
+            localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
             localStorage.setItem(
               "role",
               JSON.stringify(response.data.staffDetails.role)
@@ -132,6 +140,7 @@ const Login = () => {
               });
 
             navigate("/admin/dashboard");
+            window.location.reload();
           } else {
             sweatalert.fire({
               title: response.message,
@@ -174,7 +183,13 @@ const Login = () => {
             staff: false,
             status: false,
             report: false,
-            timesheet: false
+            timesheet: false,
+            job: false,
+            client: false,
+            all_customers: false,
+            all_clients: false,
+            all_jobs: false,
+
           };
 
           response.data.forEach((item) => {
@@ -206,12 +221,48 @@ const Login = () => {
               updatedShowTab.timesheet =
                 timesheetView && timesheetView.is_assigned === 1;
             }
+            else if (item.permission_name === "job") {
+              const jobView = item.items.find((item) => item.type === "view");
+              updatedShowTab.job = jobView && jobView.is_assigned === 1;
+            } else if (item.permission_name === "client") {
+              const clientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.client =
+                clientView && clientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.report =
+              reportView && reportView.is_assigned === 1;
+            }
+              
+            else if (item.permission_name === "all_customers") {
+              const allCustomerView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_customers =
+                allCustomerView && allCustomerView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_clients") {
+              const allClientView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_clients =
+                allClientView && allClientView.is_assigned === 1;
+            }
+            else if (item.permission_name === "all_jobs") {
+              const allJobsView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.all_jobs =
+                allJobsView && allJobsView.is_assigned === 1;
+            }
           });
-
-          localStorage.setItem(
-            "updatedShowTab",
-            JSON.stringify(updatedShowTab)
-          );
+          
+          localStorage.setItem("updatedShowTab",JSON.stringify(updatedShowTab));
         });
       }
     } catch (error) {
@@ -224,13 +275,66 @@ const Login = () => {
     if (e.key === 'Enter') {
       handleSubmitLogin();
     }
-}
+  }
 
   return (
     <div className="account-body accountbg">
       <div className="container">
         <div className="row  d-flex justify-content-center vh-100">
-          <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
+ {/*  Login  Microsoft only*/}
+        <div className="col-10 col-md-9 col-lg-9 align-self-center form-container">
+            <div className="row " style={{ height: "300px" }}>
+              <div className="col-md-6 px-0">
+                <div className="card-body p-0 auth-header-box  h-100 d-flex align-items-center justify-content-center">
+                  <div className="text-center p-3">
+                    <a className="logo logo-admin" href="/">
+                      <img
+                        src="assets/images/logo.png"
+                        alt="logo"
+                        style={{ height: "55px" }}
+                        className="auth-logo"
+                      />
+                    </a>
+                    
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="d-flex flex-column justify-content-center h-100 py-5 px-3">
+                  <div className="card-header text-center">
+                  <h3 className="mt-3 mb-1 font-weight-semibold px-5" style={{lineHeight:"35px"}}>
+                      Let's Get Started Outbooks
+                    </h3>
+                  </div>
+                  <div className="card-body">
+                    <div
+                      className="form-horizontal auth-form my-4"
+                      action="https://mannatthemes.com/dastyle/default/index.html"
+                    >
+                     
+                      </div>
+                    <button
+                      type="button"
+                      className="btn d-block mx-auto btn-outline-info login-microsoft w-100"
+                      onClick={() => handleAzureLogin()}
+                    >
+                      <img
+                        src="/assets/images/brand-logo/Microsoft_365.webp"
+                        className="me-2"
+                      ></img>{" "}
+                      Login with Microsoft
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+           
+          </div>
+
+         {/*  Login  with Email and Password*/}
+ 
+          {/* <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
             <div className="row ">
               <div className="col-md-6 ps-0">
                 <div className="card-body p-0 auth-header-box h-100 d-flex align-items-center justify-content-center">
@@ -260,7 +364,7 @@ const Login = () => {
                       action="https://mannatthemes.com/dastyle/default/index.html"
                     >
                       <div className="form-group mb-2">
-                        {/* <label htmlFor="username">Email</label> */}
+                   
 
                         <div className="input-group ">
                           <input
@@ -281,7 +385,7 @@ const Login = () => {
                         )}
                       </div>
                       <div className="form-group">
-                        {/* <label htmlFor="userpassword">Password</label> */}
+                      
                         <div className="input-group ">
                           <input
                             type="password"
@@ -302,12 +406,9 @@ const Login = () => {
                       </div>
                       <div className="form-group row my-2 text-center">
                         <div className="col-sm-12 ">
-                          {/* <a className="text-muted font-13 forget-btn" href="">
-                            <i className="ti-lock pe-1" />
-                            Forgot password?
-                          </a> */}
+                        
                         </div>
-                        {/*end col*/}
+                      
                       </div>
                       <div className="form-group mb-0 row text-center">
                         <div className="col-12 mt-2">
@@ -320,11 +421,10 @@ const Login = () => {
                             Sign In <i className="fas fa-sign-in-alt ml-1" />
                           </button>
                         </div>
-                        {/*end col*/}
+                     
                       </div>
                     </div>
-                    {/*end form*/}
-
+                  
                     <div className="account-social">
                       <h6 className="my-4">OR </h6>
                     </div>
@@ -343,13 +443,12 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-              {/*end col*/}
+            
             </div>
-            {/*end row*/}
-          </div>
-          {/*end col*/}
+            
+          </div>  */}
+         
         </div>
-        {/*end row*/}
       </div>
       {/* <div className="container" id="container">
     <div className="form-container sign-up">
@@ -388,7 +487,7 @@ const Login = () => {
       <div className="toggle row align-items-center mx-auto">
         <div className="toggle-panel col-md-6">
           <h1>Welcome Back!</h1>
-          <p>Enter your Personal details to use all of site features</p>
+          <p>Enter your Personal details to use all_of site features</p>
           <button className="hidden" id="login">Sign In</button>
         </div>
         <div className="toggle-panel  col-md-6">

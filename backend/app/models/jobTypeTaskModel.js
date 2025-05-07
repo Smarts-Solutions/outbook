@@ -3,18 +3,15 @@ const { SatffLogUpdateOperation } = require("../utils/helper");
 
 const createJobType = async (JobType) => {
   const { service_id, type } = JobType;
-  const checkQuery = `SELECT 1 FROM job_types WHERE type = ?`
+  const checkQuery = `SELECT 1 FROM job_types WHERE type = ? AND service_id = ?`;
   const query = `
     INSERT INTO job_types (service_id,type)
     VALUES (?,?)
     `;
 
   try {
-    console.log("service_id",service_id)
-    console.log("type",type)
-    
-    const [check] = await pool.query(checkQuery, [type]);
-    console.log("check",check)
+   
+    const [check] = await pool.query(checkQuery, [type, service_id]);
     if (check.length > 0) {
       return { status: false, message: "Job Type already exists." };
     }
@@ -225,8 +222,6 @@ const getTask = async (task) => {
  
 
 const addChecklist = async (checklist) => {
-
-
 
   const {
     service_id,

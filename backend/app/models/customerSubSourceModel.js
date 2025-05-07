@@ -3,14 +3,14 @@ const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createCustomerSubSource = async (CustomerSubSource) => {
   const { name ,customer_source_id} = CustomerSubSource;
-  const checkQuery = `SELECT 1 FROM customer_sub_source WHERE name = ?`;
+  const checkQuery = `SELECT 1 FROM customer_sub_source WHERE name = ? AND customer_source_id = ?`;
   const query = `
     INSERT INTO customer_sub_source (name,customer_source_id)
     VALUES (?,?)
     `;
 
   try {
-    const [check] = await pool.query(checkQuery, [name]);
+    const [check] = await pool.query(checkQuery, [name,customer_source_id]);
     if (check.length > 0) {
       return { status: false, message: "Customer Sub-source already exists." };
     }
