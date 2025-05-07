@@ -107,7 +107,7 @@ const Login = () => {
     console.log("Azure Login");
     const accounts = await azureLogin();
     console.log("Azure Accounts", accounts);
-//    console.log("Azure Accounts", accounts);
+
     if (accounts.length > 0) {
       const req = { email: accounts[0].username };
 
@@ -283,60 +283,7 @@ const Login = () => {
     <div className="account-body accountbg">
       <div className="container">
         <div className="row  d-flex justify-content-center vh-100">
- {/*  Login  Microsoft only*/}
-        <div className="col-10 col-md-9 col-lg-9 align-self-center form-container">
-            <div className="row " style={{ height: "300px" }}>
-              <div className="col-md-6 px-0">
-                <div className="card-body p-0 auth-header-box  h-100 d-flex align-items-center justify-content-center">
-                  <div className="text-center p-3">
-                    <a className="logo logo-admin" href="/">
-                      <img
-                        src="assets/images/logo.png"
-                        alt="logo"
-                        style={{ height: "55px" }}
-                        className="auth-logo"
-                      />
-                    </a>
-                    
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="d-flex flex-column justify-content-center h-100 py-5 px-3">
-                  <div className="card-header text-center">
-                  <h3 className="mt-3 mb-1 font-weight-semibold px-5" style={{lineHeight:"35px"}}>
-                      Let's Get Started Outbooks
-                    </h3>
-                  </div>
-                  <div className="card-body">
-                    <div
-                      className="form-horizontal auth-form my-4"
-                      action="https://mannatthemes.com/dastyle/default/index.html"
-                    >
-                     
-                      </div>
-                    <button
-                      type="button"
-                      className="btn d-block mx-auto btn-outline-info login-microsoft w-100"
-                      onClick={() => handleAzureLogin()}
-                    >
-                      <img
-                        src="/assets/images/brand-logo/Microsoft_365.webp"
-                        className="me-2"
-                      ></img>{" "}
-                      Login with Microsoft
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-            </div>
-           
-          </div>
-
-         {/*  Login  with Email and Password*/}
- 
-          {/* <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
+          <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
             <div className="row ">
               <div className="col-md-6 ps-0">
                 <div className="card-body p-0 auth-header-box h-100 d-flex align-items-center justify-content-center">
@@ -366,7 +313,7 @@ const Login = () => {
                       action="https://mannatthemes.com/dastyle/default/index.html"
                     >
                       <div className="form-group mb-2">
-                   
+                        {/* <label htmlFor="username">Email</label> */}
 
                         <div className="input-group ">
                           <input
@@ -387,7 +334,7 @@ const Login = () => {
                         )}
                       </div>
                       <div className="form-group">
-                      
+                        {/* <label htmlFor="userpassword">Password</label> */}
                         <div className="input-group ">
                           <input
                             type="password"
@@ -408,9 +355,12 @@ const Login = () => {
                       </div>
                       <div className="form-group row my-2 text-center">
                         <div className="col-sm-12 ">
-                        
+                          {/* <a className="text-muted font-13 forget-btn" href="">
+                            <i className="ti-lock pe-1" />
+                            Forgot password?
+                          </a> */}
                         </div>
-                      
+                        {/*end col*/}
                       </div>
                       <div className="form-group mb-0 row text-center">
                         <div className="col-12 mt-2">
@@ -423,10 +373,11 @@ const Login = () => {
                             Sign In <i className="fas fa-sign-in-alt ml-1" />
                           </button>
                         </div>
-                     
+                        {/*end col*/}
                       </div>
                     </div>
-                  
+                    {/*end form*/}
+
                     <div className="account-social">
                       <h6 className="my-4">OR </h6>
                     </div>
@@ -445,12 +396,13 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-            
+              {/*end col*/}
             </div>
-            
-          </div>  */}
-         
+            {/*end row*/}
+          </div>
+          {/*end col*/}
         </div>
+        {/*end row*/}
       </div>
       {/* <div className="container" id="container">
     <div className="form-container sign-up">
