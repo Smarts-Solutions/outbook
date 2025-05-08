@@ -8,6 +8,7 @@ import {
 import { useDispatch } from "react-redux";
 import { azureLogin } from "../AuthWithAzure/AuthProvider";
 import { Email_regex, Mobile_regex } from "../../Utils/Common_regex";
+import { base_url } from "../../Utils/Config";
 import {
   PASSWORD_ERROR,
   INVALID_EMAIL_ERROR,
@@ -23,6 +24,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
+
+ console.log("base_url", base_url);
 
   const handleSubmitLogin = async () => {
     if (Email == "") {

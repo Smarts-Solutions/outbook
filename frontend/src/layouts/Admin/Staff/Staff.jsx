@@ -592,7 +592,7 @@ const StaffPage = () => {
       ],
     },
     {
-      type: "select",
+      type: "select3",
       name: "staff_to",
       label: "Line Manager",
       label_size: 12,
