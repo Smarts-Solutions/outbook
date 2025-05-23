@@ -178,7 +178,10 @@ const Paper = () => {
               timer: 3000,
             })
             .then(() => {
+              localStorage.removeItem('newCustomerId');
               navigate("/admin/customer");
+                   
+
             });
           setIsLoading(false);
         }
