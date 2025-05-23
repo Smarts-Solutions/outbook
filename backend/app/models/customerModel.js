@@ -67,7 +67,8 @@ const createCustomer = async (customer) => {
 
             const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails, notes } = customer;
 
-            const Trading_Name = customer.Trading_Name + '_' + customer_code;
+           // const Trading_Name = customer.Trading_Name + '_' + customer_code;
+            const Trading_Name = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -247,8 +248,6 @@ const createCustomer = async (customer) => {
             const { company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in } = customer;
             try {
                 // Update customer_company_information
-
-
                 const query2 = `
                 UPDATE customer_company_information
                 SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
