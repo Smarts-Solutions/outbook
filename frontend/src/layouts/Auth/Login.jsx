@@ -341,8 +341,6 @@ const Login = () => {
 
 
 
-
-
          {/*  Login  with Email and Password*/}
  
           {/* <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
@@ -458,9 +456,6 @@ const Login = () => {
             </div>
             
           </div>  */}
-
-
-
 
 
          

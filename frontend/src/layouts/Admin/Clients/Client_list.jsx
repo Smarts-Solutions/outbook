@@ -1299,7 +1299,33 @@ const ClientList = () => {
                       </>
                     ) : null}
                   </>
-                ) : null}
+                ) : 
+                
+                activeTab === "documents" ? (
+                  <>
+                    <div
+                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                      onClick={() => {
+                        window.history.back();
+                      }}
+                    >
+                      <i className="fa fa-arrow-left pe-1" /> Back
+                    </div>
+                  </>
+                ) : 
+                activeTab === "status" ? (
+                  <>
+                    <div
+                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                      onClick={() => {
+                        window.history.back();
+                      }}
+                    >
+                      <i className="fa fa-arrow-left pe-1" /> Back
+                    </div>
+                  </>
+                ) : null
+                }
               </div>
             </div>
           </div>
