@@ -802,6 +802,17 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
   };
 
+
+  function convertDecimalToHHMM(decimalHour) {
+    const baseHours = Math.floor(decimalHour);
+    const rawMinutes = Math.round((decimalHour - baseHours) * 100);
+    const extraHours = Math.floor(rawMinutes / 60);
+    const remainingMinutes = rawMinutes % 60;
+    const finalHours = baseHours + extraHours;
+    const paddedMinutes = remainingMinutes.toString().padStart(2, '0');
+    return `${finalHours}.${paddedMinutes}`;
+  }
+
   const saveData = async (e) => {
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
@@ -810,6 +821,7 @@ const Timesheet = () => {
         return;
       }
     }
+
 
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
@@ -827,6 +839,41 @@ const Timesheet = () => {
         data: updatedTimeSheetRows,
         deleteRows: deleteRows,
       };
+
+
+
+
+      let staff_hourminute = (parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5) || null;
+      //console.log(`staff_hourminute`, staff_hourminute);
+      if (staff_hourminute != null) {
+          const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
+            return {
+              original: item.total_hours,
+              converted: convertDecimalToHHMM(item.total_hours)
+            };
+          });
+
+          const totalHours = converted.reduce((acc, item) => {
+            return acc + parseFloat(item.converted);
+          }, 0);
+
+          const finalTotalHours = convertDecimalToHHMM(totalHours);
+          //console.log(`finalTotalHours`, finalTotalHours);
+          if (staff_hourminute > parseFloat(finalTotalHours)) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "You have not completed your timesheet for this week.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+          return;
+        }
+
+      }
+
+
+
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
@@ -879,6 +926,41 @@ const Timesheet = () => {
         data: updatedTimeSheetRows1,
         deleteRows: deleteRows,
       };
+
+
+
+
+      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
+      //console.log(`staff_hourminute`, staff_hourminute);
+      if (staff_hourminute != null) {
+          const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+            return {
+              original: item.total_hours,
+              converted: convertDecimalToHHMM(item.total_hours)
+            };
+          });
+
+          const totalHours = converted.reduce((acc, item) => {
+            return acc + parseFloat(item.converted);
+          }, 0);
+
+          const finalTotalHours = convertDecimalToHHMM(totalHours);
+          //console.log(`finalTotalHours`, finalTotalHours);
+          if (staff_hourminute > parseFloat(finalTotalHours)) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "You have not completed your timesheet for this week.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+          return;
+        }
+
+      }
+
+
+
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
@@ -1056,7 +1138,7 @@ const Timesheet = () => {
             )}
             <div className="form-group col-md-8 row align-items-center">
               {staffDataWeekDataAll.data &&
-              staffDataWeekDataAll.data.length > 0 ? (
+                staffDataWeekDataAll.data.length > 0 ? (
                 <div className="form-group col-md-6 pe-0">
                   <label className="form-label mb-2">Select Date</label>
 
@@ -1092,7 +1174,7 @@ const Timesheet = () => {
               )}
 
               {["SUPERADMIN", "ADMIN"].includes(role) &&
-              timeSheetRows.length > 0 ? (
+                timeSheetRows.length > 0 ? (
                 <div className="form-group col-md-6">
                   <button
                     className=" btn btn-info float-md-end mt-lg-2"
@@ -1221,9 +1303,8 @@ const Timesheet = () => {
                                 >
                                   {/* Font Awesome plus icon */}
                                   <i
-                                    className={`fa ${
-                                      isExpanded ? "fa-minus" : "fa-plus"
-                                    }`}
+                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"
+                                      }`}
                                     aria-hidden="true"
                                   ></i>
                                 </button>
@@ -1287,7 +1368,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     <select
                                       className="form-select"
                                       style={{ width: "100px" }}
@@ -1321,7 +1402,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     <select
                                       className="form-select"
                                       style={{ width: "100px" }}
@@ -1371,7 +1452,7 @@ const Timesheet = () => {
                                     </select>
                                   ) : (
                                     <input
-                                    style={{ width: "100px" }}
+                                      style={{ width: "100px" }}
                                       className="form-control cursor-pointer"
                                       defaultValue={
                                         item.task_type === "1"
@@ -1442,11 +1523,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1471,11 +1552,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1500,11 +1581,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1529,11 +1610,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1558,11 +1639,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1587,11 +1668,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                       </div>
@@ -1620,11 +1701,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                       </div>
