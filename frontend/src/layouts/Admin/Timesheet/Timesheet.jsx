@@ -97,7 +97,6 @@ const Timesheet = () => {
 
   const GetTimeSheet = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
-    console.log("req", req);
     const res = await dispatch(
       getTimesheetData({ req, authToken: token })
     ).unwrap();
@@ -234,8 +233,6 @@ const Timesheet = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-
-  console.log("timeSheetRows", timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
