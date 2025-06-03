@@ -1236,7 +1236,7 @@ const Timesheet = () => {
                   <div className="row">
                     <div className="table-responsive table-card  mb-1">
                       <table
-                        className="timesheetTable table align-middle table-nowrap"
+                        className="timesheetTable table align-middle table-nowrap mb-0"
                         id="customerTable"
                       >
                         <thead className="table-light table-head-blue">
@@ -1540,6 +1540,12 @@ const Timesheet = () => {
 
                                 {/*Monday Input*/}
                                 <td colspan="8">
+                                  <table>
+                                    <tr>
+                                      <td></td>
+                                      
+                                    </tr>
+                                  </table>
                                   <div className="ms-2">
                                     {isExpanded ? (
                                       <div
@@ -1756,6 +1762,7 @@ const Timesheet = () => {
                                       </div>
                                     )}
                                   </div>
+
                                 </td>
 
                                 {/*Sunday Input*/}
@@ -1775,7 +1782,7 @@ const Timesheet = () => {
                               */}
                                 <td>
                                   {console.log("item.weekly_hours", item)}
-                                  {totalWeeklyHoursMinutes(item)}
+                                <span className="fs-6 text-dark"> {totalWeeklyHoursMinutes(item)}</span> 
 
                                 </td>
 
@@ -1831,7 +1838,8 @@ const Timesheet = () => {
                               </td>
                             </tr>
                           )}
-
+                         
+                           
                            
                            <tr className="tabel_new">
                             <td>
@@ -1860,7 +1868,68 @@ const Timesheet = () => {
                             <td colSpan={12}></td>
                           </tr>
                         </tbody>
+                        
                       </table>
+                      <div className="ms-5">
+                     <table
+  className="timesheetTable table align-middle table-nowrap"
+  id="customerTable"
+  style={{ marginTop:'-40px' }}
+>
+  <thead className="table-light table-head-blue">
+    <tr>
+      <th
+        className="dropdwnCol2 pe-0 border-0"
+        data-field="phone"
+        style={{ width: 10 }}
+      />
+      <th className="border-0" data-field="phone"  style={{ width: isExpanded ? "42%" : "47%" }}/>
+    
+      <th colSpan={8} className="pe-0 total-weekly border-0" style={{ width: "400px" }}>
+      
+        <div className="d-flex  " style={{ width: "88%" }}>
+           <div className="d-flex align-items-center">
+                                
+                                <span className="ms-3  fs-6">
+                                 00.25
+                                </span>
+                                {/* Conditionally render weekdays when expanded */}
+                                {isExpanded && (
+                                  <div
+                                    className="d-flex"
+                                    style={{ width: "77%" }}
+                                  >
+                                    <span className="fs-6">
+                                      00.25
+                                    </span>
+                                    <span className="fs-6">
+                                       00.25
+                                    </span>
+                                    <span className="fs-6">
+                                       00.25
+                                    </span>
+                                    <span className="fs-6">
+                                      00.25
+                                    </span>
+                                    <span className="fs-6">
+                                      00.25
+                                    </span>
+                                  </div>
+                                )}
+                               
+                             
+                              </div>
+        </div>
+      </th>
+      <th className="dropdwnCol5 border-0" data-field="phone" style={{ width: "8%" }} />
+      <th className="dropdwnCol5 border-0" data-field="phone" style={{ width: "5%" }} />
+    </tr>
+   
+  </thead>
+
+</table>
+
+                      </div>
                     </div>
                   </div>
                 </div>

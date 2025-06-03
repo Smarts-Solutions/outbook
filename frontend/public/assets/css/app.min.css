@@ -4784,3 +4784,7 @@ tbody.list.form-check-all tr:last-child td {
 }
 
 .my-redius{border-radius: 21px !important;}
+
+.total-weekly.border-0 span {
+    width: 90px;
+}
