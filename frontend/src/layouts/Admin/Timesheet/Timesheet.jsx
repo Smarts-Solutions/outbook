@@ -803,14 +803,34 @@ const Timesheet = () => {
   };
 
 
-  function convertDecimalToHHMM(decimalHour) {
-    const baseHours = Math.floor(decimalHour);
-    const rawMinutes = Math.round((decimalHour - baseHours) * 100);
-    const extraHours = Math.floor(rawMinutes / 60);
-    const remainingMinutes = rawMinutes % 60;
-    const finalHours = baseHours + extraHours;
-    const paddedMinutes = remainingMinutes.toString().padStart(2, '0');
-    return `${finalHours}.${paddedMinutes}`;
+  function totalWeeklyHoursMinutes(timeData) {
+    const dayFields = [
+      'monday_hours',
+      'tuesday_hours',
+      'wednesday_hours',
+      'thursday_hours',
+      'friday_hours',
+      'saturday_hours',
+      'sunday_hours'
+    ];
+
+    const totalMinutes = dayFields.reduce((sum, key) => {
+      const val = parseFloat(timeData[key]);
+      if (!isNaN(val)) {
+        const hours = Math.floor(val);
+        const minutes = Math.round((val - hours) * 100); // Assuming decimal is base-100
+        return sum + (hours * 60 + minutes);
+      }
+      return sum;
+    }, 0);
+
+    // 3. Convert total minutes to HH:MM
+    const finalHours = Math.floor(totalMinutes / 60);
+    const finalMinutes = totalMinutes % 60;
+    const formattedMinutes = finalMinutes.toString().padStart(2, '0');
+
+    const totalFormattedTime = `${finalHours}.${formattedMinutes}`;
+    return totalFormattedTime;
   }
 
   const saveData = async (e) => {
@@ -846,20 +866,28 @@ const Timesheet = () => {
       let staff_hourminute = (parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5) || null;
       //console.log(`staff_hourminute`, staff_hourminute);
       if (staff_hourminute != null) {
-          const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
-            return {
-              original: item.total_hours,
-              converted: convertDecimalToHHMM(item.total_hours)
-            };
-          });
 
-          const totalHours = converted.reduce((acc, item) => {
-            return acc + parseFloat(item.converted);
-          }, 0);
+        const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
+          return {
+            original: item.total_hours,
+            totalweeklyHours: totalWeeklyHoursMinutes(item)
+          };
+        });
 
-          const finalTotalHours = convertDecimalToHHMM(totalHours);
-          //console.log(`finalTotalHours`, finalTotalHours);
-          if (staff_hourminute > parseFloat(finalTotalHours)) {
+        const total = converted.reduce((acc, item) => {
+          const val = parseFloat(item.totalweeklyHours || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
+
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
+
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        //console.log(`finalTotalHours`, finalTotalHours);
+        if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
             title: "You have not completed your timesheet for this week.",
@@ -931,22 +959,30 @@ const Timesheet = () => {
 
 
       let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
-      //console.log(`staff_hourminute`, staff_hourminute);
+     // console.log(`staff_hourminute`, staff_hourminute);
       if (staff_hourminute != null) {
-          const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-            return {
-              original: item.total_hours,
-              converted: convertDecimalToHHMM(item.total_hours)
-            };
-          });
+        const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+          return {
+            original: item.total_hours,
+            totalweeklyHours: totalWeeklyHoursMinutes(item)
+          };
+        });
 
-          const totalHours = converted.reduce((acc, item) => {
-            return acc + parseFloat(item.converted);
-          }, 0);
-         
-          const finalTotalHours = convertDecimalToHHMM(totalHours);
-         // console.log(`finalTotalHours`, finalTotalHours);
-          if (staff_hourminute > parseFloat(finalTotalHours)) {
+        const total = converted.reduce((acc, item) => {
+          const val = parseFloat(item.totalweeklyHours || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
+
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
+
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+
+
+        if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
             title: "You have not completed your timesheet for this week.",
@@ -1083,6 +1119,9 @@ const Timesheet = () => {
     link.download = "TimeSheetData.csv";
     link.click();
   };
+
+
+
 
   // Example usage
   return (
@@ -1317,6 +1356,14 @@ const Timesheet = () => {
                             {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
+
+                            <th
+                              className="dropdwnCol5"
+                              data-field="phone"
+                              style={{ width: "8%" }}
+                            >
+                              Weekly Hours
+                            </th>
 
                             {submitStatusAllKey === 0 ? (
                               <th
@@ -1726,6 +1773,11 @@ const Timesheet = () => {
                               </td>
                               
                               */}
+                                <td>
+                                  {console.log("item.weekly_hours", item)}
+                                  {totalWeeklyHoursMinutes(item)}
+
+                                </td>
 
                                 {submitStatusAllKey === 0 ? (
                                   <td className="d-flex ps-0">
