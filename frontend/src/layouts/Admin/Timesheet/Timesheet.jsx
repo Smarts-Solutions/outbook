@@ -234,6 +234,9 @@ const Timesheet = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
+
+  console.log("timeSheetRows", timeSheetRows);
+
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
@@ -802,6 +805,20 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
   };
 
+  const getTotalHoursFromKey = (key) => {
+          const total =timeSheetRows&& timeSheetRows.reduce((acc, item) => {
+          const val = parseFloat(item[key] || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
+
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+       return finalTotalHours;
+};
 
   function totalWeeklyHoursMinutes(timeData) {
     const dayFields = [
@@ -831,6 +848,29 @@ const Timesheet = () => {
 
     const totalFormattedTime = `${finalHours}.${formattedMinutes}`;
     return totalFormattedTime;
+  }
+
+  const totalHoursMinute = () =>{
+     const converted = timeSheetRows && timeSheetRows?.map(item => {
+          return {
+            original: item.total_hours,
+            totalweeklyHours: totalWeeklyHoursMinutes(item)
+          };
+        });
+
+        const total = converted.reduce((acc, item) => {
+          const val = parseFloat(item.totalweeklyHours || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
+
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
+
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+       return finalTotalHours;
   }
 
   const saveData = async (e) => {
@@ -1357,13 +1397,13 @@ const Timesheet = () => {
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
 
-                            <th
+                            {/* <th
                               className="dropdwnCol5"
                               data-field="phone"
                               style={{ width: "8%" }}
                             >
                               Weekly Hours
-                            </th>
+                            </th> */}
 
                             {submitStatusAllKey === 0 ? (
                               <th
@@ -1780,11 +1820,11 @@ const Timesheet = () => {
                               </td>
                               
                               */}
-                                <td>
+                                {/* <td>
                                   {console.log("item.weekly_hours", item)}
                                   <span className="fs-6 text-dark"> {totalWeeklyHoursMinutes(item)}</span>
 
-                                </td>
+                                </td> */}
 
                                 {submitStatusAllKey === 0 ? (
                                   <td className="d-flex ps-0">
@@ -1868,9 +1908,11 @@ const Timesheet = () => {
                             <td colSpan={12}></td>
                           </tr>
                         </tbody>
-
                       </table>
-                      <div className="ms-5">
+                        {
+                          timeSheetRows.length > 0 ?
+                          <>
+                         <div className="ms-5">
                         <table
                           className="timesheetTable table align-middle table-nowrap"
                           id="customerTable"
@@ -1883,7 +1925,7 @@ const Timesheet = () => {
                                 data-field="phone"
                                 style={{ width: 10 }}
                               />
-                              <th className="border-0" data-field="phone" style={{ width: isExpanded ? "42%" : "47%" }} />
+                              <th className="border-0" data-field="phone" style={{ width: isExpanded ? "45%" : "48%" }} />
 
                               <th colSpan={8} className="pe-0 total-weekly border-0" style={{ width: "400px" }}>
 
@@ -1891,28 +1933,28 @@ const Timesheet = () => {
                                   <div className="d-flex align-items-center">
 
                                     <span className="ms-3  fs-6">
-                                      00.25
+                                      {getTotalHoursFromKey("monday_hours")}
                                     </span>
-                                    {/* Conditionally render weekdays when expanded */}
+                                    
                                     {isExpanded && (
                                       <div
                                         className="d-flex"
                                         style={{ width: "77%" }}
                                       >
                                         <span className="fs-6">
-                                          00.25
+                                          {getTotalHoursFromKey("tuesday_hours")}
                                         </span>
                                         <span className="fs-6">
-                                          00.25
+                                          {getTotalHoursFromKey("wednesday_hours")}
                                         </span>
                                         <span className="fs-6">
-                                          00.25
+                                          {getTotalHoursFromKey("thursday_hours")}
                                         </span>
                                         <span className="fs-6">
-                                          00.25
+                                          {getTotalHoursFromKey("friday_hours")}
                                         </span>
                                         <span className="fs-6">
-                                          00.25
+                                          {getTotalHoursFromKey("saturday_hours")}
                                         </span>
                                       </div>
                                     )}
@@ -1924,12 +1966,18 @@ const Timesheet = () => {
                               <th className="dropdwnCol5 border-0" data-field="phone" style={{ width: "8%" }} />
                               <th className="dropdwnCol5 border-0" data-field="phone" style={{ width: "5%" }} />
                             </tr>
-
                           </thead>
-
                         </table>
+                        </div>
 
-                      </div>
+                        <div>
+                         <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
+                        </div>
+                        </>
+                          
+                          :""
+                        }
+                        
                     </div>
                   </div>
                 </div>
