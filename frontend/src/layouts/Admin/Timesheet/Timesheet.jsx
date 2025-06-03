@@ -1820,7 +1820,10 @@ const Timesheet = () => {
                                   ""
                                 )}
                               </tr>
+                              
+
                             ))
+
                           ) : (
                             <tr>
                               <td colSpan={12} className="text-center">
@@ -1828,7 +1831,9 @@ const Timesheet = () => {
                               </td>
                             </tr>
                           )}
-                          <tr className="tabel_new">
+
+                           
+                           <tr className="tabel_new">
                             <td>
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
