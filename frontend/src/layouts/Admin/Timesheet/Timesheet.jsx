@@ -943,9 +943,9 @@ const Timesheet = () => {
           const totalHours = converted.reduce((acc, item) => {
             return acc + parseFloat(item.converted);
           }, 0);
-
+         
           const finalTotalHours = convertDecimalToHHMM(totalHours);
-          //console.log(`finalTotalHours`, finalTotalHours);
+         // console.log(`finalTotalHours`, finalTotalHours);
           if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
@@ -958,8 +958,6 @@ const Timesheet = () => {
         }
 
       }
-
-
 
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
