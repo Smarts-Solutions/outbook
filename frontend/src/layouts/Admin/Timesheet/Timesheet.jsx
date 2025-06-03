@@ -832,7 +832,7 @@ const Timesheet = () => {
       const val = parseFloat(timeData[key]);
       if (!isNaN(val)) {
         const hours = Math.floor(val);
-        const minutes = Math.round((val - hours) * 100); // Assuming decimal is base-100
+        const minutes = Math.round((val - hours) * 100); 
         return sum + (hours * 60 + minutes);
       }
       return sum;
