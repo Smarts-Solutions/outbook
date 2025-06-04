@@ -342,8 +342,8 @@ const Login = () => {
 
 
          {/*  Login  with Email and Password*/}
- 
-          {/* <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
+{/*  
+        <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
             <div className="row ">
               <div className="col-md-6 ps-0">
                 <div className="card-body p-0 auth-header-box h-100 d-flex align-items-center justify-content-center">
@@ -455,7 +455,7 @@ const Login = () => {
             
             </div>
             
-          </div>  */}
+          </div>   */}
 
 
          
