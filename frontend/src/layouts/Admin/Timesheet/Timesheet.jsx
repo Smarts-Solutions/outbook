@@ -1923,49 +1923,88 @@ const Timesheet = () => {
 
 
 
-                          <tr className="tabel_new">
-                            <td>
-                              {staffDetails.id == multipleFilter.staff_id ? (
-                                submitStatusAllKey === 0 ? (
-                                  <button
-                                    className="d-flex btn btn-info fw-normal px-2"
-                                    onClick={handleAddNewSheet}
-                                  >
-                                    <i
-                                      style={{
-                                        display: "block",
-                                        fontSize: 18,
-                                        cursor: "pointer",
-                                      }}
-                                      className="ri-add-circle-fill"
-                                    />
-                                  </button>
-                                ) : (
-                                  ""
-                                )
-                              ) : (
-                                ""
-                              )}
-                            </td>
-                            <td colSpan={12}></td>
-                          </tr>
+                         
                         </tbody>
-                      </table>
-                        {
-                          timeSheetRows.length > 0 ?
-                          <>
-                         <div className="ms-5">
-                        <table
-                          className="timesheetTable table align-middle table-nowrap"
-                          id="customerTable"
-                          // style={{ marginTop: '-40px' }}
-                        >
-                          <thead className="table-light table-head-blue">
-                            <tr>
-                             
-                              <th className="border-0" data-field="phone" style={{ width: isExpanded ? "45%" : "48%" }} />
 
-                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'100%', left: isExpanded ? "6%" : "7%" }} >
+                        <tfoot className="table-light table-head-blue">
+                         <tr>
+  <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
+  <th className="" data-field="phone" style={{ width: "10%" }}> </th>
+  <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
+  <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
+  <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
+  <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
+  <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
+<div className="d-flex  ms-3" style={{ width: "88%" }}>
+  <input
+    className="form-control cursor-pointer border-radius-end"
+    type="text"
+    readOnly
+    name="monday_hours"
+    value= {getTotalHoursFromKey("monday_hours")}
+    style={{ width: 80 }}
+
+  />
+   {isExpanded && (
+                                      <div
+                                        className="d-flex  ms-3"
+                                        style={{ width: "88%" }}
+                                      >
+  <input
+    className="form-control cursor-pointer ms-2"
+    type="text"
+    readOnly
+    name="tuesday_hours"
+  value={getTotalHoursFromKey("tuesday_hours")}
+    style={{ width: 80,border:'1px solid #00afef' }}
+  />
+  <input
+    className="form-control cursor-pointer ms-2"
+    type="text"
+    readOnly
+    name="wednesday_hours"
+  value={getTotalHoursFromKey("wednesday_hours")}
+    style={{ width: 80,border:'1px solid #00afef' }}
+  />
+  <input
+    className="form-control cursor-pointer ms-2"
+    type="text"
+    readOnly
+    name="thursday_hours"
+   value={getTotalHoursFromKey("thursday_hours")}
+    style={{ width: 80 ,border:'1px solid #00afef'}}
+  />
+  <input
+    className="form-control cursor-pointer ms-2"
+    type="text"
+    readOnly
+    name="friday_hours"
+   value={getTotalHoursFromKey("friday_hours")}
+    style={{ width: 80 ,border:'1px solid #00afef'}}
+  />
+  <input
+    className="form-control cursor-pointer ms-2"
+    type="text"
+    readOnly
+    name="saturday_hours"
+   value={getTotalHoursFromKey("saturday_hours")}
+    style={{ width: 80,border:'1px solid #00afef' }}
+  />
+
+
+  </div>
+  
+    )}
+</div>
+
+  </th>
+  <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
+</tr>
+
+                            {/* <tr>
+                             
+
+                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'47.5%' }} >
 
                                 <div className="d-flex  " style={{ width: "88%" }}>
                                   <div className="d-flex align-items-center">
@@ -2001,13 +2040,97 @@ const Timesheet = () => {
                                   </div>
                                 </div>
                               </th>
+                              <th className="border-0" data-field="phone" style={{ width:"5%" }} />
+
+                            </tr> */}
+                          </tfoot>
+                          <tfoot>
+ <tr className="tabel_new border-none">
+                            <td className="border-none" style={{border: 'none'}}>
+                              {staffDetails.id == multipleFilter.staff_id ? (
+                                submitStatusAllKey === 0 ? (
+                                  <button
+                                    className="d-flex btn btn-info fw-normal px-2"
+                                    onClick={handleAddNewSheet}
+                                  >
+                                    <i
+                                      style={{
+                                        display: "block",
+                                        fontSize: 18,
+                                        cursor: "pointer",
+                                      }}
+                                      className="ri-add-circle-fill"
+                                    />
+                                  </button>
+                                ) : (
+                                  ""
+                                )
+                              ) : (
+                                ""
+                              )}
+                            </td>
+                           
+                          </tr>
+                          </tfoot>
+                      </table>
+                        {
+                          timeSheetRows.length > 0 ?
+                          <>
+                         <div className="">
+                        {/* <table
+                          className="timesheetTable table align-middle table-nowrap"
+                          id="customerTable"
+                          
+                        >
+                          <thead className="table-light table-head-blue">
+                            <tr>
                              
+                              <th className="border-0" data-field="phone" style={{ width: "47.5%" }} />
+
+                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'47.5%' }} >
+
+                                <div className="d-flex  " style={{ width: "88%" }}>
+                                  <div className="d-flex align-items-center">
+
+                                    <span className="ms-3  fs-6">
+                                      {getTotalHoursFromKey("monday_hours")}
+                                    </span>
+                                    
+                                    {isExpanded && (
+                                      <div
+                                        className="d-flex"
+                                        style={{ width: "77%" }}
+                                      >
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("tuesday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("wednesday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("thursday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("friday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("saturday_hours")}
+                                        </span>
+                                      </div>
+                                    )}
+
+
+                                  </div>
+                                </div>
+                              </th>
+                              <th className="border-0" data-field="phone" style={{ width:"5%" }} />
+
                             </tr>
                           </thead>
-                        </table>
+                        </table> */}
                         </div>
 
-                        <div>
+                        <div className="mt-2 mb-2">
                          <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
                         </div>
                         </>
