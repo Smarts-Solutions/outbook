@@ -288,7 +288,7 @@ const Login = () => {
         <div className="row  d-flex justify-content-center vh-100">
  {/*  Login  Microsoft only*/}
 
-         <div className="col-10 col-md-9 col-lg-9 align-self-center form-container">
+         {/* <div className="col-10 col-md-9 col-lg-9 align-self-center form-container">
             <div className="row " style={{ height: "300px" }}>
               <div className="col-md-6 px-0">
                 <div className="card-body p-0 auth-header-box  h-100 d-flex align-items-center justify-content-center">
@@ -336,13 +336,13 @@ const Login = () => {
               
             </div>
            
-          </div>
+          </div> */}
 
 
 
 
          {/*  Login  with Email and Password*/}
-{/*  
+ 
         <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
             <div className="row ">
               <div className="col-md-6 ps-0">
@@ -455,7 +455,7 @@ const Login = () => {
             
             </div>
             
-          </div>   */}
+          </div>  
 
 
          

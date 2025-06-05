@@ -1913,18 +1913,14 @@ const Timesheet = () => {
                         <table
                           className="timesheetTable table align-middle table-nowrap"
                           id="customerTable"
-                          style={{ marginTop: '-40px' }}
+                          // style={{ marginTop: '-40px' }}
                         >
                           <thead className="table-light table-head-blue">
                             <tr>
-                              <th
-                                className="dropdwnCol2 pe-0 border-0"
-                                data-field="phone"
-                                style={{ width: 10 }}
-                              />
+                             
                               <th className="border-0" data-field="phone" style={{ width: isExpanded ? "45%" : "48%" }} />
 
-                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{ width: "400px" }}>
+                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'100%', left: isExpanded ? "6%" : "7%" }} >
 
                                 <div className="d-flex  " style={{ width: "88%" }}>
                                   <div className="d-flex align-items-center">
@@ -1960,8 +1956,7 @@ const Timesheet = () => {
                                   </div>
                                 </div>
                               </th>
-                              <th className="dropdwnCol5 border-0" data-field="phone" style={{ width: "8%" }} />
-                              <th className="dropdwnCol5 border-0" data-field="phone" style={{ width: "5%" }} />
+                             
                             </tr>
                           </thead>
                         </table>
