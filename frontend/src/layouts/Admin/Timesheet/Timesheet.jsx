@@ -803,19 +803,19 @@ const Timesheet = () => {
   };
 
   const getTotalHoursFromKey = (key) => {
-          const total =timeSheetRows&& timeSheetRows.reduce((acc, item) => {
-          const val = parseFloat(item[key] || 0);
-          const hrs = Math.floor(val);
-          const mins = Math.round((val - hrs) * 100);
-          acc.totalMinutes += hrs * 60 + mins;
-          return acc;
-        }, { totalMinutes: 0 });
+    const total = timeSheetRows && timeSheetRows.reduce((acc, item) => {
+      const val = parseFloat(item[key] || 0);
+      const hrs = Math.floor(val);
+      const mins = Math.round((val - hrs) * 100);
+      acc.totalMinutes += hrs * 60 + mins;
+      return acc;
+    }, { totalMinutes: 0 });
 
-        const totalHours = Math.floor(total.totalMinutes / 60);
-        const totalMins = total.totalMinutes % 60;
-        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-       return finalTotalHours;
-};
+    const totalHours = Math.floor(total.totalMinutes / 60);
+    const totalMins = total.totalMinutes % 60;
+    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    return finalTotalHours;
+  };
 
   function totalWeeklyHoursMinutes(timeData) {
     const dayFields = [
@@ -832,7 +832,7 @@ const Timesheet = () => {
       const val = parseFloat(timeData[key]);
       if (!isNaN(val)) {
         const hours = Math.floor(val);
-        const minutes = Math.round((val - hours) * 100); 
+        const minutes = Math.round((val - hours) * 100);
         return sum + (hours * 60 + minutes);
       }
       return sum;
@@ -847,27 +847,27 @@ const Timesheet = () => {
     return totalFormattedTime;
   }
 
-  const totalHoursMinute = () =>{
-     const converted = timeSheetRows && timeSheetRows?.map(item => {
-          return {
-            original: item.total_hours,
-            totalweeklyHours: totalWeeklyHoursMinutes(item)
-          };
-        });
+  const totalHoursMinute = () => {
+    const converted = timeSheetRows && timeSheetRows?.map(item => {
+      return {
+        original: item.total_hours,
+        totalweeklyHours: totalWeeklyHoursMinutes(item)
+      };
+    });
 
-        const total = converted.reduce((acc, item) => {
-          const val = parseFloat(item.totalweeklyHours || 0);
-          const hrs = Math.floor(val);
-          const mins = Math.round((val - hrs) * 100);
+    const total = converted.reduce((acc, item) => {
+      const val = parseFloat(item.totalweeklyHours || 0);
+      const hrs = Math.floor(val);
+      const mins = Math.round((val - hrs) * 100);
 
-          acc.totalMinutes += hrs * 60 + mins;
-          return acc;
-        }, { totalMinutes: 0 });
+      acc.totalMinutes += hrs * 60 + mins;
+      return acc;
+    }, { totalMinutes: 0 });
 
-        const totalHours = Math.floor(total.totalMinutes / 60);
-        const totalMins = total.totalMinutes % 60;
-        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-       return finalTotalHours;
+    const totalHours = Math.floor(total.totalMinutes / 60);
+    const totalMins = total.totalMinutes % 60;
+    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    return finalTotalHours;
   }
 
   const saveData = async (e) => {
@@ -939,7 +939,7 @@ const Timesheet = () => {
       }
 
 
-    
+
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
@@ -974,7 +974,7 @@ const Timesheet = () => {
 
   const saveTimeSheetRemark = async (e) => {
     if (submitStatus == 1) {
-     
+
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
           ...item,
@@ -1020,7 +1020,7 @@ const Timesheet = () => {
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
 
-       console.log(`finalTotalHours`, finalTotalHours);
+        console.log(`finalTotalHours`, finalTotalHours);
         console.log(`staff_hourminute`, staff_hourminute);
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
@@ -1055,7 +1055,7 @@ const Timesheet = () => {
       }
       return;
     }
-    
+
     const updatedTimeSheetRows = timeSheetRows.map((item) => {
       if (item.editRow === 1) {
         return {
@@ -1077,43 +1077,43 @@ const Timesheet = () => {
       deleteRows: deleteRows,
     };
 
-  
+
     let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
-      if (staff_hourminute != null) {
+    if (staff_hourminute != null) {
 
-        const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-          return {
-            original: item.total_hours,
-            totalweeklyHours: totalWeeklyHoursMinutes(item)
-          };
+      const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+        return {
+          original: item.total_hours,
+          totalweeklyHours: totalWeeklyHoursMinutes(item)
+        };
+      });
+
+      const total = converted.reduce((acc, item) => {
+        const val = parseFloat(item.totalweeklyHours || 0);
+        const hrs = Math.floor(val);
+        const mins = Math.round((val - hrs) * 100);
+
+        acc.totalMinutes += hrs * 60 + mins;
+        return acc;
+      }, { totalMinutes: 0 });
+
+      const totalHours = Math.floor(total.totalMinutes / 60);
+      const totalMins = total.totalMinutes % 60;
+      const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+
+
+      if (staff_hourminute > parseFloat(finalTotalHours)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "You have not completed your timesheet for this week.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
         });
-
-        const total = converted.reduce((acc, item) => {
-          const val = parseFloat(item.totalweeklyHours || 0);
-          const hrs = Math.floor(val);
-          const mins = Math.round((val - hrs) * 100);
-
-          acc.totalMinutes += hrs * 60 + mins;
-          return acc;
-        }, { totalMinutes: 0 });
-
-        const totalHours = Math.floor(total.totalMinutes / 60);
-        const totalMins = total.totalMinutes % 60;
-        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-
-       
-        if (staff_hourminute > parseFloat(finalTotalHours)) {
-          sweatalert.fire({
-            icon: "warning",
-            title: "You have not completed your timesheet for this week.",
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 3000,
-          });
-          return;
-        }
-
+        return;
       }
+
+    }
 
 
 
@@ -1923,130 +1923,93 @@ const Timesheet = () => {
 
 
 
-                         
+
                         </tbody>
+                         {
+                          timeSheetRows.length > 0 ?
+                          <tfoot className="table-light table-head-blue">
+                          <tr>
+                            <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
+                            <th className="" data-field="phone" style={{ width: "10%" }}> </th>
+                            <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
+                            <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
+                            <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
+                            <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
+                            <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
+                              <div className="d-flex  ms-3" style={{ width: "88%" }}>
+                                <input
+                                  className="form-control cursor-pointer border-radius-end"
+                                  type="text"
+                                  readOnly
+                                  name="monday_hours"
+                                  value={getTotalHoursFromKey("monday_hours")}
+                                  style={{ width: 80, border: '1px solid #00afef' }}
 
-                        <tfoot className="table-light table-head-blue">
-                         <tr>
-  <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
-  <th className="" data-field="phone" style={{ width: "10%" }}> </th>
-  <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
-  <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
-  <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
-  <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
-  <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
-<div className="d-flex  ms-3" style={{ width: "88%" }}>
-  <input
-    className="form-control cursor-pointer border-radius-end"
-    type="text"
-    readOnly
-    name="monday_hours"
-    value= {getTotalHoursFromKey("monday_hours")}
-    style={{ width: 80 }}
-
-  />
-   {isExpanded && (
-                                      <div
-                                        className="d-flex  ms-3"
-                                        style={{ width: "88%" }}
-                                      >
-  <input
-    className="form-control cursor-pointer ms-2"
-    type="text"
-    readOnly
-    name="tuesday_hours"
-  value={getTotalHoursFromKey("tuesday_hours")}
-    style={{ width: 80,border:'1px solid #00afef' }}
-  />
-  <input
-    className="form-control cursor-pointer ms-2"
-    type="text"
-    readOnly
-    name="wednesday_hours"
-  value={getTotalHoursFromKey("wednesday_hours")}
-    style={{ width: 80,border:'1px solid #00afef' }}
-  />
-  <input
-    className="form-control cursor-pointer ms-2"
-    type="text"
-    readOnly
-    name="thursday_hours"
-   value={getTotalHoursFromKey("thursday_hours")}
-    style={{ width: 80 ,border:'1px solid #00afef'}}
-  />
-  <input
-    className="form-control cursor-pointer ms-2"
-    type="text"
-    readOnly
-    name="friday_hours"
-   value={getTotalHoursFromKey("friday_hours")}
-    style={{ width: 80 ,border:'1px solid #00afef'}}
-  />
-  <input
-    className="form-control cursor-pointer ms-2"
-    type="text"
-    readOnly
-    name="saturday_hours"
-   value={getTotalHoursFromKey("saturday_hours")}
-    style={{ width: 80,border:'1px solid #00afef' }}
-  />
-
-
-  </div>
-  
-    )}
-</div>
-
-  </th>
-  <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
-</tr>
-
-                            {/* <tr>
-                             
-
-                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'47.5%' }} >
-
-                                <div className="d-flex  " style={{ width: "88%" }}>
-                                  <div className="d-flex align-items-center">
-
-                                    <span className="ms-3  fs-6">
-                                      {getTotalHoursFromKey("monday_hours")}
-                                    </span>
-                                    
-                                    {isExpanded && (
-                                      <div
-                                        className="d-flex"
-                                        style={{ width: "77%" }}
-                                      >
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("tuesday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("wednesday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("thursday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("friday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("saturday_hours")}
-                                        </span>
-                                      </div>
-                                    )}
+                                />
+                                {isExpanded && (
+                                  <div
+                                    className="d-flex  ms-3"
+                                    style={{ width: "88%" }}
+                                  >
+                                    <input
+                                      className="form-control cursor-pointer ms-2"
+                                      type="text"
+                                      readOnly
+                                      name="tuesday_hours"
+                                      value={getTotalHoursFromKey("tuesday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
+                                    />
+                                    <input
+                                      className="form-control cursor-pointer ms-2"
+                                      type="text"
+                                      readOnly
+                                      name="wednesday_hours"
+                                      value={getTotalHoursFromKey("wednesday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
+                                    />
+                                    <input
+                                      className="form-control cursor-pointer ms-2"
+                                      type="text"
+                                      readOnly
+                                      name="thursday_hours"
+                                      value={getTotalHoursFromKey("thursday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
+                                    />
+                                    <input
+                                      className="form-control cursor-pointer ms-2"
+                                      type="text"
+                                      readOnly
+                                      name="friday_hours"
+                                      value={getTotalHoursFromKey("friday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
+                                    />
+                                    <input
+                                      className="form-control cursor-pointer ms-2"
+                                      type="text"
+                                      readOnly
+                                      name="saturday_hours"
+                                      value={getTotalHoursFromKey("saturday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
+                                    />
 
 
                                   </div>
-                                </div>
-                              </th>
-                              <th className="border-0" data-field="phone" style={{ width:"5%" }} />
 
-                            </tr> */}
-                          </tfoot>
-                          <tfoot>
- <tr className="tabel_new border-none">
-                            <td className="border-none" style={{border: 'none'}}>
+                                )}
+                              </div>
+
+                            </th>
+                            <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
+                          </tr>
+                        </tfoot> 
+                          : null
+                         }
+                        
+
+                        
+                        <tfoot>
+                          <tr className="tabel_new border-none">
+                            <td className="border-none" style={{ border: 'none' }}>
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
                                   <button
@@ -2069,15 +2032,15 @@ const Timesheet = () => {
                                 ""
                               )}
                             </td>
-                           
+
                           </tr>
-                          </tfoot>
+                        </tfoot>
                       </table>
-                        {
-                          timeSheetRows.length > 0 ?
+                      {
+                        timeSheetRows.length > 0 ?
                           <>
-                         <div className="">
-                        {/* <table
+                            <div className="">
+                              {/* <table
                           className="timesheetTable table align-middle table-nowrap"
                           id="customerTable"
                           
@@ -2128,16 +2091,16 @@ const Timesheet = () => {
                             </tr>
                           </thead>
                         </table> */}
-                        </div>
+                            </div>
 
-                        <div className="mt-2 mb-2">
-                         <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
-                        </div>
-                        </>
-                          
-                          :""
-                        }
-                        
+                            <div className="mt-2 mb-2">
+                              <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
+                            </div>
+                          </>
+
+                          : ""
+                      }
+
                     </div>
                   </div>
                 </div>
