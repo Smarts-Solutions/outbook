@@ -3855,8 +3855,6 @@ const deleteCustomer = async (customer) => {
 }
 
 
-
-
 module.exports = {
     createCustomer,
     getCustomer,

@@ -302,7 +302,7 @@ const getTimesheetTaskType = async (Timesheet) => {
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
                   OR sp_customers.staff_id = staff_portfolio.staff_id    
             `
-            
+
 
         if (rows.length > 0) {
           // Allocated to
@@ -324,10 +324,8 @@ const getTimesheetTaskType = async (Timesheet) => {
           }
           // Account Manger
           else if (rows[0].role_id == 4) {
-
-
             const query = `${Query_Select}
-                WHERE jobs.account_manager_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+                WHERE jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
                 GROUP BY 
             CASE 
                 WHEN jobs.account_manager_id = ? THEN jobs.customer_id
@@ -344,7 +342,7 @@ const getTimesheetTaskType = async (Timesheet) => {
             //     customers.id;
             //         `;
 
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id, staff_id]);
             result = resultAllocated;
           }
           // Reviewer
@@ -419,16 +417,16 @@ const getTimesheetTaskType = async (Timesheet) => {
       `
         const [rows] = await pool.execute(QueryRole);
 
-         // Line Manager
-         const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-         let LineManageStaffId = LineManage?.map(item => item.staff_to);
- 
-         if (LineManageStaffId.length == 0) {
-           LineManageStaffId.push(staff_id);
-         }
+        // Line Manager
+        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
+        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+        if (LineManageStaffId.length == 0) {
+          LineManageStaffId.push(staff_id);
+        }
 
 
-         
+
 
         // Condition with Admin And SuperAdmin
 
@@ -521,7 +519,7 @@ const getTimesheetTaskType = async (Timesheet) => {
             ORDER BY 
             clients.id DESC
                 `;
-              const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId,customer_id, customer_id]);
+              const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
               if (resultAllocated.length == 0) {
                 return { status: true, message: "success.", data: resultAllocated };
               }
@@ -570,7 +568,7 @@ const getTimesheetTaskType = async (Timesheet) => {
               // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-              const [resultAccounrManage] = await pool.execute(query, [customer_id , customer_id, customer_id]);
+              const [resultAccounrManage] = await pool.execute(query, [customer_id, customer_id, customer_id]);
               if (resultAccounrManage.length == 0) {
                 return { status: true, message: "success.", data: resultAccounrManage };
               }
@@ -619,7 +617,7 @@ const getTimesheetTaskType = async (Timesheet) => {
                 `;
 
 
-              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId ,customer_id, customer_id]);
+              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
 
               if (resultReviewer.length == 0) {
                 return { status: true, message: "success.", data: resultReviewer };
@@ -632,8 +630,8 @@ const getTimesheetTaskType = async (Timesheet) => {
               );
               return { status: true, message: "success.", data: uniqueData };
 
-            } 
-            
+            }
+
             else {
               const query = `
               SELECT  
@@ -711,7 +709,7 @@ const getTimesheetTaskType = async (Timesheet) => {
             ORDER BY 
             clients.id DESC
                 `;
-              const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId ,customer_id, customer_id]);
+              const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
               if (resultAllocated.length == 0) {
                 return { status: true, message: "success.", data: resultAllocated };
               }
@@ -756,7 +754,7 @@ const getTimesheetTaskType = async (Timesheet) => {
             clients.id DESC
                 `;
 
-              const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, customer_id, StaffUserId ,customer_id , customer_id]);
+              const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, customer_id, StaffUserId, customer_id, customer_id]);
               if (resultAccounrManage.length == 0) {
                 return { status: true, message: "success.", data: resultAccounrManage };
               }
@@ -805,10 +803,10 @@ const getTimesheetTaskType = async (Timesheet) => {
                 `;
 
 
-              
 
 
-              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId,customer_id, customer_id]);
+
+              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
 
               if (resultReviewer.length == 0) {
                 return { status: true, message: "success.", data: resultReviewer };
@@ -875,15 +873,15 @@ const getTimesheetTaskType = async (Timesheet) => {
       const client_id = Timesheet.client_id
       try {
         const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
-         
-          // Line Manager
-          const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-          let LineManageStaffId = LineManage?.map(item => item.staff_to);
-  
-          if (LineManageStaffId.length == 0) {
-            LineManageStaffId.push(staff_id);
-          }
-  
+
+        // Line Manager
+        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
+        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+        if (LineManageStaffId.length == 0) {
+          LineManageStaffId.push(staff_id);
+        }
+
         let result = []
         if (ExistStaff.length > 0) {
           // Allocated to
@@ -927,7 +925,7 @@ const getTimesheetTaskType = async (Timesheet) => {
           ORDER BY
           jobs.id DESC;
          `;
-            const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id , client_id]);
+            const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id, client_id]);
             result = rowsAllocated
 
           }
@@ -1018,7 +1016,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         ORDER BY
        jobs.id DESC;
        `;
-              const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id , client_id]);
+              const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id, client_id]);
               result = rowsAllocated
 
             }
@@ -1066,7 +1064,7 @@ const getTimesheetTaskType = async (Timesheet) => {
           jobs.id DESC;
          `;
             try {
-              const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id , client_id]);
+              const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id, client_id]);
               result = rowsAllocated
             } catch (error) {
               console.log("error", error)
@@ -1113,7 +1111,7 @@ const getTimesheetTaskType = async (Timesheet) => {
           ORDER BY
           jobs.id DESC;
             `;
-            const [rows] = await pool.execute(query, [client_id , client_id]);
+            const [rows] = await pool.execute(query, [client_id, client_id]);
             result = rows
           }
 
@@ -1235,7 +1233,7 @@ const saveTimesheet = async (Timesheet) => {
             staff_id, row.task_type, customer_id, client_id, row.job_id, row.task_id,
             row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
             wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark , row.submit_status
+            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, row.submit_status
           ];
           await pool.query(insertQuery, insertValues);
 
