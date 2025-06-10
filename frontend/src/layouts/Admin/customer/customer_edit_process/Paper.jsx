@@ -169,9 +169,7 @@ const Paper = () => {
 
         const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
 
-
          console.log("folderId", folderId);
-
 
         for (const file of newFiles) {
           const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
