@@ -691,6 +691,14 @@ const Timesheet = () => {
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
     let value = e.target.value;
     let name = e.target.name;
+
+
+    console.log(`name`, name);
+    console.log(`value`, value);
+
+
+
+
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -714,8 +722,25 @@ const Timesheet = () => {
       return;
     }
 
-    const [integerPart, fractionalPart] = value.split(".");
-    if (fractionalPart && parseInt(fractionalPart) > 59) {
+
+    // const [integerPart, fractionalPart] = value.split(".");
+    // if (fractionalPart && parseInt(fractionalPart) > 59) {
+    //   sweatalert.fire({
+    //     icon: "warning",
+    //     title: "Minutes cannot exceed 59 ",
+    //     timerProgressBar: true,
+    //     showConfirmButton: true,
+    //     timer: 1500,
+    //   });
+    //   return;
+    // }
+
+    const [integerPart, fractionalPartRaw] = value.split(".");
+    let fractionalPart = fractionalPartRaw || "0";
+    if (fractionalPart.length === 1) {
+      fractionalPart = fractionalPart + "0";
+    }
+    if (parseInt(fractionalPart) > 59) {
       sweatalert.fire({
         icon: "warning",
         title: "Minutes cannot exceed 59 ",
@@ -730,6 +755,7 @@ const Timesheet = () => {
     const [day, month, year] = datePart.split("/");
     const formattedDate = new Date(`${year}-${month}-${day}`);
     const date_final_value = formattedDate.toISOString().split("T")[0];
+
 
     updatedRows[index][day_name] = date_final_value;
     updatedRows[index][name] = value;
@@ -1230,7 +1256,7 @@ const Timesheet = () => {
       <div className="report-data mt-4">
         <div className="col-md-12">
           <div className="row ">
-            {["SUPERADMIN", "ADMIN"].includes(role) ? (
+            {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
                 <select
@@ -1292,7 +1318,7 @@ const Timesheet = () => {
                 ""
               )}
 
-              {["SUPERADMIN", "ADMIN"].includes(role) &&
+              {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
                 timeSheetRows.length > 0 ? (
                 <div className="form-group col-md-6">
                   <button
@@ -1925,88 +1951,88 @@ const Timesheet = () => {
 
 
                         </tbody>
-                         {
+                        {
                           timeSheetRows.length > 0 ?
-                          <tfoot className="table-light table-head-blue">
-                          <tr>
-                            <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
-                            <th className="" data-field="phone" style={{ width: "10%" }}> </th>
-                            <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
-                            <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
-                            <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
-                              <div className="d-flex  ms-3" style={{ width: "88%" }}>
-                                <input
-                                  className="form-control cursor-pointer border-radius-end"
-                                  type="text"
-                                  readOnly
-                                  name="monday_hours"
-                                  value={getTotalHoursFromKey("monday_hours")}
-                                  style={{ width: 80, border: '1px solid #00afef' }}
+                            <tfoot className="table-light table-head-blue">
+                              <tr>
+                                <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
+                                <th className="" data-field="phone" style={{ width: "10%" }}> </th>
+                                <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
+                                <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
+                                  <div className="d-flex  ms-3" style={{ width: "88%" }}>
+                                    <input
+                                      className="form-control cursor-pointer border-radius-end"
+                                      type="text"
+                                      readOnly
+                                      name="monday_hours"
+                                      value={getTotalHoursFromKey("monday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
 
-                                />
-                                {isExpanded && (
-                                  <div
-                                    className="d-flex  ms-3"
-                                    style={{ width: "88%" }}
-                                  >
-                                    <input
-                                      className="form-control cursor-pointer ms-2"
-                                      type="text"
-                                      readOnly
-                                      name="tuesday_hours"
-                                      value={getTotalHoursFromKey("tuesday_hours")}
-                                      style={{ width: 80, border: '1px solid #00afef' }}
                                     />
-                                    <input
-                                      className="form-control cursor-pointer ms-2"
-                                      type="text"
-                                      readOnly
-                                      name="wednesday_hours"
-                                      value={getTotalHoursFromKey("wednesday_hours")}
-                                      style={{ width: 80, border: '1px solid #00afef' }}
-                                    />
-                                    <input
-                                      className="form-control cursor-pointer ms-2"
-                                      type="text"
-                                      readOnly
-                                      name="thursday_hours"
-                                      value={getTotalHoursFromKey("thursday_hours")}
-                                      style={{ width: 80, border: '1px solid #00afef' }}
-                                    />
-                                    <input
-                                      className="form-control cursor-pointer ms-2"
-                                      type="text"
-                                      readOnly
-                                      name="friday_hours"
-                                      value={getTotalHoursFromKey("friday_hours")}
-                                      style={{ width: 80, border: '1px solid #00afef' }}
-                                    />
-                                    <input
-                                      className="form-control cursor-pointer ms-2"
-                                      type="text"
-                                      readOnly
-                                      name="saturday_hours"
-                                      value={getTotalHoursFromKey("saturday_hours")}
-                                      style={{ width: 80, border: '1px solid #00afef' }}
-                                    />
+                                    {isExpanded && (
+                                      <div
+                                        className="d-flex  ms-3"
+                                        style={{ width: "88%" }}
+                                      >
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="tuesday_hours"
+                                          value={getTotalHoursFromKey("tuesday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="wednesday_hours"
+                                          value={getTotalHoursFromKey("wednesday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="thursday_hours"
+                                          value={getTotalHoursFromKey("thursday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="friday_hours"
+                                          value={getTotalHoursFromKey("friday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="saturday_hours"
+                                          value={getTotalHoursFromKey("saturday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
 
 
+                                      </div>
+
+                                    )}
                                   </div>
 
-                                )}
-                              </div>
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
+                              </tr>
+                            </tfoot>
+                            : null
+                        }
 
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
-                          </tr>
-                        </tfoot> 
-                          : null
-                         }
-                        
 
-                        
+
                         <tfoot>
                           <tr className="tabel_new border-none">
                             <td className="border-none" style={{ border: 'none' }}>

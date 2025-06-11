@@ -1184,7 +1184,8 @@ const saveTimesheet = async (Timesheet) => {
           return null;
         }
         const [hours, minutes = '0'] = input.toString().split('.');
-        const formattedMinutes = minutes.length === 1 ? `0${minutes}` : minutes;
+        const formattedMinutes = minutes.length === 1 ? `${minutes}0`: minutes == ""? `00`: minutes;
+
         return `${hours}:${formattedMinutes}`;
       };
       for (const row of data) {
