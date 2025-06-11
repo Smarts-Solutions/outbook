@@ -18,8 +18,8 @@ const config = {
        clientId: '376ee1a2-3c24-48ac-b7cc-9a09f66b9e21', //  Application (client) ID - - CCCCC
        authority: 'https://login.microsoftonline.com/common', //Accounts in any organizational directory and personal Microsoft account
        //redirectUri: 'https://outbooks.tradestreet.in/', //  Redirect URI
-      // redirectUri: 'https://dev.jobs.outbooks.com/', //  Redirect URI
-      redirectUri: 'https://jobs.outbooks.com/', //  Redirect URI
+        redirectUri: 'https://dev.jobs.outbooks.com/', //  Redirect URI
+      // redirectUri: 'https://jobs.outbooks.com/', //  Redirect URI
     },
     cache: {
         cacheLocation: 'sessionStorage', // Recommended to avoid page reload issues
