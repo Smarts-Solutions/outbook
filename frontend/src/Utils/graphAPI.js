@@ -91,7 +91,9 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
         } else {
           console.log("Folder else:");
           // Folder doesn't exist, create it
-          const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/root/children`;
+           const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/root/children`;
+
+          
 
           const folderData = {
             name: "jobManagement",
