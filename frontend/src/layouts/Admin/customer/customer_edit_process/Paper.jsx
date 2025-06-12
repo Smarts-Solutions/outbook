@@ -163,9 +163,9 @@ const Paper = () => {
         setIsLoading(true);
         const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
-        // console.log("site_ID", site_ID);
-        // console.log("drive_ID", drive_ID);
-        // console.log("folder_ID", folder_ID);
+         console.log("site_ID", site_ID);
+         console.log("drive_ID", drive_ID);
+         console.log("folder_ID", folder_ID);
 
         const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
 
@@ -193,7 +193,11 @@ const Paper = () => {
       req: { fileData: newFiles, customer_id: address, authToken: token, uploadedFiles: uploadedFilesArray },
     };
 
-   
+
+    
+     setIsLoading(false);
+     return
+
 
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()

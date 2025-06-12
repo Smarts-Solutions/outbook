@@ -21,19 +21,15 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
     });
 
 
-
-
     console.log("Site Response:", response.data);
 
-
-
+    
 
 
     if (response.data.id) {
-
-      console.log("Site ID:", response.data);
       const parts = response.data.id.split(",");
       const site_ID = parts[1];
+      console.log("Site ID:", site_ID);
 
       // Fetch Drive ID
       const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives`;
@@ -66,7 +62,11 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
 
         // return { site_ID, drive_ID, folder_ID };
 
-        const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
+         
+
+
+        const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/root/children`;
+       // const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
         const folderResponse = await axios.get(folderUrl, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -115,7 +115,7 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
           console.log("New folder created with ID:", folder_ID);
         }
 
-        
+         
 
         return { site_ID, drive_ID, folder_ID };
       }
