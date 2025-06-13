@@ -45,6 +45,10 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
       if (driveResponse.data.value?.length) {
         const drive_ID = driveResponse.data.value[0].id;
 
+        const folder_ID_fun = await getOrCreateFolder(drive_ID, accessToken);
+
+        return { site_ID, drive_ID, folder_ID: folder_ID_fun };
+
         // Fetch Folder ID
         // const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
         // const folderResponse = await axios.get(folderUrl, {
@@ -125,6 +129,52 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
     return ""
   }
 };
+
+
+
+async function getOrCreateFolder(drive_ID, accessToken) {
+  const folderName = 'JobManagement';
+
+  // 1. Fetch list of children (folders/files) in root
+  const listUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
+
+  const listResponse = await axios.get(listUrl, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // 2. Try to find the folder
+  const existingFolder = listResponse.data.value.find(
+    (item) => item.name === folderName && item.folder
+  );
+
+  if (existingFolder) {
+    console.log('Folder already exists:', existingFolder.id);
+    return existingFolder.id;
+  }
+
+  // 3. If not found, create it
+  const createUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
+
+  const folderData = {
+    name: folderName,
+    folder: {},
+    "@microsoft.graph.conflictBehavior": "rename", // optional: "fail", "rename"
+  };
+
+  const createResponse = await axios.post(createUrl, folderData, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  console.log('Folder created:', createResponse.data.id);
+  return createResponse.data.id;
+}
+
 
 export const createFolderIfNotExists = async (site_ID, drive_ID, parentFolderId, folderName, accessToken) => {
   try {

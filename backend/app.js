@@ -2,6 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const cors = require('cors');
+const axios = require('axios');
+const fs = require('fs');
+const qs = require('qs');
+const FormData = require('form-data');
 // const authRoutes = require('./routes/authRoutes');
 // const userRoutes = require('./routes/userRoutes');
 
@@ -11,84 +15,62 @@ app.use(bodyParser.json());
 require("./app/routes")(app);
 
 
+// Get Token Process
+const client_id = "376ee1a2-3c24-48ac-b7cc-9a09f66b9e21";
+const tenant_id = "332dcd89-cd37-40a0-bba2-a2b91abd434a";
+const redirect_uri = encodeURIComponent("https://jobs.outbooks.com/backend/callback");
+const scope = encodeURIComponent("offline_access Sites.ReadWrite.All");
+app.get('/getToken', async (req, res) => {
+   const auth_url = `https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/authorize` +
+    `?client_id=${client_id}&response_type=code&redirect_uri=${redirect_uri}&scope=${scope}`;
+ return res.redirect(auth_url);
+
+});
 
 
+app.get('/callback', async (req, res) => {
+ const code = req.query.code;
+ const client_secret = "peL8Q~lVqVTHX6oWbrS.Hh-XPI9dcgXQV6PJTbWc";
+ const redirect_url = "https://jobs.outbooks.com/backend/callback";
+ const scope1 = "offline_access Sites.ReadWrite.All";
 
-
-
-
-
-
-/// DEMO CODE SHAREPOINT URL////////////
-
-const axios = require('axios');
-const fs = require('fs');
-const FormData = require('form-data');
-
-// Define your tenant and credentials
-const tenantId = '332dcd89-cd37-40a0-bba2-a2b91abd434a';
-const clientId = 'e397ff0d-76d1-4bbc-83cc-b5dfeaa069dd';
-const clientSecret = '2815faa3-e4b5-4e60-926f-bc2e6fac7cf8';
-const sharepointSiteUrl = 'https://outbooksglobal.sharepoint.com/sites/SharePointOnlineforJobManagement/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FSharePointOnlineforJobManagement%2FShared%20Documents%2FJobManagement&viewid=f4e4d0d1%2D1883%2D4180%2D9ea3%2D1daef2e797c1';
-const libraryName = 'JobManagement';
-
-// Step 1: Get the access token
-async function getAccessToken() {
-  const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
-
-  const data = new URLSearchParams();
-  data.append('grant_type', 'client_credentials');
-  data.append('client_id', clientId);
-  data.append('client_secret', clientSecret);
-  data.append('scope', 'https://graph.microsoft.com/.default');
-
-
-  try {
-    const response = await axios.post(tokenUrl, data);
-    return response.data.access_token;
-  } catch (error) {
-    return 
-    //throw error;
+  if (!code) {
+    return res.status(400).send("Authorization code not received.");
   }
-}
-
-
-// Step 2: Upload the image to SharePoint library
-async function uploadImage(imagePath) {
-
-    return;
-  const accessToken = await getAccessToken();
-  
-  // Read the image file
-  const fileStream = fs.createReadStream(imagePath);
-  
-  // Set up the form data
-  const form = new FormData();
-  form.append('file', fileStream);
-
-  // SharePoint API endpoint to upload a file
-  const uploadUrl = `${sharepointSiteUrl}/_api/web/GetFolderByServerRelativeUrl('/sites/SharePointOnlineforJobManagement/Shared Documents/${libraryName}')/Files/add(url='${imagePath.split('/').pop()}',overwrite=true)`;
 
   try {
-    const response = await axios.post(uploadUrl, form, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Accept': 'application/json',
-        ...form.getHeaders()
-      }
+    const tokenUrl = `https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/token`;
+
+    const body = qs.stringify({
+      grant_type: "authorization_code",
+      code: code,
+      client_id: client_id,
+      client_secret: client_secret,
+      redirect_uri: redirect_url,
+      scope: scope1,
     });
-    
-    console.log('File uploaded successfully', response.data);
-  } catch (error) {
-    console.error('Error uploading file:', error);
+
+    const response = await axios.post(tokenUrl, body, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    const tokenData = response.data;
+    console.log("✅ Token Data:", tokenData);
+
+    res.send(`
+      <h3>Access Token:</h3><pre>${tokenData.access_token}</pre>
+      <h3>Refresh Token:</h3><pre>${tokenData.refresh_token}</pre>
+    `);
+
+  } catch (err) {
+    console.error("❌ Token error:", err.response?.data || err.message);
+    res.status(500).send("Error getting access token.");
   }
-}
-
-// Usage example
-// uploadImage('./path/to/your/image.jpg');
+});
 
 
-/// ---- END DEMO CODE SHAREPOINT URL ---- ////////////
 
 
  const GetAccessTokenData = async() => {
@@ -123,8 +105,6 @@ axios.request(config)
  }
 
 app.get('/',async(req,res)=>{
-// const accessToken = await getAccessToken();
-// await GetAccessTokenData();
  res.send("Hello Out Book")
 });
 
