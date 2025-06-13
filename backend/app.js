@@ -14,8 +14,6 @@ app.use(cors());
 app.use(bodyParser.json());
 require("./app/routes")(app);
 
-
-
 // Get Token Process
 // const client_id = "376ee1a2-3c24-48ac-b7cc-9a09f66b9e21";
 // const tenant_id = "332dcd89-cd37-40a0-bba2-a2b91abd434a";
