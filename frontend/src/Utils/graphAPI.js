@@ -4,15 +4,6 @@ import { GetSharePointToken } from "../ReduxStore/Slice/Auth/authSlice";
 
 export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
   try {
-    // const response = await axios.get(siteUrl, {
-    //   headers: {
-    //     Authorization: `Bearer ${accessToken}`,
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-
-
-    siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com"
     const response = await axios.get(siteUrl, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -21,10 +12,7 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
     });
 
 
-    console.log("Site Response:", response.data);
-
-    
-
+  //  console.log("Site Response:", response.data);
 
     if (response.data.id) {
       const parts = response.data.id.split(",");
@@ -40,37 +28,16 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
         },
       });
 
-      console.log("Drive Response:", driveResponse.data);
+     // console.log("Drive Response:", driveResponse.data);
 
       if (driveResponse.data.value?.length) {
         const drive_ID = driveResponse.data.value[0].id;
 
-        const folder_ID_fun = await getOrCreateFolder(drive_ID, accessToken);
-
-        return { site_ID, drive_ID, folder_ID: folder_ID_fun };
+        // const folder_ID_fun = await getOrCreateFolder(drive_ID, accessToken);
+        // return { site_ID, drive_ID, folder_ID: folder_ID_fun };
 
         // Fetch Folder ID
-        // const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
-        // const folderResponse = await axios.get(folderUrl, {
-        //   headers: {
-        //     Authorization: `Bearer ${accessToken}`,
-        //     "Content-Type": "application/json",
-        //   },
-        // });
-
-        // console.log("Folder Response:", folderResponse.data);
-
-        // const folder_ID = folderResponse.data.value.find(
-        //   (item) => item.name === "JobManagement"
-        // )?.id;
-
-        // return { site_ID, drive_ID, folder_ID };
-
-         
-
-
-        const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/root/children`;
-       // const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
+        const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
         const folderResponse = await axios.get(folderUrl, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -80,48 +47,12 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
 
         console.log("Folder Response:", folderResponse.data);
 
-        // Check if folder exists
-        let folder = folderResponse?.data?.value?.find(
-          (item) => item?.name === "JobManagement" && item?.folder
-        );
-
-        console.log("Folder:", folder);
-
-        let folder_ID;
-
-        if (folder) {
-          // Folder exists
-          folder_ID = folder.id;
-        } else {
-          console.log("Folder else:");
-          // Folder doesn't exist, create it
-           const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/root/children`;
-
-          
-
-          const folderData = {
-            name: "jobManagement",
-            folder: {},
-            "@microsoft.graph.conflictBehavior": "rename", // or "fail" to block duplicates
-          };
-
-          const createResponse = await axios.post(createFolderUrl, folderData, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          });
-
-
-
-          console.log("Create Folder Response:", createResponse.data);
-          folder_ID = createResponse.data.id;
-          console.log("New folder created with ID:", folder_ID);
-        }
-
-         
+        const folder_ID = folderResponse.data.value.find(
+          (item) => item.name === "jobsdocument"
+        )?.id;
 
         return { site_ID, drive_ID, folder_ID };
+
       }
     }
   } catch (err) {
@@ -273,7 +204,9 @@ export const deleteFolderFromFolder = async (site_ID, drive_ID, folder_ID, acces
 
 
 export const SiteUrlFolderPath = async () => {
-  let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
+ // let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
+  let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/outbookjobonline";
+  
   let folderPath = "/OutBook"
   let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const TokenExpire = await SharePointTokenExpire(sharepoint_token);
