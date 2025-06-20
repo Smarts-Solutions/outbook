@@ -41,6 +41,9 @@ const ClientList = () => {
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
 
+
+  console.log("fileStateClient", fileStateClient);
+
   const fetchSiteDetails = async () => {
     const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
     setSiteUrl(siteUrl);
@@ -94,18 +97,20 @@ const ClientList = () => {
       .unwrap()
       .then((response) => {
         console.log("response-client ", response.data);
+        console.log("response-client ", response.status);
         if (response.status) {
+          console.log("response.data.client_documents 1", response.data.client_documents);
           setClientDetails({
             loading: false,
             data: response.data,
           });
-          informationSetData(response.data.client);
-          setClientInformationData(response.data.contact_details[0]);
-          setCompanyDetails(response.data.company_details);
-
           if (response.data.client_documents.length > 0) {
             setFileStateClient(response.data.client_documents)
           }
+          informationSetData(response?.data?.client);
+          setClientInformationData(response?.data?.contact_details[0]);
+          setCompanyDetails(response?.data?.company_details);
+          
         } else {
           setClientDetails({
             loading: false,

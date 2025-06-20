@@ -8,7 +8,7 @@ import sweatalert from "sweetalert2";
 import { ADD_PEPPER_WORKS, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
-import {allowedTypes } from "../../../../Utils/Comman_function";
+import { allowedTypes } from "../../../../Utils/Comman_function";
 
 const Paper = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -163,18 +163,18 @@ const Paper = () => {
         setIsLoading(true);
         const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
-         console.log("site_ID", site_ID);
-         console.log("drive_ID", drive_ID);
-         console.log("folder_ID", folder_ID);
+        console.log("site_ID", site_ID);
+        console.log("drive_ID", drive_ID);
+        console.log("folder_ID", folder_ID);
 
         const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
 
-         console.log("folderId", folderId);
+        console.log("folderId", folderId);
 
         for (const file of newFiles) {
           const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
 
-        // console.log("uploadDataUrl", uploadDataUrl);
+          // console.log("uploadDataUrl", uploadDataUrl);
 
           const uploadedFileInfo = {
             web_url: uploadDataUrl,
@@ -292,6 +292,43 @@ const Paper = () => {
         });
     } else {
       return;
+    }
+  };
+
+  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+    console.log("sharePointFileUrl", sharePointFileUrl);
+    console.log("accessToken", accessToken);
+    try {
+      // Make a GET request to SharePoint to get the file as a blob
+      const response = await fetch(sharePointFileUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      console.log("response", response);
+
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      // Convert the response to a Blob (binary data)
+      const fileBlob = await response.blob();
+
+      // Create a URL for the Blob
+      const fileURL = window.URL.createObjectURL(fileBlob);
+
+      // Create a temporary <a> element to trigger the download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName; // Provide a file name (optional)
+      downloadLink.click(); // Trigger the download
+      window.URL.revokeObjectURL(fileURL); // Clean up after the download
+    } catch (error) {
+      console.error('Error downloading the file:', error);
     }
   };
 
@@ -626,6 +663,13 @@ const Paper = () => {
                                                   >
                                                     <i className="ti-trash text-danger" />
                                                   </button>
+
+
+                                                  <button className="download-icon" onClick={() => downloadFileFromSharePoint(file.web_url, sharepoint_token, file.original_name)}>
+                                                    <i className="ti-download" />
+                                                  </button>
+
+
                                                 </div>
                                               </div>
                                             </td>
