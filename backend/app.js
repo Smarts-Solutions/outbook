@@ -19,6 +19,7 @@ require("./app/routes")(app);
 // const tenant_id = "332dcd89-cd37-40a0-bba2-a2b91abd434a";
 // const redirect_uri = encodeURIComponent("https://jobs.outbooks.com/backend/callback");
 // const scope = encodeURIComponent("offline_access Sites.ReadWrite.All");
+// const scope = encodeURIComponent("offline_access Files.ReadWrite.All Sites.ReadWrite.All");
 // app.get('/getToken', async (req, res) => {
 //    const auth_url = `https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/authorize` +
 //     `?client_id=${client_id}&response_type=code&redirect_uri=${redirect_uri}&scope=${scope}`;

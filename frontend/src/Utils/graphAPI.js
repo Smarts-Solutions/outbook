@@ -100,7 +100,7 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
 
     const itemId = response.data.id;
     const publicUrl = await generateShareableLink(drive_ID, itemId, accessToken);
-
+    console.log("File uploaded successfully publicUrl:", publicUrl);
     return { webUrl: response.data.webUrl, publicUrl };
   } catch (err) {
     console.log("Error uploading file:", err);
@@ -108,11 +108,36 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
   }
 };
 
+// export const generateShareableLink = async (driveId, itemId, accessToken) => {
+//   try {
+//     const linkType = {
+//       type: "view",
+//       scope: "anonymous",
+//     };
+
+//     const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/createLink`;
+
+//     const response = await axios.post(url, linkType, {
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
+
+//     console.log("Shareable link generated:", response.data);
+//     return response.data?.link?.webUrl;
+//   } catch (err) {
+//     console.error("Error generating shareable link:", err);
+//     return "";
+//   }
+// };
+
+
 export const generateShareableLink = async (driveId, itemId, accessToken) => {
   try {
     const linkType = {
       type: "view",
-      scope: "anonymous",
+      scope: "anonymous", // try anonymous first
     };
 
     const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/createLink`;
@@ -126,10 +151,32 @@ export const generateShareableLink = async (driveId, itemId, accessToken) => {
 
     return response.data?.link?.webUrl;
   } catch (err) {
-    console.error("Error generating shareable link:", err);
-    return "";
+    console.error("Anonymous link failed, retrying with organization...", err?.response?.data || err.message);
+
+    // Try with "organization" if anonymous fails
+    try {
+      const fallbackLinkType = {
+        type: "view",
+        scope: "organization",
+      };
+
+      const fallbackUrl = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/createLink`;
+
+      const fallbackResponse = await axios.post(fallbackUrl, fallbackLinkType, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      return fallbackResponse.data?.link?.webUrl;
+    } catch (finalErr) {
+      console.error("Both link generations failed:", finalErr?.response?.data || finalErr.message);
+      return "";
+    }
   }
 };
+
 
 export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, fileName, accessToken) => {
   try {
@@ -167,6 +214,7 @@ export const deleteFolderFromFolder = async (site_ID, drive_ID, folder_ID, acces
 };
 
 export const SiteUrlFolderPath = async () => {
+   // let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
   let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/outbookjobonline";
   let folderPath = "/OutBook";
   let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));

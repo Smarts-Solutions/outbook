@@ -174,7 +174,9 @@ const Paper = () => {
         for (const file of newFiles) {
           const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
 
-          // console.log("uploadDataUrl", uploadDataUrl);
+          console.log("uploadDataUrl", uploadDataUrl);
+
+          
 
           const uploadedFileInfo = {
             web_url: uploadDataUrl,
@@ -192,7 +194,10 @@ const Paper = () => {
     const data1 = {
       req: { fileData: newFiles, customer_id: address, authToken: token, uploadedFiles: uploadedFilesArray },
     };
-
+    
+    
+    setIsLoading(false);
+     return 
 
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()
