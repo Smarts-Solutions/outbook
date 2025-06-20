@@ -24,7 +24,6 @@ require("./app/routes")(app);
 //    const auth_url = `https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/authorize` +
 //     `?client_id=${client_id}&response_type=code&redirect_uri=${redirect_uri}&scope=${scope}`;
 //  return res.redirect(auth_url);
-
 // });
 
 
