@@ -33,8 +33,14 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
           },
         });
 
-        const folder_ID = folderResponse.data.value.find(
-          (item) => item.name === "jobsdocument"
+        console.log("Folder Response:", folderResponse.data);
+
+        // const folder_ID = folderResponse.data.value.find(
+        //   (item) => item.name === "jobsdocument"
+        // )?.id;
+
+         const folder_ID = folderResponse.data.value.find(
+          (item) => item.name === "JobManagement"
         )?.id;
 
         return { site_ID, drive_ID, folder_ID };
@@ -101,6 +107,8 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
     const itemId = response.data.id;
     const publicUrl = await generateShareableLink(drive_ID, itemId, accessToken);
     console.log("File uploaded successfully publicUrl:", publicUrl);
+
+    return publicUrl
     return { webUrl: response.data.webUrl, publicUrl };
   } catch (err) {
     console.log("Error uploading file:", err);
@@ -215,7 +223,9 @@ export const deleteFolderFromFolder = async (site_ID, drive_ID, folder_ID, acces
 
 export const SiteUrlFolderPath = async () => {
    // let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
-  let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/outbookjobonline";
+   
+  let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
+ // let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/outbookjobonline";
   let folderPath = "/OutBook";
   let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const TokenExpire = await SharePointTokenExpire(sharepoint_token);

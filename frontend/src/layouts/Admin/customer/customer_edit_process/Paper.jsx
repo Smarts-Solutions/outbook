@@ -196,8 +196,7 @@ const Paper = () => {
     };
     
     
-    setIsLoading(false);
-     return 
+    
 
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()
