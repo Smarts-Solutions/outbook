@@ -234,6 +234,9 @@ const Timesheet = () => {
   const [selectedTab, setSelectedTab] = useState("this-week");
 
 
+  console.log(`timeSheetRows`, timeSheetRows);
+
+
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
@@ -651,6 +654,7 @@ const Timesheet = () => {
         job_id: e.target.value,
       };
     }
+    updatedRows[index].job_id = e.target.value;
     if (req.staff_id != undefined) {
       const res = await dispatch(
         getTimesheetTaskTypedData({ req, authToken: token })
@@ -1387,6 +1391,13 @@ const Timesheet = () => {
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
+                              style={{ width: "10%" }}
+                            >
+                              Job Type
+                            </th>
+                            <th
+                              className="dropdwnCol5"
+                              data-field="phone"
                               style={{ width: "8%" }}
                             >
                               Task
@@ -1616,6 +1627,21 @@ const Timesheet = () => {
                                     />
                                   )}
                                 </td>
+
+
+                                {/* Job Type Section */}
+                                <td>
+                                  {console.log("item.item", item)}
+                                  {item.newRow === 1 ? (
+                                    (() => {
+                                      const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
+                                      return matchedJob ? <span>{matchedJob.job_type_name}</span> : "";
+                                    })()
+                                  ) : (
+                                    ""
+                                  )}
+                                </td>
+
 
                                 {/* Task Selection */}
                                 <td>

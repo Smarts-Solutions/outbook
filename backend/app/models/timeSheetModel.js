@@ -889,6 +889,9 @@ const getTimesheetTaskType = async (Timesheet) => {
 
             const query = `
          SELECT 
+         job_types.id AS job_type_id,
+         job_types.type AS job_type_name,
+         jobs.id AS id,
          jobs.id AS id,
          jobs.total_time AS job_total_time,
          CONCAT(
@@ -934,6 +937,8 @@ const getTimesheetTaskType = async (Timesheet) => {
 
             const query = `
        SELECT 
+       job_types.id AS job_type_id,
+       job_types.type AS job_type_name,
        jobs.id AS id,
        jobs.total_time AS job_total_time,
        CONCAT(
@@ -1025,7 +1030,9 @@ const getTimesheetTaskType = async (Timesheet) => {
           // Reviewer
           else if (ExistStaff[0].role_id == 6) {
             const query = `
-         SELECT 
+         SELECT
+         job_types.id AS job_type_id,
+         job_types.type AS job_type_name, 
          jobs.id AS id,
          jobs.total_time AS job_total_time,
          CONCAT(
@@ -1075,7 +1082,9 @@ const getTimesheetTaskType = async (Timesheet) => {
           }
           else {
             const query = `
-         SELECT 
+         SELECT
+         job_types.id AS job_type_id,
+         job_types.type AS job_type_name,
          jobs.id AS id,
          jobs.total_time AS job_total_time,
          CONCAT(
@@ -1184,7 +1193,7 @@ const saveTimesheet = async (Timesheet) => {
           return null;
         }
         const [hours, minutes = '0'] = input.toString().split('.');
-        const formattedMinutes = minutes.length === 1 ? `${minutes}0`: minutes == ""? `00`: minutes;
+        const formattedMinutes = minutes.length === 1 ? `${minutes}0` : minutes == "" ? `00` : minutes;
 
         return `${hours}:${formattedMinutes}`;
       };
