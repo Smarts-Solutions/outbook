@@ -1322,7 +1322,21 @@ const Timesheet = () => {
                 ""
               )}
 
-              {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
+              {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
+                timeSheetRows.length > 0 ? (
+                <div className="form-group col-md-6">
+                  <button
+                    className=" btn btn-info float-md-end mt-lg-2"
+                    onClick={() => exportToCSV(timeSheetRows)}
+                  >
+                    Export Timesheet Data
+                    <i className="fa fa-download ms-2" />
+                  </button>
+                </div>
+              ) : (
+                ""
+              )} */}
+              {
                 timeSheetRows.length > 0 ? (
                 <div className="form-group col-md-6">
                   <button
