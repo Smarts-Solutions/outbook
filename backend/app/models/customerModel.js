@@ -461,7 +461,11 @@ const getCustomer = async (customer) => {
     'cust_', 
     SUBSTRING(customers.trading_name, 1, 3), '_',
     SUBSTRING(customers.customer_code, 1, 15)
-    ) AS customer_code
+    ) AS customer_code,
+    case
+       when clients.id is not null then 1
+         else 0
+    end as is_client
 FROM 
     customers
 JOIN 
@@ -470,6 +474,7 @@ JOIN
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id
+LEFT JOIN clients ON clients.customer_id = customers.id    
  WHERE 
     customers.trading_name LIKE ?
 ORDER BY 
@@ -570,7 +575,11 @@ LIMIT ? OFFSET ?`;
                     'cust_', 
                     SUBSTRING(customers.trading_name, 1, 3), '_',
                     SUBSTRING(customers.customer_code, 1, 15)
-                ) AS customer_code
+                ) AS customer_code,
+                case
+                    when clients.id is not null then 1
+                    else 0
+                end as is_client
             FROM 
                 customers
             LEFT JOIN
@@ -583,9 +592,10 @@ LIMIT ? OFFSET ?`;
                 customer_company_information ON customers.id = customer_company_information.customer_id
             LEFT JOIN 
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
-                LEFT JOIN 
+            LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  AND sp_customers.staff_id = staff_portfolio.staff_id    
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
+            LEFT JOIN clients ON clients.customer_id = customers.id
             WHERE 
                 ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
             GROUP BY 
@@ -675,7 +685,11 @@ LIMIT ? OFFSET ?`;
             'cust_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
+            ) AS customer_code,
+            case
+                when clients.id is not null then 1
+                else 0
+            end as is_client
         FROM 
             customers
         LEFT JOIN 
@@ -692,7 +706,8 @@ LIMIT ? OFFSET ?`;
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            AND sp_customers.staff_id = staff_portfolio.staff_id  
+            AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id      
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
@@ -740,6 +755,7 @@ LIMIT ? OFFSET ?`;
                 LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
                   AND sp_customers.staff_id = staff_portfolio.staff_id
+                  
                 WHERE 
                     ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
                 GROUP BY 
@@ -781,7 +797,11 @@ LIMIT ? OFFSET ?`;
             'cust_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
+            ) AS customer_code,
+            case
+                when clients.id is not null then 1
+                else 0
+            end as is_client
         FROM 
             customers
         LEFT JOIN 
@@ -796,7 +816,8 @@ LIMIT ? OFFSET ?`;
            staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-           AND sp_customers.staff_id = staff_portfolio.staff_id      
+           AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id         
         WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`
                     : 'jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'
                 } 
@@ -880,7 +901,11 @@ LIMIT ? OFFSET ?`;
             'cust_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
+            ) AS customer_code,
+            case
+                when clients.id is not null then 1
+                else 0
+            end as is_client
         FROM 
             customers
         JOIN 
@@ -893,7 +918,8 @@ LIMIT ? OFFSET ?`;
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            AND sp_customers.staff_id = staff_portfolio.staff_id    
+            AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id        
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}    
         ORDER BY 
