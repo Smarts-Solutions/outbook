@@ -142,6 +142,9 @@ const Timesheet = () => {
 
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
+    console.log(`name`, name);
+    console.log(`value`, value);
+
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -221,9 +224,9 @@ const Timesheet = () => {
 
   // Function to handle week change
   const changeWeek = (offset) => {
-    setWeekOffset(weekOffset + offset);
-    GetTimeSheet(weekOffset + offset);
+    setWeekOffset(parseInt(weekOffset) + offset);
     weekOffSetValue.current = parseInt(weekOffset) + offset;
+    GetTimeSheet(parseInt(weekOffset) + offset);
   };
 
   const [submitStatus, setSubmitStatus] = useState(0);
@@ -232,10 +235,6 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
-
-
-  console.log(`timeSheetRows`, timeSheetRows);
-
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -1168,7 +1167,10 @@ const Timesheet = () => {
     }
   };
 
+
+
   const dayMonthFormatDate = (dateString) => {
+   
     const parts = dateString.split(", ");
     const dayOfWeek = parts[0];
     const dateParts = parts[1].split("/");
