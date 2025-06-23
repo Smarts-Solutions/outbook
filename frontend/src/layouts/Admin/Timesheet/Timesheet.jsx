@@ -1652,7 +1652,12 @@ const Timesheet = () => {
                                       return matchedJob ? <span>{matchedJob.job_type_name}</span> : "";
                                     })()
                                   ) : (
-                                    ""
+                                    item.task_type === "1" ? (
+                                      ""
+                                    ) : (
+                                      <span>{item.job_type_name}</span>
+                                    )
+                                    
                                   )}
                                 </td>
 

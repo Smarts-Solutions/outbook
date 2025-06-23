@@ -50,6 +50,8 @@ const getTimesheet = async (Timesheet) => {
       customers.id AS customer_id,
       clients.trading_name AS client_name,
       clients.id AS client_id,
+      job_types.type AS job_type_name,
+      job_types.id AS job_type_id,
       CONCAT(
         SUBSTRING(customers.trading_name, 1, 3), '_',
         SUBSTRING(clients.trading_name, 1, 3), '_',
