@@ -798,6 +798,10 @@ const Timesheet = () => {
 
   // update record only Function
   function updateRecordSheet(rowId, name, value) {
+
+    console.log(`rowId`, rowId);
+
+
     // update record only
     const updatedRows_update = [...updateTimeSheetRows];
     const existingUpdateIndex = updatedRows_update.findIndex(
@@ -896,7 +900,8 @@ const Timesheet = () => {
   }
 
   const saveData = async (e) => {
-
+  
+    console.log(`1`);
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -904,9 +909,12 @@ const Timesheet = () => {
         return;
       }
     }
+  
+    console.log(`2`);
 
 
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
+      console.log(`3`);
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -964,6 +972,23 @@ const Timesheet = () => {
 
       }
 
+    
+     
+     let isvalid = await validateDateFields(req.data);
+     if( !isvalid) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Please fill at least one date field for each row.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
+        });
+        return;
+      } 
+    
+   
+
+
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
@@ -982,6 +1007,29 @@ const Timesheet = () => {
       }
     }
   };
+
+const validateDateFields = (data) => {
+  const isInvalid = data.some((row) => {
+    const allDatesEmpty =
+      !row.monday_date &&
+      !row.tuesday_date &&
+      !row.wednesday_date &&
+      !row.thursday_date &&
+      !row.friday_date &&
+      !row.saturday_date &&
+      !row.sunday_date;
+
+    return row.id === null && allDatesEmpty;
+  });
+
+  if (isInvalid) {
+    return false;
+  }
+  return true;
+};
+
+
+
 
   const submitData = async (e) => {
 
@@ -1245,27 +1293,12 @@ const Timesheet = () => {
     updatedRows[index].remark = e.target.value;
     setTimeSheetRows(updatedRows);
     const rowId = updatedRows[index].id;
-   // updateRecordSheet(rowId, "remark", e.target.value);
+   updateRecordSheet(rowId, "remark", e.target.value);
   };
   
 const singleRemarkModalDone = async () => {
   setRemarkSingleModel(false);
 }
-
-
- 
-
-  timeSheetRows.forEach((item, index) => {
-     console.log(`item.remark`, item.remark , `index`, index);
-     
-     console.log(`remarkSingleIndex`, remarkSingleIndex );
-     console.log(`timeSheetRows[0].remark`, timeSheetRows[0].remark);
-   }
-  );
-
-  
-
-
 
 
   // Example usage
@@ -1532,6 +1565,7 @@ const singleRemarkModalDone = async () => {
                             </th> */}
 
                             {submitStatusAllKey === 0 ? (
+                              <>
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
@@ -1539,6 +1573,17 @@ const singleRemarkModalDone = async () => {
                               >
                                 Action
                               </th>
+                               
+                               <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                                style={{ width: "5%" }}
+                              >
+                                Remark
+                              </th>
+
+                              </>
+
                             ) : (
                               ""
                             )}
@@ -2022,6 +2067,11 @@ const singleRemarkModalDone = async () => {
                                     )}
                                     {/* <Trash2 className="delete-icon" /> */}
                                   </td>
+
+                                   
+                                   
+                                     
+
                                 ) : (
                                   ""
                                 )}
@@ -2309,7 +2359,7 @@ const singleRemarkModalDone = async () => {
             </div>
           </CommonModal>
 
-          
+
 
            <CommonModal
             isOpen={remarkSingleModel}
@@ -2339,7 +2389,7 @@ const singleRemarkModalDone = async () => {
                     onChange={(e) => handleRemarkSingleText(e , remarkSingleIndex)}
                     value={
                       remarkSingleIndex != null && timeSheetRows.length > 0 ?
-                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex].remark)?"":timeSheetRows[remarkSingleIndex].remark :""
+                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?"":timeSheetRows[remarkSingleIndex].remark :""
                     
                     } 
                   />
