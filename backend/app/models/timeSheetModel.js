@@ -1185,10 +1185,15 @@ const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows } = Timesheet;
 
+  //  for (let index = 0; index < data.length; index++) {
+  //   const element = data[index];
+  //   console.log("element", element)
+  //  }
+  //   return
+
     const timesheet_log_msg = [];
-
     let checkStringEvent = [];
-
+  
     if (data.length > 0) {
       const formatTime = input => {
         if (input == null) {
@@ -1207,7 +1212,8 @@ const saveTimesheet = async (Timesheet) => {
         }
         const customer_id = row.customer_id == null ? 0 : row.customer_id;
         const client_id = row.client_id == null ? 0 : row.client_id;
-        const remark = row.remark == "" ? null : row.remark;
+        const remark =  ['',null,undefined].includes(row.remark) ? null : row.remark;
+        const final_remark =  ['',null,undefined].includes(row.final_remark) ? null : row.final_remark;
 
         const monday_hours = formatTime(row.monday_hours);
         const tuesday_hours = formatTime(row.tuesday_hours);
@@ -1238,14 +1244,14 @@ const saveTimesheet = async (Timesheet) => {
           INSERT INTO timesheet (
             staff_id, task_type, customer_id, client_id, job_id, task_id, monday_date, monday_hours,
             tuesday_date, tuesday_hours, wednesday_date, wednesday_hours, thursday_date, thursday_hours,
-            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours,remark ,submit_status
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ? , ?)`;
+            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours,remark,final_remark,submit_status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ? , ?, ?)`;
 
           const insertValues = [
             staff_id, row.task_type, customer_id, client_id, row.job_id, row.task_id,
             row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
             wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, row.submit_status
+            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, final_remark, row.submit_status
           ];
           await pool.query(insertQuery, insertValues);
 
@@ -1316,14 +1322,14 @@ const saveTimesheet = async (Timesheet) => {
             task_type = ?, customer_id = ?, client_id = ?, job_id = ?, task_id = ?,
             monday_date = ?, monday_hours = ?, tuesday_date = ?, tuesday_hours = ?, wednesday_date = ?,
             wednesday_hours = ?, thursday_date = ?, thursday_hours = ?, friday_date = ?, friday_hours = ?,
-            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ? ,submit_status = ?
+            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ? , final_remark = ? ,submit_status = ?
           WHERE id = ?`;
 
           const updateValues = [
             row.task_type, customer_id, client_id, row.job_id, row.task_id,
             row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
             wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, row.submit_status, row.id
+            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, final_remark ,row.submit_status, row.id
           ];
 
 

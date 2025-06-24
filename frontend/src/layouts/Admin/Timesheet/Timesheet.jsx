@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download , FileAxis3d } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -232,6 +232,9 @@ const Timesheet = () => {
   const [submitStatus, setSubmitStatus] = useState(0);
   const [remarkText, setRemarkText] = useState(null);
   const [remarkModel, setRemarkModel] = useState(false);
+  const [remarkSingleModel, setRemarkSingleModel] = useState(false);
+  const [remarkSingleIndex, setRemarkSingleIndex] = useState(null);
+  
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
@@ -695,13 +698,6 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
-
-    console.log(`name`, name);
-    console.log(`value`, value);
-
-
-
-
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -900,6 +896,7 @@ const Timesheet = () => {
   }
 
   const saveData = async (e) => {
+
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -930,8 +927,8 @@ const Timesheet = () => {
 
 
       let staff_hourminute = (parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5) || null;
-      console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
-      console.log(`staff_hourminute`, staff_hourminute);
+      //console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
+      //console.log(`staff_hourminute`, staff_hourminute);
       if (staff_hourminute != null) {
 
         const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
@@ -953,7 +950,7 @@ const Timesheet = () => {
         const totalHours = Math.floor(total.totalMinutes / 60);
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-        console.log(`finalTotalHours`, finalTotalHours);
+       // console.log(`finalTotalHours`, finalTotalHours);
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
@@ -966,8 +963,6 @@ const Timesheet = () => {
         }
 
       }
-
-
 
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
@@ -989,6 +984,7 @@ const Timesheet = () => {
   };
 
   const submitData = async (e) => {
+
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -1002,13 +998,14 @@ const Timesheet = () => {
   };
 
   const saveTimeSheetRemark = async (e) => {
-    if (submitStatus == 1) {
 
+    if (submitStatus == 1) {
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
           ...item,
           submit_status: "1",
           remark: item.editRow === 1 ? remarkText : null,
+          final_remark: remarkText,
         };
       });
 
@@ -1064,8 +1061,10 @@ const Timesheet = () => {
 
       }
 
-      //console.log(`req`, req);
+      console.log(`req`, req);
       console.log(`remarkText`, remarkText);
+
+
 
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
@@ -1170,8 +1169,6 @@ const Timesheet = () => {
     }
   };
 
-
-
   const dayMonthFormatDate = (dateString) => {
    
     const parts = dateString.split(", ");
@@ -1236,6 +1233,37 @@ const Timesheet = () => {
     link.download = "TimeSheetData.csv";
     link.click();
   };
+
+
+  const handleSingleRemark = (e,item,index) => {
+       setRemarkSingleModel(true);
+       setRemarkSingleIndex(index);
+  };
+
+  const handleRemarkSingleText = (e, index) => {
+    const updatedRows = [...timeSheetRows];
+    updatedRows[index].remark = e.target.value;
+    setTimeSheetRows(updatedRows);
+    const rowId = updatedRows[index].id;
+   // updateRecordSheet(rowId, "remark", e.target.value);
+  };
+  
+const singleRemarkModalDone = async () => {
+  setRemarkSingleModel(false);
+}
+
+
+ 
+
+  timeSheetRows.forEach((item, index) => {
+     console.log(`item.remark`, item.remark , `index`, index);
+     
+     console.log(`remarkSingleIndex`, remarkSingleIndex );
+     console.log(`timeSheetRows[0].remark`, timeSheetRows[0].remark);
+   }
+  );
+
+  
 
 
 
@@ -1650,7 +1678,7 @@ const Timesheet = () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                  {console.log("item.item", item)}
+                                 
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
@@ -1970,12 +1998,25 @@ const Timesheet = () => {
                                     : ""
                                 } */}
                                     {submitStatusAllKey === 0 ? (
+                                      <>
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
                                       >
-                                        <i className="ti-trash text-danger  "></i>
+                                        <i className="ti-trash text-danger"></i>
                                       </button>
+
+                                      
+                                       <FileAxis3d 
+                                        className="edit-icon"
+                                        onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                       />
+                                    
+
+                                      </>
+
                                     ) : (
                                       ""
                                     )}
@@ -2233,7 +2274,7 @@ const Timesheet = () => {
             )}
           </div>
 
-          <CommonModal
+           <CommonModal
             isOpen={remarkModel}
             backdrop="static"
             size="lg"
@@ -2245,8 +2286,44 @@ const Timesheet = () => {
             handleClose={() => {
               setRemarkModel(false);
               setSubmitStatus(0);
+              setRemarkText("");
             }}
             Submit_Function={(e) => saveTimeSheetRemark(e)}
+          >
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label htmlFor="customername-field" className="form-label">
+                   Final Remark
+                  </label>
+                  <textarea
+                    type="text"
+                    className="form-control cursor-pointer"
+                    placeholder="Enter Remark"
+                    defaultValue=""
+                    onChange={(e) => setRemarkText(e.target.value)}
+                    value={remarkText}
+                  />
+                </div>
+              </div>
+            </div>
+          </CommonModal>
+
+          
+
+           <CommonModal
+            isOpen={remarkSingleModel}
+            backdrop="static"
+            size="lg"
+            cancel_btn={false}
+            btn_2="true"
+            btn_name={"Done"}
+            title="Remark"
+            hideBtn={false}
+            handleClose={() => {
+              setRemarkSingleModel(false);
+            }}
+            Submit_Function={(e) => singleRemarkModalDone(e)}
           >
             <div className="modal-body">
               <div className="row">
@@ -2259,8 +2336,12 @@ const Timesheet = () => {
                     className="form-control cursor-pointer"
                     placeholder="Enter Remark"
                     defaultValue=""
-                    onChange={(e) => setRemarkText(e.target.value)}
-                    value={remarkText}
+                    onChange={(e) => handleRemarkSingleText(e , remarkSingleIndex)}
+                    value={
+                      remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex].remark)?"":timeSheetRows[remarkSingleIndex].remark :""
+                    
+                    } 
                   />
                 </div>
               </div>
