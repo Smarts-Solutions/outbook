@@ -1574,13 +1574,7 @@ const singleRemarkModalDone = async () => {
                                 Action
                               </th>
                                
-                               <th
-                                className="dropdwnCol5"
-                                data-field="phone"
-                                style={{ width: "5%" }}
-                              >
-                                Remark
-                              </th>
+                              
 
                               </>
 
@@ -2043,7 +2037,7 @@ const singleRemarkModalDone = async () => {
                                     : ""
                                 } */}
                                     {submitStatusAllKey === 0 ? (
-                                      <>
+                                      <div className="d-flex align-items-center">
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2060,7 +2054,7 @@ const singleRemarkModalDone = async () => {
                                        />
                                     
 
-                                      </>
+                                      </div>
 
                                     ) : (
                                       ""
@@ -2101,6 +2095,13 @@ const singleRemarkModalDone = async () => {
                                 <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
                                 <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
                                 <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
+                                 <th
+                              className="dropdwnCol5"
+                              data-field="phone"
+                              style={{ width: "10%" }}
+                            >
+                            
+                            </th>
                                 <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
                                 <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
                                   <div className="d-flex  ms-3" style={{ width: "88%" }}>
