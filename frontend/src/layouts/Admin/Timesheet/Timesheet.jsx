@@ -901,7 +901,7 @@ const Timesheet = () => {
 
   const saveData = async (e) => {
   
-    console.log(`1`);
+   
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -910,11 +910,9 @@ const Timesheet = () => {
       }
     }
   
-    console.log(`2`);
-
-
+    
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
-      console.log(`3`);
+     
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -1028,9 +1026,6 @@ const validateDateFields = (data) => {
   return true;
 };
 
-
-
-
   const submitData = async (e) => {
 
     if (timeSheetRows.length > 0) {
@@ -1108,10 +1103,6 @@ const validateDateFields = (data) => {
         }
 
       }
-
-      console.log(`req`, req);
-      console.log(`remarkText`, remarkText);
-
 
 
       const res = await dispatch(

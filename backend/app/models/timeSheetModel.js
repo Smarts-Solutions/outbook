@@ -873,6 +873,12 @@ const getTimesheetTaskType = async (Timesheet) => {
     // get job by Client
     else if (task_type === "4") {
       const client_id = Timesheet.client_id
+
+    
+      console .log("Timesheet client  ", Timesheet)
+
+
+
       try {
         const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
@@ -884,6 +890,9 @@ const getTimesheetTaskType = async (Timesheet) => {
           LineManageStaffId.push(staff_id);
         }
 
+        console.log("ExistStaff[0].role_id ", ExistStaff[0].role_id)
+        console.log("LineManageStaffId ", LineManageStaffId)
+
         let result = []
         if (ExistStaff.length > 0) {
           // Allocated to
@@ -893,7 +902,6 @@ const getTimesheetTaskType = async (Timesheet) => {
          SELECT 
          job_types.id AS job_type_id,
          job_types.type AS job_type_name,
-         jobs.id AS id,
          jobs.id AS id,
          jobs.total_time AS job_total_time,
          CONCAT(
@@ -922,11 +930,11 @@ const getTimesheetTaskType = async (Timesheet) => {
          LEFT JOIN 
          staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
          LEFT JOIN 
-         master_status ON master_status.id = jobs.status_type   
+         master_status ON master_status.id = jobs.status_type
          WHERE 
          jobs.client_id = clients.id 
          AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-         AND jobs.client_id = ?  OR (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
+         AND jobs.client_id = ?  AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
           ORDER BY
           jobs.id DESC;
          `;
@@ -973,7 +981,7 @@ const getTimesheetTaskType = async (Timesheet) => {
        WHERE 
        jobs.client_id = clients.id 
        AND (jobs.account_manager_id = ? OR jobs.staff_created_id = ?)
-       AND jobs.client_id = ? OR (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
+       AND jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
         ORDER BY
        jobs.id DESC;
        `;
@@ -1068,7 +1076,7 @@ const getTimesheetTaskType = async (Timesheet) => {
          jobs.client_id = clients.id 
          AND
          (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
-         AND jobs.client_id = ? OR (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
+         AND jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
           ORDER BY
           jobs.id DESC;
          `;
@@ -1118,7 +1126,7 @@ const getTimesheetTaskType = async (Timesheet) => {
          master_status ON master_status.id = jobs.status_type   
          WHERE 
          jobs.client_id = clients.id AND
-         jobs.client_id = ? OR (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
+         jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
           ORDER BY
           jobs.id DESC;
             `;
