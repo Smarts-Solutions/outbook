@@ -1,6 +1,5 @@
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { SignIn,GetSharePointToken } from  "../ReduxStore/Slice/Auth/authSlice";
+import { GetSharePointToken } from "../ReduxStore/Slice/Auth/authSlice";
 
 
 export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
@@ -12,9 +11,13 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
       },
     });
 
+
+  //  console.log("Site Response:", response.data);
+
     if (response.data.id) {
       const parts = response.data.id.split(",");
       const site_ID = parts[1];
+      console.log("Site ID:", site_ID);
 
       // Fetch Drive ID
       const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives`;
@@ -25,8 +28,13 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
         },
       });
 
+     // console.log("Drive Response:", driveResponse.data);
+
       if (driveResponse.data.value?.length) {
         const drive_ID = driveResponse.data.value[0].id;
+
+        // const folder_ID_fun = await getOrCreateFolder(drive_ID, accessToken);
+        // return { site_ID, drive_ID, folder_ID: folder_ID_fun };
 
         // Fetch Folder ID
         const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
@@ -37,18 +45,67 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
           },
         });
 
+        console.log("Folder Response:", folderResponse.data);
+
         const folder_ID = folderResponse.data.value.find(
-          (item) => item.name === "JobManagement"
+          (item) => item.name === "jobsdocument"
         )?.id;
 
         return { site_ID, drive_ID, folder_ID };
+
       }
     }
   } catch (err) {
-    console.error("Error fetching site and drive info:", err);
-    throw err;
+    console.log("Error fetching site and drive info:", err);
+    return ""
   }
 };
+
+
+
+async function getOrCreateFolder(drive_ID, accessToken) {
+  const folderName = 'JobManagement';
+
+  // 1. Fetch list of children (folders/files) in root
+  const listUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
+
+  const listResponse = await axios.get(listUrl, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // 2. Try to find the folder
+  const existingFolder = listResponse.data.value.find(
+    (item) => item.name === folderName && item.folder
+  );
+
+  if (existingFolder) {
+    console.log('Folder already exists:', existingFolder.id);
+    return existingFolder.id;
+  }
+
+  // 3. If not found, create it
+  const createUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
+
+  const folderData = {
+    name: folderName,
+    folder: {},
+    "@microsoft.graph.conflictBehavior": "rename", // optional: "fail", "rename"
+  };
+
+  const createResponse = await axios.post(createUrl, folderData, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  console.log('Folder created:', createResponse.data.id);
+  return createResponse.data.id;
+}
+
 
 export const createFolderIfNotExists = async (site_ID, drive_ID, parentFolderId, folderName, accessToken) => {
   try {
@@ -78,7 +135,7 @@ export const createFolderIfNotExists = async (site_ID, drive_ID, parentFolderId,
         },
       });
 
-      return createResponse.data.id; // Return new folder ID
+      return createResponse.data.id; 
     }
 
     const existingFolder = response.data.value.find(
@@ -86,16 +143,14 @@ export const createFolderIfNotExists = async (site_ID, drive_ID, parentFolderId,
     );
     return existingFolder.id;
   } catch (err) {
-    console.error("Error creating folder:", err);
-    throw err;
+    console.log("Error creating folder:", err);
+    return ""
   }
 };
 
-export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,folder_path , file, accessToken) => {
+export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, accessToken) => {
   try {
     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${file.name}:/content`;
-
-    // const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
 
     const response = await axios.put(uploadUrl, file, {
       headers: {
@@ -103,24 +158,18 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,folder_pat
         "Content-Type": "application/json",
       },
     });
-    //  console.log("response",response);
     return response.data.webUrl;
   } catch (err) {
-    console.error("Error uploading file:", err);
-    throw err;
+    console.log("Error uploading file:", err);
+    return ""
   }
 };
 
-export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, folder_path, fileName, accessToken) => {
+export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, fileName, accessToken) => {
   try {
 
-   
-    // const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${fileName}`;
-    // Construct the file path
-  //  const filePath = `${folder_path}/${fileName}`; 
-    const filePath = `${fileName}`; 
-
-  const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
+    const filePath = `${fileName}`;
+    const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
 
     // Make the DELETE request
     const response = await axios.delete(deleteUrl, {
@@ -131,62 +180,82 @@ export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, folder_
 
     return response.data;
   } catch (err) {
-    console.error("Error deleting file:", err);
-    throw err;
+    console.log("Error deleting file:", err);
+    return ""
+  }
+};
+
+export const deleteFolderFromFolder = async (site_ID, drive_ID, folder_ID, accessToken) => {
+  try {
+    const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}`;
+
+    const response = await axios.delete(deleteUrl, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (err) {
+    console.error("Error deleting folder:", err.response ? err.response.data : err.message);
+    return "";
   }
 };
 
 
 export const SiteUrlFolderPath = async () => {
-    let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
-    let folderPath = "/OutBook"
-    let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
-    const TokenExpire =  await SharePointTokenExpire(sharepoint_token);
+ // let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
+  let siteUrl = "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/outbookjobonline";
   
-    if (TokenExpire) { 
-     const newSharePointToken = await ActivityLogData();
-     if(newSharePointToken == "error"){
-        localStorage.setItem("sharepoint_token", JSON.stringify('sharepoint_token_not_found'));
-      }else{
-        localStorage.setItem("sharepoint_token", JSON.stringify(newSharePointToken));
-      }
+  let folderPath = "/OutBook"
+  let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
+  const TokenExpire = await SharePointTokenExpire(sharepoint_token);
+  // console.log("TokenExpire",TokenExpire);
+  if (TokenExpire) {
+    const newSharePointToken = await ActivityLogData();
+    if (newSharePointToken == "error") {
+      localStorage.setItem("sharepoint_token", JSON.stringify('sharepoint_token_not_found'));
+    } else {
+      localStorage.setItem("sharepoint_token", JSON.stringify(newSharePointToken));
     }
-    return { siteUrl,folderPath,sharepoint_token};
+  }
+  return { siteUrl, folderPath, sharepoint_token };
 }
 
 
 const ActivityLogData = async () => {
-    let Token
-    const token = JSON.parse(localStorage.getItem("token"));
-    const req = { };
-    const data = { req : req ,authToken: token };
-    await GetSharePointToken(data)
-      .then((res) => {
-        if (res.status) {
-            Token = res.data
-        } else {
-            Token = "error";
-        }
-      })
-      .catch((error) => {
+  let Token
+  const token = JSON.parse(localStorage.getItem("token"));
+  const req = {};
+  const data = { req: req, authToken: token };
+  await GetSharePointToken(data)
+    .then((res) => {
+      if (res.status) {
+        Token = res.data
+      } else {
         Token = "error";
-      });
+      }
+    })
+    .catch((error) => {
+      Token = "error";
+      // console.log(error);
+    });
 
-      return Token;
+  return Token;
 };
 
 const SharePointTokenExpire = async (token) => {
-    if(token != null && token != undefined && token != "" && token != "sharepoint_token_not_found" && token != "error"){
+  if (token != null && token != undefined && token != "" && token != "sharepoint_token_not_found" && token != "error") {
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Math.floor(Date.now() / 1000);
     if (decodedToken.exp && decodedToken.exp < currentTime) {
-    
-     return true;
-    }else{
-    
-     return false;
+      //console.log("Token Expired");
+      return true;
+    } else {
+      //console.log("Token Not Expired");
+      return false;
     }
-  }else{
+  } else {
     return true;
   }
 

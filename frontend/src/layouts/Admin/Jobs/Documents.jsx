@@ -7,7 +7,7 @@ import { JobDocumentAction } from "../../../ReduxStore/Slice/Customer/CustomerSl
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
-import {allowedTypes } from "../../../Utils/Comman_function";
+import { allowedTypes } from "../../../Utils/Comman_function";
 
 
 const Documents = ({ getAccessDataJob }) => {
@@ -119,12 +119,24 @@ const Documents = ({ getAccessDataJob }) => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex justify-content-end gap-2">
           {
-            (getAccessDataJob.delete === 1 ||  role === "SUPERADMIN") && (
-              <button className="delete-icon" onClick={() => removeItem(row, 2)}>
-                <i className="ti-trash fs-5 text-danger" />
-              </button>
+            (getAccessDataJob.delete === 1 || role === "SUPERADMIN") && (
+              <>
+
+                
+                <button className="delete-icon" onClick={() => removeItem(row, 2)}>
+                  <i className="ti-trash fs-5 text-danger" />
+                </button>
+                
+
+                <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
+                  <i className="ti-download" />
+                </button>
+
+
+              </>
+
             )
           }
 
@@ -353,6 +365,43 @@ const Documents = ({ getAccessDataJob }) => {
     }
   };
 
+   const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+    console.log("sharePointFileUrl", sharePointFileUrl);
+    console.log("accessToken", accessToken);
+    try {
+      // Make a GET request to SharePoint to get the file as a blob
+      const response = await fetch(sharePointFileUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      console.log("response", response);
+
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      // Convert the response to a Blob (binary data)
+      const fileBlob = await response.blob();
+
+      // Create a URL for the Blob
+      const fileURL = window.URL.createObjectURL(fileBlob);
+
+      // Create a temporary <a> element to trigger the download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName; // Provide a file name (optional)
+      downloadLink.click(); // Trigger the download
+      window.URL.revokeObjectURL(fileURL); // Clean up after the download
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+    }
+  };
+
 
   return (
     <div className={isLoading ? "blur-container" : ""}>
@@ -378,7 +427,7 @@ const Documents = ({ getAccessDataJob }) => {
                 <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-sm-end ms-sm-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
               )} */}
               {
-                (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") && (
+                (getAccessDataJob.update === 1 || role === "SUPERADMIN") && (
                   <button type="button" className="btn btn-info text-white float-sm-end ms-2" onClick={() => setUploadfiles(true)}> <i className="fa-regular fa-plus pe-1"></i> Add Document</button>
                 )}
 

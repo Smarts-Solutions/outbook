@@ -638,6 +638,10 @@ const ClientList = () => {
           <button className="delete-icon" onClick={() => removeItem(row, 2)}>
             <i className="ti-trash text-danger" />
           </button>
+
+          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
+            <i className="ti-download" />
+          </button>
         </div>
       ),
       ignoreRowClick: true,
@@ -646,6 +650,45 @@ const ClientList = () => {
       reorder: false,
     },
   ];
+
+
+  
+  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+    console.log("sharePointFileUrl", sharePointFileUrl);
+    console.log("accessToken", accessToken);
+    try {
+      // Make a GET request to SharePoint to get the file as a blob
+      const response = await fetch(sharePointFileUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      console.log("response", response);
+
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      // Convert the response to a Blob (binary data)
+      const fileBlob = await response.blob();
+
+      // Create a URL for the Blob
+      const fileURL = window.URL.createObjectURL(fileBlob);
+
+      // Create a temporary <a> element to trigger the download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName; // Provide a file name (optional)
+      downloadLink.click(); // Trigger the download
+      window.URL.revokeObjectURL(fileURL); // Clean up after the download
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+    }
+  };
 
   const removeItem = async (file, type) => {
     if (type == 1) {
@@ -1299,7 +1342,33 @@ const ClientList = () => {
                       </>
                     ) : null}
                   </>
-                ) : null}
+                ) : 
+                
+                activeTab === "documents" ? (
+                  <>
+                    <div
+                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                      onClick={() => {
+                        window.history.back();
+                      }}
+                    >
+                      <i className="fa fa-arrow-left pe-1" /> Back
+                    </div>
+                  </>
+                ) : 
+                activeTab === "status" ? (
+                  <>
+                    <div
+                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                      onClick={() => {
+                        window.history.back();
+                      }}
+                    >
+                      <i className="fa fa-arrow-left pe-1" /> Back
+                    </div>
+                  </>
+                ) : null
+                }
               </div>
             </div>
           </div>

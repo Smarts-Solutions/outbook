@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download , FileAxis3d } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -97,7 +97,6 @@ const Timesheet = () => {
 
   const GetTimeSheet = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
-    console.log("req", req);
     const res = await dispatch(
       getTimesheetData({ req, authToken: token })
     ).unwrap();
@@ -143,6 +142,9 @@ const Timesheet = () => {
 
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
+    console.log(`name`, name);
+    console.log(`value`, value);
+
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -222,14 +224,17 @@ const Timesheet = () => {
 
   // Function to handle week change
   const changeWeek = (offset) => {
-    setWeekOffset(weekOffset + offset);
-    GetTimeSheet(weekOffset + offset);
+    setWeekOffset(parseInt(weekOffset) + offset);
     weekOffSetValue.current = parseInt(weekOffset) + offset;
+    GetTimeSheet(parseInt(weekOffset) + offset);
   };
 
   const [submitStatus, setSubmitStatus] = useState(0);
   const [remarkText, setRemarkText] = useState(null);
   const [remarkModel, setRemarkModel] = useState(false);
+  const [remarkSingleModel, setRemarkSingleModel] = useState(false);
+  const [remarkSingleIndex, setRemarkSingleIndex] = useState(null);
+  
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
@@ -651,6 +656,7 @@ const Timesheet = () => {
         job_id: e.target.value,
       };
     }
+    updatedRows[index].job_id = e.target.value;
     if (req.staff_id != undefined) {
       const res = await dispatch(
         getTimesheetTaskTypedData({ req, authToken: token })
@@ -691,6 +697,7 @@ const Timesheet = () => {
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
     let value = e.target.value;
     let name = e.target.name;
+
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -714,8 +721,25 @@ const Timesheet = () => {
       return;
     }
 
-    const [integerPart, fractionalPart] = value.split(".");
-    if (fractionalPart && parseInt(fractionalPart) > 59) {
+
+    // const [integerPart, fractionalPart] = value.split(".");
+    // if (fractionalPart && parseInt(fractionalPart) > 59) {
+    //   sweatalert.fire({
+    //     icon: "warning",
+    //     title: "Minutes cannot exceed 59 ",
+    //     timerProgressBar: true,
+    //     showConfirmButton: true,
+    //     timer: 1500,
+    //   });
+    //   return;
+    // }
+
+    const [integerPart, fractionalPartRaw] = value.split(".");
+    let fractionalPart = fractionalPartRaw || "0";
+    if (fractionalPart.length === 1) {
+      fractionalPart = fractionalPart + "0";
+    }
+    if (parseInt(fractionalPart) > 59) {
       sweatalert.fire({
         icon: "warning",
         title: "Minutes cannot exceed 59 ",
@@ -730,6 +754,7 @@ const Timesheet = () => {
     const [day, month, year] = datePart.split("/");
     const formattedDate = new Date(`${year}-${month}-${day}`);
     const date_final_value = formattedDate.toISOString().split("T")[0];
+
 
     updatedRows[index][day_name] = date_final_value;
     updatedRows[index][name] = value;
@@ -773,6 +798,10 @@ const Timesheet = () => {
 
   // update record only Function
   function updateRecordSheet(rowId, name, value) {
+
+    console.log(`rowId`, rowId);
+
+
     // update record only
     const updatedRows_update = [...updateTimeSheetRows];
     const existingUpdateIndex = updatedRows_update.findIndex(
@@ -802,7 +831,77 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
   };
 
+  const getTotalHoursFromKey = (key) => {
+    const total = timeSheetRows && timeSheetRows.reduce((acc, item) => {
+      const val = parseFloat(item[key] || 0);
+      const hrs = Math.floor(val);
+      const mins = Math.round((val - hrs) * 100);
+      acc.totalMinutes += hrs * 60 + mins;
+      return acc;
+    }, { totalMinutes: 0 });
+
+    const totalHours = Math.floor(total.totalMinutes / 60);
+    const totalMins = total.totalMinutes % 60;
+    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    return finalTotalHours;
+  };
+
+  function totalWeeklyHoursMinutes(timeData) {
+    const dayFields = [
+      'monday_hours',
+      'tuesday_hours',
+      'wednesday_hours',
+      'thursday_hours',
+      'friday_hours',
+      'saturday_hours',
+      'sunday_hours'
+    ];
+
+    const totalMinutes = dayFields.reduce((sum, key) => {
+      const val = parseFloat(timeData[key]);
+      if (!isNaN(val)) {
+        const hours = Math.floor(val);
+        const minutes = Math.round((val - hours) * 100);
+        return sum + (hours * 60 + minutes);
+      }
+      return sum;
+    }, 0);
+
+    // 3. Convert total minutes to HH:MM
+    const finalHours = Math.floor(totalMinutes / 60);
+    const finalMinutes = totalMinutes % 60;
+    const formattedMinutes = finalMinutes.toString().padStart(2, '0');
+
+    const totalFormattedTime = `${finalHours}.${formattedMinutes}`;
+    return totalFormattedTime;
+  }
+
+  const totalHoursMinute = () => {
+    const converted = timeSheetRows && timeSheetRows?.map(item => {
+      return {
+        original: item.total_hours,
+        totalweeklyHours: totalWeeklyHoursMinutes(item)
+      };
+    });
+
+    const total = converted.reduce((acc, item) => {
+      const val = parseFloat(item.totalweeklyHours || 0);
+      const hrs = Math.floor(val);
+      const mins = Math.round((val - hrs) * 100);
+
+      acc.totalMinutes += hrs * 60 + mins;
+      return acc;
+    }, { totalMinutes: 0 });
+
+    const totalHours = Math.floor(total.totalMinutes / 60);
+    const totalMins = total.totalMinutes % 60;
+    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    return finalTotalHours;
+  }
+
   const saveData = async (e) => {
+  
+    console.log(`1`);
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -810,8 +909,12 @@ const Timesheet = () => {
         return;
       }
     }
+  
+    console.log(`2`);
+
 
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
+      console.log(`3`);
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -827,6 +930,65 @@ const Timesheet = () => {
         data: updatedTimeSheetRows,
         deleteRows: deleteRows,
       };
+
+
+
+
+      let staff_hourminute = (parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5) || null;
+      //console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
+      //console.log(`staff_hourminute`, staff_hourminute);
+      if (staff_hourminute != null) {
+
+        const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
+          return {
+            original: item.total_hours,
+            totalweeklyHours: totalWeeklyHoursMinutes(item)
+          };
+        });
+
+        const total = converted.reduce((acc, item) => {
+          const val = parseFloat(item.totalweeklyHours || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
+
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
+
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+       // console.log(`finalTotalHours`, finalTotalHours);
+        if (staff_hourminute > parseFloat(finalTotalHours)) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "You have not completed your timesheet for this week.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+          return;
+        }
+
+      }
+
+    
+     
+     let isvalid = await validateDateFields(req.data);
+     if( !isvalid) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Please fill at least one date field for each row.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
+        });
+        return;
+      } 
+    
+   
+
+
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
@@ -846,7 +1008,31 @@ const Timesheet = () => {
     }
   };
 
+const validateDateFields = (data) => {
+  const isInvalid = data.some((row) => {
+    const allDatesEmpty =
+      !row.monday_date &&
+      !row.tuesday_date &&
+      !row.wednesday_date &&
+      !row.thursday_date &&
+      !row.friday_date &&
+      !row.saturday_date &&
+      !row.sunday_date;
+
+    return row.id === null && allDatesEmpty;
+  });
+
+  if (isInvalid) {
+    return false;
+  }
+  return true;
+};
+
+
+
+
   const submitData = async (e) => {
+
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -860,12 +1046,14 @@ const Timesheet = () => {
   };
 
   const saveTimeSheetRemark = async (e) => {
+
     if (submitStatus == 1) {
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
           ...item,
           submit_status: "1",
           remark: item.editRow === 1 ? remarkText : null,
+          final_remark: remarkText,
         };
       });
 
@@ -879,6 +1067,53 @@ const Timesheet = () => {
         data: updatedTimeSheetRows1,
         deleteRows: deleteRows,
       };
+
+
+
+
+      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
+      if (staff_hourminute != null) {
+
+        const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+          return {
+            original: item.total_hours,
+            totalweeklyHours: totalWeeklyHoursMinutes(item)
+          };
+        });
+
+        const total = converted.reduce((acc, item) => {
+          const val = parseFloat(item.totalweeklyHours || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
+
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
+
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+
+        console.log(`finalTotalHours`, finalTotalHours);
+        console.log(`staff_hourminute`, staff_hourminute);
+        if (staff_hourminute > parseFloat(finalTotalHours)) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "You have not completed your timesheet for this week.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+          return;
+        }
+
+      }
+
+      console.log(`req`, req);
+      console.log(`remarkText`, remarkText);
+
+
+
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
@@ -920,6 +1155,48 @@ const Timesheet = () => {
       data: updatedTimeSheetRows1,
       deleteRows: deleteRows,
     };
+
+
+    let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
+    if (staff_hourminute != null) {
+
+      const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+        return {
+          original: item.total_hours,
+          totalweeklyHours: totalWeeklyHoursMinutes(item)
+        };
+      });
+
+      const total = converted.reduce((acc, item) => {
+        const val = parseFloat(item.totalweeklyHours || 0);
+        const hrs = Math.floor(val);
+        const mins = Math.round((val - hrs) * 100);
+
+        acc.totalMinutes += hrs * 60 + mins;
+        return acc;
+      }, { totalMinutes: 0 });
+
+      const totalHours = Math.floor(total.totalMinutes / 60);
+      const totalMins = total.totalMinutes % 60;
+      const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+
+
+      if (staff_hourminute > parseFloat(finalTotalHours)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "You have not completed your timesheet for this week.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
+        });
+        return;
+      }
+
+    }
+
+
+
+
     const res = await dispatch(
       saveTimesheetData({ req, authToken: token })
     ).unwrap();
@@ -941,6 +1218,7 @@ const Timesheet = () => {
   };
 
   const dayMonthFormatDate = (dateString) => {
+   
     const parts = dateString.split(", ");
     const dayOfWeek = parts[0];
     const dateParts = parts[1].split("/");
@@ -1004,6 +1282,25 @@ const Timesheet = () => {
     link.click();
   };
 
+
+  const handleSingleRemark = (e,item,index) => {
+       setRemarkSingleModel(true);
+       setRemarkSingleIndex(index);
+  };
+
+  const handleRemarkSingleText = (e, index) => {
+    const updatedRows = [...timeSheetRows];
+    updatedRows[index].remark = e.target.value;
+    setTimeSheetRows(updatedRows);
+    const rowId = updatedRows[index].id;
+   updateRecordSheet(rowId, "remark", e.target.value);
+  };
+  
+const singleRemarkModalDone = async () => {
+  setRemarkSingleModel(false);
+}
+
+
   // Example usage
   return (
     <div className="container-fluid">
@@ -1029,7 +1326,7 @@ const Timesheet = () => {
       <div className="report-data mt-4">
         <div className="col-md-12">
           <div className="row ">
-            {["SUPERADMIN", "ADMIN"].includes(role) ? (
+            {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
                 <select
@@ -1056,7 +1353,7 @@ const Timesheet = () => {
             )}
             <div className="form-group col-md-8 row align-items-center">
               {staffDataWeekDataAll.data &&
-              staffDataWeekDataAll.data.length > 0 ? (
+                staffDataWeekDataAll.data.length > 0 ? (
                 <div className="form-group col-md-6 pe-0">
                   <label className="form-label mb-2">Select Date</label>
 
@@ -1091,8 +1388,22 @@ const Timesheet = () => {
                 ""
               )}
 
-              {["SUPERADMIN", "ADMIN"].includes(role) &&
-              timeSheetRows.length > 0 ? (
+              {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
+                timeSheetRows.length > 0 ? (
+                <div className="form-group col-md-6">
+                  <button
+                    className=" btn btn-info float-md-end mt-lg-2"
+                    onClick={() => exportToCSV(timeSheetRows)}
+                  >
+                    Export Timesheet Data
+                    <i className="fa fa-download ms-2" />
+                  </button>
+                </div>
+              ) : (
+                ""
+              )} */}
+              {
+                timeSheetRows.length > 0 ? (
                 <div className="form-group col-md-6">
                   <button
                     className=" btn btn-info float-md-end mt-lg-2"
@@ -1117,7 +1428,7 @@ const Timesheet = () => {
                   <div className="row">
                     <div className="table-responsive table-card  mb-1">
                       <table
-                        className="timesheetTable table align-middle table-nowrap"
+                        className="timesheetTable table align-middle table-nowrap mb-0"
                         id="customerTable"
                       >
                         <thead className="table-light table-head-blue">
@@ -1156,6 +1467,13 @@ const Timesheet = () => {
                               style={{ width: "10%" }}
                             >
                               Job
+                            </th>
+                            <th
+                              className="dropdwnCol5"
+                              data-field="phone"
+                              style={{ width: "10%" }}
+                            >
+                              Job Type
                             </th>
                             <th
                               className="dropdwnCol5"
@@ -1221,9 +1539,8 @@ const Timesheet = () => {
                                 >
                                   {/* Font Awesome plus icon */}
                                   <i
-                                    className={`fa ${
-                                      isExpanded ? "fa-minus" : "fa-plus"
-                                    }`}
+                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"
+                                      }`}
                                     aria-hidden="true"
                                   ></i>
                                 </button>
@@ -1239,7 +1556,16 @@ const Timesheet = () => {
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
 
+                            {/* <th
+                              className="dropdwnCol5"
+                              data-field="phone"
+                              style={{ width: "8%" }}
+                            >
+                              Weekly Hours
+                            </th> */}
+
                             {submitStatusAllKey === 0 ? (
+                              <>
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
@@ -1247,6 +1573,17 @@ const Timesheet = () => {
                               >
                                 Action
                               </th>
+                               
+                               <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                                style={{ width: "5%" }}
+                              >
+                                Remark
+                              </th>
+
+                              </>
+
                             ) : (
                               ""
                             )}
@@ -1287,7 +1624,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     <select
                                       className="form-select"
                                       style={{ width: "100px" }}
@@ -1321,7 +1658,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     <select
                                       className="form-select"
                                       style={{ width: "100px" }}
@@ -1371,7 +1708,7 @@ const Timesheet = () => {
                                     </select>
                                   ) : (
                                     <input
-                                    style={{ width: "100px" }}
+                                      style={{ width: "100px" }}
                                       className="form-control cursor-pointer"
                                       defaultValue={
                                         item.task_type === "1"
@@ -1382,6 +1719,26 @@ const Timesheet = () => {
                                     />
                                   )}
                                 </td>
+
+
+                                {/* Job Type Section */}
+                                <td>
+                                 
+                                  {item.newRow === 1 ? (
+                                    (() => {
+                                      const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
+                                      return matchedJob ? <span>{matchedJob.job_type_name}</span> : "";
+                                    })()
+                                  ) : (
+                                    item.task_type === "1" ? (
+                                      ""
+                                    ) : (
+                                      <span>{item.job_type_name}</span>
+                                    )
+                                    
+                                  )}
+                                </td>
+
 
                                 {/* Task Selection */}
                                 <td>
@@ -1414,6 +1771,12 @@ const Timesheet = () => {
 
                                 {/*Monday Input*/}
                                 <td colspan="8">
+                                  <table>
+                                    <tr>
+                                      <td></td>
+
+                                    </tr>
+                                  </table>
                                   <div className="ms-2">
                                     {isExpanded ? (
                                       <div
@@ -1442,11 +1805,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1471,11 +1834,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1500,11 +1863,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1529,11 +1892,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1558,11 +1921,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                         <input
@@ -1587,11 +1950,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                       </div>
@@ -1620,16 +1983,17 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                         />
                                       </div>
                                     )}
                                   </div>
+
                                 </td>
 
                                 {/*Sunday Input*/}
@@ -1647,6 +2011,11 @@ const Timesheet = () => {
                               </td>
                               
                               */}
+                                {/* <td>
+                                  {console.log("item.weekly_hours", item)}
+                                  <span className="fs-6 text-dark"> {totalWeeklyHoursMinutes(item)}</span>
+
+                                </td> */}
 
                                 {submitStatusAllKey === 0 ? (
                                   <td className="d-flex ps-0">
@@ -1674,22 +2043,43 @@ const Timesheet = () => {
                                     : ""
                                 } */}
                                     {submitStatusAllKey === 0 ? (
+                                      <>
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
                                       >
-                                        <i className="ti-trash text-danger  "></i>
+                                        <i className="ti-trash text-danger"></i>
                                       </button>
+
+                                      
+                                       <FileAxis3d 
+                                        className="edit-icon"
+                                        onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                       />
+                                    
+
+                                      </>
+
                                     ) : (
                                       ""
                                     )}
                                     {/* <Trash2 className="delete-icon" /> */}
                                   </td>
+
+                                   
+                                   
+                                     
+
                                 ) : (
                                   ""
                                 )}
                               </tr>
+
+
                             ))
+
                           ) : (
                             <tr>
                               <td colSpan={12} className="text-center">
@@ -1697,8 +2087,96 @@ const Timesheet = () => {
                               </td>
                             </tr>
                           )}
-                          <tr className="tabel_new">
-                            <td>
+
+
+
+
+                        </tbody>
+                        {
+                          timeSheetRows.length > 0 ?
+                            <tfoot className="table-light table-head-blue">
+                              <tr>
+                                <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
+                                <th className="" data-field="phone" style={{ width: "10%" }}> </th>
+                                <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
+                                <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
+                                  <div className="d-flex  ms-3" style={{ width: "88%" }}>
+                                    <input
+                                      className="form-control cursor-pointer border-radius-end"
+                                      type="text"
+                                      readOnly
+                                      name="monday_hours"
+                                      value={getTotalHoursFromKey("monday_hours")}
+                                      style={{ width: 80, border: '1px solid #00afef' }}
+
+                                    />
+                                    {isExpanded && (
+                                      <div
+                                        className="d-flex  ms-3"
+                                        style={{ width: "88%" }}
+                                      >
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="tuesday_hours"
+                                          value={getTotalHoursFromKey("tuesday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="wednesday_hours"
+                                          value={getTotalHoursFromKey("wednesday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="thursday_hours"
+                                          value={getTotalHoursFromKey("thursday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="friday_hours"
+                                          value={getTotalHoursFromKey("friday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+                                        <input
+                                          className="form-control cursor-pointer ms-2"
+                                          type="text"
+                                          readOnly
+                                          name="saturday_hours"
+                                          value={getTotalHoursFromKey("saturday_hours")}
+                                          style={{ width: 80, border: '1px solid #00afef' }}
+                                        />
+
+
+                                      </div>
+
+                                    )}
+                                  </div>
+
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
+                              </tr>
+                            </tfoot>
+                            : null
+                        }
+
+
+
+                        <tfoot>
+                          <tr className="tabel_new border-none">
+                            <td className="border-none" style={{ border: 'none' }}>
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
                                   <button
@@ -1721,10 +2199,75 @@ const Timesheet = () => {
                                 ""
                               )}
                             </td>
-                            <td colSpan={12}></td>
+
                           </tr>
-                        </tbody>
+                        </tfoot>
                       </table>
+                      {
+                        timeSheetRows.length > 0 ?
+                          <>
+                            <div className="">
+                              {/* <table
+                          className="timesheetTable table align-middle table-nowrap"
+                          id="customerTable"
+                          
+                        >
+                          <thead className="table-light table-head-blue">
+                            <tr>
+                             
+                              <th className="border-0" data-field="phone" style={{ width: "47.5%" }} />
+
+                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'47.5%' }} >
+
+                                <div className="d-flex  " style={{ width: "88%" }}>
+                                  <div className="d-flex align-items-center">
+
+                                    <span className="ms-3  fs-6">
+                                      {getTotalHoursFromKey("monday_hours")}
+                                    </span>
+                                    
+                                    {isExpanded && (
+                                      <div
+                                        className="d-flex"
+                                        style={{ width: "77%" }}
+                                      >
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("tuesday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("wednesday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("thursday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("friday_hours")}
+                                        </span>
+                                        <span className="fs-6">
+                                          {getTotalHoursFromKey("saturday_hours")}
+                                        </span>
+                                      </div>
+                                    )}
+
+
+                                  </div>
+                                </div>
+                              </th>
+                              <th className="border-0" data-field="phone" style={{ width:"5%" }} />
+
+                            </tr>
+                          </thead>
+                        </table> */}
+                            </div>
+
+                            <div className="mt-2 mb-2">
+                              <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
+                            </div>
+                          </>
+
+                          : ""
+                      }
+
                     </div>
                   </div>
                 </div>
@@ -1781,7 +2324,7 @@ const Timesheet = () => {
             )}
           </div>
 
-          <CommonModal
+           <CommonModal
             isOpen={remarkModel}
             backdrop="static"
             size="lg"
@@ -1793,8 +2336,44 @@ const Timesheet = () => {
             handleClose={() => {
               setRemarkModel(false);
               setSubmitStatus(0);
+              setRemarkText("");
             }}
             Submit_Function={(e) => saveTimeSheetRemark(e)}
+          >
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label htmlFor="customername-field" className="form-label">
+                   Final Remark
+                  </label>
+                  <textarea
+                    type="text"
+                    className="form-control cursor-pointer"
+                    placeholder="Enter Remark"
+                    defaultValue=""
+                    onChange={(e) => setRemarkText(e.target.value)}
+                    value={remarkText}
+                  />
+                </div>
+              </div>
+            </div>
+          </CommonModal>
+
+
+
+           <CommonModal
+            isOpen={remarkSingleModel}
+            backdrop="static"
+            size="lg"
+            cancel_btn={false}
+            btn_2="true"
+            btn_name={"Done"}
+            title="Remark"
+            hideBtn={false}
+            handleClose={() => {
+              setRemarkSingleModel(false);
+            }}
+            Submit_Function={(e) => singleRemarkModalDone(e)}
           >
             <div className="modal-body">
               <div className="row">
@@ -1807,8 +2386,12 @@ const Timesheet = () => {
                     className="form-control cursor-pointer"
                     placeholder="Enter Remark"
                     defaultValue=""
-                    onChange={(e) => setRemarkText(e.target.value)}
-                    value={remarkText}
+                    onChange={(e) => handleRemarkSingleText(e , remarkSingleIndex)}
+                    value={
+                      remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?"":timeSheetRows[remarkSingleIndex].remark :""
+                    
+                    } 
                   />
                 </div>
               </div>

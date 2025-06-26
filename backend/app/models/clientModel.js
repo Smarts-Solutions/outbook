@@ -24,13 +24,13 @@ const createClient = async (client) => {
   let trading_name = client.trading_name;
   let notes = client.notes;
 
-  if (client_type == "2") {
-    trading_name = trading_name + "_" + client_code;
-  }
+  // if (client_type == "2") {
+  //   trading_name = trading_name + "_" + client_code;
+  // }
 
-  const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ?`;
+  const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND customer_id = ?`;
 
-  const [check] = await pool.execute(checkQuery, [trading_name]);
+  const [check] = await pool.execute(checkQuery, [trading_name , customer_id]);
   if (check.length > 0) {
     return { status: false, message: "Client Trading Name Already Exists." };
   }
@@ -2336,9 +2336,9 @@ const clientUpdate = async (client) => {
   } = client;
 
   let notes = client.notes == undefined ? "" : client.notes;
-  const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
+  const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND customer_id =?  AND id != ?`;
 
-  const [check] = await pool.execute(checkQuery, [trading_name, client_id]);
+  const [check] = await pool.execute(checkQuery, [trading_name,customer_id,client_id]);
   if (check.length > 0) {
     return { status: false, message: "Client Trading Name Already Exists." };
   }

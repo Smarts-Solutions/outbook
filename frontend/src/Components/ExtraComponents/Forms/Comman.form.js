@@ -212,7 +212,8 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : field.type === "checkbox" ? (
+              ) 
+              : field.type === "checkbox" ? (
                 <>
                   {field.options && field.options.length > 0 ? (
                     <>

@@ -328,7 +328,7 @@ const Sidebar = () => {
                     <span className="sidebar-icons">
                       <i className="fas fa-cog"></i> {/* Setting icon */}
                     </span>
-                    <span>Setting</span>
+                    <span>Settings</span>
                   </Link>
                 </li>
               )}

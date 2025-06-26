@@ -221,8 +221,7 @@ const Customer = () => {
           <div style={{ width: "50px" }}>
             {(role === "SUPERADMIN") && row.status == 1 ? (
               <div className="d-flex justify-content-end">
-
-               {row.form_process != "4" &&  <button
+               {(row.form_process != "4" || row.is_client == 0) &&  <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
@@ -234,7 +233,7 @@ const Customer = () => {
               </div>
             ) : (
               <div className="d-flex justify-content-end">
-                {hasDeleteAccess && row.form_process != "4" &&  (
+                {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) &&  (
                   <button
                   className="delete-icon"
                   onClick={() => handleDelete(row)}
