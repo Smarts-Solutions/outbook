@@ -607,7 +607,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div className="d-flex">
+              <div className="d-flex justify-content-start w-100">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"

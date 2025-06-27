@@ -2029,6 +2029,15 @@ const singleRemarkModalDone = async () => {
                                 } */}
                                     {submitStatusAllKey === 0 ? (
                                       <div className="d-flex align-items-center">
+                                        <button
+                                        className="edit-icon"
+                                         onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                      ><i className="ti-agenda"></i>
+                                        
+                                      </button>
+                                      
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2036,13 +2045,8 @@ const singleRemarkModalDone = async () => {
                                         <i className="ti-trash text-danger"></i>
                                       </button>
 
+                                     
                                       
-                                       <FileAxis3d 
-                                        className="edit-icon"
-                                        onClick={(e) => {
-                                          handleSingleRemark(e, item, index)
-                                        }}
-                                       />
                                     
 
                                       </div>
