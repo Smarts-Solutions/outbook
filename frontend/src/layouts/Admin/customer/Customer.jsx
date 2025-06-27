@@ -213,26 +213,32 @@ const Customer = () => {
     //   width: "120px",
     // },
     {
-      name: "Actions",
+      name: "Actions      ",
       cell: (row) => {
         const hasUpdateAccess = getAccessData.update === 1;
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
-          <div style={{ width: "50px" }}>
+          <div className="w-100">
             {(role === "SUPERADMIN") && row.status == 1 ? (
-              <div className="d-flex justify-content-end">
+              <div className="d-flex justify-content-start">
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
+                </button>
                {(row.form_process != "4" || row.is_client == 0) &&  <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
                   <i className="ti-trash text-danger " />
                 </button>}
-                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil text-primary" />
-                </button>
+                
               </div>
             ) : (
               <div className="d-flex justify-content-end">
+                 {hasUpdateAccess && row.status == 1 && (
+                  <button className="edit-icon " onClick={() => handleEdit(row)}>
+                    <i className="ti-pencil text-primary" />
+                  </button>
+                )}
                 {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) &&  (
                   <button
                   className="delete-icon"
@@ -241,11 +247,7 @@ const Customer = () => {
                     <i className="ti-trash text-danger" />
                   </button>
                 )}
-                {hasUpdateAccess && row.status == 1 && (
-                  <button className="edit-icon " onClick={() => handleEdit(row)}>
-                    <i className="ti-pencil text-primary" />
-                  </button>
-                )}
+               
               </div>
             )}
           </div>

@@ -582,7 +582,7 @@ const ReusableForm = ({
               ) :
               field.type === "text6" ? (
                 <>
-                  <div className={`col-lg-${field.col_size}`}>
+                  <div className={`col-lg-${field.col_size} `}>
                     <div className="mb-3 row flex-column">
                       <label
                         className={`col-lg-${field.label_size}`}
@@ -601,6 +601,7 @@ const ReusableForm = ({
                           defaultValue=""
                           autoFocus={index === 0 ? true : false}
                           maxLength={50}
+                        className="form-control"
                           readOnly={field.disable}
                           autoComplete="new-email"
                         />
