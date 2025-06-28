@@ -2357,7 +2357,6 @@ const singleRemarkModalDone = async () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                 
                   {
                     submitStatusAllKey === 1 ?
                     <p>
