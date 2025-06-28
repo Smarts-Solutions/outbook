@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download , FileAxis3d ,Eye } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -234,10 +234,12 @@ const Timesheet = () => {
   const [remarkModel, setRemarkModel] = useState(false);
   const [remarkSingleModel, setRemarkSingleModel] = useState(false);
   const [remarkSingleIndex, setRemarkSingleIndex] = useState(null);
-  
+
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
+
+  console.log(`timeSheetRows`, timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -799,8 +801,6 @@ const Timesheet = () => {
   // update record only Function
   function updateRecordSheet(rowId, name, value) {
 
-    console.log(`rowId`, rowId);
-
 
     // update record only
     const updatedRows_update = [...updateTimeSheetRows];
@@ -900,8 +900,8 @@ const Timesheet = () => {
   }
 
   const saveData = async (e) => {
-  
-   
+
+
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -909,10 +909,10 @@ const Timesheet = () => {
         return;
       }
     }
-  
-    
+
+
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
-     
+
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -956,7 +956,7 @@ const Timesheet = () => {
         const totalHours = Math.floor(total.totalMinutes / 60);
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-       // console.log(`finalTotalHours`, finalTotalHours);
+        // console.log(`finalTotalHours`, finalTotalHours);
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
@@ -970,10 +970,10 @@ const Timesheet = () => {
 
       }
 
-    
-     
-     let isvalid = await validateDateFields(req.data);
-     if( !isvalid) {
+
+
+      let isvalid = await validateDateFields(req.data);
+      if (!isvalid) {
         sweatalert.fire({
           icon: "warning",
           title: "Please fill at least one date field for each row.",
@@ -982,9 +982,9 @@ const Timesheet = () => {
           timer: 3000,
         });
         return;
-      } 
-    
-   
+      }
+
+
 
 
       const res = await dispatch(
@@ -1006,25 +1006,25 @@ const Timesheet = () => {
     }
   };
 
-const validateDateFields = (data) => {
-  const isInvalid = data.some((row) => {
-    const allDatesEmpty =
-      !row.monday_date &&
-      !row.tuesday_date &&
-      !row.wednesday_date &&
-      !row.thursday_date &&
-      !row.friday_date &&
-      !row.saturday_date &&
-      !row.sunday_date;
+  const validateDateFields = (data) => {
+    const isInvalid = data.some((row) => {
+      const allDatesEmpty =
+        !row.monday_date &&
+        !row.tuesday_date &&
+        !row.wednesday_date &&
+        !row.thursday_date &&
+        !row.friday_date &&
+        !row.saturday_date &&
+        !row.sunday_date;
 
-    return row.id === null && allDatesEmpty;
-  });
+      return row.id === null && allDatesEmpty;
+    });
 
-  if (isInvalid) {
-    return false;
-  }
-  return true;
-};
+    if (isInvalid) {
+      return false;
+    }
+    return true;
+  };
 
   const submitData = async (e) => {
 
@@ -1209,7 +1209,7 @@ const validateDateFields = (data) => {
   };
 
   const dayMonthFormatDate = (dateString) => {
-   
+
     const parts = dateString.split(", ");
     const dayOfWeek = parts[0];
     const dateParts = parts[1].split("/");
@@ -1274,9 +1274,9 @@ const validateDateFields = (data) => {
   };
 
 
-  const handleSingleRemark = (e,item,index) => {
-       setRemarkSingleModel(true);
-       setRemarkSingleIndex(index);
+  const handleSingleRemark = (e, item, index) => {
+    setRemarkSingleModel(true);
+    setRemarkSingleIndex(index);
   };
 
   const handleRemarkSingleText = (e, index) => {
@@ -1284,12 +1284,12 @@ const validateDateFields = (data) => {
     updatedRows[index].remark = e.target.value;
     setTimeSheetRows(updatedRows);
     const rowId = updatedRows[index].id;
-   updateRecordSheet(rowId, "remark", e.target.value);
+    updateRecordSheet(rowId, "remark", e.target.value);
   };
-  
-const singleRemarkModalDone = async () => {
-  setRemarkSingleModel(false);
-}
+
+  const singleRemarkModalDone = async () => {
+    setRemarkSingleModel(false);
+  }
 
 
   // Example usage
@@ -1395,18 +1395,18 @@ const singleRemarkModalDone = async () => {
               )} */}
               {
                 timeSheetRows.length > 0 ? (
-                <div className="form-group col-md-6">
-                  <button
-                    className=" btn btn-info float-md-end mt-lg-2"
-                    onClick={() => exportToCSV(timeSheetRows)}
-                  >
-                    Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
-                  </button>
-                </div>
-              ) : (
-                ""
-              )}
+                  <div className="form-group col-md-6">
+                    <button
+                      className=" btn btn-info float-md-end mt-lg-2"
+                      onClick={() => exportToCSV(timeSheetRows)}
+                    >
+                      Export Timesheet Data
+                      <i className="fa fa-download ms-2" />
+                    </button>
+                  </div>
+                ) : (
+                  ""
+                )}
             </div>
           </div>
 
@@ -1557,13 +1557,13 @@ const singleRemarkModalDone = async () => {
 
                             {submitStatusAllKey === 0 ? (
                               <>
-                              <th
-                                className="dropdwnCol5"
-                                data-field="phone"
-                                style={{ width: "5%" }}
-                              >
-                                Action
-                              </th>
+                                <th
+                                  className="dropdwnCol5"
+                                  data-field="phone"
+                                  style={{ width: "5%" }}
+                                >
+                                  Action
+                                </th>
                               </>
 
                             ) : (
@@ -1573,7 +1573,7 @@ const singleRemarkModalDone = async () => {
                                 style={{ width: "5%" }}
                               >
                                 Remark
-                              </th> 
+                              </th>
                             )}
                           </tr>
                         </thead>
@@ -1711,7 +1711,7 @@ const singleRemarkModalDone = async () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                 
+
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
@@ -1723,7 +1723,7 @@ const singleRemarkModalDone = async () => {
                                     ) : (
                                       <span>{item.job_type_name}</span>
                                     )
-                                    
+
                                   )}
                                 </td>
 
@@ -2005,10 +2005,10 @@ const singleRemarkModalDone = async () => {
 
                                 </td> */}
 
-                                
-                                  <td className="d-flex ps-0">
-                                    {submitStatusAllKey === 0 ? (
-                                      <div className="d-flex align-items-center">
+
+                                <td className="d-flex ps-0">
+                                  {submitStatusAllKey === 0 ? (
+                                    <div className="d-flex align-items-center">
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2016,37 +2016,37 @@ const singleRemarkModalDone = async () => {
                                         <i className="ti-trash text-danger"></i>
                                       </button>
 
-                                      
-                                       <FileAxis3d 
+
+                                      <FileAxis3d
                                         className="edit-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
-                                       />
-                                      </div>
+                                      />
+                                    </div>
 
-                                    ) : (
-                                     <div className="d-flex align-items-center">
-                                     
+                                  ) : (
+                                    <div className="d-flex align-items-center">
+
                                       <button
                                         className="view-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
                                       >
-                                       <i className="fa fa-eye text-primary"></i>
+                                        <i className="fa fa-eye text-primary"></i>
                                       </button>
 
 
-                                       </div>
-                                     
-                                    )}
-                                    {/* <Trash2 className="delete-icon" /> */}
-                                  </td>
+                                    </div>
 
-             
+                                  )}
+                                  {/* <Trash2 className="delete-icon" /> */}
+                                </td>
 
-                                
+
+
+
                               </tr>
 
 
@@ -2073,13 +2073,13 @@ const singleRemarkModalDone = async () => {
                                 <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
                                 <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
                                 <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
-                                 <th
-                              className="dropdwnCol5"
-                              data-field="phone"
-                              style={{ width: "10%" }}
-                            >
-                            
-                            </th>
+                                <th
+                                  className="dropdwnCol5"
+                                  data-field="phone"
+                                  style={{ width: "10%" }}
+                                >
+
+                                </th>
                                 <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
                                 <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
                                   <div className="d-flex  ms-3" style={{ width: "88%" }}>
@@ -2186,62 +2186,32 @@ const singleRemarkModalDone = async () => {
                         timeSheetRows.length > 0 ?
                           <>
                             <div className="">
-                              {/* <table
-                          className="timesheetTable table align-middle table-nowrap"
-                          id="customerTable"
-                          
-                        >
-                          <thead className="table-light table-head-blue">
-                            <tr>
-                             
-                              <th className="border-0" data-field="phone" style={{ width: "47.5%" }} />
 
-                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'47.5%' }} >
-
-                                <div className="d-flex  " style={{ width: "88%" }}>
-                                  <div className="d-flex align-items-center">
-
-                                    <span className="ms-3  fs-6">
-                                      {getTotalHoursFromKey("monday_hours")}
-                                    </span>
-                                    
-                                    {isExpanded && (
-                                      <div
-                                        className="d-flex"
-                                        style={{ width: "77%" }}
-                                      >
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("tuesday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("wednesday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("thursday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("friday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("saturday_hours")}
-                                        </span>
-                                      </div>
-                                    )}
-
-
-                                  </div>
-                                </div>
-                              </th>
-                              <th className="border-0" data-field="phone" style={{ width:"5%" }} />
-
-                            </tr>
-                          </thead>
-                        </table> */}
                             </div>
 
                             <div className="mt-2 mb-2">
                               <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
                             </div>
+
+                            {
+                              submitStatusAllKey === 1 ?
+                                <div className="mt-2 mb-2">
+                                  {/* setRemarkModel */}
+                                  <span className="fs-6 text-dark"> <b>Final Remark :</b>
+                                    
+                                    <button
+                                      className="view-icon"
+                                      onClick={() => setRemarkModel(true)}
+                                    >
+                                      <i className="fa fa-eye text-primary"></i>
+                                    </button>
+                                  </span>
+                                </div>
+                                :
+                                ""
+                            }
+
+
                           </>
 
                           : ""
@@ -2303,14 +2273,14 @@ const singleRemarkModalDone = async () => {
             )}
           </div>
 
-           <CommonModal
+          <CommonModal
             isOpen={remarkModel}
             backdrop="static"
             size="lg"
             cancel_btn={false}
             btn_2="true"
             btn_name={submitStatus === 1 ? "Submit" : "Save"}
-            title="Remark"
+            title="Final Remark"
             hideBtn={false}
             handleClose={() => {
               setRemarkModel(false);
@@ -2322,8 +2292,18 @@ const singleRemarkModalDone = async () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  <label htmlFor="customername-field" className="form-label">
-                   Final Remark
+
+                 {
+                   submitStatusAllKey === 1 ?
+                    <p>
+                      {timeSheetRows && timeSheetRows.length > 0 ?
+                        timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
+                        : "No Final Remark Found"}
+                    </p>  
+                   :
+                    <>
+                    <label htmlFor="customername-field" className="form-label">
+                    Final Remark
                   </label>
                   <textarea
                     type="text"
@@ -2333,6 +2313,10 @@ const singleRemarkModalDone = async () => {
                     onChange={(e) => setRemarkText(e.target.value)}
                     value={remarkText}
                   />
+                  </>
+
+                 }
+
                 </div>
               </div>
             </div>
@@ -2340,13 +2324,13 @@ const singleRemarkModalDone = async () => {
 
 
 
-           <CommonModal
+          <CommonModal
             isOpen={remarkSingleModel}
             backdrop="static"
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name={submitStatusAllKey === 1?"Close":"Done"}
+            btn_name={submitStatusAllKey === 1 ? "Close" : "Done"}
             title="Remark"
             hideBtn={false}
             handleClose={() => {
@@ -2359,33 +2343,33 @@ const singleRemarkModalDone = async () => {
                 <div className="col-lg-12">
                   {
                     submitStatusAllKey === 1 ?
-                    <p>
+                      <p>
 
-                      {remarkSingleIndex != null && timeSheetRows.length > 0 ?
-                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?
-                      "No Remark Found":!['',null,undefined].includes(timeSheetRows[remarkSingleIndex].remark) ? timeSheetRows[remarkSingleIndex].remark : "No Remark Found" : "No Remark Found"
-                    
-                    }
-                    </p> 
-                    : <>
-                     <label htmlFor="customername-field" className="form-label">
-                    Remark
-                    </label>
-                     <textarea
-                    type="text"
-                    className="form-control cursor-pointer"
-                    placeholder="Enter Remark"
-                    defaultValue=""
-                    onChange={(e) => handleRemarkSingleText(e , remarkSingleIndex)}
-                    value={
-                      remarkSingleIndex != null && timeSheetRows.length > 0 ?
-                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?"":timeSheetRows[remarkSingleIndex].remark :""
-                    
-                    } 
-                  />
-                  </>
+                        {remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                          ['', null, undefined].includes(timeSheetRows[remarkSingleIndex]) ?
+                            "No Remark Found" : !['', null, undefined].includes(timeSheetRows[remarkSingleIndex].remark) ? timeSheetRows[remarkSingleIndex].remark : "No Remark Found" : "No Remark Found"
+
+                        }
+                      </p>
+                      : <>
+                        <label htmlFor="customername-field" className="form-label">
+                          Remark
+                        </label>
+                        <textarea
+                          type="text"
+                          className="form-control cursor-pointer"
+                          placeholder="Enter Remark"
+                          defaultValue=""
+                          onChange={(e) => handleRemarkSingleText(e, remarkSingleIndex)}
+                          value={
+                            remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                              ['', null, undefined].includes(timeSheetRows[remarkSingleIndex]) ? "" : timeSheetRows[remarkSingleIndex].remark : ""
+
+                          }
+                        />
+                      </>
                   }
-                 
+
                 </div>
               </div>
             </div>

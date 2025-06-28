@@ -38,6 +38,7 @@ const getTimesheet = async (Timesheet) => {
       DATE_FORMAT(timesheet.saturday_date, '%Y-%m-%d') AS saturday_date,
       REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
       timesheet.remark AS remark,
+      timesheet.final_remark AS final_remark,
       timesheet.status AS status,
       timesheet.submit_status AS submit_status,
       timesheet.created_at AS created_at,
