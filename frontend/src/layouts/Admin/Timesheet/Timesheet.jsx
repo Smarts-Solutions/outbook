@@ -2346,7 +2346,7 @@ const singleRemarkModalDone = async () => {
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name={"Done"}
+            btn_name={submitStatusAllKey === 1?"Close":"Done"}
             title="Remark"
             hideBtn={false}
             handleClose={() => {
@@ -2362,9 +2362,6 @@ const singleRemarkModalDone = async () => {
                     submitStatusAllKey === 1 ?
                     <p>
 
-                      {console.log("remarkSingleIndex", remarkSingleIndex)}
-                      {console.log("remarkSingleIndex 2", timeSheetRows[remarkSingleIndex])}
-                     
                       {remarkSingleIndex != null && timeSheetRows.length > 0 ?
                       ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?
                       "No Remark Found":!['',null,undefined].includes(timeSheetRows[remarkSingleIndex].remark) ? timeSheetRows[remarkSingleIndex].remark : "No Remark Found" : "No Remark Found"
