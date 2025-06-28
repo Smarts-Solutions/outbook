@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download , FileAxis3d } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download , FileAxis3d ,Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -1564,13 +1564,16 @@ const singleRemarkModalDone = async () => {
                               >
                                 Action
                               </th>
-                               
-                              
-
                               </>
 
                             ) : (
-                              ""
+                              <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                                style={{ width: "5%" }}
+                              >
+                                Remark
+                              </th> 
                             )}
                           </tr>
                         </thead>
@@ -2002,31 +2005,8 @@ const singleRemarkModalDone = async () => {
 
                                 </td> */}
 
-                                {submitStatusAllKey === 0 ? (
+                                
                                   <td className="d-flex ps-0">
-                                    {/* {
-                                  item.submit_status === "0" ?
-
-                                    item.editRow == 0 || item.editRow == undefined ?
-                                      <button
-                                        className="edit-icon"
-                                        onClick={(e) => {
-                                          editRow(e, index);
-                                        }}
-                                      >
-                                        <i className="fa fa-pencil text-primary  "></i>
-                                      </button>
-                                      :
-                                      <button
-                                        className="edit-icon"
-                                        onClick={(e) => {
-                                          undoEditRow(e, index);
-                                        }}
-                                      >
-                                        <i class="fa-solid fa-arrow-rotate-left"></i>
-                                      </button>
-                                    : ""
-                                } */}
                                     {submitStatusAllKey === 0 ? (
                                       <div className="d-flex align-items-center">
                                       <button
@@ -2043,23 +2023,30 @@ const singleRemarkModalDone = async () => {
                                           handleSingleRemark(e, item, index)
                                         }}
                                        />
-                                    
-
                                       </div>
 
                                     ) : (
-                                      ""
+                                     <div className="d-flex align-items-center">
+                                     
+                                      <button
+                                        className="view-icon"
+                                        onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                      >
+                                       <i className="fa fa-eye text-primary"></i>
+                                      </button>
+
+
+                                       </div>
+                                     
                                     )}
                                     {/* <Trash2 className="delete-icon" /> */}
                                   </td>
 
-                                   
-                                   
-                                     
+             
 
-                                ) : (
-                                  ""
-                                )}
+                                
                               </tr>
 
 
@@ -2370,10 +2357,25 @@ const singleRemarkModalDone = async () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  <label htmlFor="customername-field" className="form-label">
+                 
+                  {
+                    submitStatusAllKey === 1 ?
+                    <p>
+
+                      {console.log("remarkSingleIndex", remarkSingleIndex)}
+                      {console.log("remarkSingleIndex 2", timeSheetRows[remarkSingleIndex])}
+                     
+                      {remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?
+                      "No Remark Found":!['',null,undefined].includes(timeSheetRows[remarkSingleIndex].remark) ? timeSheetRows[remarkSingleIndex].remark : "No Remark Found" : "No Remark Found"
+                    
+                    }
+                    </p> 
+                    : <>
+                     <label htmlFor="customername-field" className="form-label">
                     Remark
-                  </label>
-                  <textarea
+                    </label>
+                     <textarea
                     type="text"
                     className="form-control cursor-pointer"
                     placeholder="Enter Remark"
@@ -2385,6 +2387,9 @@ const singleRemarkModalDone = async () => {
                     
                     } 
                   />
+                  </>
+                  }
+                 
                 </div>
               </div>
             </div>
