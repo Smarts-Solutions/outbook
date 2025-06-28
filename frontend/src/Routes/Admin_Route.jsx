@@ -54,6 +54,7 @@ import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
+import TimesheetReport from "../layouts/Admin/Timesheet/TimesheetReport";
 import Reports from "../layouts/Admin/Reports/Reports";
 import Jobs from '../layouts/Admin/Reports/Jobs'
 import TextWeeklyReport from "../layouts/Admin/Reports/TextWeelyReport"
@@ -289,6 +290,7 @@ const Admin_Route = () => {
               <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />
               <Route path="/timesheet" element={<Timesheet />} />
               <Route path="/timesheetnew" element={<TimesheetNew />} />
+              <Route path="/timesheetReports" element={<TimesheetReport />} />
               <Route path="/subinternal" element={<SubInternal />} />
               <Route path="/report/jobs" element={<Jobs />} />
               <Route path="/dashboard/data" element={<DashboardLinkData />} />
