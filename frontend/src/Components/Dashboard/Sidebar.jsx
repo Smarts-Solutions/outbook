@@ -314,7 +314,7 @@ const Sidebar = () => {
                   </Link>
                 </li>
 
-                <li
+                {/* <li
                   className={
                     activeLink === "/admin/timesheetReports" ? "active" : ""
                   }
@@ -326,11 +326,11 @@ const Sidebar = () => {
                   >
                     <span className="sidebar-icons">
                       <i className="fas fa-clock"></i>{" "}
-                      {/* Time Sheet icon */}
+                     
                     </span>
                     <span>Time Sheet Reports</span>
                   </Link>
-                </li>
+                </li> */}
                 </>
               )}
             {((updatedShowTab && updatedShowTab.setting) ||

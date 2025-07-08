@@ -957,16 +957,17 @@ const Timesheet = () => {
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
         // console.log(`finalTotalHours`, finalTotalHours);
-        if (staff_hourminute > parseFloat(finalTotalHours)) {
-          sweatalert.fire({
-            icon: "warning",
-            title: "You have not completed your timesheet for this week.",
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 3000,
-          });
-          return;
-        }
+        
+        // if (staff_hourminute > parseFloat(finalTotalHours)) {
+        //   sweatalert.fire({
+        //     icon: "warning",
+        //     title: "You have not completed your timesheet for this week.",
+        //     timerProgressBar: true,
+        //     showConfirmButton: true,
+        //     timer: 3000,
+        //   });
+        //   return;
+        // }
 
       }
 
@@ -2017,25 +2018,25 @@ const Timesheet = () => {
                                       </button>
 
 
-                                      <FileAxis3d
+                                      {/* <FileAxis3d
                                         className="edit-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
-                                      />
+                                      /> */}
                                     </div>
 
                                   ) : (
                                     <div className="d-flex align-items-center">
 
-                                      <button
+                                      {/* <button
                                         className="view-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
                                       >
                                         <i className="fa fa-eye text-primary"></i>
-                                      </button>
+                                      </button> */}
 
 
                                     </div>
