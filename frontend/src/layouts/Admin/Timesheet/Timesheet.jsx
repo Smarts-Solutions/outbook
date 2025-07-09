@@ -3,6 +3,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import Select from 'react-select';
 import {
   getTimesheetData,
   getTimesheetTaskTypedData,
@@ -1297,31 +1298,31 @@ const Timesheet = () => {
       "Remark"
     ];
 
-    
-  const rows = timeSheetRows
-  .filter(item => item.id !== null && item.id !== undefined)
-  .map((item, index) => {
-    return [
-      index + 1,
-      item.task_type === "1" ? "Internal" : "External",
-      item.customer_name || "No Customer",
-      item.client_name || "No Client",
-      item.task_type === "1"
-        ? item.internal_name || "No Job"
-        : item.job_name || "No Job",
-      item.task_type === "1" ? " - " : item.job_type_name || " - ",
-      item.task_type === "1"
-        ? item.sub_internal_name || "No Task"
-        : item.task_name || "No Task",
-      item.monday_hours || 0,
-      item.tuesday_hours || 0,
-      item.wednesday_hours || 0,
-      item.thursday_hours || 0,
-      item.friday_hours || 0,
-      item.saturday_hours || 0,
-      item.remark || ""
-    ];
-  });
+
+    const rows = timeSheetRows
+      .filter(item => item.id !== null && item.id !== undefined)
+      .map((item, index) => {
+        return [
+          index + 1,
+          item.task_type === "1" ? "Internal" : "External",
+          item.customer_name || "No Customer",
+          item.client_name || "No Client",
+          item.task_type === "1"
+            ? item.internal_name || "No Job"
+            : item.job_name || "No Job",
+          item.task_type === "1" ? " - " : item.job_type_name || " - ",
+          item.task_type === "1"
+            ? item.sub_internal_name || "No Task"
+            : item.task_name || "No Task",
+          item.monday_hours || 0,
+          item.tuesday_hours || 0,
+          item.wednesday_hours || 0,
+          item.thursday_hours || 0,
+          item.friday_hours || 0,
+          item.saturday_hours || 0,
+          item.remark || ""
+        ];
+      });
 
 
 
@@ -1354,7 +1355,11 @@ const Timesheet = () => {
   const singleRemarkModalDone = async () => {
     setRemarkSingleModel(false);
   }
-
+  
+//   const staffOptions = staffDataAll.data?.map((val) => ({
+//   value: val.id,
+//   label: `${val.first_name} ${val.last_name}`
+// })) || [];
 
   // Example usage
   return (
@@ -1403,6 +1408,19 @@ const Timesheet = () => {
                       </option>
                     ))}
                 </select>
+                {/* <Select
+                  id="tabSelect"
+                  name="staff_id"
+                  options={staffOptions}
+                  defaultValue={staffOptions.find(opt => opt.value === staffDetails.id)}
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'staff_id', value: selectedOption.value } };
+                    selectFilterStaffANdWeek(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                /> */}
               </div>
             ) : (
               ""
@@ -1776,7 +1794,7 @@ const Timesheet = () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                  
+
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
