@@ -700,6 +700,18 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
+   console.log(`name`, name);
+   console.log(`value`, value);
+   let final_value = value;
+
+   let [intPart, decimalPart] = value.toString().split(".");
+
+    if (decimalPart) {
+      let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
+       final_value = `${intPart}.${multiplied}`;
+    } 
+
+    console.log(`final value `, final_value);
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -712,7 +724,7 @@ const Timesheet = () => {
       return;
     }
 
-    if (parseFloat(value) > 23.59) {
+    if (parseFloat(final_value) > 23.59) {
       sweatalert.fire({
         icon: "warning",
         title: "Total hours in a day cannot exceed 24",
@@ -736,7 +748,7 @@ const Timesheet = () => {
     //   return;
     // }
 
-    const [integerPart, fractionalPartRaw] = value.split(".");
+    const [integerPart, fractionalPartRaw] = final_value.split(".");
     let fractionalPart = fractionalPartRaw || "0";
     if (fractionalPart.length === 1) {
       fractionalPart = fractionalPart + "0";
@@ -970,8 +982,6 @@ const Timesheet = () => {
         // }
 
       }
-
-
 
       let isvalid = await validateDateFields(req.data);
       if (!isvalid) {
