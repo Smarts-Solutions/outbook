@@ -1338,7 +1338,6 @@ const Timesheet = () => {
     link.click();
   };
 
-
   const handleSingleRemark = (e, item, index) => {
     setRemarkSingleModel(true);
     setRemarkSingleIndex(index);
