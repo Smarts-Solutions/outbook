@@ -239,7 +239,7 @@ const Timesheet = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-  // console.log(`timeSheetRows`, timeSheetRows);
+  console.log(`timeSheetRows`, timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -700,20 +700,18 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
-    console.log(`name`, name);
-    console.log(`value`, value);
-    let final_value = value;
+   console.log(`name`, name);
+   console.log(`value`, value);
+   let final_value = value;
 
-    let [intPart, decimalPart] = value.toString().split(".");
+   let [intPart, decimalPart] = value.toString().split(".");
 
     if (decimalPart) {
       let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
-      final_value = `${intPart}.${multiplied}`;
-    }
+       final_value = `${intPart}.${multiplied}`;
+    } 
 
     console.log(`final value `, final_value);
-
-
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -846,26 +844,18 @@ const Timesheet = () => {
   };
 
   const getTotalHoursFromKey = (key) => {
-    // const total = timeSheetRows && timeSheetRows.reduce((acc, item) => {
-    //   const val = parseFloat(item[key] || 0);
-    //   const hrs = Math.floor(val);
-    //   const mins = Math.round((val - hrs) * 100);
-    //   acc.totalMinutes += hrs * 60 + mins;
-    //   return acc;
-    // }, { totalMinutes: 0 });
-
-    // const totalHours = Math.floor(total.totalMinutes / 60);
-    // const totalMins = total.totalMinutes % 60;
-    // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-    // return finalTotalHours;
-
-    const total = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+    const total = timeSheetRows && timeSheetRows.reduce((acc, item) => {
       const val = parseFloat(item[key] || 0);
-      return acc + val;
-    }, 0);
+      const hrs = Math.floor(val);
+      const mins = Math.round((val - hrs) * 100);
+      acc.totalMinutes += hrs * 60 + mins;
+      return acc;
+    }, { totalMinutes: 0 });
 
-    return total.toFixed(2); // returns something like 8.75
-
+    const totalHours = Math.floor(total.totalMinutes / 60);
+    const totalMins = total.totalMinutes % 60;
+    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    return finalTotalHours;
   };
 
   function totalWeeklyHoursMinutes(timeData) {
@@ -896,37 +886,29 @@ const Timesheet = () => {
 
     const totalFormattedTime = `${finalHours}.${formattedMinutes}`;
     return totalFormattedTime;
-
   }
 
   const totalHoursMinute = () => {
-    // const converted = timeSheetRows && timeSheetRows?.map(item => {
-    //   return {
-    //     original: item.total_hours,
-    //     totalweeklyHours: totalWeeklyHoursMinutes(item)
-    //   };
-    // });
-    // const total = converted.reduce((acc, item) => {
-    //   const val = parseFloat(item.totalweeklyHours || 0);
-    //   const hrs = Math.floor(val);
-    //   const mins = Math.round((val - hrs) * 100);
+    const converted = timeSheetRows && timeSheetRows?.map(item => {
+      return {
+        original: item.total_hours,
+        totalweeklyHours: totalWeeklyHoursMinutes(item)
+      };
+    });
 
-    //   acc.totalMinutes += hrs * 60 + mins;
-    //   return acc;
-    // }, { totalMinutes: 0 });
+    const total = converted.reduce((acc, item) => {
+      const val = parseFloat(item.totalweeklyHours || 0);
+      const hrs = Math.floor(val);
+      const mins = Math.round((val - hrs) * 100);
 
-    // const totalHours = Math.floor(total.totalMinutes / 60);
-    // const totalMins = total.totalMinutes % 60;
-    // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-    // return finalTotalHours;
+      acc.totalMinutes += hrs * 60 + mins;
+      return acc;
+    }, { totalMinutes: 0 });
 
-    const total = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-      const val = parseFloat(item.total_hours || 0);
-      return acc + val;
-    }, 0);
-
-    return total.toFixed(2);
-
+    const totalHours = Math.floor(total.totalMinutes / 60);
+    const totalMins = total.totalMinutes % 60;
+    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    return finalTotalHours;
   }
 
   const saveData = async (e) => {
@@ -1069,16 +1051,6 @@ const Timesheet = () => {
     setRemarkModel(true);
   };
 
-  async function convertHoursMinutes(totalHours) {
-    if (totalHours == null || totalHours === "") {
-      return "0.00"; // Return a default value if totalHours is null or empty
-    }
-    const hours = Math.floor(totalHours);
-    const minutes = Math.round((totalHours - hours) * 60);
-    const formattedMinutes = minutes.toString().padStart(2, '0');
-    return `${hours}.${formattedMinutes}`;
-  }
-
   const saveTimeSheetRemark = async (e) => {
 
     if (submitStatus == 1) {
@@ -1107,39 +1079,28 @@ const Timesheet = () => {
       let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
       if (staff_hourminute != null) {
 
-        // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-        //   return {
-        //     original: item.total_hours,
-        //     totalweeklyHours: totalWeeklyHoursMinutes(item)
-        //   };
-        // });
+        const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+          return {
+            original: item.total_hours,
+            totalweeklyHours: totalWeeklyHoursMinutes(item)
+          };
+        });
 
-        //  const total = converted.reduce((acc, item) => {
-        //   const val = parseFloat(item.totalweeklyHours || 0);
-        //   const hrs = Math.floor(val);
-        //   const mins = Math.round((val - hrs) * 100);
+        const total = converted.reduce((acc, item) => {
+          const val = parseFloat(item.totalweeklyHours || 0);
+          const hrs = Math.floor(val);
+          const mins = Math.round((val - hrs) * 100);
 
-        //   acc.totalMinutes += hrs * 60 + mins;
-        //   return acc;
-        // }, { totalMinutes: 0 });
+          acc.totalMinutes += hrs * 60 + mins;
+          return acc;
+        }, { totalMinutes: 0 });
 
-        // const totalHours = Math.floor(total.totalMinutes / 60);
-        // const totalMins = total.totalMinutes % 60;
-        // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        const totalHours = Math.floor(total.totalMinutes / 60);
+        const totalMins = total.totalMinutes % 60;
+        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+
         // console.log(`finalTotalHours`, finalTotalHours);
-
-
-        const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-          const val = parseFloat(item.total_hours || 0);
-          return acc + val;
-        }, 0);
-
-        let finalTotalHours = await convertHoursMinutes(totalHours)
-
-
-         console.log(`finalTotalHours`, finalTotalHours);
-         console.log(`staff_hourminute`, staff_hourminute);
-
+        // console.log(`staff_hourminute`, staff_hourminute);
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
@@ -1279,7 +1240,7 @@ const Timesheet = () => {
       alert("No data to export!");
       return;
     }
-     
+
     const headers = [
       "Index",
       "Task Type",
@@ -1315,10 +1276,10 @@ const Timesheet = () => {
       item.remark || ""
     ]);
 
+    
+    const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark}`, ...new Array(headers.length - 1).fill("")];
 
-    const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark || ""}`, ...new Array(headers.length - 1).fill("")];
-
-    const csvContent = [headers, ...rows, finalRemarkRow]
+    const csvContent = [headers, ...rows , finalRemarkRow]
       .map((row) => row.join(","))
       .join("\n");
 
@@ -1767,13 +1728,11 @@ const Timesheet = () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                  {console.log("item", item)}
+
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
-                                      return matchedJob && matchedJob.job_type_name !== undefined
-                                        ? <span>{matchedJob.job_type_name}</span>
-                                        : "-";
+                                      return matchedJob ? <span>{matchedJob.job_type_name}</span> : "-";
                                     })()
                                   ) : (
                                     item.task_type === "1" ? (
@@ -2145,7 +2104,6 @@ const Timesheet = () => {
                                       className="form-control cursor-pointer border-radius-end"
                                       type="text"
                                       readOnly
-                                      disabled
                                       name="monday_hours"
                                       value={getTotalHoursFromKey("monday_hours")}
                                       style={{ width: 80, border: '1px solid #00afef' }}
@@ -2159,7 +2117,6 @@ const Timesheet = () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
-                                          disabled
                                           readOnly
                                           name="tuesday_hours"
                                           value={getTotalHoursFromKey("tuesday_hours")}
@@ -2168,7 +2125,6 @@ const Timesheet = () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
-                                          disabled
                                           readOnly
                                           name="wednesday_hours"
                                           value={getTotalHoursFromKey("wednesday_hours")}
@@ -2177,7 +2133,6 @@ const Timesheet = () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
-                                          disabled
                                           readOnly
                                           name="thursday_hours"
                                           value={getTotalHoursFromKey("thursday_hours")}
@@ -2186,7 +2141,6 @@ const Timesheet = () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
-                                          disabled
                                           readOnly
                                           name="friday_hours"
                                           value={getTotalHoursFromKey("friday_hours")}
@@ -2195,7 +2149,6 @@ const Timesheet = () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
-                                          disabled
                                           readOnly
                                           name="saturday_hours"
                                           value={getTotalHoursFromKey("saturday_hours")}
@@ -2359,13 +2312,11 @@ const Timesheet = () => {
 
                   {
                     submitStatusAllKey === 1 ?
-                    <div>
                       <p>
                         {timeSheetRows && timeSheetRows.length > 0 ?
                           timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
                           : "No Final Remark Found"}
                       </p>
-                      </div>
                       :
                       <>
                         <label htmlFor="customername-field" className="form-label">
