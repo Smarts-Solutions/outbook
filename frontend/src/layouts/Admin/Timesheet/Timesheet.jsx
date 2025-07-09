@@ -1137,8 +1137,8 @@ const Timesheet = () => {
         let finalTotalHours = await convertHoursMinutes(totalHours)
 
 
-         console.log(`finalTotalHours`, finalTotalHours);
-         console.log(`staff_hourminute`, staff_hourminute);
+        console.log(`finalTotalHours`, finalTotalHours);
+        console.log(`staff_hourminute`, staff_hourminute);
 
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
@@ -1279,13 +1279,14 @@ const Timesheet = () => {
       alert("No data to export!");
       return;
     }
-     
+
     const headers = [
       "Index",
       "Task Type",
       "Customer Name",
       "Client Name",
       "Job Name",
+      "Job Type",
       "Task Name",
       "Monday Hours",
       "Tuesday Hours",
@@ -1295,7 +1296,12 @@ const Timesheet = () => {
       "Saturday Hours",
       "Remark"
     ];
-    const rows = timeSheetRows.map((item, index) => [
+
+    
+  const rows = timeSheetRows
+  .filter(item => item.id !== null && item.id !== undefined)
+  .map((item, index) => {
+    return [
       index + 1,
       item.task_type === "1" ? "Internal" : "External",
       item.customer_name || "No Customer",
@@ -1303,6 +1309,7 @@ const Timesheet = () => {
       item.task_type === "1"
         ? item.internal_name || "No Job"
         : item.job_name || "No Job",
+      item.task_type === "1" ? " - " : item.job_type_name || " - ",
       item.task_type === "1"
         ? item.sub_internal_name || "No Task"
         : item.task_name || "No Task",
@@ -1313,7 +1320,9 @@ const Timesheet = () => {
       item.friday_hours || 0,
       item.saturday_hours || 0,
       item.remark || ""
-    ]);
+    ];
+  });
+
 
 
     const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark || ""}`, ...new Array(headers.length - 1).fill("")];
@@ -1767,7 +1776,7 @@ const Timesheet = () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                  {console.log("item", item)}
+                                  
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
@@ -2359,12 +2368,12 @@ const Timesheet = () => {
 
                   {
                     submitStatusAllKey === 1 ?
-                    <div>
-                      <p>
-                        {timeSheetRows && timeSheetRows.length > 0 ?
-                          timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
-                          : "No Final Remark Found"}
-                      </p>
+                      <div>
+                        <p>
+                          {timeSheetRows && timeSheetRows.length > 0 ?
+                            timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
+                            : "No Final Remark Found"}
+                        </p>
                       </div>
                       :
                       <>
