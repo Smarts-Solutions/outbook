@@ -1355,11 +1355,39 @@ const Timesheet = () => {
   const singleRemarkModalDone = async () => {
     setRemarkSingleModel(false);
   }
-  
-//   const staffOptions = staffDataAll.data?.map((val) => ({
-//   value: val.id,
-//   label: `${val.first_name} ${val.last_name}`
-// })) || [];
+
+
+  // SELECT OPTIONS FOR STAFF START //
+  const staffOptions = staffDataAll.data?.map((val) => ({
+    value: val.id,
+    label: `${val.first_name} ${val.last_name}`
+  })) || [];
+  // SELECT OPTIONS FOR STAFF END //
+
+
+
+  // SELECT OPTIONS FOR WEEK START //
+  const weekOptions = [];
+  if (!hasValidWeekOffsetZero) {
+    weekOptions.push({
+      value: "0",
+      label: getFormattedDate("current", ""),
+    });
+  }
+
+  if (staffDataWeekDataAll.data) {
+    staffDataWeekDataAll.data.forEach((val) => {
+      weekOptions.push({
+        value: val.valid_weekOffsets,
+        label: getFormattedDate("convert", val.month_date),
+      });
+    });
+  }
+  const currentValue = weekOptions.find(
+    (opt) => opt.value == weekOffSetValue.current
+  );
+
+  // SELECT OPTIONS FOR WEEK END //
 
   // Example usage
   return (
@@ -1389,7 +1417,9 @@ const Timesheet = () => {
             {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
-                <select
+
+                {console.log(`staffDetails`, staffDetails)}
+                {/* <select
                   name="staff_id"
                   className="form-select"
                   id="tabSelect"
@@ -1407,12 +1437,13 @@ const Timesheet = () => {
                         {val.first_name + " " + val.last_name}
                       </option>
                     ))}
-                </select>
-                {/* <Select
+                </select> */}
+                <Select
                   id="tabSelect"
                   name="staff_id"
                   options={staffOptions}
-                  defaultValue={staffOptions.find(opt => opt.value === staffDetails.id)}
+                  //defaultValue={staffOptions.find(opt => Number(opt.value) === Number(staffDetails.id))}
+                  defaultValue={staffDetails.id}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
                     const e = { target: { name: 'staff_id', value: selectedOption.value } };
@@ -1420,7 +1451,7 @@ const Timesheet = () => {
                   }}
                   classNamePrefix="react-select"
                   isSearchable
-                /> */}
+                />
               </div>
             ) : (
               ""
@@ -1431,7 +1462,7 @@ const Timesheet = () => {
                 <div className="form-group col-md-6 pe-0">
                   <label className="form-label mb-2">Select Date</label>
 
-                  <select
+                  {/* <select
                     name="week"
                     className="form-select"
                     id="tabSelect"
@@ -1456,7 +1487,20 @@ const Timesheet = () => {
                           {getFormattedDate("convert", val.month_date)}
                         </option>
                       ))}
-                  </select>
+                  </select> */}
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    options={weekOptions}
+                    defaultValue={currentValue}
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
                 </div>
               ) : (
                 ""
