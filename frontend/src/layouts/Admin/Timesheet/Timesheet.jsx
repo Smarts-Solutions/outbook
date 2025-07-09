@@ -957,11 +957,11 @@ const Timesheet = () => {
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
         // console.log(`finalTotalHours`, finalTotalHours);
-        
+
         // if (staff_hourminute > parseFloat(finalTotalHours)) {
         //   sweatalert.fire({
         //     icon: "warning",
-        //     title: "You have not completed your timesheet for this week.",
+        //     title: "Please enter the minimum required hourly time in the timesheet before submitting.",
         //     timerProgressBar: true,
         //     showConfirmButton: true,
         //     timer: 3000,
@@ -1048,7 +1048,6 @@ const Timesheet = () => {
         return {
           ...item,
           submit_status: "1",
-          remark: item.editRow === 1 ? remarkText : null,
           final_remark: remarkText,
         };
       });
@@ -1090,12 +1089,13 @@ const Timesheet = () => {
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
 
-        console.log(`finalTotalHours`, finalTotalHours);
-        console.log(`staff_hourminute`, staff_hourminute);
+        // console.log(`finalTotalHours`, finalTotalHours);
+        // console.log(`staff_hourminute`, staff_hourminute);
+
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
-            title: "You have not completed your timesheet for this week.",
+            title: "Please enter the minimum required hourly time in the timesheet before submitting.",
             timerProgressBar: true,
             showConfirmButton: true,
             timer: 3000,
@@ -1104,6 +1104,7 @@ const Timesheet = () => {
         }
 
       }
+
 
 
       const res = await dispatch(
@@ -1243,6 +1244,7 @@ const Timesheet = () => {
       "Thursday Hours",
       "Friday Hours",
       "Saturday Hours",
+      "Remark"
     ];
     const rows = timeSheetRows.map((item, index) => [
       index + 1,
@@ -1261,9 +1263,13 @@ const Timesheet = () => {
       item.thursday_hours || 0,
       item.friday_hours || 0,
       item.saturday_hours || 0,
+      item.remark || ""
     ]);
 
-    const csvContent = [headers, ...rows]
+    
+    const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark}`, ...new Array(headers.length - 1).fill("")];
+
+    const csvContent = [headers, ...rows , finalRemarkRow]
       .map((row) => row.join(","))
       .join("\n");
 
@@ -1716,11 +1722,11 @@ const Timesheet = () => {
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
-                                      return matchedJob ? <span>{matchedJob.job_type_name}</span> : "";
+                                      return matchedJob ? <span>{matchedJob.job_type_name}</span> : "-";
                                     })()
                                   ) : (
                                     item.task_type === "1" ? (
-                                      ""
+                                      "-"
                                     ) : (
                                       <span>{item.job_type_name}</span>
                                     )
@@ -2018,25 +2024,25 @@ const Timesheet = () => {
                                       </button>
 
 
-                                      {/* <FileAxis3d
+                                      <FileAxis3d
                                         className="edit-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
-                                      /> */}
+                                      />
                                     </div>
 
                                   ) : (
                                     <div className="d-flex align-items-center">
 
-                                      {/* <button
+                                      <button
                                         className="view-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
                                       >
                                         <i className="fa fa-eye text-primary"></i>
-                                      </button> */}
+                                      </button>
 
 
                                     </div>
@@ -2199,7 +2205,7 @@ const Timesheet = () => {
                                 <div className="mt-2 mb-2">
                                   {/* setRemarkModel */}
                                   <span className="fs-6 text-dark"> <b>Final Remark :</b>
-                                    
+
                                     <button
                                       className="view-icon"
                                       onClick={() => setRemarkModel(true)}
@@ -2294,29 +2300,29 @@ const Timesheet = () => {
               <div className="row">
                 <div className="col-lg-12">
 
-                 {
-                   submitStatusAllKey === 1 ?
-                    <p>
-                      {timeSheetRows && timeSheetRows.length > 0 ?
-                        timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
-                        : "No Final Remark Found"}
-                    </p>  
-                   :
-                    <>
-                    <label htmlFor="customername-field" className="form-label">
-                    Final Remark
-                  </label>
-                  <textarea
-                    type="text"
-                    className="form-control cursor-pointer"
-                    placeholder="Enter Remark"
-                    defaultValue=""
-                    onChange={(e) => setRemarkText(e.target.value)}
-                    value={remarkText}
-                  />
-                  </>
+                  {
+                    submitStatusAllKey === 1 ?
+                      <p>
+                        {timeSheetRows && timeSheetRows.length > 0 ?
+                          timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
+                          : "No Final Remark Found"}
+                      </p>
+                      :
+                      <>
+                        <label htmlFor="customername-field" className="form-label">
+                          Final Remark
+                        </label>
+                        <textarea
+                          type="text"
+                          className="form-control cursor-pointer"
+                          placeholder="Enter Remark"
+                          defaultValue=""
+                          onChange={(e) => setRemarkText(e.target.value)}
+                          value={remarkText}
+                        />
+                      </>
 
-                 }
+                  }
 
                 </div>
               </div>
