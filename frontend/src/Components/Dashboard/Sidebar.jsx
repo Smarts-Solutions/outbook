@@ -249,7 +249,7 @@ const Sidebar = () => {
                     <span className="sidebar-icons">
                       <i className="fas fa-user-friends"></i>
                     </span>
-                    <span>Staff</span>
+                    <span>Staffs</span>
                   </Link>
                 </li>
               )}
@@ -288,13 +288,14 @@ const Sidebar = () => {
                       <i className="fas fa-file-alt"></i>{" "}
                       {/* Report icon */}
                     </span>
-                    <span>Report</span>
+                    <span>Reports</span>
                   </Link>
                 </li>
               )}
 
             {((updatedShowTab && updatedShowTab.timesheet) ||
               role === "SUPERADMIN") && (
+                <>
                 <li
                   className={
                     activeLink === "/admin/timesheet" ? "active" : ""
@@ -312,6 +313,25 @@ const Sidebar = () => {
                     <span>Time Sheet</span>
                   </Link>
                 </li>
+
+                {/* <li
+                  className={
+                    activeLink === "/admin/timesheetReports" ? "active" : ""
+                  }
+                >
+                  <Link
+                    to="/admin/timesheetReports"
+                    aria-expanded="false"
+                    onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
+                  >
+                    <span className="sidebar-icons">
+                      <i className="fas fa-clock"></i>{" "}
+                     
+                    </span>
+                    <span>Time Sheet Reports</span>
+                  </Link>
+                </li> */}
+                </>
               )}
             {((updatedShowTab && updatedShowTab.setting) ||
               role === "SUPERADMIN") && (

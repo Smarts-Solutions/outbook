@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download , FileAxis3d } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -234,10 +234,12 @@ const Timesheet = () => {
   const [remarkModel, setRemarkModel] = useState(false);
   const [remarkSingleModel, setRemarkSingleModel] = useState(false);
   const [remarkSingleIndex, setRemarkSingleIndex] = useState(null);
-  
+
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
+
+  // console.log(`timeSheetRows`, timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -698,6 +700,20 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
+    console.log(`name`, name);
+    console.log(`value`, value);
+    let final_value = value;
+
+    let [intPart, decimalPart] = value.toString().split(".");
+
+    if (decimalPart) {
+      let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
+      final_value = `${intPart}.${multiplied}`;
+    }
+
+    console.log(`final value `, final_value);
+
+
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -710,7 +726,7 @@ const Timesheet = () => {
       return;
     }
 
-    if (parseFloat(value) > 23.59) {
+    if (parseFloat(final_value) > 23.59) {
       sweatalert.fire({
         icon: "warning",
         title: "Total hours in a day cannot exceed 24",
@@ -734,7 +750,7 @@ const Timesheet = () => {
     //   return;
     // }
 
-    const [integerPart, fractionalPartRaw] = value.split(".");
+    const [integerPart, fractionalPartRaw] = final_value.split(".");
     let fractionalPart = fractionalPartRaw || "0";
     if (fractionalPart.length === 1) {
       fractionalPart = fractionalPart + "0";
@@ -799,8 +815,6 @@ const Timesheet = () => {
   // update record only Function
   function updateRecordSheet(rowId, name, value) {
 
-    console.log(`rowId`, rowId);
-
 
     // update record only
     const updatedRows_update = [...updateTimeSheetRows];
@@ -832,18 +846,26 @@ const Timesheet = () => {
   };
 
   const getTotalHoursFromKey = (key) => {
-    const total = timeSheetRows && timeSheetRows.reduce((acc, item) => {
-      const val = parseFloat(item[key] || 0);
-      const hrs = Math.floor(val);
-      const mins = Math.round((val - hrs) * 100);
-      acc.totalMinutes += hrs * 60 + mins;
-      return acc;
-    }, { totalMinutes: 0 });
+    // const total = timeSheetRows && timeSheetRows.reduce((acc, item) => {
+    //   const val = parseFloat(item[key] || 0);
+    //   const hrs = Math.floor(val);
+    //   const mins = Math.round((val - hrs) * 100);
+    //   acc.totalMinutes += hrs * 60 + mins;
+    //   return acc;
+    // }, { totalMinutes: 0 });
 
-    const totalHours = Math.floor(total.totalMinutes / 60);
-    const totalMins = total.totalMinutes % 60;
-    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-    return finalTotalHours;
+    // const totalHours = Math.floor(total.totalMinutes / 60);
+    // const totalMins = total.totalMinutes % 60;
+    // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    // return finalTotalHours;
+
+    const total = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+      const val = parseFloat(item[key] || 0);
+      return acc + val;
+    }, 0);
+
+    return total.toFixed(2); // returns something like 8.75
+
   };
 
   function totalWeeklyHoursMinutes(timeData) {
@@ -874,34 +896,42 @@ const Timesheet = () => {
 
     const totalFormattedTime = `${finalHours}.${formattedMinutes}`;
     return totalFormattedTime;
+
   }
 
   const totalHoursMinute = () => {
-    const converted = timeSheetRows && timeSheetRows?.map(item => {
-      return {
-        original: item.total_hours,
-        totalweeklyHours: totalWeeklyHoursMinutes(item)
-      };
-    });
+    // const converted = timeSheetRows && timeSheetRows?.map(item => {
+    //   return {
+    //     original: item.total_hours,
+    //     totalweeklyHours: totalWeeklyHoursMinutes(item)
+    //   };
+    // });
+    // const total = converted.reduce((acc, item) => {
+    //   const val = parseFloat(item.totalweeklyHours || 0);
+    //   const hrs = Math.floor(val);
+    //   const mins = Math.round((val - hrs) * 100);
 
-    const total = converted.reduce((acc, item) => {
-      const val = parseFloat(item.totalweeklyHours || 0);
-      const hrs = Math.floor(val);
-      const mins = Math.round((val - hrs) * 100);
+    //   acc.totalMinutes += hrs * 60 + mins;
+    //   return acc;
+    // }, { totalMinutes: 0 });
 
-      acc.totalMinutes += hrs * 60 + mins;
-      return acc;
-    }, { totalMinutes: 0 });
+    // const totalHours = Math.floor(total.totalMinutes / 60);
+    // const totalMins = total.totalMinutes % 60;
+    // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+    // return finalTotalHours;
 
-    const totalHours = Math.floor(total.totalMinutes / 60);
-    const totalMins = total.totalMinutes % 60;
-    const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-    return finalTotalHours;
+    const total = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+      const val = parseFloat(item.total_hours || 0);
+      return acc + val;
+    }, 0);
+
+    return total.toFixed(2);
+
   }
 
   const saveData = async (e) => {
-  
-   
+
+
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -909,10 +939,10 @@ const Timesheet = () => {
         return;
       }
     }
-  
-    
+
+
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
-     
+
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -956,24 +986,23 @@ const Timesheet = () => {
         const totalHours = Math.floor(total.totalMinutes / 60);
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-       // console.log(`finalTotalHours`, finalTotalHours);
-        if (staff_hourminute > parseFloat(finalTotalHours)) {
-          sweatalert.fire({
-            icon: "warning",
-            title: "You have not completed your timesheet for this week.",
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 3000,
-          });
-          return;
-        }
+        // console.log(`finalTotalHours`, finalTotalHours);
+
+        // if (staff_hourminute > parseFloat(finalTotalHours)) {
+        //   sweatalert.fire({
+        //     icon: "warning",
+        //     title: "Please enter the minimum required hourly time in the timesheet before submitting.",
+        //     timerProgressBar: true,
+        //     showConfirmButton: true,
+        //     timer: 3000,
+        //   });
+        //   return;
+        // }
 
       }
 
-    
-     
-     let isvalid = await validateDateFields(req.data);
-     if( !isvalid) {
+      let isvalid = await validateDateFields(req.data);
+      if (!isvalid) {
         sweatalert.fire({
           icon: "warning",
           title: "Please fill at least one date field for each row.",
@@ -982,9 +1011,9 @@ const Timesheet = () => {
           timer: 3000,
         });
         return;
-      } 
-    
-   
+      }
+
+
 
 
       const res = await dispatch(
@@ -1006,25 +1035,25 @@ const Timesheet = () => {
     }
   };
 
-const validateDateFields = (data) => {
-  const isInvalid = data.some((row) => {
-    const allDatesEmpty =
-      !row.monday_date &&
-      !row.tuesday_date &&
-      !row.wednesday_date &&
-      !row.thursday_date &&
-      !row.friday_date &&
-      !row.saturday_date &&
-      !row.sunday_date;
+  const validateDateFields = (data) => {
+    const isInvalid = data.some((row) => {
+      const allDatesEmpty =
+        !row.monday_date &&
+        !row.tuesday_date &&
+        !row.wednesday_date &&
+        !row.thursday_date &&
+        !row.friday_date &&
+        !row.saturday_date &&
+        !row.sunday_date;
 
-    return row.id === null && allDatesEmpty;
-  });
+      return row.id === null && allDatesEmpty;
+    });
 
-  if (isInvalid) {
-    return false;
-  }
-  return true;
-};
+    if (isInvalid) {
+      return false;
+    }
+    return true;
+  };
 
   const submitData = async (e) => {
 
@@ -1040,6 +1069,16 @@ const validateDateFields = (data) => {
     setRemarkModel(true);
   };
 
+  async function convertHoursMinutes(totalHours) {
+    if (totalHours == null || totalHours === "") {
+      return "0.00"; // Return a default value if totalHours is null or empty
+    }
+    const hours = Math.floor(totalHours);
+    const minutes = Math.round((totalHours - hours) * 60);
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    return `${hours}.${formattedMinutes}`;
+  }
+
   const saveTimeSheetRemark = async (e) => {
 
     if (submitStatus == 1) {
@@ -1047,7 +1086,6 @@ const validateDateFields = (data) => {
         return {
           ...item,
           submit_status: "1",
-          remark: item.editRow === 1 ? remarkText : null,
           final_remark: remarkText,
         };
       });
@@ -1069,32 +1107,44 @@ const validateDateFields = (data) => {
       let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
       if (staff_hourminute != null) {
 
-        const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-          return {
-            original: item.total_hours,
-            totalweeklyHours: totalWeeklyHoursMinutes(item)
-          };
-        });
+        // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+        //   return {
+        //     original: item.total_hours,
+        //     totalweeklyHours: totalWeeklyHoursMinutes(item)
+        //   };
+        // });
 
-        const total = converted.reduce((acc, item) => {
-          const val = parseFloat(item.totalweeklyHours || 0);
-          const hrs = Math.floor(val);
-          const mins = Math.round((val - hrs) * 100);
+        //  const total = converted.reduce((acc, item) => {
+        //   const val = parseFloat(item.totalweeklyHours || 0);
+        //   const hrs = Math.floor(val);
+        //   const mins = Math.round((val - hrs) * 100);
 
-          acc.totalMinutes += hrs * 60 + mins;
-          return acc;
-        }, { totalMinutes: 0 });
+        //   acc.totalMinutes += hrs * 60 + mins;
+        //   return acc;
+        // }, { totalMinutes: 0 });
 
-        const totalHours = Math.floor(total.totalMinutes / 60);
-        const totalMins = total.totalMinutes % 60;
-        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        // const totalHours = Math.floor(total.totalMinutes / 60);
+        // const totalMins = total.totalMinutes % 60;
+        // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        // console.log(`finalTotalHours`, finalTotalHours);
 
-        console.log(`finalTotalHours`, finalTotalHours);
-        console.log(`staff_hourminute`, staff_hourminute);
+
+        const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+          const val = parseFloat(item.total_hours || 0);
+          return acc + val;
+        }, 0);
+
+        let finalTotalHours = await convertHoursMinutes(totalHours)
+
+
+         console.log(`finalTotalHours`, finalTotalHours);
+         console.log(`staff_hourminute`, staff_hourminute);
+
+
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
-            title: "You have not completed your timesheet for this week.",
+            title: "Please enter the minimum required hourly time in the timesheet before submitting.",
             timerProgressBar: true,
             showConfirmButton: true,
             timer: 3000,
@@ -1103,6 +1153,7 @@ const validateDateFields = (data) => {
         }
 
       }
+
 
 
       const res = await dispatch(
@@ -1209,7 +1260,7 @@ const validateDateFields = (data) => {
   };
 
   const dayMonthFormatDate = (dateString) => {
-   
+
     const parts = dateString.split(", ");
     const dayOfWeek = parts[0];
     const dateParts = parts[1].split("/");
@@ -1228,7 +1279,7 @@ const validateDateFields = (data) => {
       alert("No data to export!");
       return;
     }
-
+     
     const headers = [
       "Index",
       "Task Type",
@@ -1242,6 +1293,7 @@ const validateDateFields = (data) => {
       "Thursday Hours",
       "Friday Hours",
       "Saturday Hours",
+      "Remark"
     ];
     const rows = timeSheetRows.map((item, index) => [
       index + 1,
@@ -1260,9 +1312,13 @@ const validateDateFields = (data) => {
       item.thursday_hours || 0,
       item.friday_hours || 0,
       item.saturday_hours || 0,
+      item.remark || ""
     ]);
 
-    const csvContent = [headers, ...rows]
+
+    const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark || ""}`, ...new Array(headers.length - 1).fill("")];
+
+    const csvContent = [headers, ...rows, finalRemarkRow]
       .map((row) => row.join(","))
       .join("\n");
 
@@ -1274,9 +1330,9 @@ const validateDateFields = (data) => {
   };
 
 
-  const handleSingleRemark = (e,item,index) => {
-       setRemarkSingleModel(true);
-       setRemarkSingleIndex(index);
+  const handleSingleRemark = (e, item, index) => {
+    setRemarkSingleModel(true);
+    setRemarkSingleIndex(index);
   };
 
   const handleRemarkSingleText = (e, index) => {
@@ -1284,12 +1340,12 @@ const validateDateFields = (data) => {
     updatedRows[index].remark = e.target.value;
     setTimeSheetRows(updatedRows);
     const rowId = updatedRows[index].id;
-   updateRecordSheet(rowId, "remark", e.target.value);
+    updateRecordSheet(rowId, "remark", e.target.value);
   };
-  
-const singleRemarkModalDone = async () => {
-  setRemarkSingleModel(false);
-}
+
+  const singleRemarkModalDone = async () => {
+    setRemarkSingleModel(false);
+  }
 
 
   // Example usage
@@ -1395,18 +1451,18 @@ const singleRemarkModalDone = async () => {
               )} */}
               {
                 timeSheetRows.length > 0 ? (
-                <div className="form-group col-md-6">
-                  <button
-                    className=" btn btn-info float-md-end mt-lg-2"
-                    onClick={() => exportToCSV(timeSheetRows)}
-                  >
-                    Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
-                  </button>
-                </div>
-              ) : (
-                ""
-              )}
+                  <div className="form-group col-md-6">
+                    <button
+                      className=" btn btn-info float-md-end mt-lg-2"
+                      onClick={() => exportToCSV(timeSheetRows)}
+                    >
+                      Export Timesheet Data
+                      <i className="fa fa-download ms-2" />
+                    </button>
+                  </div>
+                ) : (
+                  ""
+                )}
             </div>
           </div>
 
@@ -1557,20 +1613,23 @@ const singleRemarkModalDone = async () => {
 
                             {submitStatusAllKey === 0 ? (
                               <>
+                                <th
+                                  className="dropdwnCol5"
+                                  data-field="phone"
+                                  style={{ width: "5%" }}
+                                >
+                                  Action
+                                </th>
+                              </>
+
+                            ) : (
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
                                 style={{ width: "5%" }}
                               >
-                                Action
+                                Remark
                               </th>
-                               
-                              
-
-                              </>
-
-                            ) : (
-                              ""
                             )}
                           </tr>
                         </thead>
@@ -1708,19 +1767,21 @@ const singleRemarkModalDone = async () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                 
+                                  {console.log("item", item)}
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
-                                      return matchedJob ? <span>{matchedJob.job_type_name}</span> : "";
+                                      return matchedJob && matchedJob.job_type_name !== undefined
+                                        ? <span>{matchedJob.job_type_name}</span>
+                                        : "-";
                                     })()
                                   ) : (
                                     item.task_type === "1" ? (
-                                      ""
+                                      "-"
                                     ) : (
                                       <span>{item.job_type_name}</span>
                                     )
-                                    
+
                                   )}
                                 </td>
 
@@ -2002,42 +2063,10 @@ const singleRemarkModalDone = async () => {
 
                                 </td> */}
 
-                                {submitStatusAllKey === 0 ? (
-                                  <td className="d-flex ps-0">
-                                    {/* {
-                                  item.submit_status === "0" ?
 
-                                    item.editRow == 0 || item.editRow == undefined ?
-                                      <button
-                                        className="edit-icon"
-                                        onClick={(e) => {
-                                          editRow(e, index);
-                                        }}
-                                      >
-                                        <i className="fa fa-pencil text-primary  "></i>
-                                      </button>
-                                      :
-                                      <button
-                                        className="edit-icon"
-                                        onClick={(e) => {
-                                          undoEditRow(e, index);
-                                        }}
-                                      >
-                                        <i class="fa-solid fa-arrow-rotate-left"></i>
-                                      </button>
-                                    : ""
-                                } */}
-                                    {submitStatusAllKey === 0 ? (
-                                      <div className="d-flex align-items-center">
-                                        <button
-                                        className="edit-icon"
-                                         onClick={(e) => {
-                                          handleSingleRemark(e, item, index)
-                                        }}
-                                      ><i className="ti-agenda"></i>
-                                        
-                                      </button>
-                                      
+                                <td className="d-flex ps-0">
+                                  {submitStatusAllKey === 0 ? (
+                                    <div className="d-flex align-items-center">
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2045,25 +2074,37 @@ const singleRemarkModalDone = async () => {
                                         <i className="ti-trash text-danger"></i>
                                       </button>
 
-                                     
-                                      
-                                    
 
-                                      </div>
+                                      <FileAxis3d
+                                        className="edit-icon"
+                                        onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                      />
+                                    </div>
 
-                                    ) : (
-                                      ""
-                                    )}
-                                    {/* <Trash2 className="delete-icon" /> */}
-                                  </td>
+                                  ) : (
+                                    <div className="d-flex align-items-center">
 
-                                   
-                                   
-                                     
+                                      <button
+                                        className="view-icon"
+                                        onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                      >
+                                        <i className="fa fa-eye text-primary"></i>
+                                      </button>
 
-                                ) : (
-                                  ""
-                                )}
+
+                                    </div>
+
+                                  )}
+                                  {/* <Trash2 className="delete-icon" /> */}
+                                </td>
+
+
+
+
                               </tr>
 
 
@@ -2090,13 +2131,13 @@ const singleRemarkModalDone = async () => {
                                 <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
                                 <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
                                 <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
-                                 <th
-                              className="dropdwnCol5"
-                              data-field="phone"
-                              style={{ width: "10%" }}
-                            >
-                            
-                            </th>
+                                <th
+                                  className="dropdwnCol5"
+                                  data-field="phone"
+                                  style={{ width: "10%" }}
+                                >
+
+                                </th>
                                 <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
                                 <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
                                   <div className="d-flex  ms-3" style={{ width: "88%" }}>
@@ -2104,6 +2145,7 @@ const singleRemarkModalDone = async () => {
                                       className="form-control cursor-pointer border-radius-end"
                                       type="text"
                                       readOnly
+                                      disabled
                                       name="monday_hours"
                                       value={getTotalHoursFromKey("monday_hours")}
                                       style={{ width: 80, border: '1px solid #00afef' }}
@@ -2117,6 +2159,7 @@ const singleRemarkModalDone = async () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
+                                          disabled
                                           readOnly
                                           name="tuesday_hours"
                                           value={getTotalHoursFromKey("tuesday_hours")}
@@ -2125,6 +2168,7 @@ const singleRemarkModalDone = async () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
+                                          disabled
                                           readOnly
                                           name="wednesday_hours"
                                           value={getTotalHoursFromKey("wednesday_hours")}
@@ -2133,6 +2177,7 @@ const singleRemarkModalDone = async () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
+                                          disabled
                                           readOnly
                                           name="thursday_hours"
                                           value={getTotalHoursFromKey("thursday_hours")}
@@ -2141,6 +2186,7 @@ const singleRemarkModalDone = async () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
+                                          disabled
                                           readOnly
                                           name="friday_hours"
                                           value={getTotalHoursFromKey("friday_hours")}
@@ -2149,6 +2195,7 @@ const singleRemarkModalDone = async () => {
                                         <input
                                           className="form-control cursor-pointer ms-2"
                                           type="text"
+                                          disabled
                                           readOnly
                                           name="saturday_hours"
                                           value={getTotalHoursFromKey("saturday_hours")}
@@ -2203,62 +2250,32 @@ const singleRemarkModalDone = async () => {
                         timeSheetRows.length > 0 ?
                           <>
                             <div className="">
-                              {/* <table
-                          className="timesheetTable table align-middle table-nowrap"
-                          id="customerTable"
-                          
-                        >
-                          <thead className="table-light table-head-blue">
-                            <tr>
-                             
-                              <th className="border-0" data-field="phone" style={{ width: "47.5%" }} />
 
-                              <th colSpan={8} className="pe-0 total-weekly border-0" style={{position:'relative', width:'47.5%' }} >
-
-                                <div className="d-flex  " style={{ width: "88%" }}>
-                                  <div className="d-flex align-items-center">
-
-                                    <span className="ms-3  fs-6">
-                                      {getTotalHoursFromKey("monday_hours")}
-                                    </span>
-                                    
-                                    {isExpanded && (
-                                      <div
-                                        className="d-flex"
-                                        style={{ width: "77%" }}
-                                      >
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("tuesday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("wednesday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("thursday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("friday_hours")}
-                                        </span>
-                                        <span className="fs-6">
-                                          {getTotalHoursFromKey("saturday_hours")}
-                                        </span>
-                                      </div>
-                                    )}
-
-
-                                  </div>
-                                </div>
-                              </th>
-                              <th className="border-0" data-field="phone" style={{ width:"5%" }} />
-
-                            </tr>
-                          </thead>
-                        </table> */}
                             </div>
 
                             <div className="mt-2 mb-2">
                               <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
                             </div>
+
+                            {
+                              submitStatusAllKey === 1 ?
+                                <div className="mt-2 mb-2">
+                                  {/* setRemarkModel */}
+                                  <span className="fs-6 text-dark"> <b>Final Remark :</b>
+
+                                    <button
+                                      className="view-icon"
+                                      onClick={() => setRemarkModel(true)}
+                                    >
+                                      <i className="fa fa-eye text-primary"></i>
+                                    </button>
+                                  </span>
+                                </div>
+                                :
+                                ""
+                            }
+
+
                           </>
 
                           : ""
@@ -2320,14 +2337,14 @@ const singleRemarkModalDone = async () => {
             )}
           </div>
 
-           <CommonModal
+          <CommonModal
             isOpen={remarkModel}
             backdrop="static"
             size="lg"
             cancel_btn={false}
             btn_2="true"
             btn_name={submitStatus === 1 ? "Submit" : "Save"}
-            title="Remark"
+            title="Final Remark"
             hideBtn={false}
             handleClose={() => {
               setRemarkModel(false);
@@ -2339,17 +2356,33 @@ const singleRemarkModalDone = async () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  <label htmlFor="customername-field" className="form-label">
-                   Final Remark
-                  </label>
-                  <textarea
-                    type="text"
-                    className="form-control cursor-pointer"
-                    placeholder="Enter Remark"
-                    defaultValue=""
-                    onChange={(e) => setRemarkText(e.target.value)}
-                    value={remarkText}
-                  />
+
+                  {
+                    submitStatusAllKey === 1 ?
+                    <div>
+                      <p>
+                        {timeSheetRows && timeSheetRows.length > 0 ?
+                          timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
+                          : "No Final Remark Found"}
+                      </p>
+                      </div>
+                      :
+                      <>
+                        <label htmlFor="customername-field" className="form-label">
+                          Final Remark
+                        </label>
+                        <textarea
+                          type="text"
+                          className="form-control cursor-pointer"
+                          placeholder="Enter Remark"
+                          defaultValue=""
+                          onChange={(e) => setRemarkText(e.target.value)}
+                          value={remarkText}
+                        />
+                      </>
+
+                  }
+
                 </div>
               </div>
             </div>
@@ -2357,13 +2390,13 @@ const singleRemarkModalDone = async () => {
 
 
 
-           <CommonModal
+          <CommonModal
             isOpen={remarkSingleModel}
             backdrop="static"
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name={"Done"}
+            btn_name={submitStatusAllKey === 1 ? "Close" : "Done"}
             title="Remark"
             hideBtn={false}
             handleClose={() => {
@@ -2374,21 +2407,35 @@ const singleRemarkModalDone = async () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  <label htmlFor="customername-field" className="form-label">
-                    Remark
-                  </label>
-                  <textarea
-                    type="text"
-                    className="form-control cursor-pointer"
-                    placeholder="Enter Remark"
-                    defaultValue=""
-                    onChange={(e) => handleRemarkSingleText(e , remarkSingleIndex)}
-                    value={
-                      remarkSingleIndex != null && timeSheetRows.length > 0 ?
-                      ['',null,undefined].includes(timeSheetRows[remarkSingleIndex])?"":timeSheetRows[remarkSingleIndex].remark :""
-                    
-                    } 
-                  />
+                  {
+                    submitStatusAllKey === 1 ?
+                      <p>
+
+                        {remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                          ['', null, undefined].includes(timeSheetRows[remarkSingleIndex]) ?
+                            "No Remark Found" : !['', null, undefined].includes(timeSheetRows[remarkSingleIndex].remark) ? timeSheetRows[remarkSingleIndex].remark : "No Remark Found" : "No Remark Found"
+
+                        }
+                      </p>
+                      : <>
+                        <label htmlFor="customername-field" className="form-label">
+                          Remark
+                        </label>
+                        <textarea
+                          type="text"
+                          className="form-control cursor-pointer"
+                          placeholder="Enter Remark"
+                          defaultValue=""
+                          onChange={(e) => handleRemarkSingleText(e, remarkSingleIndex)}
+                          value={
+                            remarkSingleIndex != null && timeSheetRows.length > 0 ?
+                              ['', null, undefined].includes(timeSheetRows[remarkSingleIndex]) ? "" : timeSheetRows[remarkSingleIndex].remark : ""
+
+                          }
+                        />
+                      </>
+                  }
+
                 </div>
               </div>
             </div>
