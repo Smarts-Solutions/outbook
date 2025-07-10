@@ -1483,49 +1483,49 @@ const Timesheet = () => {
                             <th
                               className="dropdwnCol2 pe-0"
                               data-field="phone"
-                              style={{ width: "10px" }}
+                            
                             >
                               No
                             </th>
                             <th
                               className=""
                               data-field="phone"
-                              style={{ width: "10%" }}
+                              
                             >
                               Task Type
                             </th>
                             <th
                               className="dropdwnCol7"
                               data-field="phone"
-                              style={{ width: "10%" }}
+                             
                             >
                               Customer
                             </th>
                             <th
                               className="dropdwnCol6"
                               data-field="phone"
-                              style={{ width: "10%" }}
+                              
                             >
                               Client
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                              style={{ width: "10%" }}
+                            
                             >
                               Job
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                              style={{ width: "10%" }}
+                            
                             >
                               Job Type
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                              style={{ width: "8%" }}
+                              
                             >
                               Task
                             </th>
@@ -1533,7 +1533,7 @@ const Timesheet = () => {
                             <th
                               colSpan="8"
                               className="pe-0 week-data"
-                              style={{ width: "50%" }}
+                             
                             >
                               <div className="d-flex align-items-center">
                                 <ChevronLeft
@@ -1551,7 +1551,7 @@ const Timesheet = () => {
                                 {isExpanded && (
                                   <div
                                     className="d-flex"
-                                    style={{ width: "70%" }}
+                                    
                                   >
                                     <span>
                                       {weekDays.tuesday
@@ -2087,7 +2087,7 @@ const Timesheet = () => {
                                     <div className="d-flex align-items-center">
 
                                       <button
-                                        className="view-icon"
+                                        className="edit-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
@@ -2264,7 +2264,7 @@ const Timesheet = () => {
                                   <span className="fs-6 text-dark"> <b>Final Remark :</b>
 
                                     <button
-                                      className="view-icon"
+                                      className="edit-icon"
                                       onClick={() => setRemarkModel(true)}
                                     >
                                       <i className="fa fa-eye text-primary"></i>
