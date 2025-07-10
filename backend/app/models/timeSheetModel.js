@@ -946,11 +946,6 @@ const getTimesheetTaskType = async (Timesheet) => {
     else if (task_type === "4") {
       const client_id = Timesheet.client_id
 
-
-      console.log("Timesheet client  ", Timesheet)
-
-
-
       try {
         const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
@@ -962,8 +957,6 @@ const getTimesheetTaskType = async (Timesheet) => {
           LineManageStaffId.push(staff_id);
         }
 
-        console.log("ExistStaff[0].role_id ", ExistStaff[0].role_id)
-        console.log("LineManageStaffId ", LineManageStaffId)
 
         let result = []
         if (ExistStaff.length > 0) {
