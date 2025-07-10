@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId } = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds } = require('../utils/helper');
 
 const getTimesheet = async (Timesheet) => {
 
@@ -268,7 +268,9 @@ const getTimesheetTaskType = async (Timesheet) => {
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
-            customer_company_information ON customers.id = customer_company_information.customer_id   
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        GROUP BY
+            customers.id   
         ORDER BY 
             customers.id DESC;
             `;
@@ -384,6 +386,8 @@ const getTimesheetTaskType = async (Timesheet) => {
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
                   OR sp_customers.staff_id = staff_portfolio.staff_id    
                 WHERE customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+                    GROUP BY
+                    customers.id
                 ORDER BY 
                     customers.id DESC;
                     `;
@@ -402,7 +406,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
     // get Client by Customer
     else if (task_type === "3") {
-      const customer_id = Timesheet.customer_id
+      let customer_id = Timesheet.customer_id
 
       try {
         const QueryRole = `
@@ -429,32 +433,19 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
 
+        let customerCheck = customer_id
+        customer_id = [Number(customer_id)]
+        let placeholders = customer_id.map(() => "?").join(", ");
+
+        if (customerCheck == "") {
+          const allCustomer = await getAllCustomerIds(StaffUserId, 'client');
+          let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
+          customer_id = allCustomerIds;
+          placeholders = customer_id.map(() => "?").join(", ");
+        }
 
 
-        // Condition with Admin And SuperAdmin
 
-        //     const query = `
-        //     SELECT  
-        //         clients.id AS id,
-        //         clients.trading_name AS trading_name
-        //     FROM 
-        //         clients
-        //     JOIN 
-        //        customers ON customers.id = clients.customer_id    
-        //     JOIN 
-        //         client_types ON client_types.id = clients.client_type
-        //     LEFT JOIN 
-        //         client_contact_details ON client_contact_details.id = (
-        //             SELECT MIN(cd.id)
-        //             FROM client_contact_details cd
-        //             WHERE cd.client_id = clients.id
-        //         )
-        //     WHERE clients.customer_id = ?
-        //  ORDER BY 
-        //     clients.id DESC;
-        //     `;
-        //       const [result] = await pool.execute(query, [customer_id]);
-        //       return { status: true, message: "success.", data: result };
 
 
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
@@ -475,6 +466,7 @@ const getTimesheetTaskType = async (Timesheet) => {
                 WHERE cd.client_id = clients.id
             )
         WHERE clients.customer_id = ?
+        GROUP BY clients.id
      ORDER BY 
         clients.id DESC;
         `;
@@ -485,7 +477,6 @@ const getTimesheetTaskType = async (Timesheet) => {
         const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "' + StaffUserId + '" LIMIT 1');
 
         if (existStaffbyCustomer.length > 0) {
-
           const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
           if (rows.length > 0) {
@@ -513,16 +504,40 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               staffs ON customers.staff_id = staffs.id   
             WHERE 
-              (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR (clients.customer_id = ? OR clients.staff_created_id IN(${LineManageStaffId})) OR clients.customer_id = ?
+              (
+                jobs.allocated_to = ? 
+                OR clients.customer_id IN (${placeholders})  
+                OR clients.staff_created_id = ?
+              )
+              AND (
+                jobs.client_id = clients.id 
+                OR clients.staff_created_id = ?
+              )
+              AND (
+                jobs.allocated_to = ? 
+                OR clients.staff_created_id = ?
+              )
+              OR clients.customer_id IN (${placeholders})
             GROUP BY 
-            CASE 
+              CASE 
                 WHEN jobs.allocated_to = ? THEN jobs.client_id
                 ELSE clients.id
-            END
+              END
             ORDER BY 
-            clients.id DESC
+              clients.id DESC
                 `;
-              const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+              const queryParams = [
+                StaffUserId,
+                ...customer_id,   // For clients.customer_id IN (...)
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                ...customer_id,   // For OR clients.customer_id IN (...)
+                StaffUserId,
+              ];
+
+              const [resultAllocated] = await pool.execute(query, queryParams);
               if (resultAllocated.length == 0) {
                 return { status: true, message: "success.", data: resultAllocated };
               }
@@ -562,16 +577,24 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
               WHERE 
-              clients.customer_id = ? OR (clients.customer_id = ? OR clients.staff_created_id IN(${LineManageStaffId})) OR clients.customer_id = ?
-            ORDER BY 
-            clients.id DESC
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
+        ORDER BY 
+        clients.id DESC
                 `;
 
               //   WHERE 
               // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-              const [resultAccounrManage] = await pool.execute(query, [customer_id, customer_id, customer_id]);
+              // const [resultAccounrManage] = await pool.execute(query, [customer_id, customer_id, customer_id]);
+              const [resultAccounrManage] = await pool.execute(query, [
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+                ...customer_id,
+              ]);
               if (resultAccounrManage.length == 0) {
                 return { status: true, message: "success.", data: resultAccounrManage };
               }
@@ -609,18 +632,30 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               staffs ON customers.staff_id = staffs.id
             WHERE 
-              (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR (clients.customer_id = ? OR clients.staff_created_id IN(${LineManageStaffId})) OR clients.customer_id = ?
-            GROUP BY
-            CASE 
-                WHEN jobs.reviewer = ? THEN jobs.client_id 
-                ELSE clients.id
-            END
-            ORDER BY 
-            clients.id DESC
+                (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+              GROUP BY
+              CASE 
+                  WHEN jobs.reviewer = ? THEN jobs.client_id 
+                  ELSE clients.id
+              END
+              ORDER BY 
+              clients.id DESC
                 `;
 
 
-              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+              // const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+
+
+              const [resultReviewer] = await pool.execute(query, [
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+              ]);
 
               if (resultReviewer.length == 0) {
                 return { status: true, message: "success.", data: resultReviewer };
@@ -663,11 +698,16 @@ const getTimesheetTaskType = async (Timesheet) => {
                       FROM client_contact_details cd
                       WHERE cd.client_id = clients.id
                   )
-              WHERE clients.customer_id = ? OR clients.staff_created_id = ? OR (clients.staff_created_id IN(${LineManageStaffId}) OR clients.customer_id = ?) OR clients.customer_id = ?
+               WHERE clients.customer_id IN (${placeholders})
+               GROUP BY 
+              clients.id
            ORDER BY 
               clients.id DESC;
                 `;
-              const [result] = await pool.execute(query, [customer_id, StaffUserId, customer_id, customer_id]);
+              // const [result] = await pool.execute(query, [customer_id, StaffUserId, customer_id, customer_id]);
+              const [result] = await pool.execute(query, [
+                ...customer_id,
+              ]);
               return { status: true, message: "success.", data: result };
             }
 
@@ -675,7 +715,6 @@ const getTimesheetTaskType = async (Timesheet) => {
 
         } else {
 
-
           const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
           if (rows.length > 0) {
@@ -703,7 +742,7 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               staffs ON customers.staff_id = staffs.id   
             WHERE 
-              (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR (clients.customer_id = ? OR clients.staff_created_id IN(${LineManageStaffId})) OR clients.customer_id = ?
+              (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
             GROUP BY 
             CASE 
                 WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -712,7 +751,18 @@ const getTimesheetTaskType = async (Timesheet) => {
             ORDER BY 
             clients.id DESC
                 `;
-              const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+              // const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+              const [resultAllocated] = await pool.execute(query, [
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+              ]);
+
               if (resultAllocated.length == 0) {
                 return { status: true, message: "success.", data: resultAllocated };
               }
@@ -752,12 +802,20 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
               WHERE 
-              (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR (clients.customer_id = ? OR clients.staff_created_id IN(${LineManageStaffId})) OR clients.customer_id = ?
-            ORDER BY 
-            clients.id DESC
+            (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
+          ORDER BY 
+          clients.id DESC
                 `;
 
-              const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, customer_id, StaffUserId, customer_id, customer_id]);
+              // const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, customer_id, StaffUserId, customer_id, customer_id]);
+              const [resultAccounrManage] = await pool.execute(query, [
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+                ...customer_id,
+              ]);
               if (resultAccounrManage.length == 0) {
                 return { status: true, message: "success.", data: resultAccounrManage };
               }
@@ -795,21 +853,32 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               staffs ON customers.staff_id = staffs.id
             WHERE 
-              (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR (clients.customer_id = ? OR clients.staff_created_id IN(${LineManageStaffId})) OR clients.customer_id = ?
-            GROUP BY
-            CASE 
-                WHEN jobs.reviewer = ? THEN jobs.client_id 
-                ELSE clients.id
-            END
-            ORDER BY 
-            clients.id DESC
+            (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+          GROUP BY
+          CASE 
+              WHEN jobs.reviewer = ? THEN jobs.client_id 
+              ELSE clients.id
+          END
+          ORDER BY 
+          clients.id DESC
                 `;
 
 
 
 
 
-              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+              // const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
+
+              const [resultReviewer] = await pool.execute(query, [
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                ...customer_id,
+                StaffUserId,
+              ]);
 
               if (resultReviewer.length == 0) {
                 return { status: true, message: "success.", data: resultReviewer };
@@ -851,11 +920,13 @@ const getTimesheetTaskType = async (Timesheet) => {
                       FROM client_contact_details cd
                       WHERE cd.client_id = clients.id
                   )
-              WHERE clients.customer_id = ? OR clients.staff_created_id = ? OR (clients.staff_created_id IN(${LineManageStaffId}) OR clients.customer_id = ?) OR clients.customer_id = ?
-           ORDER BY 
-              clients.id DESC;
+              WHERE clients.customer_id IN (${placeholders})
+                  GROUP BY
+                clients.id
+              ORDER BY 
+                  clients.id DESC;
                 `;
-              const [result] = await pool.execute(query, [customer_id, StaffUserId, customer_id, customer_id]);
+              const [result] = await pool.execute(query, [...customer_id]);
               return { status: true, message: "success.", data: result };
             }
 
@@ -875,8 +946,8 @@ const getTimesheetTaskType = async (Timesheet) => {
     else if (task_type === "4") {
       const client_id = Timesheet.client_id
 
-    
-      console .log("Timesheet client  ", Timesheet)
+
+      console.log("Timesheet client  ", Timesheet)
 
 
 
@@ -1194,15 +1265,15 @@ const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows } = Timesheet;
 
-  //  for (let index = 0; index < data.length; index++) {
-  //   const element = data[index];
-  //   console.log("element", element)
-  //  }
-  //   return
+    //  for (let index = 0; index < data.length; index++) {
+    //   const element = data[index];
+    //   console.log("element", element)
+    //  }
+    //   return
 
     const timesheet_log_msg = [];
     let checkStringEvent = [];
-  
+
     if (data.length > 0) {
       const formatTime = input => {
         if (input == null) {
@@ -1221,8 +1292,8 @@ const saveTimesheet = async (Timesheet) => {
         }
         const customer_id = row.customer_id == null ? 0 : row.customer_id;
         const client_id = row.client_id == null ? 0 : row.client_id;
-        const remark =  ['',null,undefined].includes(row.remark) ? null : row.remark;
-        const final_remark =  ['',null,undefined].includes(row.final_remark) ? null : row.final_remark;
+        const remark = ['', null, undefined].includes(row.remark) ? null : row.remark;
+        const final_remark = ['', null, undefined].includes(row.final_remark) ? null : row.final_remark;
 
         const monday_hours = formatTime(row.monday_hours);
         const tuesday_hours = formatTime(row.tuesday_hours);
@@ -1338,7 +1409,7 @@ const saveTimesheet = async (Timesheet) => {
             row.task_type, customer_id, client_id, row.job_id, row.task_id,
             row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
             wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, final_remark ,row.submit_status, row.id
+            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, final_remark, row.submit_status, row.id
           ];
 
 
