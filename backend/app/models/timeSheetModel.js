@@ -1230,6 +1230,8 @@ const getTimesheetTaskType = async (Timesheet) => {
      task ON task.id = client_job_task.task_id
      WHERE 
      client_job_task.job_id = ?
+     GROUP BY
+      task.id
       ORDER BY
       client_job_task.id DESC;
      `;
@@ -1246,6 +1248,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         AND task.job_type_id = jobs.job_type_id
      WHERE 
      jobs.id = ?
+      GROUP BY task.id
      `;
         const [rows] = await pool.execute(query, [job_id]);
         return { status: true, message: "success.", data: rows };
