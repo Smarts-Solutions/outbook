@@ -3,6 +3,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import Select from 'react-select';
 import {
   getTimesheetData,
   getTimesheetTaskTypedData,
@@ -1137,8 +1138,8 @@ const Timesheet = () => {
         let finalTotalHours = await convertHoursMinutes(totalHours)
 
 
-         console.log(`finalTotalHours`, finalTotalHours);
-         console.log(`staff_hourminute`, staff_hourminute);
+        console.log(`finalTotalHours`, finalTotalHours);
+        console.log(`staff_hourminute`, staff_hourminute);
 
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
@@ -1279,13 +1280,14 @@ const Timesheet = () => {
       alert("No data to export!");
       return;
     }
-     
+
     const headers = [
       "Index",
       "Task Type",
       "Customer Name",
       "Client Name",
       "Job Name",
+      "Job Type",
       "Task Name",
       "Monday Hours",
       "Tuesday Hours",
@@ -1295,25 +1297,33 @@ const Timesheet = () => {
       "Saturday Hours",
       "Remark"
     ];
-    const rows = timeSheetRows.map((item, index) => [
-      index + 1,
-      item.task_type === "1" ? "Internal" : "External",
-      item.customer_name || "No Customer",
-      item.client_name || "No Client",
-      item.task_type === "1"
-        ? item.internal_name || "No Job"
-        : item.job_name || "No Job",
-      item.task_type === "1"
-        ? item.sub_internal_name || "No Task"
-        : item.task_name || "No Task",
-      item.monday_hours || 0,
-      item.tuesday_hours || 0,
-      item.wednesday_hours || 0,
-      item.thursday_hours || 0,
-      item.friday_hours || 0,
-      item.saturday_hours || 0,
-      item.remark || ""
-    ]);
+
+
+    const rows = timeSheetRows
+      .filter(item => item.id !== null && item.id !== undefined)
+      .map((item, index) => {
+        return [
+          index + 1,
+          item.task_type === "1" ? "Internal" : "External",
+          item.customer_name || "No Customer",
+          item.client_name || "No Client",
+          item.task_type === "1"
+            ? item.internal_name || "No Job"
+            : item.job_name || "No Job",
+          item.task_type === "1" ? " - " : item.job_type_name || " - ",
+          item.task_type === "1"
+            ? item.sub_internal_name || "No Task"
+            : item.task_name || "No Task",
+          item.monday_hours || 0,
+          item.tuesday_hours || 0,
+          item.wednesday_hours || 0,
+          item.thursday_hours || 0,
+          item.friday_hours || 0,
+          item.saturday_hours || 0,
+          item.remark || ""
+        ];
+      });
+
 
 
     const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark || ""}`, ...new Array(headers.length - 1).fill("")];
@@ -1328,7 +1338,6 @@ const Timesheet = () => {
     link.download = "TimeSheetData.csv";
     link.click();
   };
-
 
   const handleSingleRemark = (e, item, index) => {
     setRemarkSingleModel(true);
@@ -1347,6 +1356,38 @@ const Timesheet = () => {
     setRemarkSingleModel(false);
   }
 
+
+  // SELECT OPTIONS FOR STAFF START //
+  const staffOptions = staffDataAll.data?.map((val) => ({
+    value: val.id,
+    label: `${val.first_name} ${val.last_name}`
+  })) || [];
+  // SELECT OPTIONS FOR STAFF END //
+
+
+
+  // SELECT OPTIONS FOR WEEK START //
+  const weekOptions = [];
+  if (!hasValidWeekOffsetZero) {
+    weekOptions.push({
+      value: "0",
+      label: getFormattedDate("current", ""),
+    });
+  }
+
+  if (staffDataWeekDataAll.data) {
+    staffDataWeekDataAll.data.forEach((val) => {
+      weekOptions.push({
+        value: val.valid_weekOffsets,
+        label: getFormattedDate("convert", val.month_date),
+      });
+    });
+  }
+  const currentValue = weekOptions.find(
+    (opt) => opt.value == weekOffSetValue.current
+  );
+
+  // SELECT OPTIONS FOR WEEK END //
 
   // Example usage
   return (
@@ -1376,12 +1417,15 @@ const Timesheet = () => {
             {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
-                <select
+
+                {console.log(`staffDetails`, staffDetails)}
+                {/* <select
                   name="staff_id"
                   className="form-select"
                   id="tabSelect"
                   defaultValue={staffDetails.id}
                   onChange={(e) => selectFilterStaffANdWeek(e)}
+                  
                 >
                   {staffDataAll.data &&
                     staffDataAll.data.map((val, index) => (
@@ -1393,7 +1437,21 @@ const Timesheet = () => {
                         {val.first_name + " " + val.last_name}
                       </option>
                     ))}
-                </select>
+                </select> */}
+                <Select
+                  id="tabSelect"
+                  name="staff_id"
+                  options={staffOptions}
+                  //defaultValue={staffOptions.find(opt => Number(opt.value) === Number(staffDetails.id))}
+                  defaultValue={staffDetails.id}
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'staff_id', value: selectedOption.value } };
+                    selectFilterStaffANdWeek(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                />
               </div>
             ) : (
               ""
@@ -1404,7 +1462,7 @@ const Timesheet = () => {
                 <div className="form-group col-md-6 pe-0">
                   <label className="form-label mb-2">Select Date</label>
 
-                  <select
+                  {/* <select
                     name="week"
                     className="form-select"
                     id="tabSelect"
@@ -1429,7 +1487,20 @@ const Timesheet = () => {
                           {getFormattedDate("convert", val.month_date)}
                         </option>
                       ))}
-                  </select>
+                  </select> */}
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    options={weekOptions}
+                    defaultValue={currentValue}
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
                 </div>
               ) : (
                 ""
@@ -1749,7 +1820,7 @@ const Timesheet = () => {
 
                                 {/* Job Type Section */}
                                 <td>
-                                  {console.log("item", item)}
+
                                   {item.newRow === 1 ? (
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
@@ -2338,12 +2409,12 @@ const Timesheet = () => {
 
                   {
                     submitStatusAllKey === 1 ?
-                    <div>
-                      <p>
-                        {timeSheetRows && timeSheetRows.length > 0 ?
-                          timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
-                          : "No Final Remark Found"}
-                      </p>
+                      <div>
+                        <p>
+                          {timeSheetRows && timeSheetRows.length > 0 ?
+                            timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
+                            : "No Final Remark Found"}
+                        </p>
                       </div>
                       :
                       <>

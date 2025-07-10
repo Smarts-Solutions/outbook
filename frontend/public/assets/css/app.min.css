@@ -4788,3 +4788,8 @@ tbody.list.form-check-all tr:last-child td {
 .total-weekly.border-0 span {
     width: 90px;
 }
+.react-select__control {
+  border: 1px solid #ced4da;
+  min-height: 38px;
+  font-size: 14px;
+}
