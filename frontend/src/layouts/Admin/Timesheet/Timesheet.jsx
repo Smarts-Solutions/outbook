@@ -935,7 +935,17 @@ const Timesheet = () => {
   }
 
   const saveData = async (e) => {
-
+   
+    if(timeSheetRows.length === 0) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Please add at least one row to the timesheet.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 3000,
+      });
+      return;
+    }
 
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
@@ -1061,6 +1071,17 @@ const Timesheet = () => {
   };
 
   const submitData = async (e) => {
+
+    if(timeSheetRows.length === 0) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Please add at least one row to the timesheet.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 3000,
+      });
+      return;
+    }
 
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
