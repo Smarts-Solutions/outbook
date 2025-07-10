@@ -80,6 +80,9 @@ const Timesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const [selectedStaff, setSelectedStaff] = useState(staffDetails.id);
+
+  console.log(`selectedStaff`, selectedStaff);
 
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
@@ -150,6 +153,7 @@ const Timesheet = () => {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
       setWeekOffset(0);
+      setSelectedStaff(value);
       // await GetTimeSheet(0)
     } else if (name === "week") {
       weekOffSetValue.current = parseInt(value);
@@ -1442,8 +1446,7 @@ const Timesheet = () => {
                   id="tabSelect"
                   name="staff_id"
                   options={staffOptions}
-                  //defaultValue={staffOptions.find(opt => Number(opt.value) === Number(staffDetails.id))}
-                  defaultValue={staffDetails.id}
+                  value={staffOptions.find(opt => Number(opt.value) === Number(selectedStaff))}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
                     const e = { target: { name: 'staff_id', value: selectedOption.value } };
