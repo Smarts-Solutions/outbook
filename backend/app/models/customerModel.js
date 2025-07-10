@@ -477,6 +477,7 @@ LEFT JOIN
 LEFT JOIN clients ON clients.customer_id = customers.id    
  WHERE 
     customers.trading_name LIKE ?
+    GROUP BY customers.id
 ORDER BY 
     customers.id DESC
 LIMIT ? OFFSET ?`;
@@ -921,7 +922,9 @@ LIMIT ? OFFSET ?`;
             AND sp_customers.staff_id = staff_portfolio.staff_id
         LEFT JOIN clients ON clients.customer_id = customers.id        
         WHERE 
-            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}    
+            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'} 
+        GROUP BY 
+            customers.id   
         ORDER BY 
             customers.id DESC
             LIMIT ? OFFSET ?;
@@ -1146,6 +1149,8 @@ id DESC;`;
             AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+        GROUP BY 
+            customers.id
         ORDER BY 
             id DESC;
             `;
@@ -1324,6 +1329,8 @@ const getCustomer_dropdown_delete = async (customer) => {
                   AND sp_customers.staff_id = staff_portfolio.staff_id    
         WHERE 
             staff_id = ? OR staff_id IN (${LineManageStaffId}) OR account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+        GROUP BY 
+            customers.id
         ORDER BY 
             id DESC;
             `;
