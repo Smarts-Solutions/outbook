@@ -1497,28 +1497,28 @@ const Timesheet = () => {
                             <th
                               className="dropdwnCol7"
                               data-field="phone"
-                             
+                              
                             >
                               Customer
                             </th>
                             <th
                               className="dropdwnCol6"
                               data-field="phone"
-                              
+                             
                             >
                               Client
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                            
+                              
                             >
                               Job
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                            
+                              
                             >
                               Job Type
                             </th>
@@ -1530,75 +1530,53 @@ const Timesheet = () => {
                               Task
                             </th>
 
-                            <th
-                              colSpan="8"
-                              className="pe-0 week-data"
-                             
-                            >
-                              <div className="d-flex align-items-center">
-                                <ChevronLeft
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    changeWeek(-1);
-                                  }}
-                                />
-                                <span className=" me-0">
-                                  {weekDays.monday
-                                    ? dayMonthFormatDate(weekDays.monday)
-                                    : ""}
-                                </span>
-                                {/* Conditionally render weekdays when expanded */}
-                                {isExpanded && (
-                                  <div
-                                    className="d-flex"
-                                    
-                                  >
-                                    <span>
-                                      {weekDays.tuesday
-                                        ? dayMonthFormatDate(weekDays.tuesday)
-                                        : ""}
-                                    </span>
-                                    <span>
-                                      {weekDays.wednesday
-                                        ? dayMonthFormatDate(weekDays.wednesday)
-                                        : ""}
-                                    </span>
-                                    <span>
-                                      {weekDays.thursday
-                                        ? dayMonthFormatDate(weekDays.thursday)
-                                        : ""}
-                                    </span>
-                                    <span>
-                                      {weekDays.friday
-                                        ? dayMonthFormatDate(weekDays.friday)
-                                        : ""}
-                                    </span>
-                                    <span>
-                                      {weekDays.saturday
-                                        ? dayMonthFormatDate(weekDays.saturday)
-                                        : ""}
-                                    </span>
-                                  </div>
-                                )}
-                                <button
-                                  onClick={toggleAllRowsView}
-                                  className="px-0 btn btn-sm btn-link text-decoration-none"
-                                >
-                                  {/* Font Awesome plus icon */}
-                                  <i
-                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"
-                                      }`}
-                                    aria-hidden="true"
-                                  ></i>
-                                </button>
-                                <ChevronRight
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    changeWeek(1);
-                                  }}
-                                />
-                              </div>
-                            </th>
+                       <th
+  className={`pe-0 week-data ${isExpanded ? "expanded" : ""}`}
+  // style={{ width: isExpanded ? "50%" : "100px" }}
+>
+  <div className="d-flex align-items-center">
+    <ChevronLeft
+      onClick={(e) => {
+        e.preventDefault();
+        changeWeek(-1);
+      }}
+    />
+    <span className="me-0">
+      {weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}
+    </span>
+
+    {/* Conditionally render weekdays when expanded */}
+    {isExpanded && (
+      <div className="d-flex" style={{ width: "70%" }}>
+        {["tuesday", "wednesday", "thursday", "friday", "saturday"].map(
+          (day) => (
+            <span key={day}>
+              {weekDays[day] ? dayMonthFormatDate(weekDays[day]) : ""}
+            </span>
+          )
+        )}
+      </div>
+    )}
+
+    <button
+      onClick={toggleAllRowsView}
+      className="px-0 btn btn-sm btn-link text-decoration-none"
+    >
+      <i
+        className={`fa ${isExpanded ? "fa-minus" : "fa-plus"}`}
+        aria-hidden="true"
+      ></i>
+    </button>
+
+    <ChevronRight
+      onClick={(e) => {
+        e.preventDefault();
+        changeWeek(1);
+      }}
+    />
+  </div>
+</th>
+
                             {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
@@ -1616,7 +1594,7 @@ const Timesheet = () => {
                                 <th
                                   className="dropdwnCol5"
                                   data-field="phone"
-                                  style={{ width: "5%" }}
+                                 
                                 >
                                   Action
                                 </th>
@@ -1626,8 +1604,9 @@ const Timesheet = () => {
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
-                                style={{ width: "5%" }}
+                                
                               >
+                                
                                 Remark
                               </th>
                             )}
@@ -1656,6 +1635,7 @@ const Timesheet = () => {
                                   ) : (
                                     <select
                                       className="form-select form-control"
+                                      style={{ width: "100px" }}
                                       value={item.task_type}
                                       disabled
                                     >
@@ -1689,6 +1669,7 @@ const Timesheet = () => {
                                   ) : (
                                     <input
                                       className="form-control cursor-pointer"
+                                        style={{ width: "100px" }}
                                       defaultValue={
                                         item.task_type === "1"
                                           ? "No Customer"
@@ -1705,7 +1686,7 @@ const Timesheet = () => {
                                     item.task_type === "2" ? (
                                     <select
                                       className="form-select"
-                                      style={{ width: "100px" }}
+                                      style={{ width: "90px" }}
                                       defaultValue={item.client_id || ""}
                                       onChange={(e) =>
                                         selectClientData(e, index)
@@ -1723,6 +1704,7 @@ const Timesheet = () => {
                                   ) : (
                                     <input
                                       className="form-control cursor-pointer"
+                                      style={{ width: "90px" }}
                                       defaultValue={
                                         item.task_type === "1"
                                           ? "No Client"
@@ -1772,14 +1754,14 @@ const Timesheet = () => {
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
                                       return matchedJob && matchedJob.job_type_name !== undefined
-                                        ? <span>{matchedJob.job_type_name}</span>
-                                        : "-";
+                                        ? <div  style={{ width: "100px" }}>{matchedJob.job_type_name}</div>
+                                        :<div style={{ width: "80px" }}>-</div>;
                                     })()
                                   ) : (
                                     item.task_type === "1" ? (
-                                      "-"
+                                     <div style={{ width: "80px" }}>-</div>
                                     ) : (
-                                      <span>{item.job_type_name}</span>
+                                      <div  style={{ width: "100px" }}>{item.job_type_name}</div>
                                     )
 
                                   )}
@@ -1816,18 +1798,13 @@ const Timesheet = () => {
                                 </td>
 
                                 {/*Monday Input*/}
-                                <td colspan="8">
-                                  <table>
-                                    <tr>
-                                      <td></td>
-
-                                    </tr>
-                                  </table>
+                                <td >
+                               
                                   <div className="ms-2">
                                     {isExpanded ? (
                                       <div
                                         className="d-flex  ms-3"
-                                        style={{ width: "88%" }}
+                                       
                                       >
                                         <input
                                           className="form-control cursor-pointer border-radius-end"
@@ -2075,12 +2052,14 @@ const Timesheet = () => {
                                       </button>
 
 
-                                      <FileAxis3d
-                                        className="edit-icon"
+                                              <button
+                                        className="view-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
                                         }}
-                                      />
+                                      >
+                                        <i className="ti-comment text-warning"></i>
+                                      </button>
                                     </div>
 
                                   ) : (
@@ -2126,21 +2105,21 @@ const Timesheet = () => {
                           timeSheetRows.length > 0 ?
                             <tfoot className="table-light table-head-blue">
                               <tr>
-                                <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: "10px" }}></th>
-                                <th className="" data-field="phone" style={{ width: "10%" }}> </th>
-                                <th className="dropdwnCol7" data-field="phone" style={{ width: "10%" }}></th>
-                                <th className="dropdwnCol6" data-field="phone" style={{ width: "10%" }}></th>
-                                <th className="dropdwnCol5" data-field="phone" style={{ width: "10%" }}></th>
+                                <th className="dropdwnCol2 pe-0" data-field="phone" ></th>
+                                <th className="" data-field="phone" > </th>
+                                <th className="dropdwnCol7" data-field="phone" ></th>
+                                <th className="dropdwnCol6" data-field="phone" ></th>
+                                <th className="dropdwnCol5" data-field="phone" ></th>
                                 <th
                                   className="dropdwnCol5"
                                   data-field="phone"
-                                  style={{ width: "10%" }}
+                                
                                 >
 
                                 </th>
-                                <th className="dropdwnCol5" data-field="phone" style={{ width: "8%" }}></th>
-                                <th colSpan="8" className="pe-0 week-data" style={{ width: "50%" }}>
-                                  <div className="d-flex  ms-3" style={{ width: "88%" }}>
+                                <th className="dropdwnCol5" data-field="phone" ></th>
+                                <th  className="pe-0 week-data" >
+                                  <div className="d-flex  ms-3" >
                                     <input
                                       className="form-control cursor-pointer border-radius-end"
                                       type="text"
@@ -2154,7 +2133,7 @@ const Timesheet = () => {
                                     {isExpanded && (
                                       <div
                                         className="d-flex  ms-3"
-                                        style={{ width: "88%" }}
+                                        
                                       >
                                         <input
                                           className="form-control cursor-pointer ms-2"
