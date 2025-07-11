@@ -30,6 +30,8 @@ const CreateCheckList = () => {
     { task_id: "", task_name: "", budgeted_hour: "", checklist_tasks_id: "" },
   ]);
 
+  console.log("tasks", tasks);
+
   const [data, setData] = useState(false);
   const [errors, setErrors] = useState({});
   const [serviceList, setServiceList] = useState([]);
@@ -58,6 +60,10 @@ const CreateCheckList = () => {
           if (response.status) {
             const checklistData = response.data;
 
+            console.log("checklistData", checklistData.task);
+
+            
+
             setSelectedClientType(checklistData.client_type_id);
 
             getJobTypeData(checklistData.service_id);
@@ -71,6 +77,10 @@ const CreateCheckList = () => {
               status: checklistData.status,
             });
             if (checklistData.task) {
+
+            
+
+
               setTasks(
                 checklistData.task.map((task) => ({
                   task_id: task.task_id,
@@ -154,32 +164,25 @@ const CreateCheckList = () => {
 
       if (name === "hours") {
         const numericValue = Number(value);
-
-
         if (!isNaN(numericValue) && numericValue >= 0) {
           newTasks[index].budgeted_hour =
             value === '' ? '' : numericValue.toString().padStart(2, "0") + ":" + minutes;
         }
       } else if (name === "minutes") {
         const numericValue = Number(value);
-
-
         if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
           newTasks[index].budgeted_hour =
             hours + ":" + (value === '' ? '' : numericValue.toString().padStart(2, "0"));
         } else {
-
           e.target.value = "59";
           newTasks[index].budgeted_hour = hours + ":59";
         }
       }
     } else {
-
       newTasks[index][name] = value;
     }
 
-
-
+   
     setTasks(newTasks);
   };
 
@@ -484,7 +487,7 @@ const CreateCheckList = () => {
 
                         placeholder="Hours"
                         name="hours"
-                        defaultValue={task.budgeted_hour?.hours || ""}
+                        defaultValue={task.budgeted_hour?.hours != undefined ? task.budgeted_hour?.hours : task?.budgeted_hour?.split(":")[0] || ""}
                         onChange={(e) => handleTaskChange(index, e)}
                       />
                       <span className="input-group-text">H</span>
@@ -499,7 +502,7 @@ const CreateCheckList = () => {
                         name="minutes"
                         min="0"
                         max="59"
-                        defaultValue={task.budgeted_hour?.minutes || ""}
+                        defaultValue={task.budgeted_hour?.minutes != undefined ? task.budgeted_hour?.minutes : task?.budgeted_hour?.split(":")[1] || ""}
                         onChange={(e) => handleTaskChange(index, e)}
                       />
                       <span className="input-group-text">M</span>
