@@ -428,7 +428,10 @@ const getCustomer = async (customer) => {
     `
     const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id , 33]);
 
-
+  
+    console.log('rows[0].role_name ---- ', rows[0].role_name);
+    console.log('LineManageStaffId ---- ', LineManageStaffId);
+    console.log('staff_id ---- ', staff_id);
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
@@ -728,6 +731,9 @@ LIMIT ? OFFSET ?`;
         LIMIT ? OFFSET ?
            ;
             `;
+
+
+            console.log('query', query);
 
             let queryData = [staff_id, staff_id, staff_id,staff_id,staff_id,limit, offset];
             if (search) {
