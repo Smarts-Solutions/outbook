@@ -262,6 +262,9 @@ const CreateCheckList = () => {
     };
 
     const data = { req, authToken: token };
+
+  
+
     await dispatch(UpdateChecklistData(data))
       .unwrap()
       .then((response) => {
