@@ -629,6 +629,8 @@ LIMIT ? OFFSET ?`;
                     customers.id
                 FROM 
                     customers
+                LEFT JOIN
+                    jobs ON jobs.customer_id = customers.id    
                 LEFT JOIN 
                     customer_services ON customer_services.customer_id = customers.id
                 LEFT JOIN 
@@ -646,18 +648,18 @@ LIMIT ? OFFSET ?`;
                   AND sp_customers.staff_id = staff_portfolio.staff_id   
                 WHERE 
          ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
-                OR customers.account_manager_id = ?
+                OR customers.account_manager_id = ? OR jobs.allocated_to = ?
                 OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
                     `customer_service_account_managers.account_manager_id = ?
-            OR customers.account_manager_id = ?
+            OR customers.account_manager_id = ? OR jobs.allocated_to = ?
             OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
             GROUP BY 
                 customers.id
         ) AS result`;
 
-            let queryDataCount = [staff_id, staff_id, staff_id];
+            let queryDataCount = [staff_id, staff_id, staff_id , staff_id];
             if (search) {
-                queryDataCount = [staff_id, staff_id, staff_id];
+                queryDataCount = [staff_id, staff_id, staff_id , staff_id];
             }
             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
@@ -693,6 +695,8 @@ LIMIT ? OFFSET ?`;
             end as is_client
         FROM 
             customers
+        LEFT JOIN
+                jobs ON jobs.customer_id = customers.id    
         LEFT JOIN 
             customer_services ON customer_services.customer_id = customers.id
         LEFT JOIN 
@@ -712,22 +716,22 @@ LIMIT ? OFFSET ?`;
         WHERE 
             ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
-                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
+                OR customers.staff_id = ? OR jobs.allocated_to = ? ORcustomers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
                     `customer_service_account_managers.account_manager_id = ?
-            OR customers.account_manager_id = ?
+            OR customers.account_manager_id = ? OR jobs.allocated_to = ?
             OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
 
         GROUP BY 
-        customers.id
+         customers.id
         ORDER BY 
         customers.id DESC
         LIMIT ? OFFSET ?
            ;
             `;
 
-            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            let queryData = [staff_id, staff_id, staff_id, staff_id,limit, offset];
             if (search) {
-                queryData = [staff_id, staff_id, staff_id, limit, offset];
+                queryData = [staff_id, staff_id, staff_id,staff_id, limit, offset];
             }
             const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated;
