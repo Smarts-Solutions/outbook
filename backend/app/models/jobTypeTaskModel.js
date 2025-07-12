@@ -668,12 +668,6 @@ const getClientTypeChecklist = async (checklist) => {
 const getByServiceWithJobType = async (checklist) => {
   const { service_id, job_type_id, clientId } = checklist;
   let customer_id = (checklist.customer_id).toString()
-
- console.log("getByServiceWithJobType clientId", clientId)
- console.log("getByServiceWithJobType service_id", service_id)
- console.log("getByServiceWithJobType job_type_id", job_type_id)
-
-
   // const query = `SELECT 
   //   checklists.id AS checklists_id,
   //   checklists.check_list_name AS check_list_name,
