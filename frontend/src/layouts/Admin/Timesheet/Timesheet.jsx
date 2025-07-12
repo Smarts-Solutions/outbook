@@ -2418,9 +2418,9 @@ const Timesheet = () => {
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name={submitStatus === 1 ? "Submit" : "Save"}
+            btn_name={submitStatus === 1 ? "Submit" :  "Save11"}
             title="Final Remark"
-            hideBtn={false}
+            hideBtn={submitStatusAllKey === 1 ? true : false}
             handleClose={() => {
               setRemarkModel(false);
               setSubmitStatus(0);
