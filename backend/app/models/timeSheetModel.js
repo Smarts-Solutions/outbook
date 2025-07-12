@@ -445,10 +445,10 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
 
-
-
-
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+
+          customer_id = customer_id[0] || 1;
+
           const query = `
         SELECT  
             clients.id AS id,
@@ -470,8 +470,19 @@ const getTimesheetTaskType = async (Timesheet) => {
      ORDER BY 
         clients.id DESC;
         `;
-          const [result] = await pool.execute(query, [customer_id]);
+
+         try {
+         const [result] = await pool.execute(query, [customer_id]);
+
+          console.log("result ", result);
           return { status: true, message: "success.", data: result };
+          
+         } catch (error) {
+          console.error("Error executing query: ", error);
+          return { status: false, message: "Error executing query", error: error.message };
+          
+         }
+         
         }
 
         const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "' + StaffUserId + '" LIMIT 1');
