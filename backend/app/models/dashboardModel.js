@@ -16,9 +16,6 @@ const getDashboardData = async (dashboard) => {
   }
 
 
-  console.log("staff_id ", staff_id);
-  console.log("LineManageStaffId ", LineManageStaffId);
-
   try {
     const QueryRole = `
     SELECT
@@ -35,7 +32,7 @@ const getDashboardData = async (dashboard) => {
     `
     const [rowRoles] = await pool.execute(QueryRole);
 
-    console.log("rowRoles[0].role_id ", rowRoles[0].role_id);
+    
 
 
     const [RoleAccessCustomer] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 33]);
