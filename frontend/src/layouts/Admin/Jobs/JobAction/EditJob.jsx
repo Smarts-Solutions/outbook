@@ -12,6 +12,7 @@ import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
+import Select from 'react-select';
 
 const EditJob = () => {
   const location = useLocation();
@@ -115,7 +116,7 @@ const EditJob = () => {
     status_type: null,
     notes: "",
   });
-  
+
   useEffect(() => {
     console.log("UPDATE ALL DEFAULT FEILDS");
     setJobData((prevState) => ({
@@ -208,9 +209,8 @@ const EditJob = () => {
 
             setJobData((prevState) => ({
               ...prevState,
-              AccountManager: `${
-                response.data.outbooks_acount_manager_first_name ?? ""
-              } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
+              AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
+                } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
               Customer: response.data.customer_trading_name ?? "",
               Client:
                 location.state.goto == "Customer"
@@ -503,7 +503,7 @@ const EditJob = () => {
       }
     }
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
-      
+
       if (value == "Daily") {
         date.setDate(date.getDate() + 1);
         setJobData((prevState) => ({
@@ -705,22 +705,22 @@ const EditJob = () => {
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-        .reduce((obj, key) => {
-          const keyMapping = {
-            fte_dedicated_staffing: "Fte Dedicated Staffing",
-            percentage_model: "Percentage Model",
-            adhoc_payg_hourly: "Adhoc Payg Hourly",
-            customised_pricing: "Customised Pricing",
-          };
+      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+      .reduce((obj, key) => {
+        const keyMapping = {
+          fte_dedicated_staffing: "Fte Dedicated Staffing",
+          percentage_model: "Percentage Model",
+          adhoc_payg_hourly: "Adhoc Payg Hourly",
+          customised_pricing: "Customised Pricing",
+        };
 
-          if (keyMapping[key]) {
-            RearrangeEngagementOptionArr.push(keyMapping[key]);
-          }
+        if (keyMapping[key]) {
+          RearrangeEngagementOptionArr.push(keyMapping[key]);
+        }
 
-          obj[key] = AllJobData.data.engagement_model[0][key];
-          return obj;
-        }, {})
+        obj[key] = AllJobData.data.engagement_model[0][key];
+        return obj;
+      }, {})
     : {};
 
   const openJobModal = (e) => {
@@ -790,8 +790,8 @@ const EditJob = () => {
           : "Required",
       budgetedMinuteError:
         BudgetedHoursAddTask.minutes &&
-        BudgetedHoursAddTask.minutes >= 0 &&
-        BudgetedHoursAddTask.minutes <= 59
+          BudgetedHoursAddTask.minutes >= 0 &&
+          BudgetedHoursAddTask.minutes <= 59
           ? ""
           : "Required",
     };
@@ -1255,7 +1255,65 @@ const EditJob = () => {
   }, [jobData?.Service]);
 
 
+  // Select options for Customer Account Manager
+  const customerAccountManagerOptions = [
+    { value: '', label: 'Select Customer Account Manager' },
+    ...(AllJobData?.data?.customer_account_manager || []).map((manager) => ({
+      value: manager.customer_account_manager_officer_id,
+      label: manager.customer_account_manager_officer_name
+    }))
+  ];
 
+  // Select options for Service
+  const serviceOptions = [
+    { value: '', label: 'Select Service' },
+    ...(AllJobData?.data?.services || []).map((service) => ({
+      value: service.service_id,
+      label: service.service_name
+    }))
+  ];
+
+  // Select options for Job Type
+  const jobTypeOptions = [
+    { value: '', label: 'Select Job Type' },
+    ...(get_Job_Type?.data || []).map((jobtype) => ({
+      value: jobtype.id,
+      label: jobtype.type
+    }))
+  ];
+
+  // Select options for Reviewer
+  const reviewerOptions = [
+    { value: '', label: 'Select Reviewer' },
+    ...(AllJobData?.data?.reviewer || []).map((reviewer) => ({
+      value: reviewer.reviewer_id,
+      label: `${reviewer.reviewer_name} (${reviewer.reviewer_email})`
+    }))
+  ];
+
+  const isReviewerDisabled = !(
+    ["ADMIN", "SUPERADMIN"].includes(role) ||
+    (getJobDetails.data?.staff_created_id !== undefined &&
+      (getJobDetails.data.staff_created_id === staffCreatedId ||
+        getJobDetails.data.customer_staff_id === staffCreatedId))
+  );
+
+
+  // Select options for Allocated To
+  const allocatedStaffOptions = [
+    { value: '', label: 'Select Staff' },
+    ...(AllJobData?.data?.allocated || []).map((staff) => ({
+      value: staff.allocated_id,
+      label: `${staff.allocated_name} (${staff.allocated_email})`
+    }))
+  ];
+
+  const isAllocatedToDisabled = !(
+    ["ADMIN", "SUPERADMIN"].includes(role) ||
+    (getJobDetails.data?.staff_created_id !== undefined &&
+      (getJobDetails.data.staff_created_id === staffCreatedId ||
+        getJobDetails.data.customer_staff_id === staffCreatedId))
+  );
 
 
   return (
@@ -1446,7 +1504,7 @@ const EditJob = () => {
                                       Customer Account Manager(Officer)
                                       <span className="text-danger">*</span>
                                     </label>
-                                    <select
+                                    {/* <select
                                       className={
                                         errors["CustomerAccountManager"]
                                           ? "error-field form-select"
@@ -1478,7 +1536,31 @@ const EditJob = () => {
                                           }
                                         </option>
                                       ))}
-                                    </select>
+                                    </select> */}
+                                    <Select
+                                      name="CustomerAccountManager"
+                                      id="CustomerAccountManager"
+                                      options={customerAccountManagerOptions}
+                                      value={customerAccountManagerOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.CustomerAccountManager)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'CustomerAccountManager',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      className={
+                                        errors["CustomerAccountManager"]
+                                          ? "error-field react-select"
+                                          : "react-select"
+                                      }
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
                                     {errors["CustomerAccountManager"] && (
                                       <div className="error-text">
                                         {errors["CustomerAccountManager"]}
@@ -1491,7 +1573,7 @@ const EditJob = () => {
                                       Service
                                       <span className="text-danger">*</span>
                                     </label>
-                                    <select
+                                    {/* <select
                                       className={
                                         errors["Service"]
                                           ? "error-field form-select"
@@ -1514,7 +1596,27 @@ const EditJob = () => {
                                           </option>
                                         )
                                       )}
-                                    </select>
+                                    </select> */}
+                                    <Select
+                                      name="Service"
+                                      id="Service"
+                                      options={serviceOptions}
+                                      value={serviceOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.Service)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'Service',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      className={errors["Service"] ? "error-field react-select" : "react-select"}
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
                                     {errors["Service"] && (
                                       <div className="error-text">
                                         {errors["Service"]}
@@ -1527,7 +1629,7 @@ const EditJob = () => {
                                       Job Type
                                       <span className="text-danger">*</span>
                                     </label>
-                                    <select
+                                    {/* <select
                                       className={
                                         errors["JobType"]
                                           ? "error-field form-select  jobtype"
@@ -1552,7 +1654,33 @@ const EditJob = () => {
                                             {jobtype.type}
                                           </option>
                                         ))}
-                                    </select>
+                                    </select> */}
+                                    <Select
+                                      name="JobType"
+                                      id="JobType"
+                                      options={jobTypeOptions}
+                                      value={jobTypeOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.JobType)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'JobType',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                        openJobModal(e);
+                                      }}
+                                      isLoading={get_Job_Type.loading}
+                                      className={
+                                        errors["JobType"]
+                                          ? "error-field react-select jobtype"
+                                          : "react-select jobtype"
+                                      }
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
                                     {errors["JobType"] && (
                                       <div className="error-text">
                                         {errors["JobType"]}
@@ -1584,12 +1712,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.hours || ""}
-                                            // value={
-                                            //   budgeted_hour_totalTime !=
-                                            //     undefined
-                                            //     ? budgeted_hour_totalTime.hours
-                                            //     : "0"
-                                            // }
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.hours
+                                          //     : "0"
+                                          // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -1617,12 +1745,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.minutes || ""}
-                                            // value={
-                                            //   budgeted_hour_totalTime !=
-                                            //     undefined
-                                            //     ? budgeted_hour_totalTime.minutes
-                                            //     : "0"
-                                            // }
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.minutes
+                                          //     : "0"
+                                          // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -1639,7 +1767,7 @@ const EditJob = () => {
                                     <label className="form-label">
                                       Reviewer
                                     </label>
-                                    <select
+                                    {/* <select
                                       className="form-select"
                                       name="Reviewer"
                                       onChange={HandleChange}
@@ -1648,17 +1776,17 @@ const EditJob = () => {
                                         ["ADMIN", "SUPERADMIN"].includes(role)
                                           ? false
                                           : getJobDetails.data
-                                              .staff_created_id != undefined
-                                          ? getJobDetails.data
+                                            .staff_created_id != undefined
+                                            ? getJobDetails.data
                                               .staff_created_id ===
-                                            staffCreatedId
-                                            ? false
-                                            : getJobDetails.data
-                                                .customer_staff_id ===
                                               staffCreatedId
-                                            ? false
-                                            : true
-                                          : false
+                                              ? false
+                                              : getJobDetails.data
+                                                .customer_staff_id ===
+                                                staffCreatedId
+                                                ? false
+                                                : true
+                                            : false
                                       }
                                     >
                                       <option value=""> Select Reviewer</option>
@@ -1675,7 +1803,28 @@ const EditJob = () => {
                                           </option>
                                         )
                                       )}
-                                    </select>
+                                    </select> */}
+                                    <Select
+                                      name="Reviewer"
+                                      id="Reviewer"
+                                      options={reviewerOptions}
+                                      value={reviewerOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.Reviewer)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'Reviewer',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e); // original function
+                                      }}
+                                      isDisabled={isReviewerDisabled}
+                                      className="react-select"
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
                                     {errors["Reviewer"] && (
                                       <div className="error-text">
                                         {errors["Reviewer"]}
@@ -1687,7 +1836,7 @@ const EditJob = () => {
                                     <label className="form-label">
                                       Allocated To
                                     </label>
-                                    <select
+                                    {/* <select
                                       className="form-select"
                                       name="AllocatedTo"
                                       onChange={HandleChange}
@@ -1696,17 +1845,17 @@ const EditJob = () => {
                                         ["ADMIN", "SUPERADMIN"].includes(role)
                                           ? false
                                           : getJobDetails.data
-                                              .staff_created_id != undefined
-                                          ? getJobDetails.data
+                                            .staff_created_id != undefined
+                                            ? getJobDetails.data
                                               .staff_created_id ===
-                                            staffCreatedId
-                                            ? false
-                                            : getJobDetails.data
-                                                .customer_staff_id ===
                                               staffCreatedId
-                                            ? false
-                                            : true
-                                          : false
+                                              ? false
+                                              : getJobDetails.data
+                                                .customer_staff_id ===
+                                                staffCreatedId
+                                                ? false
+                                                : true
+                                            : false
                                       }
                                     >
                                       <option value=""> Select Staff</option>
@@ -1723,7 +1872,28 @@ const EditJob = () => {
                                           </option>
                                         )
                                       )}
-                                    </select>
+                                    </select> */}
+                                    <Select
+                                      name="AllocatedTo"
+                                      id="AllocatedTo"
+                                      options={allocatedStaffOptions}
+                                      value={allocatedStaffOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.AllocatedTo)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'AllocatedTo',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e); // original handler
+                                      }}
+                                      isDisabled={isAllocatedToDisabled}
+                                      className="react-select"
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
                                     {errors["AllocatedTo"] && (
                                       <div className="error-text">
                                         {errors["AllocatedTo"]}
@@ -2097,7 +2267,7 @@ const EditJob = () => {
                                           <option key={key} value={key}>
                                             {
                                               RearrangeEngagementOptionArr[
-                                                index
+                                              index
                                               ]
                                             }
                                           </option>
@@ -2272,14 +2442,14 @@ const EditJob = () => {
                                         {errors[
                                           "FilingWithCompaniesHouseRequired"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "FilingWithCompaniesHouseRequired"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -2367,14 +2537,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentRequired"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "OpeningBalanceAdjustmentRequired"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -2394,14 +2564,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentDate"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "OpeningBalanceAdjustmentDate"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                   </div>
@@ -2437,7 +2607,7 @@ const EditJob = () => {
                                                   }
                                                   value={jobData[field.key]}
                                                 >
-                                                 
+
                                                   {field.options?.map(
                                                     (option, i) => (
                                                       <option
@@ -2475,7 +2645,7 @@ const EditJob = () => {
 
                           {jobData.EngagementModel !=
                             "fte_dedicated_staffing" &&
-                           ( jobData?.status_type == 6 ||  jobData?.status_type == 7)  && (
+                            (jobData?.status_type == 6 || jobData?.status_type == 7) && (
                               <div className="col-lg-12">
                                 <div className="card card_shadow">
                                   <div className="card-header align-items-center d-flex card-header-light-blue">
@@ -2797,11 +2967,11 @@ const EditJob = () => {
                                                               <td>
                                                                 <div className="add">
                                                                   {AddTaskArr &&
-                                                                  AddTaskArr.find(
-                                                                    (task) =>
-                                                                      task.task_id ==
-                                                                      checklist.task_id
-                                                                  ) ? (
+                                                                    AddTaskArr.find(
+                                                                      (task) =>
+                                                                        task.task_id ==
+                                                                        checklist.task_id
+                                                                    ) ? (
                                                                     ""
                                                                   ) : (
                                                                     <button
@@ -2858,17 +3028,17 @@ const EditJob = () => {
                                                               </td>
                                                               <td>
                                                                 {checklist.budgeted_hour !=
-                                                                null
+                                                                  null
                                                                   ? checklist.budgeted_hour.split(
-                                                                      ":"
-                                                                    )[0]
+                                                                    ":"
+                                                                  )[0]
                                                                   : "0"}
                                                                 h
                                                                 {checklist.budgeted_hour !=
-                                                                null
+                                                                  null
                                                                   ? checklist.budgeted_hour.split(
-                                                                      ":"
-                                                                    )[1]
+                                                                    ":"
+                                                                  )[1]
                                                                   : "0"}
                                                                 m
                                                               </td>
