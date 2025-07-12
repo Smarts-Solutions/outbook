@@ -1199,6 +1199,15 @@ const CreateJob = () => {
     }))
   ];
 
+  // 6. Build client options
+  const clientOptions = [
+    { value: '', label: 'Select Client' },
+    ...(AllJobData?.data?.client || []).map((client) => ({
+      value: client.client_id,
+      label: client.client_trading_name
+    }))
+  ];
+
   return (
     <div>
       <div className="container-fluid">
@@ -1300,7 +1309,7 @@ const CreateJob = () => {
                                         <span className="text-danger">*</span>
                                       </label>
 
-                                      <select
+                                      {/* <select
                                         className={
                                           errors["Client"]
                                             ? "error-field form-select"
@@ -1322,7 +1331,27 @@ const CreateJob = () => {
                                             </option>
                                           )
                                         )}
-                                      </select>
+                                      </select> */}
+                                      <Select
+                                        name="Client"
+                                        id="Client"
+                                        options={clientOptions}
+                                        value={clientOptions.find(
+                                          (opt) => String(opt.value) === String(jobData.Client)
+                                        )}
+                                        onChange={(selectedOption) => {
+                                          const e = {
+                                            target: {
+                                              name: 'Client',
+                                              value: selectedOption.value
+                                            }
+                                          };
+                                          HandleChange(e); // Original handler
+                                        }}
+                                        className={errors["Client"] ? "error-field react-select" : "react-select"}
+                                        classNamePrefix="react-select"
+                                        isSearchable
+                                      />
 
                                       {errors["Client"] && (
                                         <div className="error-text">
@@ -1437,7 +1466,7 @@ const CreateJob = () => {
                                             value: selectedOption.value
                                           }
                                         };
-                                        HandleChange(e); 
+                                        HandleChange(e);
                                       }}
                                       className={
                                         errors["CustomerAccountManager"]
