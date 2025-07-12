@@ -4792,4 +4792,5 @@ tbody.list.form-check-all tr:last-child td {
   border: 1px solid #ced4da;
   min-height: 38px;
   font-size: 14px;
+  border-radius: 30px !important;
 }

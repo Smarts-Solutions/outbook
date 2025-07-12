@@ -2138,6 +2138,14 @@ const Timesheet = () => {
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
                                     <div className="d-flex align-items-center">
+                                           <button
+                                        className="view-icon"
+                                        onClick={(e) => {
+                                          handleSingleRemark(e, item, index)
+                                        }}
+                                      >
+                                        <i className="ti-comment text-warning"></i>
+                                      </button>
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2146,14 +2154,7 @@ const Timesheet = () => {
                                       </button>
 
 
-                                              <button
-                                        className="view-icon"
-                                        onClick={(e) => {
-                                          handleSingleRemark(e, item, index)
-                                        }}
-                                      >
-                                        <i className="ti-comment text-warning"></i>
-                                      </button>
+                                         
                                     </div>
 
                                   ) : (
@@ -2296,6 +2297,7 @@ const Timesheet = () => {
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
                                   <button
+                                  style={{zIndex:'unset'}}
                                     className="d-flex btn btn-info fw-normal px-2"
                                     onClick={handleAddNewSheet}
                                   >
