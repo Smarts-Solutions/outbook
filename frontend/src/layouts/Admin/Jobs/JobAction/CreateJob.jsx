@@ -172,6 +172,9 @@ const CreateJob = () => {
             : location?.state?.clientName?.id,
       };
       const data = { req: req, authToken: token };
+       
+      console.log("getAllChecklist data -----2 ", data);
+
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
@@ -246,6 +249,8 @@ const CreateJob = () => {
       action: "getById",
       checklist_id: getChecklistId && getChecklistId,
     };
+  
+    console.log("getChecklistId ---- 1", getChecklistId);
     const data = { req: req, authToken: token };
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
