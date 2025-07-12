@@ -35,6 +35,8 @@ const getDashboardData = async (dashboard) => {
     `
     const [rowRoles] = await pool.execute(QueryRole);
 
+    console.log("rowRoles[0].role_id ", rowRoles[0].role_id);
+
 
     const [RoleAccessCustomer] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 33]);
 
@@ -318,26 +320,44 @@ LEFT JOIN
       if (rows[0].role_id == 3) {
         // query += ' AND allocated_to = ? OR staff_id = ?';
         // params.push(staff_id, staff_id);
-        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (allocated_to = ' + staff_id + ' OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+
+        // query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (allocated_to = ' + staff_id + ' OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (allocated_to = ' + staff_id + ' OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '")) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+
       }
       // Account Manager Role
       else if (rows[0].role_id == 4) {
         //  query += ' AND  account_manager_id = ? OR a_account_manager_id = ?  OR staff_id = ?';
         //  params.push(staff_id, staff_id, staff_id);
-        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (account_manager_id = ' + staff_id + ' OR a_account_manager_id = ' + staff_id + '  OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+
+        // query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (account_manager_id = ' + staff_id + ' OR a_account_manager_id = ' + staff_id + '  OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+         query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (account_manager_id = ' + staff_id + ' OR a_account_manager_id = ' + staff_id + '  OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '")) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
 
       }
       // Reviewer Role
       else if (rows[0].role_id == 6) {
         // query += ' AND reviewer = ? OR staff_id = ?';
         // params.push(staff_id, staff_id);
-        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (reviewer = ' + staff_id + ' OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+        // query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (reviewer = ' + staff_id + ' OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '") OR sp_customer_id IS NOT NULL) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (reviewer = ' + staff_id + ' OR staff_id = ' + staff_id + ' OR staff_id IN("' + LineManageStaffId + '") OR account_manager_id IN("' + LineManageStaffId + '")) AND (customer_created_at BETWEEN "' + startDate + '" AND "' + endDate + '"  OR job_created_at BETWEEN "' + startDate + '" AND "' + endDate + '" OR client_created_at BETWEEN "' + startDate + '" AND "' + endDate + '")';
+
       }
 
 
       // const [viewResult] = await pool.execute(query, params);
       const [viewResult] = await pool.execute(query);
-      // console.log("viewResult ", viewResult);
+
+       //console.log("viewResult ", viewResult);
+       
+
       const uniqueCustomerIds = [...new Set(viewResult.map(item => item.customer_id))];
       const uniqueClientIds = [...new Set(viewResult.filter(item => item.client_id !== null).map(item => item.client_id))];
       const uniqueJobIds = [...new Set(viewResult.filter(item => item.job_id !== null).map(item => item.job_id))];
