@@ -104,10 +104,11 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
       },
     });
 
+    return response.data.webUrl;
+
     const itemId = response.data.id;
     const publicUrl = await generateShareableLink(drive_ID, itemId, accessToken);
     console.log("File uploaded successfully publicUrl:", publicUrl);
-
     return publicUrl
     return { webUrl: response.data.webUrl, publicUrl };
   } catch (err) {

@@ -139,7 +139,7 @@ const getAddJobData = async (job) => {
     JOIN 
          roles ON staffs.role_id = roles.id
     WHERE  
-     (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1' 
+     staffs.role_id = 3 AND staffs.status = '1' 
     ORDER BY 
      staffs.id DESC;
    `;
@@ -1037,8 +1037,6 @@ const getJobByClient = async (job) => {
       LineManageStaffId.push(StaffUserId);
   }
   
-  console.log("LineManageStaffId", LineManageStaffId);
-
   try {
     const [ExistStaff] = await pool.execute(
       'SELECT id , role_id  FROM staffs WHERE id = "' +
@@ -1126,6 +1124,11 @@ const getJobByClient = async (job) => {
       }
       // Account Manger
       else if (ExistStaff[0].role_id == 4) {
+
+        // console.log("ExistStaff[0].id", ExistStaff[0].id);
+        // console.log("client_id", client_id);
+        // console.log("LineManageStaffId", LineManageStaffId);
+
         const query = `
    SELECT 
    jobs.id AS job_id,
@@ -1172,36 +1175,38 @@ const getJobByClient = async (job) => {
    customer_services ON customer_services.service_id = jobs.service_id
    JOIN
    customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-   LEFT JOIN 
+   LEFT JOIN
    customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-   LEFT JOIN 
+   LEFT JOIN
    job_types ON jobs.job_type_id = job_types.id
-   LEFT JOIN 
+   LEFT JOIN
    staffs ON jobs.allocated_to = staffs.id
-   LEFT JOIN 
+   LEFT JOIN
    staffs AS staffs2 ON jobs.reviewer = staffs2.id
-   LEFT JOIN 
+   LEFT JOIN
    staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
    LEFT JOIN
    master_status ON master_status.id = jobs.status_type
    LEFT JOIN
    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
-   WHERE 
+   WHERE
    jobs.client_id = clients.id AND
-   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
-   GROUP BY 
-   jobs.id
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR  jobs.reviewer = ? OR jobs.allocated_to = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+   GROUP BY
+      jobs.id
     ORDER BY
-   jobs.id DESC;
-   `;
+   jobs.id DESC`;
         const [rowsAllocated] = await pool.execute(query, [
           ExistStaff[0].id,
           client_id,
           ExistStaff[0].id,
           client_id,
+          ExistStaff[0].id,
+          ExistStaff[0].id,
           client_id,
         ]);
         result = rowsAllocated;
+       // console.log("rowsAllocated lenthg", rowsAllocated.length);
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {

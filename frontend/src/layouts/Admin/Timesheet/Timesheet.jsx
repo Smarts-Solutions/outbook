@@ -1130,7 +1130,8 @@ const Timesheet = () => {
 
 
 
-      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
+      //let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
+      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute)) || null;
       if (staff_hourminute != null) {
 
         // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
@@ -1179,8 +1180,6 @@ const Timesheet = () => {
         }
 
       }
-
-
 
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })

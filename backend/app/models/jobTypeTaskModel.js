@@ -10,25 +10,25 @@ const createJobType = async (JobType) => {
     `;
 
   try {
-   
+
     const [check] = await pool.query(checkQuery, [type, service_id]);
     if (check.length > 0) {
       return { status: false, message: "Job Type already exists." };
     }
     const [result] = await pool.execute(query, [service_id, type]);
     const currentDate = new Date();
-        await SatffLogUpdateOperation(
-            {
-                staff_id: JobType.StaffUserId,
-                ip: JobType.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: "job types",
-                log_message: `created job types ${type}`,
-                permission_type: "created",
-                module_id:result.insertId
-            }
-        );
-    return {status: true ,message: 'Job Type created successfully.' , data : result.insertId};
+    await SatffLogUpdateOperation(
+      {
+        staff_id: JobType.StaffUserId,
+        ip: JobType.ip,
+        date: currentDate.toISOString().split('T')[0],
+        module_name: "job types",
+        log_message: `created job types ${type}`,
+        permission_type: "created",
+        module_id: result.insertId
+      }
+    );
+    return { status: true, message: 'Job Type created successfully.', data: result.insertId };
   } catch (err) {
     console.error("Error inserting data:", err);
     throw err;
@@ -37,9 +37,9 @@ const createJobType = async (JobType) => {
 
 const getJobType = async (JobType) => {
   const { service_id } = JobType;
- if(service_id == undefined){
-  return []
- }
+  if (service_id == undefined) {
+    return []
+  }
   const query = `
     SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id 
     WHERE job_types.service_id = ?
@@ -58,16 +58,16 @@ const getJobType = async (JobType) => {
 const deleteJobType = async (JobTypeId) => {
 
   const [[existType]] = await pool.execute(`SELECT type FROM job_types WHERE id = ?`, [JobTypeId.id]);
-  
-  
+
+
   if (parseInt(JobTypeId.id) > 0) {
 
     const [assignedChecklist] = await pool.execute(
       `SELECT COUNT(*) AS count FROM checklists WHERE job_type_id = ?`,
       [JobTypeId.id]
     );
-    if (assignedChecklist[0].count > 0) { 
-      return { status: false, message: `Job Type ${existType.type} is assigned to existing checklists.` ,key : "warning" };
+    if (assignedChecklist[0].count > 0) {
+      return { status: false, message: `Job Type ${existType.type} is assigned to existing checklists.`, key: "warning" };
     }
 
 
@@ -75,13 +75,13 @@ const deleteJobType = async (JobTypeId) => {
       `SELECT COUNT(*) AS count FROM jobs WHERE job_type_id = ?`,
       [JobTypeId.id]
     );
-    if (assignedJobs[0].count > 0) { 
-      return { status: false, message: `Job Type ${existType.type} is assigned to existing jobs.` ,key : "warning" };
+    if (assignedJobs[0].count > 0) {
+      return { status: false, message: `Job Type ${existType.type} is assigned to existing jobs.`, key: "warning" };
     }
   }
-  
-  
-  if(parseInt(JobTypeId.id) > 0){
+
+
+  if (parseInt(JobTypeId.id) > 0) {
     const currentDate = new Date();
     await SatffLogUpdateOperation(
       {
@@ -103,7 +103,7 @@ const deleteJobType = async (JobTypeId) => {
     return { status: true, message: "Job type deleted successfully" };
   } catch (err) {
     console.log("Error deleting data:", err);
-    return { status: false, message: "failed" ,key : "" };
+    return { status: false, message: "failed", key: "" };
   }
 };
 
@@ -130,28 +130,28 @@ const updateJobType = async (JobType) => {
   try {
     const [[existStatus]] = await pool.execute(`SELECT status FROM job_types WHERE id = ?`, [id]);
     let status_change = "Deactivate"
-    if(JobType.status == "1"){
+    if (JobType.status == "1") {
       status_change = "Activate"
     }
     let log_message = existStatus.status === JobType.status ?
-        `edited job types ${JobType.type}`:
-        `changes the job types status ${status_change} ${JobType.type}`
-     const [result] =  await pool.execute(query, values);
-    if(result.changedRows){
-    const currentDate = new Date();
-    await SatffLogUpdateOperation(
-      {
-        staff_id: JobType.StaffUserId,
-        ip: JobType.ip,
-        date: currentDate.toISOString().split("T")[0],
-        module_name: "job types",
-        log_message: log_message,
-        permission_type: "updated",
-        module_id: id,
-      }
-    );
-  }
-  return {status: true ,message: 'Job Type updated successfully.' , data : result.affectedRows};
+      `edited job types ${JobType.type}` :
+      `changes the job types status ${status_change} ${JobType.type}`
+    const [result] = await pool.execute(query, values);
+    if (result.changedRows) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: JobType.StaffUserId,
+          ip: JobType.ip,
+          date: currentDate.toISOString().split("T")[0],
+          module_name: "job types",
+          log_message: log_message,
+          permission_type: "updated",
+          module_id: id,
+        }
+      );
+    }
+    return { status: true, message: 'Job Type updated successfully.', data: result.affectedRows };
   } catch (err) {
     console.log("Error updating data:", err);
     throw err;
@@ -219,7 +219,7 @@ const getTask = async (task) => {
   }
 };
 
- 
+
 
 const addChecklist = async (checklist) => {
 
@@ -232,12 +232,12 @@ const addChecklist = async (checklist) => {
     task,
   } = checklist;
 
- 
+
   let customer_id = checklist.customer_id
-  if(customer_id == null || customer_id == '' || customer_id == undefined){
+  if (customer_id == null || customer_id == '' || customer_id == undefined) {
     customer_id = 0
   }
-  
+
 
 
   try {
@@ -266,7 +266,7 @@ const addChecklist = async (checklist) => {
         module_id: checklist_id,
       }
     );
-    
+
 
     const checklistTasksQuery = `
     INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
@@ -275,8 +275,8 @@ const addChecklist = async (checklist) => {
     for (const valTask of task) {
       const { task_id, task_name, budgeted_hour } = valTask;
       if (task_id == "" || task_id == null || task_id == undefined) {
-      
-      
+
+
         const InsertTaskquery = `
             INSERT INTO task (name,service_id,job_type_id)
             VALUES (?, ?, ?)
@@ -322,8 +322,8 @@ const addChecklist = async (checklist) => {
 
 const getChecklist = async (checklist) => {
   const { customer_id } = checklist;
- 
- let query = `
+
+  let query = `
     SELECT
     checklists.id AS checklists_id,
     checklists.check_list_name AS check_list_name,
@@ -348,7 +348,7 @@ const getChecklist = async (checklist) => {
     WHERE checklists.customer_id = ?
     ORDER BY checklists.id DESC
     `;
-  if(parseInt(customer_id) === 0){
+  if (parseInt(customer_id) === 0) {
     query = `
     SELECT
     checklists.id AS checklists_id,
@@ -371,7 +371,7 @@ const getChecklist = async (checklist) => {
     WHERE checklists.customer_id = ?
     ORDER BY checklists.id DESC
     `;
-  }  
+  }
   try {
     const [result] = await pool.execute(query, [customer_id]);
     return {
@@ -492,7 +492,7 @@ const updateChecklist = async (checklist) => {
   } = checklist;
 
   let customer_id = checklist.customer_id;
-  if(customer_id == null || customer_id == '' || customer_id == undefined){
+  if (customer_id == null || customer_id == '' || customer_id == undefined) {
     customer_id = 0
   }
 
@@ -502,6 +502,8 @@ const updateChecklist = async (checklist) => {
   );
   const idArray = await ExistChecklistsids.map((item) => item.id);
   let arrayInterId = [];
+
+
 
   try {
     // Update query for checklists table
@@ -525,7 +527,7 @@ const updateChecklist = async (checklist) => {
       checklists_id,
     ]);
 
-    if(checklistResult.changedRows > 0){
+    if (checklistResult.changedRows > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
@@ -550,12 +552,63 @@ const updateChecklist = async (checklist) => {
     for (const valTask of task) {
       const { checklist_tasks_id, task_id, task_name, budgeted_hour } = valTask;
       arrayInterId.push(checklist_tasks_id);
-      await pool.execute(updateChecklistTasksQuery, [
-        task_name,
-        budgeted_hour,
-        checklists_id,
-        task_id,
-      ]);
+      if (['', null, undefined].includes(task_id)) {
+        const InsertTaskquery = `
+            INSERT INTO task (name,service_id,job_type_id)
+            VALUES (?, ?, ?)
+            `;
+
+        const checkQuery = `
+                SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+            `;
+        const [existing] = await pool.execute(checkQuery, [
+          task_name,
+          service_id,
+          job_type_id,
+        ]);
+        if (existing.length === 0) {
+          const [result] = await pool.execute(InsertTaskquery, [
+            task_name,
+            service_id,
+            job_type_id,
+          ]);
+          const task_id = result.insertId;
+
+
+          const checklistTasksQuery = `
+          INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
+          VALUES (?, ?, ?, ?)
+          `;
+          const [result1] = await pool.execute(checklistTasksQuery, [
+            checklists_id,
+            task_id,
+            task_name,
+            budgeted_hour,
+          ]);
+
+        } else {
+
+          const checklistTasksQuery = `
+    INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
+    VALUES (?, ?, ?, ?)
+    `;
+          const [result1] = await pool.execute(checklistTasksQuery, [
+            checklists_id,
+            existing[0].id,
+            task_name,
+            budgeted_hour,
+          ]);
+
+        }
+
+      } else {
+        await pool.execute(updateChecklistTasksQuery, [
+          task_name,
+          budgeted_hour,
+          checklists_id,
+          task_id,
+        ]);
+      }
     }
 
     let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
@@ -613,9 +666,9 @@ const getClientTypeChecklist = async (checklist) => {
 };
 
 const getByServiceWithJobType = async (checklist) => {
-  const {  service_id, job_type_id, clientId } = checklist;
-    let customer_id = (checklist.customer_id).toString()
-    const query = `SELECT 
+  const { service_id, job_type_id, clientId } = checklist;
+  let customer_id = (checklist.customer_id).toString()
+  const query = `SELECT 
     checklists.id AS checklists_id,
     checklists.check_list_name AS check_list_name,
     checklists.status AS status,
@@ -662,7 +715,7 @@ const getByServiceWithJobType = async (checklist) => {
       data: result,
     };
   } catch (err) {
-   
+
     return { status: false, message: "Error get checklist." };
   }
 };
@@ -681,5 +734,5 @@ module.exports = {
   updateChecklist,
   customerGetService,
   getClientTypeChecklist,
-  getByServiceWithJobType, 
+  getByServiceWithJobType,
 };

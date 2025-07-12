@@ -163,13 +163,13 @@ const Paper = () => {
         setIsLoading(true);
         const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
-        console.log("site_ID", site_ID);
-        console.log("drive_ID", drive_ID);
-        console.log("folder_ID", folder_ID);
+       // console.log("site_ID", site_ID);
+     //   console.log("drive_ID", drive_ID);
+       // console.log("folder_ID", folder_ID);
 
         const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
 
-        console.log("folderId", folderId);
+        //console.log("folderId", folderId);
 
         for (const file of newFiles) {
           const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
