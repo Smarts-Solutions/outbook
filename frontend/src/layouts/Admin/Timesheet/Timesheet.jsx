@@ -1228,42 +1228,55 @@ const Timesheet = () => {
     };
 
 
-    let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
-    if (staff_hourminute != null) {
+      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute)) || null;
+      if (staff_hourminute != null) {
 
-      const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-        return {
-          original: item.total_hours,
-          totalweeklyHours: totalWeeklyHoursMinutes(item)
-        };
-      });
+        // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+        //   return {
+        //     original: item.total_hours,
+        //     totalweeklyHours: totalWeeklyHoursMinutes(item)
+        //   };
+        // });
 
-      const total = converted.reduce((acc, item) => {
-        const val = parseFloat(item.totalweeklyHours || 0);
-        const hrs = Math.floor(val);
-        const mins = Math.round((val - hrs) * 100);
+        //  const total = converted.reduce((acc, item) => {
+        //   const val = parseFloat(item.totalweeklyHours || 0);
+        //   const hrs = Math.floor(val);
+        //   const mins = Math.round((val - hrs) * 100);
 
-        acc.totalMinutes += hrs * 60 + mins;
-        return acc;
-      }, { totalMinutes: 0 });
+        //   acc.totalMinutes += hrs * 60 + mins;
+        //   return acc;
+        // }, { totalMinutes: 0 });
 
-      const totalHours = Math.floor(total.totalMinutes / 60);
-      const totalMins = total.totalMinutes % 60;
-      const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        // const totalHours = Math.floor(total.totalMinutes / 60);
+        // const totalMins = total.totalMinutes % 60;
+        // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        // console.log(`finalTotalHours`, finalTotalHours);
 
 
-      if (staff_hourminute > parseFloat(finalTotalHours)) {
-        sweatalert.fire({
-          icon: "warning",
-          title: "You have not completed your timesheet for this week.",
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 3000,
-        });
-        return;
+        const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+          const val = parseFloat(item.total_hours || 0);
+          return acc + val;
+        }, 0);
+
+        let finalTotalHours = await convertHoursMinutes(totalHours)
+
+
+        console.log(`finalTotalHours`, finalTotalHours);
+        console.log(`staff_hourminute`, staff_hourminute);
+
+
+        if (staff_hourminute > parseFloat(finalTotalHours)) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Please enter the minimum required hourly time in the timesheet before submitting.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+          return;
+        }
+
       }
-
-    }
 
 
 
