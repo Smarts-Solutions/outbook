@@ -1279,8 +1279,6 @@ const Timesheet = () => {
       }
 
 
-
-
     const res = await dispatch(
       saveTimesheetData({ req, authToken: token })
     ).unwrap();
