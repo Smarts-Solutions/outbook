@@ -1533,7 +1533,7 @@ const Timesheet = () => {
                     defaultValue={currentValue}
                     onChange={(selectedOption) => {
                       // simulate e.target.value
-                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      const e = { target: { name: 'week', value: selectedOption.value }};
                       selectFilterStaffANdWeek(e);
                     }}
                     classNamePrefix="react-select"
