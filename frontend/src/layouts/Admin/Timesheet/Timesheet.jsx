@@ -82,7 +82,6 @@ const Timesheet = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [selectedStaff, setSelectedStaff] = useState(staffDetails.id);
 
-  console.log(`selectedStaff`, selectedStaff);
 
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
@@ -341,6 +340,8 @@ const Timesheet = () => {
       console.log("API call failed:", res);
     }
   };
+
+
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
     const newSheetRows = [...timeSheetRows];
@@ -707,16 +708,19 @@ const Timesheet = () => {
 
     console.log(`name`, name);
     console.log(`value`, value);
+
+
     let final_value = value;
 
     let [intPart, decimalPart] = value.toString().split(".");
 
     if (decimalPart) {
       let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
-      final_value = `${intPart}.${multiplied}`;
-    }
 
-    console.log(`final value `, final_value);
+      const multipliedStr = multiplied.toString().padStart(2, '0');
+       final_value = `${intPart}.${multipliedStr}`;
+      // final_value = `${intPart}.${multiplied}`;
+    }
 
 
     const updatedRows = [...timeSheetRows];
@@ -935,8 +939,8 @@ const Timesheet = () => {
   }
 
   const saveData = async (e) => {
-   
-    if(timeSheetRows.length === 0) {
+
+    if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
         title: "Please add at least one row to the timesheet.",
@@ -1072,7 +1076,7 @@ const Timesheet = () => {
 
   const submitData = async (e) => {
 
-    if(timeSheetRows.length === 0) {
+    if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
         title: "Please add at least one row to the timesheet.",
@@ -1442,7 +1446,7 @@ const Timesheet = () => {
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
 
-                {console.log(`staffDetails`, staffDetails)}
+               
                 {/* <select
                   name="staff_id"
                   className="form-select"
@@ -1577,99 +1581,99 @@ const Timesheet = () => {
                             <th
                               className="dropdwnCol2 pe-0"
                               data-field="phone"
-                            
+
                             >
                               No
                             </th>
                             <th
                               className=""
                               data-field="phone"
-                              
+
                             >
                               Task Type
                             </th>
                             <th
                               className="dropdwnCol7"
                               data-field="phone"
-                              
+
                             >
                               Customer
                             </th>
                             <th
                               className="dropdwnCol6"
                               data-field="phone"
-                             
+
                             >
                               Client
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                              
+
                             >
                               Job
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                              
+
                             >
                               Job Type
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="phone"
-                              
+
                             >
                               Task
                             </th>
 
-                       <th
-  className={`pe-0 week-data ${isExpanded ? "expanded" : ""}`}
-  // style={{ width: isExpanded ? "50%" : "100px" }}
->
-  <div className="d-flex align-items-center">
-    <ChevronLeft
-      onClick={(e) => {
-        e.preventDefault();
-        changeWeek(-1);
-      }}
-    />
-    <span className="me-0">
-      {weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}
-    </span>
+                            <th
+                              className={`pe-0 week-data ${isExpanded ? "expanded" : ""}`}
+                            // style={{ width: isExpanded ? "50%" : "100px" }}
+                            >
+                              <div className="d-flex align-items-center">
+                                <ChevronLeft
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    changeWeek(-1);
+                                  }}
+                                />
+                                <span className="me-0">
+                                  {weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}
+                                </span>
 
-    {/* Conditionally render weekdays when expanded */}
-    {isExpanded && (
-      <div className="d-flex" style={{ width: "70%" }}>
-        {["tuesday", "wednesday", "thursday", "friday", "saturday"].map(
-          (day) => (
-            <span key={day}>
-              {weekDays[day] ? dayMonthFormatDate(weekDays[day]) : ""}
-            </span>
-          )
-        )}
-      </div>
-    )}
+                                {/* Conditionally render weekdays when expanded */}
+                                {isExpanded && (
+                                  <div className="d-flex" style={{ width: "70%" }}>
+                                    {["tuesday", "wednesday", "thursday", "friday", "saturday"].map(
+                                      (day) => (
+                                        <span key={day}>
+                                          {weekDays[day] ? dayMonthFormatDate(weekDays[day]) : ""}
+                                        </span>
+                                      )
+                                    )}
+                                  </div>
+                                )}
 
-    <button
-      onClick={toggleAllRowsView}
-      className="px-0 btn btn-sm btn-link text-decoration-none"
-    >
-      <i
-        className={`fa ${isExpanded ? "fa-minus" : "fa-plus"}`}
-        aria-hidden="true"
-      ></i>
-    </button>
+                                <button
+                                  onClick={toggleAllRowsView}
+                                  className="px-0 btn btn-sm btn-link text-decoration-none"
+                                >
+                                  <i
+                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"}`}
+                                    aria-hidden="true"
+                                  ></i>
+                                </button>
 
-    <ChevronRight
-      onClick={(e) => {
-        e.preventDefault();
-        changeWeek(1);
-      }}
-    />
-  </div>
-</th>
+                                <ChevronRight
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    changeWeek(1);
+                                  }}
+                                />
+                              </div>
+                            </th>
 
                             {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
@@ -1688,7 +1692,7 @@ const Timesheet = () => {
                                 <th
                                   className="dropdwnCol5"
                                   data-field="phone"
-                                 
+
                                 >
                                   Action
                                 </th>
@@ -1698,9 +1702,9 @@ const Timesheet = () => {
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
-                                
+
                               >
-                                
+
                                 Remark
                               </th>
                             )}
@@ -1763,7 +1767,7 @@ const Timesheet = () => {
                                   ) : (
                                     <input
                                       className="form-control cursor-pointer"
-                                        style={{ width: "100px" }}
+                                      style={{ width: "100px" }}
                                       defaultValue={
                                         item.task_type === "1"
                                           ? "No Customer"
@@ -1848,14 +1852,14 @@ const Timesheet = () => {
                                     (() => {
                                       const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
                                       return matchedJob && matchedJob.job_type_name !== undefined
-                                        ? <div  style={{ width: "100px" }}>{matchedJob.job_type_name}</div>
-                                        :<div style={{ width: "80px" }}>-</div>;
+                                        ? <div style={{ width: "100px" }}>{matchedJob.job_type_name}</div>
+                                        : <div style={{ width: "80px" }}>-</div>;
                                     })()
                                   ) : (
                                     item.task_type === "1" ? (
-                                     <div style={{ width: "80px" }}>-</div>
+                                      <div style={{ width: "80px" }}>-</div>
                                     ) : (
-                                      <div  style={{ width: "100px" }}>{item.job_type_name}</div>
+                                      <div style={{ width: "100px" }}>{item.job_type_name}</div>
                                     )
 
                                   )}
@@ -1893,12 +1897,12 @@ const Timesheet = () => {
 
                                 {/*Monday Input*/}
                                 <td >
-                               
+
                                   <div className="ms-2">
                                     {isExpanded ? (
                                       <div
                                         className="d-flex  ms-3"
-                                       
+
                                       >
                                         <input
                                           className="form-control cursor-pointer border-radius-end"
@@ -2138,7 +2142,7 @@ const Timesheet = () => {
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
                                     <div className="d-flex align-items-center">
-                                           <button
+                                      <button
                                         className="view-icon"
                                         onClick={(e) => {
                                           handleSingleRemark(e, item, index)
@@ -2154,7 +2158,7 @@ const Timesheet = () => {
                                       </button>
 
 
-                                         
+
                                     </div>
 
                                   ) : (
@@ -2208,12 +2212,12 @@ const Timesheet = () => {
                                 <th
                                   className="dropdwnCol5"
                                   data-field="phone"
-                                
+
                                 >
 
                                 </th>
                                 <th className="dropdwnCol5" data-field="phone" ></th>
-                                <th  className="pe-0 week-data" >
+                                <th className="pe-0 week-data" >
                                   <div className="d-flex  ms-3" >
                                     <input
                                       className="form-control cursor-pointer border-radius-end"
@@ -2228,7 +2232,7 @@ const Timesheet = () => {
                                     {isExpanded && (
                                       <div
                                         className="d-flex  ms-3"
-                                        
+
                                       >
                                         <input
                                           className="form-control cursor-pointer ms-2"
@@ -2297,7 +2301,7 @@ const Timesheet = () => {
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
                                   <button
-                                  style={{zIndex:'unset'}}
+                                    style={{ zIndex: 'unset' }}
                                     className="d-flex btn btn-info fw-normal px-2"
                                     onClick={handleAddNewSheet}
                                   >
@@ -2418,7 +2422,7 @@ const Timesheet = () => {
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name={submitStatus === 1 ? "Submit" :  "Save11"}
+            btn_name={submitStatus === 1 ? "Submit" : "Save11"}
             title="Final Remark"
             hideBtn={submitStatusAllKey === 1 ? true : false}
             handleClose={() => {
