@@ -4685,7 +4685,7 @@ select#tabSelect {
 }
 
 .rdt_TableHead {
-  z-index: 12 !important;
+  z-index: unset !important;
 }
 i.exp_icon {
   color: #00afef;
@@ -4793,4 +4793,7 @@ tbody.list.form-check-all tr:last-child td {
   min-height: 38px;
   font-size: 14px;
   border-radius: 30px !important;
+}
+.react-select__loading-indicator {
+    display: none !important;
 }
