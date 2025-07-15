@@ -718,7 +718,7 @@ const Timesheet = () => {
       let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
 
       const multipliedStr = multiplied.toString().padStart(2, '0');
-       final_value = `${intPart}.${multipliedStr}`;
+      final_value = `${intPart}.${multipliedStr}`;
       // final_value = `${intPart}.${multiplied}`;
     }
 
@@ -1135,7 +1135,19 @@ const Timesheet = () => {
 
 
       //let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
-      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute)) || null;
+      let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
+
+    //  console.log(`staff_hourminute 111 `, staff_hourminute);
+
+      if (staff_hourminute != null && staff_hourminute?.includes(":")) {
+        const [hours, minutes] = staff_hourminute.split(":").map(Number);
+        const decimal = hours+'.'+minutes;
+        staff_hourminute = parseFloat(decimal); 
+      } else if (staff_hourminute != null) {
+        console.log(staff_hourminute); 
+        staff_hourminute = parseFloat(staff_hourminute)
+      }
+
       if (staff_hourminute != null) {
 
         // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
@@ -1168,8 +1180,8 @@ const Timesheet = () => {
         let finalTotalHours = await convertHoursMinutes(totalHours)
 
 
-        console.log(`finalTotalHours`, finalTotalHours);
-        console.log(`staff_hourminute`, staff_hourminute);
+        // console.log(`finalTotalHours`, finalTotalHours);
+        // console.log(`staff_hourminute`, staff_hourminute);
 
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
@@ -1184,6 +1196,8 @@ const Timesheet = () => {
         }
 
       }
+
+
 
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
@@ -1228,55 +1242,64 @@ const Timesheet = () => {
     };
 
 
-      let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute)) || null;
-      if (staff_hourminute != null) {
+    let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
 
-        // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-        //   return {
-        //     original: item.total_hours,
-        //     totalweeklyHours: totalWeeklyHoursMinutes(item)
-        //   };
-        // });
-
-        //  const total = converted.reduce((acc, item) => {
-        //   const val = parseFloat(item.totalweeklyHours || 0);
-        //   const hrs = Math.floor(val);
-        //   const mins = Math.round((val - hrs) * 100);
-
-        //   acc.totalMinutes += hrs * 60 + mins;
-        //   return acc;
-        // }, { totalMinutes: 0 });
-
-        // const totalHours = Math.floor(total.totalMinutes / 60);
-        // const totalMins = total.totalMinutes % 60;
-        // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-        // console.log(`finalTotalHours`, finalTotalHours);
-
-
-        const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-          const val = parseFloat(item.total_hours || 0);
-          return acc + val;
-        }, 0);
-
-        let finalTotalHours = await convertHoursMinutes(totalHours)
-
-
-        console.log(`finalTotalHours`, finalTotalHours);
-        console.log(`staff_hourminute`, staff_hourminute);
-
-
-        if (staff_hourminute > parseFloat(finalTotalHours)) {
-          sweatalert.fire({
-            icon: "warning",
-            title: "Please enter the minimum required hourly time in the timesheet before submitting.",
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 3000,
-          });
-          return;
-        }
-
+    if (staff_hourminute != null && staff_hourminute?.includes(":")) {
+        const [hours, minutes] = staff_hourminute.split(":").map(Number);
+        const decimal = hours+'.'+minutes;
+        staff_hourminute = parseFloat(decimal); 
+      } else if (staff_hourminute != null) {
+        staff_hourminute = parseFloat(staff_hourminute)
       }
+
+    if (staff_hourminute != null) {
+
+      // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
+      //   return {
+      //     original: item.total_hours,
+      //     totalweeklyHours: totalWeeklyHoursMinutes(item)
+      //   };
+      // });
+
+      //  const total = converted.reduce((acc, item) => {
+      //   const val = parseFloat(item.totalweeklyHours || 0);
+      //   const hrs = Math.floor(val);
+      //   const mins = Math.round((val - hrs) * 100);
+
+      //   acc.totalMinutes += hrs * 60 + mins;
+      //   return acc;
+      // }, { totalMinutes: 0 });
+
+      // const totalHours = Math.floor(total.totalMinutes / 60);
+      // const totalMins = total.totalMinutes % 60;
+      // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+      // console.log(`finalTotalHours`, finalTotalHours);
+
+
+      const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+        const val = parseFloat(item.total_hours || 0);
+        return acc + val;
+      }, 0);
+
+      let finalTotalHours = await convertHoursMinutes(totalHours)
+
+
+      // console.log(`finalTotalHours 1 `, finalTotalHours);
+      // console.log(`staff_hourminute 1 `, staff_hourminute);
+
+
+      if (staff_hourminute > parseFloat(finalTotalHours)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Please enter the minimum required hourly time in the timesheet before submitting.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
+        });
+        return;
+      }
+    }
+
 
 
     const res = await dispatch(
@@ -1457,7 +1480,7 @@ const Timesheet = () => {
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
 
-               
+
                 {/* <select
                   name="staff_id"
                   className="form-select"
@@ -1533,7 +1556,7 @@ const Timesheet = () => {
                     defaultValue={currentValue}
                     onChange={(selectedOption) => {
                       // simulate e.target.value
-                      const e = { target: { name: 'week', value: selectedOption.value }};
+                      const e = { target: { name: 'week', value: selectedOption.value } };
                       selectFilterStaffANdWeek(e);
                     }}
                     classNamePrefix="react-select"
