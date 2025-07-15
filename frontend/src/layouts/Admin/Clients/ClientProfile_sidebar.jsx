@@ -7,6 +7,7 @@ import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import Select from "react-select";
 
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 const ClientList = () => {
@@ -28,32 +29,32 @@ const ClientList = () => {
     GetAllJobListByCustomer("");
     GetAllCustomer();
     GetStatus();
-    if (![undefined,"", null].includes(cust_id_sidebar) && ![undefined,"", null].includes(cli_id_sidebar)) {
-     getAllClientData1(cust_id_sidebar,cust_id_sidebar_name, cli_id_sidebar ,cli_id_sidebar_name);
-     setHararchyData({ customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name }, client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name } });
+    if (![undefined, "", null].includes(cust_id_sidebar) && ![undefined, "", null].includes(cli_id_sidebar)) {
+      getAllClientData1(cust_id_sidebar, cust_id_sidebar_name, cli_id_sidebar, cli_id_sidebar_name);
+      setHararchyData({ customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name }, client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name } });
     }
   }, []);
 
-  
-  
-    const getAllClientData1 = async (customer_id ,customer_name, client_id ,client_name) => {
-      const req = { action: "get", customer_id: customer_id };
-      const data = { req: req, authToken: token };
-      await dispatch(ClientAction(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            setClientData(response.data);
-            GetClientDetails(client_id);
-            GetAllJobList(client_id);
-            setClientDetailSingle({ id: client_id, client_name: client_name });
 
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    };
+
+  const getAllClientData1 = async (customer_id, customer_name, client_id, client_name) => {
+    const req = { action: "get", customer_id: customer_id };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setClientData(response.data);
+          GetClientDetails(client_id);
+          GetAllJobList(client_id);
+          setClientDetailSingle({ id: client_id, client_name: client_name });
+
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
 
 
@@ -98,19 +99,19 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setClientData(response.data);
-      
+
           if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
 
-            sessionStorage.setItem('cli_id_sidebar',response?.data[0]?.id);
-            sessionStorage.setItem('cli_id_sidebar_name',response?.data[0]?.client_name);
-            
-            setClientDetailSingle({ id:response?.data[0]?.id, client_name: response?.data[0]?.client_name });
-            setHararchyData({ customer: { id: id, trading_name: name }, client: { id:response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
+            sessionStorage.setItem('cli_id_sidebar', response?.data[0]?.id);
+            sessionStorage.setItem('cli_id_sidebar_name', response?.data[0]?.client_name);
+
+            setClientDetailSingle({ id: response?.data[0]?.id, client_name: response?.data[0]?.client_name });
+            setHararchyData({ customer: { id: id, trading_name: name }, client: { id: response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
             GetAllJobList(response?.data[0]?.id);
             GetClientDetails(response?.data[0]?.id);
             setActiveTab("NoOfJobs");
           }
-          if(response.data.length == 0){
+          if (response.data.length == 0) {
             sessionStorage.remove('cli_id_sidebar');
             setClientDetailSingle({ id: '', client_name: '' });
             setHararchyData({ customer: { id: id, trading_name: name }, client: { id: '', client_name: '' } });
@@ -159,7 +160,7 @@ const ClientList = () => {
       (item) => item.permission_name === "job"
     )?.items || [];
 
-    const accessDataJobAll =
+  const accessDataJobAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "all_jobs"
     )?.items || [];
@@ -167,7 +168,7 @@ const ClientList = () => {
 
   useEffect(() => {
     if (accessDataJob.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 , all_jobs: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, all_jobs: 0 };
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -315,7 +316,7 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {
-           ( getAccessDataJob.view == 1 || getAccessDataJob.all_jobs == 1) ||  role === "SUPERADMIN" ? (
+            (getAccessDataJob.view == 1 || getAccessDataJob.all_jobs == 1) || role === "SUPERADMIN" ? (
               <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
                 {row.job_code_id}
               </a>
@@ -356,7 +357,7 @@ const ClientList = () => {
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
-              disabled={getAccessDataJob.update === 1 ||  role === "SUPERADMIN" ? false : true}
+              disabled={getAccessDataJob.update === 1 || role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -432,14 +433,14 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(getAccessDataJob.update == 1 ||  role === "SUPERADMIN") && (
+          {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
           )}
           {
             row.timesheet_job_id == null ?
-              (getAccessDataJob.delete == 1 ||  role === "SUPERADMIN") && (
+              (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
                 <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
                   <i className="ti-trash text-danger" />
                 </button>
@@ -555,7 +556,7 @@ const ClientList = () => {
       setActiveTab("NoOfJobs");
       GetAllClientData(id, name);
     } else {
-     // sessionStorage.remove('cust_id_sidebar');
+      // sessionStorage.remove('cust_id_sidebar');
       GetAllJobListByCustomer("");
       setCustomerData([]);
       setClientData([]);
@@ -598,8 +599,35 @@ const ClientList = () => {
     "Outbooks Account Manager": item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name,
     "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
     "Invoiced": item.invoiced == "1" ? "YES" : "NO",
-    "Status": item.status ,
+    "Status": item.status,
   }));
+
+
+
+
+  // Prepare customer options for the select dropdown
+  const customerOptions = (customerDataAll || [])
+    .filter(val => Number(val.status) === 1 && Number(val.form_process) === 4)
+    .map(val => ({
+      value: val.id,
+      label: val.trading_name,
+    }));
+
+  const selectedOption = customerOptions.find(
+    (opt) => Number(opt.value) === Number(customerDetails.id)
+  );
+
+
+  // Prepare client options for the select dropdown
+  const clientOptions = (clientData || []).map(client => ({
+    value: client.id,
+    label: client.client_name,
+  }));
+
+  const selectedOptionClient = clientOptions.find(
+    (opt) => Number(opt.value) === Number(clientDetailSingle.id)
+  );
+
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -607,7 +635,7 @@ const ClientList = () => {
 
           <div className="form-group col-md-4 mb-0">
             <label className="form-label mb-2">Select Customer</label>
-            <select
+            {/* <select
               name="staff_id"
               className="form-select"
               id="tabSelect"
@@ -618,135 +646,155 @@ const ClientList = () => {
                 const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
                 selectCustomerId(selectedId, selectedCustomer?.trading_name);
               }}
-            > 
-            <option value="">Select Customer</option>  
+            >
+              <option value="">Select Customer</option>
               {customerDataAll &&
-                customerDataAll.map((val, index) => 
+                customerDataAll.map((val, index) =>
                   Number(val.status) === 1 && Number(val.form_process) === 4 ?
-                  (
-                  <option
-                    key={index}
-                    value={val.id}
-                    selected={Number(customerDetails.id) == Number(val.id)}
-                  >
-                    {val.trading_name}
-                  </option>
-                )
-                :null
-                
-                )}
-            </select>
-          </div>
-
-    
-          
-
-
-          {
-            customerDetails.id != "" ?
-             <>
-
-
-<div className="form-group col-md-4 mb-0">
-            <label className="form-label mb-2">Select Client</label>
-            {
-              clientData.length == 0 ?
-                <input type="text" className="form-select" disabled value={"The customer's client is not available."} />
-                :
-                <select
-                  name="staff_id"
-                  className="form-select"
-                  id="tabSelect"
-                  defaultValue={clientDetailSingle.id}
-                  // onChange={(e) => selectCustomerId(e)}
-                  onChange={(e) => {
-                    const selectedId = e.target.value;
-                    const selectedClient = clientData.find(client => client.id == selectedId);
-                    selectClientId(selectedId, selectedClient?.client_name);
-                  }}
-                >
-                  {clientData &&
-                    clientData.map((val, index) => (
+                    (
                       <option
                         key={index}
                         value={val.id}
-                        selected={clientDetailSingle.id == val.id}
+                        selected={Number(customerDetails.id) == Number(val.id)}
                       >
-                        {val.client_name}
+                        {val.trading_name}
                       </option>
-                    ))}
-                </select>
-            }
+                    )
+                    : null
 
+                )}
+            </select> */}
+            <Select
+              id="tabSelect"
+              name="staff_id"
 
+              options={customerOptions}
+              value={selectedOption}
+              onChange={(selected) => {
+                const selectedCustomer = customerDataAll.find(
+                  (customer) => customer.id == selected.value
+                );
+                selectCustomerId(selected.value, selectedCustomer?.trading_name);
+              }}
+              classNamePrefix="react-select"
+              isSearchable
+              placeholder="Select Customer"
+            />
           </div>
 
+          {
+            customerDetails.id != "" ?
+              <>
 
 
-
-
-
-
-             <div className="page-title-box pt-2">
-            <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
-              <div className=" col-md-6 col-lg-8">
-                <ul
-                  className="nav nav-pills rounded-tabs"
-                  id="pills-tab"
-                  role="tablist"
-                >
-                  {tabs.map((tab) => (
-                    <li className="nav-item" role="presentation" key={tab.id}>
-                      <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
-                        id={`${tab.id}-tab`}
-                        data-bs-toggle="pill"
-                        data-bs-target={`#${tab.id}`}
-                        type="button"
-                        role="tab"
-                        aria-controls={tab.id}
-                        aria-selected={activeTab === tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                      >
-                        <i className={tab.icon}></i>
-                        {tab.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {activeTab == "NoOfJobs" && (
-                <>
-                  <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                    {
-                      ((getAccessDataJob.insert == 1 ||  role === "SUPERADMIN") && clientData.length > 0) && (
-                        <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
-                          <i className="fa fa-plus pe-1" /> Create Job
-                        </div>
-                      )
-                    }
-
-                  </div>
-                </>
-              )}
-
-              {activeTab === "view client" && (
-                <div className="col-md-4 col-auto">
+                <div className="form-group col-md-4 mb-0">
+                  <label className="form-label mb-2">Select Client</label>
+                  {
+                    clientData.length == 0 ?
+                      <input type="text" className="form-select" disabled value={"The customer's client is not available."} />
+                      :
+                      // <select
+                      //   name="staff_id"
+                      //   className="form-select"
+                      //   id="tabSelect"
+                      //   defaultValue={clientDetailSingle.id}
+                      //   // onChange={(e) => selectCustomerId(e)}
+                      //   onChange={(e) => {
+                      //     const selectedId = e.target.value;
+                      //     const selectedClient = clientData.find(client => client.id == selectedId);
+                      //     selectClientId(selectedId, selectedClient?.client_name);
+                      //   }}
+                      // >
+                      //   {clientData &&
+                      //     clientData.map((val, index) => (
+                      //       <option
+                      //         key={index}
+                      //         value={val.id}
+                      //         selected={clientDetailSingle.id == val.id}
+                      //       >
+                      //         {val.client_name}
+                      //       </option>
+                      //     ))}
+                      // </select>
+                      <Select
+                        id="tabSelect"
+                        name="staff_id"
+                        classNamePrefix="react-select"
+                        isSearchable
+                        options={clientOptions}
+                        value={selectedOptionClient}
+                        onChange={(selected) => {
+                          const selectedClient = clientData.find(
+                            client => client.id == selected.value
+                          );
+                          selectClientId(selected.value, selectedClient?.client_name);
+                        }}
+                        placeholder="Select Client"
+                      />
+                  }
                 </div>
-              )}
-            </div>
-          </div>
 
-          <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={activeTab == 'NoOfJobs' ? customerData.length : ""} />
-             </>
-            :""
+
+                <div className="page-title-box pt-2">
+                  <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
+                    <div className=" col-md-6 col-lg-8">
+                      <ul
+                        className="nav nav-pills rounded-tabs"
+                        id="pills-tab"
+                        role="tablist"
+                      >
+                        {tabs.map((tab) => (
+                          <li className="nav-item" role="presentation" key={tab.id}>
+                            <button
+                              className={`nav-link ${activeTab === tab.id ? "active" : ""
+                                }`}
+                              id={`${tab.id}-tab`}
+                              data-bs-toggle="pill"
+                              data-bs-target={`#${tab.id}`}
+                              type="button"
+                              role="tab"
+                              aria-controls={tab.id}
+                              aria-selected={activeTab === tab.id}
+                              onClick={() => setActiveTab(tab.id)}
+                            >
+                              <i className={tab.icon}></i>
+                              {tab.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    {activeTab == "NoOfJobs" && (
+                      <>
+                        <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+                          {
+                            ((getAccessDataJob.insert == 1 || role === "SUPERADMIN") && clientData.length > 0) && (
+                              <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
+                                <i className="fa fa-plus pe-1" /> Create Job
+                              </div>
+                            )
+                          }
+
+                        </div>
+                      </>
+                    )}
+
+                    {activeTab === "view client" && (
+                      <div className="col-md-4 col-auto">
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={activeTab == 'NoOfJobs' ? customerData.length : ""} />
+              </>
+              : ""
           }
-          
 
         </div>
 
         <div className="mt-2">
+
           {activeTab == "NoOfJobs" && (
             <div
               className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
@@ -778,13 +826,13 @@ const ClientList = () => {
                     </ul>
 
 
-                      <div className="col-md-2">
-                        <ExportToExcel
-                          className="btn btn-outline-info fw-bold float-end border-3 "
-                          apiData={exportData}
-                          fileName={`Job Details`}
-                        />
-                      </div>
+                    <div className="col-md-2">
+                      <ExportToExcel
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        apiData={exportData}
+                        fileName={`Job Details`}
+                      />
+                    </div>
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div
@@ -816,9 +864,6 @@ const ClientList = () => {
               </div>
             </div>
           )}
-
-
-
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">
               <div className="report-data">

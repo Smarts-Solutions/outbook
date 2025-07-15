@@ -9,10 +9,11 @@ import { Email_regex } from "../../../../Utils/Common_regex";
 import axios from "axios";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA, GetOfficerDetails} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA, GetOfficerDetails } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm ,convertDate } from '../../../../Utils/Comman_function'
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm, convertDate } from '../../../../Utils/Comman_function'
 import { use } from "react";
+import Select from 'react-select';
 
 const Information = ({ id, pageStatus }) => {
   const { address, setAddress, next } = useContext(MultiStepFormContext);
@@ -39,7 +40,7 @@ const Information = ({ id, pageStatus }) => {
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
-   
+
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -338,7 +339,7 @@ const Information = ({ id, pageStatus }) => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        customer_contact_person_role_id: personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "",
+        customer_contact_person_role_id: personRoleDataAll.length > 0 ? (personRoleDataAll[0]?.id).toString() : "",
         phone: "",
         email: "",
         phone_code: "+44",
@@ -372,7 +373,7 @@ const Information = ({ id, pageStatus }) => {
         authorised_signatory_status: false,
         first_name: "",
         last_name: "",
-        customer_contact_person_role_id: personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "",
+        customer_contact_person_role_id: personRoleDataAll.length > 0 ? (personRoleDataAll[0]?.id).toString() : "",
         phone: "",
         email: "",
         phone_code: "+44",
@@ -406,7 +407,7 @@ const Information = ({ id, pageStatus }) => {
       ).unwrap();
       if (response.status) {
         setStaffDataAll(response.data);
-        if(role == "MANAGER" && response.data.length > 0){
+        if (role == "MANAGER" && response.data.length > 0) {
           setManagerType(staffDetails.id)
         }
       } else {
@@ -1081,9 +1082,9 @@ const Information = ({ id, pageStatus }) => {
               return updatedContacts;
             });
           }
-          
+
         } else {
-          
+
         }
       })
       .catch((err) => {
@@ -1105,7 +1106,7 @@ const Information = ({ id, pageStatus }) => {
       .then(async (response) => {
         if (response.status) {
           setIncorporationDataAll(response.data);
-          if(response.data.length > 0){
+          if (response.data.length > 0) {
             setCompanyDetails({ ...getCompanyDetails, IncorporationIn: (response.data[0].id).toString() });
           }
         } else {
@@ -1116,30 +1117,41 @@ const Information = ({ id, pageStatus }) => {
         return;
       });
   };
- 
+
 
   // set customer type function
   const setCustomerTypeFun = (e) => {
     setCustomerType(e.target.value);
     if (e.target.value == 2) {
-     
+
       setContacts(prevContacts =>
         prevContacts.map(contact => ({
-            ...contact,
-            customer_contact_person_role_id:personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "", 
+          ...contact,
+          customer_contact_person_role_id: personRoleDataAll.length > 0 ? (personRoleDataAll[0]?.id).toString() : "",
         }))
-    );
-  
+      );
+
     } else if (e.target.value == 3) {
-      
+
       setContacts1(prevContacts =>
         prevContacts.map(contact => ({
-            ...contact,
-            customer_contact_person_role_id:personRoleDataAll.length > 0? (personRoleDataAll[0]?.id).toString() : "", 
+          ...contact,
+          customer_contact_person_role_id: personRoleDataAll.length > 0 ? (personRoleDataAll[0]?.id).toString() : "",
         }))
-    );
+      );
     }
   }
+
+
+  // SELECT ACCOUNT MANAGE 
+ 
+  const staffOptions = [
+  { value: '', label: 'Select Manager' }, // <-- default option
+  ...(staffDataAll?.map((data) => ({
+    value: data?.id,
+    label: `${capitalizeFirstLetter(data?.first_name)} ${capitalizeFirstLetter(data?.last_name)} (${data?.email})`
+  })) || [])
+];
 
   return (
     <>
@@ -1194,7 +1206,7 @@ const Information = ({ id, pageStatus }) => {
                     <div className="card-body">
                       <div className="row">
                         <div className="col-lg-12">
-                          <Field
+                          {/* <Field
                             as="select"
                             name="accountManager"
                             className={getAccountMangerIdErr ? "error-field form-select" : "form-select"}
@@ -1209,10 +1221,23 @@ const Information = ({ id, pageStatus }) => {
                                 <option key={data?.id} value={data?.id}>
                                   {capitalizeFirstLetter(data?.first_name) +
                                     " " +
-                                    capitalizeFirstLetter(data?.last_name) +  " (" + data?.email + ")"}
+                                    capitalizeFirstLetter(data?.last_name) + " (" + data?.email + ")"}
                                 </option>
                               ))}
-                          </Field>
+                          </Field> */}
+
+                          <Select
+                            id="accountManager"
+                            name="accountManager"
+                            options={staffOptions}
+                            value={staffOptions.find(opt => Number(opt.value) === Number(ManagerType))}
+                            onChange={(selectedOption) => {
+                              const e = { target: { name: 'accountManager', value: selectedOption.value } };
+                              handleChangeManager(e);
+                            }}
+                            classNamePrefix="react-select"
+                            isSearchable
+                          />
                           {getAccountMangerIdErr && (
                             <div
                               className="error-text"
@@ -1231,7 +1256,7 @@ const Information = ({ id, pageStatus }) => {
             <section>
               {customerType == 1 ? (
                 <div className="row mt-3">
-                   <div className="col-lg-12">
+                  <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className="card-header card-header-light-blue step-card-header  align-items-center d-flex">
                         <h4 className="card-title mb-0 flex-grow-1">
@@ -1342,7 +1367,7 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                       </div>
                     </div>
-                     <div className="card">
+                    <div className="card">
                       <div className="card-header card-header-light-blue step-card-header mb-3 ">
                         <h4
                           className="card-title mb-0 flex-grow-1"
@@ -1518,7 +1543,7 @@ const Information = ({ id, pageStatus }) => {
                         <div className="row">
                           <div className="col-lg-12">
                             <div className="mb-3">
-    
+
                               <textarea
                                 type="text"
                                 className={errors1["notes"] && errors1["notes"] ? "error-field form-control" : "form-control"}
@@ -1743,7 +1768,7 @@ const Information = ({ id, pageStatus }) => {
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails?.IncorporationIn}
-                                  >
+                                >
                                   <option value="">
                                     Please Select Incorporation In
                                   </option>
@@ -2631,7 +2656,7 @@ const Information = ({ id, pageStatus }) => {
                     </div>
                   </div>
 
-                  
+
                   <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
@@ -2665,7 +2690,7 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>
-                
+
 
                 </div>
               ) : (

@@ -67,7 +67,7 @@ const createCustomer = async (customer) => {
 
             const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails, notes } = customer;
 
-           // const Trading_Name = customer.Trading_Name + '_' + customer_code;
+            // const Trading_Name = customer.Trading_Name + '_' + customer_code;
             const Trading_Name = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
@@ -407,7 +407,7 @@ const getCustomer = async (customer) => {
         LineManageStaffId.push(staff_id);
     }
 
-    const QueryRole =`
+    const QueryRole = `
   SELECT
     staffs.id AS id,
     staffs.role_id AS role_id,
@@ -422,16 +422,14 @@ const getCustomer = async (customer) => {
   `
     const [rows] = await pool.execute(QueryRole);
 
-    
+
     const RoleAccessQuery = `
     SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?
     `
-    const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id , 33]);
+    const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id, 33]);
 
-  
-    console.log('rows[0].role_name ---- ', rows[0].role_name);
-    console.log('LineManageStaffId ---- ', LineManageStaffId);
-    console.log('staff_id ---- ', staff_id);
+
+
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
@@ -471,9 +469,9 @@ const getCustomer = async (customer) => {
     end as is_client
 FROM 
     customers
-JOIN 
+LEFT JOIN 
     staffs AS staff1 ON customers.staff_id = staff1.id
-JOIN 
+LEFT JOIN 
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id
@@ -485,30 +483,30 @@ ORDER BY
     customers.id DESC
 LIMIT ? OFFSET ?`;
 
-    
+
         try {
-        
-        const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
 
-        return {
-            status: true,
-            message: 'Success..',
-            data: {
-                data: result, pagination: {
-                    totalItems: total,
-                    totalPages: Math.ceil(total / limit),
-                    currentPage: page,
-                    limit
-                }
-            },
+            const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
 
-        };
+            return {
+                status: true,
+                message: 'Success..',
+                data: {
+                    data: result, pagination: {
+                        totalItems: total,
+                        totalPages: Math.ceil(total / limit),
+                        currentPage: page,
+                        limit
+                    }
+                },
+
+            };
         } catch (error) {
-            return {   status: false, message: 'Error fetching customers', error: error.message };
-           // console.log('error ---- JJJ ', error);
-            
+            return { status: false, message: 'Error fetching customers', error: error.message };
+            // console.log('error ---- JJJ ', error);
+
         }
-       
+
 
         // return { status: true, message: 'Success..', data: result };
     }
@@ -660,9 +658,9 @@ LIMIT ? OFFSET ?`;
                 customers.id
         ) AS result`;
 
-            let queryDataCount = [staff_id, staff_id, staff_id , staff_id , staff_id];
+            let queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id];
             if (search) {
-                queryDataCount = [staff_id, staff_id, staff_id , staff_id , staff_id];
+                queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id];
             }
             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
@@ -735,9 +733,9 @@ LIMIT ? OFFSET ?`;
 
             console.log('query', query);
 
-            let queryData = [staff_id, staff_id, staff_id,staff_id,staff_id,limit, offset];
+            let queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, limit, offset];
             if (search) {
-                queryData = [staff_id, staff_id, staff_id,staff_id,staff_id,limit, offset];
+                queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, limit, offset];
             }
             const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated;
@@ -969,7 +967,7 @@ LIMIT ? OFFSET ?`;
         console.error('Error selecting data:', err);
         return { status: true, message: 'Error selecting data', data: err };
     }
-        
+
 }
 
 const getCustomer_dropdown = async (customer) => {
@@ -997,7 +995,7 @@ const getCustomer_dropdown = async (customer) => {
   `
     const [rows] = await pool.execute(QueryRole);
 
-    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 33]);
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -1167,7 +1165,7 @@ id DESC;`;
 
             const [result1] = await pool.execute(query, [StaffUserId]);
             result = result1
-                }
+        }
     }
     try {
 
@@ -2676,6 +2674,23 @@ const customerUpdate = async (customer) => {
 
         const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails, notes } = customer;
 
+        // console.log("account_manager_id", account_manager_id)
+        // console.log("ExistCustomer[0].account_manager_id", ExistCustomer[0].account_manager_id)
+
+        if (Number(account_manager_id) != Number(ExistCustomer[0].account_manager_id)) {
+
+            const [exist_account_manager] = await pool.execute(`SELECT id FROM customer_services JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id WHERE customer_services.customer_id = ${Number(customer_id)} AND customer_service_account_managers.account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
+
+            let customer_services_ids = exist_account_manager.map(item => item.id);
+
+            if (customer_services_ids.length > 0) {
+
+                const placeholders = customer_services_ids.map(() => '?').join(', ');
+                const query = `DELETE FROM customer_service_account_managers WHERE customer_service_id IN (${placeholders})`;
+                await pool.execute(query, customer_services_ids);
+            }
+
+        }
 
         const firstThreeLetters = trading_name.substring(0, 3);
         const customer_code = "cust_" + firstThreeLetters + "_" + lastCode;
@@ -2992,7 +3007,10 @@ const customerUpdate = async (customer) => {
 
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
+
+
         const { services, Task } = customer;
+
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
         var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -3334,11 +3352,11 @@ WHERE service_id = ${service_id} AND customer_id = 0;
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        console.log("insertQuery", insertQuery)
-        console.log("customer_engagement_model_id", customer_engagement_model_id)
-        console.log("number_of_accountants", number_of_accountants)
-        console.log("fee_per_accountant", fee_per_accountant)
-        console.log("number_of_bookkeepers", number_of_bookkeepers)
+                console.log("insertQuery", insertQuery)
+                console.log("customer_engagement_model_id", customer_engagement_model_id)
+                console.log("number_of_accountants", number_of_accountants)
+                console.log("fee_per_accountant", fee_per_accountant)
+                console.log("number_of_bookkeepers", number_of_bookkeepers)
                 const [result] = await pool.execute(insertQuery, [
                     customer_engagement_model_id,
                     number_of_accountants,

@@ -668,7 +668,45 @@ const getClientTypeChecklist = async (checklist) => {
 const getByServiceWithJobType = async (checklist) => {
   const { service_id, job_type_id, clientId } = checklist;
   let customer_id = (checklist.customer_id).toString()
-  const query = `SELECT 
+  // const query = `SELECT 
+  //   checklists.id AS checklists_id,
+  //   checklists.check_list_name AS check_list_name,
+  //   checklists.status AS status,
+  //   checklists.client_type_id AS client_type_id,
+  //   clients.client_type AS client_type,
+  //   customers.id AS customer_id,
+  //   services.id AS service_id,
+  //   services.name AS service_name,
+  //   job_types.id AS job_type_id,
+  //   job_types.type AS job_type_type,
+  //   checklist_tasks.task_id AS task_id,
+  //   checklist_tasks.budgeted_hour AS budgeted_hour,
+  //   task.name AS task_name
+  //   FROM checklists 
+  //   LEFT JOIN 
+  //       customers ON customers.id = checklists.customer_id
+  //   JOIN 
+  //       services ON services.id = checklists.service_id
+  //   JOIN
+  //       job_types ON job_types.id = checklists.job_type_id
+  //   JOIN
+  //       checklist_tasks ON checklist_tasks.checklist_id = checklists.id
+  //   JOIN
+  //       task ON task.id = checklist_tasks.task_id     
+  //   LEFT JOIN
+  //       clients ON clients.id = ${clientId}
+  //   WHERE checklists.service_id = ${service_id}
+  //   AND checklists.job_type_id = ${job_type_id}
+  //   AND FIND_IN_SET(checklists.client_type_id,clients.client_type) > 0
+  //   AND checklists.customer_id = ${customer_id} OR
+        // checklists.is_all_customer LIKE '%${customer_id}]%' OR
+        // checklists.is_all_customer LIKE '[${customer_id},%' OR
+        // checklists.is_all_customer LIKE '%,${customer_id}]' OR
+        // checklists.is_all_customer LIKE '${customer_id}]'
+  //   GROUP BY  checklist_tasks.task_id
+  //   ORDER BY checklists.id DESC;`
+
+  const query = `SELECT
     checklists.id AS checklists_id,
     checklists.check_list_name AS check_list_name,
     checklists.status AS status,
@@ -682,23 +720,23 @@ const getByServiceWithJobType = async (checklist) => {
     checklist_tasks.task_id AS task_id,
     checklist_tasks.budgeted_hour AS budgeted_hour,
     task.name AS task_name
-    FROM checklists 
-    LEFT JOIN 
+    FROM checklists
+    LEFT JOIN
         customers ON customers.id = checklists.customer_id
-    JOIN 
+    JOIN
         services ON services.id = checklists.service_id
     JOIN
         job_types ON job_types.id = checklists.job_type_id
     JOIN
         checklist_tasks ON checklist_tasks.checklist_id = checklists.id
     JOIN
-        task ON task.id = checklist_tasks.task_id     
+        task ON task.id = checklist_tasks.task_id
     LEFT JOIN
-        clients ON clients.id = ${clientId}
-    WHERE checklists.service_id = ${service_id}
-    AND checklists.job_type_id = ${job_type_id}
-    AND FIND_IN_SET(checklists.client_type_id,clients.client_type) > 0
-    OR checklists.customer_id = ${customer_id} OR
+        clients ON clients.id = ${Number(clientId)}
+    WHERE checklists.service_id = ${Number(service_id)}
+    AND checklists.job_type_id = ${Number(job_type_id)}
+    OR FIND_IN_SET(checklists.client_type_id,clients.client_type) > 0
+    AND checklists.customer_id = ${Number(customer_id)} AND
         checklists.is_all_customer LIKE '%${customer_id}]%' OR
         checklists.is_all_customer LIKE '[${customer_id},%' OR
         checklists.is_all_customer LIKE '%,${customer_id}]' OR
