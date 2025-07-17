@@ -35,6 +35,8 @@ const ClientList = () => {
   const [hararchyData, setHararchyData] = useState({
     customer: location.state,
   });
+
+ 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState("");
   const [statusDataAll, setStatusDataAll] = useState([]);
@@ -1069,10 +1071,14 @@ const ClientList = () => {
         if (response.status) {
           if (response.data.length > 0) {
             let Array = [
-              { id: 1, name: "SoleTrader" },
+              { id: 1, name: "Sole Trader" },
               { id: 2, name: "Company" },
               { id: 3, name: "Partnership" },
               { id: 4, name: "Individual" },
+              { id: 5, name: "Charity Incorporated Organisation" },
+              { id: 6, name: "Charity Unincorporated Association" },
+              { id: 7, name: "Trust" },
+
             ];
             let data = response.data.map((item) => {
               return {

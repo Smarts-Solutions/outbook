@@ -323,6 +323,7 @@ const addChecklist = async (checklist) => {
 const getChecklist = async (checklist) => {
   const { customer_id } = checklist;
 
+  console.log("customer_id", customer_id)
   let query = `
     SELECT
     checklists.id AS checklists_id,
@@ -348,6 +349,8 @@ const getChecklist = async (checklist) => {
     WHERE checklists.customer_id = ?
     ORDER BY checklists.id DESC
     `;
+
+    // console.log("query", query)
   if (parseInt(customer_id) === 0) {
     query = `
     SELECT
@@ -372,6 +375,8 @@ const getChecklist = async (checklist) => {
     ORDER BY checklists.id DESC
     `;
   }
+
+  console.log("query", query)
   try {
     const [result] = await pool.execute(query, [customer_id]);
     return {
