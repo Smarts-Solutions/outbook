@@ -4797,3 +4797,18 @@ tbody.list.form-check-all tr:last-child td {
 .react-select__loading-indicator {
     display: none !important;
 }
+.react-select__control {
+  z-index: 1;
+  position: relative;
+}
+/* Ensure the react-select dropdown menu appears above all other content */
+.react-select__menu,
+.react-select__menu-portal {
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+/* Optional: If you're using portals */
+.react-select__menu-portal {
+  position: fixed !important;
+}
