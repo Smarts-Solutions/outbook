@@ -174,13 +174,14 @@ const CreateJob = () => {
       };
       const data = { req: req, authToken: token };
 
-
+     
 
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
             if (response.data.length > 0) {
+              
               const isIncluded = response.data[0].client_type_id
                 .split(",")
                 .includes(response.data[0].client_type);
