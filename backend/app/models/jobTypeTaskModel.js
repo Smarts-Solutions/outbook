@@ -628,6 +628,7 @@ const updateChecklist = async (checklist) => {
       data: [],
     };
   } catch (err) {
+    console.error("Error updating checklist:", err);
     return { status: false, message: "Error updating checklist." };
   }
 };
