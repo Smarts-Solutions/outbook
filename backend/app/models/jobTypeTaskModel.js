@@ -350,7 +350,7 @@ const getChecklist = async (checklist) => {
     ORDER BY checklists.id DESC
     `;
 
-    // console.log("query", query)
+
   if (parseInt(customer_id) === 0) {
     query = `
     SELECT
@@ -376,7 +376,6 @@ const getChecklist = async (checklist) => {
     `;
   }
 
-  console.log("query", query)
   try {
     const [result] = await pool.execute(query, [customer_id]);
     return {
