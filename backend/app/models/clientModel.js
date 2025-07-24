@@ -580,7 +580,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
- console.log("getClient client", client);
+//  console.log("getClient client", client);
 
   let { customer_id, StaffUserId } = client;
   let customerCheck = customer_id
@@ -764,7 +764,7 @@ ORDER BY
         // Account Manger
         else if (rows[0].role_id == 4) {
 
-          console.log("customer_id 111", customer_id);
+        
           const query = `
            SELECT  
           clients.customer_id AS customer_id,

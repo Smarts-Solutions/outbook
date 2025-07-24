@@ -645,9 +645,9 @@ const getJobByCustomer = async (job) => {
     const [ExistStaff] = await pool.execute(QueryRole);
     
 
-    console.log("ExistStaff", ExistStaff);
-    console.log("customer_id", customer_id);
-    console.log("LineManageStaffId", LineManageStaffId);
+    // console.log("ExistStaff", ExistStaff);
+    // console.log("customer_id", customer_id);
+    // console.log("LineManageStaffId", LineManageStaffId);
     let result = [];
 
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [ExistStaff[0].role_id , 35]);
@@ -1126,9 +1126,9 @@ const getJobByClient = async (job) => {
       else if (ExistStaff[0].role_id == 4) {
       
         // console.log("ExistStaff[0].id", ExistStaff[0].id);
-         console.log("ExistStaff[0].id", ExistStaff[0].id);
-         console.log("client_id", client_id);
-         console.log("LineManageStaffId", LineManageStaffId);
+        //  console.log("ExistStaff[0].id", ExistStaff[0].id);
+        //  console.log("client_id", client_id);
+        //  console.log("LineManageStaffId", LineManageStaffId);
 
         const query = `
    SELECT 
