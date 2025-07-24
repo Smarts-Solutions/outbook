@@ -1209,8 +1209,8 @@ const getJobByClient = async (job) => {
           client_id,
         ]);
         result = rowsAllocated;
-       console.log("rowsAllocated lenthg", rowsAllocated);
-       console.log("rowsAllocated lenthg", rowsAllocated.length);
+      //  console.log("rowsAllocated lenthg", rowsAllocated);
+      //  console.log("rowsAllocated lenthg", rowsAllocated.length);
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
