@@ -1124,10 +1124,11 @@ const getJobByClient = async (job) => {
       }
       // Account Manger
       else if (ExistStaff[0].role_id == 4) {
-
+      
         // console.log("ExistStaff[0].id", ExistStaff[0].id);
-        // console.log("client_id", client_id);
-        // console.log("LineManageStaffId", LineManageStaffId);
+         console.log("ExistStaff[0].id", ExistStaff[0].id);
+         console.log("client_id", client_id);
+         console.log("LineManageStaffId", LineManageStaffId);
 
         const query = `
    SELECT 
@@ -1191,7 +1192,7 @@ const getJobByClient = async (job) => {
    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
    WHERE
    jobs.client_id = clients.id AND
-   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR  jobs.reviewer = ? OR jobs.allocated_to = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.client_id = ? AND jobs.reviewer = ?) OR (jobs.client_id = ? AND jobs.allocated_to = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
    GROUP BY
       jobs.id
     ORDER BY
@@ -1201,12 +1202,15 @@ const getJobByClient = async (job) => {
           client_id,
           ExistStaff[0].id,
           client_id,
+          client_id,
           ExistStaff[0].id,
+           client_id,
           ExistStaff[0].id,
           client_id,
         ]);
         result = rowsAllocated;
-       // console.log("rowsAllocated lenthg", rowsAllocated.length);
+       console.log("rowsAllocated lenthg", rowsAllocated);
+       console.log("rowsAllocated lenthg", rowsAllocated.length);
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
