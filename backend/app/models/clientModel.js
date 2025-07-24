@@ -1089,17 +1089,7 @@ ORDER BY
 
 
 
-        //      WHERE 
-        //   (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
-        // GROUP BY
-        // CASE 
-        //     WHEN jobs.reviewer = ? THEN jobs.client_id 
-        //     ELSE clients.id
-        // END
-        // ORDER BY 
-        // clients.id DESC
-
-         
+      
 
           const [resultAccounrManage] = await pool.execute(query, [
             StaffUserId,

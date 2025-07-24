@@ -303,9 +303,10 @@ const getTimesheetTaskType = async (Timesheet) => {
             customer_company_information ON customers.id = customer_company_information.customer_id
         LEFT JOIN 
                    staff_portfolio ON staff_portfolio.customer_id = customers.id
-                LEFT JOIN 
+        LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
+                  OR sp_customers.staff_id = staff_portfolio.staff_id
+         LEFT JOIN clients ON clients.customer_id = customers.id             
             `
 
 
@@ -327,27 +328,50 @@ const getTimesheetTaskType = async (Timesheet) => {
             result = resultAllocated
 
           }
-          // Account Manger
+          // Account Manager
           else if (rows[0].role_id == 4) {
-            const query = `${Query_Select}
-                WHERE jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+            const query = `
+               SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+                'cust_', 
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN
+                jobs ON jobs.customer_id = customers.id    
+        LEFT JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        LEFT JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        LEFT JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        LEFT JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        LEFT JOIN 
+            staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+            AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id
+                WHERE jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
                 GROUP BY 
-            CASE 
-                WHEN jobs.account_manager_id = ? THEN jobs.customer_id
-                ELSE customers.id
-            END
+                customers.id
                 ORDER BY 
-                    customers.id DESC;
+                customers.id DESC;
                     `;
 
 
-            // const query = `${Query_Select}
-            //     WHERE customer_service_account_managers.account_manager_id = ? OR customers.account_manager_id = ? OR customers.staff_id = ?
-            //     GROUP BY 
-            //     customers.id;
-            //         `;
+           
 
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id, staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id,staff_id,staff_id, staff_id,staff_id]);
             result = resultAllocated;
           }
           // Reviewer
@@ -813,7 +837,8 @@ const getTimesheetTaskType = async (Timesheet) => {
             LEFT JOIN 
               customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
               WHERE 
-            (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
+            (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR clients.staff_created_id = ?) OR (jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR
+            (jobs.reviewer = ? OR jobs.allocated_to = ? OR clients.staff_created_id = ?)
           ORDER BY 
           clients.id DESC
                 `;
@@ -825,7 +850,10 @@ const getTimesheetTaskType = async (Timesheet) => {
                 StaffUserId,
                 ...customer_id,
                 StaffUserId,
-                ...customer_id,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
+                StaffUserId,
               ]);
               if (resultAccounrManage.length == 0) {
                 return { status: true, message: "success.", data: resultAccounrManage };
@@ -1022,7 +1050,8 @@ const getTimesheetTaskType = async (Timesheet) => {
           else if (ExistStaff[0].role_id == 4) {
 
             const query = `
-       SELECT 
+       
+   SELECT 
        job_types.id AS job_type_id,
        job_types.type AS job_type_name,
        jobs.id AS id,
@@ -1034,34 +1063,53 @@ const getTimesheetTaskType = async (Timesheet) => {
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS name
     
-       FROM 
-       jobs
-       LEFT JOIN 
-       customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-       LEFT JOIN 
-       clients ON jobs.client_id = clients.id
-       LEFT JOIN
-          customers ON jobs.customer_id = customers.id
-       LEFT JOIN 
-       job_types ON jobs.job_type_id = job_types.id
-       LEFT JOIN 
-       services ON jobs.service_id = services.id
-       LEFT JOIN 
-       staffs ON jobs.allocated_to = staffs.id
-       LEFT JOIN 
-       staffs AS staffs2 ON jobs.reviewer = staffs2.id
-       LEFT JOIN 
-       staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-       LEFT JOIN 
-       master_status ON master_status.id = jobs.status_type   
-       WHERE 
-       jobs.client_id = clients.id 
-       AND (jobs.account_manager_id = ? OR jobs.staff_created_id = ?)
-       AND jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
-        ORDER BY
-       jobs.id DESC;
+    FROM 
+   jobs
+   LEFT JOIN 
+   clients ON jobs.client_id = clients.id
+   LEFT JOIN
+      customers ON jobs.customer_id = customers.id
+   JOIN 
+   services ON jobs.service_id = services.id
+   JOIN
+   customer_services ON customer_services.service_id = jobs.service_id
+   JOIN
+   customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+   LEFT JOIN
+   customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+   LEFT JOIN
+   job_types ON jobs.job_type_id = job_types.id
+   LEFT JOIN
+   staffs ON jobs.allocated_to = staffs.id
+   LEFT JOIN
+   staffs AS staffs2 ON jobs.reviewer = staffs2.id
+   LEFT JOIN
+   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+   LEFT JOIN
+   master_status ON master_status.id = jobs.status_type
+   LEFT JOIN
+   timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
+   WHERE
+   jobs.client_id = clients.id AND
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.client_id = ? AND jobs.reviewer = ?) OR (jobs.client_id = ? AND jobs.allocated_to = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+   GROUP BY
+      jobs.id
+    ORDER BY
+   jobs.id DESC
        `;
-            const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id, client_id]);
+            const [rowsAllocated] = await pool.execute(query, 
+              [
+          ExistStaff[0].id,
+          client_id,
+          ExistStaff[0].id,
+          client_id,
+          client_id,
+          ExistStaff[0].id,
+           client_id,
+          ExistStaff[0].id,
+          client_id,
+        ]
+            );
             result = rowsAllocated
             if (rowsAllocated.length === 0) {
               const query = `

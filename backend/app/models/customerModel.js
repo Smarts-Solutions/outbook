@@ -622,7 +622,6 @@ LIMIT ? OFFSET ?`;
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-
             const countQuery = `
             SELECT COUNT(*) AS total_count
             FROM (
@@ -648,19 +647,20 @@ LIMIT ? OFFSET ?`;
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
                   AND sp_customers.staff_id = staff_portfolio.staff_id   
                 WHERE 
-         ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
+         ${search ? `customers.trading_name LIKE '%${search}%' AND (
+                  jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
                 OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
-                    `customer_service_account_managers.account_manager_id = ?
+                 `jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
             OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
             GROUP BY 
                 customers.id
         ) AS result`;
 
-            let queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id];
+            let queryDataCount = [staff_id,staff_id, staff_id, staff_id, staff_id, staff_id];
             if (search) {
-                queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id];
+                queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id,staff_id];
             }
             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
@@ -715,10 +715,11 @@ LIMIT ? OFFSET ?`;
             AND sp_customers.staff_id = staff_portfolio.staff_id
         LEFT JOIN clients ON clients.customer_id = customers.id      
         WHERE 
-            ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
+            ${search ? `customers.trading_name LIKE '%${search}%' AND (
+                jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
                 OR customers.account_manager_id = ?
                 OR customers.staff_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
-                    `customer_service_account_managers.account_manager_id = ?
+                    `jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
             OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
 
@@ -733,9 +734,9 @@ LIMIT ? OFFSET ?`;
 
             // console.log('query', query);
 
-            let queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, limit, offset];
+            let queryData = [staff_id, staff_id, staff_id, staff_id, staff_id,staff_id, limit, offset];
             if (search) {
-                queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, limit, offset];
+                queryData = [staff_id, staff_id, staff_id, staff_id, staff_id,staff_id, limit, offset];
             }
             const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated;
