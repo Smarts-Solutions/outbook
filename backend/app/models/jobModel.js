@@ -112,7 +112,7 @@ const getAddJobData = async (job) => {
     JOIN 
          roles ON staffs.role_id = roles.id
     WHERE  
-     staffs.role_id = 6 AND staffs.status = '1' 
+     (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1' 
     ORDER BY 
      staffs.id DESC;
    `;
@@ -139,7 +139,7 @@ const getAddJobData = async (job) => {
     JOIN 
          roles ON staffs.role_id = roles.id
     WHERE  
-     staffs.role_id = 3 AND staffs.status = '1' 
+     (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1' 
     ORDER BY 
      staffs.id DESC;
    `;

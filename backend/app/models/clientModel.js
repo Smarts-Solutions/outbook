@@ -580,6 +580,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
+ console.log("getClient client", client);
+
   let { customer_id, StaffUserId } = client;
   let customerCheck = customer_id
   customer_id = [Number(customer_id)]
@@ -654,7 +656,7 @@ ORDER BY
     clients.id DESC;
     `;
       const [result] = await pool.execute(query);
-      console.log("result", result.length);
+     
       return { status: true, message: "success.", data: result };
     }
 
@@ -761,6 +763,8 @@ ORDER BY
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
+
+          console.log("customer_id 111", customer_id);
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -1032,6 +1036,7 @@ ORDER BY
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
+        
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -1071,13 +1076,30 @@ ORDER BY
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR clients.staff_created_id = ?) OR (jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR (jobs.reviewer = ? OR jobs.allocated_to = ? OR clients.staff_created_id = ?)
         ORDER BY 
         clients.id DESC
             `;
 
-          //   WHERE
-          // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+
+        //     WHERE 
+        //   (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
+        // ORDER BY 
+        // clients.id DESC
+
+
+
+        //      WHERE 
+        //   (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+        // GROUP BY
+        // CASE 
+        //     WHEN jobs.reviewer = ? THEN jobs.client_id 
+        //     ELSE clients.id
+        // END
+        // ORDER BY 
+        // clients.id DESC
+
+         
 
           const [resultAccounrManage] = await pool.execute(query, [
             StaffUserId,
@@ -1085,8 +1107,14 @@ ORDER BY
             StaffUserId,
             ...customer_id,
             StaffUserId,
-            ...customer_id,
+            StaffUserId,
+            StaffUserId,
+            StaffUserId,
+            StaffUserId,
+            StaffUserId,
           ]);
+
+          
           if (resultAccounrManage.length == 0) {
             return {
               status: true,
@@ -1094,7 +1122,7 @@ ORDER BY
               data: resultAccounrManage,
             };
           }
-
+   
           const filteredData = resultAccounrManage.filter((item) =>
             customer_id.includes(parseInt(item.customer_id))
           );
@@ -1107,6 +1135,7 @@ ORDER BY
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
+            
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
