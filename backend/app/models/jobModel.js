@@ -1191,21 +1191,24 @@ const getJobByClient = async (job) => {
    LEFT JOIN
    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
    WHERE
-   jobs.client_id = clients.id AND
-   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.client_id = ? AND jobs.reviewer = ?) OR (jobs.client_id = ? AND jobs.allocated_to = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+    (jobs.client_id = clients.id AND 
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR  jobs.reviewer = ? OR jobs.allocated_to = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)) AND jobs.client_id = ?
    GROUP BY
       jobs.id
     ORDER BY
    jobs.id DESC`;
+
+
+  //   jobs.client_id = clients.id AND
+  //  customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.client_id = ? AND jobs.reviewer = ?) OR (jobs.client_id = ? AND jobs.allocated_to = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
         const [rowsAllocated] = await pool.execute(query, [
           ExistStaff[0].id,
           client_id,
           ExistStaff[0].id,
           client_id,
+          ExistStaff[0].id,
+          ExistStaff[0].id,
           client_id,
-          ExistStaff[0].id,
-           client_id,
-          ExistStaff[0].id,
           client_id,
         ]);
         result = rowsAllocated;
