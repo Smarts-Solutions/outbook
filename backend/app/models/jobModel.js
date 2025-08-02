@@ -1319,6 +1319,9 @@ const getJobByClient = async (job) => {
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
 
+     job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+     jobs.staff_created_id AS staff_created_id,
+
      master_status.name AS status,
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1333,9 +1336,11 @@ const getJobByClient = async (job) => {
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      LEFT JOIN 
      clients ON jobs.client_id = clients.id
-      LEFT JOIN
-      customers ON jobs.customer_id = customers.id
-     LEFT JOIN 
+     LEFT JOIN
+     customers ON jobs.customer_id = customers.id
+     LEFT JOIN
+     job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+     LEFT JOIN
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
      services ON jobs.service_id = services.id
@@ -1352,12 +1357,26 @@ const getJobByClient = async (job) => {
      WHERE 
      (jobs.client_id = clients.id AND
      jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
-     AND jobs.client_id = ?
+     AND jobs.client_id = ? 
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
      `;
+
+     
+     console.log("LineManageStaffId", LineManageStaffId);
+
+    //  (jobs.client_id = clients.id AND
+    //  jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
+    //  AND jobs.client_id = ?
         const [rows] = await pool.execute(query, [client_id,client_id, client_id]);
+
+        const [isExistJobAllowedStaffs] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+       
+          
+
+        console.log("rows", rows);
         result = rows;
       }
     }
