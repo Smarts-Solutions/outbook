@@ -1145,9 +1145,7 @@ id DESC;`;
             result = resultAllocated
 
         }
-        else {
-
-            console.log('No matching role found');
+        else { 
             const query = `
                 SELECT  
             customers.id AS id,
@@ -1165,47 +1163,21 @@ id DESC;`;
             staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-            AND sp_customers.staff_id = staff_portfolio.staff_id    
+            AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id
+        LEFT JOIN jobs ON clients.id = jobs.client_id
+        LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id        
         WHERE 
-            customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+            job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
         GROUP BY 
             customers.id
         ORDER BY 
             id DESC;
             `;
 
-            onsole.log('query', query);
-            const [result1] = await pool.execute(query, [StaffUserId]);
-
-
-
-            const queryAllJobsStaff = `SELECT
-   customers.id AS id,
-            customers.status AS status,
-            customers.form_process AS form_process,
-            customers.trading_name AS trading_name,
-            CONCAT(
-            'cust_',
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
-FROM job_allowed_staffs
-LEFT JOIN jobs ON jobs.id = job_allowed_staffs.job_id
-JOIN clients ON clients.id = jobs.client_id
-JOIN customers ON customers.id = clients.customer_id
-WHERE job_allowed_staffs.staff_id = ${StaffUserId}`
-            const [result2] = await pool.execute(queryAllJobsStaff);
-            const map = new Map();
-            for (const item of result1) map.set(item.id, item);
-            for (const item of result2) if (!map.has(item.id)) map.set(item.id, item);
-            const array3 = [...map.values()];
-
-            // console.log('array3', array3);
-
-
-
+            console.log('query', query);
+            const [result1] = await pool.execute(query, [StaffUserId, StaffUserId]);
             result = result1
-            //result = array3
         }
     }
     try {
