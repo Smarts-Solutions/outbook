@@ -581,7 +581,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 const getClient = async (client) => {
 //  console.log("getClient client", client);
-
   let { customer_id, StaffUserId } = client;
   let customerCheck = customer_id
   customer_id = [Number(customer_id)]
@@ -959,6 +958,8 @@ ORDER BY
         }
       }
     } else {
+
+     
       const [rows] = await pool.execute(
         'SELECT id , role_id  FROM staffs WHERE id = "' +
         StaffUserId +
@@ -1195,45 +1196,90 @@ ORDER BY
               index === self.findIndex((t) => t.id === value.id)
           );
           return { status: true, message: "success.", data: uniqueData };
-        } else {
-          const query = `
-          SELECT  
-              clients.id AS id,
-              clients.trading_name AS client_name,
-              clients.status AS status,
-                  jobs.id AS Delete_Status,
+        } 
+        else {
+          
+    //       const query = `
+    //       SELECT  
+    //           clients.id AS id,
+    //           clients.trading_name AS client_name,
+    //           clients.status AS status,
+    //               jobs.id AS Delete_Status,
 
-              client_types.type AS client_type_name,
-              client_contact_details.email AS email,
-              client_contact_details.phone_code AS phone_code,
-              client_contact_details.phone AS phone,
-              CONCAT(
-                  'cli_', 
-                  SUBSTRING(customers.trading_name, 1, 3), '_',
-                  SUBSTRING(clients.trading_name, 1, 3), '_',
-                  SUBSTRING(clients.client_code, 1, 15)
-                  ) AS client_code
-          FROM 
-              clients
-          JOIN 
-             customers ON customers.id = clients.customer_id    
-          JOIN 
-              client_types ON client_types.id = clients.client_type
-              LEFT JOIN     jobs ON jobs.client_id = clients.id
-       
-          LEFT JOIN 
-              client_contact_details ON client_contact_details.id = (
-                  SELECT MIN(cd.id)
-                  FROM client_contact_details cd
-                  WHERE cd.client_id = clients.id
-              )
-          WHERE clients.customer_id IN (${placeholders})
-          GROUP BY
-    clients.id
-       ORDER BY 
-          clients.id DESC;
-            `;
+    //           client_types.type AS client_type_name,
+    //           client_contact_details.email AS email,
+    //           client_contact_details.phone_code AS phone_code,
+    //           client_contact_details.phone AS phone,
+    //           CONCAT(
+    //               'cli_', 
+    //               SUBSTRING(customers.trading_name, 1, 3), '_',
+    //               SUBSTRING(clients.trading_name, 1, 3), '_',
+    //               SUBSTRING(clients.client_code, 1, 15)
+    //               ) AS client_code
+    //       FROM 
+    //           clients
+    //       JOIN 
+    //          customers ON customers.id = clients.customer_id    
+    //       JOIN 
+    //           client_types ON client_types.id = clients.client_type
+    //       LEFT JOIN jobs ON jobs.client_id = clients.id
+    //       LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+    //       LEFT JOIN 
+    //           client_contact_details ON client_contact_details.id = (
+    //               SELECT MIN(cd.id)
+    //               FROM client_contact_details cd
+    //               WHERE cd.client_id = clients.id
+    //           )
+    //       WHERE  clients.customer_id IN (${placeholders})
+    //       GROUP BY
+    // clients.id
+    //    ORDER BY 
+    //       clients.id DESC;
+    //         `;
+
+    const query = `SELECT  
+    clients.id AS id,
+    clients.trading_name AS client_name,
+    clients.status AS status,
+    jobs.id AS Delete_Status,
+    client_types.type AS client_type_name,
+    client_contact_details.email AS email,
+    client_contact_details.phone_code AS phone_code,
+    client_contact_details.phone AS phone,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code
+FROM clients
+JOIN customers ON customers.id = clients.customer_id    
+JOIN client_types ON client_types.id = clients.client_type
+LEFT JOIN jobs ON jobs.client_id = clients.id
+LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+LEFT JOIN client_contact_details ON client_contact_details.id = (
+    SELECT MIN(cd.id)
+    FROM client_contact_details cd
+    WHERE cd.client_id = clients.id
+)
+WHERE
+    customers.staff_id != ${StaffUserId} 
+
+    AND clients.id IN (
+        SELECT jobs.client_id
+        FROM jobs
+        JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+        WHERE job_allowed_staffs.staff_id = ${StaffUserId}
+    )
+
+    ${placeholders.length > 0 ? `AND clients.customer_id IN (${placeholders})` : ''}
+
+GROUP BY clients.id
+ORDER BY clients.id DESC;
+`
+           
           const [result] = await pool.execute(query, [...customer_id]);
+         
           return { status: true, message: "success.", data: result };
         }
       }
