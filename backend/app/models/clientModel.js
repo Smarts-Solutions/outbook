@@ -1193,7 +1193,32 @@ ORDER BY
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+          customers.staff_id != ${StaffUserId} 
+
+      AND clients.id IN (
+        SELECT jobs.client_id
+        FROM jobs
+        JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+        WHERE job_allowed_staffs.staff_id = ${StaffUserId}
+      )
+
+      AND (
+        (
+          (jobs.allocated_to = ? 
+            OR clients.customer_id IN (${placeholders})  
+            OR clients.staff_created_id = ?
+          )
+          AND (
+            jobs.client_id = clients.id 
+            OR clients.staff_created_id = ?
+          )
+          AND (
+            jobs.allocated_to = ? 
+            OR clients.staff_created_id = ?
+          )
+        )
+        OR clients.customer_id IN (${placeholders})
+      )
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -1202,6 +1227,8 @@ ORDER BY
         ORDER BY 
         clients.id DESC
             `;
+
+            // (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
 
           const [resultReviewer] = await pool.execute(query, [
             StaffUserId,
