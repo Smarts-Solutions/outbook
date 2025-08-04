@@ -1196,7 +1196,6 @@ const getJobByClient = async (job) => {
    jobs
    LEFT JOIN 
    clients ON jobs.client_id = clients.id
-    
    LEFT JOIN
    customers ON jobs.customer_id = customers.id
    JOIN 
