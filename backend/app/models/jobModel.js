@@ -1042,7 +1042,6 @@ const getJobByClient = async (job) => {
       '" LIMIT 1'
     );
 
-
     let result = [];
     if (ExistStaff.length > 0) {
       // Allocated to
