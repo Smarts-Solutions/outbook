@@ -1406,18 +1406,18 @@ const getJobByClient = async (job) => {
      jobs
      LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-     LEFT JOIN 
+     LEFT JOIN
      clients ON jobs.client_id = clients.id
      LEFT JOIN
      customers ON jobs.customer_id = customers.id
-     LEFT JOIN
-     job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
      LEFT JOIN
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
      services ON jobs.service_id = services.id
      LEFT JOIN 
      staffs ON jobs.allocated_to = staffs.id
+     LEFT JOIN
+     job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id}
      LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      LEFT JOIN 
@@ -1427,7 +1427,7 @@ const getJobByClient = async (job) => {
      LEFT JOIN
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE 
-     (jobs.client_id = clients.id AND
+     (job_allowed_staffs.staff_id = ? OR jobs.client_id = clients.id AND
      jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
      AND jobs.client_id = ? 
      GROUP BY jobs.id
@@ -1436,7 +1436,7 @@ const getJobByClient = async (job) => {
      `;
 
 
-        const [rows] = await pool.execute(query, [client_id, client_id, client_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id,client_id, client_id, client_id]);
 
         const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
