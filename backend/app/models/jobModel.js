@@ -607,7 +607,7 @@ const getJobByCustomer = async (job) => {
   let placeholders = customer_id.map(() => "?").join(", ");
 
   if (customerCheck == "") {
-    const allCustomer = await getAllCustomerIds(StaffUserId , 'job');
+    const allCustomer = await getAllCustomerIds(StaffUserId, 'job');
     let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
     customer_id = allCustomerIds;
     placeholders = customer_id.map(() => "?").join(", ");
@@ -617,11 +617,11 @@ const getJobByCustomer = async (job) => {
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
   let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-  if (LineManageStaffId.length ==  0) {
-      LineManageStaffId.push(StaffUserId);
+  if (LineManageStaffId.length == 0) {
+    LineManageStaffId.push(StaffUserId);
   }
 
-  
+
   try {
     // const [ExistStaff] = await pool.execute(
     //   'SELECT id , role_id  FROM staffs WHERE id = "' +
@@ -643,17 +643,17 @@ const getJobByCustomer = async (job) => {
   LIMIT 1
   `;
     const [ExistStaff] = await pool.execute(QueryRole);
-    
+
 
     // console.log("ExistStaff", ExistStaff);
     // console.log("customer_id", customer_id);
     // console.log("LineManageStaffId", LineManageStaffId);
     let result = [];
 
-    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [ExistStaff[0].role_id , 35]);
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [ExistStaff[0].role_id, 35]);
 
-  
-    if(ExistStaff.length > 0  && (ExistStaff[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)){
+
+    if (ExistStaff.length > 0 && (ExistStaff[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
       const query = `
         SELECT 
@@ -717,8 +717,8 @@ const getJobByCustomer = async (job) => {
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [...customer_id , ...customer_id]);
-        return { status: true, message: "Success.", data: rows };
+      const [rows] = await pool.execute(query, [...customer_id, ...customer_id]);
+      return { status: true, message: "Success.", data: rows };
 
     }
 
@@ -1014,7 +1014,7 @@ const getJobByCustomer = async (job) => {
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [...customer_id , ...customer_id]);
+        const [rows] = await pool.execute(query, [...customer_id, ...customer_id]);
         result = rows;
       }
     }
@@ -1028,15 +1028,15 @@ const getJobByCustomer = async (job) => {
 const getJobByClient = async (job) => {
   const { client_id, StaffUserId } = job;
 
-   
+
   // Line Manager
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
   let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
   if (LineManageStaffId.length == 0) {
-      LineManageStaffId.push(StaffUserId);
+    LineManageStaffId.push(StaffUserId);
   }
-  
+
   try {
     const [ExistStaff] = await pool.execute(
       'SELECT id , role_id  FROM staffs WHERE id = "' +
@@ -1044,7 +1044,7 @@ const getJobByClient = async (job) => {
       '" LIMIT 1'
     );
 
-   
+
     let result = [];
     if (ExistStaff.length > 0) {
       // Allocated to
@@ -1124,7 +1124,7 @@ const getJobByClient = async (job) => {
       }
       // Account Manger
       else if (ExistStaff[0].role_id == 4) {
-      
+
         // console.log("ExistStaff[0].id", ExistStaff[0].id);
         //  console.log("ExistStaff[0].id", ExistStaff[0].id);
         //  console.log("client_id", client_id);
@@ -1204,13 +1204,13 @@ const getJobByClient = async (job) => {
           client_id,
           client_id,
           ExistStaff[0].id,
-           client_id,
+          client_id,
           ExistStaff[0].id,
           client_id,
         ]);
         result = rowsAllocated;
-      //  console.log("rowsAllocated lenthg", rowsAllocated);
-      //  console.log("rowsAllocated lenthg", rowsAllocated.length);
+        //  console.log("rowsAllocated lenthg", rowsAllocated);
+        //  console.log("rowsAllocated lenthg", rowsAllocated.length);
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
@@ -1363,20 +1363,27 @@ const getJobByClient = async (job) => {
       jobs.id DESC;
      `;
 
-     
-     console.log("LineManageStaffId", LineManageStaffId);
 
-    //  (jobs.client_id = clients.id AND
-    //  jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
-    //  AND jobs.client_id = ?
-        const [rows] = await pool.execute(query, [client_id,client_id, client_id]);
+        const [rows] = await pool.execute(query, [client_id, client_id, client_id]);
 
-        const [isExistJobAllowedStaffs] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+        const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
-       
-          
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rows.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+        //  console.log("filtered", filtered.length);
+          return { status: true, message: "Success.", data: filtered };
 
-        console.log("rows", rows);
+
+        }
+
+
+       // console.log("rows", rows.length);
         result = rows;
       }
     }
@@ -2517,7 +2524,7 @@ const updateJobStatus = async (job) => {
 const GetJobStatus = async (job) => {
   const { status_id } = job;
   try {
-// console.log("status_id",status_id)  
+    // console.log("status_id",status_id)  
 
     const query = `SELECT 
         jobs.job_id AS job_id,
@@ -2551,7 +2558,7 @@ const GetJobStatus = async (job) => {
     }
 
   } catch {
-    console.log("DDD",err);
+    console.log("DDD", err);
     return { status: false, message: "Error getting job status." };
   }
 
