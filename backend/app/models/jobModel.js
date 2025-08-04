@@ -1076,6 +1076,9 @@ const getJobByClient = async (job) => {
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
 
+     job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+     jobs.staff_created_id AS staff_created_id,
+
      master_status.name AS status,
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1091,13 +1094,15 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      clients ON jobs.client_id = clients.id
      LEFT JOIN
-      customers ON jobs.customer_id = customers.id
+     customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
      services ON jobs.service_id = services.id
      LEFT JOIN 
      staffs ON jobs.allocated_to = staffs.id
+     LEFT JOIN
+     job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id} 
      LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      LEFT JOIN 
@@ -1108,7 +1113,7 @@ const getJobByClient = async (job) => {
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'   
      WHERE 
      jobs.client_id = clients.id 
-     AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
+     AND job_allowed_staffs.staff_id = ?  OR (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
      AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
@@ -1117,9 +1122,30 @@ const getJobByClient = async (job) => {
         const [rowsAllocated] = await pool.execute(query, [
           ExistStaff[0].id,
           ExistStaff[0].id,
+          ExistStaff[0].id,
           client_id,
           client_id,
         ]);
+
+
+        const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rowsAllocated?.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+        //  console.log("filtered", filtered.length);
+          return { status: true, message: "Success.", data: filtered };
+
+        }
+
+
+     
+
         result = rowsAllocated;
       }
       // Account Manger
@@ -1157,10 +1183,14 @@ const getJobByClient = async (job) => {
    staffs3.first_name AS outbooks_acount_manager_first_name,
    staffs3.last_name AS outbooks_acount_manager_last_name,
 
+   job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+   jobs.staff_created_id AS staff_created_id,
+
    master_status.name AS status,
-   CONCAT(
+    CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
 
@@ -1168,8 +1198,9 @@ const getJobByClient = async (job) => {
    jobs
    LEFT JOIN 
    clients ON jobs.client_id = clients.id
+    
    LEFT JOIN
-      customers ON jobs.customer_id = customers.id
+   customers ON jobs.customer_id = customers.id
    JOIN 
    services ON jobs.service_id = services.id
    JOIN
@@ -1183,6 +1214,8 @@ const getJobByClient = async (job) => {
    LEFT JOIN
    staffs ON jobs.allocated_to = staffs.id
    LEFT JOIN
+   job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id} 
+   LEFT JOIN
    staffs AS staffs2 ON jobs.reviewer = staffs2.id
    LEFT JOIN
    staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
@@ -1191,13 +1224,14 @@ const getJobByClient = async (job) => {
    LEFT JOIN
    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
    WHERE
-   jobs.client_id = clients.id AND
+   jobs.client_id = clients.id AND job_allowed_staffs.staff_id = ? OR
    customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) OR (jobs.client_id = ? AND jobs.reviewer = ?) OR (jobs.client_id = ? AND jobs.allocated_to = ?) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
    GROUP BY
       jobs.id
     ORDER BY
    jobs.id DESC`;
         const [rowsAllocated] = await pool.execute(query, [
+          ExistStaff[0].id,
           ExistStaff[0].id,
           client_id,
           ExistStaff[0].id,
@@ -1208,6 +1242,24 @@ const getJobByClient = async (job) => {
           ExistStaff[0].id,
           client_id,
         ]);
+
+       
+
+        const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rowsAllocated?.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+        //  console.log("filtered", filtered.length);
+          return { status: true, message: "Success.", data: filtered };
+
+        }
+   
         result = rowsAllocated;
         //  console.log("rowsAllocated lenthg", rowsAllocated);
         //  console.log("rowsAllocated lenthg", rowsAllocated.length);
@@ -1241,6 +1293,11 @@ const getJobByClient = async (job) => {
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
 
+     job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+     jobs.staff_created_id AS staff_created_id,
+
+     
+
      master_status.name AS status,
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1263,6 +1320,8 @@ const getJobByClient = async (job) => {
      services ON jobs.service_id = services.id
      LEFT JOIN 
      staffs ON jobs.allocated_to = staffs.id
+     LEFT JOIN
+     job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id}
      LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      LEFT JOIN 
@@ -1274,7 +1333,7 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id 
      AND
-     (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
+      job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
      AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
      GROUP BY jobs.id
       ORDER BY
@@ -1284,9 +1343,27 @@ const getJobByClient = async (job) => {
           const [rowsAllocated] = await pool.execute(query, [
             ExistStaff[0].id,
             ExistStaff[0].id,
+            ExistStaff[0].id,
             client_id,
             client_id
           ]);
+
+           const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rowsAllocated?.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+        //  console.log("filtered", filtered.length);
+          return { status: true, message: "Success.", data: filtered };
+
+        }
+
+
           result = rowsAllocated;
         } catch (error) {
           console.log("error", error);
