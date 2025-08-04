@@ -1137,7 +1137,6 @@ const getJobByClient = async (job) => {
             Number(row.allocated_id) === Number(ExistStaff[0].id)||
             Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
           );
-        //  console.log("filtered", filtered.length);
           return { status: true, message: "Success.", data: filtered };
 
         }
