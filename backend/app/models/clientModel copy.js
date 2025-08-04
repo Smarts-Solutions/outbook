@@ -1001,37 +1001,10 @@ ORDER BY
             )
         LEFT JOIN
           jobs ON jobs.client_id = clients.id
-        LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
         LEFT JOIN 
-          staffs ON customers.staff_id = staffs.id
-       WHERE
-           customers.staff_id != ${StaffUserId} 
-
-      AND clients.id IN (
-        SELECT jobs.client_id
-        FROM jobs
-        JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-        WHERE job_allowed_staffs.staff_id = ${StaffUserId}
-      )
-
-      AND (
-        (
-          (jobs.allocated_to = ? 
-            OR clients.customer_id IN (${placeholders})  
-            OR clients.staff_created_id = ?
-          )
-          AND (
-            jobs.client_id = clients.id 
-            OR clients.staff_created_id = ?
-          )
-          AND (
-            jobs.allocated_to = ? 
-            OR clients.staff_created_id = ?
-          )
-        )
-        OR clients.customer_id IN (${placeholders})
-      )
-           
+          staffs ON customers.staff_id = staffs.id   
+        WHERE 
+          (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -1040,13 +1013,9 @@ ORDER BY
         ORDER BY 
         clients.id DESC
             `;
-
-           
-          // (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
-           
           const [resultAllocated] = await pool.execute(query, [
             StaffUserId,
-            ...customer_id, // For clients.customer_id IN (...)
+            ...customer_id, 
             StaffUserId,
             StaffUserId,
             StaffUserId,
