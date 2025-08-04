@@ -582,6 +582,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 const getClient = async (client) => {
 //  console.log("getClient client", client);
   let { customer_id, StaffUserId } = client;
+
+  console.log("getClient client", client);
   let customerCheck = customer_id
   customer_id = [Number(customer_id)]
   let placeholders = customer_id.map(() => "?").join(", ");
@@ -958,7 +960,8 @@ ORDER BY
         }
       }
     } else {
-
+    
+      console.log("existStaffbyCustomer Else", existStaffbyCustomer);
      
       const [rows] = await pool.execute(
         'SELECT id , role_id  FROM staffs WHERE id = "' +
@@ -1350,6 +1353,8 @@ ORDER BY clients.id DESC;
 
 const getByidClient = async (client) => {
   const { client_id } = client;
+
+  console.log("getByidClient client_id", client_id);
   const [ExistClient] = await pool.execute(
     "SELECT client_type FROM `clients` WHERE id =" + client_id
   );
