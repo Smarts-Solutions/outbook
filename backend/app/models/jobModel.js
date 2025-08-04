@@ -1379,9 +1379,7 @@ const getJobByClient = async (job) => {
         //  console.log("filtered", filtered.length);
           return { status: true, message: "Success.", data: filtered };
 
-
         }
-
 
        // console.log("rows", rows.length);
         result = rows;
