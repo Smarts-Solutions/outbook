@@ -1110,9 +1110,10 @@ const getJobByClient = async (job) => {
       LEFT JOIN
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'   
      WHERE 
-     jobs.client_id = clients.id 
+     (jobs.client_id = clients.id 
      AND job_allowed_staffs.staff_id = ?  OR (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
+     AND jobs.client_id = ?
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
@@ -1121,6 +1122,7 @@ const getJobByClient = async (job) => {
           ExistStaff[0].id,
           ExistStaff[0].id,
           ExistStaff[0].id,
+          client_id,
           client_id,
           client_id,
         ]);
@@ -1148,12 +1150,6 @@ const getJobByClient = async (job) => {
       }
       // Account Manger
       else if (ExistStaff[0].role_id == 4) {
-
-        // console.log("ExistStaff[0].id", ExistStaff[0].id);
-        //  console.log("ExistStaff[0].id", ExistStaff[0].id);
-        //  console.log("client_id", client_id);
-        //  console.log("LineManageStaffId", LineManageStaffId);
-
         const query = `
    SELECT 
    jobs.id AS job_id,
@@ -1332,8 +1328,9 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id 
      AND
-      job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
-     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?)
+     ( job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
+     AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
+     AND jobs.client_id = ?
      GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
@@ -1344,7 +1341,8 @@ const getJobByClient = async (job) => {
             ExistStaff[0].id,
             ExistStaff[0].id,
             client_id,
-            client_id
+            client_id,
+            client_id,
           ]);
 
            const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
