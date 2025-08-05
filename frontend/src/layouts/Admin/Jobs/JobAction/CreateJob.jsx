@@ -13,6 +13,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
+import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -174,14 +175,14 @@ const CreateJob = () => {
       };
       const data = { req: req, authToken: token };
 
-     
+
 
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
             if (response.data.length > 0) {
-              
+
               const isIncluded = response.data[0].client_type_id
                 .split(",")
                 .includes(response.data[0].client_type);
@@ -1209,6 +1210,25 @@ const CreateJob = () => {
     }))
   ];
 
+
+
+  //  Handle multiple select change
+  const handleMultipleSelect = (selectedOptions) => {
+    // alert("Selected Options: " + selectedOptions.map(option => option.label).join(", "));
+  }
+
+ 
+  const options = [
+    { key: "1", label: "Sole Trader" },
+    { key: "2", label: "Company" },
+    { key: "3", label: "Partnership" },
+    { key: "4", label: "Individual" },
+    { key: "5", label: "Charity Incorporated Organisation" },
+    { key: "6", label: "Charity Unincorporated Association" },
+    { key: "7", label: "Trust" },
+  ];
+
+
   return (
     <div>
       <div className="container-fluid">
@@ -2171,6 +2191,30 @@ const CreateJob = () => {
                                       </div>
                                     )}
                                   </div>
+
+
+                                  <div
+                                    id="invoice_type"
+                                    className="col-lg-4 mb-3"
+                                  >
+                                    <label
+                                      htmlFor="firstNameinput"
+                                      className="form-label"
+                                    >
+                                      Staff
+                                    </label>
+                                    <div className="custom-multiselect">
+                                      <DropdownMultiselect
+                                        options={options}
+                                        name="multipleSelectStaff"
+                                        className=""
+                                        handleOnChange={(e) => handleMultipleSelect(e)}
+                                      />
+                                    </div>
+
+                                  </div>
+
+
                                 </div>
                               </div>
                             </div>

@@ -44,13 +44,13 @@ const CreateCheckList = () => {
   });
 
   const options = [
-    { key: "1", label: "Sole Trader" },
-    { key: "2", label: "Company" },
-    { key: "3", label: "Partnership" },
-    { key: "4", label: "Individual" },
-    { key: "5", label: "Charity Incorporated Organisation" },
-    { key: "6", label: "Charity Unincorporated Association" },
-    { key: "7", label: "Trust" },
+    { id: "1", label: "Sole Trader" },
+    { id: "2", label: "Company" },
+    { id: "3", label: "Partnership" },
+    { id: "4", label: "Individual" },
+    { id: "5", label: "Charity Incorporated Organisation" },
+    { id: "6", label: "Charity Unincorporated Association" },
+    { id: "7", label: "Trust" },
   ];
 
   useEffect(() => {
@@ -246,10 +246,6 @@ const CreateCheckList = () => {
   const handleSubmit = async () => {
     let validationErrors = {};
 
-
-
-
-
     const formattedTasks = formatBudgetedHours();
 
     const isValid = validateAllFields();
@@ -415,6 +411,8 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
+
+
             <div className="col-lg-4 mb-lg-0 ">
               <div className="row">
                 <div className="col-lg-12">
@@ -433,6 +431,8 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
+
+
             <div className="col-lg-4 mt-3">
               <div className=" row flex-column">
                 <div>
