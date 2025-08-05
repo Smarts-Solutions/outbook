@@ -230,8 +230,8 @@ const getAddJobData = async (job) => {
            staffs
       WHERE  
        staffs.id = ${rows[0].customer_account_manager_id}`;
-
     const [rows9] = await pool.execute(queryAccountManeger);
+
     let AccountManagerArr = [];
     if (rows9.length > 0) {
       AccountManagerArr = rows9.map((row) => ({
@@ -239,6 +239,19 @@ const getAddJobData = async (job) => {
         manager_name: row.manager_first_name + " " + row.manager_last_name,
       }));
     }
+
+
+    // Return the data
+    const allStaff = `
+       SELECT  
+           staffs.id AS id,
+           CONCAT(staffs.first_name, ' ', staffs.last_name) AS full_name
+      FROM 
+           staffs
+      WHERE  
+       (staffs.role_id != 1  AND staffs.role_id != 2) AND staffs.status = '1'`;
+    const [rowsStaff] = await pool.execute(allStaff);
+
 
     return {
       status: true,
@@ -254,6 +267,7 @@ const getAddJobData = async (job) => {
         engagement_model: engagement_model,
         currency: rows8,
         Manager: AccountManagerArr,
+        allStaff: rowsStaff
       },
     };
   } catch (err) {
@@ -263,6 +277,7 @@ const getAddJobData = async (job) => {
 
 const jobAdd = async (job) => {
   const {
+    selectedStaffData,
     staffCreatedId,
     account_manager_id,
     customer_id,
@@ -310,6 +325,8 @@ const jobAdd = async (job) => {
     invoice_remark,
   } = job;
 
+  // console.log("selectedStaffData", selectedStaffData);
+  
   let notes = job.notes == undefined ? "" : job.notes;
 
   // Set Status type
@@ -587,6 +604,20 @@ VALUES (
           }
         }
       }
+
+      if (selectedStaffData && selectedStaffData.length > 0) {
+        for (const staff of selectedStaffData) {
+          let { value } = staff;
+          const [[isExistJobId]] = await pool.execute(`SELECT id FROM job_allowed_staffs WHERE staff_id = ${value} AND job_id = ${result.insertId}`)
+          if (!isExistJobId) {
+            const query = `
+        INSERT INTO job_allowed_staffs (job_id, staff_id)
+        VALUES (?, ?)
+        `;
+          await pool.execute(query, [result.insertId, value]);
+          }
+        }
+      }
     }
     return {
       status: true,
@@ -621,7 +652,7 @@ const getJobByCustomer = async (job) => {
     LineManageStaffId.push(StaffUserId);
   }
 
- 
+
 
 
   try {
@@ -724,7 +755,7 @@ const getJobByCustomer = async (job) => {
 
     }
 
-   
+
 
     if (ExistStaff.length > 0) {
       // Allocated to
@@ -1141,11 +1172,11 @@ const getJobByClient = async (job) => {
         const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
         if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
-         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
           let filtered = rowsAllocated?.filter(row =>
             Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
             Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
-            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.allocated_id) === Number(ExistStaff[0].id) ||
             Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
           );
           return { status: true, message: "Success.", data: filtered };
@@ -1153,7 +1184,7 @@ const getJobByClient = async (job) => {
         }
 
 
-     
+
 
         result = rowsAllocated;
       }
@@ -1244,26 +1275,26 @@ const getJobByClient = async (job) => {
           ExistStaff[0].id,
           client_id,
           client_id,
-          
+
         ]);
 
-       
+
 
         const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
         if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
-         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
           let filtered = rowsAllocated?.filter(row =>
             Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
             Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
-            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.allocated_id) === Number(ExistStaff[0].id) ||
             Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
           );
-        //  console.log("filtered", filtered.length);
+          //  console.log("filtered", filtered.length);
           return { status: true, message: "Success.", data: filtered };
 
         }
-   
+
         result = rowsAllocated;
         //  console.log("rowsAllocated lenthg", rowsAllocated);
         //  console.log("rowsAllocated lenthg", rowsAllocated.length);
@@ -1354,20 +1385,20 @@ const getJobByClient = async (job) => {
             client_id,
           ]);
 
-           const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+          const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
-        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
-         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
-          let filtered = rowsAllocated?.filter(row =>
-            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
-            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
-            Number(row.allocated_id) === Number(ExistStaff[0].id)||
-            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
-          );
-        //  console.log("filtered", filtered.length);
-          return { status: true, message: "Success.", data: filtered };
+          if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+            // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+            let filtered = rowsAllocated?.filter(row =>
+              Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+              Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+              Number(row.allocated_id) === Number(ExistStaff[0].id) ||
+              Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+            );
+            //  console.log("filtered", filtered.length);
+            return { status: true, message: "Success.", data: filtered };
 
-        }
+          }
 
 
           result = rowsAllocated;
@@ -1447,24 +1478,24 @@ const getJobByClient = async (job) => {
      `;
 
 
-        const [rows] = await pool.execute(query, [ExistStaff[0].id,client_id, client_id, client_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id, client_id, client_id, client_id]);
 
         const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
         if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
-         // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
           let filtered = rows.filter(row =>
             Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
             Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
-            Number(row.allocated_id) === Number(ExistStaff[0].id)||
+            Number(row.allocated_id) === Number(ExistStaff[0].id) ||
             Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
           );
-        //  console.log("filtered", filtered.length);
+          //  console.log("filtered", filtered.length);
           return { status: true, message: "Success.", data: filtered };
 
         }
 
-       // console.log("rows", rows.length);
+        // console.log("rows", rows.length);
         result = rows;
       }
     }

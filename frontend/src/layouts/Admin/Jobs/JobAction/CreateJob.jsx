@@ -13,7 +13,6 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
-import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -60,6 +59,11 @@ const CreateJob = () => {
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  const [allStaffData, setAllStaffData] = useState([]);
+  const [selectedStaffData, setSelectedStaffData] = useState([]);
+
+  
+
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -109,6 +113,11 @@ const CreateJob = () => {
 
   });
 
+  console.log("AllocatedTo", jobData.AllocatedTo);
+  console.log("Reviewer", jobData.Reviewer);
+  console.log("staffCreatedId", staffCreatedId);
+  console.log("selectedStaffData", selectedStaffData);
+
   useEffect(() => {
     setJobData((prevState) => ({
       ...prevState,
@@ -139,11 +148,14 @@ const CreateJob = () => {
             CustomerAccountManager: response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id.toString() || "",
             EngagementModel: Object.entries(response.data?.engagement_model[0]).find(([key, value]) => value === "1")?.[0] || "",
           }));
+
+          setAllStaffData(response?.data?.allStaff || []);
         } else {
           setAllJobData({
             loading: true,
             data: [],
           });
+          setAllStaffData([]);
         }
       })
       .catch((error) => {
@@ -464,6 +476,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
     const req = {
+      selectedStaffData:selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
@@ -1217,12 +1230,12 @@ const CreateJob = () => {
     // alert("Selected Options: " + selectedOptions.map(option => option.label).join(", "));
   }
 
- 
+
   const options = [
     { key: "1", label: "Sole Trader" },
     { key: "2", label: "Company" },
     { key: "3", label: "Partnership" },
-    { key: "4", label: "Individual" },
+    { key: "4", label: "Indivkeyual" },
     { key: "5", label: "Charity Incorporated Organisation" },
     { key: "6", label: "Charity Unincorporated Association" },
     { key: "7", label: "Trust" },
@@ -2203,14 +2216,24 @@ const CreateJob = () => {
                                     >
                                       Staff
                                     </label>
-                                    <div className="custom-multiselect">
-                                      <DropdownMultiselect
-                                        options={options}
-                                        name="multipleSelectStaff"
-                                        className=""
-                                        handleOnChange={(e) => handleMultipleSelect(e)}
-                                      />
-                                    </div>
+                                  
+                                    <Select
+                                      options={allStaffData
+                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId) 
+                                        ?.map((data) => {
+                                        return { label: data.full_name, value: data.id };
+                                      })}
+                                      isMulti
+                                      closeMenuOnSelect={false}
+                                      className="basic-multi-select"
+                                      name="staff"
+                                      id="staff"
+                                      value={selectedStaffData}
+                                      onChange={(e) => {
+                                        setSelectedStaffData(e);
+                                      }}
+                                      placeholder="Select options"
+                                    />
 
                                   </div>
 
