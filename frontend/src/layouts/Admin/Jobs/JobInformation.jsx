@@ -10,6 +10,7 @@ import {
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import Select from 'react-select';
 
 const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
 
+ const [allStaffData, setAllStaffData] = useState([]);
+   const [selectedStaffData, setSelectedStaffData] = useState([]);
 
   const [JobInformationData, setJobInformationData] = useState({
     AccountManager: "",
@@ -85,7 +88,9 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     notes: "",
   });
 
-console.log("========", selectStatusIs);
+
+
+  console.log("========", selectStatusIs);
 
 
   useEffect(() => {
@@ -104,6 +109,7 @@ console.log("========", selectStatusIs);
       .unwrap()
       .then(async (response) => {
         if (response.status) {
+          setSelectedStaffData(response.data.selectedStaffData || []);
           setBudgetedHours({
             hours: response.data.budgeted_hours.split(":")[0],
             minutes: response.data.budgeted_hours.split(":")[1],
@@ -272,11 +278,13 @@ console.log("========", selectStatusIs);
             loading: true,
             data: response.data,
           });
+          setAllStaffData(response?.data?.allStaff || []);
         } else {
           setAllJobData({
             loading: true,
             data: [],
           });
+          setAllStaffData([]);
         }
       })
       .catch((error) => {
@@ -401,22 +409,22 @@ console.log("========", selectStatusIs);
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-        .reduce((obj, key) => {
-          const keyMapping = {
-            fte_dedicated_staffing: "Fte Dedicated Staffing",
-            percentage_model: "Percentage Model",
-            adhoc_payg_hourly: "Adhoc Payg Hourly",
-            customised_pricing: "Customised Pricing",
-          };
+      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+      .reduce((obj, key) => {
+        const keyMapping = {
+          fte_dedicated_staffing: "Fte Dedicated Staffing",
+          percentage_model: "Percentage Model",
+          adhoc_payg_hourly: "Adhoc Payg Hourly",
+          customised_pricing: "Customised Pricing",
+        };
 
-          if (keyMapping[key]) {
-            RearrangeEngagementOptionArr.push(keyMapping[key]);
-          }
+        if (keyMapping[key]) {
+          RearrangeEngagementOptionArr.push(keyMapping[key]);
+        }
 
-          obj[key] = AllJobData.data.engagement_model[0][key];
-          return obj;
-        }, {})
+        obj[key] = AllJobData.data.engagement_model[0][key];
+        return obj;
+      }, {})
     : {};
   const serviceFields = [
     {
@@ -796,7 +804,7 @@ console.log("========", selectStatusIs);
   useEffect(() => {
     setServiceFieldsData(
       serviceFields[JobInformationData?.Service]?.fields ||
-        serviceFields[0]?.fields
+      serviceFields[0]?.fields
     );
   }, [JobInformationData?.Service]);
 
@@ -813,39 +821,39 @@ console.log("========", selectStatusIs);
             {goto !== "report" && (
               <>
                 {(getAccessDataJob.update === 1 ||
-                  
+
                   role === "SUPERADMIN") && (
-                  <div className="w-auto">
-                    <select
-                      className="form-select form-control"
-                      onChange={handleStatusChange}
-                      value={selectStatusIs}
-                    >
-                      {statusDataAll.map((status) => (
-                        <option value={status.id} key={status.id}>
-                          {status.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                    <div className="w-auto">
+                      <select
+                        className="form-select form-control"
+                        onChange={handleStatusChange}
+                        value={selectStatusIs}
+                      >
+                        {statusDataAll.map((status) => (
+                          <option value={status.id} key={status.id}>
+                            {status.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                 {(getAccessDataJob.update === 1 ||
-                  
+
                   role === "SUPERADMIN") && (
-                  <button className="edit-icon" onClick={handleJobEdit}>
-                    <i className="ti-pencil text-primary" />
-                  </button>
-                )}
+                    <button className="edit-icon" onClick={handleJobEdit}>
+                      <i className="ti-pencil text-primary" />
+                    </button>
+                  )}
 
                 {location.state.timesheet_job_id == null
                   ? (getAccessDataJob.delete === 1 ||
-                      
-                      role === "SUPERADMIN") && (
-                      <button className="delete-icon" onClick={handleDelete}>
-                        <i className="ti-trash text-danger" />
-                      </button>
-                    )
+
+                    role === "SUPERADMIN") && (
+                    <button className="delete-icon" onClick={handleDelete}>
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  )
                   : ""}
               </>
             )}
@@ -1427,6 +1435,37 @@ console.log("========", selectStatusIs);
                       ))}
                     </select>
                   </div>
+
+
+                  <div
+                    id="satff"
+                    className="col-lg-4 mb-3"
+                  >
+                    <label
+                      htmlFor="firstNameinput"
+                      className="form-label"
+                    >
+                      Staff
+                    </label>
+
+                    <Select
+                      isDisabled={true}
+                      options={allStaffData?.map((data) => {
+                          return { label: data.full_name, value: data.id };
+                        })}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      className="basic-multi-select"
+                      name="staff"
+                      id="staff"
+                      value={selectedStaffData}
+                      onChange={(e) => {
+                        setSelectedStaffData(e);
+                      }}
+                      placeholder="Select options"
+                    />
+
+                  </div>
                 </div>
               </div>
             </div>
@@ -1761,184 +1800,184 @@ console.log("========", selectStatusIs);
           </div>
 
           {JobInformationData.EngagementModel != "fte_dedicated_staffing" &&
-          (selectStatusIs == 6 || selectStatusIs == 7) && (
-            <div className="col-lg-12">
+            (selectStatusIs == 6 || selectStatusIs == 7) && (
               <div className="col-lg-12">
-                <div className="card card_shadow">
-                  <div className="card-header card-header-light-blue align-items-center d-flex">
-                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                      Invoice
-                    </h4>
-                  </div>
-                  <div className="card-body">
-                    <div style={{ marginTop: 15 }}>
-                      <div className="row">
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Invoiced</label>
-                          <select
-                            className="invoiced_dropdown form-select"
-                            name="Invoiced"
-                            disabled
-                            onChange={(e) =>
-                              setJobInformationData({
-                                ...JobInformationData,
-                                Invoiced: e.target.value,
-                              })
-                            }
-                            value={JobInformationData.Invoiced}
-                          >
-                            <option value="">Please Select Invoiced</option>
-                            <option value={1}>Yes</option>
-                            <option value={0}>No</option>
-                          </select>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Currency</label>
-                          <select
-                            className="invoiced_dropdown form-select"
-                            name="Currency"
-                            disabled
-                            onChange={(e) =>
-                              setJobInformationData({
-                                ...JobInformationData,
-                                Currency: e.target.value,
-                              })
-                            }
-                            value={JobInformationData.Currency}
-                          >
-                            <option value="">Please Select Currency</option>
-                            <option>Rupee</option>
-                            <option>Dollar</option>
-                          </select>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label"> Invoice Value </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Invoice Value"
-                            name="InvoiceValue"
-                            defaultValue=""
-                            disabled
-                            onChange={(e) =>
-                              setJobInformationData({
-                                ...JobInformationData,
-                                InvoiceValue: e.target.value,
-                              })
-                            }
-                            value={JobInformationData.InvoiceValue}
-                          />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Invoice Date</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            placeholder="DD-MM-YYYY"
-                            name="InvoiceDate"
-                            max="2024-08-27"
-                            defaultValue=""
-                            disabled
-                            onChange={(e) =>
-                              setJobInformationData({
-                                ...JobInformationData,
-                                InvoiceDate: e.target.value,
-                              })
-                            }
-                            value={JobInformationData.InvoiceDate}
-                          />
-                        </div>
-                        <div className="col-lg-4">
-                          <div className="mb-3">
-                            <label className="form-label">Invoice </label>
+                <div className="col-lg-12">
+                  <div className="card card_shadow">
+                    <div className="card-header card-header-light-blue align-items-center d-flex">
+                      <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                        Invoice
+                      </h4>
+                    </div>
+                    <div className="card-body">
+                      <div style={{ marginTop: 15 }}>
+                        <div className="row">
+                          <div className="col-lg-4 mb-3">
+                            <label className="form-label">Invoiced</label>
+                            <select
+                              className="invoiced_dropdown form-select"
+                              name="Invoiced"
+                              disabled
+                              onChange={(e) =>
+                                setJobInformationData({
+                                  ...JobInformationData,
+                                  Invoiced: e.target.value,
+                                })
+                              }
+                              value={JobInformationData.Invoiced}
+                            >
+                              <option value="">Please Select Invoiced</option>
+                              <option value={1}>Yes</option>
+                              <option value={0}>No</option>
+                            </select>
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <label className="form-label">Currency</label>
+                            <select
+                              className="invoiced_dropdown form-select"
+                              name="Currency"
+                              disabled
+                              onChange={(e) =>
+                                setJobInformationData({
+                                  ...JobInformationData,
+                                  Currency: e.target.value,
+                                })
+                              }
+                              value={JobInformationData.Currency}
+                            >
+                              <option value="">Please Select Currency</option>
+                              <option>Rupee</option>
+                              <option>Dollar</option>
+                            </select>
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <label className="form-label"> Invoice Value </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="Invoice Value"
+                              name="InvoiceValue"
+                              defaultValue=""
+                              disabled
+                              onChange={(e) =>
+                                setJobInformationData({
+                                  ...JobInformationData,
+                                  InvoiceValue: e.target.value,
+                                })
+                              }
+                              value={JobInformationData.InvoiceValue}
+                            />
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <label className="form-label">Invoice Date</label>
+                            <input
+                              type="date"
+                              className="form-control"
+                              placeholder="DD-MM-YYYY"
+                              name="InvoiceDate"
+                              max="2024-08-27"
+                              defaultValue=""
+                              disabled
+                              onChange={(e) =>
+                                setJobInformationData({
+                                  ...JobInformationData,
+                                  InvoiceDate: e.target.value,
+                                })
+                              }
+                              value={JobInformationData.InvoiceDate}
+                            />
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">Invoice </label>
 
-                            <div className="input-group">
-                              <div className="hours-div">
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Hours"
-                                  defaultValue=""
-                                  disabled
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (
-                                      value === "" ||
-                                      (Number(value) >= 0 &&
-                                        Number(value) <= 23)
-                                    ) {
-                                      setInvoiceTime({
-                                        ...invoiceTime,
-                                        hours: value,
-                                      });
-                                    }
-                                  }}
-                                  value={invoiceTime.hours}
-                                />
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon2"
-                                >
-                                  H
-                                </span>
-                              </div>
-                              <div className="hours-div">
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Minutes"
-                                  defaultValue=""
-                                  disabled
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (
-                                      value === "" ||
-                                      (Number(value) >= 0 &&
-                                        Number(value) <= 59)
-                                    ) {
-                                      setInvoiceTime({
-                                        ...invoiceTime,
-                                        minutes: value,
-                                      });
-                                    }
-                                  }}
-                                  value={invoiceTime.minutes}
-                                />
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon2"
-                                >
-                                  M
-                                </span>
+                              <div className="input-group">
+                                <div className="hours-div">
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Hours"
+                                    defaultValue=""
+                                    disabled
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (
+                                        value === "" ||
+                                        (Number(value) >= 0 &&
+                                          Number(value) <= 23)
+                                      ) {
+                                        setInvoiceTime({
+                                          ...invoiceTime,
+                                          hours: value,
+                                        });
+                                      }
+                                    }}
+                                    value={invoiceTime.hours}
+                                  />
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon2"
+                                  >
+                                    H
+                                  </span>
+                                </div>
+                                <div className="hours-div">
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Minutes"
+                                    defaultValue=""
+                                    disabled
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (
+                                        value === "" ||
+                                        (Number(value) >= 0 &&
+                                          Number(value) <= 59)
+                                      ) {
+                                        setInvoiceTime({
+                                          ...invoiceTime,
+                                          minutes: value,
+                                        });
+                                      }
+                                    }}
+                                    value={invoiceTime.minutes}
+                                  />
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon2"
+                                  >
+                                    M
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div id="invoicedremark" className="col-lg-4">
-                          <label className="form-label">Invoice Remark</label>
-                          <textarea
-                            className="form-control"
-                            placeholder="Invoice Remark"
-                            name="InvoiceRemark"
-                            defaultValue=""
-                            disabled
-                            onChange={(e) =>
-                              setJobInformationData({
-                                ...JobInformationData,
-                                InvoiceRemark: e.target.value,
-                              })
-                            }
-                            value={JobInformationData.InvoiceRemark}
-                            maxLength={500}
-                          />
+                          <div id="invoicedremark" className="col-lg-4">
+                            <label className="form-label">Invoice Remark</label>
+                            <textarea
+                              className="form-control"
+                              placeholder="Invoice Remark"
+                              name="InvoiceRemark"
+                              defaultValue=""
+                              disabled
+                              onChange={(e) =>
+                                setJobInformationData({
+                                  ...JobInformationData,
+                                  InvoiceRemark: e.target.value,
+                                })
+                              }
+                              value={JobInformationData.InvoiceRemark}
+                              maxLength={500}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           <div className="col-lg-12">
             <div className="card card_shadow">

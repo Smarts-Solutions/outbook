@@ -446,7 +446,7 @@ const EditJob = () => {
             loading: true,
             data: [],
           });
-           setAllStaffData(response?.data?.allStaff || []);
+           setAllStaffData([]);
         }
       })
       .catch((error) => {
