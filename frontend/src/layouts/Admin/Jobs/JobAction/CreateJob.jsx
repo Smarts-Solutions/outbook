@@ -1224,24 +1224,6 @@ const CreateJob = () => {
   ];
 
 
-
-  //  Handle multiple select change
-  const handleMultipleSelect = (selectedOptions) => {
-    // alert("Selected Options: " + selectedOptions.map(option => option.label).join(", "));
-  }
-
-
-  const options = [
-    { key: "1", label: "Sole Trader" },
-    { key: "2", label: "Company" },
-    { key: "3", label: "Partnership" },
-    { key: "4", label: "Indivkeyual" },
-    { key: "5", label: "Charity Incorporated Organisation" },
-    { key: "6", label: "Charity Unincorporated Association" },
-    { key: "7", label: "Trust" },
-  ];
-
-
   return (
     <div>
       <div className="container-fluid">
@@ -2207,7 +2189,7 @@ const CreateJob = () => {
 
 
                                   <div
-                                    id="invoice_type"
+                                    id="satff"
                                     className="col-lg-4 mb-3"
                                   >
                                     <label

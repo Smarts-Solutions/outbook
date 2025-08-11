@@ -326,7 +326,7 @@ const jobAdd = async (job) => {
   } = job;
 
   // console.log("selectedStaffData", selectedStaffData);
-  
+
   let notes = job.notes == undefined ? "" : job.notes;
 
   // Set Status type
@@ -614,7 +614,7 @@ VALUES (
         INSERT INTO job_allowed_staffs (job_id, staff_id)
         VALUES (?, ?)
         `;
-          await pool.execute(query, [result.insertId, value]);
+            await pool.execute(query, [result.insertId, value]);
           }
         }
       }
@@ -1586,6 +1586,8 @@ const getByJobStaffId = async (job) => {
 
 const getJobById = async (job) => {
   const { job_id } = job;
+
+  console.log("job_id", job_id);
   try {
     const query = `
     SELECT 
@@ -1722,9 +1724,8 @@ const getJobById = async (job) => {
      client_job_task ON client_job_task.job_id = jobs.id
      LEFT JOIN
      task ON client_job_task.task_id = task.id
-      LEFT JOIN
+     LEFT JOIN
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
-     
      WHERE
       jobs.id = ?
       GROUP BY jobs.id 
@@ -1734,6 +1735,15 @@ const getJobById = async (job) => {
     //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
 
     const [rows] = await pool.execute(query, [job_id]);
+
+    const [selectedStaffData] = await pool.execute(
+      `SELECT CONCAT(staffs.first_name, ' ', staffs.last_name) AS label , staffs.id AS value
+   FROM job_allowed_staffs
+   JOIN staffs ON job_allowed_staffs.staff_id = staffs.id
+   WHERE job_id = ?`,
+      [job_id]
+    );
+
 
     let result = {};
     if (rows.length > 0) {
@@ -1869,6 +1879,7 @@ const getJobById = async (job) => {
           checklist_id: rows[0].checklist_id,
           task: tasks,
         },
+        selectedStaffData: selectedStaffData || [],
       };
     }
 
