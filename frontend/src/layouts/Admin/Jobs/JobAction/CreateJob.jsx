@@ -113,10 +113,10 @@ const CreateJob = () => {
 
   });
 
-  console.log("AllocatedTo", jobData.AllocatedTo);
-  console.log("Reviewer", jobData.Reviewer);
-  console.log("staffCreatedId", staffCreatedId);
-  console.log("selectedStaffData", selectedStaffData);
+  // console.log("AllocatedTo", jobData.AllocatedTo);
+  // console.log("Reviewer", jobData.Reviewer);
+  // console.log("staffCreatedId", staffCreatedId);
+  // console.log("selectedStaffData", selectedStaffData);
 
   useEffect(() => {
     setJobData((prevState) => ({

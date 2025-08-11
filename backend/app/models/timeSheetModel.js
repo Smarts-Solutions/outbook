@@ -473,6 +473,11 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
 
+        if (['', null, undefined].includes(placeholders)) {
+          placeholders = '0';
+        }
+
+
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
 
           customer_id = customer_id[0] || 1;

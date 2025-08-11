@@ -596,6 +596,10 @@ const getClient = async (client) => {
   // console.log("placeholders", placeholders);
   // console.log("customer_id", customer_id);
 
+  if(['',null,undefined].includes(placeholders)){
+      placeholders = '0';
+    }
+
 
   try {
     const QueryRole = `

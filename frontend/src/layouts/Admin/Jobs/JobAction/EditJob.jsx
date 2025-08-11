@@ -72,8 +72,10 @@ const EditJob = () => {
 
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
-  console.log("selectedStaffData", selectedStaffData);
-  console.log("allStaffData", allStaffData);
+
+
+  // console.log("selectedStaffData", selectedStaffData);
+  // console.log("allStaffData", allStaffData);
 
 
   const [jobData, setJobData] = useState({
