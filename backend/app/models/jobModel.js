@@ -1586,8 +1586,6 @@ const getByJobStaffId = async (job) => {
 
 const getJobById = async (job) => {
   const { job_id } = job;
-
-  console.log("job_id", job_id);
   try {
     const query = `
     SELECT 
@@ -1893,6 +1891,7 @@ const getJobById = async (job) => {
 const jobUpdate = async (job) => {
   const {
     job_id, // Assuming job_id is provided for the update
+    selectedStaffData,
     account_manager_id,
     customer_id,
     client_id,
@@ -2168,6 +2167,28 @@ const jobUpdate = async (job) => {
 
     // Execute the query with sanitized parameters
     const [result] = await pool.execute(query, sanitizedParams);
+
+    // INSERT AND DELETE selectedStaffData
+     if (selectedStaffData && selectedStaffData.length > 0) {
+      // Delete existing staff assignments for the job
+      const deleteQuery = `
+        DELETE FROM job_allowed_staffs WHERE job_id = ?
+      `;
+      await pool.execute(deleteQuery, [job_id]);
+      const insertQuery = `
+        INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)
+      `;
+      for (const staff of selectedStaffData) {
+        await pool.execute(insertQuery, [job_id, staff.value]);
+      }
+    } else {
+      const deleteQuery = `
+        DELETE FROM job_allowed_staffs WHERE job_id = ?
+      `;
+      await pool.execute(deleteQuery, [job_id]);
+    }
+
+
 
     if (result.affectedRows > 0) {
       if (tasks.task.length > 0) {

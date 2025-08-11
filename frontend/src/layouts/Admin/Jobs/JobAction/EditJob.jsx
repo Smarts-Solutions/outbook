@@ -609,6 +609,7 @@ const EditJob = () => {
     const req = {
       job_id: location.state.job_id,
       ...jobData,
+      selectedStaffData:selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
         getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
@@ -2323,7 +2324,7 @@ const EditJob = () => {
                                     />
 
                                   </div>
-                                  
+
                                 </div>
                               </div>
                             </div>
