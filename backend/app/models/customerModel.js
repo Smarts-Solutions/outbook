@@ -1193,7 +1193,7 @@ id DESC;`;
             id DESC;
             `;
 
-            console.log('query', query);
+            
             const [result1] = await pool.execute(query, [StaffUserId, StaffUserId]);
             result = result1
         }

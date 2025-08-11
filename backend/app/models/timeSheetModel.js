@@ -397,23 +397,17 @@ const getTimesheetTaskType = async (Timesheet) => {
                     customers.id AS id,
                     customers.trading_name AS trading_name
                 FROM 
-                    customers
-                JOIN 
-                    staffs AS staff1 ON customers.staff_id = staff1.id
-                JOIN 
-                    staffs AS staff2 ON customers.account_manager_id = staff2.id
-                LEFT JOIN 
-                    customer_company_information ON customers.id = customer_company_information.customer_id
-                LEFT JOIN 
-                   staff_portfolio ON staff_portfolio.customer_id = customers.id
-                LEFT JOIN 
+            customers
+              LEFT JOIN 
+                  staff_portfolio ON staff_portfolio.customer_id = customers.id
+              LEFT JOIN 
                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id
-                LEFT JOIN clients ON clients.customer_id = customers.id
-                LEFT JOIN jobs ON clients.id = jobs.client_id
-                LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id       
-                WHERE 
-                job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
+              LEFT JOIN clients ON clients.customer_id = customers.id
+              LEFT JOIN jobs ON clients.id = jobs.client_id
+              LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id        
+              WHERE 
+                  job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL
                     GROUP BY
                     customers.id
                 ORDER BY 
