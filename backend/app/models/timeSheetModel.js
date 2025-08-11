@@ -998,6 +998,10 @@ const getTimesheetTaskType = async (Timesheet) => {
 
             }
             else {
+
+              if (['0'].includes(placeholders)) {
+                placeholders = '';
+              }
               const query = `
               SELECT  
                   clients.id AS id,

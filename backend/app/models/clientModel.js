@@ -1297,6 +1297,10 @@ ORDER BY
     //       clients.id DESC;
     //         `;
 
+    if(['0'].includes(placeholders)){
+      placeholders = '';
+    }
+
     const query = `SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
@@ -1348,7 +1352,6 @@ ORDER BY clients.id DESC;
     return { status: false, message: "Err Client Get" };
   }
 };
-
 
 const getByidClient = async (client) => {
   const { client_id } = client;
