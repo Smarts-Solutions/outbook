@@ -833,6 +833,21 @@ const getJobByCustomer = async (job) => {
           ...customer_id,
           ...customer_id,
         ]);
+
+       const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+          // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rows?.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id) ||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+          return { status: true, message: "Success.", data: filtered };
+
+        }
+
         result = rows;
       }
       // Account Manger
@@ -913,6 +928,22 @@ const getJobByCustomer = async (job) => {
           ...customer_id,
           ...customer_id,
         ]);
+
+         const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+          // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rows?.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id) ||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+          //  console.log("filtered", filtered.length);
+          return { status: true, message: "Success.", data: filtered };
+
+        }
+
         result = rows;
       }
       // Reviewer
@@ -990,6 +1021,23 @@ const getJobByCustomer = async (job) => {
           ...customer_id,
           ...customer_id,
         ]);
+        
+         const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
+
+        if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
+          // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
+          let filtered = rows?.filter(row =>
+            Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
+            Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
+            Number(row.allocated_id) === Number(ExistStaff[0].id) ||
+            Number(row.job_allowed_staffs_id) === Number(ExistStaff[0].id)
+          );
+          //  console.log("filtered", filtered.length);
+          return { status: true, message: "Success.", data: filtered };
+
+        }
+
+
         result = rows;
       } else {
         const query = `
@@ -1068,7 +1116,7 @@ const getJobByCustomer = async (job) => {
 
         if (![undefined, null, ''].includes(isExistJobAllowedStaffs) && isExistJobAllowedStaffs.staff_id == ExistStaff[0].id) {
           // console.log("isExistJobAllowedStaffs", isExistJobAllowedStaffs);
-          let filtered = rows.filter(row =>
+          let filtered = rows?.filter(row =>
             Number(row.staff_created_id) === Number(ExistStaff[0].id) ||
             Number(row.reviewer_id) === Number(ExistStaff[0].id) ||
             Number(row.allocated_id) === Number(ExistStaff[0].id) ||
