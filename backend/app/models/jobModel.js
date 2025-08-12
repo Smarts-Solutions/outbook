@@ -633,6 +633,8 @@ VALUES (
 const getJobByCustomer = async (job) => {
   let { customer_id, StaffUserId } = job;
 
+  // console.log("getJobByCustomer", job);
+
   let customerCheck = customer_id
   customer_id = [Number(customer_id)]
   let placeholders = customer_id.map(() => "?").join(", ");
@@ -788,6 +790,10 @@ const getJobByCustomer = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+        jobs.staff_created_id AS staff_created_id,
+
         master_status.name AS status,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -811,6 +817,8 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN 
         staffs ON jobs.allocated_to = staffs.id
         LEFT JOIN 
+        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id}
+        LEFT JOIN 
         staffs AS staffs2 ON jobs.reviewer = staffs2.id
         LEFT JOIN 
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
@@ -821,13 +829,14 @@ const getJobByCustomer = async (job) => {
         WHERE 
         jobs.customer_id = customers.id 
         AND 
-        (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
+        job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
         AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN (${placeholders}))
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
         const [rows] = await pool.execute(query, [
+          ExistStaff[0].id,
           ExistStaff[0].id,
           ExistStaff[0].id,
           ...customer_id,
@@ -880,6 +889,9 @@ const getJobByCustomer = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
+        job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+        jobs.staff_created_id AS staff_created_id,
+
         master_status.name AS status,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -905,6 +917,8 @@ const getJobByCustomer = async (job) => {
         job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN 
         staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN
+        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id}
         LEFT JOIN 
         staffs AS staffs2 ON jobs.reviewer = staffs2.id
         LEFT JOIN 
@@ -914,7 +928,7 @@ const getJobByCustomer = async (job) => {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
-        jobs.customer_id = customers.id AND 
+        jobs.customer_id = customers.id AND job_allowed_staffs.staff_id = ? OR 
         customer_service_account_managers.account_manager_id = ? AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id = ? AND jobs.customer_id IN (${placeholders})) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders}))
         GROUP BY 
         jobs.id 
@@ -922,6 +936,7 @@ const getJobByCustomer = async (job) => {
         jobs.id DESC;
         `;
         const [rows] = await pool.execute(query, [
+          ExistStaff[0].id,
           ExistStaff[0].id,
           ...customer_id,
           ExistStaff[0].id,
@@ -976,6 +991,9 @@ const getJobByCustomer = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
+        job_allowed_staffs.staff_id AS job_allowed_staffs_id,
+        jobs.staff_created_id AS staff_created_id,
+
         master_status.name AS status,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -998,6 +1016,8 @@ const getJobByCustomer = async (job) => {
         services ON jobs.service_id = services.id
         LEFT JOIN 
         staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN
+        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${ExistStaff[0].id}
         LEFT JOIN 
         staffs AS staffs2 ON jobs.reviewer = staffs2.id
         LEFT JOIN 
@@ -1009,13 +1029,14 @@ const getJobByCustomer = async (job) => {
         WHERE 
         jobs.customer_id = customers.id 
         AND 
-        (jobs.reviewer = ? OR jobs.staff_created_id = ?)
+        job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?)
         AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders}))
         GROUP BY jobs.id 
         ORDER BY 
          jobs.id DESC;
         `;
         const [rows] = await pool.execute(query, [
+          ExistStaff[0].id,
           ExistStaff[0].id,
           ExistStaff[0].id,
           ...customer_id,
@@ -1039,7 +1060,8 @@ const getJobByCustomer = async (job) => {
 
 
         result = rows;
-      } else {
+      } 
+      else {
         const query = `
         SELECT 
         jobs.id AS job_id,
