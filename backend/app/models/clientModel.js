@@ -1687,14 +1687,7 @@ ORDER BY
          
           return { status: true, message: "success.", data: result };
         }
-      }
-
-
-
-
-
-
-
+   }
 
 
 //     if (existStaffbyCustomer.length > 0) {
