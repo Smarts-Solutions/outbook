@@ -1448,7 +1448,7 @@ ORDER BY
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-        console.log("Account Manager Role",StaffUserId);
+        
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -1497,9 +1497,9 @@ ORDER BY
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
           job_allowed_staffs.staff_id = ? OR (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) OR (clients.customer_id IN (${placeholders}) OR clients.staff_created_id = ?) OR (jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR jobs.reviewer = ? OR jobs.allocated_to = ? OR clients.staff_created_id = ?
-        ORDER BY 
+        ORDER BY
         clients.id DESC
-            `;
+          `;
 
           const [resultAccounrManage] = await pool.execute(query, [
             StaffUserId,
@@ -1514,8 +1514,7 @@ ORDER BY
             StaffUserId,
             StaffUserId
           ]);
-          
-          
+
           if (resultAccounrManage.length == 0) {
             return {
               status: true,
@@ -1532,15 +1531,18 @@ ORDER BY
             item.allocated_to == StaffUserId ||
             item.client_staff_created_id == StaffUserId
           );
+
           const uniqueData = filteredData.filter(
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
           );
+
           return { status: true, message: "success.", data: uniqueData };
+
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
-             console.log("Reviewer Role");
+            
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -1556,6 +1558,9 @@ ORDER BY
 
           job_allowed_staffs.staff_id AS job_allowed_staffs_id,
           jobs.staff_created_id AS staff_created_id,
+          jobs.reviewer AS reviewer,
+          jobs.allocated_to AS allocated_to,
+          clients.staff_created_id AS client_staff_created_id,
           CONCAT(
               'cli_', 
               SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1581,7 +1586,7 @@ ORDER BY
         job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${StaffUserId}
 
         WHERE
-        job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+        job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders}) OR jobs.reviewer = ? OR jobs.allocated_to = ? OR clients.staff_created_id = ?
         GROUP BY
         CASE 
             WHEN (jobs.reviewer = ? || job_allowed_staffs.staff_id = ?) THEN jobs.client_id 
@@ -1602,15 +1607,25 @@ ORDER BY
             ...customer_id,
             StaffUserId,
             StaffUserId,
+            StaffUserId,
+            StaffUserId,
+            StaffUserId,
           ]);
 
-         // console.log("resultReviewer", resultReviewer);
+          console.log("resultReviewer", resultReviewer);
 
           if (resultReviewer.length == 0) {
             return { status: true, message: "success.", data: resultReviewer };
           }
           const filteredData = resultReviewer.filter((item) =>
-           ( customer_id.includes(parseInt(item.customer_id)) || item.job_allowed_staffs_id == StaffUserId || item.staff_created_id == StaffUserId )
+           ( customer_id.includes(parseInt(item.customer_id)) || 
+          item.job_allowed_staffs_id == StaffUserId || 
+          item.staff_created_id == StaffUserId ||
+          item.reviewer == StaffUserId ||
+          item.allocated_to == StaffUserId ||
+          item.client_staff_created_id == StaffUserId
+          )
+          
           );
 
           const uniqueData = filteredData.filter(

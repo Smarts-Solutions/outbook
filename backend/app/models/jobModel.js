@@ -1033,7 +1033,7 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders}))
+        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders})) OR jobs.reviewer = ? OR jobs.allocated_to = ? OR jobs.staff_created_id = ?
         GROUP BY jobs.id 
         ORDER BY 
          jobs.id DESC;
@@ -1044,6 +1044,9 @@ const getJobByCustomer = async (job) => {
           ExistStaff[0].id,
           ...customer_id,
           ...customer_id,
+          ExistStaff[0].id,
+          ExistStaff[0].id,
+          ExistStaff[0].id
         ]);
         
          const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
@@ -1560,7 +1563,7 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
         jobs.customer_id = customers.id 
         AND 
         job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders}))
+        AND jobs.customer_id IN (${placeholders}) OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.customer_id IN(${placeholders})) OR jobs.reviewer = ? OR jobs.allocated_to = ? OR jobs.staff_created_id = ?
         GROUP BY jobs.id 
         ORDER BY 
          jobs.id DESC;
@@ -1571,6 +1574,9 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
           ExistStaff[0].id,
           ...customer_id,
           ...customer_id,
+          ExistStaff[0].id,
+          ExistStaff[0].id,
+          ExistStaff[0].id
         ]);
         
          const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
@@ -1997,7 +2003,7 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id 
      AND
-     ( job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
+     ( job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR jobs.staff_created_id = ? OR jobs.allocated_to = ?) 
      AND jobs.client_id = ? OR (jobs.staff_created_id IN(${LineManageStaffId}) AND jobs.client_id = ?))
      AND jobs.client_id = ?
      GROUP BY jobs.id
@@ -2009,10 +2015,13 @@ const getJobByClient = async (job) => {
             ExistStaff[0].id,
             ExistStaff[0].id,
             ExistStaff[0].id,
+            ExistStaff[0].id,
             client_id,
             client_id,
             client_id,
           ]);
+
+          console.log("rowsAllocated", rowsAllocated);
 
           const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
