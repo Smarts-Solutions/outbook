@@ -1114,7 +1114,7 @@ ORDER BY
             StaffUserId,
             StaffUserId
           ]);
-           console.log("resultAccounrManage", resultAccounrManage);
+          
           
           if (resultAccounrManage.length == 0) {
             return {
