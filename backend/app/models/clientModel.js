@@ -1361,9 +1361,7 @@ ORDER BY
       StaffUserId +
       '" LIMIT 1'
     );
-      console.log("Account Manager Role customer_id",customer_id);
-      console.log("Account Manager Role SSS",StaffUserId);
-      console.log("Account Manager Role existStaffbyCustomer.length",existStaffbyCustomer.length);
+    
 
   if (rows.length > 0) {
         // Allocated to
@@ -1380,8 +1378,13 @@ ORDER BY
           client_contact_details.email AS email,
           client_contact_details.phone_code AS phone_code,
           client_contact_details.phone AS phone,
+
           job_allowed_staffs.staff_id AS job_allowed_staffs_id,
           jobs.staff_created_id AS staff_created_id,
+          jobs.reviewer AS reviewer,
+          jobs.allocated_to AS allocated_to,
+          clients.staff_created_id AS client_staff_created_id,
+
           CONCAT(
               'cli_', 
               SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1407,7 +1410,7 @@ ORDER BY
         LEFT JOIN
           job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${StaffUserId}
        WHERE
-           job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+           job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})  OR jobs.allocated_to = ? OR clients.staff_created_id = ?
            
         GROUP BY 
         CASE 
@@ -1430,6 +1433,8 @@ ORDER BY
             StaffUserId,
             StaffUserId,
             ...customer_id, 
+            StaffUserId,
+            StaffUserId,
             StaffUserId,
           ]);
           if (resultAllocated.length == 0) {
@@ -1586,7 +1591,7 @@ ORDER BY
         job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id AND job_allowed_staffs.staff_id = ${StaffUserId}
 
         WHERE
-        job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders}) OR jobs.reviewer = ? OR jobs.allocated_to = ? OR clients.staff_created_id = ?
+        job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders}) OR jobs.reviewer = ? OR clients.staff_created_id = ?
         GROUP BY
         CASE 
             WHEN (jobs.reviewer = ? || job_allowed_staffs.staff_id = ?) THEN jobs.client_id 
@@ -1608,11 +1613,10 @@ ORDER BY
             StaffUserId,
             StaffUserId,
             StaffUserId,
-            StaffUserId,
-            StaffUserId,
+            StaffUserId
           ]);
 
-          console.log("resultReviewer", resultReviewer);
+          // console.log("resultReviewer", resultReviewer);
 
           if (resultReviewer.length == 0) {
             return { status: true, message: "success.", data: resultReviewer };
