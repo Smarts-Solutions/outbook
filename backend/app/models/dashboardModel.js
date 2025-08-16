@@ -39,6 +39,53 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 
 
 
+// SELECT  
+//     customers.id AS customer_id,
+//     clients.id AS client_id,
+//     jobs.id AS job_id,
+//     jobs.reviewer AS staff_id
+// FROM 
+//     jobs
+// JOIN clients ON clients.id = jobs.client_id
+// JOIN customers ON customers.id = clients.customer_id
+// JOIN staffs ON staffs.id = jobs.reviewer
+
+// UNION ALL
+
+// SELECT  
+//     customers.id AS customer_id,
+//     clients.id AS client_id,
+//     jobs.id AS job_id,
+//     jobs.allocated_to AS staff_id
+// FROM 
+//     jobs
+// JOIN clients ON clients.id = jobs.client_id
+// JOIN customers ON customers.id = clients.customer_id
+// JOIN staffs ON staffs.id = jobs.allocated_to
+
+// UNION ALL
+
+// SELECT  
+//     customers.id AS customer_id,
+//     clients.id AS client_id,
+//     jobs.id AS job_id,
+//     job_allowed_staffs.staff_id AS staff_id
+// FROM 
+//     jobs
+// JOIN clients ON clients.id = jobs.client_id
+// JOIN customers ON customers.id = clients.customer_id
+// LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+// JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
+
+
+
+
+
+
+
+
+
+
 
 
 
