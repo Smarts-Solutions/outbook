@@ -1181,8 +1181,8 @@ ORDER BY
         }
         // Complete the GROUP BY, ORDER BY, LIMIT and OFFSET for the main query
         query += `
-    LIMIT ? OFFSET ?
-    `;
+        LIMIT ? OFFSET ?
+        `;
         // Add pagination parameters to the main query
         queryParams.push(limit, offset);
         // Execute the count query
