@@ -1048,10 +1048,10 @@ WHERE
 
       // const [viewResult] = await pool.execute(query, params);
 
-      console.log("query ", query);
+      // console.log("query ", query);
       let [viewResult] = await pool.execute(query);
 
-       console.log("viewResult ", viewResult);
+      //  console.log("viewResult ", viewResult);
 ``
       viewResult = viewResult.filter(item => 
         (Number(item.staff_id) == Number(staff_id) ||

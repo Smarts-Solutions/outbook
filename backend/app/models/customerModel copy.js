@@ -389,608 +389,7 @@ const createCustomer = async (customer) => {
 
 };
 
-// const getCustomer = async (customer) => {
-//     const { staff_id } = customer;
-//     const page = parseInt(customer.page) || 1; // Default to page 1
-//     const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
-//     const offset = (page - 1) * limit;
-//     const search = customer.search || "";
-
-//     // Line Manager
-//     const LineManageQuery = `
-//     SELECT staff_to FROM line_managers WHERE staff_by = ?
-//     `
-//     const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
-//     let LineManageStaffId = LineManage?.map(item => item.staff_to);
-
-//     if (LineManageStaffId.length == 0) {
-//         LineManageStaffId.push(staff_id);
-//     }
-
-//     const QueryRole = `
-//   SELECT
-//     staffs.id AS id,
-//     staffs.role_id AS role_id,
-//     roles.role AS role_name
-//   FROM
-//     staffs
-//   JOIN
-//     roles ON roles.id = staffs.role_id
-//   WHERE
-//     staffs.id = ${staff_id}
-//   LIMIT 1
-//   `
-//     const [rows] = await pool.execute(QueryRole);
-
-
-//     const RoleAccessQuery = `
-//     SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?
-//     `
-//     const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id, 33]);
-
-
-
-//     // Condition with Admin And SuperAdmin
-//     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-
-//         const countQuery = `
-//         SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
-//         const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
-
-//         const query = `
-//     SELECT  
-//     customers.id AS id,
-//     customers.customer_type AS customer_type,
-//     customers.staff_id AS staff_id,
-//     customers.account_manager_id AS account_manager_id,
-//     customers.trading_name AS trading_name,
-//     customers.trading_address AS trading_address,
-//     customers.vat_registered AS vat_registered,
-//     customers.vat_number AS vat_number,
-//     customers.website AS website,
-//     customers.form_process AS form_process,
-//     customers.created_at AS created_at,
-//     customers.updated_at AS updated_at,
-//     customers.status AS status,
-//     staff1.first_name AS staff_firstname, 
-//     staff1.last_name AS staff_lastname,
-//     staff2.first_name AS account_manager_firstname, 
-//     staff2.last_name AS account_manager_lastname,
-//     customer_company_information.company_name AS company_name,
-//     customer_company_information.company_number AS company_number,
-//     CONCAT(
-//     'cust_', 
-//     SUBSTRING(customers.trading_name, 1, 3), '_',
-//     SUBSTRING(customers.customer_code, 1, 15)
-//     ) AS customer_code,
-//     case
-//        when clients.id is not null then 1
-//          else 0
-//     end as is_client
-// FROM 
-//     customers
-// LEFT JOIN 
-//     staffs AS staff1 ON customers.staff_id = staff1.id
-// LEFT JOIN 
-//     staffs AS staff2 ON customers.account_manager_id = staff2.id
-// LEFT JOIN 
-//     customer_company_information ON customers.id = customer_company_information.customer_id
-// LEFT JOIN clients ON clients.customer_id = customers.id    
-//  WHERE 
-//     customers.trading_name LIKE ?
-//     GROUP BY customers.id
-// ORDER BY 
-//     customers.id DESC
-// LIMIT ? OFFSET ?`;
-
-
-//         try {
-
-//             const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
-
-//             return {
-//                 status: true,
-//                 message: 'Success..',
-//                 data: {
-//                     data: result, pagination: {
-//                         totalItems: total,
-//                         totalPages: Math.ceil(total / limit),
-//                         currentPage: page,
-//                         limit
-//                     }
-//                 },
-
-//             };
-//         } catch (error) {
-//             return { status: false, message: 'Error fetching customers', error: error.message };
-//             // console.log('error ---- JJJ ', error);
-
-//         }
-
-
-//         // return { status: true, message: 'Success..', data: result };
-//     }
-//     let result = []
-//     let total = 0;
-//     if (rows.length > 0) {
-//         // Allocated to
-//         if (rows[0].role_id == 3) {
-//             const countQuery = `
-//             SELECT COUNT(*) AS total_count
-//                 FROM (
-//                     SELECT  
-//                         customers.id AS id
-//                     FROM 
-//                         customers
-//                     LEFT JOIN
-//                         jobs ON jobs.customer_id = customers.id   
-//                     JOIN 
-//                         staffs AS staff1 ON customers.staff_id = staff1.id
-//                     JOIN 
-//                         staffs AS staff2 ON customers.account_manager_id = staff2.id
-//                     LEFT JOIN
-//                         customer_company_information ON customers.id = customer_company_information.customer_id
-//                     LEFT JOIN
-//                         staff_portfolio ON staff_portfolio.customer_id = customers.id
-//                     LEFT JOIN 
-//                        customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//                        AND sp_customers.staff_id = staff_portfolio.staff_id
-//                     LEFT JOIN clients ON clients.customer_id = customers.id
-//                     LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id  
-
-//                     WHERE 
-//                     ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})  OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
-//                     GROUP BY 
-//                         CASE 
-//                             WHEN jobs.allocated_to = ? THEN jobs.customer_id
-//                             ELSE customers.id
-//                         END
-//                 ) AS result;
-//           `;
-
-//             let queryDataCount = [staff_id, staff_id, staff_id , staff_id];
-//             if (search) {
-//                 queryDataCount = [staff_id, staff_id, staff_id, staff_id];
-//             }
-
-//             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
-
-//             const query = `
-//             SELECT  
-//                 customers.id AS id,
-//                 customers.customer_type AS customer_type,
-//                 customers.staff_id AS staff_id,
-//                 customers.account_manager_id AS account_manager_id,
-//                 customers.trading_name AS trading_name,
-//                 customers.trading_address AS trading_address,
-//                 customers.vat_registered AS vat_registered,
-//                 customers.vat_number AS vat_number,
-//                 customers.website AS website,
-//                 customers.form_process AS form_process,
-//                 customers.created_at AS created_at,
-//                 customers.updated_at AS updated_at,
-//                 customers.status AS status,
-//                 staff1.first_name AS staff_firstname, 
-//                 staff1.last_name AS staff_lastname,
-//                 staff2.first_name AS account_manager_firstname, 
-//                 staff2.last_name AS account_manager_lastname,
-//                 customer_company_information.company_name AS company_name,
-//                 customer_company_information.company_number AS company_number,
-//                 CONCAT(
-//                     'cust_', 
-//                     SUBSTRING(customers.trading_name, 1, 3), '_',
-//                     SUBSTRING(customers.customer_code, 1, 15)
-//                 ) AS customer_code,
-//                 case
-//                     when clients.id is not null then 1
-//                     else 0
-//                 end as is_client
-//             FROM 
-//                 customers
-//             LEFT JOIN
-//                 jobs ON jobs.customer_id = customers.id   
-//             JOIN 
-//                 staffs AS staff1 ON customers.staff_id = staff1.id
-//             JOIN 
-//                 staffs AS staff2 ON customers.account_manager_id = staff2.id
-//             LEFT JOIN
-//                 customer_company_information ON customers.id = customer_company_information.customer_id
-//             LEFT JOIN 
-//                    staff_portfolio ON staff_portfolio.customer_id = customers.id
-//             LEFT JOIN 
-//                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//                   AND sp_customers.staff_id = staff_portfolio.staff_id
-//             LEFT JOIN clients ON clients.customer_id = customers.id
-//             LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-//             WHERE 
-//                 ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
-//             GROUP BY 
-//                 CASE 
-//                     WHEN jobs.allocated_to = ? THEN jobs.customer_id
-//                     ELSE customers.id
-//                 END
-//             ORDER BY 
-//                 customers.id DESC
-//             LIMIT ? OFFSET ?
-//         `;
-//             let queryData = [staff_id, staff_id, staff_id,staff_id,limit, offset];
-//             if (search) {
-//                 queryData = [staff_id, staff_id, staff_id,staff_id,limit, offset];
-//             }
-
-//             const [resultAllocated] = await pool.execute(query, queryData);
-
-//             result = resultAllocated
-//             total = total_count;
-
-//         }
-//         // Account Manger
-//         else if (rows[0].role_id == 4) {
-//             const countQuery = `
-//             SELECT COUNT(*) AS total_count
-//             FROM (
-//                 SELECT 
-//                     customers.id
-//                 FROM 
-//                     customers
-//                 LEFT JOIN
-//                     jobs ON jobs.customer_id = customers.id    
-//                 LEFT JOIN 
-//                     customer_services ON customer_services.customer_id = customers.id
-//                 LEFT JOIN 
-//                     customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-//                 LEFT JOIN 
-//                     staffs AS staff1 ON customers.staff_id = staff1.id
-//                 LEFT JOIN 
-//                     staffs AS staff2 ON customers.account_manager_id = staff2.id
-//                 LEFT JOIN 
-//                     customer_company_information ON customers.id = customer_company_information.customer_id
-//                 LEFT JOIN 
-//                    staff_portfolio ON staff_portfolio.customer_id = customers.id
-//                 LEFT JOIN 
-//                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//                   AND sp_customers.staff_id = staff_portfolio.staff_id
-//                 LEFT JOIN clients ON clients.customer_id = customers.id
-//                 LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id   
-//                 WHERE 
-//          ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (
-//                   jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
-//                 OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
-//                 OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
-//                     `job_allowed_staffs.staff_id = ? OR jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
-//             OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
-//             OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
-//             GROUP BY 
-//                 customers.id
-//         ) AS result`;
-
-//             let queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id, staff_id];
-//             if (search) {
-//                 queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id, staff_id];
-//             }
-//             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
-//             const query = `
-//             SELECT  
-//             customers.id AS id,
-//             customers.customer_type AS customer_type,
-//             customers.staff_id AS staff_id,
-//             customers.account_manager_id AS account_manager_id,
-//             customers.trading_name AS trading_name,
-//             customers.customer_code AS customer_code,
-//             customers.trading_address AS trading_address,
-//             customers.vat_registered AS vat_registered,
-//             customers.vat_number AS vat_number,
-//             customers.website AS website,
-//             customers.form_process AS form_process,
-//             customers.created_at AS created_at,
-//             customers.updated_at AS updated_at,
-//             customers.status AS status,
-//             staff1.first_name AS staff_firstname, 
-//             staff1.last_name AS staff_lastname,
-//             staff2.first_name AS account_manager_firstname, 
-//             staff2.last_name AS account_manager_lastname,
-//             customer_company_information.company_name AS company_name,
-//             customer_company_information.company_number AS company_number,
-//             CONCAT(
-//             'cust_', 
-//             SUBSTRING(customers.trading_name, 1, 3), '_',
-//             SUBSTRING(customers.customer_code, 1, 15)
-//             ) AS customer_code,
-//             case
-//                 when clients.id is not null then 1
-//                 else 0
-//             end as is_client
-//         FROM 
-//             customers
-//         LEFT JOIN
-//                 jobs ON jobs.customer_id = customers.id    
-//         LEFT JOIN 
-//             customer_services ON customer_services.customer_id = customers.id
-//         LEFT JOIN 
-//             customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-//         LEFT JOIN 
-//             staffs AS staff1 ON customers.staff_id = staff1.id
-//         LEFT JOIN 
-//             staffs AS staff2 ON customers.account_manager_id = staff2.id
-//         LEFT JOIN 
-//             customer_company_information ON customers.id = customer_company_information.customer_id
-//         LEFT JOIN 
-//             staff_portfolio ON staff_portfolio.customer_id = customers.id
-//         LEFT JOIN 
-//             customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//             AND sp_customers.staff_id = staff_portfolio.staff_id
-//         LEFT JOIN clients ON clients.customer_id = customers.id
-//         LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id      
-//         WHERE 
-//             ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (
-//                 jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
-//                 OR customers.account_manager_id = ?
-//                 OR customers.staff_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
-//                     `job_allowed_staffs.staff_id = ? OR jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
-//             OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
-//             OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
-
-//         GROUP BY 
-//          customers.id
-//         ORDER BY 
-//         customers.id DESC
-//         LIMIT ? OFFSET ?
-//            ;
-//             `;
-
-
-//             // console.log('query', query);
-
-//             let queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id,staff_id, limit, offset];
-//             if (search) {
-//                 queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id,staff_id, limit, offset];
-//             }
-//             const [resultAllocated] = await pool.execute(query, queryData);
-//             result = resultAllocated;
-//             total = total_count;
-//         }
-//         // Reviewer
-//         else if (rows[0].role_id == 6) {
-
-//             const countQuery = `
-//             SELECT COUNT(*) AS total_count
-//             FROM (
-//                 SELECT  
-//                     customers.id AS id
-//                 FROM 
-//                     customers
-//                 LEFT JOIN 
-//                     jobs ON jobs.customer_id = customers.id   
-//                 JOIN 
-//                     staffs AS staff1 ON customers.staff_id = staff1.id
-//                 JOIN 
-//                     staffs AS staff2 ON customers.account_manager_id = staff2.id
-//                 LEFT JOIN 
-//                     customer_company_information ON customers.id = customer_company_information.customer_id
-//                 LEFT JOIN 
-//                    staff_portfolio ON staff_portfolio.customer_id = customers.id
-//                 LEFT JOIN 
-//                   customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//                   AND sp_customers.staff_id = staff_portfolio.staff_id
-//                 LEFT JOIN clients ON clients.customer_id = customers.id
-//                 LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id 
-
-//                 WHERE 
-//                     ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
-//                 GROUP BY 
-//                     CASE 
-//                         WHEN jobs.reviewer = ? THEN jobs.customer_id
-//                         ELSE customers.id
-//                     END
-//             ) AS result;
-// `;
-
-//             let queryDataCount = [staff_id, staff_id, staff_id, staff_id];
-//             if (search) {
-//                 queryDataCount = [staff_id, staff_id, staff_id, staff_id];
-//             }
-
-//             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
-//             const query = `
-//             SELECT  
-//             customers.id AS id,
-//             customers.customer_type AS customer_type,
-//             customers.staff_id AS staff_id,
-//             customers.account_manager_id AS account_manager_id,
-//             customers.trading_name AS trading_name,
-//             customers.trading_address AS trading_address,
-//             customers.vat_registered AS vat_registered,
-//             customers.vat_number AS vat_number,
-//             customers.website AS website,
-//             customers.form_process AS form_process,
-//             customers.created_at AS created_at,
-//             customers.updated_at AS updated_at,
-//             customers.status AS status,
-//             staff1.first_name AS staff_firstname, 
-//             staff1.last_name AS staff_lastname,
-//             staff2.first_name AS account_manager_firstname, 
-//             staff2.last_name AS account_manager_lastname,
-//             customer_company_information.company_name AS company_name,
-//             customer_company_information.company_number AS company_number,
-//             CONCAT(
-//             'cust_', 
-//             SUBSTRING(customers.trading_name, 1, 3), '_',
-//             SUBSTRING(customers.customer_code, 1, 15)
-//             ) AS customer_code,
-//             case
-//                 when clients.id is not null then 1
-//                 else 0
-//             end as is_client
-//         FROM 
-//             customers
-//         LEFT JOIN 
-//             jobs ON jobs.customer_id = customers.id   
-//         JOIN 
-//             staffs AS staff1 ON customers.staff_id = staff1.id
-//         JOIN 
-//             staffs AS staff2 ON customers.account_manager_id = staff2.id
-//         LEFT JOIN 
-//             customer_company_information ON customers.id = customer_company_information.customer_id
-//         LEFT JOIN 
-//            staff_portfolio ON staff_portfolio.customer_id = customers.id
-//         LEFT JOIN 
-//            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//            AND sp_customers.staff_id = staff_portfolio.staff_id
-//         LEFT JOIN clients ON clients.customer_id = customers.id
-//         LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id         
-//         WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`
-//                     : 'job_allowed_staffs.staff_id = ? OR jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'
-//                 } 
-//          GROUP BY 
-//     CASE 
-//         WHEN jobs.reviewer = ? THEN jobs.customer_id
-//         ELSE customers.id
-//     END
-//         ORDER BY 
-//             customers.id DESC
-//              LIMIT ? OFFSET ?;
-//             `;
-
-//             let queryData = [staff_id, staff_id, staff_id,staff_id, limit, offset];
-//             if (search) {
-//                 queryData = [staff_id, staff_id, staff_id,staff_id, limit, offset];
-//             }
-//             try {
-//                 const [resultAllocated] = await pool.execute(query, queryData);
-//                 result = resultAllocated;
-//                 total = total_count;
-//             } catch (error) {
-//                 console.log('error ---- ', error);
-//             }
-
-
-//         }
-//         else {
-
-//             // console.log('else condition');
-//             // console.log('LineManageStaffId', LineManageStaffId);
-//             const countQuery = `
-//                     SELECT COUNT(*) AS total_count
-//                     FROM (
-//                         SELECT
-//                             customers.id AS id
-//                         FROM
-//                             customers
-//                         JOIN
-//                             staffs AS staff1 ON customers.staff_id = staff1.id
-//                         JOIN
-//                             staffs AS staff2 ON customers.account_manager_id = staff2.id
-//                         LEFT JOIN
-//                             customer_company_information ON customers.id = customer_company_information.customer_id
-//                         LEFT JOIN 
-//                            staff_portfolio ON staff_portfolio.customer_id = customers.id
-//                         LEFT JOIN 
-//                           customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//                           AND sp_customers.staff_id = staff_portfolio.staff_id
-//                         LEFT JOIN clients ON clients.customer_id = customers.id
-//                         LEFT JOIN jobs ON clients.id = jobs.client_id
-//                         LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id   
-//                         WHERE 
-//                             ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}    
-//                     ) AS result;`;
-
-//             let queryDataCount = [staff_id, staff_id];
-//             if (search) {
-//                 queryDataCount = [staff_id, staff_id];
-//             }
-//             const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
-
-//             const query = `
-//                     SELECT  
-//                     customers.id AS id,
-//                     customers.customer_type AS customer_type,
-//                     customers.staff_id AS staff_id,
-//                     customers.account_manager_id AS account_manager_id,
-//                     customers.trading_name AS trading_name,
-//                     customers.trading_address AS trading_address,
-//                     customers.vat_registered AS vat_registered,
-//                     customers.vat_number AS vat_number,
-//                     customers.website AS website,
-//                     customers.form_process AS form_process,
-//                     customers.created_at AS created_at,
-//                     customers.updated_at AS updated_at,
-//                     customers.status AS status,
-//                     staff1.first_name AS staff_firstname, 
-//                     staff1.last_name AS staff_lastname,
-//                     staff2.first_name AS account_manager_firstname, 
-//                     staff2.last_name AS account_manager_lastname,
-//                     customer_company_information.company_name AS company_name,
-//                     customer_company_information.company_number AS company_number,
-//                     CONCAT(
-//                     'cust_', 
-//                     SUBSTRING(customers.trading_name, 1, 3), '_',
-//                     SUBSTRING(customers.customer_code, 1, 15)
-//                     ) AS customer_code,
-//                     case
-//                         when clients.id is not null then 1
-//                         else 0
-//                     end as is_client
-//                 FROM 
-//                     customers
-//                 JOIN 
-//                     staffs AS staff1 ON customers.staff_id = staff1.id
-//                 JOIN 
-//                     staffs AS staff2 ON customers.account_manager_id = staff2.id
-//                 LEFT JOIN 
-//                     customer_company_information ON customers.id = customer_company_information.customer_id
-//                 LEFT JOIN 
-//                     staff_portfolio ON staff_portfolio.customer_id = customers.id
-//                 LEFT JOIN 
-//                     customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-//                     AND sp_customers.staff_id = staff_portfolio.staff_id
-//                 LEFT JOIN clients ON clients.customer_id = customers.id
-//                 LEFT JOIN jobs ON clients.id = jobs.client_id
-//                 LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-
-//                 WHERE 
-//                     ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'} 
-//                 GROUP BY 
-//                     customers.id   
-//                 ORDER BY 
-//                     customers.id DESC
-//                     LIMIT ? OFFSET ?;
-//                     `;
-
-//             let queryData = [staff_id, staff_id, limit, offset];
-//             if (search) {
-//                 queryData = [staff_id, staff_id, limit, offset];
-//             }
-//             const [result1] = await pool.execute(query, queryData);
-
-//             result = result1
-//             total = total_count;
-//         }
-//     }
-//     try {
-//         return {
-//             status: true,
-//             message: 'Success..',
-//             data: {
-//                 data: result, pagination: {
-//                     totalItems: total,
-//                     totalPages: Math.ceil(total / limit),
-//                     currentPage: page,
-//                     limit
-//                 }
-//             },
-
-//         };
-//         // return { status: true, message: 'Success..', data: result };
-
-//     } catch (err) {
-//         console.error('Error selecting data:', err);
-//         return { status: true, message: 'Error selecting data', data: err };
-//     }
-
-// }
-
 const getCustomer = async (customer) => {
-
     const { staff_id } = customer;
     const page = parseInt(customer.page) || 1; // Default to page 1
     const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
@@ -1029,14 +428,16 @@ const getCustomer = async (customer) => {
     `
     const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id, 33]);
 
+
+
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        try {
-            const countQuery = `
-        SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
-            const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
 
-            const query = `
+        const countQuery = `
+        SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
+        const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
+
+        const query = `
     SELECT  
     customers.id AS id,
     customers.customer_type AS customer_type,
@@ -1080,8 +481,10 @@ LEFT JOIN clients ON clients.customer_id = customers.id
     GROUP BY customers.id
 ORDER BY 
     customers.id DESC
-        LIMIT ? OFFSET ?`;
+LIMIT ? OFFSET ?`;
 
+
+        try {
 
             const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
 
@@ -1099,114 +502,489 @@ ORDER BY
 
             };
         } catch (error) {
-            console.error('Error fetching customers:', error);
             return { status: false, message: 'Error fetching customers', error: error.message };
+            // console.log('error ---- JJJ ', error);
+
         }
 
+
+        // return { status: true, message: 'Success..', data: result };
     }
+    let result = []
+    let total = 0;
+    if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+                FROM (
+                    SELECT  
+                        customers.id AS id
+                    FROM 
+                        customers
+                    LEFT JOIN
+                        jobs ON jobs.customer_id = customers.id   
+                    JOIN 
+                        staffs AS staff1 ON customers.staff_id = staff1.id
+                    JOIN 
+                        staffs AS staff2 ON customers.account_manager_id = staff2.id
+                    LEFT JOIN
+                        customer_company_information ON customers.id = customer_company_information.customer_id
+                    LEFT JOIN
+                        staff_portfolio ON staff_portfolio.customer_id = customers.id
+                    LEFT JOIN 
+                       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                       AND sp_customers.staff_id = staff_portfolio.staff_id
+                    LEFT JOIN clients ON clients.customer_id = customers.id
+                    LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id  
+                           
+                    WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})  OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
+                    GROUP BY 
+                        CASE 
+                            WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                            ELSE customers.id
+                        END
+                ) AS result;
+           `;
 
+            let queryDataCount = [staff_id, staff_id, staff_id , staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id, staff_id];
+            }
 
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
 
-    try {
-        let countQuery = `
-        SELECT COUNT(*) AS total
-        FROM customers  
-        JOIN staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-        LEFT JOIN customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE
-            (customers.staff_id = ? OR assigned_jobs_staff_view.staff_id = ?)
-         GROUP BY
-            customers.id
-            `;
-        let query = `
-    SELECT  
-        customers.id AS id,
-        customers.customer_type AS customer_type,
-        customers.staff_id AS staff_id,
-        customers.account_manager_id AS account_manager_id,
-        customers.trading_name AS trading_name,
-        customers.trading_address AS trading_address,
-        customers.vat_registered AS vat_registered,
-        customers.vat_number AS vat_number,
-        customers.website AS website,
-        customers.form_process AS form_process,
-        customers.created_at AS created_at,
-        customers.updated_at AS updated_at,
-        customers.status AS status,
-        staff1.first_name AS staff_firstname, 
-        staff1.last_name AS staff_lastname,
-        staff2.first_name AS account_manager_firstname, 
-        staff2.last_name AS account_manager_lastname,
-        customer_company_information.company_name AS company_name,
-        customer_company_information.company_number AS company_number,
-        CONCAT(
+            const query = `
+            SELECT  
+                customers.id AS id,
+                customers.customer_type AS customer_type,
+                customers.staff_id AS staff_id,
+                customers.account_manager_id AS account_manager_id,
+                customers.trading_name AS trading_name,
+                customers.trading_address AS trading_address,
+                customers.vat_registered AS vat_registered,
+                customers.vat_number AS vat_number,
+                customers.website AS website,
+                customers.form_process AS form_process,
+                customers.created_at AS created_at,
+                customers.updated_at AS updated_at,
+                customers.status AS status,
+                staff1.first_name AS staff_firstname, 
+                staff1.last_name AS staff_lastname,
+                staff2.first_name AS account_manager_firstname, 
+                staff2.last_name AS account_manager_lastname,
+                customer_company_information.company_name AS company_name,
+                customer_company_information.company_number AS company_number,
+                CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code,
+                case
+                    when clients.id is not null then 1
+                    else 0
+                end as is_client
+            FROM 
+                customers
+            LEFT JOIN
+                jobs ON jobs.customer_id = customers.id   
+            JOIN 
+                staffs AS staff1 ON customers.staff_id = staff1.id
+            JOIN 
+                staffs AS staff2 ON customers.account_manager_id = staff2.id
+            LEFT JOIN
+                customer_company_information ON customers.id = customer_company_information.customer_id
+            LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+            LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
+            LEFT JOIN clients ON clients.customer_id = customers.id
+            LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+            WHERE 
+                ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
+            GROUP BY 
+                CASE 
+                    WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                    ELSE customers.id
+                END
+            ORDER BY 
+                customers.id DESC
+            LIMIT ? OFFSET ?
+             `;
+            let queryData = [staff_id, staff_id, staff_id,staff_id,limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id,staff_id,limit, offset];
+            }
+
+            const [resultAllocated] = await pool.execute(query, queryData);
+
+            result = resultAllocated
+            total = total_count;
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT 
+                    customers.id
+                FROM 
+                    customers
+                LEFT JOIN
+                    jobs ON jobs.customer_id = customers.id    
+                LEFT JOIN 
+                    customer_services ON customer_services.customer_id = customers.id
+                LEFT JOIN 
+                    customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+                LEFT JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                LEFT JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
+                LEFT JOIN clients ON clients.customer_id = customers.id
+                LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id   
+                WHERE 
+         ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (
+                  jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
+                OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
+                OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
+                    `job_allowed_staffs.staff_id = ? OR jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
+            GROUP BY 
+                customers.id
+        ) AS result`;
+
+            let queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id, staff_id];
+            }
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.created_at AS created_at,
+            customers.updated_at AS updated_at,
+            customers.status AS status,
+            staff1.first_name AS staff_firstname, 
+            staff1.last_name AS staff_lastname,
+            staff2.first_name AS account_manager_firstname, 
+            staff2.last_name AS account_manager_lastname,
+            customer_company_information.company_name AS company_name,
+            customer_company_information.company_number AS company_number,
+            CONCAT(
             'cust_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(customers.customer_code, 1, 15)
-        ) AS customer_code,
-        CASE
-            WHEN clients.id IS NOT NULL THEN 1
-            ELSE 0
-        END AS is_client
+            ) AS customer_code,
+            case
+                when clients.id is not null then 1
+                else 0
+            end as is_client
         FROM 
-            customers  
+            customers
+        LEFT JOIN
+                jobs ON jobs.customer_id = customers.id    
+        LEFT JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        LEFT JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        LEFT JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        LEFT JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        LEFT JOIN 
+            staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+            customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+            AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id
+        LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id      
+        WHERE 
+            ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (
+                jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
+                OR customers.account_manager_id = ?
+                OR customers.staff_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` :
+                    `job_allowed_staffs.staff_id = ? OR jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ? OR jobs.allocated_to = ? OR jobs.reviewer = ?
+            OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`}
+
+        GROUP BY 
+         customers.id
+        ORDER BY 
+        customers.id DESC
+        LIMIT ? OFFSET ?
+           ;
+            `;
+
+
+            // console.log('query', query);
+
+            let queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id,staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, staff_id, staff_id, staff_id,staff_id, limit, offset];
+            }
+            const [resultAllocated] = await pool.execute(query, queryData);
+            result = resultAllocated;
+            total = total_count;
+        }
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT  
+                    customers.id AS id
+                FROM 
+                    customers
+                LEFT JOIN 
+                    jobs ON jobs.customer_id = customers.id   
+                JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                LEFT JOIN 
+                   staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                  AND sp_customers.staff_id = staff_portfolio.staff_id
+                LEFT JOIN clients ON clients.customer_id = customers.id
+                LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id 
+                  
+                WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}
+                GROUP BY 
+                    CASE 
+                        WHEN jobs.reviewer = ? THEN jobs.customer_id
+                        ELSE customers.id
+                    END
+            ) AS result;
+`;
+
+            let queryDataCount = [staff_id, staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id, staff_id];
+            }
+
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.created_at AS created_at,
+            customers.updated_at AS updated_at,
+            customers.status AS status,
+            staff1.first_name AS staff_firstname, 
+            staff1.last_name AS staff_lastname,
+            staff2.first_name AS account_manager_firstname, 
+            staff2.last_name AS account_manager_lastname,
+            customer_company_information.company_name AS company_name,
+            customer_company_information.company_number AS company_number,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code,
+            case
+                when clients.id is not null then 1
+                else 0
+            end as is_client
+        FROM 
+            customers
+        LEFT JOIN 
+            jobs ON jobs.customer_id = customers.id   
         JOIN 
             staffs AS staff1 ON customers.staff_id = staff1.id
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN
-            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-        LEFT JOIN
+        LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE
-            (customers.staff_id = ? OR assigned_jobs_staff_view.staff_id = ?)
-        GROUP BY
-        customers.id
+        LEFT JOIN 
+           staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+           customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+           AND sp_customers.staff_id = staff_portfolio.staff_id
+        LEFT JOIN clients ON clients.customer_id = customers.id
+        LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id         
+        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR (jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId})) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL`
+                    : 'job_allowed_staffs.staff_id = ? OR jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'
+                } 
+         GROUP BY 
+    CASE 
+        WHEN jobs.reviewer = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
         ORDER BY 
             customers.id DESC
-    `;
-        // Parameters array for both queries
-        let countParams = [staff_id, staff_id];
-        let queryParams = [staff_id, staff_id];
-        // Add search condition if search term is provided
-        if (search) {
-            countQuery += ` AND customers.trading_name LIKE ?`;
-            query += ` AND customers.trading_name LIKE ?`;
-            countParams.push(`%${search}%`);
-            queryParams.push(`%${search}%`);
-        }
-        // Complete the GROUP BY, ORDER BY, LIMIT and OFFSET for the main query
-        query += `
-    LIMIT ? OFFSET ?
-    `;
-        // Add pagination parameters to the main query
-        queryParams.push(limit, offset);
-        // Execute the count query
-        const [countResult] = await pool.execute(countQuery, countParams);
-        const total = countResult[0].total;
-        // Execute the main query
-        const [result] = await pool.execute(query, queryParams);
+             LIMIT ? OFFSET ?;
+            `;
 
+            let queryData = [staff_id, staff_id, staff_id,staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id,staff_id, limit, offset];
+            }
+            try {
+                const [resultAllocated] = await pool.execute(query, queryData);
+                result = resultAllocated;
+                total = total_count;
+            } catch (error) {
+                console.log('error ---- ', error);
+            }
+
+
+        }
+        else {
+
+            // console.log('else condition');
+            // console.log('LineManageStaffId', LineManageStaffId);
+            const countQuery = `
+                    SELECT COUNT(*) AS total_count
+                    FROM (
+                        SELECT
+                            customers.id AS id
+                        FROM
+                            customers
+                        JOIN
+                            staffs AS staff1 ON customers.staff_id = staff1.id
+                        JOIN
+                            staffs AS staff2 ON customers.account_manager_id = staff2.id
+                        LEFT JOIN
+                            customer_company_information ON customers.id = customer_company_information.customer_id
+                        LEFT JOIN 
+                           staff_portfolio ON staff_portfolio.customer_id = customers.id
+                        LEFT JOIN 
+                          customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                          AND sp_customers.staff_id = staff_portfolio.staff_id
+                        LEFT JOIN clients ON clients.customer_id = customers.id
+                        LEFT JOIN jobs ON clients.id = jobs.client_id
+                        LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id   
+                        WHERE 
+                            ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'}    
+                    ) AS result;`;
+
+            let queryDataCount = [staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id];
+            }
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+
+            const query = `
+                    SELECT  
+                    customers.id AS id,
+                    customers.customer_type AS customer_type,
+                    customers.staff_id AS staff_id,
+                    customers.account_manager_id AS account_manager_id,
+                    customers.trading_name AS trading_name,
+                    customers.trading_address AS trading_address,
+                    customers.vat_registered AS vat_registered,
+                    customers.vat_number AS vat_number,
+                    customers.website AS website,
+                    customers.form_process AS form_process,
+                    customers.created_at AS created_at,
+                    customers.updated_at AS updated_at,
+                    customers.status AS status,
+                    staff1.first_name AS staff_firstname, 
+                    staff1.last_name AS staff_lastname,
+                    staff2.first_name AS account_manager_firstname, 
+                    staff2.last_name AS account_manager_lastname,
+                    customer_company_information.company_name AS company_name,
+                    customer_company_information.company_number AS company_number,
+                    CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                    ) AS customer_code,
+                    case
+                        when clients.id is not null then 1
+                        else 0
+                    end as is_client
+                FROM 
+                    customers
+                JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                LEFT JOIN 
+                    staff_portfolio ON staff_portfolio.customer_id = customers.id
+                LEFT JOIN 
+                    customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
+                    AND sp_customers.staff_id = staff_portfolio.staff_id
+                LEFT JOIN clients ON clients.customer_id = customers.id
+                LEFT JOIN jobs ON clients.id = jobs.client_id
+                LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+        
+                WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR sp_customers.id IS NOT NULL` : 'job_allowed_staffs.staff_id = ? OR customers.staff_id = ? OR customers.staff_id IN (' + LineManageStaffId + ') OR customers.account_manager_id IN (' + LineManageStaffId + ') OR sp_customers.id IS NOT NULL'} 
+                GROUP BY 
+                    customers.id   
+                ORDER BY 
+                    customers.id DESC
+                    LIMIT ? OFFSET ?;
+                    `;
+
+            let queryData = [staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, limit, offset];
+            }
+            const [result1] = await pool.execute(query, queryData);
+
+            result = result1
+            total = total_count;
+        }
+    }
+    try {
         return {
             status: true,
             message: 'Success..',
             data: {
-                data: result,
-                pagination: {
+                data: result, pagination: {
                     totalItems: total,
                     totalPages: Math.ceil(total / limit),
                     currentPage: page,
                     limit
                 }
             },
+
         };
+        // return { status: true, message: 'Success..', data: result };
+
     } catch (err) {
         console.error('Error selecting data:', err);
-        return { status: false, message: 'Error selecting data', data: err };
+        return { status: true, message: 'Error selecting data', data: err };
     }
 
 }
@@ -1385,7 +1163,7 @@ id DESC;`;
             result = resultAllocated
 
         }
-        else {
+        else { 
             const query = `
                 SELECT  
             customers.id AS id,
@@ -1415,7 +1193,7 @@ id DESC;`;
             id DESC;
             `;
 
-
+            
             const [result1] = await pool.execute(query, [StaffUserId, StaffUserId]);
             result = result1
         }
