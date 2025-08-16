@@ -3,6 +3,45 @@ const deleteUploadFile = require("../middlewares/deleteUploadFile");
 const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = require('../utils/helper');
 
 
+
+
+// CREATE VIEW assigned_jobs_staff_view AS
+// SELECT  
+//     customers.id AS customer_id,
+//     clients.id AS client_id,
+//     jobs.id AS job_id,
+//     jobs.reviewer AS staff_id
+// FROM 
+//     jobs
+// JOIN clients ON clients.id = jobs.client_id
+// JOIN customers ON customers.id = clients.customer_id
+// JOIN staffs ON staffs.id = jobs.reviewer
+
+// UNION ALL
+
+// SELECT  
+//     customers.id AS customer_id,
+//     clients.id AS client_id,
+//     jobs.id AS job_id,
+//     jobs.allocated_to AS staff_id
+// FROM 
+//     jobs
+// JOIN clients ON clients.id = jobs.client_id
+// JOIN customers ON customers.id = clients.customer_id
+// JOIN staffs ON staffs.id = jobs.allocated_to;
+
+
+
+
+
+
+
+
+
+
+
+
+
 // const getDashboardData = async (dashboard) => {
 //   const { staff_id, date_filter } = dashboard;
 //   const { startDate, endDate } = await getDateRange(date_filter);
