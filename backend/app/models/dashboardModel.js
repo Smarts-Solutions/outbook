@@ -36,14 +36,13 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 
 
 
-
-
-
+// CREATE VIEW assigned_jobs_staff_view AS
 // SELECT  
 //     customers.id AS customer_id,
 //     clients.id AS client_id,
 //     jobs.id AS job_id,
-//     jobs.reviewer AS staff_id
+//     jobs.reviewer AS staff_id,
+//     'reviewer' AS source
 // FROM 
 //     jobs
 // JOIN clients ON clients.id = jobs.client_id
@@ -56,7 +55,9 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 //     customers.id AS customer_id,
 //     clients.id AS client_id,
 //     jobs.id AS job_id,
-//     jobs.allocated_to AS staff_id
+//     jobs.allocated_to AS staff_id,
+//      'allocated_to' AS source
+    
 // FROM 
 //     jobs
 // JOIN clients ON clients.id = jobs.client_id
@@ -69,7 +70,8 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 //     customers.id AS customer_id,
 //     clients.id AS client_id,
 //     jobs.id AS job_id,
-//     job_allowed_staffs.staff_id AS staff_id
+//     job_allowed_staffs.staff_id AS staff_id,
+//      'job_allowed_staffs' AS source
 // FROM 
 //     jobs
 // JOIN clients ON clients.id = jobs.client_id
