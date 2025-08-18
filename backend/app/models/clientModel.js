@@ -1422,15 +1422,16 @@ ORDER BY
           clients.id DESC;
     `;
      //console.log("Client Query:", query);
-     
+     let result = []; 
      if(ExistStaff.length === 0){
-      const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
-      return { status: true, message: "success.", data: result };
+      const [data] = await pool.execute(query,[StaffUserId,StaffUserId]);
+      result = data;
       }else{
-      const [result]  = await pool.execute(query,[...customer_id, StaffUserId,StaffUserId]);
-      return { status: true, message: "success.", data: result };
-     }
- 
+      const [data]  = await pool.execute(query,[...customer_id, StaffUserId,StaffUserId]);
+      result = data;
+    }
+    
+    return { status: true, message: "success.", data: result };
 }
 
 const getByidClient = async (client) => {
