@@ -651,6 +651,9 @@ ORDER BY
    }
 
 
+   console.log("Client GGGG:");
+   console.log("Client GGGG:");
+   console.log("Client LineManageStaffId:",LineManageStaffId);
 
    // Other role Get data
     
@@ -672,7 +675,7 @@ ORDER BY
     ) AS client_code
       FROM 
           clients
-      LEFT JOIN 
+      JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
       JOIN 
           customers ON customers.id = clients.customer_id    
@@ -680,7 +683,6 @@ ORDER BY
           client_types ON client_types.id = clients.client_type
       LEFT JOIN 
           jobs ON clients.id = jobs.client_id
-          
       LEFT JOIN 
           client_contact_details ON client_contact_details.id = (
               SELECT MIN(cd.id)
@@ -688,14 +690,15 @@ ORDER BY
               WHERE cd.client_id = clients.id
           ) 
       WHERE 
-      (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
-      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+      clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       GROUP BY
           clients.id
       ORDER BY 
           clients.id DESC;
     `;
-    //  console.log("Client Query:", query);
+
+      console.log("Client Query:", query);
 
      const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
      return { status: true, message: "success.", data: result };
