@@ -745,7 +745,7 @@ ORDER BY
       ORDER BY 
           clients.id DESC;
     `;
-     console.log("Client Query:", query);
+    //  console.log("Client Query:", query);
 
      let result = []; 
      if(ExistStaff.length === 0){
@@ -857,7 +857,7 @@ ORDER BY
         LEFT JOIN clients ON clients.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
-        LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
+         LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
          LEFT JOIN customer_services ON customer_services.customer_id = customers.id
         JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
         WHERE
@@ -930,7 +930,7 @@ ORDER BY
 const getByidClient = async (client) => {
   const { client_id } = client;
 
-  console.log("getByidClient client_id", client_id);
+  // console.log("getByidClient client_id", client_id);
   const [ExistClient] = await pool.execute(
     "SELECT client_type FROM `clients` WHERE id =" + client_id
   );

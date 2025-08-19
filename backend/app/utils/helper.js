@@ -298,7 +298,7 @@ id DESC;`;
     return { status: true, message: 'Success..', data: result };
   }
 
-  console.log("Line Manager Staff IDs:", LineManageStaffId);
+  // console.log("Line Manager Staff IDs:", LineManageStaffId);
   let query = `
     SELECT  
         customers.id AS id,

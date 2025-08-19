@@ -8,35 +8,43 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 // CREATE VIEW assigned_jobs_staff_view AS
 // SELECT  
 //     customers.id AS customer_id,
-//     clients.id AS client_id,
-//     jobs.id AS job_id,
-//     jobs.reviewer AS staff_id
+//      NULL AS client_id,
+//      NULL AS job_id,
+//     staffs.id AS staff_id,
+//     'assign_customer_portfolio' AS source
 // FROM 
-//     jobs
-// JOIN clients ON clients.id = jobs.client_id
-// JOIN customers ON customers.id = clients.customer_id
-// JOIN staffs ON staffs.id = jobs.reviewer
+//     customers
+// JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
+// JOIN staffs ON staffs.id = staff_portfolio.staff_id
 
 // UNION ALL
 
 // SELECT  
 //     customers.id AS customer_id,
-//     clients.id AS client_id,
-//     jobs.id AS job_id,
-//     jobs.allocated_to AS staff_id
+//      NULL AS client_id,
+//      NULL AS job_id,
+//      staffs.id AS staff_id,
+//     'assign_customer_service' AS source
 // FROM 
-//     jobs
-// JOIN clients ON clients.id = jobs.client_id
-// JOIN customers ON customers.id = clients.customer_id
-// JOIN staffs ON staffs.id = jobs.allocated_to;
+//     customers
+// JOIN customer_services ON customer_services.customer_id = customers.id
+// JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+// JOIN staffs ON staffs.id = customer_service_account_managers.account_manager_id
 
+// UNION ALL
 
+// SELECT  
+//     customers.id AS customer_id,
+//      NULL AS client_id,
+//      NULL AS job_id,
+//      staffs.id AS staff_id,
+//     'assign_customer_main_account_manager' AS source
+// FROM 
+//     customers
+// JOIN staffs ON staffs.id = customers.account_manager_id
 
+// UNION ALL
 
-
-
-
-// CREATE VIEW assigned_jobs_staff_view AS
 // SELECT  
 //     customers.id AS customer_id,
 //     clients.id AS client_id,
