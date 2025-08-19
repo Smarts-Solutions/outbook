@@ -45,6 +45,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 
 // UNION ALL
 
+
 // SELECT  
 //     customers.id AS customer_id,
 //     clients.id AS client_id,
