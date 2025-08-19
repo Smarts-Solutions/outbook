@@ -586,23 +586,7 @@ const getClient = async (client) => {
     return await getAllClientsSidebar(StaffUserId);
   }
 
-  let customerCheck = customer_id
-  customer_id = [Number(customer_id)]
-  let placeholders = customer_id.map(() => "?").join(", ");
-
-  if (customerCheck == "") {
-    const allCustomer = await getAllCustomerIds(StaffUserId , 'client');
-    let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
-    customer_id = allCustomerIds;
-    placeholders = customer_id.map(() => "?").join(", ");
-  }
-
-  //  console.log("customer_id =--",  customerCheck);
-
-   if(['',null,undefined].includes(placeholders)){
-      placeholders = '0';
-    }
-
+  console.log("getClient customer_id", customer_id);
 
    try {
     const QueryRole = `
@@ -653,54 +637,23 @@ LEFT JOIN
         WHERE cd.client_id = clients.id
     )
 WHERE 
-    clients.customer_id IN (${customer_id})
+    clients.customer_id = ${customer_id}
 GROUP BY
     clients.id    
 ORDER BY 
     clients.id DESC;
     `;
       const [result] = await pool.execute(query);
-     
       return { status: true, message: "success.", data: result };
     }
     } catch (err) {
      return { status: false, message: "Err Client Get" };
    }
 
-     // Other role Get data
 
 
    // Other role Get data
-    let queryExistStaff = `
-    SELECT  
-        customers.id AS id
-        FROM 
-            customers  
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN
-            customer_company_information ON customers.id = customer_company_information.customer_id
-        LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-         LEFT JOIN customer_services ON customer_services.customer_id = customers.id
-        JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-        WHERE
-            (customers.staff_id = ? OR customers.account_manager_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ?
-            )
-           GROUP BY customers.id
-           ORDER BY customers.id DESC
-
-         `;
- 
-    const [ExistStaff] = await pool.execute(queryExistStaff, [StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
-    if(ExistStaff.length === 0) {
-      placeholders = '0';
-    }
-
-
-
+    
     const query = `
    SELECT  
     clients.id AS id,
@@ -719,27 +672,24 @@ ORDER BY
     ) AS client_code
       FROM 
           clients
+      LEFT JOIN 
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
       JOIN 
           customers ON customers.id = clients.customer_id    
       JOIN 
           client_types ON client_types.id = clients.client_type
       LEFT JOIN 
           jobs ON clients.id = jobs.client_id
-      LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-      LEFT JOIN
-            customer_company_information ON customers.id = customer_company_information.customer_id
-      LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-      LEFT JOIN customer_services ON customer_services.customer_id = customers.id
-      JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id    
+          
       LEFT JOIN 
           client_contact_details ON client_contact_details.id = (
               SELECT MIN(cd.id)
               FROM client_contact_details cd
               WHERE cd.client_id = clients.id
-          )
+          ) 
       WHERE 
-      (customers.id IN (${placeholders}) OR customers.staff_id = ? OR customers.account_manager_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?) AND clients.customer_id = ${customerCheck}
+      (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
       GROUP BY
           clients.id
       ORDER BY 
@@ -747,21 +697,8 @@ ORDER BY
     `;
     //  console.log("Client Query:", query);
 
-     let result = []; 
-     if(ExistStaff.length === 0){
-     const [data] = await pool.execute(query,[StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
-     result = data;
-
-     }else{
-      const [data] = await pool.execute(query,[...customer_id ,StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
-      result = data;
-     }
-   
-    
-    return { status: true, message: "success.", data: result };
-
-
-
+     const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
+     return { status: true, message: "success.", data: result };
 
 };
 
