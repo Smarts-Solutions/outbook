@@ -767,6 +767,7 @@ ORDER BY
         JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN clients ON clients.customer_id = customers.id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        LEFT JOIN customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
             (customers.staff_id = ? OR assigned_jobs_staff_view.staff_id = ?
             OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
@@ -811,6 +812,8 @@ ORDER BY
         LEFT JOIN clients ON clients.customer_id = customers.id
         LEFT JOIN
             assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        LEFT JOIN
+            customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
             (customers.staff_id = ? OR assigned_jobs_staff_view.staff_id = ? 
 
@@ -973,21 +976,17 @@ id DESC;`;
             assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
-        LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-         LEFT JOIN customer_services ON customer_services.customer_id = customers.id
-        JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
         WHERE
-            (customers.staff_id = ?  OR customers.account_manager_id = ? OR assigned_jobs_staff_view.staff_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ? 
+            (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
 
-            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            OR staff_portfolio.staff_id IN (${LineManageStaffId}) OR customer_service_account_managers.account_manager_id IN (${LineManageStaffId})
+            OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
             )
            GROUP BY customers.id
            ORDER BY customers.id DESC
 
          `;
          try {
-             const [result] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
+             const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
              return { status: true, message: 'Success..', data: result };
          } catch (err) {
             console.error('Error executing query getCustomer_dropdown:', err);
