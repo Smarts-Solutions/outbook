@@ -597,7 +597,7 @@ const getClient = async (client) => {
     placeholders = customer_id.map(() => "?").join(", ");
   }
 
-   console.log("customer_id =--",  customerCheck);
+  //  console.log("customer_id =--",  customerCheck);
 
    if(['',null,undefined].includes(placeholders)){
       placeholders = '0';
