@@ -583,7 +583,7 @@ const getClient = async (client) => {
 //  console.log("getClient client", client);
   let { customer_id, StaffUserId } = client;
   if(customer_id == undefined || customer_id == null || customer_id == ''){
-    return await getAllClientsSidebar(customer_id,StaffUserId);
+    return await getAllClientsSidebar(StaffUserId);
   }
 
   let customerCheck = customer_id
@@ -765,21 +765,15 @@ ORDER BY
 
 };
 
-async function getAllClientsSidebar(customer_id, StaffUserId) {
-  let customerCheck = customer_id
+async function getAllClientsSidebar(StaffUserId) {
+   // Line Manager
+    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+    let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-  if (customerCheck == "") {
-    const allCustomer = await getAllCustomerIds(StaffUserId , 'client');
-    let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
-    customer_id = allCustomerIds;
-    placeholders = customer_id.map(() => "?").join(", ");
-  }
-
-  if(['',null,undefined].includes(placeholders)){
-      placeholders = '0';
-   }
-
-
+    if (LineManageStaffId.length == 0) {
+        LineManageStaffId.push(StaffUserId);
+    }
+  
   try {
     const QueryRole = `
   SELECT
@@ -844,36 +838,7 @@ ORDER BY
    }
 
   
-    // Other role Get data
-    let queryExistStaff = `
-    SELECT  
-        customers.id AS id
-        FROM 
-            customers  
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN
-            customer_company_information ON customers.id = customer_company_information.customer_id
-         LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-         LEFT JOIN customer_services ON customer_services.customer_id = customers.id
-        JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-        WHERE
-            (customers.staff_id = ? OR customers.account_manager_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ?
-            )
-           GROUP BY customers.id
-           ORDER BY customers.id DESC
-
-         `;
- 
-    const [ExistStaff] = await pool.execute(queryExistStaff, [StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
-    // console.log("Existing Staff:", ExistStaff.length);
-    // console.log("placeholders:", placeholders);
-    if(ExistStaff.length === 0) {
-      placeholders = '0';
-    }
+    // Other Role Get data
 
     const query = `
    SELECT  
@@ -893,6 +858,8 @@ ORDER BY
     ) AS client_code
       FROM 
           clients
+      LEFT JOIN 
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id
       JOIN 
           customers ON customers.id = clients.customer_id    
       JOIN 
@@ -900,31 +867,22 @@ ORDER BY
       LEFT JOIN 
           jobs ON clients.id = jobs.client_id
       LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-      LEFT JOIN 
           client_contact_details ON client_contact_details.id = (
               SELECT MIN(cd.id)
               FROM client_contact_details cd
               WHERE cd.client_id = clients.id
           )
-      WHERE 
-      customers.id IN (${placeholders}) OR clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+      WHERE clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       GROUP BY
           clients.id    
       ORDER BY 
           clients.id DESC;
     `;
      //console.log("Client Query:", query);
-     let result = []; 
-     if(ExistStaff.length === 0){
-      const [data] = await pool.execute(query,[StaffUserId,StaffUserId]);
-      result = data;
-      }else{
-      const [data]  = await pool.execute(query,[...customer_id, StaffUserId,StaffUserId]);
-      result = data;
-    }
-    
-    return { status: true, message: "success.", data: result };
+  
+      const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
+      return { status: true, message: "success.", data: result };
 }
 
 const getByidClient = async (client) => {
