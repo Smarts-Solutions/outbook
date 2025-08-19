@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Aug 16, 2025 at 11:26 AM
+-- Generation Time: Aug 19, 2025 at 01:01 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `assigned_jobs_staff_view` (
 ,`client_id` int(11)
 ,`job_id` int(11)
 ,`staff_id` varchar(255)
-,`source` varchar(18)
+,`source` varchar(36)
 );
 
 -- --------------------------------------------------------
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `clients` (
   UNIQUE KEY `client_code` (`client_code`),
   KEY `customer_id` (`customer_id`),
   KEY `client_industry_id` (`client_industry_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `clients`
@@ -180,7 +180,8 @@ INSERT INTO `clients` (`id`, `client_type`, `customer_id`, `staff_created_id`, `
 (5, '7', 8, 1, 0, 'GGGGGGGGG', '00005', 's', NULL, NULL, '0', '', '', '', '1', '2025-07-17 06:39:05', '2025-07-17 06:39:05'),
 (6, '1', 9, 15, 3, 'CLI---1', '00006', 's', NULL, NULL, '0', '', '', '', '1', '2025-07-24 11:35:02', '2025-07-24 11:35:29'),
 (7, '1', 9, 15, 3, 'CLI--2', '00007', 's', NULL, NULL, '0', '', '', '', '1', '2025-07-24 11:35:21', '2025-07-24 11:35:21'),
-(8, '1', 10, 13, 3, 'NEW_A_CLI', '00008', 'hj', NULL, NULL, '0', '', '', '', '1', '2025-08-13 06:04:47', '2025-08-13 06:04:47');
+(8, '1', 10, 13, 3, 'NEW_A_CLI', '00008', 'hj', NULL, NULL, '0', '', '', '', '1', '2025-08-13 06:04:47', '2025-08-13 06:04:47'),
+(9, '1', 3, 1, 3, 'SHK333', '00009', 's', NULL, NULL, '0', '', '', '', '1', '2025-08-16 11:31:39', '2025-08-16 11:31:39');
 
 -- --------------------------------------------------------
 
@@ -231,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `client_contact_details` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   KEY `role` (`role`)
-) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_contact_details`
@@ -245,7 +246,8 @@ INSERT INTO `client_contact_details` (`id`, `client_id`, `role`, `first_name`, `
 (24, 5, 2, 's', 's', '', '', '+44', '', '+44', '', NULL, '0', '2025-07-17 06:39:05', '2025-07-17 06:39:05'),
 (25, 6, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-24 11:35:02', '2025-07-24 11:35:02'),
 (26, 7, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-24 11:35:21', '2025-07-24 11:35:21'),
-(27, 8, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-08-13 06:04:47', '2025-08-13 06:04:47');
+(27, 8, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-08-13 06:04:47', '2025-08-13 06:04:47'),
+(28, 9, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-08-16 11:31:39', '2025-08-16 11:31:39');
 
 -- --------------------------------------------------------
 
@@ -839,7 +841,8 @@ INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account
 (61, 11, '2025-07-14 11:07:04', '2025-07-14 11:07:04'),
 (62, 15, '2025-08-13 09:47:39', '2025-08-13 09:47:39'),
 (63, 13, '2025-08-13 06:03:59', '2025-08-13 06:03:59'),
-(64, 13, '2025-08-13 06:03:59', '2025-08-13 06:03:59');
+(64, 13, '2025-08-13 06:03:59', '2025-08-13 06:03:59'),
+(64, 16, '2025-08-18 05:57:01', '2025-08-18 05:57:01');
 
 -- --------------------------------------------------------
 
@@ -1175,7 +1178,7 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (1, 1, '00001', 10, 1, 1, '', 35, 3, 3, '00:00', 6, '5', '2025-07-05', '2025-07-05', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-05 12:39:14', '2025-07-07 05:38:50'),
 (2, 1, '00002', 11, 1, 1, '', 35, 3, 3, '24:24', 13, '13', '2025-07-09', '2025-07-09', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-14', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-09 12:10:36', '2025-07-11 10:23:00'),
 (3, 1, '00003', 10, 3, 2, '', 37, 2, 4, '00:00', 14, '11', '2025-07-10', '2025-07-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-11', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-10 11:44:28', '2025-07-11 10:44:42'),
-(4, 1, '00004', 10, 3, 2, '', 37, 2, 4, '00:00', 6, '0', '2025-07-11', '2025-07-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-12', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-11 06:49:52', '2025-07-14 05:43:40'),
+(4, 1, '00004', 10, 3, 2, '', 37, 2, 4, '00:00', 14, '0', '2025-07-11', '2025-07-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-12', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-11 06:49:52', '2025-08-16 11:34:41'),
 (5, 1, '00005', 10, 1, 1, '', 35, 2, 4, '24:24', 11, '14', '2025-07-11', '2025-07-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-12', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-11 09:58:58', '2025-08-13 10:11:21'),
 (6, 15, '00006', 15, 9, 7, '', 43, 3, 3, '00:00', 0, '14', '2025-07-24', '2025-07-24', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-07-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-07-24 11:35:52', '2025-07-24 11:42:52'),
 (7, 1, '00007', 15, 9, 7, '', 43, 3, 3, '00:00', 0, '0', '2025-08-02', '2025-08-02', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2025-08-03', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', 'Daily', 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', 'Quarterly', '2025-08-02 09:59:35', '2025-08-02 09:59:35'),
@@ -1198,7 +1201,7 @@ CREATE TABLE IF NOT EXISTS `job_allowed_staffs` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=43 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `job_allowed_staffs`
@@ -1213,7 +1216,9 @@ INSERT INTO `job_allowed_staffs` (`id`, `job_id`, `staff_id`, `created_at`, `upd
 (32, 9, 6, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
 (31, 1, 16, '2025-08-13 11:33:56', '2025-08-13 11:33:56'),
 (38, 9, 16, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
-(39, 9, 3, '2025-08-16 11:20:41', '2025-08-16 11:20:41');
+(39, 9, 3, '2025-08-16 11:20:41', '2025-08-16 11:20:41'),
+(41, 4, 14, '2025-08-16 11:34:41', '2025-08-16 11:34:41'),
+(42, 4, 17, '2025-08-18 08:21:33', '2025-08-18 08:21:33');
 
 -- --------------------------------------------------------
 
@@ -1281,7 +1286,7 @@ CREATE TABLE IF NOT EXISTS `line_managers` (
   PRIMARY KEY (`id`),
   KEY `staff_by` (`staff_by`),
   KEY `staff_to` (`staff_to`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `line_managers`
@@ -1739,14 +1744,14 @@ CREATE TABLE IF NOT EXISTS `staffs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `role_id` (`role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staffs`
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-08-16 10:06:41', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1NTMzODgwMSwiZXhwIjoxNzU1Mzc0ODAxfQ.rzgPjR3Pn8Q3-DnMes2ZukNmS2XCE4PrIN76wor7kEw'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-08-19 09:48:56', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1NTU5NjkzNiwiZXhwIjoxNzU1NjMyOTM2fQ.KTnyTO7hExrWl1rciKW1FXp_KTaMaimpEu1PqXs8sgw'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$UGh8LOFOP9Kwtha4kypOcuJL.YZYwwyRsSrzaYsRvMiBiwMomGvdW', '659:00', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-06 08:46:14', ''),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 2, '2025-02-06 07:27:58', '2025-08-13 11:03:43', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1NTA4MzAyMywiZXhwIjoxNzU1MTE5MDIzfQ.rhXs3PuL-WvJsAhZND8XGRSaftkEznyELR1mhGVZxeo'),
@@ -1756,9 +1761,10 @@ INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phon
 (10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, '2025-02-08 11:36:28', '2025-08-13 11:13:13', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTUwODMwNTUsImV4cCI6MTc1NTExOTA1NX0.EFJVIW4mb7SHDB9A0M4Fd5TILD50mrTFzWSSWwXqcz0'),
 (12, 6, 'STAFF 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, '2025-04-17 05:56:18', '2025-08-13 09:34:03', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NTUwNzc2NDMsImV4cCI6MTc1NTExMzY0M30.eKKc_Tbt6E9e9nA_dhjO_do_zDAJFeldlr3ti1ip3pM'),
 (13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, '2025-06-11 09:18:34', '2025-08-13 05:44:58', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NTUwNjM4OTgsImV4cCI6MTc1NTA5OTg5OH0.WQfMEG6-OXq616_AV46UByVbu8rdPo7vG8Y-BVOEyPU'),
-(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, '2025-07-11 10:42:49', '2025-08-13 06:06:03', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NTUwNjUxNjMsImV4cCI6MTc1NTEwMTE2M30.4eFnwPn-ylJHEddvdDteSsHHnx65QhznfSA-4Q8Y-Oo'),
-(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, '2025-07-11 10:48:30', '2025-07-24 11:32:42', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTMzNTY3NjIsImV4cCI6MTc1MzM5Mjc2Mn0.rdRafKeN9aIzdRHVdE7S_D1CLuC3lMYomeHOZNZ7PsU'),
-(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, '2025-08-13 11:32:32', '2025-08-13 11:33:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTUwODQ3ODQsImV4cCI6MTc1NTEyMDc4NH0.fEWVHgEoK6qNBmxtXFFCDXBxYPtSQQajJ6wD6pwIOys');
+(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, '2025-07-11 10:42:49', '2025-08-19 11:24:14', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NTU2MDI2NTQsImV4cCI6MTc1NTYzODY1NH0.TfeDDVdGVa5q5ptrb444eTY9rTM7UF7HjGpmOHmmsdc'),
+(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, '2025-07-11 10:48:30', '2025-08-16 13:17:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTUzNTAyNDEsImV4cCI6MTc1NTM4NjI0MX0.XgV3T05OQ21s2XM5ZIXlLWHl-RcqyWTuh8WfM-NOGig'),
+(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, '2025-08-13 11:32:32', '2025-08-19 11:27:23', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTU2MDI4NDMsImV4cCI6MTc1NTYzODg0M30.YX5OzRt2ZVk_Az0ADigsW-LEa1g3Cj7fhVhaabKIjHQ'),
+(17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, '2025-08-18 08:20:15', '2025-08-19 09:49:32', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTU1OTY5NzIsImV4cCI6MTc1NTYzMjk3Mn0.DIcFHILLcb1-TyP1j7AWYiV-sM23rXNhc0dAdaVC6NQ');
 
 -- --------------------------------------------------------
 
@@ -1797,7 +1803,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=730 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=748 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -2535,7 +2541,25 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (726, 1, '2025-08-13', 'permission', 3, ' updated the access for PROCESSOR. Access Changes Add Permission (job-update, client-update) ', 'Super Admin System Super Super Admin  updated the access for PROCESSOR. Access Changes Add Permission (job-update, client-update)  ', 'updated', '122.168.114.106', '2025-08-13 11:33:33', '2025-08-13 11:33:33'),
 (727, 5, '2025-08-13', 'job', 11, 'created job code:', 'Processor STAFF ONE created job code: SHK_SSH_V3_000011', 'created', '122.168.114.106', '2025-08-13 11:57:45', '2025-08-13 11:57:45'),
 (728, 5, '2025-08-14', '-', 0, ' Logged Out', 'Processor STAFF ONE  Logged Out ', '-', '122.168.114.106', '2025-08-14 05:03:54', '2025-08-14 05:03:54'),
-(729, 1, '2025-08-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-16 10:06:41', '2025-08-16 10:06:41');
+(729, 1, '2025-08-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-16 10:06:41', '2025-08-16 10:06:41'),
+(730, 1, '2025-08-16', 'client', 9, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SHK_SHK_00009(SHK333)', 'created', '122.168.114.106', '2025-08-16 11:31:39', '2025-08-16 11:31:39'),
+(731, 1, '2025-08-16', 'job', 4, 'edited the job information and changed the job to the reviewer, STAFF EIGHT job code:', 'Super Admin System Super Super Admin edited the job information and changed the job to the reviewer, STAFF EIGHT job code: SHK_SSS_V4_00004', 'updated', '122.168.114.106', '2025-08-16 11:34:41', '2025-08-16 11:34:41'),
+(732, 14, '2025-08-16', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-16 12:06:42', '2025-08-16 12:06:42'),
+(733, 16, '2025-08-16', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-16 12:18:04', '2025-08-16 12:18:04'),
+(734, 14, '2025-08-16', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-08-16 13:17:09', '2025-08-16 13:17:09'),
+(735, 15, '2025-08-16', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-08-16 13:17:21', '2025-08-16 13:17:21'),
+(736, 16, '2025-08-18', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-18 05:14:23', '2025-08-18 05:14:23'),
+(737, 1, '2025-08-18', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-18 05:52:10', '2025-08-18 05:52:10'),
+(738, 14, '2025-08-18', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-18 06:12:04', '2025-08-18 06:12:04'),
+(739, 1, '2025-08-18', 'staff', 17, 'created staff STAFF ELEVEN', 'Super Admin System Super Super Admin created staff STAFF ELEVEN ', 'created', '122.168.114.106', '2025-08-18 08:20:15', '2025-08-18 08:20:15'),
+(740, 1, '2025-08-18', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-18 08:20:26', '2025-08-18 08:20:26'),
+(741, 17, '2025-08-18', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-18 08:20:35', '2025-08-18 08:20:35'),
+(742, 1, '2025-08-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-19 09:48:56', '2025-08-19 09:48:56'),
+(743, 17, '2025-08-19', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-19 09:49:32', '2025-08-19 09:49:32'),
+(744, 14, '2025-08-19', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-08-19 10:08:33', '2025-08-19 10:08:33'),
+(745, 14, '2025-08-19', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-19 11:24:14', '2025-08-19 11:24:14'),
+(746, 14, '2025-08-19', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-08-19 11:27:16', '2025-08-19 11:27:16'),
+(747, 16, '2025-08-19', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-19 11:27:23', '2025-08-19 11:27:23');
 
 -- --------------------------------------------------------
 
@@ -2550,14 +2574,15 @@ CREATE TABLE IF NOT EXISTS `staff_portfolio` (
   `customer_id` int(11) NOT NULL,
   `createdAt` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `staff_portfolio`
 --
 
 INSERT INTO `staff_portfolio` (`id`, `staff_id`, `customer_id`, `createdAt`) VALUES
-(9, 6, 1, '2025-02-11 14:28:29');
+(9, 6, 1, '2025-02-11 14:28:29'),
+(10, 16, 2, '2025-08-18 05:48:47');
 
 -- --------------------------------------------------------
 
@@ -2754,7 +2779,7 @@ INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_i
 DROP TABLE IF EXISTS `assigned_jobs_staff_view`;
 
 DROP VIEW IF EXISTS `assigned_jobs_staff_view`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `assigned_jobs_staff_view`  AS SELECT `customers`.`id` AS `customer_id`, `clients`.`id` AS `client_id`, `jobs`.`id` AS `job_id`, `jobs`.`reviewer` AS `staff_id`, 'reviewer' AS `source` FROM (((`jobs` join `clients` on((`clients`.`id` = `jobs`.`client_id`))) join `customers` on((`customers`.`id` = `clients`.`customer_id`))) join `staffs` on((`staffs`.`id` = `jobs`.`reviewer`))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `assigned_jobs_staff_view`  AS SELECT `customers`.`id` AS `customer_id`, `clients`.`id` AS `client_id`, `jobs`.`id` AS `job_id`, `staffs`.`id` AS `staff_id`, 'assign_customer_portfolio' AS `source` FROM ((((`customers` join `staff_portfolio` on((`staff_portfolio`.`customer_id` = `customers`.`id`))) join `staffs` on((`staffs`.`id` = `staff_portfolio`.`staff_id`))) left join `clients` on((`clients`.`customer_id` = `customers`.`id`))) left join `jobs` on((`jobs`.`client_id` = `clients`.`id`))) ;
 
 -- --------------------------------------------------------
 
