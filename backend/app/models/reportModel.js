@@ -880,18 +880,19 @@ const taxWeeklyStatusReport = async (Report) => {
         const weeks_sql = weeks.join(",\n    ");
 
         const QueryRole = `
-    SELECT
-        staffs.id AS id,
-        staffs.role_id AS role_id,
-        roles.role AS role_name
-    FROM staffs
-    LEFT JOIN roles ON staffs.role_id = roles.id
-    WHERE staffs.id = ${StaffUserId}
-    LIMIT 1
-    `;
+            SELECT
+                staffs.id AS id,
+                staffs.role_id AS role_id,
+                roles.role AS role_name
+            FROM staffs
+            LEFT JOIN roles ON staffs.role_id = roles.id
+            WHERE staffs.id = ${StaffUserId}
+            LIMIT 1
+            `;
         const [rows] = await pool.execute(QueryRole);
-        // if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
-
+        
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+        
         let query = `
             SELECT
                 master_status.name AS job_status,
@@ -901,6 +902,8 @@ const taxWeeklyStatusReport = async (Report) => {
                 COUNT(jobs.id) AS Grand_Total
             FROM 
                 customers
+            LEFT JOIN 
+                assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
              `;
 
 
@@ -932,9 +935,25 @@ const taxWeeklyStatusReport = async (Report) => {
             conditions.push(`jobs.reviewer = ${reviewer_id}`);
         }
 
-        if (conditions.length > 0) {
+        
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+          if (conditions.length > 0) {
             query += ` WHERE ${conditions.join(" AND ")}`;
+          }
+        }else{
+          if (conditions.length > 0) {
+            query += ` WHERE (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND
+             ${conditions.join(" AND ")}`;
+          }else{
+            query += ` WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})`;
+          }
+            
         }
+
+
+        // if (conditions.length > 0) {
+        //     query += ` WHERE ${conditions.join(" AND ")}`;
+        // }
 
         query += `
             GROUP BY 
@@ -969,9 +988,7 @@ const taxWeeklyStatusReport = async (Report) => {
         });
 
         return { status: true, message: 'Success.', data: formattedResult };
-        // } else {
-        //     return { status: true, message: 'Success.', data: [] };
-        // }
+        
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting tax status weekly report.' };
