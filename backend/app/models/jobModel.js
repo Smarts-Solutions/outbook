@@ -1285,8 +1285,7 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
       placeholders = '0';
     }
 
-  console.log("SQL Query placeholders-", placeholders);
-  console.log("SQL Query customer_id-", customer_id);
+ 
 
   // Other Role data
 
@@ -1320,8 +1319,8 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
       placeholders = '0';
     }
 
-    console.log("placeholders", placeholders);
-    console.log("LineManageStaffId", LineManageStaffId);
+    
+    
 
        const query = `
         SELECT 
@@ -1400,7 +1399,8 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
 
         // customers.staff_id = ? OR customers.account_manager_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ? OR assigned_jobs_staff_view.staff_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
 
-        console.log("SQL Query -", query);
+      
+        
         let result = [];
         const [data] = await pool.execute(query, [
           StaffUserId,
@@ -1744,7 +1744,8 @@ const getJobByClient = async (job) => {
             client_id,
           ]);
 
-          console.log("rowsAllocated", rowsAllocated);
+         
+          
 
           const [[isExistJobAllowedStaffs]] = await pool.execute(`SELECT staff_id FROM job_allowed_staffs WHERE staff_id = ${ExistStaff[0].id} LIMIT 1`);
 
