@@ -468,7 +468,6 @@ const getTimesheetTaskType = async (Timesheet) => {
         // console.log("LineManageStaffId", LineManageStaffId);
 
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
-
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
           const query = `
