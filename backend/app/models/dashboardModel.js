@@ -1,96 +1,100 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = require('../utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange ,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../utils/helper');
 
 
-//  CREATE VIEW assigned_jobs_staff_view AS
-// SELECT  
-//     customers.id AS customer_id,
-//     clients.id AS client_id,
-//     jobs.id AS job_id,
-//     staffs.id AS staff_id,
-//     'assign_customer_portfolio' AS source
-// FROM 
-//     customers
-// JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-// JOIN staffs ON staffs.id = staff_portfolio.staff_id
-// LEFT JOIN clients ON clients.customer_id = customers.id
-// LEFT JOIN jobs ON jobs.client_id =clients.id
+/*
+VIEW
+CREATE VIEW assigned_jobs_staff_view AS
+SELECT  
+    customers.id AS customer_id,
+    clients.id AS client_id,
+    jobs.id AS job_id,
+    staffs.id AS staff_id,
+    'assign_customer_portfolio' AS source
+FROM 
+    customers
+JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
+JOIN staffs ON staffs.id = staff_portfolio.staff_id
+LEFT JOIN clients ON clients.customer_id = customers.id
+LEFT JOIN jobs ON jobs.client_id =clients.id
 
-// UNION ALL
+UNION ALL
 
-// SELECT  
-//     customers.id AS customer_id,
-//      clients.id AS client_id,
-//     jobs.id AS job_id,
-//      staffs.id AS staff_id,
-//     'assign_customer_service' AS source
-// FROM 
-//     customers
-// JOIN customer_services ON customer_services.customer_id = customers.id
-// JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-// JOIN staffs ON staffs.id = customer_service_account_managers.account_manager_id
-// LEFT JOIN clients ON clients.customer_id = customers.id
-// LEFT JOIN jobs ON jobs.client_id =clients.id
+SELECT  
+    customers.id AS customer_id,
+     clients.id AS client_id,
+    jobs.id AS job_id,
+     staffs.id AS staff_id,
+    'assign_customer_service' AS source
+FROM 
+    customers
+JOIN customer_services ON customer_services.customer_id = customers.id
+JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+JOIN staffs ON staffs.id = customer_service_account_managers.account_manager_id
+LEFT JOIN clients ON clients.customer_id = customers.id
+LEFT JOIN jobs ON jobs.client_id =clients.id
 
-// UNION ALL
+UNION ALL
 
-// SELECT  
-//     customers.id AS customer_id,
-//      clients.id AS client_id,
-//     jobs.id AS job_id,
-//      staffs.id AS staff_id,
-//     'assign_customer_main_account_manager' AS source
-// FROM 
-//     customers
-// JOIN staffs ON staffs.id = customers.account_manager_id
-// LEFT JOIN clients ON clients.customer_id = customers.id
-// LEFT JOIN jobs ON jobs.client_id =clients.id
+SELECT  
+    customers.id AS customer_id,
+     clients.id AS client_id,
+    jobs.id AS job_id,
+     staffs.id AS staff_id,
+    'assign_customer_main_account_manager' AS source
+FROM 
+    customers
+JOIN staffs ON staffs.id = customers.account_manager_id
+LEFT JOIN clients ON clients.customer_id = customers.id
+LEFT JOIN jobs ON jobs.client_id =clients.id
 
-// UNION ALL
+UNION ALL
 
 
-// SELECT  
-//     customers.id AS customer_id,
-//     clients.id AS client_id,
-//     jobs.id AS job_id,
-//     jobs.reviewer AS staff_id,
-//     'reviewer' AS source
-// FROM 
-//     jobs
-// JOIN clients ON clients.id = jobs.client_id
-// JOIN customers ON customers.id = clients.customer_id
-// JOIN staffs ON staffs.id = jobs.reviewer
+SELECT  
+    customers.id AS customer_id,
+    clients.id AS client_id,
+    jobs.id AS job_id,
+    jobs.reviewer AS staff_id,
+    'reviewer' AS source
+FROM 
+    jobs
+JOIN clients ON clients.id = jobs.client_id
+JOIN customers ON customers.id = clients.customer_id
+JOIN staffs ON staffs.id = jobs.reviewer
 
-// UNION ALL
+UNION ALL
 
-// SELECT  
-//     customers.id AS customer_id,
-//     clients.id AS client_id,
-//     jobs.id AS job_id,
-//     jobs.allocated_to AS staff_id,
-//      'allocated_to' AS source
+SELECT  
+    customers.id AS customer_id,
+    clients.id AS client_id,
+    jobs.id AS job_id,
+    jobs.allocated_to AS staff_id,
+     'allocated_to' AS source
 
-// FROM 
-//     jobs
-// JOIN clients ON clients.id = jobs.client_id
-// JOIN customers ON customers.id = clients.customer_id
-// JOIN staffs ON staffs.id = jobs.allocated_to
+FROM 
+    jobs
+JOIN clients ON clients.id = jobs.client_id
+JOIN customers ON customers.id = clients.customer_id
+JOIN staffs ON staffs.id = jobs.allocated_to
 
-// UNION ALL
+UNION ALL
 
-// SELECT  
-//     customers.id AS customer_id,
-//     clients.id AS client_id,
-//     jobs.id AS job_id,
-//     job_allowed_staffs.staff_id AS staff_id,
-//      'job_allowed_staffs' AS source
-// FROM 
-//     jobs
-// JOIN clients ON clients.id = jobs.client_id
-// JOIN customers ON customers.id = clients.customer_id
-// LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-// JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
+SELECT  
+    customers.id AS customer_id,
+    clients.id AS client_id,
+    jobs.id AS job_id,
+    job_allowed_staffs.staff_id AS staff_id,
+     'job_allowed_staffs' AS source
+FROM 
+    jobs
+JOIN clients ON clients.id = jobs.client_id
+JOIN customers ON customers.id = clients.customer_id
+LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
+
+*/
 
 
 
@@ -99,30 +103,13 @@ const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
   const { startDate, endDate } = await getDateRange(date_filter);
 
-  // Line Manager
-  const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-  let LineManageStaffId = LineManage?.map(item => item.staff_to);
-
-  if (LineManageStaffId.length == 0) {
-    LineManageStaffId.push(staff_id);
-  }
+   // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
+    // Get Role
+    const rowRoles = await QueryRoleHelperFunction(staff_id)
 
   try {
-    const QueryRole = `
-    SELECT
-      staffs.id AS id,
-      staffs.role_id AS role_id,
-      roles.role AS role_name
-    FROM
-      staffs
-    JOIN
-      roles ON roles.id = staffs.role_id
-    WHERE
-      staffs.id = ${staff_id}
-    LIMIT 1
-    `
-    const [rowRoles] = await pool.execute(QueryRole);
-
+   
     const [RoleAccessCustomer] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 33]);
 
     const [RoleAccessClient] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 34]);
