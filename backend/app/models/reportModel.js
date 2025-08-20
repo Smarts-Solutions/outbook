@@ -203,11 +203,11 @@ const jobReceivedSentReports = async (Report) => {
   `
         const [rows] = await pool.execute(QueryRole);
 
-       const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
-        
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
+
         let weeklyRows = [];
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const weeklyQuery = `
+            const weeklyQuery = `
             SELECT 
             DATE_FORMAT(jobs.created_at, '%M') AS month_name,
             DAY(jobs.created_at) AS day,
@@ -225,9 +225,9 @@ const jobReceivedSentReports = async (Report) => {
         ORDER BY 
             MONTH(jobs.created_at), DAY(jobs.created_at);;
                 `;
-        const [weeklyData] = await pool.execute(weeklyQuery);
-        weeklyRows = weeklyData;
-        }else{
+            const [weeklyData] = await pool.execute(weeklyQuery);
+            weeklyRows = weeklyData;
+        } else {
             const weeklyQuery = `
             SELECT 
             DATE_FORMAT(jobs.created_at, '%M') AS month_name,
@@ -251,8 +251,8 @@ const jobReceivedSentReports = async (Report) => {
         ORDER BY 
             MONTH(jobs.created_at), DAY(jobs.created_at);;
                 `;
-        const [weeklyData] = await pool.execute(weeklyQuery);
-        weeklyRows = weeklyData;
+            const [weeklyData] = await pool.execute(weeklyQuery);
+            weeklyRows = weeklyData;
         }
 
 
@@ -308,7 +308,7 @@ const jobReceivedSentReports = async (Report) => {
             };
         });
         return { status: true, message: 'Success.', data: result };
-       
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting monthly and weekly job count.' };
@@ -345,10 +345,10 @@ const jobSummaryReports = async (Report) => {
   LIMIT 1
   `
         const [rows] = await pool.execute(QueryRole);
-        
+
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
-       if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const query = `
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+            const query = `
         SELECT 
         master_status.name AS job_status,
         master_status.name AS job_status,
@@ -361,11 +361,11 @@ const jobSummaryReports = async (Report) => {
         GROUP BY 
             master_status.name, jobs.status_type
          `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
-       }
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+        }
 
-       // Other Role Data
+        // Other Role Data
         const query = `
         SELECT 
         master_status.name AS job_status,
@@ -388,7 +388,7 @@ const jobSummaryReports = async (Report) => {
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
 
-        
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
@@ -422,11 +422,11 @@ const jobPendingReports = async (Report) => {
   LIMIT 1
   `
         const [rows] = await pool.execute(QueryRole);
-         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
-        const query = `
+            const query = `
        SELECT 
         master_status.name AS job_status,
         job_types.type AS job_type_name,
@@ -443,13 +443,13 @@ const jobPendingReports = async (Report) => {
         GROUP BY 
             master_status.name, jobs.status_type
          `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
-    }
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+        }
 
-    // Other Role Data
+        // Other Role Data
 
-      const query = `
+        const query = `
        SELECT 
         master_status.name AS job_status,
         job_types.type AS job_type_name,
@@ -474,8 +474,8 @@ const jobPendingReports = async (Report) => {
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
 
-     
-       
+
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
@@ -508,11 +508,11 @@ const teamMonthlyReports = async (Report) => {
             staffs.id = ${StaffUserId}
         LIMIT 1`
         const [rows] = await pool.execute(QueryRole);
-    
-      const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const query = `
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
+
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+            const query = `
        SELECT 
         CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name,
         COALESCE(SUM(CASE WHEN jobs.status_type = 6 THEN 1 ELSE 0 END), 0) AS number_of_job_completed,
@@ -526,12 +526,12 @@ const teamMonthlyReports = async (Report) => {
         GROUP BY 
             staffs.id
          `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
-    }
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+        }
 
-    // Other Role Data
-     const query = `
+        // Other Role Data
+        const query = `
        SELECT 
         CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name,
         COALESCE(SUM(CASE WHEN jobs.status_type = 6 THEN 1 ELSE 0 END), 0) AS number_of_job_completed,
@@ -586,7 +586,7 @@ const dueByReport = async (Report) => {
   `
         const [rows] = await pool.execute(QueryRole);
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
-       
+
         const monthsRange = 12;
 
         // Start building the query
@@ -619,15 +619,15 @@ const dueByReport = async (Report) => {
         query += dueConditions.join(",\n");
 
         // Continue the query with the FROM and JOIN clauses
-        
+
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
             query += `
             FROM customers
             LEFT JOIN jobs ON jobs.customer_id = customers.id
           `;
-          
-         }else{
-             query += `
+
+        } else {
+            query += `
             FROM customers
             LEFT JOIN jobs ON jobs.customer_id = customers.id
             LEFT JOIN
@@ -635,9 +635,9 @@ const dueByReport = async (Report) => {
             WHERE 
               customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
            `;
-         }
+        }
 
-        
+
         // Final GROUP BY and ORDER BY clauses
         query += `
             GROUP BY customers.id
@@ -699,7 +699,10 @@ const reportCountJob = async (Report) => {
   LIMIT 1
   `
         const [rows] = await pool.execute(QueryRole);
-        //  if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
+
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
         const query = `
         SELECT 
         jobs.id AS job_id,
@@ -762,10 +765,79 @@ const reportCountJob = async (Report) => {
         `;
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
-        // }
-        // else {
-        //     return { status: true, message: 'Success.', data: [] };
-        // }
+
+        }
+
+        // Other Role Data
+
+        const query = `
+        SELECT 
+        jobs.id AS job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+
+        CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
+
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        master_status.name AS status,
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+
+        FROM 
+        jobs
+        LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type    
+        WHERE 
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
+        AND jobs.id IN (`+ cleaneJob_ids + `) 
+        ORDER BY
+        jobs.id DESC;
+        `;
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job dueByReport.' };
@@ -911,12 +983,12 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
     try {
 
         // Line Manager
-  const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
-  let LineManageStaffId = LineManage?.map(item => item.staff_to);
+        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+        let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-  if (LineManageStaffId.length == 0) {
-    LineManageStaffId.push(StaffUserId);
-  }
+        if (LineManageStaffId.length == 0) {
+            LineManageStaffId.push(StaffUserId);
+        }
 
         // job Reviewer
         const queryCustomer = `
@@ -1023,12 +1095,12 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
 const averageTatReport = async (Report) => {
     const { StaffUserId } = Report;
     // Line Manager
-  const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
-  let LineManageStaffId = LineManage?.map(item => item.staff_to);
+    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+    let LineManageStaffId = LineManage?.map(item => item.staff_to);
 
-  if (LineManageStaffId.length == 0) {
-    LineManageStaffId.push(StaffUserId);
-  }
+    if (LineManageStaffId.length == 0) {
+        LineManageStaffId.push(StaffUserId);
+    }
 
     try {
         const QueryRole = `
