@@ -586,7 +586,15 @@ const getClient = async (client) => {
     return await getAllClientsSidebar(StaffUserId);
   }
 
-  console.log("getClient customer_id", customer_id);
+
+  const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+    let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+    if (LineManageStaffId.length == 0) {
+        LineManageStaffId.push(StaffUserId);
+    }
+
+  // console.log("getClient customer_id", customer_id);
 
    try {
     const QueryRole = `
@@ -651,9 +659,8 @@ ORDER BY
    }
 
 
-   console.log("Client GGGG:");
-   console.log("Client GGGG:");
-   console.log("Client LineManageStaffId:",LineManageStaffId);
+ 
+   //console.log("Client LineManageStaffId:",LineManageStaffId);
 
    // Other role Get data
     
@@ -690,8 +697,8 @@ ORDER BY
               WHERE cd.client_id = clients.id
           ) 
       WHERE 
-      clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
-      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
       GROUP BY
           clients.id
       ORDER BY 
