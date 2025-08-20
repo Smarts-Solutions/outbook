@@ -705,7 +705,7 @@ ORDER BY
           clients.id DESC;
     `;
 
-      console.log("Client Query:", query);
+   
 
      const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
      return { status: true, message: "success.", data: result };
