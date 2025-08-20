@@ -934,7 +934,7 @@ id DESC;`;
         return { status: true, message: 'Success..', data: result };
     }
   
-
+        // other Role Data
         let query = `
     SELECT  
         customers.id AS id,
