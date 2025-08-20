@@ -1,6 +1,6 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-const { SatffLogUpdateOperation, generateNextUniqueCode, getAllCustomerIds } = require("../../app/utils/helper");
+const { SatffLogUpdateOperation, generateNextUniqueCode, getAllCustomerIds ,LineManageStaffIdHelperFunction,QueryRoleHelperFunction} = require("../../app/utils/helper");
 
 const createClient = async (client) => {
   // client Code(cli_CUS_CLI_00001)
@@ -582,35 +582,22 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 const getClient = async (client) => {
 //  console.log("getClient client", client);
   let { customer_id, StaffUserId } = client;
+
+   // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
+
+
   if(customer_id == undefined || customer_id == null || customer_id == ''){
-    return await getAllClientsSidebar(StaffUserId);
+    return await getAllClientsSidebar(StaffUserId , LineManageStaffId , rows);
   }
-
-
-  const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
-    let LineManageStaffId = LineManage?.map(item => item.staff_to);
-
-    if (LineManageStaffId.length == 0) {
-        LineManageStaffId.push(StaffUserId);
-    }
 
   // console.log("getClient customer_id", customer_id);
 
    try {
-    const QueryRole = `
-  SELECT
-    staffs.id AS id,
-    staffs.role_id AS role_id,
-    roles.role AS role_name
-  FROM
-    staffs
-  JOIN
-    roles ON roles.id = staffs.role_id
-  WHERE
-    staffs.id = ${StaffUserId}
-  LIMIT 1
-  `;
-    const [rows] = await pool.execute(QueryRole);
+   
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 34]);
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -709,31 +696,11 @@ ORDER BY
 
 };
 
-async function getAllClientsSidebar(StaffUserId) {
-   // Line Manager
-    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
-    let LineManageStaffId = LineManage?.map(item => item.staff_to);
+async function getAllClientsSidebar(StaffUserId, LineManageStaffId, rows) {
 
-    if (LineManageStaffId.length == 0) {
-        LineManageStaffId.push(StaffUserId);
-    }
-  
+
   try {
-    const QueryRole = `
-  SELECT
-    staffs.id AS id,
-    staffs.role_id AS role_id,
-    roles.role AS role_name
-  FROM
-    staffs
-  JOIN
-    roles ON roles.id = staffs.role_id
-  WHERE
-    staffs.id = ${StaffUserId}
-  LIMIT 1
-  `;
-    const [rows] = await pool.execute(QueryRole);
-
+  
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 34]);
 
     // Condition with Admin And SuperAdmin

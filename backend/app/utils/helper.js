@@ -363,7 +363,36 @@ id DESC;`;
 
 }
 
+async function LineManageStaffIdHelperFunction(staff_id) {
+  const LineManageQuery = `
+    SELECT staff_to FROM line_managers WHERE staff_by = ?
+  `
+  const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
+  let LineManageStaffId = LineManage?.map(item => item.staff_to);
+  // if (LineManageStaffId.length == 0) {
+  //     LineManageStaffId.push(staff_id);
+  // }
+  LineManageStaffId.push(staff_id);
+  return LineManageStaffId;
+}
 
 
+async function QueryRoleHelperFunction(staff_id) {
+  const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${staff_id}
+  LIMIT 1
+  `
+  const [rows] = await pool.execute(QueryRole);
+  return rows;
+}
 
-module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds };
+module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds ,LineManageStaffIdHelperFunction ,QueryRoleHelperFunction };

@@ -818,6 +818,7 @@ async function getAllJobsSidebar(StaffUserId) {
   if (LineManageStaffId.length == 0) {
     LineManageStaffId.push(StaffUserId);
   }
+  console.log("LineManageStaffId", LineManageStaffId);
 
 
   try {
