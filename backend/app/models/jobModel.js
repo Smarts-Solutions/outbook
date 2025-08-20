@@ -635,7 +635,7 @@ const getJobByCustomer = async (job) => {
 
    console.log("getJobByCustomer", job);
    if(customer_id == undefined || customer_id == null || customer_id == ''){
-    return await getAllJobsSidebar(customer_id,StaffUserId);
+    return await getAllJobsSidebar(StaffUserId);
    }
 
   let customerCheck = customer_id
@@ -1165,15 +1165,8 @@ const getJobByCustomer = async (job) => {
   }
 };
 
-async function getAllJobsSidebar(customer_id,StaffUserId) {
-   let customerCheck = customer_id
-  if (customerCheck == "") {
-    const allCustomer = await getAllCustomerIds(StaffUserId, 'job');
-    let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
-    customer_id = allCustomerIds;
-    placeholders = customer_id.map(() => "?").join(", ");
-  }
-
+async function getAllJobsSidebar(StaffUserId) {
+   
   // Line Manager
   const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
   let LineManageStaffId = LineManage?.map(item => item.staff_to);
@@ -1183,17 +1176,7 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
   }
 
 
-  if(['',null,undefined].includes(placeholders)){
-      placeholders = '0';
-    }
-
   try {
-    // const [ExistStaff] = await pool.execute(
-    //   'SELECT id , role_id  FROM staffs WHERE id = "' +
-    //   StaffUserId +
-    //   '" LIMIT 1'
-    // );
-
     const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -1209,11 +1192,9 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
   `;
     const [rows] = await pool.execute(QueryRole);
 
-    // console.log("customer_id", customer_id);
     // console.log("LineManageStaffId", LineManageStaffId);
    
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
-
 
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
@@ -1276,52 +1257,17 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
         ORDER BY 
          jobs.id DESC;
         `;
-      const [rows] = await pool.execute(query, [...customer_id, ...customer_id]);
+      const [rows] = await pool.execute(query);
       return { status: true, message: "Success.", data: rows };
     }
 
 
-    if(['',null,undefined].includes(placeholders)){
-      placeholders = '0';
-    }
+   
 
  
 
   // Other Role data
-
-      
-    let queryExistStaff = `
-    SELECT  
-        customers.id AS id
-        FROM 
-            customers  
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN
-            customer_company_information ON customers.id = customer_company_information.customer_id
-         LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-         LEFT JOIN customer_services ON customer_services.customer_id = customers.id
-        JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-        WHERE
-            (customers.staff_id = ? OR customers.account_manager_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ?
-            )
-           GROUP BY customers.id
-           ORDER BY customers.id DESC
-
-         `;
  
-    const [ExistStaff] = await pool.execute(queryExistStaff, [StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
-
-    if(ExistStaff.length === 0) {
-      placeholders = '0';
-    }
-
-    
-    
-
        const query = `
         SELECT 
         jobs.id AS job_id,
@@ -1390,27 +1336,15 @@ async function getAllJobsSidebar(customer_id,StaffUserId) {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR staff_portfolio.staff_id IN(${LineManageStaffId}) OR customer_service_account_managers.account_manager_id IN(${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
+        assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
         GROUP BY 
         jobs.id 
         ORDER BY 
         jobs.id DESC;
         `;
 
-        // customers.staff_id = ? OR customers.account_manager_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ? OR assigned_jobs_staff_view.staff_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
-
-      
-        
-        let result = [];
-        const [data] = await pool.execute(query, [
-          StaffUserId,
-          StaffUserId,
-          StaffUserId,
-          StaffUserId,
-          StaffUserId
-        ]);
-        result = data;
-     
+       const [result] = await pool.execute(query);
+  
     return { status: true, message: "Success.", data: result };
   } catch (error) {
     console.log("err -", error);
