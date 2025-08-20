@@ -906,7 +906,7 @@ const getCustomer_dropdown = async (customer) => {
   WHERE
     staffs.id = ${StaffUserId}
   LIMIT 1
-  `
+     `
     const [rows] = await pool.execute(QueryRole);
 
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);

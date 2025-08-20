@@ -703,7 +703,7 @@ const reportCountJob = async (Report) => {
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const query = `
+            const query = `
         SELECT 
         jobs.id AS job_id,
         job_types.type AS job_type_name,
@@ -763,8 +763,8 @@ const reportCountJob = async (Report) => {
         ORDER BY
         jobs.id DESC;
         `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
 
         }
 
@@ -990,7 +990,30 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
             LineManageStaffId.push(StaffUserId);
         }
 
-        // job Reviewer
+        // Customer
+
+        const QueryRole = `
+        SELECT
+            staffs.id AS id,
+            staffs.role_id AS role_id,
+            roles.role AS role_name
+        FROM
+            staffs
+        JOIN
+            roles ON roles.id = staffs.role_id
+        WHERE
+            staffs.id = ${StaffUserId}
+        LIMIT 1
+     `
+        const [rows] = await pool.execute(QueryRole);
+
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+
+
+        let customer = []
+        let custumerData = [];
+       
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
         const queryCustomer = `
         SELECT  
             customers.id AS customer_id,
@@ -999,16 +1022,33 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
             customers   
         ORDER BY 
         customers.id DESC;
-     `;
-        const [rows] = await pool.execute(queryCustomer);
-        let customer = []
-        if (rows.length > 0) {
-            customer = rows.map(row => ({
+       `;
+        const [data] = await pool.execute(queryCustomer);
+        custumerData = data;
+        }else{
+            const queryCustomer = `
+        SELECT  
+            customers.id AS customer_id,
+            customers.trading_name AS customer_name
+        FROM 
+            customers
+        LEFT JOIN
+            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        WHERE 
+          customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})           
+        ORDER BY 
+        customers.id DESC;
+       `;
+        const [data] = await pool.execute(queryCustomer);
+        custumerData = data;
+        }
+
+        if (custumerData.length > 0) {
+            customer = custumerData.map(row => ({
                 customer_id: row.customer_id,
                 customer_name: row.customer_name
             }));
         }
-
 
 
 
