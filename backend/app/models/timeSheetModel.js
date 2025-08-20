@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds } = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../utils/helper');
 
 const getTimesheet = async (Timesheet) => {
 
@@ -233,29 +233,12 @@ const getTimesheetTaskType = async (Timesheet) => {
     else if (task_type === "2") {
 
       try {
-        const QueryRole = `
-          SELECT
-            staffs.id AS id,
-            staffs.role_id AS role_id,
-            roles.role AS role_name
-          FROM
-            staffs
-          JOIN
-            roles ON roles.id = staffs.role_id
-          WHERE
-            staffs.id = ${staff_id}
-          LIMIT 1
-          `
-        const [rows] = await pool.execute(QueryRole);
+       // Line Manager
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-        // Line Manager
-        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-        let LineManageStaffId = LineManage?.map(item => item.staff_to);
-
-        if (LineManageStaffId.length == 0) {
-          LineManageStaffId.push(staff_id);
-        }
-        // Condition with And SuperAdmin
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
+        // Condition with  SuperAdmin
 
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
@@ -323,28 +306,11 @@ const getTimesheetTaskType = async (Timesheet) => {
       let customer_id = Timesheet.customer_id
 
       try {
-        const QueryRole = `
-      SELECT
-        staffs.id AS id,
-        staffs.role_id AS role_id,
-        roles.role AS role_name
-      FROM
-        staffs
-      JOIN
-        roles ON roles.id = staffs.role_id
-      WHERE
-        staffs.id = ${StaffUserId}
-      LIMIT 1
-      `
-        const [rows] = await pool.execute(QueryRole);
-
         // Line Manager
-        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-        if (LineManageStaffId.length == 0) {
-          LineManageStaffId.push(staff_id);
-        }
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
 
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 34]);
 
@@ -442,28 +408,10 @@ const getTimesheetTaskType = async (Timesheet) => {
 
       try {
         // Line Manager
-        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-        if (LineManageStaffId.length == 0) {
-          LineManageStaffId.push(staff_id);
-        }
-
-
-        const QueryRole = `
-          SELECT
-            staffs.id AS id,
-            staffs.role_id AS role_id,
-            roles.role AS role_name
-          FROM
-            staffs
-          JOIN
-            roles ON roles.id = staffs.role_id
-          WHERE
-            staffs.id = ${StaffUserId}
-          LIMIT 1
-        `;
-        const [rows] = await pool.execute(QueryRole);
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
 
         // console.log("LineManageStaffId", LineManageStaffId);
 
