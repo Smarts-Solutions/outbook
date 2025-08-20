@@ -129,219 +129,9 @@ const getDashboardData = async (dashboard) => {
 
     const [RoleAccessJob] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 35]);
 
+    // console.log("rows startDate ", startDate);
+    // console.log("rows endDate ", endDate);
     
-    
-
-  //   if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessCustomer.length > 0 || RoleAccessClient.length > 0 || RoleAccessJob.length > 0)) {
-
-  //     // Customer Condition
-  //     let CustomerCondition = `(SELECT COUNT(*) FROM customers WHERE created_at BETWEEN ? AND ?) AS customer,
-  //     (SELECT GROUP_CONCAT(id) FROM customers WHERE created_at BETWEEN ? AND ?) AS customer_ids,`;
-  //     if (rowRoles[0].role_name != "SUPERADMIN" && RoleAccessCustomer.length === 0) {
-  //       CustomerCondition = `(SELECT COUNT(*) FROM customers 
-  //       LEFT JOIN
-  //       staff_portfolio ON staff_portfolio.customer_id = customers.id
-  //       LEFT JOIN 
-  //       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //       OR sp_customers.staff_id = staff_portfolio.staff_id
-  //       WHERE (customers.staff_id = ${staff_id} OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId})) AND customers.created_at BETWEEN ? AND ?) AS customer,
-
-  //       (SELECT GROUP_CONCAT(customers.id) FROM customers
-  //       LEFT JOIN
-  //       staff_portfolio ON staff_portfolio.customer_id = customers.id
-  //       LEFT JOIN 
-  //       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //       OR sp_customers.staff_id = staff_portfolio.staff_id
-  //       WHERE (customers.staff_id = ${staff_id} OR customers.staff_id IN(${LineManageStaffId})  OR customers.account_manager_id IN(${LineManageStaffId})
-  //       ) AND customers.created_at BETWEEN ? AND ?) AS customer_ids,`
-
-  //     }
-
-
-  //     // Client Condition
-  //     let ClientCondition = `(SELECT COUNT(*) FROM clients WHERE created_at BETWEEN ? AND ?) AS client,
-  //     (SELECT GROUP_CONCAT(id) FROM clients WHERE created_at BETWEEN ? AND ?) AS client_ids,`;
-  //     if (rowRoles[0].role_name != "SUPERADMIN" && RoleAccessClient.length === 0) {
-  //       ClientCondition = `(SELECT COUNT(*) 
-  //       FROM clients c
-  //       JOIN customers cu ON c.customer_id = cu.id
-  //       LEFT JOIN
-  //       staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //       LEFT JOIN 
-  //       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //       OR sp_customers.staff_id = staff_portfolio.staff_id
-  //       WHERE (cu.staff_id = ${staff_id}  OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND cu.created_at BETWEEN ? AND ?) AS client,
-   
-   
-  //      (SELECT GROUP_CONCAT(c.id) 
-  //       FROM clients c
-  //       JOIN customers cu ON c.customer_id = cu.id
-  //       LEFT JOIN
-  //       staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //       LEFT JOIN 
-  //       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //       OR sp_customers.staff_id = staff_portfolio.staff_id
-  //       WHERE (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND cu.created_at BETWEEN ? AND ?) AS client_ids,`
-
-  //     }
-
-
-  //     // Job Condition
-  //     let JobCondition = `(SELECT COUNT(*) FROM jobs WHERE created_at BETWEEN ? AND ?) AS job,
-  //     (SELECT GROUP_CONCAT(id) FROM jobs WHERE created_at BETWEEN ? AND ?) AS job_ids,`;
-  //     if (rowRoles[0].role_name != "SUPERADMIN" && RoleAccessJob.length === 0) {
-  //       JobCondition = `(SELECT COUNT(*) 
-  //       FROM jobs j
-  //       JOIN clients c ON j.client_id = c.id
-  //       JOIN customers cu ON c.customer_id = cu.id
-  //       LEFT JOIN
-  //       staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //       LEFT JOIN 
-  //       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //       OR sp_customers.staff_id = staff_portfolio.staff_id
-  //       WHERE (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS job,
-  //       (SELECT GROUP_CONCAT(j.id) 
-  //       FROM jobs j
-  //       JOIN clients c ON j.client_id = c.id
-  //       JOIN customers cu ON c.customer_id = cu.id
-  //       LEFT JOIN
-  //       staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //       LEFT JOIN 
-  //       customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //       OR sp_customers.staff_id = staff_portfolio.staff_id
-  //       WHERE (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS job_ids,`
-  //     }
-
-
-  //     // Pending Job Condition
-  //     let PendingJobCondition = `(SELECT COUNT(*) FROM jobs WHERE status_type != '6' AND created_at BETWEEN ? AND ?) AS pending_job,
-  //     (SELECT GROUP_CONCAT(id) FROM jobs WHERE status_type != '6' AND created_at BETWEEN ? AND ?) AS pending_job_ids,`;
-  //     if (rowRoles[0].role_name != "SUPERADMIN" && RoleAccessJob.length === 0) {
-  //       PendingJobCondition = `(SELECT COUNT(*) 
-  //         FROM jobs j
-  //         JOIN clients c ON j.client_id = c.id
-  //         JOIN customers cu ON c.customer_id = cu.id
-  //         LEFT JOIN
-  //         staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //         LEFT JOIN 
-  //         customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //         OR sp_customers.staff_id = staff_portfolio.staff_id
-  //         WHERE j.status_type != '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS pending_job,
-  //         (SELECT GROUP_CONCAT(j.id) 
-  //         FROM jobs j
-  //         JOIN clients c ON j.client_id = c.id
-  //         JOIN customers cu ON c.customer_id = cu.id
-  //         LEFT JOIN
-  //         staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //         LEFT JOIN 
-  //         customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //         OR sp_customers.staff_id = staff_portfolio.staff_id
-  //         WHERE j.status_type != '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS pending_job_ids,`;
-  //     }
-
-
-  //     let CompletedJobCondition = `(SELECT COUNT(*) FROM jobs WHERE status_type = '6' AND created_at BETWEEN ? AND ?) AS completed_job,
-  //     (SELECT GROUP_CONCAT(id) FROM jobs WHERE status_type = '6' AND created_at BETWEEN ? AND ?) AS completed_job_ids`;
-  //     if (rowRoles[0].role_name != "SUPERADMIN" && RoleAccessJob.length === 0) {
-  //       CompletedJobCondition = `(SELECT COUNT(*)
-  //         FROM jobs j
-  //         JOIN clients c ON j.client_id = c.id
-  //         JOIN customers cu ON c.customer_id = cu.id
-  //         LEFT JOIN
-  //         staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //         LEFT JOIN 
-  //         customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //         OR sp_customers.staff_id = staff_portfolio.staff_id
-  //         WHERE j.status_type = '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS completed_job,
-  //         (SELECT GROUP_CONCAT(j.id) 
-  //         FROM jobs j
-  //         JOIN clients c ON j.client_id = c.id
-  //         JOIN customers cu ON c.customer_id = cu.id
-  //         LEFT JOIN
-  //         staff_portfolio ON staff_portfolio.customer_id = cu.id
-  //         LEFT JOIN 
-  //         customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-  //         OR sp_customers.staff_id = staff_portfolio.staff_id
-  //         WHERE j.status_type = '6' AND (cu.staff_id = ${staff_id} OR cu.staff_id IN(${LineManageStaffId})  OR cu.account_manager_id IN(${LineManageStaffId})) AND c.created_at BETWEEN ? AND ?) AS completed_job_ids`;
-  //     }
-
-
-
-
-  //     const query = `
-  //   SELECT
-
-  //     ${CustomerCondition}
-
-
-  //     ${ClientCondition}
-
-
-  //     (SELECT COUNT(*) FROM staffs WHERE created_at BETWEEN ? AND ?) AS staff,
-  //     (SELECT GROUP_CONCAT(id) FROM staffs WHERE created_at BETWEEN ? AND ?) AS staff_ids,
-
-
-  //     ${JobCondition}
-
-
-  //     ${PendingJobCondition}
-
-
-  //     ${CompletedJobCondition}
-  // `;
-  //     // console.log("query ", query)
-  //     const [rowAllCounts] = await pool.execute(query, [
-  //       // Pass the dynamic date range for each query
-  //       // For customer
-  //       startDate, endDate, startDate, endDate,
-  //       // For client
-  //       startDate, endDate, startDate, endDate,
-  //       // For staff
-  //       startDate, endDate, startDate, endDate,
-  //       // For jobs
-  //       startDate, endDate, startDate, endDate,
-  //       // For pending jobs
-  //       startDate, endDate, startDate, endDate,
-  //       // For completed jobs
-  //       startDate, endDate, startDate, endDate
-  //     ]);
-
-  //     const result = {
-  //       customer: {
-  //         count: rowAllCounts[0].customer,
-  //         ids: rowAllCounts[0].customer_ids
-  //       },
-  //       client: {
-  //         count: rowAllCounts[0].client,
-  //         ids: rowAllCounts[0].client_ids
-  //       },
-  //       job: {
-  //         count: rowAllCounts[0].job,
-  //         ids: rowAllCounts[0].job_ids
-  //       },
-  //       staff: {
-  //         count: rowAllCounts[0].staff,
-  //         ids: rowAllCounts[0].staff_ids
-  //       },
-  //       pending_job: {
-  //         count: rowAllCounts[0].pending_job,
-  //         ids: rowAllCounts[0].pending_job_ids
-  //       },
-  //       completed_job: {
-  //         count: rowAllCounts[0].completed_job,
-  //         ids: rowAllCounts[0].completed_job_ids
-  //       }
-  //     };
-  //     // console.log("result ", result)
-
-  //     return { status: true, message: "success.", data: result };
-
-  //   }
-
-    console.log("rows startDate ", startDate);
-    console.log("rows endDate ", endDate);
-    // Other Role Data
-
     // For Cutomer Data
     let CustomerResult = [];
     if(rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessCustomer.length >0)){
@@ -478,7 +268,40 @@ const getDashboardData = async (dashboard) => {
     // For Jobs Data
     let JobResult = []
     if(rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessJob.length >0)){
-
+    const JobQuery = `
+        SELECT 
+        jobs.id AS id,
+        jobs.status_type AS status_type
+        FROM 
+        jobs
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.created_at BETWEEN ? AND ?
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+      const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
+      JobResult = JobData;
     }
     else{
     const JobQuery = `
