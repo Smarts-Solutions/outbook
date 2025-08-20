@@ -1027,8 +1027,6 @@ const getJobByClient = async (job) => {
 
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
-
-      console.log("client_id----", client_id);
       const query = `
         SELECT 
         jobs.id AS job_id,
@@ -1095,8 +1093,6 @@ const getJobByClient = async (job) => {
     }
 
     // Other Role Data
-
-
      const query = `
         SELECT 
         jobs.id AS job_id,
@@ -1171,7 +1167,6 @@ const getJobByClient = async (job) => {
         ORDER BY 
         jobs.id DESC;
         `;
-
     const [result] = await pool.execute(query);
     return { status: true, message: "Success.", data: result };
   } catch (error) {

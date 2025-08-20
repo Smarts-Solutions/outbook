@@ -663,7 +663,6 @@ ORDER BY
    //console.log("Client LineManageStaffId:",LineManageStaffId);
 
    // Other role Get data
-    
     const query = `
    SELECT  
     clients.id AS id,
@@ -704,8 +703,6 @@ ORDER BY
       ORDER BY 
           clients.id DESC;
     `;
-
-   
 
      const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
      return { status: true, message: "success.", data: result };
