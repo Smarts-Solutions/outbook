@@ -894,6 +894,9 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
         jobs.staff_created_id AS staff_created_id,
+        
+        assigned_jobs_staff_view.source AS assigned_source,
+        customer_services.service_id AS customer_service_id,
 
         master_status.name AS status,
         CONCAT(
