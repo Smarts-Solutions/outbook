@@ -11,7 +11,8 @@ SELECT
     clients.id AS client_id,
     jobs.id AS job_id,
     staffs.id AS staff_id,
-    'assign_customer_portfolio' AS source
+    'assign_customer_portfolio' AS source,
+    NULL AS service_id_assign
 FROM 
     customers
 JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
@@ -24,9 +25,10 @@ UNION ALL
 SELECT  
     customers.id AS customer_id,
      clients.id AS client_id,
-    jobs.id AS job_id,
+     jobs.id AS job_id,
      staffs.id AS staff_id,
-    'assign_customer_service' AS source
+    'assign_customer_service' AS source,
+     customer_services.service_id AS service_id_assign
 FROM 
     customers
 JOIN customer_services ON customer_services.customer_id = customers.id
@@ -42,7 +44,8 @@ SELECT
      clients.id AS client_id,
     jobs.id AS job_id,
      staffs.id AS staff_id,
-    'assign_customer_main_account_manager' AS source
+    'assign_customer_main_account_manager' AS source,
+    NULL AS service_id_assign
 FROM 
     customers
 JOIN staffs ON staffs.id = customers.account_manager_id
@@ -57,7 +60,8 @@ SELECT
     clients.id AS client_id,
     jobs.id AS job_id,
     jobs.reviewer AS staff_id,
-    'reviewer' AS source
+    'reviewer' AS source,
+    NULL AS service_id_assign
 FROM 
     jobs
 JOIN clients ON clients.id = jobs.client_id
@@ -71,7 +75,8 @@ SELECT
     clients.id AS client_id,
     jobs.id AS job_id,
     jobs.allocated_to AS staff_id,
-     'allocated_to' AS source
+     'allocated_to' AS source,
+     NULL AS service_id_assign
 
 FROM 
     jobs
@@ -86,7 +91,8 @@ SELECT
     clients.id AS client_id,
     jobs.id AS job_id,
     job_allowed_staffs.staff_id AS staff_id,
-     'job_allowed_staffs' AS source
+    'job_allowed_staffs' AS source,
+    NULL AS service_id_assign
 FROM 
     jobs
 JOIN clients ON clients.id = jobs.client_id

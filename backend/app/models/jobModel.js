@@ -896,8 +896,10 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         jobs.staff_created_id AS staff_created_id,
 
         assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.staff_id AS assigned_staff_id,
         customer_services.service_id AS customer_service_id,
         jobs.service_id AS job_service_id,
+        customer_service_account_managers.account_manager_id AS customer_service_account_manager_id,
 
         master_status.name AS status,
         CONCAT(
@@ -915,13 +917,13 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         JOIN
         customer_services ON customer_services.service_id = jobs.service_id
         JOIN
-        customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+        customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id 
         LEFT JOIN 
         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         LEFT JOIN 
         clients ON jobs.client_id = clients.id
         LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
+        customers ON jobs.customer_id = customers.id OR customer_services.customer_id = customers.id
         LEFT JOIN 
         staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 
@@ -942,9 +944,11 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         jobs.id 
         ORDER BY 
         jobs.id DESC;
-        `;
+     `;
 
+     
     const [result] = await pool.execute(query);
+    console.log("getJobBySideBar - result", result);
 
     return { status: true, message: "Success.", data: result };
   } catch (error) {
