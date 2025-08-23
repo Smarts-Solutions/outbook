@@ -300,7 +300,12 @@ const getDashboardData = async (dashboard) => {
     const JobQuery = `
         SELECT 
         jobs.id AS id,
-        jobs.status_type AS status_type
+        jobs.status_type AS status_type,
+        
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id
+
         FROM 
         jobs
         LEFT JOIN 
@@ -342,7 +347,26 @@ const getDashboardData = async (dashboard) => {
         jobs.id DESC;
         `;
     const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
-    JobResult = JobData;
+
+    
+      //////-----START Assign Customer Service Data START----////////
+   let isExistAssignCustomer = JobData?.find(item => item?.assigned_source === 'assign_customer_service');
+   if(isExistAssignCustomer != undefined){
+    let matched = JobData?.filter(item =>
+      item?.assigned_source === 'assign_customer_service' &&
+      Number(item?.service_id_assign) === Number(item?.job_service_id)
+    )
+    let matched2 = JobData?.filter(item =>
+    item?.assigned_source !== 'assign_customer_service'
+    )
+    const resultAssignCustomer = [...matched, ...matched2]
+    JobResult = resultAssignCustomer;
+    }
+    //////-----END Assign Customer Service Data END----////////
+    else{
+      JobResult = JobData;
+    }
+
     }
 
 
