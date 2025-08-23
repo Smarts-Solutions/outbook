@@ -22,9 +22,7 @@ const CreateJob = () => {
 
 
 
-  //  console.log("location", location?.state?.isAssignDetails);
-  let isAssignDetails = location?.state?.isAssignDetails;
-  console.log("isAssignDetails", isAssignDetails?.service_id_assign);
+
 
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
@@ -71,6 +69,7 @@ const CreateJob = () => {
   
 
   const [jobData, setJobData] = useState({
+    CustomerDetails: [],
     AccountManager: "",
     Customer: "",
     Client: "",
@@ -119,7 +118,7 @@ const CreateJob = () => {
 
   });
 
-  // console.log("AllocatedTo", jobData.AllocatedTo);
+   console.log("CustomerDetails", jobData.CustomerDetails);
   // console.log("Reviewer", jobData.Reviewer);
   // console.log("staffCreatedId", staffCreatedId);
   // console.log("selectedStaffData", selectedStaffData);
@@ -129,6 +128,7 @@ const CreateJob = () => {
       ...prevState,
       AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
       Customer: AllJobData?.data?.customer?.customer_trading_name || "",
+      CustomerDetails: AllJobData?.data?.customerDetails || [],
       Client:
         location.state.goto == "Customer"
           ? ""
@@ -1181,11 +1181,14 @@ const CreateJob = () => {
       label: service.service_name
     }))
   ];
-
-  if (isAssignDetails?.service_id_assign) {
-    serviceOptions = serviceOptions.filter(
-      (option) => option.value === isAssignDetails?.service_id_assign
-    );
+  
+  
+  let isAssignDetails = jobData?.CustomerDetails.find(
+    (detail) => detail.assigned_source === "assign_customer_service"
+  );
+  if (isAssignDetails != undefined) {
+    //console.log("isAssignDetails", isAssignDetails);
+    serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
   }
 
   // 2. Build job type options based on selected service

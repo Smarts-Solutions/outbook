@@ -8,7 +8,9 @@ const {
 } = require("../../app/utils/helper");
 
 const getAddJobData = async (job) => {
-  const { customer_id } = job;
+  const { customer_id ,StaffUserId} = job;
+
+  console.log("job -- ", job);
 
   // customer Client
   try {
@@ -30,6 +32,8 @@ const getAddJobData = async (job) => {
     customers.id DESC;
   `;
     const [rows] = await pool.execute(queryCustomerWithClient, [customer_id]);
+
+  
     let customer = [];
     let client = [];
     if (rows.length > 0) {
@@ -45,6 +49,29 @@ const getAddJobData = async (job) => {
         client_client_type: row.client_client_type,
       }));
     }
+
+
+     const queryCustomerDetails = `
+    SELECT  
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        customers.account_manager_id  AS customer_account_manager_id,
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign
+    FROM 
+        customers
+   LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+   WHERE customers.id = ? AND assigned_jobs_staff_view.staff_id = ?
+   GROUP BY customers.id
+   ORDER BY 
+    customers.id DESC;
+  `;
+    const [customerDetails] = await pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
+
+
+   
+
 
     // CustomerAccountManager
     const queryCustomerWithCustomerAccountManager = `
@@ -269,7 +296,8 @@ const getAddJobData = async (job) => {
         engagement_model: engagement_model,
         currency: rows8,
         Manager: AccountManagerArr,
-        allStaff: rowsStaff
+        allStaff: rowsStaff,
+        customerDetails: customerDetails
       },
     };
   } catch (err) {

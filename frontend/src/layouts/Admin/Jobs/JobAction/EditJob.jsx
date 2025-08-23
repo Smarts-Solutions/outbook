@@ -23,6 +23,10 @@ const EditJob = () => {
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
 
+  // customer Details
+
+  const [CustomerDetails, setCustomerDetails] = useState([]);
+
 
   // console.log("location EDIT -", location);
 
@@ -77,7 +81,7 @@ const EditJob = () => {
 
 
   // console.log("selectedStaffData", selectedStaffData);
-  // console.log("allStaffData", allStaffData);
+   console.log("CustomerDetails", CustomerDetails);
 
 
   const [jobData, setJobData] = useState({
@@ -442,6 +446,8 @@ const EditJob = () => {
             loading: true,
             data: response.data,
           });
+
+          setCustomerDetails(response.data.customerDetails || []);
 
           setAllStaffData(response?.data?.allStaff || []);
         } else {
@@ -1283,13 +1289,22 @@ const EditJob = () => {
   ];
 
   // Select options for Service
-  const serviceOptions = [
+  let  serviceOptions = [
     { value: '', label: 'Select Service' },
     ...(AllJobData?.data?.services || []).map((service) => ({
       value: service.service_id,
       label: service.service_name
     }))
   ];
+
+   let isAssignDetails = CustomerDetails.find(
+    (detail) => detail.assigned_source === "assign_customer_service"
+  );
+  if (isAssignDetails != undefined) {
+    //console.log("isAssignDetails", isAssignDetails);
+    serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+  }
+
 
   // Select options for Job Type
   const jobTypeOptions = [
