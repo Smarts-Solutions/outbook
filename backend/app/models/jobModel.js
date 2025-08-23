@@ -636,10 +636,10 @@ const getJobByCustomer = async (job) => {
   let { customer_id, StaffUserId } = job;
 
   // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-    // Get Role
-    const rows = await QueryRoleHelperFunction(StaffUserId)
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId)
 
   //  console.log("getJobByCustomer", job);
   if (customer_id == undefined || customer_id == null || customer_id == '') {
@@ -648,7 +648,7 @@ const getJobByCustomer = async (job) => {
 
 
   try {
-    
+
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -745,6 +745,10 @@ const getJobByCustomer = async (job) => {
 
         jobs.staff_created_id AS staff_created_id,
 
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
         master_status.name AS status,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -783,8 +787,28 @@ const getJobByCustomer = async (job) => {
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
-        `;
+     `;
+
     const [result] = await pool.execute(query);
+
+
+      //////-----START Assign Customer Service Data START----////////
+   let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+   if(isExistAssignCustomer != undefined){
+    let matched = result?.filter(item =>
+      item?.assigned_source === 'assign_customer_service' &&
+      Number(item?.service_id_assign) === Number(item?.job_service_id)
+    )
+    let matched2 = result?.filter(item =>
+    item?.assigned_source !== 'assign_customer_service'
+    )
+    const resultAssignCustomer = [...matched, ...matched2]
+    return { status: true, message: "Success.", data: resultAssignCustomer };
+    }
+    //////-----END Assign Customer Service Data END----////////
+
+
+
     return { status: true, message: "Success.", data: result };
 
   } catch (error) {
@@ -896,10 +920,8 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         jobs.staff_created_id AS staff_created_id,
 
         assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.staff_id AS assigned_staff_id,
-        customer_services.service_id AS customer_service_id,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
-        customer_service_account_managers.account_manager_id AS customer_service_account_manager_id,
 
         master_status.name AS status,
         CONCAT(
@@ -945,10 +967,25 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         ORDER BY 
         jobs.id DESC;
      `;
-
-     
     const [result] = await pool.execute(query);
-    console.log("getJobBySideBar - result", result);
+
+
+    
+    //////-----START Assign Customer Service Data START----////////
+   let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+   if(isExistAssignCustomer != undefined){
+    let matched = result?.filter(item =>
+      item?.assigned_source === 'assign_customer_service' &&
+      Number(item?.service_id_assign) === Number(item?.job_service_id)
+    )
+    let matched2 = result?.filter(item =>
+    item?.assigned_source !== 'assign_customer_service'
+    )
+    const resultAssignCustomer = [...matched, ...matched2]
+    return { status: true, message: "Success.", data: resultAssignCustomer };
+    }
+    //////-----END Assign Customer Service Data END----////////
+
 
     return { status: true, message: "Success.", data: result };
   } catch (error) {
@@ -963,10 +1000,10 @@ const getJobByClient = async (job) => {
   // console.log("getJobByClient", job);
 
   // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-    // Get Role
-    const rows = await QueryRoleHelperFunction(StaffUserId)
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId)
 
 
   try {
@@ -1042,7 +1079,7 @@ const getJobByClient = async (job) => {
     }
 
     // Other Role Data
-     const query = `
+    const query = `
         SELECT 
         jobs.id AS job_id,
         timesheet.job_id AS timesheet_job_id,
@@ -1071,6 +1108,10 @@ const getJobByClient = async (job) => {
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
         jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
 
         master_status.name AS status,
         CONCAT(
@@ -1117,6 +1158,25 @@ const getJobByClient = async (job) => {
         jobs.id DESC;
         `;
     const [result] = await pool.execute(query);
+
+
+      //////-----START Assign Customer Service Data START----////////
+   let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+   if(isExistAssignCustomer != undefined){
+    let matched = result?.filter(item =>
+      item?.assigned_source === 'assign_customer_service' &&
+      Number(item?.service_id_assign) === Number(item?.job_service_id)
+    )
+    let matched2 = result?.filter(item =>
+    item?.assigned_source !== 'assign_customer_service'
+    )
+    const resultAssignCustomer = [...matched, ...matched2]
+    return { status: true, message: "Success.", data: resultAssignCustomer };
+    }
+    //////-----END Assign Customer Service Data END----////////
+
+    
+
     return { status: true, message: "Success.", data: result };
   } catch (error) {
     console.log("err -", error);
