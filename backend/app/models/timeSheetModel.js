@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../utils/helper');
 
 const getTimesheet = async (Timesheet) => {
 
@@ -233,7 +233,7 @@ const getTimesheetTaskType = async (Timesheet) => {
     else if (task_type === "2") {
 
       try {
-       // Line Manager
+        // Line Manager
         const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
         // Get Role
@@ -471,6 +471,11 @@ const getTimesheetTaskType = async (Timesheet) => {
          jobs.id AS id,
          jobs.total_time AS job_total_time,
          jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
          CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -516,6 +521,23 @@ const getTimesheetTaskType = async (Timesheet) => {
         jobs.id DESC;
         `;
         const [result] = await pool.execute(query);
+
+        //////-----START Assign Customer Service Data START----////////
+        let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+        if (isExistAssignCustomer != undefined) {
+          let matched = result?.filter(item =>
+            item?.assigned_source === 'assign_customer_service' &&
+            Number(item?.service_id_assign) === Number(item?.job_service_id)
+          )
+          let matched2 = result?.filter(item =>
+            item?.assigned_source !== 'assign_customer_service'
+          )
+          const resultAssignCustomer = [...matched, ...matched2]
+          return { status: true, message: "Success.", data: resultAssignCustomer };
+        }
+        //////-----END Assign Customer Service Data END----////////
+
+
         return { status: true, message: "Success.", data: result };
       } catch (error) {
         console.log("err -", error)
