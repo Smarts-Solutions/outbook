@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Login from "../layouts/Auth/Login";
+import Login1 from "../layouts/Auth/Login1";
 import { jwtDecode } from "jwt-decode";
 
 import Admin_Route from "./Admin_Route";
@@ -20,10 +21,17 @@ const Main_Route = () => {
   const token = JSON.parse(localStorage.getItem("token"));
 
   useEffect(() => {
+    // if (role == null || token == null || staffDetails == null) {
+    //   navigate("/login");
+    //   return;
+    // }
     if (role == null || token == null || staffDetails == null) {
-      navigate("/login");
-      return;
-    }
+  if (location.pathname !== "/login1") {
+    navigate("/login");
+  }
+  return;
+}
+
 
     if (location.pathname.startsWith("/updatepassword")) {
       navigate(location.pathname);
@@ -34,7 +42,7 @@ const Main_Route = () => {
       navigate("/login");
       return;
     }
-
+  
     if (location.pathname === "/forget") {
       navigate("/forget");
       return;
@@ -91,6 +99,7 @@ const Main_Route = () => {
       <Routes>
         <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
         <Route path="/login" element={<Login />} />
+         <Route path="/login1" element={<Login1 />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
       </Routes>
     </div>
