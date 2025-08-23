@@ -4812,4 +4812,18 @@ tbody.list.form-check-all tr:last-child td {
 .react-select__menu-portal {
   position: fixed !important;
 }
-
+.basic-multi-select
+{
+  z-index: 9999 !important;
+}
+.login1
+{
+  display: none !important;
+}
+@media screen and (min-width: 5000px) {
+.login1
+{
+  display: block !important;
+}
+  
+}

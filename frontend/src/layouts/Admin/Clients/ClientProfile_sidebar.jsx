@@ -667,7 +667,7 @@ const ClientList = () => {
             <Select
               id="tabSelect"
               name="staff_id"
-
+className="basic-multi-select"
               options={customerOptions}
               value={selectedOption}
               onChange={(selected) => {
@@ -719,6 +719,7 @@ const ClientList = () => {
                       <Select
                         id="tabSelect"
                         name="staff_id"
+                        className="basic-multi-select"
                         classNamePrefix="react-select"
                         isSearchable
                         options={clientOptions}

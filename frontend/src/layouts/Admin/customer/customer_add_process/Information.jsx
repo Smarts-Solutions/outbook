@@ -1230,6 +1230,7 @@ const Information = ({ id, pageStatus }) => {
                             id="accountManager"
                             name="accountManager"
                             options={staffOptions}
+                            className="basic-multi-select"
                             value={staffOptions.find(opt => Number(opt.value) === Number(ManagerType))}
                             onChange={(selectedOption) => {
                               const e = { target: { name: 'accountManager', value: selectedOption.value } };

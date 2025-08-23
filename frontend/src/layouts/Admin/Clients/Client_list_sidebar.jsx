@@ -1076,6 +1076,7 @@ const ClientLists = () => {
               <Select
                 id="tabSelect"
                 name="staff_id"
+                className="basic-multi-select"
                 classNamePrefix="react-select"
                 isSearchable
                 options={customerOptions}
