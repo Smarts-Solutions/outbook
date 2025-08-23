@@ -1,12 +1,12 @@
 const { response } = require('express');
 const pool = require('../config/database');
-const { SatffLogUpdateOperation ,LineManageStaffIdHelperFunction,
-  QueryRoleHelperFunction} = require('../utils/helper');
+const { SatffLogUpdateOperation, LineManageStaffIdHelperFunction,
+    QueryRoleHelperFunction } = require('../utils/helper');
 
 const jobStatusReports = async (Report) => {
     const { StaffUserId } = Report;
 
-   // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
@@ -81,6 +81,12 @@ const jobStatusReports = async (Report) => {
         const query = `
         SELECT 
          jobs.id AS id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+
          CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -140,6 +146,24 @@ const jobStatusReports = async (Report) => {
          ORDER BY jobs.id DESC
          `;
         const [result] = await pool.execute(query);
+
+
+        //////-----START Assign Customer Service Data START----////////
+        let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+        if (isExistAssignCustomer != undefined) {
+            let matched = result?.filter(item =>
+                item?.assigned_source === 'assign_customer_service' &&
+                Number(item?.service_id_assign) === Number(item?.job_service_id)
+            )
+            let matched2 = result?.filter(item =>
+                item?.assigned_source !== 'assign_customer_service'
+            )
+            const resultAssignCustomer = [...matched, ...matched2]
+            return { status: true, message: "Success.", data: resultAssignCustomer };
+        }
+        //////-----END Assign Customer Service Data END----////////
+
+
         return { status: true, message: 'Success.', data: result };
 
 
@@ -163,14 +187,14 @@ const getCustomWeekNumber = (day) => {
 const jobReceivedSentReports = async (Report) => {
     const { StaffUserId } = Report;
 
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
     try {
-       
+
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
         let weeklyRows = [];
@@ -197,7 +221,12 @@ const jobReceivedSentReports = async (Report) => {
             weeklyRows = weeklyData;
         } else {
             const weeklyQuery = `
-            SELECT 
+            SELECT
+
+            assigned_jobs_staff_view.source AS assigned_source,
+            assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+            jobs.service_id AS job_service_id,
+
             DATE_FORMAT(jobs.created_at, '%M') AS month_name,
             DAY(jobs.created_at) AS day,
             COUNT(DISTINCT jobs.id) AS job_received,  -- Count distinct jobs
@@ -220,7 +249,28 @@ const jobReceivedSentReports = async (Report) => {
             MONTH(jobs.created_at), DAY(jobs.created_at);;
                 `;
             const [weeklyData] = await pool.execute(weeklyQuery);
-            weeklyRows = weeklyData;
+
+            // console.log("weeklyData", weeklyData);
+
+            //////-----START Assign Customer Service Data START----////////
+            let isExistAssignCustomer = weeklyData?.find(item => item?.assigned_source === 'assign_customer_service');
+            if (isExistAssignCustomer != undefined) {
+                let matched = weeklyData?.filter(item =>
+                    item?.assigned_source === 'assign_customer_service' &&
+                    Number(item?.service_id_assign) === Number(item?.job_service_id)
+                )
+                let matched2 = weeklyData?.filter(item =>
+                    item?.assigned_source !== 'assign_customer_service'
+                )
+                const resultAssignCustomer = [...matched, ...matched2]
+                weeklyRows = resultAssignCustomer;
+
+            }
+            //////-----END Assign Customer Service Data END----////////
+            else {
+                weeklyRows = weeklyData;
+            }
+
         }
 
 
@@ -275,6 +325,9 @@ const jobReceivedSentReports = async (Report) => {
                 }))
             };
         });
+
+
+        // console.log("result", result);
         return { status: true, message: 'Success.', data: result };
 
     } catch (error) {
@@ -317,6 +370,11 @@ const jobSummaryReports = async (Report) => {
         // Other Role Data
         const query = `
         SELECT 
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
         master_status.name AS job_status,
         master_status.name AS job_status,
         COUNT(jobs.status_type) AS number_of_job,
@@ -332,9 +390,28 @@ const jobSummaryReports = async (Report) => {
         WHERE 
             assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
         GROUP BY 
-            master_status.name, jobs.status_type
+             master_status.name, jobs.status_type
          `;
         const [result] = await pool.execute(query);
+       
+
+        console.log("result", result);
+
+        //////-----START Assign Customer Service Data START----////////
+        let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+        if (isExistAssignCustomer != undefined) {
+            let matched = result?.filter(item =>
+                item?.assigned_source === 'assign_customer_service' &&
+                Number(item?.service_id_assign) === Number(item?.job_service_id)
+            )
+            let matched2 = result?.filter(item =>
+                item?.assigned_source !== 'assign_customer_service'
+            )
+            const resultAssignCustomer = [...matched, ...matched2]
+            return { status: true, message: "Success.", data: resultAssignCustomer };
+        }
+        //////-----END Assign Customer Service Data END----////////
+
         return { status: true, message: 'Success.', data: result };
 
 
@@ -347,7 +424,7 @@ const jobSummaryReports = async (Report) => {
 const jobPendingReports = async (Report) => {
     const { StaffUserId } = Report;
 
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
@@ -478,14 +555,14 @@ const teamMonthlyReports = async (Report) => {
 const dueByReport = async (Report) => {
     const { StaffUserId } = Report;
 
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
     try {
-      
+
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
         const monthsRange = 12;
@@ -578,14 +655,14 @@ const reportCountJob = async (Report) => {
     const { StaffUserId, job_ids } = Report;
     const cleaneJob_ids = job_ids.replace(/^,+|,+$/g, '');
 
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
     try {
-      
+
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -763,10 +840,10 @@ const taxWeeklyStatusReport = async (Report) => {
         }
         const weeks_sql = weeks.join(",\n    ");
 
-       
-        
+
+
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
-        
+
         let query = `
             SELECT
                 master_status.name AS job_status,
@@ -809,19 +886,19 @@ const taxWeeklyStatusReport = async (Report) => {
             conditions.push(`jobs.reviewer = ${reviewer_id}`);
         }
 
-        
+
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-          if (conditions.length > 0) {
-            query += ` WHERE ${conditions.join(" AND ")}`;
-          }
-        }else{
-          if (conditions.length > 0) {
-            query += ` WHERE (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND
+            if (conditions.length > 0) {
+                query += ` WHERE ${conditions.join(" AND ")}`;
+            }
+        } else {
+            if (conditions.length > 0) {
+                query += ` WHERE (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND
              ${conditions.join(" AND ")}`;
-          }else{
-            query += ` WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})`;
-          }
-            
+            } else {
+                query += ` WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})`;
+            }
+
         }
 
 
@@ -862,7 +939,7 @@ const taxWeeklyStatusReport = async (Report) => {
         });
 
         return { status: true, message: 'Success.', data: formattedResult };
-        
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting tax status weekly report.' };
@@ -884,9 +961,9 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
 
         let customer = []
         let custumerData = [];
-       
+
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const queryCustomer = `
+            const queryCustomer = `
         SELECT  
             customers.id AS customer_id,
             customers.trading_name AS customer_name
@@ -895,9 +972,9 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         ORDER BY 
         customers.id DESC;
        `;
-        const [data] = await pool.execute(queryCustomer);
-        custumerData = data;
-        }else{
+            const [data] = await pool.execute(queryCustomer);
+            custumerData = data;
+        } else {
             const queryCustomer = `
         SELECT  
             customers.id AS customer_id,
@@ -911,8 +988,8 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         ORDER BY 
         customers.id DESC;
        `;
-        const [data] = await pool.execute(queryCustomer);
-        custumerData = data;
+            const [data] = await pool.execute(queryCustomer);
+            custumerData = data;
         }
 
         if (custumerData.length > 0) {
@@ -1006,18 +1083,18 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
 
 const averageTatReport = async (Report) => {
     const { StaffUserId } = Report;
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
     try {
-        
+
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
-      if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const query = `
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+            const query = `
        SELECT
             CASE 
                 WHEN MONTH(jobs.created_at) = MONTH(CURDATE()) AND YEAR(jobs.created_at) = YEAR(CURDATE()) THEN 'Current'
@@ -1035,40 +1112,40 @@ const averageTatReport = async (Report) => {
             ORDER BY
             jobs.created_at DESC
        `;
-        //      const query = `
-        //      SELECT
-        //      CASE 
-        //          WHEN MONTH(jobs.created_at) = MONTH(CURDATE()) AND YEAR(jobs.created_at) = YEAR(CURDATE()) THEN 'Current'
-        //          ELSE DATE_FORMAT(jobs.created_at, '%b %Y')
-        //      END AS month,
+            //      const query = `
+            //      SELECT
+            //      CASE 
+            //          WHEN MONTH(jobs.created_at) = MONTH(CURDATE()) AND YEAR(jobs.created_at) = YEAR(CURDATE()) THEN 'Current'
+            //          ELSE DATE_FORMAT(jobs.created_at, '%b %Y')
+            //      END AS month,
 
-        //      -- Calculate the total count of jobs for the month
-        //      COUNT(jobs.id) AS job_count,
+            //      -- Calculate the total count of jobs for the month
+            //      COUNT(jobs.id) AS job_count,
 
-        //      -- Calculate the number of days in the current month (for averaging)
-        //      DAY(LAST_DAY(jobs.created_at)) AS days_in_month,
+            //      -- Calculate the number of days in the current month (for averaging)
+            //      DAY(LAST_DAY(jobs.created_at)) AS days_in_month,
 
-        //      -- Calculate the average turnaround time (TAT) per day
-        //      AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) / DAY(LAST_DAY(jobs.created_at)) AS average_tat_per_day,
+            //      -- Calculate the average turnaround time (TAT) per day
+            //      AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) / DAY(LAST_DAY(jobs.created_at)) AS average_tat_per_day,
 
-        //      -- Concatenate job IDs for each month
-        //      GROUP_CONCAT(jobs.id ORDER BY jobs.created_at) AS job_ids
+            //      -- Concatenate job IDs for each month
+            //      GROUP_CONCAT(jobs.id ORDER BY jobs.created_at) AS job_ids
 
-        //  FROM
-        //      jobs
-        //  WHERE
-        //      jobs.status_type = 6
-        //  GROUP BY
-        //      YEAR(jobs.created_at),
-        //      MONTH(jobs.created_at)
-        //      ORDER BY
-        //      jobs.created_at DESC
-        //       `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
-       }
+            //  FROM
+            //      jobs
+            //  WHERE
+            //      jobs.status_type = 6
+            //  GROUP BY
+            //      YEAR(jobs.created_at),
+            //      MONTH(jobs.created_at)
+            //      ORDER BY
+            //      jobs.created_at DESC
+            //       `;
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+        }
 
-     // Other Data Role
+        // Other Data Role
         const query = `
         SELECT
             CASE 
@@ -1124,7 +1201,7 @@ const averageTatReport = async (Report) => {
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
 
-       
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };

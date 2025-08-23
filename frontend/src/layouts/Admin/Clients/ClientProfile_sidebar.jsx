@@ -152,7 +152,7 @@ const ClientList = () => {
 
 
 
-
+ console.log("customerData side baar",customerData)
 
 
   const accessDataJob =

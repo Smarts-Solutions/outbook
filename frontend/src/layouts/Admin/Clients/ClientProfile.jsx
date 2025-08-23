@@ -23,6 +23,8 @@ const ClientList = () => {
   const fileInputRef = useRef(null);
   const [customerData, setCustomerData] = useState([]);
 
+  // console.log("customerData", customerData);
+
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
   const [informationData, informationSetData] = useState([]);
@@ -42,7 +44,7 @@ const ClientList = () => {
   const [folderPath, setFolderPath] = useState("");
 
 
-  console.log("fileStateClient", fileStateClient);
+  //  console.log("getClientDetails", getClientDetails);
 
   const fetchSiteDetails = async () => {
     const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
@@ -968,7 +970,7 @@ const ClientList = () => {
             </div>
           )}
 
-          {console.log("getClientDetails sssss", getClientDetails?.data?.client?.client_type)}
+          {/* {console.log("getClientDetails sssss", getClientDetails?.data?.client?.client_type)} */}
 
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">

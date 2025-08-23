@@ -36,6 +36,8 @@ const ClientList = () => {
     customer: location.state,
   });
 
+  // console.log("getJobDetails ", getJobDetails);
+
  
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState("");
@@ -1319,7 +1321,7 @@ const ClientList = () => {
                               state: {
                                 customer_id: location.state.id,
                                 goto: "Customer",
-                                activeTab: activeTab,
+                                activeTab: activeTab
                               },
                             })
                           }

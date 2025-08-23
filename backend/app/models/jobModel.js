@@ -1371,13 +1371,13 @@ const getJobById = async (job) => {
   jobs.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 AS If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
   jobs.Management_Accounts_Frequency_id_6 AS Management_Accounts_Frequency_id_6,
 
-
-
      client_job_task.time AS task_budgeted_hour,
      task.id AS task_id,
      task.name AS task_name
      FROM 
      jobs
+     JOIN 
+     assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
      JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      JOIN 
@@ -1409,9 +1409,8 @@ const getJobById = async (job) => {
 
     //  checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
     //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
-
+ 
     const [rows] = await pool.execute(query, [job_id]);
-
     const [selectedStaffData] = await pool.execute(
       `SELECT CONCAT(staffs.first_name, ' ', staffs.last_name) AS label , staffs.id AS value
    FROM job_allowed_staffs
@@ -1550,6 +1549,8 @@ const getJobById = async (job) => {
         If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
           rows[0].If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
         Management_Accounts_Frequency_id_6: rows[0].Management_Accounts_Frequency_id_6,
+        
+
 
         tasks: {
           checklist_id: rows[0].checklist_id,

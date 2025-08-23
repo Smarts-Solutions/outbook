@@ -24,6 +24,8 @@ const EditJob = () => {
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
 
 
+  // console.log("location EDIT -", location);
+
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState({
     loading: false,
@@ -170,6 +172,7 @@ const EditJob = () => {
 
     }));
   }, []);
+
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id };
@@ -341,7 +344,7 @@ const EditJob = () => {
                 response.data.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 ??
                 "",
               Management_Accounts_Frequency_id_6:
-                response.data.Management_Accounts_Frequency_id_6 ?? "",
+                response.data.Management_Accounts_Frequency_id_6 ?? ""
             }));
           }
 

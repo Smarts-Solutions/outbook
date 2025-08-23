@@ -20,6 +20,12 @@ const CreateJob = () => {
   const dispatch = useDispatch();
   const role = JSON.parse(localStorage.getItem("role"));
 
+
+
+  //  console.log("location", location?.state?.isAssignDetails);
+  let isAssignDetails = location?.state?.isAssignDetails;
+  console.log("isAssignDetails", isAssignDetails?.service_id_assign);
+
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
@@ -1168,13 +1174,19 @@ const CreateJob = () => {
 
   // SELECT OPTION 
   // 1. Build service options
-  const serviceOptions = [
+  let serviceOptions = [
     { value: '', label: 'Select Service' },
     ...(AllJobData?.data?.services || []).map((service) => ({
       value: service.service_id,
       label: service.service_name
     }))
   ];
+
+  if (isAssignDetails?.service_id_assign) {
+    serviceOptions = serviceOptions.filter(
+      (option) => option.value === isAssignDetails?.service_id_assign
+    );
+  }
 
   // 2. Build job type options based on selected service
   const jobTypeOptions = [
