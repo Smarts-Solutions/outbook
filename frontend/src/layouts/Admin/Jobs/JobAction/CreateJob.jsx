@@ -59,6 +59,11 @@ const CreateJob = () => {
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  const [allStaffData, setAllStaffData] = useState([]);
+  const [selectedStaffData, setSelectedStaffData] = useState([]);
+
+  
+
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -108,6 +113,11 @@ const CreateJob = () => {
 
   });
 
+  // console.log("AllocatedTo", jobData.AllocatedTo);
+  // console.log("Reviewer", jobData.Reviewer);
+  // console.log("staffCreatedId", staffCreatedId);
+  // console.log("selectedStaffData", selectedStaffData);
+
   useEffect(() => {
     setJobData((prevState) => ({
       ...prevState,
@@ -138,11 +148,14 @@ const CreateJob = () => {
             CustomerAccountManager: response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id.toString() || "",
             EngagementModel: Object.entries(response.data?.engagement_model[0]).find(([key, value]) => value === "1")?.[0] || "",
           }));
+
+          setAllStaffData(response?.data?.allStaff || []);
         } else {
           setAllJobData({
             loading: true,
             data: [],
           });
+          setAllStaffData([]);
         }
       })
       .catch((error) => {
@@ -174,14 +187,14 @@ const CreateJob = () => {
       };
       const data = { req: req, authToken: token };
 
-     
+
 
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
             if (response.data.length > 0) {
-              
+
               const isIncluded = response.data[0].client_type_id
                 .split(",")
                 .includes(response.data[0].client_type);
@@ -463,6 +476,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
     const req = {
+      selectedStaffData:selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
@@ -1208,6 +1222,7 @@ const CreateJob = () => {
       label: client.client_trading_name
     }))
   ];
+
 
   return (
     <div>
@@ -2171,6 +2186,40 @@ const CreateJob = () => {
                                       </div>
                                     )}
                                   </div>
+
+
+                                  <div
+                                    id="satff"
+                                    className="col-lg-4 mb-3"
+                                  >
+                                    <label
+                                      htmlFor="firstNameinput"
+                                      className="form-label"
+                                    >
+                                      Staff
+                                    </label>
+                                  
+                                    <Select
+                                      options={allStaffData
+                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId) 
+                                        ?.map((data) => {
+                                        return { label: data.full_name, value: data.id };
+                                      })}
+                                      isMulti
+                                      closeMenuOnSelect={false}
+                                      className="basic-multi-select"
+                                      name="staff"
+                                      id="staff"
+                                      value={selectedStaffData}
+                                      onChange={(e) => {
+                                        setSelectedStaffData(e);
+                                      }}
+                                      placeholder="Select options"
+                                    />
+
+                                  </div>
+
+
                                 </div>
                               </div>
                             </div>

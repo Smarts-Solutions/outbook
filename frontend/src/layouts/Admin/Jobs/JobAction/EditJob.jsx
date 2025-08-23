@@ -69,6 +69,15 @@ const EditJob = () => {
   const [tempTaskArr, setTempTaskArr] = useState([]);
   const [tempChecklistId, setTempChecklistId] = useState("");
 
+
+  const [allStaffData, setAllStaffData] = useState([]);
+  const [selectedStaffData, setSelectedStaffData] = useState([]);
+
+
+  // console.log("selectedStaffData", selectedStaffData);
+  // console.log("allStaffData", allStaffData);
+
+
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -170,6 +179,8 @@ const EditJob = () => {
       .then(async (response) => {
         if (response.status) {
           if (Object.keys(response.data).length > 0) {
+           
+            setSelectedStaffData(response.data.selectedStaffData || []);
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempTaskArr(response.data.tasks?.task ?? []);
@@ -428,11 +439,14 @@ const EditJob = () => {
             loading: true,
             data: response.data,
           });
+
+          setAllStaffData(response?.data?.allStaff || []);
         } else {
           setAllJobData({
             loading: true,
             data: [],
           });
+           setAllStaffData([]);
         }
       })
       .catch((error) => {
@@ -597,6 +611,7 @@ const EditJob = () => {
     const req = {
       job_id: location.state.job_id,
       ...jobData,
+      selectedStaffData:selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
         getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
@@ -2280,6 +2295,38 @@ const EditJob = () => {
                                       </div>
                                     )}
                                   </div>
+
+                                  <div
+                                    id="satff"
+                                    className="col-lg-4 mb-3"
+                                  >
+                                    <label
+                                      htmlFor="firstNameinput"
+                                      className="form-label"
+                                    >
+                                      Staff
+                                    </label>
+                                  
+                                    <Select
+                                      options={allStaffData
+                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId) 
+                                        ?.map((data) => {
+                                        return { label: data.full_name, value: data.id };
+                                      })}
+                                      isMulti
+                                      closeMenuOnSelect={false}
+                                      className="basic-multi-select"
+                                      name="staff"
+                                      id="staff"
+                                      value={selectedStaffData}
+                                      onChange={(e) => {
+                                        setSelectedStaffData(e);
+                                      }}
+                                      placeholder="Select options"
+                                    />
+
+                                  </div>
+
                                 </div>
                               </div>
                             </div>

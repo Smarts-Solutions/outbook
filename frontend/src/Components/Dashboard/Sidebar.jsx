@@ -314,7 +314,7 @@ const Sidebar = () => {
                   </Link>
                 </li>
 
-                {/* <li
+                <li
                   className={
                     activeLink === "/admin/timesheetReports" ? "active" : ""
                   }
@@ -330,7 +330,7 @@ const Sidebar = () => {
                     </span>
                     <span>Time Sheet Reports</span>
                   </Link>
-                </li> */}
+                </li>
                 </>
               )}
             {((updatedShowTab && updatedShowTab.setting) ||

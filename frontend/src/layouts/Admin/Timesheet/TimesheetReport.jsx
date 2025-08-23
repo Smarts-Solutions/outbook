@@ -12,11 +12,19 @@ import { useDispatch, useSelector } from "react-redux";
 // import AverageTatReport from './AverageTatReport';
 
 
+
+// import Select from 'react-select';
+
+
+
+import * as XLSX from "xlsx";
+
+
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
- 
+
 
 function TimesheetReport() {
- 
+
   const [filter, setFilter] = useState(false);
   const getActiveTab = sessionStorage.getItem('activeReport');
   const [activeTab, setActiveTab] = useState(getActiveTab || "jobStatusReport");
@@ -27,36 +35,36 @@ function TimesheetReport() {
   };
 
 
-//   const getTabContent = () => {
-//     switch (activeTab) {
-//       case 'jobStatusReport':
-//         return <JobStatusReport />
-//       case 'jobsReceivedSentReports':
-//         return <JobsReceivedSentReports />;
-//       case 'jobSummaryReport':
-//         return <JobSummaryReport />
-//       case 'jobsPendingReport':
-//         return <JobPendingReport />;
-//       case 'dueByReport':
-//         return <DueByReport />;
-//       case 'teamPerformanceReport':
-//         return <TeamMonthlyReport />;
-//       case 'timesheetReport':
-//         return <TimesheetReport />
-//       case 'averageTATReport':
-//         return <AverageTatReport />;
-//       case 'taxWeeklyStatusReport':
-//         return <TextWeelyReport />;
-//       default:
-//         return null;
-//     }
-//   };
-const dispatch = useDispatch(); 
-const token = JSON.parse(localStorage.getItem("token"));
-const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-const [selectedStaff, setSelectedStaff] = useState({});
+  //   const getTabContent = () => {
+  //     switch (activeTab) {
+  //       case 'jobStatusReport':
+  //         return <JobStatusReport />
+  //       case 'jobsReceivedSentReports':
+  //         return <JobsReceivedSentReports />;
+  //       case 'jobSummaryReport':
+  //         return <JobSummaryReport />
+  //       case 'jobsPendingReport':
+  //         return <JobPendingReport />;
+  //       case 'dueByReport':
+  //         return <DueByReport />;
+  //       case 'teamPerformanceReport':
+  //         return <TeamMonthlyReport />;
+  //       case 'timesheetReport':
+  //         return <TimesheetReport />
+  //       case 'averageTATReport':
+  //         return <AverageTatReport />;
+  //       case 'taxWeeklyStatusReport':
+  //         return <TextWeelyReport />;
+  //       default:
+  //         return null;
+  //     }
+  //   };
+  const dispatch = useDispatch();
+  const token = JSON.parse(localStorage.getItem("token"));
+  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [selectedStaff, setSelectedStaff] = useState({});
 
- const staffData = async () => {
+  const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -77,61 +85,259 @@ const [selectedStaff, setSelectedStaff] = useState({});
   }, []);
 
   const handleSelectStaff = (e) => {
-    let {name, value} = e.target;
+    let { name, value } = e.target;
     let staff = staffDataAll.data.find(staff => staff.id === parseInt(value));
     setSelectedStaff(staff);
   }
 
-
   console.log("selectStaff ", selectedStaff);
 
 
-  return (
-    <div className='container-fluid'>
-      <div className="row ">
-        <div className="col-sm-12">
-          <div className="page-title-box">
-            <div className="row">
-              <div>
-                <h5 className="mb-4" style={{ fontWeight: 600 }}>Timesheet Reports</h5>
-              </div>
-              <div className="col-lg-4 col-md-6 ">
-                <>
-                 <label htmlFor="tabSelect" className="form-label">Select Staff</label>
-                  <select className="form-select" id="tabSelect" name='staff'
-                  // value={activeTab}
-                   onChange={(e)=>handleSelectStaff(e)}
-                   > 
-                    <option value="">---Select Staff---</option>
-                    {staffDataAll &&  staffDataAll.data.map((staff, index) => (
-                      <option key={index} value={staff.id}>
-                        {staff.first_name} {staff.last_name}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              </div>
-            </div>
-          </div>
+
+
+
+  const data = [
+    {
+      jobId: "F & CLI_V3_00009",
+      accountManager: "STAFF NINE",
+      client: "CLI--2",
+      serviceType: "Payroll",
+      jobType: "V3",
+      status: "To Be Started Yet Allocated Internally",
+    },
+    {
+      jobId: "F & CLI_V3_00008",
+      accountManager: "STAFF NINE",
+      client: "CLI--2",
+      serviceType: "Payroll",
+      jobType: "V3",
+      status: "To Be Started Yet Allocated Internally",
+    },
+  ];
+
+  const exportExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Job Status Report");
+    XLSX.writeFile(workbook, "JobStatusReport.xlsx");
+  };
+
+
+
+const dummyData = [
+  {
+    employee: "John",
+    internalExternal: "Internal",
+    customer: "ABC Corp",
+    client: "XYZ Ltd",
+    job: "Developer",
+    task: "Coding",
+    date: "2025-08-01",
+  },
+  {
+    employee: "Mary",
+    internalExternal: "External",
+    customer: "DEF Inc",
+    client: "XYZ Ltd",
+    job: "Designer",
+    task: "Design",
+    date: "2025-08-05",
+  },
+  // aur bhi data items
+];
+
+ const [filters, setFilters] = useState({
+    groupBy: "Employee",
+    timePeriod: "This month",
+    displayBy: "Weekly",
+    fromDate: "",
+    toDate: "",
+  });
+
+  // Handle filter change
+  const handleFilterChange = (e) => {
+    const { id, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  // Filter the data based on filters
+  const filteredData = dummyData.filter((item) => {
+    // Filter by date range if fromDate and toDate set
+    const itemDate = new Date(item.date);
+    const fromDate = filters.fromDate ? new Date(filters.fromDate) : null;
+    const toDate = filters.toDate ? new Date(filters.toDate) : null;
+
+    if (fromDate && itemDate < fromDate) return false;
+    if (toDate && itemDate > toDate) return false;
+
+    // Example: Filter by groupBy if you want to restrict data
+    // For demo, let's say groupBy does not filter data directly
+    // You can add more complex filtering here
+
+    return true; // Include all matching items
+  });
+
+
+
+
+
+  
+
+ return (
+    <div className="container-fluid py-4">
+      {/* Page Title */}
+      <div className="row mb-3">
+        <div className="col-12">
+          <h5 className="fw-semibold mb-0">Timesheet Reports</h5>
         </div>
       </div>
-      <div className="tab-content" id="pills-tabContent">
-        {/* {getTabContent()} */}
+
+      {/* Filters Section */}
+      <div className="row g-3 mb-3 bg-light p-3 rounded shadow-sm">
+        {/* Group By */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Group By</label>
+          <select
+            className="form-select shadow-sm"
+            id="groupBy"
+            value={filters.groupBy}
+            onChange={handleFilterChange}
+          >
+            <option>Employee</option>
+            <option>Internal/External</option>
+            <option>Customer</option>
+            <option>Client</option>
+            <option>Job</option>
+            <option>Task</option>
+          </select>
+        </div>
+
+        {/* Time Period */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Time Period</label>
+          <select
+            className="form-select shadow-sm"
+            id="timePeriod"
+            value={filters.timePeriod}
+            onChange={handleFilterChange}
+          >
+            <option>This week</option>
+            <option>This month</option>
+            <option>This quarter</option>
+            <option>This year</option>
+            <option>Last Week</option>
+            <option>Last Month</option>
+            <option>Custom</option>
+          </select>
+        </div>
+
+        {/* Display By */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Display By</label>
+          <select
+            className="form-select shadow-sm"
+            id="displayBy"
+            value={filters.displayBy}
+            onChange={handleFilterChange}
+          >
+            <option>Daily</option>
+            <option>Weekly</option>
+            <option>Monthly</option>
+            <option>Quarterly</option>
+            <option>Yearly</option>
+          </select>
+        </div>
+
+        {/* From Date */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">From Date</label>
+          <input
+            type="date"
+            className="form-control shadow-sm"
+            id="fromDate"
+            value={filters.fromDate}
+            onChange={handleFilterChange}
+          />
+        </div>
+
+        {/* To Date */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">To Date</label>
+          <input
+            type="date"
+            className="form-control shadow-sm"
+            id="toDate"
+            value={filters.toDate}
+            onChange={handleFilterChange}
+          />
+        </div>
       </div>
-      <CommanModal
-        isOpen={filter}
-        backdrop="static"
-        size="ms-5"
-        title="Task"
-        cancel_btn="cancel"
-        hideBtn={false}
-        btn_name="Save"
-        handleClose={() => setFilter(false)}
-      >
-        {/* Modal content here */}
-      </CommanModal>
+
+      {/* Buttons */}
+      <div className="d-flex gap-2 align-items-center mb-4">
+        <button
+          className="btn btn-outline-secondary shadow-sm"
+          id="btn-reset"
+          onClick={() =>
+            setFilters({
+              groupBy: "Employee",
+              timePeriod: "This month",
+              displayBy: "Weekly",
+              fromDate: "",
+              toDate: "",
+            })
+          }
+        >
+          Reset
+        </button>
+        <button className="btn btn-success shadow-sm" id="btn-export">
+          Export Excel
+        </button>
+      </div>
+
+      {/* Filtered Data Display */}
+      <div>
+        <h6>Filtered Data:</h6>
+        {filteredData.length === 0 ? (
+          <p>No records found</p>
+        ) : (
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Internal/External</th>
+                <th>Customer</th>
+                <th>Client</th>
+                <th>Job</th>
+                <th>Task</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((item, idx) => (
+                <tr key={idx}>
+                  <td>{item.employee}</td>
+                  <td>{item.internalExternal}</td>
+                  <td>{item.customer}</td>
+                  <td>{item.client}</td>
+                  <td>{item.job}</td>
+                  <td>{item.task}</td>
+                  <td>{item.date}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
+
+
+
+
 }
 
 export default TimesheetReport;

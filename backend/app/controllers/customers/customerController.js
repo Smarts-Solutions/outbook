@@ -78,7 +78,6 @@ const updateProcessCustomerFile = async (req, res) => {
     }
 }
 
-
 const updateProcessCustomerFileAction = async (req, res) => {
   try {
     const { ...customerProcessData } = req.body;
@@ -92,7 +91,6 @@ const updateProcessCustomerFileAction = async (req, res) => {
       res.status(500).json({ status:false, message: error.message});
     }
 }
-
 
 const customerUpdate = async (req, res) => {
   try {
@@ -153,8 +151,6 @@ const deleteCustomer = async (req, res) => {
       res.status(500).json({ status:false, message: error.message});
     }
 }
-
-
 
 
 

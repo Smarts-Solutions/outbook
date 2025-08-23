@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds } = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../utils/helper');
 
 const getTimesheet = async (Timesheet) => {
 
@@ -233,175 +233,72 @@ const getTimesheetTaskType = async (Timesheet) => {
     else if (task_type === "2") {
 
       try {
-        const QueryRole = `
-          SELECT
-            staffs.id AS id,
-            staffs.role_id AS role_id,
-            roles.role AS role_name
-          FROM
-            staffs
-          JOIN
-            roles ON roles.id = staffs.role_id
-          WHERE
-            staffs.id = ${staff_id}
-          LIMIT 1
-          `
-        const [rows] = await pool.execute(QueryRole);
-
         // Line Manager
-        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-        if (LineManageStaffId.length == 0) {
-          LineManageStaffId.push(staff_id);
-        }
-        // Condition with Admin And SuperAdmin
-        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
+        // Condition with  SuperAdmin
+
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
           const query = `
-            SELECT  
-            customers.id AS id,
-            customers.trading_name AS trading_name
-        FROM 
-            customers
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN 
-            customer_company_information ON customers.id = customer_company_information.customer_id
-        GROUP BY
-            customers.id   
-        ORDER BY 
-            customers.id DESC;
-            `;
+              SELECT  
+              customers.id AS id,
+              customers.status AS status,
+              customers.form_process AS form_process,
+              customers.trading_name AS trading_name,
+              CONCAT(
+              'cust_', 
+              SUBSTRING(customers.trading_name, 1, 3), '_',
+              SUBSTRING(customers.customer_code, 1, 15)
+              ) AS customer_code
+          FROM 
+              customers 
+          ORDER BY 
+          id DESC;`;
+
           const [result] = await pool.execute(query);
           return { status: true, message: 'Success..', data: result };
         }
-        let result = []
 
-        const Query_Select = ` SELECT  
-            customers.id AS id,
-            customers.trading_name AS trading_name,
-            CONCAT(
-                'cust_', 
-                SUBSTRING(customers.trading_name, 1, 3), '_',
-                SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
+        // Other Role Data
+        let query = `
+       SELECT  
+        customers.id AS id,
+        customers.status AS status,
+        customers.form_process AS form_process,
+        customers.trading_name AS trading_name,
+        CONCAT(
+        'cust_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(customers.customer_code, 1, 15)
+        ) AS customer_code
         FROM 
-            customers
-        LEFT JOIN 
-            customer_services ON customer_services.customer_id = customers.id
-        LEFT JOIN 
-            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id    
-        LEFT JOIN
-            jobs ON jobs.customer_id = customers.id   
+            customers  
         JOIN 
             staffs AS staff1 ON customers.staff_id = staff1.id
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN clients ON clients.customer_id = customers.id
+        LEFT JOIN
+            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
-        LEFT JOIN 
-                   staff_portfolio ON staff_portfolio.customer_id = customers.id
-                LEFT JOIN 
-                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
-            `
-
-
-        if (rows.length > 0) {
-          // Allocated to
-          if (rows[0].role_id == 3) {
-            const query = `${Query_Select}
-        WHERE 
-            jobs.allocated_to = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
-        GROUP BY 
-            CASE 
-                WHEN jobs.allocated_to = ? THEN jobs.customer_id
-                ELSE customers.id
-            END
-        ORDER BY 
-            customers.id DESC
-                    `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
-            result = resultAllocated
-
-          }
-          // Account Manger
-          else if (rows[0].role_id == 4) {
-            const query = `${Query_Select}
-                WHERE jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
-                GROUP BY 
-            CASE 
-                WHEN jobs.account_manager_id = ? THEN jobs.customer_id
-                ELSE customers.id
-            END
-                ORDER BY 
-                    customers.id DESC;
-                    `;
-
-
-            // const query = `${Query_Select}
-            //     WHERE customer_service_account_managers.account_manager_id = ? OR customers.account_manager_id = ? OR customers.staff_id = ?
-            //     GROUP BY 
-            //     customers.id;
-            //         `;
-
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id, staff_id]);
-            result = resultAllocated;
-          }
-          // Reviewer
-          else if (rows[0].role_id == 6) {
-
-            const query = `${Query_Select}
-                WHERE jobs.reviewer = ? OR customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
-                 GROUP BY 
-            CASE 
-                WHEN jobs.reviewer = ? THEN jobs.customer_id
-                ELSE customers.id
-            END
-                ORDER BY 
-                    customers.id DESC;
-                    `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
-            result = resultAllocated
-
-          }
-          else {
-            const query = `
-                    SELECT  
-                    customers.id AS id,
-                    customers.trading_name AS trading_name
-                FROM 
-                    customers
-                JOIN 
-                    staffs AS staff1 ON customers.staff_id = staff1.id
-                JOIN 
-                    staffs AS staff2 ON customers.account_manager_id = staff2.id
-                LEFT JOIN 
-                    customer_company_information ON customers.id = customer_company_information.customer_id
-                LEFT JOIN 
-                   staff_portfolio ON staff_portfolio.customer_id = customers.id
-                LEFT JOIN 
-                  customers AS sp_customers ON sp_customers.id = staff_portfolio.customer_id
-                  OR sp_customers.staff_id = staff_portfolio.staff_id    
-                WHERE customers.staff_id = ? OR customers.staff_id IN(${LineManageStaffId}) OR customers.account_manager_id IN(${LineManageStaffId}) OR sp_customers.id IS NOT NULL
-                    GROUP BY
-                    customers.id
-                ORDER BY 
-                    customers.id DESC;
-                    `;
-            const [result1] = await pool.execute(query, [staff_id]);
-            result = result1
-          }
-        }
+        WHERE
+            (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
+            OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+            )
+           GROUP BY customers.id
+           ORDER BY customers.id DESC
+         `;
+        const [result] = await pool.execute(query, [staff_id, staff_id]);
         return { status: true, message: 'Success..', data: result };
 
       } catch (err) {
-
-        return { status: true, message: 'Error get Customer data', data: err };
+        return { status: true, message: 'Error get Customer data in Timesheet', data: err };
       }
-
     }
 
     // get Client by Customer
@@ -409,548 +306,100 @@ const getTimesheetTaskType = async (Timesheet) => {
       let customer_id = Timesheet.customer_id
 
       try {
-        const QueryRole = `
-      SELECT
-        staffs.id AS id,
-        staffs.role_id AS role_id,
-        roles.role AS role_name
-      FROM
-        staffs
-      JOIN
-        roles ON roles.id = staffs.role_id
-      WHERE
-        staffs.id = ${StaffUserId}
-      LIMIT 1
-      `
-        const [rows] = await pool.execute(QueryRole);
-
         // Line Manager
-        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-        if (LineManageStaffId.length == 0) {
-          LineManageStaffId.push(staff_id);
-        }
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
 
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 34]);
 
-        let customerCheck = customer_id
-        customer_id = [Number(customer_id)]
-        let placeholders = customer_id.map(() => "?").join(", ");
-
-        if (customerCheck == "") {
-          const allCustomer = await getAllCustomerIds(StaffUserId, 'client');
-          let allCustomerIds = allCustomer && allCustomer.data.map((item) => item.id);
-          customer_id = allCustomerIds;
-          placeholders = customer_id.map(() => "?").join(", ");
-        }
-
-
-        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
-
-          customer_id = customer_id[0] || 1;
-
-          const query = `
-        SELECT  
-            clients.id AS id,
-            clients.trading_name AS trading_name
-        FROM 
-            clients
-        JOIN 
-           customers ON customers.id = clients.customer_id    
-        JOIN 
-            client_types ON client_types.id = clients.client_type
-        LEFT JOIN 
-            client_contact_details ON client_contact_details.id = (
-                SELECT MIN(cd.id)
-                FROM client_contact_details cd
-                WHERE cd.client_id = clients.id
-            )
-        WHERE clients.customer_id = ?
-        GROUP BY clients.id
-     ORDER BY 
-        clients.id DESC;
-        `;
-
-         try {
-         const [result] = await pool.execute(query, [customer_id]);
-
-          console.log("result ", result);
-          return { status: true, message: "success.", data: result };
-          
-         } catch (error) {
-          console.error("Error executing query: ", error);
-          return { status: false, message: "Error executing query", error: error.message };
-          
-         }
-         
-        }
-
-        const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "' + StaffUserId + '" LIMIT 1');
-
-        if (existStaffbyCustomer.length > 0) {
-          const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
-
-          if (rows.length > 0) {
-            // Allocated to
-            if (rows[0].role_id == 3) {
-              const query = `
-               SELECT  
-              clients.customer_id AS customer_id,
-              clients.id AS id,
-              clients.trading_name AS trading_name
-            FROM 
-                clients
-            JOIN 
-              customers ON customers.id = clients.customer_id    
-            JOIN 
-                client_types ON client_types.id = clients.client_type
-                LEFT JOIN 
-                client_contact_details ON client_contact_details.id = (
-                    SELECT MIN(cd.id)
-                    FROM client_contact_details cd
-                    WHERE cd.client_id = clients.id
-                )
-            LEFT JOIN
-              jobs ON jobs.client_id = clients.id
-            LEFT JOIN 
-              staffs ON customers.staff_id = staffs.id   
-            WHERE 
-              (
-                jobs.allocated_to = ? 
-                OR clients.customer_id IN (${placeholders})  
-                OR clients.staff_created_id = ?
-              )
-              AND (
-                jobs.client_id = clients.id 
-                OR clients.staff_created_id = ?
-              )
-              AND (
-                jobs.allocated_to = ? 
-                OR clients.staff_created_id = ?
-              )
-              OR clients.customer_id IN (${placeholders})
-            GROUP BY 
-              CASE 
-                WHEN jobs.allocated_to = ? THEN jobs.client_id
-                ELSE clients.id
-              END
-            ORDER BY 
-              clients.id DESC
-                `;
-              const queryParams = [
-                StaffUserId,
-                ...customer_id,   // For clients.customer_id IN (...)
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                ...customer_id,   // For OR clients.customer_id IN (...)
-                StaffUserId,
-              ];
-
-              const [resultAllocated] = await pool.execute(query, queryParams);
-              if (resultAllocated.length == 0) {
-                return { status: true, message: "success.", data: resultAllocated };
-              }
-              const filteredData = resultAllocated.filter(item => item.customer_id === parseInt(customer_id));
-
-              const uniqueData = filteredData.filter((value, index, self) =>
-                index === self.findIndex((t) => t.id === value.id)
-              );
-              return { status: true, message: "success.", data: uniqueData };
-
-            }
-            // Account Manger
-            else if (rows[0].role_id == 4) {
-              const query = `
-               SELECT  
-              clients.customer_id AS customer_id,
-              clients.id AS id,
-              clients.trading_name AS trading_name
-            FROM 
-                clients
-            JOIN 
-              customers ON customers.id = clients.customer_id    
-            JOIN 
-                client_types ON client_types.id = clients.client_type
-                LEFT JOIN 
-                client_contact_details ON client_contact_details.id = (
-                    SELECT MIN(cd.id)
-                    FROM client_contact_details cd
-                    WHERE cd.client_id = clients.id
-                )
-            LEFT JOIN
-              jobs ON jobs.client_id = clients.id
-            LEFT JOIN 
-              staffs ON customers.staff_id = staffs.id
-            LEFT JOIN 
-              customer_services ON customer_services.customer_id = customers.id
-            LEFT JOIN 
-              customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+          try {
+            const query = `
+                SELECT  
+                  clients.id AS id,
+                  clients.trading_name AS trading_name,
+                  CONCAT(
+                      'cli_', 
+                      SUBSTRING(customers.trading_name, 1, 3), '_',
+                      SUBSTRING(clients.trading_name, 1, 3), '_',
+                      SUBSTRING(clients.client_code, 1, 15)
+                  ) AS client_code
+              FROM 
+                  clients
+              JOIN 
+                  customers ON customers.id = clients.customer_id    
+              JOIN 
+                  client_types ON client_types.id = clients.client_type
+              LEFT JOIN 
+                  jobs ON clients.id = jobs.client_id  -- Corrected LEFT JOIN condition
+              LEFT JOIN 
+                  client_contact_details ON client_contact_details.id = (
+                      SELECT MIN(cd.id)
+                      FROM client_contact_details cd
+                      WHERE cd.client_id = clients.id
+                  )
               WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
-        ORDER BY 
-        clients.id DESC
-                `;
-
-              //   WHERE 
-              // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
-
-
-              // const [resultAccounrManage] = await pool.execute(query, [customer_id, customer_id, customer_id]);
-              const [resultAccounrManage] = await pool.execute(query, [
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-                ...customer_id,
-              ]);
-              if (resultAccounrManage.length == 0) {
-                return { status: true, message: "success.", data: resultAccounrManage };
-              }
-
-              const filteredData = resultAccounrManage.filter(item => item.customer_id === parseInt(customer_id));
-
-              const uniqueData = filteredData.filter((value, index, self) =>
-                index === self.findIndex((t) => t.id === value.id)
-              );
-              return { status: true, message: "success.", data: uniqueData };
-
-            }
-            // Reviewer
-            else if (rows[0].role_id == 6) {
-
-              const query = `
-               SELECT  
-              clients.customer_id AS customer_id,
-              clients.id AS id,
-              clients.trading_name AS trading_name
-            FROM 
-                clients
-            JOIN 
-              customers ON customers.id = clients.customer_id   
-            JOIN
-                client_types ON client_types.id = clients.client_type
-                LEFT JOIN 
-                client_contact_details ON client_contact_details.id = (
-                    SELECT MIN(cd.id)
-                    FROM client_contact_details cd
-                    WHERE cd.client_id = clients.id
-                )
-            LEFT JOIN
-              jobs ON jobs.client_id = clients.id 
-            LEFT JOIN 
-              staffs ON customers.staff_id = staffs.id
-            WHERE 
-                (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
+                  clients.customer_id = ${customer_id}
               GROUP BY
-              CASE 
-                  WHEN jobs.reviewer = ? THEN jobs.client_id 
-                  ELSE clients.id
-              END
-              ORDER BY 
-              clients.id DESC
-                `;
-
-
-              // const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
-
-
-              const [resultReviewer] = await pool.execute(query, [
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-              ]);
-
-              if (resultReviewer.length == 0) {
-                return { status: true, message: "success.", data: resultReviewer };
-              }
-
-              const filteredData = resultReviewer.filter(item => item.customer_id === parseInt(customer_id));
-
-              const uniqueData = filteredData.filter((value, index, self) =>
-                index === self.findIndex((t) => t.id === value.id)
-              );
-              return { status: true, message: "success.", data: uniqueData };
-
-            }
-
-            else {
-              const query = `
-              SELECT  
-                  clients.id AS id,
-                  clients.trading_name AS trading_name,
-                  clients.status AS status,
-                  client_types.type AS client_type_name,
-                  client_contact_details.email AS email,
-                  client_contact_details.phone_code AS phone_code,
-                  client_contact_details.phone AS phone,
-                  CONCAT(
-                      'cli_', 
-                      SUBSTRING(customers.trading_name, 1, 3), '_',
-                      SUBSTRING(clients.trading_name, 1, 3), '_',
-                      SUBSTRING(clients.client_code, 1, 15)
-                      ) AS client_code
-              FROM 
-                  clients
-              JOIN 
-                 customers ON customers.id = clients.customer_id    
-              JOIN 
-                  client_types ON client_types.id = clients.client_type
-              LEFT JOIN 
-                  client_contact_details ON client_contact_details.id = (
-                      SELECT MIN(cd.id)
-                      FROM client_contact_details cd
-                      WHERE cd.client_id = clients.id
-                  )
-               WHERE clients.customer_id IN (${placeholders})
-               GROUP BY 
-              clients.id
-           ORDER BY 
-              clients.id DESC;
-                `;
-              // const [result] = await pool.execute(query, [customer_id, StaffUserId, customer_id, customer_id]);
-              const [result] = await pool.execute(query, [
-                ...customer_id,
-              ]);
-              return { status: true, message: "success.", data: result };
-            }
-
-          }
-
-        } else {
-
-          const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
-
-          if (rows.length > 0) {
-            // Allocated to
-            if (rows[0].role_id == 3) {
-              const query = `
-               SELECT  
-              clients.customer_id AS customer_id,
-              clients.id AS id,
-              clients.trading_name AS trading_name
-            FROM 
-                clients
-            JOIN 
-              customers ON customers.id = clients.customer_id    
-            JOIN 
-                client_types ON client_types.id = clients.client_type
-                LEFT JOIN 
-                client_contact_details ON client_contact_details.id = (
-                    SELECT MIN(cd.id)
-                    FROM client_contact_details cd
-                    WHERE cd.client_id = clients.id
-                )
-            LEFT JOIN
-              jobs ON jobs.client_id = clients.id
-            LEFT JOIN 
-              staffs ON customers.staff_id = staffs.id   
-            WHERE 
-              (jobs.allocated_to = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
-            GROUP BY 
-            CASE 
-                WHEN jobs.allocated_to = ? THEN jobs.client_id
-                ELSE clients.id
-            END
-            ORDER BY 
-            clients.id DESC
-                `;
-              // const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
-              const [resultAllocated] = await pool.execute(query, [
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-              ]);
-
-              if (resultAllocated.length == 0) {
-                return { status: true, message: "success.", data: resultAllocated };
-              }
-              const filteredData = resultAllocated.filter(item => item.customer_id === parseInt(customer_id));
-
-              const uniqueData = filteredData.filter((value, index, self) =>
-                index === self.findIndex((t) => t.id === value.id)
-              );
-              return { status: true, message: "success.", data: uniqueData };
-
-            }
-            // Account Manger
-            else if (rows[0].role_id == 4) {
-              const query = `
-               SELECT  
-              clients.customer_id AS customer_id,
-              clients.id AS id,
-              clients.trading_name AS trading_name
-            FROM 
-                clients
-            JOIN 
-              customers ON customers.id = clients.customer_id    
-            JOIN 
-                client_types ON client_types.id = clients.client_type
-                LEFT JOIN 
-                client_contact_details ON client_contact_details.id = (
-                    SELECT MIN(cd.id)
-                    FROM client_contact_details cd
-                    WHERE cd.client_id = clients.id
-                )
-            LEFT JOIN
-              jobs ON jobs.client_id = clients.id
-            LEFT JOIN 
-              staffs ON customers.staff_id = staffs.id
-            LEFT JOIN 
-              customer_services ON customer_services.customer_id = customers.id
-            LEFT JOIN 
-              customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
-              WHERE 
-            (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id IN (${placeholders}) OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id IN (${placeholders})
-          ORDER BY 
-          clients.id DESC
-                `;
-
-              // const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, customer_id, StaffUserId, customer_id, customer_id]);
-              const [resultAccounrManage] = await pool.execute(query, [
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-                ...customer_id,
-              ]);
-              if (resultAccounrManage.length == 0) {
-                return { status: true, message: "success.", data: resultAccounrManage };
-              }
-
-              const filteredData = resultAccounrManage.filter(item => item.customer_id === parseInt(customer_id));
-
-              const uniqueData = filteredData.filter((value, index, self) =>
-                index === self.findIndex((t) => t.id === value.id)
-              );
-              return { status: true, message: "success.", data: uniqueData };
-
-            }
-            // Reviewer
-            else if (rows[0].role_id == 6) {
-
-              const query = `
-               SELECT  
-              clients.customer_id AS customer_id,
-              clients.id AS id,
-              clients.trading_name AS trading_name
-            FROM 
-                clients
-            JOIN 
-              customers ON customers.id = clients.customer_id   
-            JOIN
-                client_types ON client_types.id = clients.client_type
-                LEFT JOIN 
-                client_contact_details ON client_contact_details.id = (
-                    SELECT MIN(cd.id)
-                    FROM client_contact_details cd
-                    WHERE cd.client_id = clients.id
-                )
-            LEFT JOIN
-              jobs ON jobs.client_id = clients.id 
-            LEFT JOIN 
-              staffs ON customers.staff_id = staffs.id
-            WHERE 
-            (jobs.reviewer = ? OR clients.customer_id IN (${placeholders})  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id IN (${placeholders})
-          GROUP BY
-          CASE 
-              WHEN jobs.reviewer = ? THEN jobs.client_id 
-              ELSE clients.id
-          END
-          ORDER BY 
-          clients.id DESC
-                `;
-
-
-
-
-
-              // const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, customer_id]);
-
-              const [resultReviewer] = await pool.execute(query, [
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                StaffUserId,
-                ...customer_id,
-                StaffUserId,
-              ]);
-
-              if (resultReviewer.length == 0) {
-                return { status: true, message: "success.", data: resultReviewer };
-              }
-
-              const filteredData = resultReviewer.filter(item => item.customer_id === parseInt(customer_id));
-
-              const uniqueData = filteredData.filter((value, index, self) =>
-                index === self.findIndex((t) => t.id === value.id)
-              );
-              return { status: true, message: "success.", data: uniqueData };
-
-            }
-            else {
-              const query = `
-              SELECT  
-                  clients.id AS id,
-                  clients.trading_name AS trading_name,
-                  clients.status AS status,
-                  client_types.type AS client_type_name,
-                  client_contact_details.email AS email,
-                  client_contact_details.phone_code AS phone_code,
-                  client_contact_details.phone AS phone,
-                  CONCAT(
-                      'cli_', 
-                      SUBSTRING(customers.trading_name, 1, 3), '_',
-                      SUBSTRING(clients.trading_name, 1, 3), '_',
-                      SUBSTRING(clients.client_code, 1, 15)
-                      ) AS client_code
-              FROM 
-                  clients
-              JOIN 
-                 customers ON customers.id = clients.customer_id    
-              JOIN 
-                  client_types ON client_types.id = clients.client_type
-              LEFT JOIN 
-                  client_contact_details ON client_contact_details.id = (
-                      SELECT MIN(cd.id)
-                      FROM client_contact_details cd
-                      WHERE cd.client_id = clients.id
-                  )
-              WHERE clients.customer_id IN (${placeholders})
-                  GROUP BY
-                clients.id
+                  clients.id    
               ORDER BY 
                   clients.id DESC;
-                `;
-              const [result] = await pool.execute(query, [...customer_id]);
-              return { status: true, message: "success.", data: result };
-            }
-
+                  `;
+            const [result] = await pool.execute(query);
+            return { status: true, message: "success.", data: result };
+          } catch (error) {
+            console.error("Error executing query: ", error);
+            return { status: false, message: "Error executing query", error: error.message };
           }
 
         }
+
+
+        // Other role Get data
+        const query = `
+              SELECT  
+                clients.id AS id,
+                clients.trading_name AS trading_name,
+                CONCAT(
+                    'cli_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(clients.trading_name, 1, 3), '_',
+                    SUBSTRING(clients.client_code, 1, 15)
+                ) AS client_code
+                  FROM 
+                      clients
+                  JOIN 
+                      assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
+                  JOIN 
+                      customers ON customers.id = clients.customer_id    
+                  JOIN 
+                      client_types ON client_types.id = clients.client_type
+                  LEFT JOIN 
+                      jobs ON clients.id = jobs.client_id
+                  LEFT JOIN 
+                      client_contact_details ON client_contact_details.id = (
+                          SELECT MIN(cd.id)
+                          FROM client_contact_details cd
+                          WHERE cd.client_id = clients.id
+                      ) 
+                  WHERE 
+                  (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+                  OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+                  GROUP BY
+                      clients.id
+                  ORDER BY 
+                      clients.id DESC;
+        `;
+        const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
+        return { status: true, message: "success.", data: result };
 
       } catch (err) {
         return { status: false, message: "Err Client Get" };
       }
 
-      // const [rows] = await pool.query(`SELECT id , trading_name FROM clients WHERE status = '1' AND customer_id=${customer_id} ORDER BY id DESC`);
-      // return { status: true, message: "success.", data: rows };
+
     }
 
     // get job by Client
@@ -958,261 +407,138 @@ const getTimesheetTaskType = async (Timesheet) => {
       const client_id = Timesheet.client_id
 
       try {
-        const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
-
         // Line Manager
-        const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [staff_id]);
-        let LineManageStaffId = LineManage?.map(item => item.staff_to);
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-        if (LineManageStaffId.length == 0) {
-          LineManageStaffId.push(staff_id);
-        }
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
 
+        // console.log("LineManageStaffId", LineManageStaffId);
 
-        let result = []
-        if (ExistStaff.length > 0) {
-          // Allocated to
-          if (ExistStaff[0].role_id == 3) {
+        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
 
-            const query = `
-         SELECT 
+          const query = `
+        SELECT 
          job_types.id AS job_type_id,
          job_types.type AS job_type_name,
          jobs.id AS id,
          jobs.total_time AS job_total_time,
+         jobs.staff_created_id AS staff_created_id,
          CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
                 SUBSTRING(job_types.type, 1, 4), '_',
                 SUBSTRING(jobs.job_id, 1, 15)
                 ) AS name
-    
-         FROM 
-         jobs
-         LEFT JOIN 
-         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-         LEFT JOIN 
-         clients ON jobs.client_id = clients.id
-         LEFT JOIN
-          customers ON jobs.customer_id = customers.id
-         LEFT JOIN 
-         job_types ON jobs.job_type_id = job_types.id
-         LEFT JOIN 
-         services ON jobs.service_id = services.id
-         LEFT JOIN 
-         staffs ON jobs.allocated_to = staffs.id
-         LEFT JOIN 
-         staffs AS staffs2 ON jobs.reviewer = staffs2.id
-         LEFT JOIN 
-         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-         LEFT JOIN 
-         master_status ON master_status.id = jobs.status_type
-         WHERE 
-         jobs.client_id = clients.id 
-         AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-         AND jobs.client_id = ?  AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
-          ORDER BY
-          jobs.id DESC;
-         `;
-            const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id, client_id]);
-            result = rowsAllocated
+        FROM 
+        jobs
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.client_id = ${client_id}
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+          const [rows] = await pool.execute(query);
+          return { status: true, message: "Success.", data: rows };
+        }
 
-          }
-          // Account Manger
-          else if (ExistStaff[0].role_id == 4) {
-
-            const query = `
-       SELECT 
-       job_types.id AS job_type_id,
-       job_types.type AS job_type_name,
-       jobs.id AS id,
-       jobs.total_time AS job_total_time,
-       CONCAT(
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(clients.trading_name, 1, 3), '_',
-            SUBSTRING(job_types.type, 1, 4), '_',
-            SUBSTRING(jobs.job_id, 1, 15)
-            ) AS name
-    
-       FROM 
-       jobs
-       LEFT JOIN 
-       customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-       LEFT JOIN 
-       clients ON jobs.client_id = clients.id
-       LEFT JOIN
-          customers ON jobs.customer_id = customers.id
-       LEFT JOIN 
-       job_types ON jobs.job_type_id = job_types.id
-       LEFT JOIN 
-       services ON jobs.service_id = services.id
-       LEFT JOIN 
-       staffs ON jobs.allocated_to = staffs.id
-       LEFT JOIN 
-       staffs AS staffs2 ON jobs.reviewer = staffs2.id
-       LEFT JOIN 
-       staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-       LEFT JOIN 
-       master_status ON master_status.id = jobs.status_type   
-       WHERE 
-       jobs.client_id = clients.id 
-       AND (jobs.account_manager_id = ? OR jobs.staff_created_id = ?)
-       AND jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
-        ORDER BY
-       jobs.id DESC;
-       `;
-            const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id, client_id]);
-            result = rowsAllocated
-            if (rowsAllocated.length === 0) {
-              const query = `
-       SELECT 
-       jobs.id AS id,
-       jobs.total_time AS job_total_time,
-      CONCAT(
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(clients.trading_name, 1, 3), '_',
-            SUBSTRING(job_types.type, 1, 4), '_',
-            SUBSTRING(jobs.job_id, 1, 15)
-            ) AS name
-    
-       FROM 
-       jobs
-       LEFT JOIN 
-       clients ON jobs.client_id = clients.id
-       LEFT JOIN
-          customers ON jobs.customer_id = customers.id
-       JOIN 
-       services ON jobs.service_id = services.id
-       JOIN
-       customer_services ON customer_services.service_id = jobs.service_id
-       JOIN
-       customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-       LEFT JOIN 
-       customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-       LEFT JOIN 
-       job_types ON jobs.job_type_id = job_types.id
-       LEFT JOIN 
-       staffs ON jobs.allocated_to = staffs.id
-       LEFT JOIN 
-       staffs AS staffs2 ON jobs.reviewer = staffs2.id
-       LEFT JOIN 
-       staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-       LEFT JOIN
-       master_status ON master_status.id = jobs.status_type   
-       WHERE 
-       jobs.client_id = clients.id AND
-       customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.client_id = ? AND jobs.staff_created_id IN(${LineManageStaffId}))
-       GROUP BY 
-       jobs.id
-        ORDER BY
-       jobs.id DESC;
-       `;
-              const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id, client_id]);
-              result = rowsAllocated
-
-            }
-
-          }
-          // Reviewer
-          else if (ExistStaff[0].role_id == 6) {
-            const query = `
-         SELECT
-         job_types.id AS job_type_id,
-         job_types.type AS job_type_name, 
-         jobs.id AS id,
-         jobs.total_time AS job_total_time,
-         CONCAT(
-                SUBSTRING(customers.trading_name, 1, 3), '_',
-                SUBSTRING(clients.trading_name, 1, 3), '_',
-                SUBSTRING(job_types.type, 1, 4), '_',
-                SUBSTRING(jobs.job_id, 1, 15)
-                ) AS name
-    
-         FROM 
-         jobs
-         LEFT JOIN 
-          clients ON jobs.client_id = clients.id
-         LEFT JOIN
-          customers ON jobs.customer_id = customers.id
-         LEFT JOIN 
-         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-         LEFT JOIN 
-         job_types ON jobs.job_type_id = job_types.id
-         LEFT JOIN 
-         services ON jobs.service_id = services.id
-         LEFT JOIN 
-         staffs ON jobs.allocated_to = staffs.id
-         LEFT JOIN 
-         staffs AS staffs2 ON jobs.reviewer = staffs2.id
-         LEFT JOIN 
-         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-         LEFT JOIN 
-         master_status ON master_status.id = jobs.status_type   
-         WHERE 
-         jobs.client_id = clients.id 
-         AND
-         (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
-         AND jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
-          ORDER BY
-          jobs.id DESC;
-         `;
-            try {
-              const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id, client_id]);
-              result = rowsAllocated
-            } catch (error) {
-              console.log("error", error)
-
-            }
-
-
-          }
-          else {
-            const query = `
-         SELECT
+        // Other Role Data
+        const query = `
+        SELECT 
          job_types.id AS job_type_id,
          job_types.type AS job_type_name,
          jobs.id AS id,
          jobs.total_time AS job_total_time,
+         jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
          CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
                 SUBSTRING(job_types.type, 1, 4), '_',
                 SUBSTRING(jobs.job_id, 1, 15)
                 ) AS name
-    
-         FROM 
-         jobs
-         LEFT JOIN 
-         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-         LEFT JOIN 
-         clients ON jobs.client_id = clients.id
+   
+        FROM 
+        jobs
+        LEFT JOIN 
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        JOIN 
+        services ON jobs.service_id = services.id
+        JOIN
+        customer_services ON customer_services.service_id = jobs.service_id
+        JOIN
+        customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        staff_portfolio ON staff_portfolio.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
          LEFT JOIN
-         customers ON jobs.customer_id = customers.id
-         LEFT JOIN 
-         job_types ON jobs.job_type_id = job_types.id
-         LEFT JOIN 
-         services ON jobs.service_id = services.id
-         LEFT JOIN 
-         staffs ON jobs.allocated_to = staffs.id
-         LEFT JOIN 
-         staffs AS staffs2 ON jobs.reviewer = staffs2.id
-         LEFT JOIN 
-         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-         LEFT JOIN 
-         master_status ON master_status.id = jobs.status_type   
-         WHERE 
-         jobs.client_id = clients.id AND
-         jobs.client_id = ? AND (jobs.client_id = ? OR jobs.staff_created_id IN(${LineManageStaffId}))
-          ORDER BY
-          jobs.id DESC;
-            `;
-            const [rows] = await pool.execute(query, [client_id, client_id]);
-            result = rows
-          }
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        GROUP BY 
+        jobs.id 
+        ORDER BY 
+        jobs.id DESC;
+        `;
+        const [result] = await pool.execute(query);
 
+        //////-----START Assign Customer Service Data START----////////
+        let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+        if (isExistAssignCustomer != undefined) {
+          let matched = result?.filter(item =>
+            item?.assigned_source === 'assign_customer_service' &&
+            Number(item?.service_id_assign) === Number(item?.job_service_id)
+          )
+          let matched2 = result?.filter(item =>
+            item?.assigned_source !== 'assign_customer_service'
+          )
+          const resultAssignCustomer = [...matched, ...matched2]
+          return { status: true, message: "Success.", data: resultAssignCustomer };
         }
+        //////-----END Assign Customer Service Data END----////////
 
-        return { status: true, message: 'Success.', data: result };
+
+        return { status: true, message: "Success.", data: result };
       } catch (error) {
         console.log("err -", error)
         return { status: false, message: 'Error getting job.' };
