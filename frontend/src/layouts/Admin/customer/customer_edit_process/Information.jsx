@@ -1054,6 +1054,7 @@ const Information = ({ id, pageStatus }) => {
                           </Field> */}
                           <Select
                             name="accountManager"
+                      
                             id="accountManager"
                             options={staffOptions}
                             value={staffOptions.find(opt => String(opt.value) === String(ManagerType))}
@@ -1061,7 +1062,7 @@ const Information = ({ id, pageStatus }) => {
                               const e = { target: { name: 'accountManager', value: selectedOption.value } };
                               handleChangeValue(e); // your original function
                             }}
-                            className={getAccountMangerIdErr ? "error-field react-select" : "react-select"}
+                            className={getAccountMangerIdErr ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
                             classNamePrefix="react-select"
                             isSearchable
                             autoFocus

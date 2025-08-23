@@ -1349,7 +1349,7 @@ const CreateJob = () => {
                                           };
                                           HandleChange(e); // Original handler
                                         }}
-                                        className={errors["Client"] ? "error-field react-select" : "react-select"}
+                                        className={errors["Client"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
                                         classNamePrefix="react-select"
                                         isSearchable
                                       />
@@ -1471,8 +1471,8 @@ const CreateJob = () => {
                                       }}
                                       className={
                                         errors["CustomerAccountManager"]
-                                          ? "error-field react-select"
-                                          : "react-select"
+                                          ? "error-field react-select basic-multi-select"
+                                          : "react-select basic-multi-select"
                                       }
                                       classNamePrefix="react-select"
                                       isSearchable
@@ -1533,7 +1533,7 @@ const CreateJob = () => {
                                         HandleChange(e);
                                       }}
                                       isDisabled={jobData.Client === ""}
-                                      className={errors["Service"] ? "error-field react-select" : "react-select"}
+                                      className={errors["Service"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
@@ -1591,7 +1591,7 @@ const CreateJob = () => {
                                         openJobModal(e);
                                       }}
                                       isLoading={get_Job_Type.loading}
-                                      className={errors["JobType"] ? "error-field react-select jobtype" : "react-select jobtype"}
+                                      className={errors["JobType"] ? "error-field react-select jobtype basic-multi-select" : "basic-multi-select react-select jobtype"}
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
@@ -1718,7 +1718,7 @@ const CreateJob = () => {
                                         };
                                         HandleChange(e);
                                       }}
-                                      className={errors["Reviewer"] ? "error-field react-select" : "react-select"}
+                                      className={errors["Reviewer"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
@@ -1775,7 +1775,7 @@ const CreateJob = () => {
                                         };
                                         HandleChange(e);
                                       }}
-                                      className={errors["AllocatedTo"] ? "error-field react-select" : "react-select"}
+                                      className={errors["AllocatedTo"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
                                       classNamePrefix="react-select"
                                       isSearchable
                                     // Uncomment below if you want to enable/disable based on role

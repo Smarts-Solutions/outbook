@@ -798,7 +798,7 @@ const Service = () => {
             <div className="row">
               <div className="col-12">
                 <Select
-                  classNames="multiselect"
+               
                   options={staffDataAll.data.map((data) => ({
                     value: data.id,
                     label: data.first_name+" "+data.last_name,

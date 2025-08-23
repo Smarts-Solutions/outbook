@@ -1555,8 +1555,8 @@ const EditJob = () => {
                                       }}
                                       className={
                                         errors["CustomerAccountManager"]
-                                          ? "error-field react-select"
-                                          : "react-select"
+                                          ? "error-field react-select basic-multi-select"
+                                          : "react-select basic-multi-select"
                                       }
                                       classNamePrefix="react-select"
                                       isSearchable
@@ -1613,8 +1613,8 @@ const EditJob = () => {
                                         };
                                         HandleChange(e);
                                       }}
-                                      className={errors["Service"] ? "error-field react-select" : "react-select"}
-                                      classNamePrefix="react-select"
+                                      className={errors["Service"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                      classNamePrefix="react-select "
                                       isSearchable
                                     />
                                     {errors["Service"] && (
@@ -1675,8 +1675,8 @@ const EditJob = () => {
                                       isLoading={get_Job_Type.loading}
                                       className={
                                         errors["JobType"]
-                                          ? "error-field react-select jobtype"
-                                          : "react-select jobtype"
+                                          ? "error-field react-select jobtype basic-multi-select "
+                                          : "react-select jobtype basic-multi-select"
                                       }
                                       classNamePrefix="react-select"
                                       isSearchable
@@ -1821,7 +1821,7 @@ const EditJob = () => {
                                         HandleChange(e); // original function
                                       }}
                                       isDisabled={isReviewerDisabled}
-                                      className="react-select"
+                                      className="react-select basic-multi-select"
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
@@ -1890,7 +1890,7 @@ const EditJob = () => {
                                         HandleChange(e); // original handler
                                       }}
                                       isDisabled={isAllocatedToDisabled}
-                                      className="react-select"
+                                      className="react-select basic-multi-select"
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />

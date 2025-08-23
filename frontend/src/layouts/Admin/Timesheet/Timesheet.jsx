@@ -1503,6 +1503,7 @@ const Timesheet = () => {
                 <Select
                   id="tabSelect"
                   name="staff_id"
+                  className="basic-multi-select"
                   options={staffOptions}
                   value={staffOptions.find(opt => Number(opt.value) === Number(selectedStaff))}
                   onChange={(selectedOption) => {
@@ -1552,6 +1553,7 @@ const Timesheet = () => {
                   <Select
                     id="tabSelect"
                     name="week"
+                    className="basic-multi-select"
                     options={weekOptions}
                     defaultValue={currentValue}
                     onChange={(selectedOption) => {
