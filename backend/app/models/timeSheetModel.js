@@ -1,6 +1,29 @@
 const pool = require("../config/database");
 const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../utils/helper');
 
+
+// SELECT 
+// timesheet.*,
+// CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
+// CONCAT(customers.trading_name) AS customer_name,
+// CONCAT(clients.trading_name) AS client_name,
+// COALESCE(jobs.job_id, internal.name) AS job_name,
+// COALESCE(task.name, sub_internal.name) AS task_name
+
+// FROM `timesheet`
+// JOIN staffs ON staffs.id = timesheet.staff_id
+// LEFT JOIN customers ON customers.id = timesheet.customer_id
+// LEFT JOIN clients ON clients.id = timesheet.client_id
+
+// LEFT JOIN jobs ON jobs.id = timesheet.job_id AND timesheet.task_type = 2
+// LEFT JOIN internal ON internal.id = timesheet.job_id AND timesheet.task_type = 1
+
+// LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
+// LEFT JOIN sub_internal ON sub_internal.id = timesheet.task_id AND timesheet.task_type = 1;
+
+
+
+
 const getTimesheet = async (Timesheet) => {
 
   const { staff_id, weekOffset } = Timesheet;
