@@ -293,7 +293,7 @@ const dummyData = [
         >
           Reset
         </button>
-        <button className="btn btn-success shadow-sm" id="btn-export">
+        <button className="btn btn-info" id="btn-export">
           Export Excel
         </button>
       </div>
