@@ -848,7 +848,8 @@ const getJobByCustomer = async (job) => {
 async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
   try {
-
+    
+    
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -999,7 +1000,6 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
     const [result] = await pool.execute(query);
 
 
-    
     //////-----START Assign Customer Service Data START----////////
    let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
    if(isExistAssignCustomer != undefined){
@@ -1011,6 +1011,8 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
     item?.assigned_source !== 'assign_customer_service'
     )
     const resultAssignCustomer = [...matched, ...matched2]
+
+    
     return { status: true, message: "Success.", data: resultAssignCustomer };
     }
     //////-----END Assign Customer Service Data END----////////
