@@ -4695,7 +4695,7 @@ i.exp_icon {
 }
 .basic-multi-select {
   position: relative;
-  z-index: 9;
+  /* z-index: 9; */
 }
 .dropdown-menu.custom-dropdown.show {
   z-index: 999 !important;
@@ -4805,17 +4805,17 @@ tbody.list.form-check-all tr:last-child td {
 .react-select__menu,
 .react-select__menu-portal {
   z-index: 9999 !important;
-  position: absolute !important;
+  /* position: absolute !important; */
 }
 
 /* Optional: If you're using portals */
 .react-select__menu-portal {
   position: fixed !important;
 }
-.basic-multi-select
+/* .basic-multi-select
 {
   z-index: 9999 !important;
-}
+} */
 .login1
 {
   display: none !important;
