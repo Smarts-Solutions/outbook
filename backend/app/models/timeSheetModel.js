@@ -566,23 +566,24 @@ const getTimesheetTaskType = async (Timesheet) => {
       client_job_task.id DESC;
      `;
       const [rows] = await pool.execute(query, [job_id]);
-      if (rows.length > 0) {
-        return { status: true, message: "success.", data: rows };
-      } else {
+      return { status: true, message: "success.", data: rows };
+    //   if (rows.length > 0) {
+    //     return { status: true, message: "success.", data: rows };
+    //   } else {
 
-        const query = `
-     SELECT task.id AS id, task.name AS name
-     FROM task
-     INNER JOIN jobs 
-        ON task.service_id = jobs.service_id 
-        AND task.job_type_id = jobs.job_type_id
-     WHERE 
-     jobs.id = ?
-      GROUP BY task.id
-     `;
-        const [rows] = await pool.execute(query, [job_id]);
-        return { status: true, message: "success.", data: rows };
-      }
+    //     const query = `
+    //  SELECT task.id AS id, task.name AS name
+    //  FROM task
+    //  INNER JOIN jobs 
+    //     ON task.service_id = jobs.service_id 
+    //     AND task.job_type_id = jobs.job_type_id
+    //  WHERE 
+    //  jobs.id = ?
+    //   GROUP BY task.id
+    //  `;
+    //     const [rows] = await pool.execute(query, [job_id]);
+    //     return { status: true, message: "success.", data: rows };
+    //   }
     }
 
     return { status: false, message: "Invalid Task Type." };
