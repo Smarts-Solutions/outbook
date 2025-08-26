@@ -3,8 +3,6 @@ const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../../app/utils/helper');
 
 
-
-
 // DELIMITER $$
 
 // CREATE PROCEDURE GetCustomersData (
@@ -28,17 +26,17 @@ const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelper
 //                 customers.created_at,
 //                 customers.updated_at,
 //                 customers.status,
-//                 staff1.first_name AS staff_firstname, 
-//                 staff1.last_name AS staff_lastname,
 //                 staff2.first_name AS account_manager_firstname, 
 //                 staff2.last_name AS account_manager_lastname,
 //                 CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_',
 //                        SUBSTRING(customers.customer_code, 1, 15)) AS customer_code,
-//                 CASE WHEN clients.id IS NOT NULL THEN 1 ELSE 0 END AS is_client
+//                 CASE
+//         WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+//         THEN 1 ELSE 0
+//     END AS is_client
+    
 //          FROM customers
-//          JOIN staffs AS staff1 ON customers.staff_id = staff1.id
 //          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-//          LEFT JOIN clients ON clients.customer_id = customers.id
 //          LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
 //          WHERE (customers.staff_id IN (", LineManageStaffId, ")
 //                 OR assigned_jobs_staff_view.staff_id IN (", LineManageStaffId, "))"
@@ -63,9 +61,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelper
 //     SET @sql_count = CONCAT(
 //         "SELECT COUNT(DISTINCT customers.id) AS total
 //          FROM customers
-//          JOIN staffs AS staff1 ON customers.staff_id = staff1.id
 //          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-//          LEFT JOIN clients ON clients.customer_id = customers.id
 //          LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
 //          WHERE (customers.staff_id IN (", LineManageStaffId, ")
 //                 OR assigned_jobs_staff_view.staff_id IN (", LineManageStaffId, "))"
@@ -82,14 +78,6 @@ const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelper
 // END$$
 
 // DELIMITER ;
-
-
-
-
-
-
-
-
 
 const createCustomer = async (customer) => {
 
