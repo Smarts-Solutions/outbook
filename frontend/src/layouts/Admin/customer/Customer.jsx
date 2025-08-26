@@ -120,29 +120,7 @@ const Customer = () => {
       sortable: true,
 
     },
-    // {
-    //   name: "Company Name",
-    //   cell: (row) => (
-    //     <div
-    //       style={{
-    //         overflow: "hidden",
-    //         textOverflow: "ellipsis",
-    //         whiteSpace: "nowrap",
-    //         maxWidth: "200px",
-    //       }}
-    //     >
-    //       <a title={row.company_name}>{row.company_name}</a>
-    //     </div>
-    //   ),
-    //   sortable: true,
-    //   width: "250px",
-    // },
-    // {
-    //   name: "Company Number",
-    //   selector: (row) => (row.company_number == null ? "" : row.company_number),
-    //   sortable: true,
-    //   width: "200px",
-    // },
+    
     {
       name: "Type",
       selector: (row) =>

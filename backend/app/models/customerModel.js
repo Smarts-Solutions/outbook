@@ -2,6 +2,95 @@ const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../../app/utils/helper');
 
+
+
+
+// DELIMITER $$
+
+// CREATE PROCEDURE GetCustomersData (
+//     IN LineManageStaffId VARCHAR(255),   -- Example: '1,2,3,4'
+//     IN searchTerm VARCHAR(255),          
+//     IN limitVal INT,
+//     IN offsetVal INT
+// )
+// BEGIN
+//     SET @sql_main = CONCAT(
+//         "SELECT DISTINCT customers.id AS id,
+//                 customers.customer_type,
+//                 customers.staff_id,
+//                 customers.account_manager_id,
+//                 customers.trading_name,
+//                 customers.trading_address,
+//                 customers.vat_registered,
+//                 customers.vat_number,
+//                 customers.website,
+//                 customers.form_process,
+//                 customers.created_at,
+//                 customers.updated_at,
+//                 customers.status,
+//                 staff1.first_name AS staff_firstname, 
+//                 staff1.last_name AS staff_lastname,
+//                 staff2.first_name AS account_manager_firstname, 
+//                 staff2.last_name AS account_manager_lastname,
+//                 CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_',
+//                        SUBSTRING(customers.customer_code, 1, 15)) AS customer_code,
+//                 CASE WHEN clients.id IS NOT NULL THEN 1 ELSE 0 END AS is_client
+//          FROM customers
+//          JOIN staffs AS staff1 ON customers.staff_id = staff1.id
+//          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+//          LEFT JOIN clients ON clients.customer_id = customers.id
+//          LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+//          WHERE (customers.staff_id IN (", LineManageStaffId, ")
+//                 OR assigned_jobs_staff_view.staff_id IN (", LineManageStaffId, "))"
+//     );
+
+//     -- search condition
+//     IF searchTerm IS NOT NULL AND searchTerm <> '' THEN
+//         SET @sql_main = CONCAT(@sql_main, 
+//             " AND customers.trading_name LIKE ", QUOTE(CONCAT('%', searchTerm, '%')));
+//     END IF;
+
+//     SET @sql_main = CONCAT(@sql_main, 
+//         " ORDER BY customers.id DESC LIMIT ", limitVal, " OFFSET ", offsetVal);
+
+//     -- execute main query
+//     PREPARE stmt FROM @sql_main;
+//     EXECUTE stmt;
+//     DEALLOCATE PREPARE stmt;
+
+
+//     -- Count Query
+//     SET @sql_count = CONCAT(
+//         "SELECT COUNT(DISTINCT customers.id) AS total
+//          FROM customers
+//          JOIN staffs AS staff1 ON customers.staff_id = staff1.id
+//          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+//          LEFT JOIN clients ON clients.customer_id = customers.id
+//          LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+//          WHERE (customers.staff_id IN (", LineManageStaffId, ")
+//                 OR assigned_jobs_staff_view.staff_id IN (", LineManageStaffId, "))"
+//     );
+
+//     IF searchTerm IS NOT NULL AND searchTerm <> '' THEN
+//         SET @sql_count = CONCAT(@sql_count, 
+//             " AND customers.trading_name LIKE ", QUOTE(CONCAT('%', searchTerm, '%')));
+//     END IF;
+
+//     PREPARE stmt2 FROM @sql_count;
+//     EXECUTE stmt2;
+//     DEALLOCATE PREPARE stmt2;
+// END$$
+
+// DELIMITER ;
+
+
+
+
+
+
+
+
+
 const createCustomer = async (customer) => {
 
     // Customer Code(cust+CustName+UniqueNo)
@@ -486,6 +575,48 @@ ORDER BY
     }
 
     // console.log("LineManageStaffId", LineManageStaffId);
+
+   console.log("Call Customer:", "time", new Date().toISOString());
+       try {
+           const [rows] = await pool.query(
+               `CALL GetCustomersData(?, ?, ?, ?)`,
+               [LineManageStaffId, search || null, limit, offset]);
+   
+           console.log("Main Query Result:", rows, "time", new Date().toISOString());
+   
+           const result = rows[0];
+           const countResult = rows[1];
+   
+           const total = countResult[0]?.total || 0;
+   
+           return {
+               status: true,
+               message: 'Success..',
+               data: {
+                   data: result,
+                   pagination: {
+                       totalItems: total,
+                       totalPages: Math.ceil(total / limit),
+                       currentPage: page,
+                       limit
+                   }
+               }
+           };
+   
+   
+   
+       } catch (error) {
+           console.error('Error fetching customers:', error);
+           return { status: false, message: 'Error fetching customers', error: error.message };
+   
+       }
+   
+   
+       return
+
+
+
+
 
     try {
         let countQuery = `
