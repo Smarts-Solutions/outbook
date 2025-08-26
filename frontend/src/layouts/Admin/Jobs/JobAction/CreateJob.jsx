@@ -2211,7 +2211,7 @@ const CreateJob = () => {
                                       htmlFor="firstNameinput"
                                       className="form-label"
                                     >
-                                      Staff
+                                      Allocated to (Other)
                                     </label>
                                   
                                     <Select

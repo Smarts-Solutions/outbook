@@ -10,7 +10,7 @@ const {
 const getAddJobData = async (job) => {
   const { customer_id ,StaffUserId} = job;
 
-  console.log("job -- ", job);
+  
 
   // customer Client
   try {
@@ -274,7 +274,7 @@ const getAddJobData = async (job) => {
     const allStaff = `
        SELECT  
            staffs.id AS id,
-           CONCAT(staffs.first_name, ' ', staffs.last_name) AS full_name
+           CONCAT(staffs.first_name, ' ', staffs.last_name,' (',staffs.email,')') AS full_name
       FROM 
            staffs
       WHERE  
