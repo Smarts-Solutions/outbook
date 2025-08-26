@@ -1,9 +1,9 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../../app/utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../../app/utils/helper');
 
 
-// DELIMITER $$
+ // DELIMITER $$
 
 // CREATE PROCEDURE GetCustomersData (
 //     IN LineManageStaffId VARCHAR(255),   -- Example: '1,2,3,4'
@@ -80,7 +80,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelper
 // DELIMITER ;
 
 
- 
+
 const createCustomer = async (customer) => {
 
     // Customer Code(cust+CustName+UniqueNo)
@@ -465,7 +465,6 @@ const createCustomer = async (customer) => {
         }
 
     }
-
 };
 
 const getCustomer = async (customer) => {
@@ -836,7 +835,7 @@ const getCustomer_dropdown_delete = async (customer) => {
   `
     const [rows] = await pool.execute(QueryRole);
 
-     let query = `
+    let query = `
     SELECT  
         customers.id AS id,
         customers.customer_type AS customer_type,
@@ -890,13 +889,13 @@ const getCustomer_dropdown_delete = async (customer) => {
            ORDER BY customers.id DESC
 
          `;
-         try {
-             const [result] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
-             return { status: true, message: 'Success..', data: result };
-         } catch (err) {
-            console.error('Error executing query getCustomer_dropdown:', err);
-            return { status: false, message: 'Error executing query', data: err };
-         }
+    try {
+        const [result] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
+        return { status: true, message: 'Success..', data: result };
+    } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+    }
 
 }
 
