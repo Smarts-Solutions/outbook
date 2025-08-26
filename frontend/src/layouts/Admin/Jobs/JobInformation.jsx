@@ -1445,7 +1445,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       htmlFor="firstNameinput"
                       className="form-label"
                     >
-                      Staff
+                      Allocated to (Other)
                     </label>
 
                     <Select
