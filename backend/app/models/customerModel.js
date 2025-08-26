@@ -30,10 +30,10 @@ const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelper
 //                 staff2.last_name AS account_manager_lastname,
 //                 CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_',
 //                        SUBSTRING(customers.customer_code, 1, 15)) AS customer_code,
-//                 CASE
-//         WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
-//         THEN 1 ELSE 0
-//     END AS is_client
+    //             CASE
+    //     WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+    //     THEN 1 ELSE 0
+    // END AS is_client
     
 //          FROM customers
 //          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
@@ -79,6 +79,8 @@ const { SatffLogUpdateOperation, generateNextUniqueCode ,LineManageStaffIdHelper
 
 // DELIMITER ;
 
+
+ 
 const createCustomer = async (customer) => {
 
     // Customer Code(cust+CustName+UniqueNo)
@@ -508,29 +510,21 @@ const getCustomer = async (customer) => {
     customers.created_at AS created_at,
     customers.updated_at AS updated_at,
     customers.status AS status,
-    staff1.first_name AS staff_firstname, 
-    staff1.last_name AS staff_lastname,
     staff2.first_name AS account_manager_firstname, 
     staff2.last_name AS account_manager_lastname,
-    customer_company_information.company_name AS company_name,
-    customer_company_information.company_number AS company_number,
     CONCAT(
     'cust_', 
     SUBSTRING(customers.trading_name, 1, 3), '_',
     SUBSTRING(customers.customer_code, 1, 15)
     ) AS customer_code,
-    case
-       when clients.id is not null then 1
-         else 0
-    end as is_client
+    CASE
+        WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+        THEN 1 ELSE 0
+    END AS is_client
 FROM 
     customers
 LEFT JOIN 
-    staffs AS staff1 ON customers.staff_id = staff1.id
-LEFT JOIN 
     staffs AS staff2 ON customers.account_manager_id = staff2.id
-LEFT JOIN 
-    customer_company_information ON customers.id = customer_company_information.customer_id
 LEFT JOIN clients ON clients.customer_id = customers.id    
  WHERE 
     customers.trading_name LIKE ?
@@ -564,44 +558,43 @@ ORDER BY
 
     // console.log("LineManageStaffId", LineManageStaffId);
 
-   console.log("Call Customer:", "time", new Date().toISOString());
-       try {
-           const [rows] = await pool.query(
-               `CALL GetCustomersData(?, ?, ?, ?)`,
-               [LineManageStaffId, search || null, limit, offset]);
-   
-           console.log("Main Query Result:", rows, "time", new Date().toISOString());
-   
-           const result = rows[0];
-           const countResult = rows[1];
-   
-           const total = countResult[0]?.total || 0;
-   
-           return {
-               status: true,
-               message: 'Success..',
-               data: {
-                   data: result,
-                   pagination: {
-                       totalItems: total,
-                       totalPages: Math.ceil(total / limit),
-                       currentPage: page,
-                       limit
-                   }
-               }
-           };
-   
-   
-   
-       } catch (error) {
-           console.error('Error fetching customers:', error);
-           return { status: false, message: 'Error fetching customers', error: error.message };
-   
-       }
-   
-   
-       return
+  console.log("Call Customer:", "time", new Date().toISOString());
+    try {
+        const [rows] = await pool.query(
+            `CALL GetCustomersData(?, ?, ?, ?)`,
+            [LineManageStaffId, search || null, limit, offset]);
 
+        console.log("Main Query Result:", rows, "time", new Date().toISOString());
+
+        const result = rows[0];
+        const countResult = rows[1];
+
+        const total = countResult[0]?.total || 0;
+
+        return {
+            status: true,
+            message: 'Success..',
+            data: {
+                data: result,
+                pagination: {
+                    totalItems: total,
+                    totalPages: Math.ceil(total / limit),
+                    currentPage: page,
+                    limit
+                }
+            }
+        };
+
+
+
+    } catch (error) {
+        console.error('Error fetching customers:', error);
+        return { status: false, message: 'Error fetching customers', error: error.message };
+
+    }
+
+
+    return
 
 
 
@@ -780,8 +773,6 @@ id DESC;`;
         customers.created_at AS created_at,
         customers.updated_at AS updated_at,
         customers.status AS status,
-        staff1.first_name AS staff_firstname, 
-        staff1.last_name AS staff_lastname,
         staff2.first_name AS account_manager_firstname, 
         staff2.last_name AS account_manager_lastname,
         customer_company_information.company_name AS company_name,
@@ -792,31 +783,25 @@ id DESC;`;
             SUBSTRING(customers.customer_code, 1, 15)
         ) AS customer_code,
         CASE
-            WHEN clients.id IS NOT NULL THEN 1
-            ELSE 0
+        WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+        THEN 1 ELSE 0
         END AS is_client
         FROM 
-            customers  
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
+            customers
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
         LEFT JOIN
             assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-            (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
-
-            OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            )
+             customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
            ORDER BY customers.id DESC
 
          `;
          try {
-             const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
+             const [result] = await pool.execute(query);
              return { status: true, message: 'Success..', data: result };
          } catch (err) {
             console.error('Error executing query getCustomer_dropdown:', err);
