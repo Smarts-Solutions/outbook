@@ -607,9 +607,6 @@ const getClient = async (client) => {
     clients.trading_name AS client_name,
     clients.status AS status,
     client_types.type AS client_type_name,
-    client_contact_details.email AS email,
-    client_contact_details.phone_code AS phone_code,
-    client_contact_details.phone AS phone,
     jobs.id AS Delete_Status,
     CONCAT(
         'cli_', 
@@ -625,12 +622,6 @@ JOIN
     client_types ON client_types.id = clients.client_type
 LEFT JOIN 
     jobs ON clients.id = jobs.client_id  -- Corrected LEFT JOIN condition
-LEFT JOIN 
-    client_contact_details ON client_contact_details.id = (
-        SELECT MIN(cd.id)
-        FROM client_contact_details cd
-        WHERE cd.client_id = clients.id
-    )
 WHERE 
     clients.customer_id = ${customer_id}
 GROUP BY
@@ -656,9 +647,6 @@ ORDER BY
     clients.trading_name AS client_name,
     clients.status AS status,
     client_types.type AS client_type_name,
-    client_contact_details.email AS email,
-    client_contact_details.phone_code AS phone_code,
-    client_contact_details.phone AS phone,
     jobs.id AS Delete_Status,
     CONCAT(
         'cli_', 
@@ -669,29 +657,22 @@ ORDER BY
       FROM 
           clients
       JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})  
       JOIN 
           customers ON customers.id = clients.customer_id    
       JOIN 
           client_types ON client_types.id = clients.client_type
       LEFT JOIN 
-          jobs ON clients.id = jobs.client_id
-      LEFT JOIN 
-          client_contact_details ON client_contact_details.id = (
-              SELECT MIN(cd.id)
-              FROM client_contact_details cd
-              WHERE cd.client_id = clients.id
-          ) 
+          jobs ON clients.id = jobs.client_id 
       WHERE 
-      (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
-      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+      (clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
       GROUP BY
           clients.id
       ORDER BY 
           clients.id DESC;
     `;
 
-     const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
+     const [result] = await pool.execute(query);
      return { status: true, message: "success.", data: result };
 
 };
@@ -711,9 +692,6 @@ async function getAllClientsSidebar(StaffUserId, LineManageStaffId, rows) {
     clients.trading_name AS client_name,
     clients.status AS status,
     client_types.type AS client_type_name,
-    client_contact_details.email AS email,
-    client_contact_details.phone_code AS phone_code,
-    client_contact_details.phone AS phone,
     jobs.id AS Delete_Status,
     CONCAT(
         'cli_', 
@@ -729,12 +707,6 @@ JOIN
     client_types ON client_types.id = clients.client_type
 LEFT JOIN 
     jobs ON clients.id = jobs.client_id  -- Corrected LEFT JOIN condition
-LEFT JOIN 
-    client_contact_details ON client_contact_details.id = (
-        SELECT MIN(cd.id)
-        FROM client_contact_details cd
-        WHERE cd.client_id = clients.id
-    )
 GROUP BY
     clients.id    
 ORDER BY 
@@ -757,9 +729,6 @@ ORDER BY
     clients.trading_name AS client_name,
     clients.status AS status,
     client_types.type AS client_type_name,
-    client_contact_details.email AS email,
-    client_contact_details.phone_code AS phone_code,
-    client_contact_details.phone AS phone,
     jobs.id AS Delete_Status,
     CONCAT(
         'cli_', 
@@ -770,21 +739,15 @@ ORDER BY
       FROM 
           clients
       LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       JOIN 
           customers ON customers.id = clients.customer_id    
       JOIN 
           client_types ON client_types.id = clients.client_type
       LEFT JOIN 
           jobs ON clients.id = jobs.client_id
-      LEFT JOIN 
-          client_contact_details ON client_contact_details.id = (
-              SELECT MIN(cd.id)
-              FROM client_contact_details cd
-              WHERE cd.client_id = clients.id
-          )
-      WHERE clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
-      OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      WHERE 
+       clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       GROUP BY
           clients.id    
       ORDER BY 
@@ -792,7 +755,7 @@ ORDER BY
     `;
      //console.log("Client Query:", query);
   
-      const [result] = await pool.execute(query,[StaffUserId,StaffUserId]);
+      const [result] = await pool.execute(query);
       return { status: true, message: "success.", data: result };
 }
 
