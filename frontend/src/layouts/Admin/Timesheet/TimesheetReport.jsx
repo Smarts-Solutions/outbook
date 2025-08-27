@@ -215,6 +215,27 @@ const dummyData = [
           </select>
         </div>
 
+
+         {/* Field To Display */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Fields to Display</label>
+          <select
+            className="form-select shadow-sm"
+            id="fieldsToDisplay"
+            value={filters.fieldsToDisplay}
+            onChange={handleFilterChange}
+          >
+            <option>Employee Name</option>
+            <option>Customer Name</option>
+            <option>Client Name</option>
+            <option>Job Type Name</option>
+            <option>Task Name</option>
+          </select>
+        </div>
+
+
+
+
         {/* Time Period */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Time Period</label>
@@ -234,22 +255,7 @@ const dummyData = [
           </select>
         </div>
 
-        {/* Display By */}
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">Display By</label>
-          <select
-            className="form-select shadow-sm"
-            id="displayBy"
-            value={filters.displayBy}
-            onChange={handleFilterChange}
-          >
-            <option>Daily</option>
-            <option>Weekly</option>
-            <option>Monthly</option>
-            <option>Quarterly</option>
-            <option>Yearly</option>
-          </select>
-        </div>
+        
 
         {/* From Date */}
         <div className="col-lg-4 col-md-6">
@@ -274,7 +280,32 @@ const dummyData = [
             onChange={handleFilterChange}
           />
         </div>
+
+
+       {/* Display By */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Display By</label>
+          <select
+            className="form-select shadow-sm"
+            id="displayBy"
+            value={filters.displayBy}
+            onChange={handleFilterChange}
+          >
+            <option>Daily</option>
+            <option>Weekly</option>
+            <option>Monthly</option>
+            <option>Quarterly</option>
+            <option>Yearly</option>
+          </select>
+        </div>
+
+
+
+
       </div>
+
+
+      
 
       {/* Buttons */}
       <div className="d-flex gap-2 align-items-center mb-4">
