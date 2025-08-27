@@ -137,10 +137,10 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 
 
 // -- This Month Weekly Report
-// CALL GetTimesheetReportsNormalized('ThisMonth', NULL, NULL, 'Employee', 'Weekly');
+// CALL GetTimesheetReportsNormalized('last_month', NULL, NULL, 'Employee', 'Weekly');
 
 // -- Custom Range Daily Report
-// CALL GetTimesheetReportsNormalized('Custom', '2025-08-01', '2025-08-31', 'Client', 'Daily');
+// CALL GetTimesheetReportsNormalized('custom', '2025-08-01', '2025-08-31', 'Client', 'Daily');
 
 
 
