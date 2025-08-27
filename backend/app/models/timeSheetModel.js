@@ -36,22 +36,42 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 //     DECLARE v_end_date DATE;
 
 //     
-//     IF p_time_period = 'ThisWeek' THEN
-//         SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY);
-//         SET v_end_date = DATE_ADD(v_start_date, INTERVAL 6 DAY);
-//     ELSEIF p_time_period = 'LastWeek' THEN
-//         SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())+7) DAY);
-//         SET v_end_date = DATE_ADD(v_start_date, INTERVAL 6 DAY);
-//     ELSEIF p_time_period = 'ThisMonth' THEN
-//         SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY);
-//         SET v_end_date = LAST_DAY(CURDATE());
-//     ELSEIF p_time_period = 'LastMonth' THEN
-//         SET v_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH);
-//         SET v_end_date = LAST_DAY(v_start_date);
-//     ELSEIF p_time_period = 'Custom' THEN
-//         SET v_start_date = p_from_date;
-//         SET v_end_date = p_to_date;
-//     END IF;
+    // IF p_time_period = 'this_week' THEN
+    //     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY);
+    //     SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
+
+    // ELSEIF p_time_period = 'last_week' THEN
+    //     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())+7) DAY);
+    //     SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
+
+    // ELSEIF p_time_period = 'this_month' THEN
+    //     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY);
+    //     SET v_end_date   = LAST_DAY(CURDATE());
+
+    // ELSEIF p_time_period = 'last_month' THEN
+    //     SET v_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH);
+    //     SET v_end_date   = LAST_DAY(v_start_date);
+
+    // ELSEIF p_time_period = 'this_quarter' THEN
+    //     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL QUARTER(CURDATE())*3-3 MONTH;
+    //     SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
+
+    // ELSEIF p_time_period = 'last_quarter' THEN
+    //     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL (QUARTER(CURDATE())-2)*3 MONTH;
+    //     SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
+
+    // ELSEIF p_time_period = 'this_year' THEN
+    //     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1);
+    //     SET v_end_date   = MAKEDATE(YEAR(CURDATE()), 365);
+
+    // ELSEIF p_time_period = 'last_year' THEN
+    //     SET v_start_date = MAKEDATE(YEAR(CURDATE())-1, 1);
+    //     SET v_end_date   = MAKEDATE(YEAR(CURDATE())-1, 365);
+
+    // ELSEIF p_time_period = 'custom' THEN
+    //     SET v_start_date = p_from_date;
+    //     SET v_end_date   = p_to_date;
+    // END IF;
 
 //    
 //     SELECT 
