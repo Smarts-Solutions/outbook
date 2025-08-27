@@ -22,6 +22,9 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 // LEFT JOIN sub_internal ON sub_internal.id = timesheet.task_id AND timesheet.task_type = 1;
 
 
+
+
+
 // DELIMITER $$
 
 // CREATE PROCEDURE GetTimesheetReportsNormalized(
