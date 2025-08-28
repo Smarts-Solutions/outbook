@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
+import { getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useDispatch, useSelector } from "react-redux";
 // import TimesheetReport from './TimesheetReport';
 // import JobStatusReport from './JobStatusPeport';
@@ -102,6 +103,31 @@ function TimesheetReport() {
 
 
 
+    const GetAllCustomer = async () => {
+      const req = { action: "get_dropdown" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllCustomerDropDown(data)).unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.trading_name
+          }));
+            setOptions(data);
+            // response.data
+            
+          } else {
+            setOptions([]);
+
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    };
+
+
+
   const data = [
     {
       jobId: "F & CLI_V3_00009",
@@ -196,6 +222,9 @@ function TimesheetReport() {
 
       if (value == "employee") {
         staffData()
+      }
+      else if(value == "customer"){
+        GetAllCustomer()
       }
 
 
@@ -293,15 +322,21 @@ function TimesheetReport() {
             className="form-select shadow-sm"
             id="timePeriod"
             value={filters.timePeriod}
-            onChange={handleFilterChange}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "timePeriod", value: selected.target.value },
+              })
+            }
           >
-            <option>This week</option>
-            <option>This month</option>
-            <option>This quarter</option>
-            <option>This year</option>
-            <option>Last Week</option>
-            <option>Last Month</option>
-            <option>Custom</option>
+            <option value={"this_week"}>This week</option>
+            <option value={"last_week"}>Last Week</option>
+            <option value={"this_month"}>This month</option>
+            <option value={"last_month"}>Last Month</option>
+            <option value={"this_quarter"}>This quarter</option>
+            <option value={"last_quarter"}>Last quarter</option>
+            <option value={"this_year"}>This year</option>
+            <option value={"last_year"}>Last year</option>
+            <option value={"custom"}>Custom</option>
           </select>
         </div>
 
@@ -315,7 +350,11 @@ function TimesheetReport() {
             className="form-control shadow-sm"
             id="fromDate"
             value={filters.fromDate}
-            onChange={handleFilterChange}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "fromDate", value: selected.target.value },
+              })
+            }
           />
         </div>
 
@@ -327,7 +366,11 @@ function TimesheetReport() {
             className="form-control shadow-sm"
             id="toDate"
             value={filters.toDate}
-            onChange={handleFilterChange}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "toDate", value: selected.target.value },
+              })
+            }
           />
         </div>
 
@@ -339,13 +382,16 @@ function TimesheetReport() {
             className="form-select shadow-sm"
             id="displayBy"
             value={filters.displayBy}
-            onChange={handleFilterChange}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "displayBy", value: selected.target.value },
+              })
+            }
           >
-            <option>Daily</option>
-            <option>Weekly</option>
-            <option>Monthly</option>
-            <option>Quarterly</option>
-            <option>Yearly</option>
+            <option value={"Daily"}>Daily</option>
+            <option value={"Weekly"}>Weekly</option>
+            <option value={"Monthly"}>Monthly</option>
+            <option value={"Yearly"}>Yearly</option>
           </select>
         </div>
 
