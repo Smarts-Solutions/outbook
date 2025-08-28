@@ -249,6 +249,10 @@ function TimesheetReport() {
         GetAllJobs()
       }
 
+      else if (value == "task") {
+        GetAllTask()
+      }
+
       setFilters((prev) => ({
         ...prev,
         fieldsToDisplay: null,

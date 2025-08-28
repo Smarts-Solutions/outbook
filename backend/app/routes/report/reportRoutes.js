@@ -15,6 +15,7 @@ router.post('/reportCountJob',verifyToken, reportController.reportCountJob);
 router.post('/taxWeeklyStatusReport',verifyToken, reportController.taxWeeklyStatusReport);
 router.post('/taxWeeklyStatusReportFilterKey',verifyToken, reportController.taxWeeklyStatusReportFilterKey);
 router.post('/averageTatReport',verifyToken, reportController.averageTatReport);
+router.post('/getAllTaskByStaff',verifyToken, reportController.getAllTaskByStaff);
 
 
 

@@ -1208,6 +1208,20 @@ const averageTatReport = async (Report) => {
     }
 }
 
+const getAllTaskByStaff = async (Report) => {
+  const { StaffUserId } = Report;
+
+  console.log("StaffUserId get Task", StaffUserId);
+  const query = `
+    SELECT
+      *
+    FROM
+      task
+  `;
+  const [result] = await pool.execute(query);
+  return { status: true, message: 'Success.', data: result };
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -1218,5 +1232,6 @@ module.exports = {
     reportCountJob,
     taxWeeklyStatusReport,
     taxWeeklyStatusReportFilterKey,
-    averageTatReport
+    averageTatReport,
+    getAllTaskByStaff
 };

@@ -39,6 +39,10 @@ const averageTatReport = async (Report) => {
   return reportModel.averageTatReport(Report);
 }
 
+const getAllTaskByStaff = async (Report) => {
+  return reportModel.getAllTaskByStaff(Report);
+}
+
 module.exports = {
   jobStatusReports,
   jobReceivedSentReports,
@@ -49,5 +53,6 @@ module.exports = {
   reportCountJob,
   taxWeeklyStatusReport,
   taxWeeklyStatusReportFilterKey,
-  averageTatReport
+  averageTatReport,
+  getAllTaskByStaff
 };
