@@ -118,7 +118,7 @@ function TimesheetReport() {
 
   // Get All task
   const GetAllTask = async () => {
-    const req = { action: "getByCustomer", customer_id: "" };
+    const req = { action: "get" };
     const data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()

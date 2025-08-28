@@ -1209,9 +1209,10 @@ const averageTatReport = async (Report) => {
 }
 
 const getAllTaskByStaff = async (Report) => {
-  const { StaffUserId } = Report;
+  const { StaffUserId ,jobids } = Report;
 
   console.log("StaffUserId get Task", StaffUserId);
+  console.log("jobids get Task", jobids);
   const query = `
     SELECT
       *
