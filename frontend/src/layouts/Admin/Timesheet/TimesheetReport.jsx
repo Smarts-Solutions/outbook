@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { getAllCustomerDropDown, JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown, JobAction ,getAllTaskByStaff} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -115,6 +115,29 @@ function TimesheetReport() {
         return;
       });
   };
+
+  // Get All task
+  const GetAllTask = async () => {
+    const req = { action: "getByCustomer", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          // const data = response?.data?.map((item) => ({
+          //   value: item.job_id,
+          //   label: item.job_code_id
+          // }));
+          // setOptions(data);
+        } else {
+          //setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
 
 
 
@@ -279,7 +302,7 @@ function TimesheetReport() {
             }
           >
             <option value="employee">Employee</option>
-            <option value="internal_external">Internal/External</option>
+            {/* <option value="internal_external">Internal/External</option> */}
             <option value="customer">Customer</option>
             <option value="client">Client</option>
             <option value="job">Job</option>

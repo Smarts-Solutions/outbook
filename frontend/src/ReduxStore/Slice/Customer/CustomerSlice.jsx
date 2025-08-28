@@ -33,11 +33,25 @@ import {
   getcustomerschecklist,
   get_All_Customer_DropDown,
   delete_Customer,
-  UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY
+  UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY,
+  get_All_Task_ByStaff
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+
+
+export const getAllTaskByStaff = createAsyncThunk("getAllTaskByStaff", async (data) => {
+  try {
+    const updatedReq = {
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await get_All_Task_ByStaff(updatedReq);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {
@@ -64,8 +78,6 @@ export const GetOfficerDetails = createAsyncThunk("seachCompany", async (data) =
     throw err;
   }
 });
-
-
 
 export const AddCustomer = createAsyncThunk("addCustomer", async (data) => {
   try {

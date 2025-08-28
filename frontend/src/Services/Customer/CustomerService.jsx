@@ -5,6 +5,23 @@ import * as Config from "../../Utils/Config";
 import { header } from "../../Utils/ApiHeader";
 const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
+
+
+// get All Task By Staff
+
+export async function get_All_Task_ByStaff(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getAllTaskByStaff`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 // Search Company Name
 export async function GETALLCOMPANY(data) {
   try {
