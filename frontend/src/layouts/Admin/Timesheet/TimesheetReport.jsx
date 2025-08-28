@@ -1,68 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown, JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch, useSelector } from "react-redux";
-// import TimesheetReport from './TimesheetReport';
-// import JobStatusReport from './JobStatusPeport';
-// import JobSummaryReport from './JobSummaryReport';
-// import TeamMonthlyReport from './TeamMonthlyReports';
-// import JobPendingReport from './JobPendingReports';
-// import JobsReceivedSentReports from './JobsReceivedSentReports';
-// import DueByReport from './DueByReport';
-// import TextWeelyReport from './TextWeelyReport';
-// import AverageTatReport from './AverageTatReport';
-
-
-
 import Select from "react-select";
-
-
-
 import * as XLSX from "xlsx";
-
-
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
 
 function TimesheetReport() {
 
-  const [filter, setFilter] = useState(false);
-  const getActiveTab = sessionStorage.getItem('activeReport');
-  const [activeTab, setActiveTab] = useState(getActiveTab || "jobStatusReport");
-
-  const handleTabClick = (tabValue) => {
-    sessionStorage.setItem('activeReport', tabValue);
-    setActiveTab(tabValue);
-  };
-
-
-  //   const getTabContent = () => {
-  //     switch (activeTab) {
-  //       case 'jobStatusReport':
-  //         return <JobStatusReport />
-  //       case 'jobsReceivedSentReports':
-  //         return <JobsReceivedSentReports />;
-  //       case 'jobSummaryReport':
-  //         return <JobSummaryReport />
-  //       case 'jobsPendingReport':
-  //         return <JobPendingReport />;
-  //       case 'dueByReport':
-  //         return <DueByReport />;
-  //       case 'teamPerformanceReport':
-  //         return <TeamMonthlyReport />;
-  //       case 'timesheetReport':
-  //         return <TimesheetReport />
-  //       case 'averageTATReport':
-  //         return <AverageTatReport />;
-  //       case 'taxWeeklyStatusReport':
-  //         return <TextWeelyReport />;
-  //       default:
-  //         return null;
-  //     }
-  //   };
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [selectedStaff, setSelectedStaff] = useState({});
   const [options, setOptions] = useState([]);
 
 
@@ -102,29 +51,70 @@ function TimesheetReport() {
   }, []);
 
 
-
-    const GetAllCustomer = async () => {
-      const req = { action: "get_dropdown" };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllCustomerDropDown(data)).unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
+  // Get All Customers
+  const GetAllCustomer = async () => {
+    const req = { action: "get_dropdown" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllCustomerDropDown(data)).unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
             value: item.id,
             label: item.trading_name
           }));
-            setOptions(data);
-            // response.data
-            
-          } else {
-            setOptions([]);
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    };
+  // Get All Clients
+  const GetAllClient = async () => {
+    const req = { action: "get", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.client_name + " (" + item.client_code + ")"
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  // Get All Jobs
+  const GetAllJobs = async () => {
+    const req = { action: "getByCustomer", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.job_id,
+            label: item.job_code_id
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
 
 
@@ -177,11 +167,11 @@ function TimesheetReport() {
   ];
 
   const [filters, setFilters] = useState({
-    groupBy: "Employee",
+    groupBy: "employee",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
-    timePeriod: "This month",
-    displayBy: "Weekly",
+    timePeriod: "this_week",
+    displayBy: "Daily",
     fromDate: null,
     toDate: null,
   });
@@ -223,10 +213,18 @@ function TimesheetReport() {
       if (value == "employee") {
         staffData()
       }
-      else if(value == "customer"){
+
+      else if (value == "customer") {
         GetAllCustomer()
       }
 
+      else if (value == "client") {
+        GetAllClient()
+      }
+
+      else if (value == "job") {
+        GetAllJobs()
+      }
 
       setFilters((prev) => ({
         ...prev,
@@ -293,7 +291,7 @@ function TimesheetReport() {
         {/* Field To Display */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Fields to Display</label>
-          
+
           <Select
             options={options}
             value={
