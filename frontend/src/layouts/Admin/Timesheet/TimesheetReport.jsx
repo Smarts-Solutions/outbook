@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 
 
-// import Select from 'react-select';
+import Select from "react-select";
 
 
 
@@ -61,18 +61,34 @@ function TimesheetReport() {
   //   };
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const [selectedStaff, setSelectedStaff] = useState({});
+  const [options, setOptions] = useState([]);
+
+
+
+
+  //  let options = [
+  //   { value: "employee", label: "Employee Name" },
+  //   { value: "customer", label: "Customer Name" },
+  //   { value: "client", label: "Client Name" },
+  //   { value: "job", label: "Job Type Name" },
+  //   { value: "task", label: "Task Name" },
+  //  ];
+
 
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log("response.data ", response.data);
-          setStaffDataAll({ loading: false, data: response.data });
+          // console.log("response.data ", response.data);
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.email
+          }));
+          setOptions(data);
         } else {
-          setStaffDataAll({ loading: false, data: [] });
+          setOptions([]);
         }
       })
       .catch((error) => {
@@ -83,16 +99,6 @@ function TimesheetReport() {
   useEffect(() => {
     staffData();
   }, []);
-
-  const handleSelectStaff = (e) => {
-    let { name, value } = e.target;
-    let staff = staffDataAll.data.find(staff => staff.id === parseInt(value));
-    setSelectedStaff(staff);
-  }
-
-  console.log("selectStaff ", selectedStaff);
-
-
 
 
 
@@ -122,50 +128,42 @@ function TimesheetReport() {
     XLSX.writeFile(workbook, "JobStatusReport.xlsx");
   };
 
+  const dummyData = [
+    {
+      employee: "John",
+      internalExternal: "Internal",
+      customer: "ABC Corp",
+      client: "XYZ Ltd",
+      job: "Developer",
+      task: "Coding",
+      date: "2025-08-01",
+    },
+    {
+      employee: "Mary",
+      internalExternal: "External",
+      customer: "DEF Inc",
+      client: "XYZ Ltd",
+      job: "Designer",
+      task: "Design",
+      date: "2025-08-05",
+    },
+    // aur bhi data items
+  ];
 
-
-const dummyData = [
-  {
-    employee: "John",
-    internalExternal: "Internal",
-    customer: "ABC Corp",
-    client: "XYZ Ltd",
-    job: "Developer",
-    task: "Coding",
-    date: "2025-08-01",
-  },
-  {
-    employee: "Mary",
-    internalExternal: "External",
-    customer: "DEF Inc",
-    client: "XYZ Ltd",
-    job: "Designer",
-    task: "Design",
-    date: "2025-08-05",
-  },
-  // aur bhi data items
-];
-
- const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState({
     groupBy: "Employee",
+    fieldsToDisplay: null,
+    fieldsToDisplayId: null,
     timePeriod: "This month",
     displayBy: "Weekly",
-    fromDate: "",
-    toDate: "",
+    fromDate: null,
+    toDate: null,
   });
 
-  // Handle filter change
-  const handleFilterChange = (e) => {
-    const { id, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
+
 
   // Filter the data based on filters
   const filteredData = dummyData.filter((item) => {
-    // Filter by date range if fromDate and toDate set
     const itemDate = new Date(item.date);
     const fromDate = filters.fromDate ? new Date(filters.fromDate) : null;
     const toDate = filters.toDate ? new Date(filters.toDate) : null;
@@ -173,20 +171,59 @@ const dummyData = [
     if (fromDate && itemDate < fromDate) return false;
     if (toDate && itemDate > toDate) return false;
 
-    // Example: Filter by groupBy if you want to restrict data
-    // For demo, let's say groupBy does not filter data directly
-    // You can add more complex filtering here
-
-    return true; // Include all matching items
+    return true;
   });
 
 
 
 
 
-  
+  const handleFilterChange = (e) => {
+    const { key, value, label } = e.target;
 
- return (
+    if (key === "fieldsToDisplay") {
+      setFilters((prev) => ({
+        ...prev,
+        [key]: label,
+        [key + "Id"]: value
+      }));
+    }
+
+    else if (key === "groupBy") {
+      setOptions([])
+      console.log("Group By changed: ", value);
+
+
+      if (value == "employee") {
+        staffData()
+      }
+
+
+      setFilters((prev) => ({
+        ...prev,
+        fieldsToDisplay: null,
+        fieldsToDisplayId: null,
+        [key]: value
+      }));
+
+    }
+
+    else {
+      setFilters((prev) => ({
+        ...prev,
+        [key]: value
+      }));
+    }
+
+
+
+  };
+
+
+  console.log("filters ", filters);
+
+
+  return (
     <div className="container-fluid py-4">
       {/* Page Title */}
       <div className="row mb-3">
@@ -204,33 +241,46 @@ const dummyData = [
             className="form-select shadow-sm"
             id="groupBy"
             value={filters.groupBy}
-            onChange={handleFilterChange}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "groupBy",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text
+                }
+              })
+            }
           >
-            <option>Employee</option>
-            <option>Internal/External</option>
-            <option>Customer</option>
-            <option>Client</option>
-            <option>Job</option>
-            <option>Task</option>
+            <option value="employee">Employee</option>
+            <option value="internal_external">Internal/External</option>
+            <option value="customer">Customer</option>
+            <option value="client">Client</option>
+            <option value="job">Job</option>
+            <option value="task">Task</option>
           </select>
         </div>
 
 
-         {/* Field To Display */}
+        {/* Field To Display */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Fields to Display</label>
-          <select
-            className="form-select shadow-sm"
-            id="fieldsToDisplay"
-            value={filters.fieldsToDisplay}
-            onChange={handleFilterChange}
-          >
-            <option>Employee Name</option>
-            <option>Customer Name</option>
-            <option>Client Name</option>
-            <option>Job Type Name</option>
-            <option>Task Name</option>
-          </select>
+          
+          <Select
+            options={options}
+            value={
+              options && options.length > 0
+                ? options.find((opt) => Number(opt.value) === Number(filters.fieldsToDisplayId)) || null
+                : null
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "fieldsToDisplay", value: selected.value, label: selected.label },
+              })
+            }
+            isSearchable
+            className="shadow-sm"
+          />
+
         </div>
 
 
@@ -255,7 +305,7 @@ const dummyData = [
           </select>
         </div>
 
-        
+
 
         {/* From Date */}
         <div className="col-lg-4 col-md-6">
@@ -282,7 +332,7 @@ const dummyData = [
         </div>
 
 
-       {/* Display By */}
+        {/* Display By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Display By</label>
           <select
@@ -305,7 +355,7 @@ const dummyData = [
       </div>
 
 
-      
+
 
       {/* Buttons */}
       <div className="d-flex gap-2 align-items-center mb-4">
