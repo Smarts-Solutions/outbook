@@ -14,8 +14,9 @@ function TimesheetReport() {
   const token = JSON.parse(localStorage.getItem("token"));
   const [options, setOptions] = useState([]);
   const today = new Date().toISOString().split("T")[0];
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
-
+ console.log("staffDetails ", staffDetails);
 
 
   //  let options = [
@@ -28,7 +29,12 @@ function TimesheetReport() {
 
 
   const staffData = async () => {
-    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+
+   let role = staffDetails?.role?.toUpperCase();
+ //  console.log("role ", role);
+
+     if(role==="SUPERADMIN"){
+      await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -45,6 +51,15 @@ function TimesheetReport() {
       .catch((error) => {
         return;
       });
+     }
+     else{
+      let data = [{ id: staffDetails?.id , email: staffDetails?.email }] 
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email
+      }));
+      setOptions(data);
+     }
   };
 
   useEffect(() => {
