@@ -1329,14 +1329,69 @@ const getTimesheetReportData = async (Report) => {
 
     let where = [];
 
+
+   // group by employee condition
+    if(groupBy == "employee"){
+        // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
+     
+    }else{
+       where.push(`staff_id = ${StaffUserId}`);
+    }        
+   }
+
+
+   // time timePeriod
+   if (timePeriod) {
+    const currentDate = new Date();
+    let startDate, endDate;
+
+    switch (timePeriod) {
+        case 'this_week':
+            const firstDayOfWeek = currentDate.getDate() - currentDate.getDay(); // Sunday as the first day
+            startDate = new Date(currentDate.setDate(firstDayOfWeek));
+            endDate = new Date(currentDate.setDate(firstDayOfWeek + 6));
+            break;
+        case 'last_week':
+            const firstDayOfLastWeek = currentDate.getDate() - currentDate.getDay() - 7;
+            startDate = new Date(currentDate.setDate(firstDayOfLastWeek));
+            endDate = new Date(currentDate.setDate(firstDayOfLastWeek + 6));
+            break;
+        case 'this_month':
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            break;
+        case 'last_month':
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+            break;
+        case 'this_year':
+            startDate = new Date(currentDate.getFullYear(), 0, 1);
+            endDate = new Date(currentDate.getFullYear(), 11, 31);
+            break;
+        case 'last_year':
+            startDate = new Date(currentDate.getFullYear() - 1, 0, 1);
+            endDate = new Date(currentDate.getFullYear() - 1, 11, 31);
+            break;
+        default:
+            startDate = null;
+            endDate = null;
+    }
+
+    if (startDate && endDate) {
+        const formattedStartDate = startDate.toISOString().split('T')[0];
+        const formattedEndDate = endDate.toISOString().split('T')[0];
+        where.push(`created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
+    }
+   }
+
     if (fromDate) {
         where.push(`created_at >= '${fromDate}'`);
     }
     if (toDate) {
         where.push(`created_at <= '${toDate}'`);
     }
-
-    
 
 
     if(where.length > 0){
