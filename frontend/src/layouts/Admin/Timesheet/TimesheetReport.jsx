@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { getAllCustomerDropDown, JobAction ,getAllTaskByStaff ,getTimesheetReportData} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown, JobAction, getAllTaskByStaff, getTimesheetReportData } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -15,8 +15,11 @@ function TimesheetReport() {
   const [options, setOptions] = useState([]);
   const today = new Date().toISOString().split("T")[0];
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const [showData, setShowData] = useState([]);
 
-//  console.log("staffDetails ", staffDetails);
+  console.log("showData ", showData);
+
+  //  console.log("staffDetails ", staffDetails);
 
 
   //  let options = [
@@ -30,36 +33,36 @@ function TimesheetReport() {
 
   const staffData = async () => {
 
-   let role = staffDetails?.role?.toUpperCase();
- //  console.log("role ", role);
+    let role = staffDetails?.role?.toUpperCase();
+    //  console.log("role ", role);
 
-     if(role==="SUPERADMIN"){
+    if (role === "SUPERADMIN") {
       await dispatch(Staff({ req: { action: "get" }, authToken: token }))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          // console.log("response.data ", response.data);
-          const data = response?.data?.map((item) => ({
-            value: item.id,
-            label: item.email
-          }));
-          setOptions(data);
-        } else {
-          setOptions([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-     }
-     else{
-      let data = [{ id: staffDetails?.id , email: staffDetails?.email }] 
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            // console.log("response.data ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.email
+            }));
+            setOptions(data);
+          } else {
+            setOptions([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    }
+    else {
+      let data = [{ id: staffDetails?.id, email: staffDetails?.email }]
       data = data?.map((item) => ({
         value: item.id,
         label: item.email
       }));
       setOptions(data);
-     }
+    }
   };
 
   useEffect(() => {
@@ -268,13 +271,13 @@ function TimesheetReport() {
     }
 
     else if (key == "timePeriod") {
-     
-        setFilters((prev) => ({
-          ...prev,
-          fromDate: null,
-          toDate: null,
-          [key]: value,
-        }));
+
+      setFilters((prev) => ({
+        ...prev,
+        fromDate: null,
+        toDate: null,
+        [key]: value,
+      }));
     }
 
     else if (key == "fromDate") {
@@ -305,15 +308,15 @@ function TimesheetReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     console.log("Calling filter API with filters: ", filters);
-    const req = { action: "get" , filters : filters };
+    const req = { action: "get", filters: filters };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-           
+          setShowData(response.data);
         } else {
-          
+          setShowData([]);
         }
       })
       .catch((error) => {
@@ -324,12 +327,26 @@ function TimesheetReport() {
   };
 
   useEffect(() => {
-    if(filters.fieldsToDisplay !== null){
+    if (filters.fieldsToDisplay !== null) {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay , filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy]);
 
   // console.log("filters ", filters);
+
+  const resetFunction = () => {
+    setFilters({
+      groupBy: "employee",
+      fieldsToDisplay: null,
+      fieldsToDisplayId: null,
+      timePeriod: "this_week",
+      displayBy: "Daily",
+      fromDate: null,
+      toDate: null,
+    })
+    setShowData([]);
+    staffData();
+  }
 
 
   return (
@@ -423,9 +440,9 @@ function TimesheetReport() {
 
 
         {/* From Date  And To Date */}
-      { filters.timePeriod == "custom" && (
+        {filters.timePeriod == "custom" && (
           <>
-        {/* <div className="col-lg-4 col-md-6">
+            {/* <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">From Date</label>
           <input
             type="date"
@@ -454,41 +471,41 @@ function TimesheetReport() {
             }
           />
         </div> */}
-        {/* From Date */}
-      <div className="col-lg-4 col-md-6">
-        <label className="form-label fw-medium">From Date</label>
-        <input
-          type="date"
-          className="form-control shadow-sm"
-          id="fromDate"
-          value={filters.fromDate}
-        //  min={today} 
-          onChange={(selected) =>
-            handleFilterChange({
-              target: { key: "fromDate", value: selected.target.value },
-            })
-          }
-        />
-      </div>
+            {/* From Date */}
+            <div className="col-lg-4 col-md-6">
+              <label className="form-label fw-medium">From Date</label>
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="fromDate"
+                value={filters.fromDate}
+                //  min={today} 
+                onChange={(selected) =>
+                  handleFilterChange({
+                    target: { key: "fromDate", value: selected.target.value },
+                  })
+                }
+              />
+            </div>
 
-      {/* To Date */}
-      <div className="col-lg-4 col-md-6">
-        <label className="form-label fw-medium">To Date</label>
-        <input
-          type="date"
-          className="form-control shadow-sm"
-          id="toDate"
-          value={filters.toDate}
-          min={filters.fromDate || today} 
-          onChange={(selected) =>
-            handleFilterChange({
-              target: { key: "toDate", value: selected.target.value },
-            })
-          }
-          disabled={!filters.fromDate} // जब तक fromDate select न हो, disable
-        />
-      </div>
-        </>
+            {/* To Date */}
+            <div className="col-lg-4 col-md-6">
+              <label className="form-label fw-medium">To Date</label>
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="toDate"
+                value={filters.toDate}
+                min={filters.fromDate || today}
+                onChange={(selected) =>
+                  handleFilterChange({
+                    target: { key: "toDate", value: selected.target.value },
+                  })
+                }
+                disabled={!filters.fromDate} // जब तक fromDate select न हो, disable
+              />
+            </div>
+          </>
         )}
 
 
@@ -525,15 +542,7 @@ function TimesheetReport() {
         <button
           className="btn btn-outline-secondary shadow-sm"
           id="btn-reset"
-          onClick={() =>
-            setFilters({
-              groupBy: "Employee",
-              timePeriod: "This month",
-              displayBy: "Weekly",
-              fromDate: "",
-              toDate: "",
-            })
-          }
+          onClick={() => resetFunction()}
         >
           Reset
         </button>
@@ -545,7 +554,7 @@ function TimesheetReport() {
       {/* Filtered Data Display */}
       <div>
         <h6>Filtered Data:</h6>
-        {filteredData.length === 0 ? (
+        {showData.length === 0 ? (
           <p>No records found</p>
         ) : (
           <table className="table table-striped">
@@ -561,15 +570,15 @@ function TimesheetReport() {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, idx) => (
+              {showData && showData?.map((item, idx) => (
                 <tr key={idx}>
-                  <td>{item.employee}</td>
-                  <td>{item.internalExternal}</td>
-                  <td>{item.customer}</td>
-                  <td>{item.client}</td>
-                  <td>{item.job}</td>
-                  <td>{item.task}</td>
-                  <td>{item.date}</td>
+                  <td>{item.employee_email}</td>
+                  <td>{""}</td>
+                  <td>{""}</td>
+                  <td>{""}</td>
+                  <td>{""}</td>
+                  <td>{""}</td>
+                  <td>{""}</td>
                 </tr>
               ))}
             </tbody>

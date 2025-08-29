@@ -1337,7 +1337,7 @@ const getTimesheetReportData = async (Report) => {
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
 
         } else {
-            where.push(`staff_id = ${StaffUserId}`);
+            where.push(`timesheet.staff_id = ${StaffUserId}`);
         }
     }
 
@@ -1386,7 +1386,7 @@ const getTimesheetReportData = async (Report) => {
         if (startDate && endDate) {
             const formattedStartDate = startDate.toISOString().split('T')[0];
             const formattedEndDate = endDate.toISOString().split('T')[0];
-            where.push(`created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
+            where.push(`timesheet.created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
         }
     }
 
@@ -1395,12 +1395,12 @@ const getTimesheetReportData = async (Report) => {
 
     // fromDate and toDate
     if (timePeriod == "custom" || fromDate) {
-        where.push(`created_at >= '${fromDate}'`);
+        where.push(`timesheet.created_at >= '${fromDate}'`);
     }
 
     // toDate condition
     if (timePeriod == "custom" || toDate) {
-        where.push(`created_at <= '${toDate}'`);
+        where.push(`timesheet.created_at <= '${toDate}'`);
     }
 
 
@@ -1414,9 +1414,11 @@ const getTimesheetReportData = async (Report) => {
 
     const query = `
     SELECT 
-    *
+    staffs.email AS employee_email,
+    timesheet.*
     FROM 
     timesheet
+    JOIN staffs ON timesheet.staff_id = staffs.id
     ${where}
     `;
     const [result] = await pool.execute(query);
