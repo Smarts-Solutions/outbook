@@ -1237,7 +1237,7 @@ const getAllTaskByStaff = async (Report) => {
     GROUP BY task.id
     `;
     const [result] = await pool.execute(query);
-   // console.log("Task data retrieved:", result);
+    // console.log("Task data retrieved:", result);
     return { status: true, message: 'Success.', data: result };
 }
 
@@ -1315,94 +1315,98 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
 
 const getTimesheetReportData = async (Report) => {
-    const { StaffUserId ,data } = Report;
-     console.log("Report in getTimesheetReportData", data.filters);
-     let {
-         groupBy,
-         fieldsToDisplay,
-         fieldsToDisplayId,
-         timePeriod,
-         displayBy,
-         fromDate,
-         toDate
-     } = data.filters;
+    const { StaffUserId, data } = Report;
+    console.log("Report in getTimesheetReportData", data.filters);
+    let {
+        groupBy,
+        fieldsToDisplay,
+        fieldsToDisplayId,
+        timePeriod,
+        displayBy,
+        fromDate,
+        toDate
+    } = data.filters;
 
     let where = [];
 
 
-   // group by employee condition
-    if(groupBy == "employee"){
+    // group by employee condition
+    if (groupBy == "employee") {
         // Get Role
-    const rows = await QueryRoleHelperFunction(StaffUserId)
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
-     
-    }else{
-       where.push(`staff_id = ${StaffUserId}`);
-    }        
-   }
+        const rows = await QueryRoleHelperFunction(StaffUserId)
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
 
-
-   // time timePeriod
-   if (timePeriod) {
-    const currentDate = new Date();
-    let startDate, endDate;
-
-    switch (timePeriod) {
-        case 'this_week':
-            const firstDayOfWeek = currentDate.getDate() - currentDate.getDay(); // Sunday as the first day
-            startDate = new Date(currentDate.setDate(firstDayOfWeek));
-            endDate = new Date(currentDate.setDate(firstDayOfWeek + 6));
-            break;
-        case 'last_week':
-            const firstDayOfLastWeek = currentDate.getDate() - currentDate.getDay() - 7;
-            startDate = new Date(currentDate.setDate(firstDayOfLastWeek));
-            endDate = new Date(currentDate.setDate(firstDayOfLastWeek + 6));
-            break;
-        case 'this_month':
-            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-            break;
-        case 'last_month':
-            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
-            break;
-        case 'this_year':
-            startDate = new Date(currentDate.getFullYear(), 0, 1);
-            endDate = new Date(currentDate.getFullYear(), 11, 31);
-            break;
-        case 'last_year':
-            startDate = new Date(currentDate.getFullYear() - 1, 0, 1);
-            endDate = new Date(currentDate.getFullYear() - 1, 11, 31);
-            break;
-        default:
-            startDate = null;
-            endDate = null;
+        } else {
+            where.push(`staff_id = ${StaffUserId}`);
+        }
     }
 
-    if (startDate && endDate) {
-        const formattedStartDate = startDate.toISOString().split('T')[0];
-        const formattedEndDate = endDate.toISOString().split('T')[0];
-        where.push(`created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
+
+
+
+
+
+    // time timePeriod
+    if (timePeriod) {
+        const currentDate = new Date();
+        let startDate, endDate;
+
+        switch (timePeriod) {
+            case 'this_week':
+                const firstDayOfWeek = currentDate.getDate() - currentDate.getDay(); // Sunday as the first day
+                startDate = new Date(currentDate.setDate(firstDayOfWeek));
+                endDate = new Date(currentDate.setDate(firstDayOfWeek + 6));
+                break;
+            case 'last_week':
+                const firstDayOfLastWeek = currentDate.getDate() - currentDate.getDay() - 7;
+                startDate = new Date(currentDate.setDate(firstDayOfLastWeek));
+                endDate = new Date(currentDate.setDate(firstDayOfLastWeek + 6));
+                break;
+            case 'this_month':
+                startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                break;
+            case 'last_month':
+                startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+                endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+                break;
+            case 'this_year':
+                startDate = new Date(currentDate.getFullYear(), 0, 1);
+                endDate = new Date(currentDate.getFullYear(), 11, 31);
+                break;
+            case 'last_year':
+                startDate = new Date(currentDate.getFullYear() - 1, 0, 1);
+                endDate = new Date(currentDate.getFullYear() - 1, 11, 31);
+                break;
+            default:
+                startDate = null;
+                endDate = null;
+        }
+
+        if (startDate && endDate) {
+            const formattedStartDate = startDate.toISOString().split('T')[0];
+            const formattedEndDate = endDate.toISOString().split('T')[0];
+            where.push(`created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
+        }
     }
-   }
 
 
 
 
     // fromDate and toDate
-    if (fromDate) {
+    if (timePeriod == "custom" || fromDate) {
         where.push(`created_at >= '${fromDate}'`);
     }
 
     // toDate condition
-    if (toDate) {
+    if (timePeriod == "custom" || toDate) {
         where.push(`created_at <= '${toDate}'`);
     }
 
 
-    if(where.length > 0){
+    if (where.length > 0) {
         where = `WHERE ${where.join(" AND ")}`;
-    }else{
+    } else {
         where = "";
     }
 
