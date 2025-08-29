@@ -1386,9 +1386,15 @@ const getTimesheetReportData = async (Report) => {
     }
    }
 
+
+
+
+    // fromDate and toDate
     if (fromDate) {
         where.push(`created_at >= '${fromDate}'`);
     }
+
+    // toDate condition
     if (toDate) {
         where.push(`created_at <= '${toDate}'`);
     }
