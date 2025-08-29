@@ -15,6 +15,7 @@ function TimesheetReport() {
   const [options, setOptions] = useState([]);
   const today = new Date().toISOString().split("T")[0];
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
 
   console.log("showData ", showData);
@@ -33,10 +34,10 @@ function TimesheetReport() {
 
   const staffData = async () => {
 
-    let role = staffDetails?.role?.toUpperCase();
+    
     //  console.log("role ", role);
 
-    if (role === "SUPERADMIN") {
+    if (role?.toUpperCase() === "SUPERADMIN") {
       await dispatch(Staff({ req: { action: "get" }, authToken: token }))
         .unwrap()
         .then(async (response) => {
@@ -54,6 +55,7 @@ function TimesheetReport() {
         .catch((error) => {
           return;
         });
+        
     }
     else {
       let data = [{ id: staffDetails?.id, email: staffDetails?.email }]
@@ -275,10 +277,14 @@ function TimesheetReport() {
   };
 
   useEffect(() => {
-    if (filters.fieldsToDisplay !== null) {
+    if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
   }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy]);
+
+
+  
+ 
 
   // console.log("filters ", filters);
 

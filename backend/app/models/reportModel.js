@@ -1335,6 +1335,9 @@ const getTimesheetReportData = async (Report) => {
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
+            if(fieldsToDisplayId !== null){
+                where.push(`timesheet.staff_id = ${fieldsToDisplayId}`);  
+            }
 
         } else {
             where.push(`timesheet.staff_id = ${StaffUserId}`);
