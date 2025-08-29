@@ -1312,6 +1312,31 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
 }
 
+
+
+const getTimesheetReportData = async (Report) => {
+    const { StaffUserId ,data } = Report;
+     console.log("Report in getTimesheetReportData", data.filters);
+     let {
+         groupBy,
+         fieldsToDisplay,
+         fieldsToDisplayId,
+         timePeriod,
+         displayBy,
+         fromDate,
+         toDate
+     } = data.filters;
+
+    const query = `
+    SELECT 
+    *
+    FROM 
+    timesheet
+    `;
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -1323,5 +1348,6 @@ module.exports = {
     taxWeeklyStatusReport,
     taxWeeklyStatusReportFilterKey,
     averageTatReport,
-    getAllTaskByStaff
+    getAllTaskByStaff,
+    getTimesheetReportData
 };

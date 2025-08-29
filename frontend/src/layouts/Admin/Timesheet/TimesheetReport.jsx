@@ -305,7 +305,7 @@ function TimesheetReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     console.log("Calling filter API with filters: ", filters);
-   const req = { action: "get" };
+    const req = { action: "get" , filters : filters };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()

@@ -48,6 +48,7 @@ export const getTimesheetReportData = createAsyncThunk("getTimesheetReportData",
   try {
     const updatedReq = {
       StaffUserId: StaffUserId.id,
+      data: data.req
     };
     const res = await get_Timesheet_ReportData(updatedReq);
     return await res;
@@ -60,8 +61,10 @@ export const getTimesheetReportData = createAsyncThunk("getTimesheetReportData",
 
 export const getAllTaskByStaff = createAsyncThunk("getAllTaskByStaff", async (data) => {
   try {
+
+    
     const updatedReq = {
-      StaffUserId: StaffUserId.id,
+      StaffUserId: StaffUserId.id
     };
     const res = await get_All_Task_ByStaff(updatedReq);
     return await res;
