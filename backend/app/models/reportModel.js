@@ -1418,10 +1418,14 @@ const getTimesheetReportData = async (Report) => {
     const query = `
     SELECT 
     staffs.email AS employee_email,
+    customers.trading_name AS customer_name,
+    clients.trading_name AS client_name,
     timesheet.*
     FROM 
     timesheet
     JOIN staffs ON timesheet.staff_id = staffs.id
+    LEFT JOIN customers ON timesheet.customer_id = customers.id
+    LEFT JOIN clients ON timesheet.client_id = clients.id
     ${where}
     `;
     const [result] = await pool.execute(query);

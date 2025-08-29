@@ -528,7 +528,7 @@ function TimesheetReport() {
                 <tr key={idx}>
                   <td>{item.employee_email}</td>
                   <td>{""}</td>
-                  <td>{""}</td>
+                  <td>{item.customer_name}</td>
                   <td>{""}</td>
                   <td>{""}</td>
                   <td>{""}</td>
