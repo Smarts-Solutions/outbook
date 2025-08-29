@@ -13,6 +13,7 @@ function TimesheetReport() {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [options, setOptions] = useState([]);
+  const today = new Date().toISOString().split("T")[0];
 
 
 
@@ -124,24 +125,19 @@ function TimesheetReport() {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-
-          
-          // const data = response?.data?.map((item) => ({
-          //   value: item.job_id,
-          //   label: item.job_code_id
-          // }));
-          // setOptions(data);
+          const data = response?.data?.map((item) => ({
+            value: item.task_id,
+            label: item.task_name
+          }));
+          setOptions(data);
         } else {
-          //setOptions([]);
+          setOptions([]);
         }
       })
       .catch((error) => {
         return;
       });
   };
-
-
-
 
   const data = [
     {
@@ -201,8 +197,6 @@ function TimesheetReport() {
     toDate: null,
   });
 
-
-
   // Filter the data based on filters
   const filteredData = dummyData.filter((item) => {
     const itemDate = new Date(item.date);
@@ -214,10 +208,6 @@ function TimesheetReport() {
 
     return true;
   });
-
-
-
-
 
   const handleFilterChange = (e) => {
     const { key, value, label } = e.target;
@@ -232,9 +222,7 @@ function TimesheetReport() {
 
     else if (key === "groupBy") {
       setOptions([])
-      console.log("Group By changed: ", value);
-
-
+      //console.log("Group By changed: ", value);
       if (value == "employee") {
         staffData()
       }
@@ -262,6 +250,30 @@ function TimesheetReport() {
         [key]: value
       }));
 
+    }
+
+    else if (key == "timePeriod") {
+      console.log("Time Period changed: ", value);
+        setFilters((prev) => ({
+          ...prev,
+          fromDate: null,
+          toDate: null,
+          [key]: value,
+        }));
+    }
+
+    else if (key == "fromDate") {
+      if (value > filters.toDate) {
+        setFilters((prev) => ({
+          ...prev,
+          toDate: value,
+        }));
+      }
+
+      setFilters((prev) => ({
+        ...prev,
+        fromDate: value,
+      }));
     }
 
     else {
@@ -369,8 +381,10 @@ function TimesheetReport() {
 
 
 
-        {/* From Date */}
-        <div className="col-lg-4 col-md-6">
+        {/* From Date  And To Date */}
+      { filters.timePeriod == "custom" && (
+          <>
+        {/* <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">From Date</label>
           <input
             type="date"
@@ -385,7 +399,6 @@ function TimesheetReport() {
           />
         </div>
 
-        {/* To Date */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">To Date</label>
           <input
@@ -399,7 +412,43 @@ function TimesheetReport() {
               })
             }
           />
-        </div>
+        </div> */}
+        {/* From Date */}
+      <div className="col-lg-4 col-md-6">
+        <label className="form-label fw-medium">From Date</label>
+        <input
+          type="date"
+          className="form-control shadow-sm"
+          id="fromDate"
+          value={filters.fromDate}
+          min={today} // आज से पहले की date disable
+          onChange={(selected) =>
+            handleFilterChange({
+              target: { key: "fromDate", value: selected.target.value },
+            })
+          }
+        />
+      </div>
+
+      {/* To Date */}
+      <div className="col-lg-4 col-md-6">
+        <label className="form-label fw-medium">To Date</label>
+        <input
+          type="date"
+          className="form-control shadow-sm"
+          id="toDate"
+          value={filters.toDate}
+          min={filters.fromDate || today} // fromDate से पहले की disable
+          onChange={(selected) =>
+            handleFilterChange({
+              target: { key: "toDate", value: selected.target.value },
+            })
+          }
+          disabled={!filters.fromDate} // जब तक fromDate select न हो, disable
+        />
+      </div>
+        </>
+        )}
 
 
         {/* Display By */}

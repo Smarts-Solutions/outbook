@@ -148,10 +148,6 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 
 
 
-
-
-
-
 const getTimesheet = async (Timesheet) => {
 
   const { staff_id, weekOffset } = Timesheet;
