@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { getAllCustomerDropDown, JobAction ,getAllTaskByStaff} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown, JobAction ,getAllTaskByStaff ,getTimesheetReportData} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -16,7 +16,7 @@ function TimesheetReport() {
   const today = new Date().toISOString().split("T")[0];
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
- console.log("staffDetails ", staffDetails);
+//  console.log("staffDetails ", staffDetails);
 
 
   //  let options = [
@@ -268,7 +268,7 @@ function TimesheetReport() {
     }
 
     else if (key == "timePeriod") {
-      console.log("Time Period changed: ", value);
+     
         setFilters((prev) => ({
           ...prev,
           fromDate: null,
@@ -302,8 +302,34 @@ function TimesheetReport() {
 
   };
 
+  const callFilterApi = async () => {
+    // Call your filter API here
+    console.log("Calling filter API with filters: ", filters);
+   const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(getTimesheetReportData(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+           
+        } else {
+          
+        }
+      })
+      .catch((error) => {
+        return;
+      });
 
-  console.log("filters ", filters);
+
+  };
+
+  useEffect(() => {
+    if(filters.fieldsToDisplay !== null){
+      callFilterApi();
+    }
+  }, [filters.fieldsToDisplay , filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy]);
+
+  // console.log("filters ", filters);
 
 
   return (

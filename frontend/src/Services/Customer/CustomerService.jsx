@@ -6,9 +6,21 @@ import { header } from "../../Utils/ApiHeader";
 const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
 
+// get Timesheet Report Data
+export async function get_Timesheet_ReportData(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getTimesheetReportData`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
 // get All Task By Staff
-
 export async function get_All_Task_ByStaff(data) {
   try {
     const token = JSON.parse(localStorage.getItem("token"));
