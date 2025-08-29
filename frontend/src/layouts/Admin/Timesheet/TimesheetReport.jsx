@@ -157,53 +157,13 @@ function TimesheetReport() {
       });
   };
 
-  const data = [
-    {
-      jobId: "F & CLI_V3_00009",
-      accountManager: "STAFF NINE",
-      client: "CLI--2",
-      serviceType: "Payroll",
-      jobType: "V3",
-      status: "To Be Started Yet Allocated Internally",
-    },
-    {
-      jobId: "F & CLI_V3_00008",
-      accountManager: "STAFF NINE",
-      client: "CLI--2",
-      serviceType: "Payroll",
-      jobType: "V3",
-      status: "To Be Started Yet Allocated Internally",
-    },
-  ];
-
   const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(showData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Job Status Report");
     XLSX.writeFile(workbook, "JobStatusReport.xlsx");
   };
 
-  const dummyData = [
-    {
-      employee: "John",
-      internalExternal: "Internal",
-      customer: "ABC Corp",
-      client: "XYZ Ltd",
-      job: "Developer",
-      task: "Coding",
-      date: "2025-08-01",
-    },
-    {
-      employee: "Mary",
-      internalExternal: "External",
-      customer: "DEF Inc",
-      client: "XYZ Ltd",
-      job: "Designer",
-      task: "Design",
-      date: "2025-08-05",
-    },
-    // aur bhi data items
-  ];
 
   const [filters, setFilters] = useState({
     groupBy: "employee",
@@ -215,18 +175,7 @@ function TimesheetReport() {
     toDate: null,
   });
 
-  // Filter the data based on filters
-  const filteredData = dummyData.filter((item) => {
-    const itemDate = new Date(item.date);
-    const fromDate = filters.fromDate ? new Date(filters.fromDate) : null;
-    const toDate = filters.toDate ? new Date(filters.toDate) : null;
-
-    if (fromDate && itemDate < fromDate) return false;
-    if (toDate && itemDate > toDate) return false;
-
-    return true;
-  });
-
+  
   const handleFilterChange = (e) => {
     const { key, value, label } = e.target;
 
@@ -300,7 +249,6 @@ function TimesheetReport() {
         [key]: value
       }));
     }
-
 
 
   };
