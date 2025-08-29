@@ -462,7 +462,7 @@ function TimesheetReport() {
           className="form-control shadow-sm"
           id="fromDate"
           value={filters.fromDate}
-          min={today} // आज से पहले की date disable
+        //  min={today} 
           onChange={(selected) =>
             handleFilterChange({
               target: { key: "fromDate", value: selected.target.value },
@@ -479,7 +479,7 @@ function TimesheetReport() {
           className="form-control shadow-sm"
           id="toDate"
           value={filters.toDate}
-          min={filters.fromDate || today} // fromDate से पहले की disable
+          min={filters.fromDate || today} 
           onChange={(selected) =>
             handleFilterChange({
               target: { key: "toDate", value: selected.target.value },

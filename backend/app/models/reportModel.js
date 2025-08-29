@@ -1327,11 +1327,32 @@ const getTimesheetReportData = async (Report) => {
          toDate
      } = data.filters;
 
+    let where = [];
+
+    if (fromDate) {
+        where.push(`created_at >= '${fromDate}'`);
+    }
+    if (toDate) {
+        where.push(`created_at <= '${toDate}'`);
+    }
+
+    
+
+
+    if(where.length > 0){
+        where = `WHERE ${where.join(" AND ")}`;
+    }else{
+        where = "";
+    }
+
+    console.log("where", where);
+
     const query = `
     SELECT 
     *
     FROM 
     timesheet
+    ${where}
     `;
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
