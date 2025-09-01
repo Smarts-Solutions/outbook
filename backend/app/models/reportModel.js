@@ -1328,6 +1328,7 @@ const getTimesheetReportData = async (Report) => {
     } = data.filters;
 
     let where = [];
+    
 
 
     // group by employee condition
@@ -1338,16 +1339,24 @@ const getTimesheetReportData = async (Report) => {
             if(fieldsToDisplayId !== null){
                 where.push(`timesheet.staff_id = ${fieldsToDisplayId}`);  
             }
-
         } else {
             where.push(`timesheet.staff_id = ${StaffUserId}`);
         }
     }
 
+    // group by customer condition
+    if (groupBy == "customer") {
+        if(fieldsToDisplayId !== null){
+            where.push(`timesheet.customer_id = ${fieldsToDisplayId}`);
+        }
+    }
 
-
-
-
+    // group by client condition
+    if (groupBy == "client") {
+        if(fieldsToDisplayId !== null){
+            where.push(`timesheet.client_id = ${fieldsToDisplayId}`);
+        }
+    }
 
     // time timePeriod
     if (timePeriod) {
