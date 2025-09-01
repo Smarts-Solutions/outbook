@@ -527,11 +527,11 @@ function TimesheetReport() {
               {showData && showData?.map((item, idx) => (
                 <tr key={idx}>
                   <td>{item.employee_email}</td>
-                  <td>{""}</td>
+                  <td>{item.internal_external}</td>
                   <td>{item.customer_name}</td>
-                  <td>{""}</td>
-                  <td>{""}</td>
-                  <td>{""}</td>
+                  <td>{item.client_name}</td>
+                  <td>{item.job_name}</td>
+                  <td>{item.task_name}</td>
                   <td>{""}</td>
                 </tr>
               ))}
