@@ -1436,7 +1436,9 @@ const getTimesheetReportData = async (Report) => {
     CASE
         WHEN timesheet.task_type = '1' THEN 'Internal'
         WHEN timesheet.task_type = '2' THEN 'External'
-    END AS internal_external
+    END AS internal_external,
+
+    timesheet.created_at AS created_at
 
     FROM 
     timesheet

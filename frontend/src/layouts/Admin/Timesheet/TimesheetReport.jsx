@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
 import * as XLSX from "xlsx";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import dayjs from "dayjs";
 
 
 function TimesheetReport() {
@@ -528,11 +529,12 @@ function TimesheetReport() {
                 <tr key={idx}>
                   <td>{item.employee_email}</td>
                   <td>{item.internal_external}</td>
-                  <td>{item.customer_name}</td>
-                  <td>{item.client_name}</td>
+                  <td>{item.customer_name ?? '-'}</td>
+                  <td>{item.client_name ?? '-'}</td>
                   <td>{item.job_name}</td>
                   <td>{item.task_name}</td>
-                  <td>{""}</td>
+                  <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>
+
                 </tr>
               ))}
             </tbody>
