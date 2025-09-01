@@ -1354,6 +1354,17 @@ const getTimesheetReportData = async (Report) => {
         }
     }
 
+
+    if (groupBy != "employee") {
+        // Get Role
+        const rows = await QueryRoleHelperFunction(StaffUserId)
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
+           
+        } else {
+            where.push(`timesheet.staff_id = ${StaffUserId}`);
+        }
+    }
+
     // group by customer condition
     if (groupBy == "customer") {
         if(fieldsToDisplayId !== null){

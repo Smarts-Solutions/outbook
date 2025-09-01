@@ -128,9 +128,8 @@ function TimesheetReport() {
   };
 
   // Get All Jobs
-  const GetAllJobs = async () => {
-    
-    if (filters.internal_external == "1") {
+  const GetAllJobs = async (internal_external) => {
+    if (internal_external == "1") {
       const req = { action: "getInternalJobs" };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
@@ -180,9 +179,8 @@ function TimesheetReport() {
   };
 
   // Get All task
-  const GetAllTask = async () => {
-
-   if (filters.internal_external == "1") {
+  const GetAllTask = async (internal_external) => {
+   if (internal_external == "1") {
       const req = { action: "getInternalTasks" };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
@@ -248,6 +246,21 @@ function TimesheetReport() {
       }));
     }
 
+    else if (key === "internal_external") {
+      setFilters((prev) => ({
+        ...prev,
+        [key]: value
+      }));
+      if(filters.groupBy == 'job'){
+        setOptions([])
+        GetAllJobs(value)
+      }else if(filters.groupBy == 'task'){
+        setOptions([])
+        GetAllTask(value)
+      }
+
+    }
+
     else if (key === "groupBy") {
       setOptions([])
       //console.log("Group By changed: ", value);
@@ -264,11 +277,11 @@ function TimesheetReport() {
       }
 
       else if (value == "job") {
-        GetAllJobs()
+        GetAllJobs(filters.internal_external)
       }
 
       else if (value == "task") {
-        GetAllTask()
+        GetAllTask(filters.internal_external)
       }
 
       setFilters((prev) => ({
@@ -310,6 +323,8 @@ function TimesheetReport() {
         [key]: value
       }));
     }
+
+
 
 
   };
