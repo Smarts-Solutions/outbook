@@ -1358,6 +1358,20 @@ const getTimesheetReportData = async (Report) => {
         }
     }
 
+    // group by job condition
+    if (groupBy == "job") {
+        if(fieldsToDisplayId !== null){
+            where.push(`task_type = 2 AND timesheet.job_id = ${fieldsToDisplayId}`);
+        }
+    }
+
+    // group by task condition
+    if (groupBy == "task") {
+        if(fieldsToDisplayId !== null){
+            where.push(`task_type = 2 AND timesheet.task_id = ${fieldsToDisplayId}`);
+        }
+    }
+
     // time timePeriod
     if (timePeriod) {
         const currentDate = new Date();
@@ -1401,9 +1415,6 @@ const getTimesheetReportData = async (Report) => {
             where.push(`timesheet.created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
         }
     }
-
-
-
 
     // fromDate and toDate
     if (timePeriod == "custom" || fromDate) {
