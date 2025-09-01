@@ -1210,7 +1210,6 @@ const averageTatReport = async (Report) => {
 
 const getAllTaskByStaff = async (Report) => {
     const { StaffUserId } = Report;
-
     // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
     // Get Role
@@ -1312,13 +1311,24 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
 }
 
+const getInternalJobs = async  (Report) => {
+    const query = `SELECT * FROM internal ORDER BY id DESC`;
+    const [result] = await pool.execute(query);
+     return { status: true, message: 'Success.', data: result };
+}
 
+const getInternalTasks = async (Report) => {
+    const query = `SELECT * FROM sub_internal ORDER BY id DESC`;
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+}
 
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
-    console.log("Report in getTimesheetReportData", data.filters);
+   // console.log("Report in getTimesheetReportData", data.filters);
     let {
         groupBy,
+        internal_external,
         fieldsToDisplay,
         fieldsToDisplayId,
         timePeriod,
@@ -1361,14 +1371,14 @@ const getTimesheetReportData = async (Report) => {
     // group by job condition
     if (groupBy == "job") {
         if(fieldsToDisplayId !== null){
-            where.push(`task_type = 2 AND timesheet.job_id = ${fieldsToDisplayId}`);
+            where.push(`task_type = '${internal_external}' AND timesheet.job_id = ${fieldsToDisplayId}`);
         }
     }
 
     // group by task condition
     if (groupBy == "task") {
         if(fieldsToDisplayId !== null){
-            where.push(`task_type = 2 AND timesheet.task_id = ${fieldsToDisplayId}`);
+            where.push(`task_type = '${internal_external}' AND timesheet.task_id = ${fieldsToDisplayId}`);
         }
     }
 
@@ -1424,6 +1434,10 @@ const getTimesheetReportData = async (Report) => {
     // toDate condition
     if (timePeriod == "custom" || toDate) {
         where.push(`timesheet.created_at <= '${toDate}'`);
+    }
+
+    if(internal_external == "1" || internal_external == "2"){
+        where.push(`timesheet.task_type = '${internal_external}'`);
     }
 
 
@@ -1494,5 +1508,8 @@ module.exports = {
     taxWeeklyStatusReportFilterKey,
     averageTatReport,
     getAllTaskByStaff,
-    getTimesheetReportData
+    getTimesheetReportData,
+    getAllJobsSidebar,
+    getInternalJobs,
+    getInternalTasks
 };

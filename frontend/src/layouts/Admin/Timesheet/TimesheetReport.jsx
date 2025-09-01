@@ -21,6 +21,17 @@ function TimesheetReport() {
 
   console.log("showData ", showData);
 
+  const [filters, setFilters] = useState({
+    groupBy: "employee",
+    internal_external: "1",
+    fieldsToDisplay: null,
+    fieldsToDisplayId: null,
+    timePeriod: "this_week",
+    displayBy: "Daily",
+    fromDate: null,
+    toDate: null,
+  });
+
   //  console.log("staffDetails ", staffDetails);
 
 
@@ -35,7 +46,7 @@ function TimesheetReport() {
 
   const staffData = async () => {
 
-    
+
     //  console.log("role ", role);
 
     if (role?.toUpperCase() === "SUPERADMIN") {
@@ -56,7 +67,7 @@ function TimesheetReport() {
         .catch((error) => {
           return;
         });
-        
+
     }
     else {
       let data = [{ id: staffDetails?.id, email: staffDetails?.email }]
@@ -118,6 +129,36 @@ function TimesheetReport() {
 
   // Get All Jobs
   const GetAllJobs = async () => {
+    
+    if (filters.internal_external == "1") {
+      const req = { action: "getInternalJobs" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+
+            console.log("Internal jobs response: ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setOptions(data);
+          } else {
+            setOptions([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+
+      return
+
+    }
+    
+
+    // External get All jobs
     const req = { action: "getByCustomer", customer_id: "" };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
@@ -140,6 +181,34 @@ function TimesheetReport() {
 
   // Get All task
   const GetAllTask = async () => {
+
+   if (filters.internal_external == "1") {
+      const req = { action: "getInternalTasks" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+
+            console.log("Internal tasks response: ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setOptions(data);
+          } else {
+            setOptions([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+      return
+    }
+
+   
+    // External Task
     const req = { action: "get" };
     const data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
@@ -168,17 +237,6 @@ function TimesheetReport() {
   };
 
 
-  const [filters, setFilters] = useState({
-    groupBy: "employee",
-    fieldsToDisplay: null,
-    fieldsToDisplayId: null,
-    timePeriod: "this_week",
-    displayBy: "Daily",
-    fromDate: null,
-    toDate: null,
-  });
-
-  
   const handleFilterChange = (e) => {
     const { key, value, label } = e.target;
 
@@ -281,17 +339,18 @@ function TimesheetReport() {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external]);
 
 
-  
- 
+
+
 
   // console.log("filters ", filters);
 
   const resetFunction = () => {
     setFilters({
       groupBy: "employee",
+      internal_external: "1",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
       timePeriod: "this_week",
@@ -333,11 +392,32 @@ function TimesheetReport() {
             }
           >
             <option value="employee">Employee</option>
-            {/* <option value="internal_external">Internal/External</option> */}
             <option value="customer">Customer</option>
             <option value="client">Client</option>
             <option value="job">Job</option>
             <option value="task">Task</option>
+          </select>
+        </div>
+
+        {/* Field To Internal External */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Internal / External</label>
+          <select
+            className="form-select shadow-sm"
+            id="internal_external"
+            value={filters.internal_external}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "internal_external",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text
+                }
+              })
+            }
+          >
+            <option value="1">Internal</option>
+            <option value="2">External</option>
           </select>
         </div>
 

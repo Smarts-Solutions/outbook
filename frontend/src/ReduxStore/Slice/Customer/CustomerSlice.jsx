@@ -64,7 +64,8 @@ export const getAllTaskByStaff = createAsyncThunk("getAllTaskByStaff", async (da
 
     
     const updatedReq = {
-      StaffUserId: StaffUserId.id
+      StaffUserId: StaffUserId.id,
+      data: data.req
     };
     const res = await get_All_Task_ByStaff(updatedReq);
     return await res;
