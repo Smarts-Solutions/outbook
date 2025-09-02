@@ -406,7 +406,7 @@ function TimesheetReport() {
               })
             }
           >
-            <option value="employee">Employee</option>
+            <option value="employee">staff</option>
             <option value="customer">Customer</option>
             <option value="client">Client</option>
             <option value="job">Job</option>
@@ -439,7 +439,7 @@ function TimesheetReport() {
 
         {/* Field To Display */}
         <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">Fields to Display</label>
+          <label className="form-label fw-medium">{filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)}</label>
 
           <Select
             options={options}
@@ -596,16 +596,17 @@ function TimesheetReport() {
         >
           Reset
         </button>
-        <button className="btn btn-info" id="btn-export">
+        <button className="btn btn-info" id="btn-export"
+          onClick={exportExcel}>
           Export Excel
         </button>
       </div>
 
       {/* Filtered Data Display */}
       <div>
-        <h6>Filtered Data:</h6>
+        {/* <h6>Filtered Data:</h6> */}
         {showData.length === 0 ? (
-          <p>No records found</p>
+          <p style={{ textAlign: "center" }}>No records found</p>
         ) : (
           <table className="table table-striped">
             <thead>
