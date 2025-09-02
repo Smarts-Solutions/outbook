@@ -1,32 +1,92 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Select from 'react-select';
 
 
-const JobStatus = () => {
+const MissingTimesheet = () => {
+
+  const getFormattedDate = (type, date) => {
+    let now = new Date();
+    if (type === "convert") {
+      now = new Date(date);
+    }
+
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // Months are 0-indexed
+    const week = Math.ceil(now.getDate() / 7); // Calculate week number of the month
+    return `Week ${week}, Month ${month}, Year ${year}`;
+  };
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [missingTimesheetReportData, setMissingTimesheetReportData] = useState([]);
+  const [staffDataWeekDataAll, setStaffDataWeekDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+
+  const [hasValidWeekOffsetZero, setHasValidWeekOffsetZero] = useState(false);
+  const weekOffSetValue = useRef(0);
 
   useEffect(() => {
-    MissingTimesheet();
+    // MissingTimesheet("");
+    MissingTimesheetCurrent("");
   }, []);
 
-
-  const MissingTimesheet = async () => {
-    const req = { action: "missingTimesheetReport" };
+   
+  const MissingTimesheetCurrent = async (filterStaffIds) => {
+    const req = { action: "missingTimesheetReport" , filterStaffIds : filterStaffIds ,type: "filterDate" };
     const data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
-          setMissingTimesheetReportData(res.data);
+          console.log("MissingTimesheet Data:", res.data);
+          console.log("MissingTimesheet Data:", res);
+          setMissingTimesheetReportData(res.data.result);
+          setStaffDataWeekDataAll({
+            loading: false,
+            data: res.data.filterDataWeek
+          });
         }
         else {
           setMissingTimesheetReportData([]);
+          setStaffDataWeekDataAll({
+            loading: false,
+            data: []
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  const MissingTimesheet = async (filterStaffIds) => {
+    const req = { action: "missingTimesheetReport" , filterStaffIds : filterStaffIds };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          console.log("MissingTimesheet Data:", res.data);
+          console.log("MissingTimesheet Data:", res);
+          setMissingTimesheetReportData(res.data.result);
+          setStaffDataWeekDataAll({
+            loading: false,
+            data: res.data.filterDataWeek
+          });
+        }
+        else {
+          setMissingTimesheetReportData([]);
+          setStaffDataWeekDataAll({
+            loading: false,
+            data: []
+          });
         }
       })
       .catch((err) => {
@@ -44,6 +104,34 @@ const JobStatus = () => {
     { name: 'Staff Email', selector: row => row.staff_email, sortable: true, width: '50%' },
   ]
 
+
+
+  // SELECT OPTIONS FOR WEEK START //
+  const weekOptions = [];
+  if (staffDataWeekDataAll.data) {
+    staffDataWeekDataAll.data.forEach((val) => {
+      weekOptions.push({
+        value: val.valid_weekOffsets,
+        label: getFormattedDate("convert", val.month_date),
+      });
+    });
+  }
+ 
+
+
+  const selectFilterStaffANdWeek = async (e) => {
+    const { name, value } = e.target;
+    console.log("Selected Week:", value);
+    if(value != ""){
+    let filterStaffIds = staffDataWeekDataAll && staffDataWeekDataAll?.data?.filter((item) => item.valid_weekOffsets == value).map(i => i.staff_id);
+    console.log("filterStaffIds", filterStaffIds);
+    MissingTimesheet(filterStaffIds);
+    }else{
+    MissingTimesheet("");
+    }
+
+  };
+
   return (
     <div>
       <div className='report-data'>
@@ -54,15 +142,48 @@ const JobStatus = () => {
             </div>
           </div>
         </div>
+
         <div className='datatable-wrapper mt-minus'>
+
+
+          <div className='row'>
+            <div className='col-md-5'>
+              <div className='tab-title'>
+                <h3>Staff Data Week</h3>
+                <Select
+                  id="tabSelect"
+                  name="week"
+                  className="basic-multi-select"
+                  // options={weekOptions}
+                  options={[
+                    { value: "", label: "Select Week..." },
+                    ...weekOptions,
+                  ]}
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    selectFilterStaffANdWeek(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                />
+              </div>
+            </div>
+          </div>
+
+
           <Datatable
             filter={true}
             columns={columns}
-             data={missingTimesheetReportData && missingTimesheetReportData} />
+            data={missingTimesheetReportData && missingTimesheetReportData} />
         </div>
+
+
+
+
       </div>
     </div>
   )
 }
 
-export default JobStatus
+export default MissingTimesheet

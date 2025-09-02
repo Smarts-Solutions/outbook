@@ -1564,17 +1564,119 @@ const getTimesheetReportData = async (Report) => {
 
 const missingTimesheetReport = async (Report) => {
     console.log("Missing Timesheet Report:", Report);
+    const { data } = Report;
 
-    const query = `
+    let query = `
   SELECT 
      CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
-     staffs.email AS staff_email
+     staffs.email AS staff_email,
+     staffs.id AS staff_id
   FROM timesheet 
     JOIN staffs ON staffs.id = timesheet.staff_id
     WHERE timesheet.submit_status = '0'
   `;
+
+   if(data.filterStaffIds != ""){
+     query += ` AND timesheet.staff_id IN (${data.filterStaffIds.join(",")}) GROUP BY timesheet.staff_id`;
+   }else{
+     query += ` GROUP BY timesheet.staff_id`;
+   }
+  
+
+  // get week filter data
+    const query_week_filter = `SELECT  
+    id,
+    staff_id,
+    DATE_FORMAT(monday_date, '%Y-%m-%d') AS monday_date,
+    DATE_FORMAT(tuesday_date, '%Y-%m-%d') AS tuesday_date,
+    DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
+    DATE_FORMAT(thursday_date, '%Y-%m-%d') AS thursday_date,
+    DATE_FORMAT(monday_date, '%Y-%m-%d') AS friday_date,
+    DATE_FORMAT(monday_date, '%Y-%m-%d') AS saturday_date,
+    DATE_FORMAT(monday_date, '%Y-%m-%d') AS sunday_date,
+    CONCAT(
+        CASE 
+            WHEN monday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), monday_date), ' ') 
+            ELSE '' 
+        END,
+        CASE 
+            WHEN monday_date IS NOT NULL AND tuesday_date IS NOT NULL THEN ''
+            WHEN tuesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), tuesday_date), ' ') 
+            ELSE '' 
+        END,
+        CASE 
+            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL) AND wednesday_date IS NOT NULL THEN ''
+            WHEN wednesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), wednesday_date), ' ') 
+            ELSE '' 
+        END,
+        CASE 
+            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL) AND thursday_date IS NOT NULL THEN ''
+            WHEN thursday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), thursday_date), ' ') 
+            ELSE '' 
+        END,
+        CASE 
+            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL) AND friday_date IS NOT NULL THEN ''
+            WHEN friday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), friday_date), ' ') 
+            ELSE '' 
+        END,
+        CASE 
+            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL) AND saturday_date IS NOT NULL THEN ''
+            WHEN saturday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), saturday_date), ' ') 
+            ELSE '' 
+        END,
+        CASE 
+            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL OR saturday_date IS NOT NULL) AND sunday_date IS NOT NULL THEN ''
+            WHEN sunday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), sunday_date), ' ') 
+            ELSE '' 
+        END
+    ) AS valid_weekOffsets
+FROM 
+timesheet 
+WHERE 
+  submit_status = '0'
+GROUP BY valid_weekOffsets
+ORDER BY
+    valid_weekOffsets ASC
+    `
+    const [filterDataWeekRows] = await pool.query(query_week_filter);
+    const filterDataWeek = filterDataWeekRows
+      .map(item => {
+        if (
+          item.valid_weekOffsets != null &&
+          item.valid_weekOffsets != '' &&
+          item.valid_weekOffsets != undefined
+        ) {
+          const firstDate =
+            item.monday_date ||
+            item.tuesday_date ||
+            item.wednesday_date ||
+            item.thursday_date ||
+            item.friday_date ||
+            item.saturday_date ||
+            item.sunday_date;
+
+          const result = {
+            id: item.id,
+            staff_id: item.staff_id,
+            valid_weekOffsets: item.valid_weekOffsets,
+          };
+          if (firstDate) {
+            result.month_date = firstDate;
+          }
+          return result;
+        }
+      })
+      .filter(Boolean);
+
+    
     const [result] = await pool.execute(query);
-    return { status: true, message: 'Success.', data: result };
+
+    if(data.filterStaffIds == ""){
+      console.log("No data found for the selected staff---.",filterDataWeek);  
+      console.log("No data found for the selected staff.",result);  
+    }
+    
+    return { status: true, message: 'Success.', data: {result: result, filterDataWeek: filterDataWeek} };
 }
 
 module.exports = {
