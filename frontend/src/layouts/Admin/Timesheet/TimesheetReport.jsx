@@ -70,7 +70,8 @@ function TimesheetReport() {
 
     }
     else {
-      let data = [{ id: staffDetails?.id, email: staffDetails?.email }]
+      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+
       data = data?.map((item) => ({
         value: item.id,
         label: item.email
@@ -419,7 +420,7 @@ function TimesheetReport() {
               })
             }
           >
-            <option value="employee">staff</option>
+            <option value="employee">Staff</option>
             <option value="customer">Customer</option>
             <option value="client">Client</option>
             <option value="job">Job</option>
@@ -452,11 +453,16 @@ function TimesheetReport() {
 
         {/* Field To Display */}
         <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">{filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)
+          <label className="form-label fw-medium">
+             {
+              'Select '
+             } 
+            
+            {filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)
           }
 
             {
-              filters.groupBy == "job" || filters.groupBy == "task" ? filters.internal_external === "1" ? " ( Internal )" : "" : ""
+              filters.groupBy == "job" || filters.groupBy == "task" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
             }
 
 
