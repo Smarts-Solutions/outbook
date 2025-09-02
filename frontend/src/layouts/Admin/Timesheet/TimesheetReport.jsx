@@ -32,7 +32,7 @@ function TimesheetReport() {
     toDate: null,
   });
 
-  //  console.log("staffDetails ", staffDetails);
+  console.log("staffDetails ", staffDetails);
 
 
   //  let options = [
@@ -54,10 +54,10 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-           console.log("response.data ", response.data);
+            console.log("response.data ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
-              label:  `${item.first_name} ${item.last_name} (${item.email})`
+              label: `${item.first_name} ${item.last_name} (${item.email})`
             }));
             setOptions(data);
           } else {
@@ -243,19 +243,19 @@ function TimesheetReport() {
       //console.log("Fields to Display changed field: ", value);
 
       if ([null, undefined, ""].includes(value)) {
-       setFilters((prev) => ({
-        ...prev,
-        [key]: null,
-        [key + "Id"]: null
-      }));
-      }else{
         setFilters((prev) => ({
-        ...prev,
-        [key]: label,
-        [key + "Id"]: value
-      }));
+          ...prev,
+          [key]: null,
+          [key + "Id"]: null
+        }));
+      } else {
+        setFilters((prev) => ({
+          ...prev,
+          [key]: label,
+          [key + "Id"]: value
+        }));
       }
-      
+
     }
 
     else if (key === "internal_external") {
@@ -465,7 +465,7 @@ function TimesheetReport() {
           <Select
             //options={options}
             options={[
-              { value: "", label: "Select..." }, 
+              { value: "", label: "Select..." },
               ...options,
             ]}
             value={
@@ -633,7 +633,7 @@ function TimesheetReport() {
         {showData.length === 0 ? (
           <p style={{ textAlign: "center" }}>No records found</p>
         ) : (
-          <table className="table table-striped">
+          <table className="table table-striped table-bordered" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
             <thead>
               <tr>
                 <th>Staff</th>
@@ -642,6 +642,11 @@ function TimesheetReport() {
                 <th>Client</th>
                 <th>Job</th>
                 <th>Task</th>
+                <th>Mon (hrs)</th>
+                <th>Tue (hrs)</th>
+                <th>Wed (hrs)</th>
+                <th>Thu (hrs)</th>
+                <th>Fri (hrs)</th>
                 <th>Date</th>
               </tr>
             </thead>
@@ -655,6 +660,11 @@ function TimesheetReport() {
                   <td>{item.client_code ?? '-'}</td>
                   <td>{item.job_name}</td>
                   <td>{item.task_name}</td>
+                  <td>{item.monday_hours || "-"}</td>
+                  <td>{item.tuesday_hours || "-"}</td>
+                  <td>{item.wednesday_hours || "-"}</td>
+                  <td>{item.thursday_hours || "-"}</td>
+                  <td>{item.friday_hours || "-"}</td>
                   <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>
 
                 </tr>

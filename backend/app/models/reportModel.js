@@ -1392,7 +1392,8 @@ const getTimesheetReportData = async (Report) => {
             where.push(`task_type = '${internal_external}' AND timesheet.task_id = ${fieldsToDisplayId}`);
         }
     }
-
+    
+    console.log("timePeriod", timePeriod);
     // time timePeriod
     if (timePeriod) {
         const currentDate = new Date();
@@ -1416,6 +1417,17 @@ const getTimesheetReportData = async (Report) => {
             case 'last_month':
                 startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
                 endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+                break;
+            case 'this_quarter':
+                var currentQuarter = Math.floor(currentDate.getMonth() / 3) + 1;
+                startDate = new Date(currentDate.getFullYear(), (currentQuarter - 1) * 3, 1);
+                endDate = new Date(currentDate.getFullYear(), currentQuarter * 3, 0);
+                break;
+            case 'last_quarter':
+                var currentQuarter = Math.floor(currentDate.getMonth() / 3) + 1
+                const lastQuarter = currentQuarter - 1;
+                startDate = new Date(currentDate.getFullYear(), (lastQuarter - 1) * 3, 1);
+                endDate = new Date(currentDate.getFullYear(), lastQuarter * 3, 0);
                 break;
             case 'this_year':
                 startDate = new Date(currentDate.getFullYear(), 0, 1);
@@ -1498,6 +1510,24 @@ const getTimesheetReportData = async (Report) => {
         WHEN timesheet.task_type = '1' THEN 'Internal'
         WHEN timesheet.task_type = '2' THEN 'External'
     END AS internal_external,
+
+
+
+    timesheet.monday_date,
+    timesheet.monday_hours,
+    timesheet.tuesday_date,
+    timesheet.tuesday_hours,
+    timesheet.wednesday_date,
+    timesheet.wednesday_hours,
+    timesheet.thursday_date,
+    timesheet.thursday_hours,
+    timesheet.friday_date,
+    timesheet.friday_hours,
+    timesheet.saturday_date,
+    timesheet.saturday_hours,
+    timesheet.sunday_date,
+    timesheet.sunday_hours,
+
 
     timesheet.created_at AS created_at
 
