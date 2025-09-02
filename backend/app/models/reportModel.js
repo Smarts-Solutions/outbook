@@ -1562,6 +1562,21 @@ const getTimesheetReportData = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
+const missingTimesheetReport = async (Report) => {
+    console.log("Missing Timesheet Report:", Report);
+
+    const query = `
+  SELECT 
+     CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
+     staffs.email AS staff_email
+  FROM timesheet 
+    JOIN staffs ON staffs.id = timesheet.staff_id
+    WHERE timesheet.submit_status = '0'
+  `;
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -1577,5 +1592,6 @@ module.exports = {
     getTimesheetReportData,
     getAllJobsSidebar,
     getInternalJobs,
-    getInternalTasks
+    getInternalTasks,
+    missingTimesheetReport
 };

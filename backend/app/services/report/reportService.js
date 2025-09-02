@@ -41,7 +41,7 @@ const averageTatReport = async (Report) => {
 
 const getAllTaskByStaff = async (Report) => {
 const { data } = Report;
-console.log("Action in service:", data.action);
+// console.log("Action in service:", data.action);
 if(data.action == "get"){
   return reportModel.getAllTaskByStaff(Report);
 }
@@ -51,6 +51,9 @@ else if(data.action == "getInternalJobs"){
 else if(data.action == "getInternalTasks"){
   return reportModel.getInternalTasks(Report);
 }
+else if(data.action == "missingTimesheetReport"){
+  return reportModel.missingTimesheetReport(Report);
+}
 else{
   return;
 }
@@ -59,6 +62,7 @@ else{
 const getTimesheetReportData = async (Report) => {
   return reportModel.getTimesheetReportData(Report);
 }
+
 
 module.exports = {
   jobStatusReports,
