@@ -1,78 +1,104 @@
 import React, { useState, useEffect } from 'react';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
+import { getAllCustomerDropDown, JobAction, getAllTaskByStaff, getTimesheetReportData } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch, useSelector } from "react-redux";
-// import TimesheetReport from './TimesheetReport';
-// import JobStatusReport from './JobStatusPeport';
-// import JobSummaryReport from './JobSummaryReport';
-// import TeamMonthlyReport from './TeamMonthlyReports';
-// import JobPendingReport from './JobPendingReports';
-// import JobsReceivedSentReports from './JobsReceivedSentReports';
-// import DueByReport from './DueByReport';
-// import TextWeelyReport from './TextWeelyReport';
-// import AverageTatReport from './AverageTatReport';
-
-
-
-// import Select from 'react-select';
-
-
-
+import Select from "react-select";
 import * as XLSX from "xlsx";
-
-
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import dayjs from "dayjs";
 
 
 function TimesheetReport() {
 
-  const [filter, setFilter] = useState(false);
-  const getActiveTab = sessionStorage.getItem('activeReport');
-  const [activeTab, setActiveTab] = useState(getActiveTab || "jobStatusReport");
-
-  const handleTabClick = (tabValue) => {
-    sessionStorage.setItem('activeReport', tabValue);
-    setActiveTab(tabValue);
-  };
-
-
-  //   const getTabContent = () => {
-  //     switch (activeTab) {
-  //       case 'jobStatusReport':
-  //         return <JobStatusReport />
-  //       case 'jobsReceivedSentReports':
-  //         return <JobsReceivedSentReports />;
-  //       case 'jobSummaryReport':
-  //         return <JobSummaryReport />
-  //       case 'jobsPendingReport':
-  //         return <JobPendingReport />;
-  //       case 'dueByReport':
-  //         return <DueByReport />;
-  //       case 'teamPerformanceReport':
-  //         return <TeamMonthlyReport />;
-  //       case 'timesheetReport':
-  //         return <TimesheetReport />
-  //       case 'averageTATReport':
-  //         return <AverageTatReport />;
-  //       case 'taxWeeklyStatusReport':
-  //         return <TextWeelyReport />;
-  //       default:
-  //         return null;
-  //     }
-  //   };
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const [selectedStaff, setSelectedStaff] = useState({});
+  const [options, setOptions] = useState([]);
+  const today = new Date().toISOString().split("T")[0];
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const role = staffDetails?.role;
+  const [showData, setShowData] = useState([]);
+
+  console.log("showData ", showData);
+
+  const [filters, setFilters] = useState({
+    groupBy: "employee",
+    internal_external: "1",
+    fieldsToDisplay: null,
+    fieldsToDisplayId: null,
+    timePeriod: "this_week",
+    displayBy: "Daily",
+    fromDate: null,
+    toDate: null,
+  });
+
+  console.log("staffDetails ", staffDetails);
+
+
+  //  let options = [
+  //   { value: "employee", label: "Employee Name" },
+  //   { value: "customer", label: "Customer Name" },
+  //   { value: "client", label: "Client Name" },
+  //   { value: "job", label: "Job Type Name" },
+  //   { value: "task", label: "Task Name" },
+  //  ];
+
 
   const staffData = async () => {
-    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
-      .unwrap()
+
+
+    //  console.log("role ", role);
+
+    if (role?.toUpperCase() === "SUPERADMIN") {
+      await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            console.log("response.data ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: `${item.first_name} ${item.last_name} (${item.email})`
+            }));
+            setOptions(data);
+          } else {
+            setOptions([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+    }
+    else {
+      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email
+      }));
+      setOptions(data);
+    }
+  };
+
+  useEffect(() => {
+    staffData();
+  }, []);
+
+
+  // Get All Customers
+  const GetAllCustomer = async () => {
+    const req = { action: "get_dropdown" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllCustomerDropDown(data)).unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log("response.data ", response.data);
-          setStaffDataAll({ loading: false, data: response.data });
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.trading_name
+          }));
+          setOptions(data);
         } else {
-          setStaffDataAll({ loading: false, data: [] });
+          setOptions([]);
         }
       })
       .catch((error) => {
@@ -80,113 +106,293 @@ function TimesheetReport() {
       });
   };
 
-  useEffect(() => {
-    staffData();
-  }, []);
+  // Get All Clients
+  const GetAllClient = async () => {
+    const req = { action: "get", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.client_name + " (" + item.client_code + ")"
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
-  const handleSelectStaff = (e) => {
-    let { name, value } = e.target;
-    let staff = staffDataAll.data.find(staff => staff.id === parseInt(value));
-    setSelectedStaff(staff);
-  }
+  // Get All Jobs
+  const GetAllJobs = async (internal_external) => {
+    if (internal_external == "1") {
+      const req = { action: "getInternalJobs" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
 
-  console.log("selectStaff ", selectedStaff);
+            console.log("Internal jobs response: ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setOptions(data);
+          } else {
+            setOptions([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
 
 
+      return
+
+    }
 
 
+    // External get All jobs
+    const req = { action: "getByCustomer", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.job_id,
+            label: item.job_code_id
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
-  const data = [
-    {
-      jobId: "F & CLI_V3_00009",
-      accountManager: "STAFF NINE",
-      client: "CLI--2",
-      serviceType: "Payroll",
-      jobType: "V3",
-      status: "To Be Started Yet Allocated Internally",
-    },
-    {
-      jobId: "F & CLI_V3_00008",
-      accountManager: "STAFF NINE",
-      client: "CLI--2",
-      serviceType: "Payroll",
-      jobType: "V3",
-      status: "To Be Started Yet Allocated Internally",
-    },
-  ];
+  // Get All task
+  const GetAllTask = async (internal_external) => {
+    if (internal_external == "1") {
+      const req = { action: "getInternalTasks" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+
+            console.log("Internal tasks response: ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setOptions(data);
+          } else {
+            setOptions([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+      return
+    }
+
+
+    // External Task
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.task_id,
+            label: item.task_name
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(showData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Job Status Report");
     XLSX.writeFile(workbook, "JobStatusReport.xlsx");
   };
 
 
-
-const dummyData = [
-  {
-    employee: "John",
-    internalExternal: "Internal",
-    customer: "ABC Corp",
-    client: "XYZ Ltd",
-    job: "Developer",
-    task: "Coding",
-    date: "2025-08-01",
-  },
-  {
-    employee: "Mary",
-    internalExternal: "External",
-    customer: "DEF Inc",
-    client: "XYZ Ltd",
-    job: "Designer",
-    task: "Design",
-    date: "2025-08-05",
-  },
-  // aur bhi data items
-];
-
- const [filters, setFilters] = useState({
-    groupBy: "Employee",
-    timePeriod: "This month",
-    displayBy: "Weekly",
-    fromDate: "",
-    toDate: "",
-  });
-
-  // Handle filter change
   const handleFilterChange = (e) => {
-    const { id, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    const { key, value, label } = e.target;
+
+    if (key === "fieldsToDisplay") {
+
+      //console.log("Fields to Display changed field: ", value);
+
+      if ([null, undefined, ""].includes(value)) {
+        setFilters((prev) => ({
+          ...prev,
+          [key]: null,
+          [key + "Id"]: null
+        }));
+      } else {
+        setFilters((prev) => ({
+          ...prev,
+          [key]: label,
+          [key + "Id"]: value
+        }));
+      }
+
+    }
+
+    else if (key === "internal_external") {
+      setFilters((prev) => ({
+        ...prev,
+        [key]: value
+      }));
+      if (filters.groupBy == 'job') {
+        setOptions([])
+        GetAllJobs(value)
+      } else if (filters.groupBy == 'task') {
+        setOptions([])
+        GetAllTask(value)
+      }
+
+    }
+
+    else if (key === "groupBy") {
+      setOptions([])
+      //console.log("Group By changed: ", value);
+      if (value == "employee") {
+        staffData()
+      }
+
+      else if (value == "customer") {
+        GetAllCustomer()
+      }
+
+      else if (value == "client") {
+        GetAllClient()
+      }
+
+      else if (value == "job") {
+        GetAllJobs(filters.internal_external)
+      }
+
+      else if (value == "task") {
+        GetAllTask(filters.internal_external)
+      }
+
+      setFilters((prev) => ({
+        ...prev,
+        fieldsToDisplay: null,
+        fieldsToDisplayId: null,
+        [key]: value
+      }));
+
+    }
+
+    else if (key == "timePeriod") {
+
+      setFilters((prev) => ({
+        ...prev,
+        fromDate: null,
+        toDate: null,
+        [key]: value,
+      }));
+    }
+
+    else if (key == "fromDate") {
+      if (value > filters.toDate) {
+        setFilters((prev) => ({
+          ...prev,
+          toDate: value,
+        }));
+      }
+
+      setFilters((prev) => ({
+        ...prev,
+        fromDate: value,
+      }));
+    }
+
+    else {
+      setFilters((prev) => ({
+        ...prev,
+        [key]: value
+      }));
+    }
+
+
+
+
   };
 
-  // Filter the data based on filters
-  const filteredData = dummyData.filter((item) => {
-    // Filter by date range if fromDate and toDate set
-    const itemDate = new Date(item.date);
-    const fromDate = filters.fromDate ? new Date(filters.fromDate) : null;
-    const toDate = filters.toDate ? new Date(filters.toDate) : null;
-
-    if (fromDate && itemDate < fromDate) return false;
-    if (toDate && itemDate > toDate) return false;
-
-    // Example: Filter by groupBy if you want to restrict data
-    // For demo, let's say groupBy does not filter data directly
-    // You can add more complex filtering here
-
-    return true; // Include all matching items
-  });
-
-
-
+  const callFilterApi = async () => {
+    // Call your filter API here
+    console.log("Calling filter API with filters: ", filters);
+    const req = { action: "get", filters: filters };
+    const data = { req: req, authToken: token };
+    await dispatch(getTimesheetReportData(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setShowData(response.data);
+        } else {
+          setShowData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
 
 
-  
+  };
 
- return (
+  useEffect(() => {
+    if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
+      callFilterApi();
+    }
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external]);
+
+
+
+
+
+  // console.log("filters ", filters);
+
+  const resetFunction = () => {
+    setFilters({
+      groupBy: "employee",
+      internal_external: "1",
+      fieldsToDisplay: null,
+      fieldsToDisplayId: null,
+      timePeriod: "this_week",
+      displayBy: "Daily",
+      fromDate: null,
+      toDate: null,
+    })
+    setShowData([]);
+    staffData();
+  }
+
+  console.log("Filters after reset: ", filters);
+
+  return (
     <div className="container-fluid py-4">
       {/* Page Title */}
       <div className="row mb-3">
@@ -204,16 +410,88 @@ const dummyData = [
             className="form-select shadow-sm"
             id="groupBy"
             value={filters.groupBy}
-            onChange={handleFilterChange}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "groupBy",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text
+                }
+              })
+            }
           >
-            <option>Employee</option>
-            <option>Internal/External</option>
-            <option>Customer</option>
-            <option>Client</option>
-            <option>Job</option>
-            <option>Task</option>
+            <option value="employee">Staff</option>
+            <option value="customer">Customer</option>
+            <option value="client">Client</option>
+            <option value="job">Job</option>
+            <option value="task">Task</option>
           </select>
         </div>
+
+        {/* Field To Internal External */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Internal / External</label>
+          <select
+            className="form-select shadow-sm"
+            id="internal_external"
+            value={filters.internal_external}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "internal_external",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text
+                }
+              })
+            }
+          >
+            <option value="1">Internal</option>
+            <option value="2">External</option>
+          </select>
+        </div>
+
+
+        {/* Field To Display */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">
+             {
+              'Select '
+             } 
+            
+            {filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)
+          }
+
+            {
+              filters.groupBy == "job" || filters.groupBy == "task" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
+            }
+
+
+          </label>
+
+          <Select
+            //options={options}
+            options={[
+              { value: "", label: "Select..." },
+              ...options,
+            ]}
+            value={
+              options && options.length > 0
+                ? options.find((opt) => Number(opt.value) === Number(filters.fieldsToDisplayId)) || null
+                : null
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "fieldsToDisplay", value: selected.value, label: selected.label },
+              })
+            }
+            isSearchable
+            className="shadow-sm"
+          />
+
+        </div>
+
+
+
 
         {/* Time Period */}
         <div className="col-lg-4 col-md-6">
@@ -222,17 +500,95 @@ const dummyData = [
             className="form-select shadow-sm"
             id="timePeriod"
             value={filters.timePeriod}
-            onChange={handleFilterChange}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "timePeriod", value: selected.target.value },
+              })
+            }
           >
-            <option>This week</option>
-            <option>This month</option>
-            <option>This quarter</option>
-            <option>This year</option>
-            <option>Last Week</option>
-            <option>Last Month</option>
-            <option>Custom</option>
+            <option value={"this_week"}>This week</option>
+            <option value={"last_week"}>Last Week</option>
+            <option value={"this_month"}>This month</option>
+            <option value={"last_month"}>Last Month</option>
+            <option value={"this_quarter"}>This quarter</option>
+            <option value={"last_quarter"}>Last quarter</option>
+            <option value={"this_year"}>This year</option>
+            <option value={"last_year"}>Last year</option>
+            <option value={"custom"}>Custom</option>
           </select>
         </div>
+
+
+
+        {/* From Date  And To Date */}
+        {filters.timePeriod == "custom" && (
+          <>
+            {/* <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">From Date</label>
+          <input
+            type="date"
+            className="form-control shadow-sm"
+            id="fromDate"
+            value={filters.fromDate}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "fromDate", value: selected.target.value },
+              })
+            }
+          />
+        </div>
+
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">To Date</label>
+          <input
+            type="date"
+            className="form-control shadow-sm"
+            id="toDate"
+            value={filters.toDate}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "toDate", value: selected.target.value },
+              })
+            }
+          />
+        </div> */}
+            {/* From Date */}
+            <div className="col-lg-4 col-md-6">
+              <label className="form-label fw-medium">From Date</label>
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="fromDate"
+                value={filters.fromDate}
+                //  min={today} 
+                onChange={(selected) =>
+                  handleFilterChange({
+                    target: { key: "fromDate", value: selected.target.value },
+                  })
+                }
+              />
+            </div>
+
+            {/* To Date */}
+            <div className="col-lg-4 col-md-6">
+              <label className="form-label fw-medium">To Date</label>
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="toDate"
+                value={filters.toDate}
+                min={filters.fromDate || today}
+                onChange={(selected) =>
+                  handleFilterChange({
+                    target: { key: "toDate", value: selected.target.value },
+                  })
+                }
+                disabled={!filters.fromDate} // जब तक fromDate select न हो, disable
+              />
+            </div>
+          </>
+        )}
+
 
         {/* Display By */}
         <div className="col-lg-4 col-md-6">
@@ -241,91 +597,82 @@ const dummyData = [
             className="form-select shadow-sm"
             id="displayBy"
             value={filters.displayBy}
-            onChange={handleFilterChange}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "displayBy", value: selected.target.value },
+              })
+            }
           >
-            <option>Daily</option>
-            <option>Weekly</option>
-            <option>Monthly</option>
-            <option>Quarterly</option>
-            <option>Yearly</option>
+            <option value={"Daily"}>Daily</option>
+            <option value={"Weekly"}>Weekly</option>
+            <option value={"Monthly"}>Monthly</option>
+            <option value={"Yearly"}>Yearly</option>
           </select>
         </div>
 
-        {/* From Date */}
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">From Date</label>
-          <input
-            type="date"
-            className="form-control shadow-sm"
-            id="fromDate"
-            value={filters.fromDate}
-            onChange={handleFilterChange}
-          />
-        </div>
 
-        {/* To Date */}
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">To Date</label>
-          <input
-            type="date"
-            className="form-control shadow-sm"
-            id="toDate"
-            value={filters.toDate}
-            onChange={handleFilterChange}
-          />
-        </div>
+
+
       </div>
+
+
+
 
       {/* Buttons */}
       <div className="d-flex gap-2 align-items-center mb-4">
         <button
           className="btn btn-outline-secondary shadow-sm"
           id="btn-reset"
-          onClick={() =>
-            setFilters({
-              groupBy: "Employee",
-              timePeriod: "This month",
-              displayBy: "Weekly",
-              fromDate: "",
-              toDate: "",
-            })
-          }
+          onClick={() => resetFunction()}
         >
           Reset
         </button>
-        <button className="btn btn-success shadow-sm" id="btn-export">
+        <button className="btn btn-info" id="btn-export"
+          onClick={exportExcel}>
           Export Excel
         </button>
       </div>
 
       {/* Filtered Data Display */}
       <div>
-        <h6>Filtered Data:</h6>
-        {filteredData.length === 0 ? (
-          <p>No records found</p>
+        {/* <h6>Filtered Data:</h6> */}
+        {showData.length === 0 ? (
+          <p style={{ textAlign: "center" }}>No records found</p>
         ) : (
-          <table className="table table-striped">
+          <table className="table table-striped table-bordered" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
             <thead>
               <tr>
-                <th>Employee</th>
+                <th>Staff</th>
                 <th>Internal/External</th>
                 <th>Customer</th>
                 <th>Client</th>
                 <th>Job</th>
                 <th>Task</th>
+                <th>Mon (hrs)</th>
+                <th>Tue (hrs)</th>
+                <th>Wed (hrs)</th>
+                <th>Thu (hrs)</th>
+                <th>Fri (hrs)</th>
                 <th>Date</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, idx) => (
+              {showData && showData?.map((item, idx) => (
                 <tr key={idx}>
-                  <td>{item.employee}</td>
-                  <td>{item.internalExternal}</td>
-                  <td>{item.customer}</td>
-                  <td>{item.client}</td>
-                  <td>{item.job}</td>
-                  <td>{item.task}</td>
-                  <td>{item.date}</td>
+                  {/* <td>{`${item.staff_fullname} (${item.staff_email})`}</td> */}
+                  <td>{`${item.staff_fullname}`}</td>
+                  <td>{item.internal_external}</td>
+                  <td>{item.customer_name ?? '-'}</td>
+                  <td>{item.client_code ?? '-'}</td>
+                  <td>{item.job_name}</td>
+                  <td>{item.task_name}</td>
+                  <td>{item.monday_hours || "-"}</td>
+                  <td>{item.tuesday_hours || "-"}</td>
+                  <td>{item.wednesday_hours || "-"}</td>
+                  <td>{item.thursday_hours || "-"}</td>
+                  <td>{item.friday_hours || "-"}</td>
+                  <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>
+
                 </tr>
               ))}
             </tbody>

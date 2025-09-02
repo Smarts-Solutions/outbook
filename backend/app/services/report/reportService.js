@@ -39,6 +39,27 @@ const averageTatReport = async (Report) => {
   return reportModel.averageTatReport(Report);
 }
 
+const getAllTaskByStaff = async (Report) => {
+const { data } = Report;
+console.log("Action in service:", data.action);
+if(data.action == "get"){
+  return reportModel.getAllTaskByStaff(Report);
+}
+else if(data.action == "getInternalJobs"){
+  return reportModel.getInternalJobs(Report);
+}
+else if(data.action == "getInternalTasks"){
+  return reportModel.getInternalTasks(Report);
+}
+else{
+  return;
+}
+}
+
+const getTimesheetReportData = async (Report) => {
+  return reportModel.getTimesheetReportData(Report);
+}
+
 module.exports = {
   jobStatusReports,
   jobReceivedSentReports,
@@ -49,5 +70,7 @@ module.exports = {
   reportCountJob,
   taxWeeklyStatusReport,
   taxWeeklyStatusReportFilterKey,
-  averageTatReport
+  averageTatReport,
+  getAllTaskByStaff,
+  getTimesheetReportData
 };
