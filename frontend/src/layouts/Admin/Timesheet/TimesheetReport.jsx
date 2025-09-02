@@ -54,10 +54,10 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("response.data ", response.data);
+           console.log("response.data ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
-              label: item.email
+              label:  `${item.first_name} ${item.last_name} (${item.email})`
             }));
             setOptions(data);
           } else {
@@ -155,7 +155,7 @@ function TimesheetReport() {
       return
 
     }
-    
+
 
     // External get All jobs
     const req = { action: "getByCustomer", customer_id: "" };
@@ -180,7 +180,7 @@ function TimesheetReport() {
 
   // Get All task
   const GetAllTask = async (internal_external) => {
-   if (internal_external == "1") {
+    if (internal_external == "1") {
       const req = { action: "getInternalTasks" };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
@@ -205,7 +205,7 @@ function TimesheetReport() {
       return
     }
 
-   
+
     // External Task
     const req = { action: "get" };
     const data = { req: req, authToken: token };
@@ -239,11 +239,23 @@ function TimesheetReport() {
     const { key, value, label } = e.target;
 
     if (key === "fieldsToDisplay") {
-      setFilters((prev) => ({
+
+      //console.log("Fields to Display changed field: ", value);
+
+      if ([null, undefined, ""].includes(value)) {
+       setFilters((prev) => ({
+        ...prev,
+        [key]: null,
+        [key + "Id"]: null
+      }));
+      }else{
+        setFilters((prev) => ({
         ...prev,
         [key]: label,
         [key + "Id"]: value
       }));
+      }
+      
     }
 
     else if (key === "internal_external") {
@@ -251,10 +263,10 @@ function TimesheetReport() {
         ...prev,
         [key]: value
       }));
-      if(filters.groupBy == 'job'){
+      if (filters.groupBy == 'job') {
         setOptions([])
         GetAllJobs(value)
-      }else if(filters.groupBy == 'task'){
+      } else if (filters.groupBy == 'task') {
         setOptions([])
         GetAllTask(value)
       }
@@ -377,6 +389,7 @@ function TimesheetReport() {
     staffData();
   }
 
+  console.log("Filters after reset: ", filters);
 
   return (
     <div className="container-fluid py-4">
@@ -439,10 +452,22 @@ function TimesheetReport() {
 
         {/* Field To Display */}
         <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">{filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)}</label>
+          <label className="form-label fw-medium">{filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)
+          }
+
+            {
+              filters.groupBy == "job" || filters.groupBy == "task" ? filters.internal_external === "1" ? " ( Internal )" : "" : ""
+            }
+
+
+          </label>
 
           <Select
-            options={options}
+            //options={options}
+            options={[
+              { value: "", label: "Select..." }, 
+              ...options,
+            ]}
             value={
               options && options.length > 0
                 ? options.find((opt) => Number(opt.value) === Number(filters.fieldsToDisplayId)) || null
@@ -611,7 +636,7 @@ function TimesheetReport() {
           <table className="table table-striped">
             <thead>
               <tr>
-                <th>Employee</th>
+                <th>Staff</th>
                 <th>Internal/External</th>
                 <th>Customer</th>
                 <th>Client</th>
@@ -623,10 +648,11 @@ function TimesheetReport() {
             <tbody>
               {showData && showData?.map((item, idx) => (
                 <tr key={idx}>
-                  <td>{item.employee_email}</td>
+                  {/* <td>{`${item.staff_fullname} (${item.staff_email})`}</td> */}
+                  <td>{`${item.staff_fullname}`}</td>
                   <td>{item.internal_external}</td>
                   <td>{item.customer_name ?? '-'}</td>
-                  <td>{item.client_name ?? '-'}</td>
+                  <td>{item.client_code ?? '-'}</td>
                   <td>{item.job_name}</td>
                   <td>{item.task_name}</td>
                   <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>

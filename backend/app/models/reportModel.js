@@ -1462,14 +1462,30 @@ const getTimesheetReportData = async (Report) => {
 
     const query = `
     SELECT 
-    staffs.email AS employee_email,
+    staffs.email AS staff_email,
+    CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
     customers.trading_name AS customer_name,
     clients.trading_name AS client_name,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code,
    
 
      CASE 
         WHEN timesheet.task_type = '1' THEN internal.name
-        WHEN timesheet.task_type = '2' THEN jobs.job_id
+        WHEN timesheet.task_type = '2' THEN 
+        
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            )
+
+
     END AS job_name,
 
 
@@ -1493,13 +1509,11 @@ const getTimesheetReportData = async (Report) => {
 
     LEFT JOIN internal ON (timesheet.task_type = '1' AND timesheet.job_id = internal.id)
     LEFT JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
+    LEFT JOIN job_types ON jobs.job_type_id = job_types.id 
 
 
     LEFT JOIN sub_internal ON (timesheet.task_type = '1' AND timesheet.task_id = sub_internal.id)
     LEFT JOIN task ON (timesheet.task_type = '2' AND timesheet.task_id = task.id)
-
-
-
 
     ${where}
     `;
