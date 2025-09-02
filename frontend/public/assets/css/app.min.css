@@ -4827,3 +4827,7 @@ tbody.list.form-check-all tr:last-child td {
 }
   
 }
+
+.css-13cymwt-control{
+  border-radius: 20px !important;
+}
