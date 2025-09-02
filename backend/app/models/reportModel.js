@@ -1311,10 +1311,10 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
 }
 
-const getInternalJobs = async  (Report) => {
+const getInternalJobs = async (Report) => {
     const query = `SELECT * FROM internal ORDER BY id DESC`;
     const [result] = await pool.execute(query);
-     return { status: true, message: 'Success.', data: result };
+    return { status: true, message: 'Success.', data: result };
 }
 
 const getInternalTasks = async (Report) => {
@@ -1325,7 +1325,7 @@ const getInternalTasks = async (Report) => {
 
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
-   // console.log("Report in getTimesheetReportData", data.filters);
+    // console.log("Report in getTimesheetReportData", data.filters);
     let {
         groupBy,
         internal_external,
@@ -1338,7 +1338,7 @@ const getTimesheetReportData = async (Report) => {
     } = data.filters;
 
     let where = [];
-    
+
 
 
     // group by employee condition
@@ -1346,8 +1346,8 @@ const getTimesheetReportData = async (Report) => {
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
-            if(fieldsToDisplayId !== null){
-                where.push(`timesheet.staff_id = ${fieldsToDisplayId}`);  
+            if (fieldsToDisplayId !== null) {
+                where.push(`timesheet.staff_id = ${fieldsToDisplayId}`);
             }
         } else {
             where.push(`timesheet.staff_id = ${StaffUserId}`);
@@ -1359,7 +1359,7 @@ const getTimesheetReportData = async (Report) => {
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
-           
+
         } else {
             where.push(`timesheet.staff_id = ${StaffUserId}`);
         }
@@ -1367,32 +1367,32 @@ const getTimesheetReportData = async (Report) => {
 
     // group by customer condition
     if (groupBy == "customer") {
-        if(fieldsToDisplayId !== null){
+        if (fieldsToDisplayId !== null) {
             where.push(`timesheet.customer_id = ${fieldsToDisplayId}`);
         }
     }
 
     // group by client condition
     if (groupBy == "client") {
-        if(fieldsToDisplayId !== null){
+        if (fieldsToDisplayId !== null) {
             where.push(`timesheet.client_id = ${fieldsToDisplayId}`);
         }
     }
 
     // group by job condition
     if (groupBy == "job") {
-        if(fieldsToDisplayId !== null){
+        if (fieldsToDisplayId !== null) {
             where.push(`task_type = '${internal_external}' AND timesheet.job_id = ${fieldsToDisplayId}`);
         }
     }
 
     // group by task condition
     if (groupBy == "task") {
-        if(fieldsToDisplayId !== null){
+        if (fieldsToDisplayId !== null) {
             where.push(`task_type = '${internal_external}' AND timesheet.task_id = ${fieldsToDisplayId}`);
         }
     }
-    
+
     console.log("timePeriod", timePeriod);
     // time timePeriod
     if (timePeriod) {
@@ -1401,14 +1401,25 @@ const getTimesheetReportData = async (Report) => {
 
         switch (timePeriod) {
             case 'this_week':
-                const firstDayOfWeek = currentDate.getDate() - currentDate.getDay(); // Sunday as the first day
-                startDate = new Date(currentDate.setDate(firstDayOfWeek));
-                endDate = new Date(currentDate.setDate(firstDayOfWeek + 6));
+
+                const today = new Date();
+                // Sunday as first day of the week
+                const firstDayOfWeek = today.getDate() - today.getDay();
+                startDate = new Date(today);
+                startDate.setDate(firstDayOfWeek);
+
+                endDate = new Date(today);
+                endDate.setDate(firstDayOfWeek + 6);
                 break;
             case 'last_week':
-                const firstDayOfLastWeek = currentDate.getDate() - currentDate.getDay() - 7;
-                startDate = new Date(currentDate.setDate(firstDayOfLastWeek));
-                endDate = new Date(currentDate.setDate(firstDayOfLastWeek + 6));
+                const today2 = new Date();
+                const firstDayOfLastWeek = today2.getDate() - today2.getDay() - 7;
+                startDate = new Date(today2);
+                startDate.setDate(firstDayOfLastWeek);
+
+                endDate = new Date(today2);
+                endDate.setDate(firstDayOfLastWeek + 6);
+
                 break;
             case 'this_month':
                 startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -1459,7 +1470,7 @@ const getTimesheetReportData = async (Report) => {
         where.push(`timesheet.created_at <= '${toDate}'`);
     }
 
-    if(internal_external == "1" || internal_external == "2"){
+    if (internal_external == "1" || internal_external == "2") {
         where.push(`timesheet.task_type = '${internal_external}'`);
     }
 
