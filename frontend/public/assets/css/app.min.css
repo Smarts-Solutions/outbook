@@ -4820,10 +4820,14 @@ tbody.list.form-check-all tr:last-child td {
 {
   display: none !important;
 }
-@media screen and (min-width: 5000px) {
+@media screen and (min-width: 4000px) {
 .login1
 {
   display: block !important;
 }
   
+}
+
+.css-13cymwt-control{
+  border-radius: 20px !important;
 }

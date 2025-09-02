@@ -395,14 +395,32 @@ function TimesheetReport() {
   return (
     <div className="container-fluid py-4">
       {/* Page Title */}
-      <div className="row mb-3">
+      <div className="content-title">
+          <div className="tab-title">
+            <div className="row">
+              <div className="col-12 col-sm-6">
+                <h3 className="mt-0">Timesheet Reports</h3>
+              </div>
+              <div className="col-12 col-sm-6">
+                <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
+                  <button className="btn btn-info" id="btn-export"
+          onClick={exportExcel}>
+          Export Data
+        </button>
+                 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {/* <div className="row mb-3">
         <div className="col-12">
           <h5 className="fw-semibold mb-0">Timesheet Reports</h5>
         </div>
-      </div>
+      </div> */}
 
       {/* Filters Section */}
-      <div className="row g-3 mb-3 bg-light p-3 rounded shadow-sm">
+      <div className="row g-3 mb-3 bg-light p-3 rounded shadow-sm align-items-end">
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
@@ -485,7 +503,7 @@ function TimesheetReport() {
               })
             }
             isSearchable
-            className="shadow-sm"
+            className="shadow-sm select-staff"
           />
 
         </div>
@@ -583,7 +601,7 @@ function TimesheetReport() {
                     target: { key: "toDate", value: selected.target.value },
                   })
                 }
-                disabled={!filters.fromDate} // जब तक fromDate select न हो, disable
+                disabled={!filters.fromDate} 
               />
             </div>
           </>
@@ -609,9 +627,16 @@ function TimesheetReport() {
             <option value={"Yearly"}>Yearly</option>
           </select>
         </div>
-
-
-
+        {/* Reset Button */}
+        <div className="col-lg-4 col-md-6">
+          <button
+            className="btn btn-outline-secondary shadow-sm rounded-pill"
+            id="btn-reset"
+            onClick={() => resetFunction()}
+          >
+            Clear Filter
+          </button>
+        </div>
 
       </div>
 
@@ -619,41 +644,35 @@ function TimesheetReport() {
 
 
       {/* Buttons */}
-      <div className="d-flex gap-2 align-items-center mb-4">
-        <button
-          className="btn btn-outline-secondary shadow-sm"
-          id="btn-reset"
-          onClick={() => resetFunction()}
-        >
-          Reset
-        </button>
+      {/* <div className="d-flex gap-2 align-items-center mb-4">
+    
         <button className="btn btn-info" id="btn-export"
           onClick={exportExcel}>
-          Export Excel
+          Export Data
         </button>
-      </div>
+      </div> */}
 
       {/* Filtered Data Display */}
-      <div>
+      <div className='datatable-container'>
         {/* <h6>Filtered Data:</h6> */}
         {showData.length === 0 ? (
           <p style={{ textAlign: "center" }}>No records found</p>
         ) : (
-          <table className="table table-striped table-bordered" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
-            <thead>
-              <tr>
-                <th>Staff</th>
-                <th>Internal/External</th>
-                <th>Customer</th>
-                <th>Client</th>
-                <th>Job</th>
-                <th>Task</th>
-                <th>Mon (hrs)</th>
-                <th>Tue (hrs)</th>
-                <th>Wed (hrs)</th>
-                <th>Thu (hrs)</th>
-                <th>Fri (hrs)</th>
-                <th>Date</th>
+          <table className="table rdt_Table" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
+            <thead className=' rdt_TableHead'>
+              <tr className='rdt_TableHeadRow'>
+                <th className='rdt_TableCol'>Staff</th>
+                <th className='rdt_TableCol'>Internal/External</th>
+                <th className='rdt_TableCol'>Customer</th>
+                <th className='rdt_TableCol'>Client</th>
+                <th className='rdt_TableCol'>Job</th>
+                <th className='rdt_TableCol'>Task</th>
+                <th className='rdt_TableCol'>Mon (hrs)</th>
+                <th className='rdt_TableCol'>Tue (hrs)</th>
+                <th className='rdt_TableCol'>Wed (hrs)</th>
+                <th className='rdt_TableCol'>Thu (hrs)</th>
+                <th className='rdt_TableCol'>Fri (hrs)</th>
+                <th className='rdt_TableCol'>Date</th>
               </tr>
             </thead>
             <tbody>
