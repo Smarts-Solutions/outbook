@@ -54,6 +54,9 @@ else if(data.action == "getInternalTasks"){
 else if(data.action == "missingTimesheetReport"){
   return reportModel.missingTimesheetReport(Report);
 }
+else if(data.action == "discrepancyReport"){
+  return reportModel.discrepancyReport(Report);
+}
 else{
   return;
 }

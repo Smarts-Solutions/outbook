@@ -721,7 +721,9 @@ const Timesheet = () => {
       final_value = `${intPart}.${multipliedStr}`;
       // final_value = `${intPart}.${multiplied}`;
     }
+   
 
+    console.log(`final_value`, final_value);
 
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {

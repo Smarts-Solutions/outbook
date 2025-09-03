@@ -10,6 +10,7 @@ import DueByReport from './DueByReport';
 import TextWeelyReport from './TextWeelyReport';
 import AverageTatReport from './AverageTatReport';
 import MissingTimesheetReport from './MissingTimesheetReport';
+import DiscrepancyReport from './DiscrepancyReport';
  
 
 function Reportsnew() {
@@ -45,6 +46,8 @@ function Reportsnew() {
         return <TextWeelyReport />;
       case 'missingTimesheetReport':
         return <MissingTimesheetReport />;
+      case 'discrepancyReport':
+        return <DiscrepancyReport />;
       default:
         return null;
     }
@@ -74,6 +77,7 @@ function Reportsnew() {
                     <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
                     <option value="averageTATReport">Average TAT Report</option>
                     <option value="missingTimesheetReport">Missing Timesheet Report</option>
+                    <option value="discrepancyReport">Discrepancy Report</option>
                   </select>
                 </>
               </div>

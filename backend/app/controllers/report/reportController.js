@@ -154,7 +154,7 @@ const averageTatReport = async (req, res) => {
 }
 
 const getAllTaskByStaff = async (req, res) => {
-  console.log("Get All Task By Staff", req.body);
+  // console.log("Get All Task By Staff", req.body);
   try {
     const { ...Report } = req.body;
     const result = await reportService.getAllTaskByStaff(Report);
