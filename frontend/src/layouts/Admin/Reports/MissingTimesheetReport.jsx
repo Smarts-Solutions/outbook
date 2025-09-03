@@ -124,8 +124,7 @@ const MissingTimesheet = () => {
     console.log("Selected Week:", value);
     if(value != ""){
     let filterStaffIds = staffDataWeekDataAll && staffDataWeekDataAll?.data?.filter((item) => item.valid_weekOffsets == value).map(i => i.staff_id);
-    console.log("filterStaffIds", filterStaffIds);
-    MissingTimesheet(filterStaffIds);
+    MissingTimesheet(value);
     }else{
     MissingTimesheet("");
     }
@@ -149,16 +148,17 @@ const MissingTimesheet = () => {
           <div className='row'>
             <div className='col-md-5'>
               <div className='tab-title'>
-                <h3>Staff Data Week</h3>
+                <label>Staff Data Week</label>
                 <Select
                   id="tabSelect"
                   name="week"
                   className="basic-multi-select"
                   // options={weekOptions}
                   options={[
-                    { value: "", label: "Select Week..." },
+                    { value: "", label: "Current Week " },
                     ...weekOptions,
                   ]}
+                  defaultValue={{ value: "", label: "Current Week " }}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
                     const e = { target: { name: 'week', value: selectedOption.value } };
