@@ -71,7 +71,7 @@ const DiscrepancyReport = () => {
 
 
   const handleClickTimesheet = (row) => {
-    console.log("Timesheet clicked:", row);
+    // console.log("Timesheet clicked:", row);
     setSelectedRow(row);
     setShowModal(true);
   }
@@ -96,7 +96,9 @@ const DiscrepancyReport = () => {
       cell: (row) => (
         <span
           onClick={() => handleClickTimesheet(row)}
-          style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+          style={{ cursor: "pointer" }}
+          className="btn btn-info"
+          
         >
           {convertTimeFormatString(convertTimeFormat(row.timesheet_total_hours))}
         </span>
