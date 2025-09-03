@@ -1726,6 +1726,10 @@ const discrepancyReport = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
+const capacityReport = async (Report) => {
+    console.log("Capacity Report:", Report);
+}
+
 
 module.exports = {
     jobStatusReports,
@@ -1744,5 +1748,6 @@ module.exports = {
     getInternalJobs,
     getInternalTasks,
     missingTimesheetReport,
-    discrepancyReport
+    discrepancyReport,
+    capacityReport
 };

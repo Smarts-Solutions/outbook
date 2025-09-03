@@ -11,7 +11,8 @@ import TextWeelyReport from './TextWeelyReport';
 import AverageTatReport from './AverageTatReport';
 import MissingTimesheetReport from './MissingTimesheetReport';
 import DiscrepancyReport from './DiscrepancyReport';
- 
+import CapacityReport from './CapacityReport';
+
 
 function Reportsnew() {
 
@@ -48,6 +49,8 @@ function Reportsnew() {
         return <MissingTimesheetReport />;
       case 'discrepancyReport':
         return <DiscrepancyReport />;
+      case 'capacityReport':
+        return <CapacityReport />;
       default:
         return null;
     }
@@ -64,10 +67,10 @@ function Reportsnew() {
               </div>
               <div className="col-lg-4 col-md-6 ">
                 <>
-                  <select className="form-select" id="tabSelect" 
-                   value={activeTab}
-                   onChange={(e)=>handleTabClick(e.target.value)}
-                   >
+                  <select className="form-select" id="tabSelect"
+                    value={activeTab}
+                    onChange={(e) => handleTabClick(e.target.value)}
+                  >
                     <option value="jobStatusReport">Job Status Report</option>
                     <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
                     <option value="jobSummaryReport">Job Summary Report</option>
@@ -78,6 +81,7 @@ function Reportsnew() {
                     <option value="averageTATReport">Average TAT Report</option>
                     <option value="missingTimesheetReport">Missing Timesheet Report</option>
                     <option value="discrepancyReport">Discrepancy Report</option>
+                    <option value="capacityReport">Capacity Report</option>
                   </select>
                 </>
               </div>
