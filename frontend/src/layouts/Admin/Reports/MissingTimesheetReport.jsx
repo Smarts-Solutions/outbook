@@ -121,9 +121,9 @@ const MissingTimesheet = () => {
 
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
-    console.log("Selected Week:", value);
+    // console.log("Selected Week:", value);
     if(value != ""){
-    let filterStaffIds = staffDataWeekDataAll && staffDataWeekDataAll?.data?.filter((item) => item.valid_weekOffsets == value).map(i => i.staff_id);
+    // let filterStaffIds = staffDataWeekDataAll && staffDataWeekDataAll?.data?.filter((item) => item.valid_weekOffsets == value).map(i => i.staff_id);
     MissingTimesheet(value);
     }else{
     MissingTimesheet("");
