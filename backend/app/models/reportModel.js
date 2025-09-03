@@ -1677,6 +1677,11 @@ const discrepancyReport = async (Report) => {
         SELECT 
         timesheet.id AS timsheet_id,
         timesheet.staff_id,
+        timesheet.monday_hours,
+        timesheet.tuesday_hours,
+        timesheet.wednesday_hours,
+        timesheet.thursday_hours,
+        timesheet.friday_hours,
         (
         COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
         COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
