@@ -1673,7 +1673,7 @@ const discrepancyReport = async (Report) => {
   const rows = await QueryRoleHelperFunction(StaffUserId)
 
 
-  let query = `
+    let query = `
         SELECT 
         timesheet.id AS timsheet_id,
         timesheet.staff_id,
@@ -1728,6 +1728,9 @@ const discrepancyReport = async (Report) => {
 
 const capacityReport = async (Report) => {
     console.log("Capacity Report:", Report);
+
+    
+    return { status: true, message: 'no make Api', data: [] };
 }
 
 
