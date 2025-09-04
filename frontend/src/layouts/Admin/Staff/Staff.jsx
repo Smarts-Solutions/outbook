@@ -846,6 +846,8 @@ const StaffPage = () => {
               icon: "success",
               confirmButtonText: "OK"
             });
+            SetRefresh(!refresh);
+            
 
           }
           else {
