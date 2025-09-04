@@ -1679,6 +1679,62 @@ const getChangedRoleStaff = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
+const staffRoleChangeUpdate = async (Report) => {
+    const { data } = Report;
+    const { editStaffData, updateData, selectedStaff } = data;
+    console.log("Staff Role Change Update:", editStaffData);
+    console.log("Staff Role Change updateData:", updateData);
+    console.log("Staff Role Change selectedStaff:", selectedStaff);
+
+    let role_id = Number(editStaffData?.role_id);
+    let update_role_id = Number(updateData?.role);
+    let to_staff_id = editStaffData?.id;
+    let update_staff_id = selectedStaff?.staff_id;
+   
+    let query = [];
+    if (role_id !== update_role_id) {
+      query.push(`UPDATE staffs SET role_id = ${update_role_id} WHERE id = ${to_staff_id}`);
+    }
+
+    
+    
+    if(role_id == 3){
+       query.push(`UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`);
+    }
+    else if(role_id == 6){
+       query.push(`UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`);
+    }
+    else if(role_id == 4){
+       query.push(`UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`);
+      
+       query.push(`UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`);
+
+       query.push(`UPDATE jobs SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
+     
+       query.push(`UPDATE customers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
+       
+       query.push(`UPDATE IGNORE customer_service_account_managers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
+      
+    }
+    
+
+   /// query = query.join(";");
+
+    console.log("Staff Role Change Update Query:", query);
+    try {
+        
+    await Promise.all(query.map(q => pool.execute(q)));
+
+    return { status: true, message: 'Success.', data: [] };
+    } catch (error) {
+        console.error("Staff Role Change Update Error:", error);
+        return { status: false, message: 'Error occurred while updating staff role.', data: [] };
+    }
+    
+
+
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -1698,5 +1754,6 @@ module.exports = {
     missingTimesheetReport,
     discrepancyReport,
     capacityReport,
-    getChangedRoleStaff
+    getChangedRoleStaff,
+    staffRoleChangeUpdate
 };

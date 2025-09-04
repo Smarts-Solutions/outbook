@@ -65,6 +65,9 @@ else if(data.action == "capacityReport"){
 else if(data.action == "getChangedRoleStaff"){
   return reportModel.getChangedRoleStaff(Report);
 }
+else if(data.action == "staffRoleChangeUpdate"){
+  return reportModel.staffRoleChangeUpdate(Report);
+}
 else{
   return;
 }

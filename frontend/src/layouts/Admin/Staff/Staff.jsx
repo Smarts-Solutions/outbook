@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { staffPortfolio, DELETESTAFF } from "../../../Services/Staff/staff";
 import { GET_ALL_CUSTOMERS, getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { use } from "react";
+import Swal from "sweetalert2";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -732,6 +733,7 @@ const StaffPage = () => {
       return;
     }
   };
+
   const getCustomersName = async (id) => {
     if (!id) return;
     try {
@@ -759,7 +761,7 @@ const StaffPage = () => {
   const [changedRoleStaffDataAPiStatus, setChangedRoleStaffDataAPiStatus] = useState(0);
   const [changeRole, setChangeRole] = useState(false);
   const getChangedRoleStaff = async (role_id) => {
-    console.log("Get Changed Role Staff:", role_id);
+    // console.log("Get Changed Role Staff:", role_id);
     try {
       const req = { action: "getChangedRoleStaff", role_id: role_id };
       const data = { req: req, authToken: token };
@@ -810,6 +812,7 @@ const StaffPage = () => {
         }
 
         setChangeRole(true);
+        setEditStaff(false);
 
         console.log("role value: editStaffData", editStaffData);
       }
@@ -821,28 +824,46 @@ const StaffPage = () => {
 
 
   const handleChangeRole = async () => {
-    // try {
-    //   const response = await changeRoleStaff({
-    //     req: {
-    //       action: "update",
-    //       staff_id: editStaffData.id,
-    //       role_id: formik.values.role,
-    //     },
-    //     authToken: token,
-    //   });
-    //   if (response.status) {
-    //     sweatalert.fire({
-    //       icon: "success",
-    //       title: "Success",
-    //       text: response.message,
-    //       timer: 2000,
-    //     });
-    //     SetRefresh(!refresh);
-    //     setEditShowModel(false);
-    //   }
-    // } catch (error) {
-    //   return;
-    // }
+
+    console.log("handleChangeRole clicked");
+    console.log("editStaffData:", editStaffData);
+    console.log("selected role:", selectedStaff);
+    try {
+      const req = { action: "staffRoleChangeUpdate", editStaffData: editStaffData ,updateData :formik.values,selectedStaff: selectedStaff };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            console.log("Changed Role Staff Data:", res);
+            setChangeRole(false); 
+            setSelectedStaff(null); 
+            formik.resetForm();
+            setEditStaffData({});
+            Swal.fire({
+              title: "Success!",
+              text: "Staff role updated successfully.",
+              icon: "success",
+              confirmButtonText: "OK"
+            });
+
+          }
+          else {
+            Swal.fire({
+              title: "Error!",
+              text: "Failed to update staff role.",
+              icon: "error",
+              confirmButtonText: "OK"
+            });
+
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (error) {
+      console.error("Error fetching staff tasks:", error);
+    }
   };
 
   return (
@@ -1264,7 +1285,12 @@ const StaffPage = () => {
         size="ms-5"
         title="Change Role Staff"
         hideBtn={true}
-        handleClose={() => { setChangeRole(false); setSelectedStaff(null); }}
+        handleClose={() => { 
+          setChangeRole(false); 
+          setSelectedStaff(null);
+           formik.resetForm();
+           setEditStaffData({});
+        }}
       >
         <div className="modal-body"
 
@@ -1318,7 +1344,12 @@ const StaffPage = () => {
               </button>
             )}
             <button
-              onClick={() => { setChangeRole(false); setSelectedStaff(null); }}
+              onClick={() => { 
+                setChangeRole(false); 
+                setSelectedStaff(null); 
+                formik.resetForm();
+                setEditStaffData({});
+              }}
               className="btn btn-secondary"
             >
               <i className="bi bi-x-circle"></i> Cancel

@@ -114,8 +114,6 @@ const updateStaff = async (staff) => {
   let email = fields.email;
 
 
-
-
   // Line Manage Code
   let staff_to = fields.staff_to;
   if (staff_to != "" && staff_to != undefined) {
