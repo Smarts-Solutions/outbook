@@ -1682,9 +1682,9 @@ const getChangedRoleStaff = async (Report) => {
 const staffRoleChangeUpdate = async (Report) => {
     const { data } = Report;
     const { editStaffData, updateData, selectedStaff } = data;
-    console.log("Staff Role Change Update:", editStaffData);
-    console.log("Staff Role Change updateData:", updateData);
-    console.log("Staff Role Change selectedStaff:", selectedStaff);
+    // console.log("Staff Role Change Update:", editStaffData);
+    // console.log("Staff Role Change updateData:", updateData);
+    // console.log("Staff Role Change selectedStaff:", selectedStaff);
 
     let role_id = Number(editStaffData?.role_id);
     let update_role_id = Number(updateData?.role);
@@ -1720,7 +1720,7 @@ const staffRoleChangeUpdate = async (Report) => {
 
    /// query = query.join(";");
 
-    console.log("Staff Role Change Update Query:", query);
+    // console.log("Staff Role Change Update Query:", query);
     try {
         
     await Promise.all(query.map(q => pool.execute(q)));

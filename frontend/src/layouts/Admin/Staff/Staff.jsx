@@ -825,9 +825,9 @@ const StaffPage = () => {
 
   const handleChangeRole = async () => {
 
-    console.log("handleChangeRole clicked");
-    console.log("editStaffData:", editStaffData);
-    console.log("selected role:", selectedStaff);
+    // console.log("handleChangeRole clicked");
+    // console.log("editStaffData:", editStaffData);
+    // console.log("selected role:", selectedStaff);
     try {
       const req = { action: "staffRoleChangeUpdate", editStaffData: editStaffData ,updateData :formik.values,selectedStaff: selectedStaff };
       const data = { req: req, authToken: token };
