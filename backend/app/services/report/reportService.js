@@ -60,6 +60,11 @@ else if(data.action == "discrepancyReport"){
 else if(data.action == "capacityReport"){
   return reportModel.capacityReport(Report);
 }
+
+// Staff Work
+else if(data.action == "getChangedRoleStaff"){
+  return reportModel.getChangedRoleStaff(Report);
+}
 else{
   return;
 }

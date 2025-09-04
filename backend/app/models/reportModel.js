@@ -1661,6 +1661,24 @@ const capacityReport = async (Report) => {
 }
 
 
+
+// Staff Work
+const getChangedRoleStaff = async (Report) => {
+    const { data } = Report;
+    const { role_id } = data;
+
+    console.log("Get Changed Role Staff:", role_id);
+    const query = `
+        SELECT 
+            staffs.id AS staff_id,
+            CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_fullname
+        FROM staffs
+        WHERE staffs.role_id = ? AND staffs.status = '1'
+    `;
+    const [result] = await pool.execute(query, [role_id]);
+    return { status: true, message: 'Success.', data: result };
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -1679,5 +1697,6 @@ module.exports = {
     getInternalTasks,
     missingTimesheetReport,
     discrepancyReport,
-    capacityReport
+    capacityReport,
+    getChangedRoleStaff
 };

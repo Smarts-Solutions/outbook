@@ -16,7 +16,7 @@ import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { staffPortfolio, DELETESTAFF } from "../../../Services/Staff/staff";
-import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GET_ALL_CUSTOMERS, getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { use } from "react";
 
 const StaffPage = () => {
@@ -48,7 +48,7 @@ const StaffPage = () => {
       role: deleteStaff.role,
     };
     const res = await DELETESTAFF(data);
-    
+
     if (res?.status) {
       await dispatch(
         Staff({
@@ -94,7 +94,7 @@ const StaffPage = () => {
     if (
       accessData &&
       accessData.length > 0 &&
-     // role !== "ADMIN" &&
+      // role !== "ADMIN" &&
       role !== "SUPERADMIN"
     ) {
       accessData &&
@@ -148,10 +148,12 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          
+
           console.log("response.data ", response.data);
 
           setStaffDataAll({ loading: false, data: response.data });
+
+
         } else {
           setStaffDataAll({ loading: false, data: [] });
         }
@@ -607,6 +609,8 @@ const StaffPage = () => {
     },
   ];
 
+
+
   const handleCheckboxChange = (event, id) => {
     const { checked } = event.target;
 
@@ -654,7 +658,7 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
-    
+
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
@@ -664,6 +668,7 @@ const StaffPage = () => {
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue("phone_code", editStaffData.phone_code || null);
       formik.setFieldValue("staff_to", editStaffData.staff_to || "");
+      formik.setFieldValue("id", editStaffData?.id || "");
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],
@@ -746,9 +751,99 @@ const StaffPage = () => {
 
   useEffect(() => {
     getCustomersName(deleteStaff?.id);
-  }, [deleteStaff?.id, token]); // Ensure token is included if it might change
+  }, [deleteStaff?.id, token]);
 
 
+  /// CHANGE ROLE GET STAFF
+  const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
+  const [changedRoleStaffDataAPiStatus, setChangedRoleStaffDataAPiStatus] = useState(0);
+  const [changeRole, setChangeRole] = useState(false);
+  const getChangedRoleStaff = async (role_id) => {
+    console.log("Get Changed Role Staff:", role_id);
+    try {
+      const req = { action: "getChangedRoleStaff", role_id: role_id };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            // console.log("Changed Role Staff Data:", res);
+            setChangedRoleStaffDataAPiStatus(1);
+            setChangedRoleStaffData(res.data);
+          }
+          else {
+            setChangedRoleStaffDataAPiStatus(1);
+            setChangedRoleStaffData([]);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (error) {
+      console.error("Error fetching staff tasks:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchChangedRoleStaff = async () => {
+      if (editStaffData.id !== undefined && Number(formik.values.role) !== Number(editStaffData.role_id)
+      ) {
+        // PROCESSOR
+        if (Number(editStaffData.role_id) === 3) {
+          if (changedRoleStaffDataAPiStatus === 0) {
+            await getChangedRoleStaff(editStaffData.role_id);
+          }
+
+        }
+        // MANAGER
+        else if (Number(editStaffData.role_id) === 4) {
+          if (changedRoleStaffDataAPiStatus === 0) {
+            await getChangedRoleStaff(editStaffData.role_id);
+          }
+
+        }
+        // REVIEWER
+        else if (Number(editStaffData.role_id) === 6) {
+          if (changedRoleStaffDataAPiStatus === 0) {
+            await getChangedRoleStaff(editStaffData.role_id);
+          }
+        }
+
+        setChangeRole(true);
+
+        console.log("role value: editStaffData", editStaffData);
+      }
+    };
+
+    fetchChangedRoleStaff();
+  }, [formik.values.role]);
+
+
+
+  const handleChangeRole = async () => {
+    // try {
+    //   const response = await changeRoleStaff({
+    //     req: {
+    //       action: "update",
+    //       staff_id: editStaffData.id,
+    //       role_id: formik.values.role,
+    //     },
+    //     authToken: token,
+    //   });
+    //   if (response.status) {
+    //     sweatalert.fire({
+    //       icon: "success",
+    //       title: "Success",
+    //       text: response.message,
+    //       timer: 2000,
+    //     });
+    //     SetRefresh(!refresh);
+    //     setEditShowModel(false);
+    //   }
+    // } catch (error) {
+    //   return;
+    // }
+  };
 
   return (
     <div>
@@ -881,6 +976,7 @@ const StaffPage = () => {
           setEditStaff(false);
           formik.resetForm();
           setEditStaffData({});
+          setChangedRoleStaffDataAPiStatus(0);
         }}
       >
         <Formicform
@@ -893,6 +989,7 @@ const StaffPage = () => {
             formik.resetForm();
             setEditStaff(false);
             setEditStaffData({});
+            setChangedRoleStaffDataAPiStatus(0);
           }}
           additional_field={
             <div className="row mt-2 ">
@@ -1047,119 +1144,189 @@ const StaffPage = () => {
         </FormGroup>
       </CommanModal>
 
-    <CommanModal
-  isOpen={deleteStaff}
-  backdrop="static"
-  size="ms-5"
-  title="Delete Staff"
-  hideBtn={true}
-  handleClose={() => {setDeleteStaff(false);setSelectedStaff(null);}}
->
-  <div className="modal-body">
-    {/* Staff Deletion Title */}
-    <div className="text-start mb-3">
-      <h5 className="text-danger fw-bold">
-        <i className="bi bi-trash3"></i> Delete Staff:{" "}
-        <span className="text-dark">
-          {deleteStaff?.first_name + " " + deleteStaff?.last_name}
-        </span>
-      </h5>
-    </div>
-
-    {/* Select Staff to Replace */}
-    <div className="mb-4">
-      <label htmlFor="staff-select" className="form-label fw-semibold">
-        <i className="bi bi-person-fill"></i> Select Staff to Replace:
-      </label>
-
-      <div className="dropdown">
-      <button
-        className="btn btn-info dropdown-toggle w-100"
-        type="button"
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+      <CommanModal
+        isOpen={deleteStaff}
+        backdrop="static"
+        size="ms-5"
+        title="Delete Staff"
+        hideBtn={true}
+        handleClose={() => { setDeleteStaff(false); setSelectedStaff(null); }}
       >
-        Choose Staff {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
-      </button>
-
-      {dropdownOpen && (
-        <ul
-          className="dropdown-menu show w-100"
-          style={{ maxHeight: "200px", overflowY: "auto" }}
-        >
-          {
-          staffDataAll?.data
-            // ?.filter(
-            //   (staff) =>
-            //     staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
-            // )
-            ?.filter((staff) => {
-                if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
-                  return (
-                    staff.role?.toUpperCase() === "MANAGER" && 
-                    staff.id !== deleteStaff?.id && 
-                    staff.id !== 1 &&
-                    staff.id !== 2
-                  );
-                }
-                return (
-                  staff.id !== deleteStaff?.id &&
-                  staff.id !== 1 &&
-                  staff.id !== 2
-                );
-              })
-            .map((staff) => (
-              <li key={staff.id}>
-                <button
-                  className="dropdown-item"
-                  onClick={() =>{  setSelectedStaff(staff);setDropdownOpen(!dropdownOpen);}}
-                >
-                  {staff.first_name + " " + staff.last_name}
-                </button>
-              </li>
-            ))}
-        </ul>
-      )}
-    </div>
-    </div>
-
-   
-
-    {/* Buttons */}
-    <div className="d-grid gap-2">
-      {selectedStaff && (
-        <button onClick={handleDeleteClick} className="btn btn-danger">
-          <i className="bi bi-trash"></i> Delete
-        </button>
-      )}
-      <button
-        onClick={() => {setDeleteStaff(false);setSelectedStaff(null);}}
-        className="btn btn-secondary"
-      >
-        <i className="bi bi-x-circle"></i> Cancel
-      </button>
-    </div>
-
-
-     {/* Customers List */}
-     {deleteStaffCustomer.length > 0 && (
-      <div className="mb-4">
-        <h6 className="fw-bold text-primary">
-          <i className="bi bi-people"></i> Customers Assigned:
-        </h6>
-        <ul className="list-group">
-          {deleteStaffCustomer.map((customer) => (
-            <li key={customer.id} className="list-group-item d-flex justify-content-between align-items-center">
+        <div className="modal-body">
+          {/* Staff Deletion Title */}
+          <div className="text-start mb-3">
+            <h5 className="text-danger fw-bold">
+              <i className="bi bi-trash3"></i> Delete Staff:{" "}
               <span className="text-dark">
-                {customer?.trading_name}{" "}
-                <span className="badge bg-secondary">{customer?.customer_code}</span>
+                {deleteStaff?.first_name + " " + deleteStaff?.last_name}
               </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </div>
-</CommanModal>
+            </h5>
+          </div>
+
+          {/* Select Staff to Replace */}
+          <div className="mb-4">
+            <label htmlFor="staff-select" className="form-label fw-semibold">
+              <i className="bi bi-person-fill"></i> Select Staff to Replace:
+            </label>
+
+            <div className="dropdown">
+              <button
+                className="btn btn-info dropdown-toggle w-100"
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                Choose Staff {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
+              </button>
+
+              {dropdownOpen && (
+                <ul
+                  className="dropdown-menu show w-100"
+                  style={{ maxHeight: "200px", overflowY: "auto" }}
+                >
+                  {
+                    staffDataAll?.data
+                      // ?.filter(
+                      //   (staff) =>
+                      //     staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
+                      // )
+                      ?.filter((staff) => {
+                        if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
+                          return (
+                            staff.role?.toUpperCase() === "MANAGER" &&
+                            staff.id !== deleteStaff?.id &&
+                            staff.id !== 1 &&
+                            staff.id !== 2
+                          );
+                        }
+                        return (
+                          staff.id !== deleteStaff?.id &&
+                          staff.id !== 1 &&
+                          staff.id !== 2
+                        );
+                      })
+                      .map((staff) => (
+                        <li key={staff.id}>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => { setSelectedStaff(staff); setDropdownOpen(!dropdownOpen); }}
+                          >
+                            {staff.first_name + " " + staff.last_name}
+                          </button>
+                        </li>
+                      ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+
+
+          {/* Buttons */}
+          <div className="d-grid gap-2">
+            {selectedStaff && (
+              <button onClick={handleDeleteClick} className="btn btn-danger">
+                <i className="bi bi-trash"></i> Delete
+              </button>
+            )}
+            <button
+              onClick={() => { setDeleteStaff(false); setSelectedStaff(null); }}
+              className="btn btn-secondary"
+            >
+              <i className="bi bi-x-circle"></i> Cancel
+            </button>
+          </div>
+
+
+          {/* Customers List */}
+          {deleteStaffCustomer.length > 0 && (
+            <div className="mb-4">
+              <h6 className="fw-bold text-primary">
+                <i className="bi bi-people"></i> Customers Assigned:
+              </h6>
+              <ul className="list-group">
+                {deleteStaffCustomer.map((customer) => (
+                  <li key={customer.id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <span className="text-dark">
+                      {customer?.trading_name}{" "}
+                      <span className="badge bg-secondary">{customer?.customer_code}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={changeRole}
+        backdrop="static"
+        size="ms-5"
+        title="Change Role Staff"
+        hideBtn={true}
+        handleClose={() => { setChangeRole(false); setSelectedStaff(null); }}
+      >
+        <div className="modal-body"
+
+
+        >
+
+
+          {/* Select Staff to Replace */}
+          <div className="mb-4">
+            <label htmlFor="staff-select" className="form-label fw-semibold">
+              <i className="bi bi-person-fill"></i> Select Staff to Replace:
+            </label>
+
+            <div className="dropdown">
+              <button
+                className="btn btn-info dropdown-toggle w-100"
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                Choose Staff {selectedStaff ? `: ${selectedStaff.staff_fullname}` : ""}
+              </button>
+
+              {dropdownOpen && (
+                <ul
+                  className="dropdown-menu show w-100"
+                  style={{ maxHeight: "200px", overflowY: "auto" }}
+                >
+                  {
+                    changedRoleStaffData?.map((staff) => (
+                      <li key={staff.id}>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => { setSelectedStaff(staff); setDropdownOpen(!dropdownOpen); }}
+                        >
+                          {staff.staff_fullname}
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+
+
+          {/* Buttons */}
+          <div className="d-grid gap-2">
+            {selectedStaff && (
+              <button onClick={handleChangeRole} className="btn btn-danger">
+                <i className="bi bi-trash"></i> Change Role
+              </button>
+            )}
+            <button
+              onClick={() => { setChangeRole(false); setSelectedStaff(null); }}
+              className="btn btn-secondary"
+            >
+              <i className="bi bi-x-circle"></i> Cancel
+            </button>
+          </div>
+
+        </div>
+      </CommanModal>
 
     </div>
   );
