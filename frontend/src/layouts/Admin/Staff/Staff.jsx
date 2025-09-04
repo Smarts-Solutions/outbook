@@ -817,8 +817,9 @@ const StaffPage = () => {
         console.log("role value: editStaffData", editStaffData);
       }
     };
-
-    fetchChangedRoleStaff();
+    if([3,4,6].includes(Number(editStaffData.role_id))){
+      fetchChangedRoleStaff();
+    }
   }, [formik.values.role]);
 
 
