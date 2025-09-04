@@ -810,10 +810,9 @@ const StaffPage = () => {
             await getChangedRoleStaff(editStaffData.role_id);
           }
         }
-
+        
         setChangeRole(true);
         setEditStaff(false);
-
         console.log("role value: editStaffData", editStaffData);
       }
     };
