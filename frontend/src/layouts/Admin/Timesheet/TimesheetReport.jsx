@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 
 
 function TimesheetReport() {
-
+ const noDataImage = '/assets/images/No-data-amico.png';
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [options, setOptions] = useState([]);
@@ -448,11 +448,11 @@ function TimesheetReport() {
   console.log("Filters after reset: ", filters);
 
   return (
-    <div className="container-fluid py-4">
+    <div className="container-fluid pb-3">
       {/* Page Title */}
       <div className="content-title">
-          <div className="tab-title">
-            <div className="row">
+          <div className="tab-title mb-3">
+            <div className="row align-items-center">
               <div className="col-12 col-sm-6">
                 <h3 className="mt-0">Timesheet Reports</h3>
               </div>
@@ -475,12 +475,12 @@ function TimesheetReport() {
       </div> */}
 
       {/* Filters Section */}
-      <div className="row g-3 mb-3 bg-light p-3 rounded shadow-sm align-items-end">
+      <div className="row g-3 mb-3 bg-light p-3  mt-4 rounded shadow-sm align-items-end">
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
           <select
-            className="form-select shadow-sm"
+            className="form-select shadow-sm  rounded-pill"
             id="groupBy"
             value={filters.groupBy}
             onChange={(e) =>
@@ -558,7 +558,7 @@ function TimesheetReport() {
               })
             }
             isSearchable
-            className="shadow-sm select-staff"
+            className="shadow-sm select-staff rounded-pill"
           />
 
         </div>
@@ -711,12 +711,19 @@ function TimesheetReport() {
       <div className='datatable-container'>
         {/* <h6>Filtered Data:</h6> */}
         {showData.length === 0 ? (
-          <p style={{ textAlign: "center" }}>No records found</p>
+         <div className='text-center'>
+          <img
+            src={noDataImage}
+            alt="No records available"
+            style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+          />
+          <p className='fs-16'>There are no records to display</p>
+        </div>
         ) : (
           <table className="table rdt_Table" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
             <thead className=' rdt_TableHead'>
               <tr className='rdt_TableHeadRow'>
-                <th className='rdt_TableCol'>Staff</th>
+                <th className='rdt_TableCol border-bottom-0'>Staff</th>
                 <th className='rdt_TableCol'>Internal/External</th>
                 <th className='rdt_TableCol'>Customer</th>
                 <th className='rdt_TableCol'>Client</th>

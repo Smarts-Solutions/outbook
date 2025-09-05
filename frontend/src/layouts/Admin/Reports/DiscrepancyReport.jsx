@@ -97,7 +97,7 @@ const DiscrepancyReport = () => {
         <span
           onClick={() => handleClickTimesheet(row)}
           style={{ cursor: "pointer" }}
-          className="btn btn-info"
+          className="btn btn-sm btn-outline-info px-3 py-1"
           
         >
           {convertTimeFormatString(convertTimeFormat(row.timesheet_total_hours))}
