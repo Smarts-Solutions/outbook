@@ -228,13 +228,6 @@ function TimesheetReport() {
       });
   };
 
-  const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(showData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Job Status Report");
-    XLSX.writeFile(workbook, "JobStatusReport.xlsx");
-  };
-
 
   const exportToCSV = (showData) => {
   if (!showData || showData.length === 0) {
@@ -258,7 +251,7 @@ function TimesheetReport() {
     "Date",
   ];
 
-  // Rows as per <tbody>
+  // Rows mapping data keys to headers
   const rows = showData.map((item) => {
     return [
       item.staff_fullname || "-", // Staff
@@ -289,7 +282,7 @@ function TimesheetReport() {
     )
     .join("\n");
 
-  // Download logic
+  // Download CSV
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
