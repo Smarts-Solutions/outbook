@@ -9,9 +9,6 @@ const {
 
 const getAddJobData = async (job) => {
   const { customer_id ,StaffUserId} = job;
-
-  
-
   // customer Client
   try {
     const queryCustomerWithClient = `
