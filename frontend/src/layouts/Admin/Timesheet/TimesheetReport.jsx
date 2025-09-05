@@ -236,6 +236,68 @@ function TimesheetReport() {
   };
 
 
+  const exportToCSV = (showData) => {
+  if (!showData || showData.length === 0) {
+    alert("No data to export!");
+    return;
+  }
+
+  // Headers as per <thead>
+  const headers = [
+    "Staff",
+    "Internal/External",
+    "Customer",
+    "Client",
+    "Job",
+    "Task",
+    "Mon (hrs)",
+    "Tue (hrs)",
+    "Wed (hrs)",
+    "Thu (hrs)",
+    "Fri (hrs)",
+    "Date",
+  ];
+
+  // Rows as per <tbody>
+  const rows = showData.map((item) => {
+    return [
+      item.staff_fullname || "-", // Staff
+      item.internal_external || "-", // Internal/External
+      item.customer_name ?? "-", // Customer
+      item.client_code ?? "-", // Client
+      item.job_name || "-", // Job
+      item.task_name || "-", // Task
+      item.monday_hours || "-", // Mon
+      item.tuesday_hours || "-", // Tue
+      item.wednesday_hours || "-", // Wed
+      item.thursday_hours || "-", // Thu
+      item.friday_hours || "-", // Fri
+      item.created_at ? dayjs(item.created_at).format("DD-MM-YYYY") : "-", // Date
+    ];
+  });
+
+  // CSV content
+  const csvContent = [headers, ...rows]
+    .map((row) =>
+      row
+        .map((val) =>
+          typeof val === "string" && val.includes(",")
+            ? `"${val}"` // agar string me comma ho to quotes me wrap
+            : val
+        )
+        .join(",")
+    )
+    .join("\n");
+
+  // Download logic
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "TimeSheetReportData.csv";
+  link.click();
+};
+
+
   const handleFilterChange = (e) => {
     const { key, value, label } = e.target;
 
@@ -404,7 +466,7 @@ function TimesheetReport() {
               <div className="col-12 col-sm-6">
                 <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                   <button className="btn btn-info" id="btn-export"
-          onClick={exportExcel}>
+          onClick={()=> exportToCSV(showData)}>
           Export Data
         </button>
                  
