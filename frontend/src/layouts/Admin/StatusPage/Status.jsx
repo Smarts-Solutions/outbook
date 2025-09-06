@@ -114,7 +114,7 @@ const Status = () => {
           {row.is_disable == "0" && (
             <button
               className="delete-icon"
-              onClick={() => setDeleteStatus(row)}
+             onClick={() => confirmDeleteStatus(row)} 
             >
               <i className="ti-trash text-danger" />
             </button>
@@ -244,6 +244,43 @@ const Status = () => {
         return;
       });
   };
+const confirmDeleteStatus = async (row) => {
+  Swal.fire({
+    title: `Delete Status: ${row?.name}?`,
+    // text: "This action cannot be undone!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Yes, Delete",
+    cancelButtonText: "Cancel",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const data = {
+          req: {
+            action: "delete",
+            id: row.id,
+            replace_id: replaceStatue, 
+          },
+          authToken: token,
+        };
+
+        const response = await dispatch(MasterStatusData(data)).unwrap();
+
+        if (response.status) {
+          Swal.fire("Deleted!", "Status has been deleted.", "success");
+          GetStatus();
+          setReplaceStatue(null);
+        } else {
+          Swal.fire("Error", response.message, "error");
+        }
+      } catch (error) {
+        Swal.fire("Error", "Something went wrong!", "error");
+      }
+    }
+  });
+};
 
   const createTask = async () => {
     if (!getStatsAdd.statusname?.trim() || !getStatsAdd.statustype?.trim()) {

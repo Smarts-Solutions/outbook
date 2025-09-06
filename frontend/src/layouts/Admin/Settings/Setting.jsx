@@ -2303,12 +2303,14 @@ const Setting = () => {
 
       let data = { 
         req: { action: "delete", id: deleteStatus?.id ,replace_id:replaceStatue},
+
         authToken: token 
       };
       const response = await dispatch(GetStaffByRole(data)).unwrap();
       if (response.status) {
         sweatalert.fire({
           title: response.message,
+          // text: "Staff Role Deleted Successfully",
           icon: "success",
           timer: 2000,
         });
@@ -2322,6 +2324,7 @@ const Setting = () => {
       } else {
         sweatalert.fire({
           title: response.message,
+         
           icon: "error",
           timer: 2000,
         });
@@ -2915,99 +2918,109 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
-        <CommonModal
-          isOpen={deleteStatus}
-          backdrop="static"
-          size="ms-5"
-          title="Delete Role"
-          hideBtn={true}
-          handleClose={() => setDeleteStatus(false)}
-        >
-          <div className="modal-body">
-            <div className="text-start mb-3">
-              <h5 className="text-danger fw-bold">
-                <i className="bi bi-trash3"></i> Delete Role:{" "}
-                <span className="text-dark">{deleteStatus?.role_name}</span>
-              </h5>
-            </div>
-           
-           {
-            StaffRoleDAta.length > 0 ?
-            <>
-            
-            <div className="mb-3">
-              <label htmlFor="staff-select" className="form-label">
-                Select Role to Replace:
-              </label>
-              <select
-                id="staff-select"
-                value={replaceStatue || ""}
-                onChange={(e) => setReplaceStatue(e.target.value)}
-                className="form-select"
-              >
-                <option value="" disabled>
-                  Choose Role
+       <CommonModal
+  isOpen={deleteStatus}
+  backdrop="static"
+  size="md"
+  title="Delete Role"
+  hideBtn={true}
+  handleClose={() => setDeleteStatus(false)}
+>
+  <div className="modal-body">
+    {/* Heading */}
+    <div className="text-start mb-4 border-bottom pb-2">
+      <h5 className="text-danger fw-bold d-flex align-items-center">
+        <i className="bi bi-trash3 me-2"></i>
+        Delete Role: <span className="text-dark ms-2">{deleteStatus?.role_name}</span>
+      </h5>
+    </div>
+
+    {StaffRoleDAta.length > 0 ? (
+      <>
+        {/* Replacement Dropdown */}
+        <div className="mb-4">
+          <label htmlFor="staff-select" className="form-label fw-semibold">
+            Select Role to Replace
+          </label>
+          <select
+            id="staff-select"
+            value={replaceStatue || ""}
+            onChange={(e) => setReplaceStatue(e.target.value)}
+            className="form-select"
+          >
+            <option value="" disabled>
+              Choose Role
+            </option>
+            {roleDataAll.data
+              .filter(
+                (staff) =>
+                  staff.id !== deleteStatus?.id &&
+                  staff.role !== "ADMIN" &&
+                  staff.role !== "SUPERADMIN"
+              )
+              .map((staff) => (
+                <option key={staff.id} value={staff.id}>
+                  {staff.role_name}
                 </option>
-                {roleDataAll.data
-                  .filter((staff) => staff.id !== deleteStatus?.id && staff.role!="ADMIN" && staff.role != "SUPERADMIN")
-                  .map((staff, index) => (
-                    <option key={staff.id} value={staff.id}>
-                      {staff.role_name}
-                    </option>
-                  ))}
-              </select>
-            </div>
+              ))}
+          </select>
+        </div>
 
-            {replaceStatue && (
-              <button
-                onClick={roledeleteUpdatestaff}
-                className="btn btn-danger w-100 mt-3"
+        {/* Staff List */}
+        <div className="mb-4">
+          <h6 className="fw-bold text-primary d-flex align-items-center">
+            <i className="bi bi-people me-2"></i> Staff Assigned
+          </h6>
+          <ul className="list-group mt-2">
+            {StaffRoleDAta.map((customer, index) => (
+              <li
+                key={index}
+                className="list-group-item d-flex justify-content-between align-items-center"
               >
-                Delete
-              </button>
-            )}
+                <span className="text-dark">
+                  {`${customer?.first_name} ${customer.last_name}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            <button
-              onClick={() => setDeleteStatus(false)}
-              className="btn btn-secondary w-100 mt-2"
-            >
-              Cancel
-            </button>
+        {/* Buttons */}
+        <div className="d-flex gap-2">
+          <button
+            disabled={!replaceStatue}
+            onClick={roledeleteUpdatestaff}
+            className="btn btn-danger w-100"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => setDeleteStatus(false)}
+            className="btn btn-secondary w-100"
+          >
+            Cancel
+          </button>
+        </div>
+      </>
+    ) : (
+      <div className="d-flex gap-2">
+        <button
+          onClick={roledeleteUpdatestaff}
+          className="btn btn-danger w-100 rounded-pill"
+        >
+          Delete
+        </button>
+        <button
+          onClick={() => setDeleteStatus(false)}
+          className="btn btn-info w-100"
+        >
+          Cancel
+        </button>
+      </div>
+    )}
+  </div>
+</CommonModal>
 
-            {StaffRoleDAta.length > 0 && (
-              <div className="mb-4">
-                <h6 className="fw-bold text-primary">
-                  <i className="bi bi-people"></i> Staff Assigned:
-                </h6>
-                <ul className="list-group">
-                  <label className="">Staff Name</label>
-                  {StaffRoleDAta.map((customer) => (
-                    <li
-                      key={customer.job_id}
-                      className="list-group-item d-flex justify-content-between align-items-center"
-                    >
-                      <span className="text-dark">{`${customer?.first_name} ${customer.last_name}`} </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-             
-            </>
-              
-            :
-            <button
-                onClick={roledeleteUpdatestaff}
-                className="btn btn-danger w-100 mt-3"
-              >
-                Delete
-              </button>
-
-           }
-
-           
-          </div>
-        </CommonModal>
       </div>
     </>
   );

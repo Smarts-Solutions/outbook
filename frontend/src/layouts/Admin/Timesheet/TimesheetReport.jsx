@@ -723,18 +723,18 @@ function TimesheetReport() {
           <table className="table rdt_Table" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
             <thead className=' rdt_TableHead'>
               <tr className='rdt_TableHeadRow'>
-                <th className='rdt_TableCol border-bottom-0'>Staff</th>
-                <th className='rdt_TableCol'>Internal/External</th>
-                <th className='rdt_TableCol'>Customer</th>
-                <th className='rdt_TableCol'>Client</th>
-                <th className='rdt_TableCol'>Job</th>
-                <th className='rdt_TableCol'>Task</th>
-                <th className='rdt_TableCol'>Mon (hrs)</th>
-                <th className='rdt_TableCol'>Tue (hrs)</th>
-                <th className='rdt_TableCol'>Wed (hrs)</th>
-                <th className='rdt_TableCol'>Thu (hrs)</th>
-                <th className='rdt_TableCol'>Fri (hrs)</th>
-                <th className='rdt_TableCol'>Date</th>
+                <th className='rdt_TableCol border-bottom-0 '>Staff</th>
+                <th className='rdt_TableCol border-bottom-0'>Internal/External</th>
+                <th className='rdt_TableCol border-bottom-0'>Customer</th>
+                <th className='rdt_TableCol border-bottom-0'>Client</th>
+                <th className='rdt_TableCol border-bottom-0'>Job</th>
+                <th className='rdt_TableCol border-bottom-0'>Task</th>
+                <th className='rdt_TableCol border-bottom-0'>Mon (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Tue (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Wed (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Thu (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Fri (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Date</th>
               </tr>
             </thead>
             <tbody>

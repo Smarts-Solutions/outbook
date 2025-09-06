@@ -1285,7 +1285,7 @@ const StaffPage = () => {
         isOpen={changeRole}
         backdrop="static"
         size="ms-5"
-        title="Change Role Staff"
+        title="Change Staff Role"
         hideBtn={true}
         handleClose={() => { 
           setChangeRole(false); 
@@ -1308,7 +1308,7 @@ const StaffPage = () => {
 
             <div className="dropdown">
               <button
-                className="btn btn-info dropdown-toggle w-100"
+                className="form-select dropdown-toggle"
                 type="button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
@@ -1339,9 +1339,9 @@ const StaffPage = () => {
 
 
           {/* Buttons */}
-          <div className="d-grid gap-2">
+          <div className="d-flex gap-2 justify-content-end">
             {selectedStaff && (
-              <button onClick={handleChangeRole} className="btn btn-danger">
+              <button onClick={handleChangeRole} className="btn btn-info">
                 <i className="bi bi-trash"></i> Change Role
               </button>
             )}
@@ -1352,7 +1352,7 @@ const StaffPage = () => {
                 formik.resetForm();
                 setEditStaffData({});
               }}
-              className="btn btn-secondary"
+              className="btn btn-secondary w-auto"
             >
               <i className="bi bi-x-circle"></i> Cancel
             </button>
