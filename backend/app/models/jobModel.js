@@ -1463,7 +1463,7 @@ const getJobById = async (job) => {
      task.name AS task_name
      FROM 
      jobs
-     JOIN 
+     LEFT JOIN 
      assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
      JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
@@ -1506,7 +1506,8 @@ const getJobById = async (job) => {
       [job_id]
     );
 
-
+   
+    console.log("rows", rows);
     let result = {};
     if (rows.length > 0) {
       let tasks = [];
