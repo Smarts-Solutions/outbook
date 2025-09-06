@@ -18,8 +18,6 @@ const ClientList = () => {
   const cust_id_sidebar_name = sessionStorage.getItem('cust_id_sidebar_name');
   const cli_id_sidebar_name = sessionStorage.getItem('cli_id_sidebar_name');
 
-
-
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState({ id: cust_id_sidebar || "", trading_name: "" });
 

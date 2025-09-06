@@ -732,7 +732,7 @@ const EditJob = () => {
       .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
       .reduce((obj, key) => {
         const keyMapping = {
-          fte_dedicated_staffing: "Fte Dedicated Staffing",
+          fte_dedicated_staffing: "FTE Dedicated Staffing",
           percentage_model: "Percentage Model",
           adhoc_payg_hourly: "Adhoc Payg Hourly",
           customised_pricing: "Customised Pricing",
