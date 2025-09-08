@@ -91,6 +91,58 @@ const StaffPage = () => {
     }
   };
 
+  const handleDeleteIsNotExistCustomer = async (row) => {
+    // conformation alert
+    setSelectedStaff(null);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "you want to delete this staff?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await dispatch(
+          Staff({
+            req: { action: "delete", id: row.id },
+            authToken: token,
+          })
+        )
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              sweatalert.fire({
+                icon: "success",
+                title: "Success",
+                text: response.message,
+                timer: 2000,
+              });
+              setSelectedStaff(null);
+              SetRefresh(!refresh);
+              setDeleteStaff(false);
+            } else {
+              sweatalert.fire({
+                icon: "error",
+                title: "Oops...",
+                text: response.message,
+              });
+              setDeleteStaff(false);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
+      }
+      else {
+        return;
+      }
+    });
+
+
+  }
+
   useEffect(() => {
     if (
       accessData &&
@@ -324,13 +376,21 @@ const StaffPage = () => {
           <>
             <div className="px-2">
               {row?.is_disable == 0 && (
-                <button
-                  className="delete-icon dropdown-item  w-auto mb-2"
-                  onClick={() => setDeleteStaff(row)}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
+                row.is_customer_exist == 1 ?
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => setDeleteStaff(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                  :
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => handleDeleteIsNotExistCustomer(row)}
+                  > {" "}<i className="ti-trash text-danger" />
+                  </button>
+
               )}
             </div>
             <div className="dropdown">
@@ -789,15 +849,15 @@ const StaffPage = () => {
       ) {
         // PROCESSOR
         if (Number(editStaffData.role_id) === 3) {
-            await getChangedRoleStaff(editStaffData);
+          await getChangedRoleStaff(editStaffData);
         }
         // MANAGER
         else if (Number(editStaffData.role_id) === 4) {
-            await getChangedRoleStaff(editStaffData);
+          await getChangedRoleStaff(editStaffData);
         }
         // REVIEWER
         else if (Number(editStaffData.role_id) === 6) {
-            await getChangedRoleStaff(editStaffData);
+          await getChangedRoleStaff(editStaffData);
         }
 
         setChangeRole(true);
@@ -806,7 +866,7 @@ const StaffPage = () => {
       }
     };
     // console.log("editStaffData is_customer_exist", editStaffData.is_customer_exist);
-    if([3,4,6].includes(Number(editStaffData.role_id)) && editStaffData.is_customer_exist == 1){
+    if ([3, 4, 6].includes(Number(editStaffData.role_id)) && editStaffData.is_customer_exist == 1) {
       fetchChangedRoleStaff();
     }
   }, [formik.values.role]);
@@ -814,20 +874,19 @@ const StaffPage = () => {
 
 
   const handleChangeRole = async () => {
-
     // console.log("handleChangeRole clicked");
     // console.log("editStaffData:", editStaffData);
     // console.log("selected role:", selectedStaff);
     try {
-      const req = { action: "staffRoleChangeUpdate", editStaffData: editStaffData ,updateData :formik.values,selectedStaff: selectedStaff };
+      const req = { action: "staffRoleChangeUpdate", editStaffData: editStaffData, updateData: formik.values, selectedStaff: selectedStaff };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then((res) => {
           if (res.status) {
             console.log("Changed Role Staff Data:", res);
-            setChangeRole(false); 
-            setSelectedStaff(null); 
+            setChangeRole(false);
+            setSelectedStaff(null);
             formik.resetForm();
             setEditStaffData({});
             Swal.fire({
@@ -837,7 +896,7 @@ const StaffPage = () => {
               confirmButtonText: "OK"
             });
             SetRefresh(!refresh);
-            
+
 
           }
           else {
@@ -989,7 +1048,7 @@ const StaffPage = () => {
           setEditStaff(false);
           formik.resetForm();
           setEditStaffData({});
-         
+
         }}
       >
         <Formicform
@@ -1002,7 +1061,7 @@ const StaffPage = () => {
             formik.resetForm();
             setEditStaff(false);
             setEditStaffData({});
-           
+
           }}
           additional_field={
             <div className="row mt-2 ">
@@ -1277,12 +1336,12 @@ const StaffPage = () => {
         size="ms-5"
         title="Change Role Staff"
         hideBtn={true}
-        handleClose={() => { 
-          setChangeRole(false); 
+        handleClose={() => {
+          setChangeRole(false);
           setSelectedStaff(null);
-           formik.resetForm();
-           setEditStaffData({});
-            setChangedRoleStaffData([]);
+          formik.resetForm();
+          setEditStaffData({});
+          setChangedRoleStaffData([]);
         }}
       >
         <div className="modal-body"
@@ -1337,9 +1396,9 @@ const StaffPage = () => {
               </button>
             )}
             <button
-              onClick={() => { 
-                setChangeRole(false); 
-                setSelectedStaff(null); 
+              onClick={() => {
+                setChangeRole(false);
+                setSelectedStaff(null);
                 formik.resetForm();
                 setEditStaffData({});
                 setChangedRoleStaffData([]);

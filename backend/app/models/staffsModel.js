@@ -621,10 +621,6 @@ const UpdateStaffPortfolio = async (staff) => {
 const deleteStaffUpdateStaff = async (staff) => {
   const { delete_id, update_staff ,role} = staff;
 
-
- 
- 
-
     if(role.toUpperCase() === "MANAGER"){
       await pool.execute(`UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`, [update_staff, delete_id]);
 
