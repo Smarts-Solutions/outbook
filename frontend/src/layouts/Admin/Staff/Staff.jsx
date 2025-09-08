@@ -797,9 +797,7 @@ const StaffPage = () => {
         }
         // REVIEWER
         else if (Number(editStaffData.role_id) === 6) {
-          
             await getChangedRoleStaff(editStaffData.role_id);
-         
         }
 
         setChangeRole(true);
@@ -807,7 +805,8 @@ const StaffPage = () => {
         // console.log("role value: editStaffData", editStaffData);
       }
     };
-    if([3,4,6].includes(Number(editStaffData.role_id))){
+    // console.log("editStaffData is_customer_exist", editStaffData.is_customer_exist);
+    if([3,4,6].includes(Number(editStaffData.role_id)) && editStaffData.is_customer_exist == 1){
       fetchChangedRoleStaff();
     }
   }, [formik.values.role]);
