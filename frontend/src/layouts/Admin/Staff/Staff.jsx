@@ -758,7 +758,6 @@ const StaffPage = () => {
 
   /// CHANGE ROLE GET STAFF
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
-  const [changedRoleStaffDataAPiStatus, setChangedRoleStaffDataAPiStatus] = useState(0);
   const [changeRole, setChangeRole] = useState(false);
   const getChangedRoleStaff = async (role_id) => {
     // console.log("Get Changed Role Staff:", role_id);
@@ -770,11 +769,9 @@ const StaffPage = () => {
         .then((res) => {
           if (res.status) {
             // console.log("Changed Role Staff Data:", res);
-            setChangedRoleStaffDataAPiStatus(1);
             setChangedRoleStaffData(res.data);
           }
           else {
-            setChangedRoleStaffDataAPiStatus(1);
             setChangedRoleStaffData([]);
           }
         })
@@ -792,23 +789,17 @@ const StaffPage = () => {
       ) {
         // PROCESSOR
         if (Number(editStaffData.role_id) === 3) {
-          if (changedRoleStaffDataAPiStatus === 0) {
             await getChangedRoleStaff(editStaffData.role_id);
-          }
-
         }
         // MANAGER
         else if (Number(editStaffData.role_id) === 4) {
-          if (changedRoleStaffDataAPiStatus === 0) {
             await getChangedRoleStaff(editStaffData.role_id);
-          }
-
         }
         // REVIEWER
         else if (Number(editStaffData.role_id) === 6) {
-          if (changedRoleStaffDataAPiStatus === 0) {
+          
             await getChangedRoleStaff(editStaffData.role_id);
-          }
+         
         }
 
         setChangeRole(true);
@@ -999,7 +990,7 @@ const StaffPage = () => {
           setEditStaff(false);
           formik.resetForm();
           setEditStaffData({});
-          setChangedRoleStaffDataAPiStatus(0);
+         
         }}
       >
         <Formicform
@@ -1012,7 +1003,7 @@ const StaffPage = () => {
             formik.resetForm();
             setEditStaff(false);
             setEditStaffData({});
-            setChangedRoleStaffDataAPiStatus(0);
+           
           }}
           additional_field={
             <div className="row mt-2 ">
@@ -1285,13 +1276,14 @@ const StaffPage = () => {
         isOpen={changeRole}
         backdrop="static"
         size="ms-5"
-        title="Change Staff Role"
+        title="Change Role Staff"
         hideBtn={true}
         handleClose={() => { 
           setChangeRole(false); 
           setSelectedStaff(null);
            formik.resetForm();
            setEditStaffData({});
+            setChangedRoleStaffData([]);
         }}
       >
         <div className="modal-body"
@@ -1308,7 +1300,7 @@ const StaffPage = () => {
 
             <div className="dropdown">
               <button
-                className="form-select dropdown-toggle"
+                className="btn btn-info dropdown-toggle w-100"
                 type="button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
@@ -1339,9 +1331,9 @@ const StaffPage = () => {
 
 
           {/* Buttons */}
-          <div className="d-flex gap-2 justify-content-end">
+          <div className="d-grid gap-2">
             {selectedStaff && (
-              <button onClick={handleChangeRole} className="btn btn-info">
+              <button onClick={handleChangeRole} className="btn btn-danger">
                 <i className="bi bi-trash"></i> Change Role
               </button>
             )}
@@ -1351,8 +1343,9 @@ const StaffPage = () => {
                 setSelectedStaff(null); 
                 formik.resetForm();
                 setEditStaffData({});
+                setChangedRoleStaffData([]);
               }}
-              className="btn btn-secondary w-auto"
+              className="btn btn-secondary"
             >
               <i className="bi bi-x-circle"></i> Cancel
             </button>
