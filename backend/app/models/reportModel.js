@@ -1665,17 +1665,18 @@ const capacityReport = async (Report) => {
 // Staff Work
 const getChangedRoleStaff = async (Report) => {
     const { data } = Report;
-    const { role_id } = data;
+    const { staffData } = data;
 
-    console.log("Get Changed Role Staff:", role_id);
+    // console.log("Get Changed Role Staff:", staffData);
+    // console.log("Get Changed Role Staff:", staffData.role_id);
     const query = `
         SELECT 
             staffs.id AS staff_id,
             CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_fullname
         FROM staffs
-        WHERE staffs.role_id = ? AND staffs.status = '1'
+        WHERE staffs.id != ? AND staffs.role_id = ? AND staffs.status = '1'
     `;
-    const [result] = await pool.execute(query, [role_id]);
+    const [result] = await pool.execute(query, [staffData.id,staffData.role_id]);
     return { status: true, message: 'Success.', data: result };
 }
 

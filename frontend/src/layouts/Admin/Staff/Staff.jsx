@@ -759,10 +759,10 @@ const StaffPage = () => {
   /// CHANGE ROLE GET STAFF
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
-  const getChangedRoleStaff = async (role_id) => {
+  const getChangedRoleStaff = async (staffData) => {
     // console.log("Get Changed Role Staff:", role_id);
     try {
-      const req = { action: "getChangedRoleStaff", role_id: role_id };
+      const req = { action: "getChangedRoleStaff", staffData: staffData };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
@@ -789,15 +789,15 @@ const StaffPage = () => {
       ) {
         // PROCESSOR
         if (Number(editStaffData.role_id) === 3) {
-            await getChangedRoleStaff(editStaffData.role_id);
+            await getChangedRoleStaff(editStaffData);
         }
         // MANAGER
         else if (Number(editStaffData.role_id) === 4) {
-            await getChangedRoleStaff(editStaffData.role_id);
+            await getChangedRoleStaff(editStaffData);
         }
         // REVIEWER
         else if (Number(editStaffData.role_id) === 6) {
-            await getChangedRoleStaff(editStaffData.role_id);
+            await getChangedRoleStaff(editStaffData);
         }
 
         setChangeRole(true);
