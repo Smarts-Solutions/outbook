@@ -85,7 +85,45 @@ const createStaff = async (staff) => {
 
 const getStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone_code ,staffs.phone , staffs.is_disable ,staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role ,line_managers.staff_to FROM staffs JOIN roles ON staffs.role_id = roles.id LEFT JOIN line_managers ON line_managers.staff_by = staffs.id  ORDER BY staffs.id DESC"
+    `SELECT 
+     staffs.id , 
+     staffs.role_id , 
+     staffs.first_name ,
+     staffs.last_name ,
+     staffs.email ,
+     staffs.phone_code ,
+     staffs.phone ,
+     staffs.is_disable ,
+     staffs.status ,
+     staffs.created_at ,
+     staffs.hourminute ,
+     
+     roles.role_name ,
+     roles.role ,
+     line_managers.staff_to,
+     
+     CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM assigned_jobs_staff_view WHERE assigned_jobs_staff_view.staff_id = staffs.id
+        ) 
+        OR EXISTS (
+            SELECT 1 FROM customers WHERE customers.staff_id = staffs.id OR customers.account_manager_id = staffs.id
+        )
+        OR EXISTS (
+            SELECT 1 FROM clients WHERE clients.staff_created_id = staffs.id
+        )
+        OR EXISTS (
+            SELECT 1 FROM jobs WHERE jobs.staff_created_id = staffs.id OR jobs.account_manager_id = staffs.id
+        )
+        THEN TRUE ELSE FALSE 
+     END AS is_customer_exist
+
+
+     FROM staffs 
+     JOIN roles ON staffs.role_id = roles.id 
+     LEFT JOIN line_managers ON line_managers.staff_by = staffs.id 
+     ORDER BY staffs.id DESC
+     `
   );
   return rows;
 };
