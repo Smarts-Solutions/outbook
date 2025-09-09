@@ -140,15 +140,9 @@ const MissingTimesheet = () => {
               <h3>Missing Timesheet Report</h3>
             </div>
           </div>
-        </div>
-
-        <div className='datatable-wrapper mt-minus'>
-
-
-          <div className='row'>
-            <div className='col-md-5'>
+          <div className='col-md-5'>
               <div className='tab-title'>
-                <label>Staff Data Week</label>
+                <label className='form-label'> <b>Weekly Staff Data</b></label>
                 <Select
                   id="tabSelect"
                   name="week"
@@ -169,6 +163,13 @@ const MissingTimesheet = () => {
                 />
               </div>
             </div>
+        </div>
+
+        <div className='datatable-wrapper mt-minus'>
+
+
+          <div className='row'>
+            
           </div>
 
 

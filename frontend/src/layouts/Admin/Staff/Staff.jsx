@@ -1330,87 +1330,91 @@ const StaffPage = () => {
         </div>
       </CommanModal>
 
-      <CommanModal
-        isOpen={changeRole}
-        backdrop="static"
-        size="ms-5"
-        title="Change Role Staff"
-        hideBtn={true}
-        handleClose={() => {
+     <CommanModal
+  isOpen={changeRole}
+  backdrop="static"
+  
+  title="Change Role - Staff"
+  hideBtn={true}
+  handleClose={() => {
+    setChangeRole(false);
+    setSelectedStaff(null);
+    formik.resetForm();
+    setEditStaffData({});
+    setChangedRoleStaffData([]);
+  }}
+>
+  <div className="modal-body">
+
+    {/* Select Staff to Replace */}
+    <div className="mb-4">
+      <label htmlFor="staff-select" className="form-label fw-semibold">
+        <i className="bi bi-person-fill me-2"></i> Select Staff to Replace
+      </label>
+
+      <div className="dropdown w-100">
+        <button
+          className="btn btn-outline-info rounded-pill dropdown-toggle w-100 text-start"
+          type="button"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        >
+          {selectedStaff ? selectedStaff.staff_fullname : "Choose Staff"}
+        </button>
+
+        {dropdownOpen && (
+          <ul
+            className="dropdown-menu show w-100 shadow-sm"
+            style={{ maxHeight: "220px", overflowY: "auto" }}
+          >
+            {changedRoleStaffData?.length > 0 ? (
+              changedRoleStaffData.map((staff) => (
+                <li key={staff.id}>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      setSelectedStaff(staff);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    {staff.staff_fullname}
+                  </button>
+                </li>
+              ))
+            ) : (
+              <li>
+                <span className="dropdown-item text-muted">
+                  No staff available
+                </span>
+              </li>
+            )}
+          </ul>
+        )}
+      </div>
+    </div>
+
+    {/* Action Buttons */}
+    <div className="d-flex justify-content-end gap-2">
+      {selectedStaff && (
+        <button onClick={handleChangeRole} className="btn btn-info">
+          <i className="bi bi-arrow-repeat me-1"></i> Change Role
+        </button>
+      )}
+      <button
+        onClick={() => {
           setChangeRole(false);
           setSelectedStaff(null);
           formik.resetForm();
           setEditStaffData({});
           setChangedRoleStaffData([]);
         }}
+        className="btn btn-secondary"
       >
-        <div className="modal-body"
+        <i className="bi bi-x-circle me-1"></i> Cancel
+      </button>
+    </div>
+  </div>
+</CommanModal>
 
-
-        >
-
-
-          {/* Select Staff to Replace */}
-          <div className="mb-4">
-            <label htmlFor="staff-select" className="form-label fw-semibold">
-              <i className="bi bi-person-fill"></i> Select Staff to Replace:
-            </label>
-
-            <div className="dropdown">
-              <button
-                className="btn btn-info dropdown-toggle w-100"
-                type="button"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                Choose Staff {selectedStaff ? `: ${selectedStaff.staff_fullname}` : ""}
-              </button>
-
-              {dropdownOpen && (
-                <ul
-                  className="dropdown-menu show w-100"
-                  style={{ maxHeight: "200px", overflowY: "auto" }}
-                >
-                  {
-                    changedRoleStaffData?.map((staff) => (
-                      <li key={staff.id}>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => { setSelectedStaff(staff); setDropdownOpen(!dropdownOpen); }}
-                        >
-                          {staff.staff_fullname}
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div>
-          </div>
-
-
-
-          {/* Buttons */}
-          <div className="d-grid gap-2">
-            {selectedStaff && (
-              <button onClick={handleChangeRole} className="btn btn-danger">
-                <i className="bi bi-trash"></i> Change Role
-              </button>
-            )}
-            <button
-              onClick={() => {
-                setChangeRole(false);
-                setSelectedStaff(null);
-                formik.resetForm();
-                setEditStaffData({});
-                setChangedRoleStaffData([]);
-              }}
-              className="btn btn-secondary"
-            >
-              <i className="bi bi-x-circle"></i> Cancel
-            </button>
-          </div>
-
-        </div>
-      </CommanModal>
 
     </div>
   );
