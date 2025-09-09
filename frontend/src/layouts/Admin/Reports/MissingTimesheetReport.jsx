@@ -134,14 +134,14 @@ const MissingTimesheet = () => {
   return (
     <div>
       <div className='report-data'>
-        <div className='row'>
-          <div className='col-md-7 mb-5'>
+        <div className='row mb-5'>
+          <div className='col-md-7 '>
             <div className='tab-title'>
               <h3>Missing Timesheet Report</h3>
             </div>
           </div>
           <div className='col-md-5'>
-              <div className='tab-title'>
+              <div className='tab-title mt-2'>
                 <label className='form-label'> <b>Weekly Staff Data</b></label>
                 <Select
                   id="tabSelect"
@@ -174,7 +174,7 @@ const MissingTimesheet = () => {
 
 
           <Datatable
-            filter={true}
+            filter={false}
             columns={columns}
             data={missingTimesheetReportData && missingTimesheetReportData} />
         </div>
