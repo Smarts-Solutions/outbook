@@ -2327,3 +2327,75 @@ module.exports = {
     getChangedRoleStaff,
     staffRoleChangeUpdate
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function pivotWithZeros(unpivotRows, fromDate, toDate, displayBy = "daily") {
+    // 1. Date range generate करो
+    const dates = [];
+    let cur = new Date(fromDate);
+    const end = new Date(toDate);
+
+    while (cur <= end) {
+        dates.push(getPeriodKey(displayBy, toYMD(cur))); // daily, weekly, monthly, yearly
+        // increment सही तरीके से करो
+        switch (displayBy.toLowerCase()) {
+            case "monthly":
+                cur.setMonth(cur.getMonth() + 1);
+                break;
+            case "yearly":
+                cur.setFullYear(cur.getFullYear() + 1);
+                break;
+            case "weekly":
+                cur.setDate(cur.getDate() + 7);
+                break;
+            default: // daily
+                cur.setDate(cur.getDate() + 1);
+        }
+    }
+
+    // 2. Staff-wise group बनाओ
+    const groups = {};
+    for (const r of unpivotRows) {
+        const secs = parseHoursToSeconds(r.work_hours);
+        if (!groups[r.group_value]) {
+            groups[r.group_value] = { staff_id: r.group_value, total_secs: 0, total_records: 0, data: {} };
+        }
+
+        const periodKey = getPeriodKey(displayBy, r.work_date);
+        groups[r.group_value].data[periodKey] = formatSecondsToHMM(secs);
+
+        groups[r.group_value].total_secs += secs;
+        groups[r.group_value].total_records += 1;
+    }
+
+    // 3. Final rows (missing dates → "0:00")
+    const result = [];
+    for (const staffId in groups) {
+        const g = groups[staffId];
+        const row = { staff_id: staffId };
+
+        for (const d of dates) {
+            row[d] = g.data[d] || "0:00";
+        }
+
+        row.total_hours = formatSecondsToHMM(g.total_secs);
+        row.total_records = g.total_records;
+        result.push(row);
+    }
+
+    return { columns: ["staff_id", ...dates, "total_hours", "total_records"], outRows: result };
+}
