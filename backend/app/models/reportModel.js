@@ -1803,7 +1803,7 @@ const getTimesheetReportData = async (Report) => {
         console.log("unpivotSQL", unpivotSQL);
         console.log("Query Params:", [fromDate, toDate]);
         console.log("Unpivot Rows:", rows.length);
-        // console.log("Unpivot Rows Data:", rows);
+        console.log("Unpivot Rows Data:", rows);
 
         // rows: { timesheet_id, group_value, work_date, work_hours }
         // Aggregate in JS to build dynamic pivot
@@ -1811,6 +1811,7 @@ const getTimesheetReportData = async (Report) => {
         const periodSet = new Set();
 
         for (const r of rows) {
+            
             // normalize work_date to YYYY-MM-DD string
             let workDateStr = null;
             if (r.work_date instanceof Date) {
@@ -1821,11 +1822,14 @@ const getTimesheetReportData = async (Report) => {
             } else {
                 continue;
             }
-
+       
             const gid = r.group_value == null ? 'NULL' : String(r.group_value);
             const secs = parseHoursToSeconds(r.work_hours);
 
+            // console.log("displayBy",displayBy, "workDateStr", workDateStr);
+
             const periodKey = getPeriodKey(displayBy, workDateStr);
+            // console.log("periodKey", periodKey);
             if (!periodKey) continue;
 
             periodSet.add(periodKey);
@@ -1847,7 +1851,8 @@ const getTimesheetReportData = async (Report) => {
 
         // sort periods
         const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
-
+       
+        console.log("periods", periods);
         // build rows
         const outRows = [];
         // sort group keys numerically if they look numeric
