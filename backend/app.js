@@ -74,6 +74,11 @@ app.get('/',async(req,res)=>{
  res.send("Hello Out Book")
 });
 
+app.get('/testing',async(req,res)=>{
+
+ res.send("Hello Out Book")
+});
+
 
 // app.use('/api/auth', authRoutes);
 // app.use('/api', userRoutes);
