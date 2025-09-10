@@ -288,12 +288,12 @@ function TimesheetReport() {
       const labels = e.map((opt) => opt.label);
       // console.log("Filter changed (multi): ", "groupBy", values, labels);
       setOptions([]);
-      let gropByArray = sortByReference(values)
+     let gropByArray = sortByReference(values)
 
-      let lastIndexValue = gropByArray[gropByArray.length - 1];
+     let lastIndexValue = gropByArray[gropByArray.length - 1];
       console.log("lastIndexValue ", lastIndexValue);
 
-      if (lastIndexValue == "employee") {
+     if (lastIndexValue == "employee") {
         staffData()
       }
 
@@ -313,6 +313,24 @@ function TimesheetReport() {
         GetAllTask(filters.internal_external)
       }
 
+
+      // multiple selected values ke hisab se apne functions call karna h
+      // if (values.includes("employee")) {
+      //   staffData();
+      // }
+      // if (values.includes("customer")) {
+      //   GetAllCustomer();
+      // }
+      // if (values.includes("client")) {
+      //   GetAllClient();
+      // }
+      // if (values.includes("job")) {
+      //   GetAllJobs(filters.internal_external);
+      // }
+      // if (values.includes("task")) {
+      //   GetAllTask(filters.internal_external);
+      // }
+
       setFilters((prev) => ({
         ...prev,
         fieldsToDisplay: null,
@@ -324,9 +342,44 @@ function TimesheetReport() {
     }
 
 
+
+
+
     const { key, value, label } = e.target;
-    console.log("Filter changed: ", key, value, label);
-    if (key === "fieldsToDisplay") {
+     console.log("Filter changed: ", key, value, label);
+
+    if (key === "groupBy") {
+      setOptions([])
+      //console.log("Group By changed: ", value);
+      if (value == "employee") {
+        staffData()
+      }
+
+      else if (value == "customer") {
+        GetAllCustomer()
+      }
+
+      else if (value == "client") {
+        GetAllClient()
+      }
+
+      else if (value == "job") {
+        GetAllJobs(filters.internal_external)
+      }
+
+      else if (value == "task") {
+        GetAllTask(filters.internal_external)
+      }
+
+      setFilters((prev) => ({
+        ...prev,
+        fieldsToDisplay: null,
+        fieldsToDisplayId: null,
+        [key]: value
+      }));
+
+    }
+    else if (key === "fieldsToDisplay") {
 
       //console.log("Fields to Display changed field: ", value);
 

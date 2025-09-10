@@ -1096,13 +1096,13 @@ const averageTatReport = async (Report) => {
 
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
             where.push(`jobs.status_type = 6`);
-        }else{
+        } else {
             where.push(`(assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND
             jobs.status_type = 6`);
         }
         where = `WHERE ${where.join(" AND ")}`;
 
-    
+
         const query = `
         SELECT
             CASE 
@@ -1124,7 +1124,7 @@ const averageTatReport = async (Report) => {
             ORDER BY
             jobs.created_at DESC
        `;
-       
+
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
 
@@ -1264,7 +1264,191 @@ const getTimesheetReportData = async (Report) => {
         toDate
     } = data.filters;
 
+    console.log("groupBy", data.filters);
+
     let where = [];
+
+   const baseQuery = `
+  SELECT staff_id, monday_date AS work_date, monday_hours AS work_hours FROM timesheet WHERE monday_date IS NOT NULL
+  UNION ALL
+  SELECT staff_id, tuesday_date, tuesday_hours FROM timesheet WHERE tuesday_date IS NOT NULL
+  UNION ALL
+  SELECT staff_id, wednesday_date, wednesday_hours FROM timesheet WHERE wednesday_date IS NOT NULL
+  UNION ALL
+  SELECT staff_id, thursday_date, thursday_hours FROM timesheet WHERE thursday_date IS NOT NULL
+  UNION ALL
+  SELECT staff_id, friday_date, friday_hours FROM timesheet WHERE friday_date IS NOT NULL
+  UNION ALL
+  SELECT staff_id, saturday_date, saturday_hours FROM timesheet WHERE saturday_date IS NOT NULL
+  UNION ALL
+  SELECT staff_id, sunday_date, sunday_hours FROM timesheet WHERE sunday_date IS NOT NULL
+`;
+
+function getDateRange(timePeriod) {
+  const today = new Date();
+  let start, end;
+
+  switch (timePeriod) {
+    case "this_week": {
+      const day = today.getDay();
+      const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+      start = new Date(today.getFullYear(), today.getMonth(), diff);
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      break;
+    }
+    case "this_month": {
+      start = new Date(today.getFullYear(), today.getMonth(), 1);
+      end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+    }
+    case "this_year": {
+      start = new Date(today.getFullYear(), 0, 1);
+      end = new Date(today);
+      break;
+    }
+    default:
+      start = new Date(today.getFullYear(), today.getMonth(), 1);
+      end = today;
+  }
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+// generate series of keys based on displayBy
+function generatePeriods(displayBy, start, end) {
+  const periods = [];
+  let cursor = new Date(start);
+
+  if (displayBy === "daily") {
+    while (cursor <= end) {
+      periods.push(cursor.toISOString().split("T")[0]);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  } else if (displayBy === "monthly") {
+    while (cursor <= end) {
+      periods.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`);
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+  } else if (displayBy === "yearly") {
+    while (cursor <= end) {
+      periods.push(cursor.getFullYear().toString());
+      cursor.setFullYear(cursor.getFullYear() + 1);
+    }
+  }
+  return periods;
+}
+
+async function getPivotReport(options) {
+  const {
+    displayBy = "daily",
+    timePeriod = "this_week",
+    fromDate = null,
+    toDate = null,
+  } = options;
+
+  const conn = await pool.getConnection();
+  try {
+    const { start, end } = fromDate && toDate
+      ? { start: new Date(fromDate), end: new Date(toDate) }
+      : getDateRange(timePeriod);
+
+    // dynamic period expression
+    let periodExpr;
+    switch (displayBy.toLowerCase()) {
+      case "daily": periodExpr = "DATE(work_date)"; break;
+      case "monthly": periodExpr = "DATE_FORMAT(work_date, '%Y-%m')"; break;
+      case "yearly": periodExpr = "YEAR(work_date)"; break;
+      default: periodExpr = "DATE(work_date)";
+    }
+
+    const query = `
+      SELECT 
+        staff_id,
+        ${periodExpr} AS period_key,
+        SUM(TIME_TO_SEC(STR_TO_DATE(work_hours, '%H:%i'))) AS total_secs
+      FROM (${baseQuery}) x
+      WHERE work_date BETWEEN ? AND ?
+      GROUP BY staff_id, period_key
+      ORDER BY staff_id, period_key
+    `;
+    const [rows] = await conn.query(query, [start, end]);
+
+    // make staff -> periods map
+    const groups = {};
+    for (const r of rows) {
+      const gid = r.staff_id;
+      const key = r.period_key;
+      const secs = r.total_secs || 0;
+      if (!groups[gid]) {
+        groups[gid] = { staff_id: gid, total: 0, periods: {} };
+      }
+      groups[gid].periods[key] = secs;
+      groups[gid].total += secs;
+    }
+
+    // generate complete list of periods
+    const periodList = generatePeriods(displayBy.toLowerCase(), start, end);
+
+    // formatting helper
+    function formatHours(secs) {
+      const h = Math.floor(secs / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      return `${h}:${m.toString().padStart(2, "0")}`;
+    }
+
+    // build final result
+    const result = [];
+    for (const gid in groups) {
+      const g = groups[gid];
+      const row = { staff_id: gid };
+
+      for (const p of periodList) {
+        row[p] = formatHours(g.periods[p] || 0);
+      }
+      row.total_hours = formatHours(g.total);
+      result.push(row);
+    }
+
+    return result;
+  } finally {
+    conn.release();
+  }
+}
+
+
+
+    const report = await getPivotReport({
+        displayBy,
+        timePeriod,
+        fromDate,
+        toDate
+    });
+
+
+
+console.log("report", report);
+
+ return { status: true, message: 'Success.', data: report };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /////////////////
 
 
 
@@ -1280,7 +1464,6 @@ const getTimesheetReportData = async (Report) => {
             where.push(`timesheet.staff_id = ${StaffUserId}`);
         }
     }
-
 
     if (groupBy != "employee") {
         // Get Role
@@ -1305,20 +1488,20 @@ const getTimesheetReportData = async (Report) => {
             where.push(`timesheet.client_id = ${fieldsToDisplayId}`);
         }
     }
-
     // group by job condition
     if (groupBy == "job") {
         if (fieldsToDisplayId !== null) {
             where.push(`task_type = '${internal_external}' AND timesheet.job_id = ${fieldsToDisplayId}`);
         }
     }
-
     // group by task condition
     if (groupBy == "task") {
         if (fieldsToDisplayId !== null) {
             where.push(`task_type = '${internal_external}' AND timesheet.task_id = ${fieldsToDisplayId}`);
         }
     }
+
+
 
     console.log("timePeriod", timePeriod);
     // time timePeriod
@@ -1408,7 +1591,7 @@ const getTimesheetReportData = async (Report) => {
         where = "";
     }
 
-   // console.log("where", where);
+    // console.log("where", where);
 
     const query = `
     SELECT 
@@ -1490,25 +1673,25 @@ const getTimesheetReportData = async (Report) => {
 }
 
 const missingTimesheetReport = async (Report) => {
-//   console.log("Missing Timesheet Report:", Report);
-  const { data ,StaffUserId } = Report;
+    //   console.log("Missing Timesheet Report:", Report);
+    const { data, StaffUserId } = Report;
     // Line Manager
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
-  // Get Role
-  const rows = await QueryRoleHelperFunction(StaffUserId)
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
 
-  let where = [];
-  if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
-    // Allow access to all data
-    where.push(`ts.submit_status = '0'`);
-  }else{
-    where.push(`ts.submit_status = '0' AND ts.staff_id IN (${LineManageStaffId})`);
-  }
+    let where = [];
+    if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
+        // Allow access to all data
+        where.push(`ts.submit_status = '0'`);
+    } else {
+        where.push(`ts.submit_status = '0' AND ts.staff_id IN (${LineManageStaffId})`);
+    }
 
-   where = `WHERE ${where.join(" AND ")}`;
+    where = `WHERE ${where.join(" AND ")}`;
 
-  //  Main staff query (already grouped by staff)
-  let query = `
+    //  Main staff query (already grouped by staff)
+    let query = `
     SELECT 
        CONCAT(st.first_name,' ',st.last_name) AS staff_fullname,
        st.email AS staff_email,
@@ -1519,8 +1702,8 @@ const missingTimesheetReport = async (Report) => {
     GROUP BY ts.staff_id
   `;
 
-  //  Optimized week filter query
-  let query_week_filter = `
+    //  Optimized week filter query
+    let query_week_filter = `
     SELECT  
       ts.id,
       ts.staff_id,
@@ -1547,57 +1730,57 @@ const missingTimesheetReport = async (Report) => {
 
 
 
-  // run queries in parallel
-  const [[filterDataWeekRows], [staffRows]] = await Promise.all([
-    pool.query(query_week_filter),
-    pool.query(query)
-  ]);
+    // run queries in parallel
+    const [[filterDataWeekRows], [staffRows]] = await Promise.all([
+        pool.query(query_week_filter),
+        pool.query(query)
+    ]);
 
-  // filter out "0" offsets at once
-  const groupedWeekData = filterDataWeekRows
-    .filter(item => item.valid_weekOffsets.trim() !== '0')
-    .reduce((acc, item) => {
-      const key = item.valid_weekOffsets + '_' + item.month_date;
-      if (!acc[key]) {
-        acc[key] = {
-          valid_weekOffsets: item.valid_weekOffsets,
-          month_date: item.month_date
-        };
-      }
-      return acc;
-    }, {});
-  
-  let staffsCurrentWeek;
-  if (data.filterStaffIds === "") {
-    staffsCurrentWeek = filterDataWeekRows
-      .filter(item => item.valid_weekOffsets.includes('0'))
-      .map(i => i.staff_id);
-  } else {
-    staffsCurrentWeek = filterDataWeekRows
-      .filter(item => item.valid_weekOffsets.includes(data.filterStaffIds))
-      .map(i => i.staff_id);
-  }
+    // filter out "0" offsets at once
+    const groupedWeekData = filterDataWeekRows
+        .filter(item => item.valid_weekOffsets.trim() !== '0')
+        .reduce((acc, item) => {
+            const key = item.valid_weekOffsets + '_' + item.month_date;
+            if (!acc[key]) {
+                acc[key] = {
+                    valid_weekOffsets: item.valid_weekOffsets,
+                    month_date: item.month_date
+                };
+            }
+            return acc;
+        }, {});
 
-  // only keep staff in current week
-  const filteredStaff = staffRows.filter(s => staffsCurrentWeek.includes(s.staff_id));
+    let staffsCurrentWeek;
+    if (data.filterStaffIds === "") {
+        staffsCurrentWeek = filterDataWeekRows
+            .filter(item => item.valid_weekOffsets.includes('0'))
+            .map(i => i.staff_id);
+    } else {
+        staffsCurrentWeek = filterDataWeekRows
+            .filter(item => item.valid_weekOffsets.includes(data.filterStaffIds))
+            .map(i => i.staff_id);
+    }
 
-  return { 
-    status: true, 
-    message: 'Success.', 
-    data: { 
-      result: filteredStaff, 
-      filterDataWeek: Object.values(groupedWeekData) 
-    } 
-  };
+    // only keep staff in current week
+    const filteredStaff = staffRows.filter(s => staffsCurrentWeek.includes(s.staff_id));
+
+    return {
+        status: true,
+        message: 'Success.',
+        data: {
+            result: filteredStaff,
+            filterDataWeek: Object.values(groupedWeekData)
+        }
+    };
 };
 
 const discrepancyReport = async (Report) => {
-  // console.log("Discrepancy Report:", Report);
- let {StaffUserId} = Report;
-  // Line Manager
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
-  // Get Role
-  const rows = await QueryRoleHelperFunction(StaffUserId)
+    // console.log("Discrepancy Report:", Report);
+    let { StaffUserId } = Report;
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
 
 
     let query = `
@@ -1640,14 +1823,14 @@ const discrepancyReport = async (Report) => {
     JOIN clients ON clients.id = jobs.client_id
     JOIN job_types ON jobs.job_type_id = job_types.id
     `;
-    
+
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
-       // Allow access to all data
-    }else{
-       // Restrict access to specific data
-       query += ` WHERE timesheet.staff_id IN (${LineManageStaffId})`;
+        // Allow access to all data
+    } else {
+        // Restrict access to specific data
+        query += ` WHERE timesheet.staff_id IN (${LineManageStaffId})`;
     }
-    
+
 
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
@@ -1656,7 +1839,7 @@ const discrepancyReport = async (Report) => {
 const capacityReport = async (Report) => {
     console.log("Capacity Report:", Report);
 
-    
+
     return { status: true, message: 'no make Api', data: [] };
 }
 
@@ -1676,7 +1859,7 @@ const getChangedRoleStaff = async (Report) => {
         FROM staffs
         WHERE staffs.id != ? AND staffs.role_id = ? AND staffs.status = '1'
     `;
-    const [result] = await pool.execute(query, [staffData.id,staffData.role_id]);
+    const [result] = await pool.execute(query, [staffData.id, staffData.role_id]);
     return { status: true, message: 'Success.', data: result };
 }
 
@@ -1691,47 +1874,47 @@ const staffRoleChangeUpdate = async (Report) => {
     let update_role_id = Number(updateData?.role);
     let to_staff_id = editStaffData?.id;
     let update_staff_id = selectedStaff?.staff_id;
-   
+
     let query = [];
     if (role_id !== update_role_id) {
-      query.push(`UPDATE staffs SET role_id = ${update_role_id} WHERE id = ${to_staff_id}`);
+        query.push(`UPDATE staffs SET role_id = ${update_role_id} WHERE id = ${to_staff_id}`);
     }
 
-    
-    
-    if(role_id == 3){
-       query.push(`UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`);
-    }
-    else if(role_id == 6){
-       query.push(`UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`);
-    }
-    else if(role_id == 4){
-       query.push(`UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`);
-      
-       query.push(`UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`);
 
-       query.push(`UPDATE jobs SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
-     
-       query.push(`UPDATE customers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
-       
-       query.push(`UPDATE IGNORE customer_service_account_managers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
-      
-    }
-    
 
-   /// query = query.join(";");
+    if (role_id == 3) {
+        query.push(`UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`);
+    }
+    else if (role_id == 6) {
+        query.push(`UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`);
+    }
+    else if (role_id == 4) {
+        query.push(`UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`);
+
+        query.push(`UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`);
+
+        query.push(`UPDATE jobs SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
+
+        query.push(`UPDATE customers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
+
+        query.push(`UPDATE IGNORE customer_service_account_managers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`);
+
+    }
+
+
+    /// query = query.join(";");
 
     // console.log("Staff Role Change Update Query:", query);
     try {
-        
-    await Promise.all(query.map(q => pool.execute(q)));
 
-    return { status: true, message: 'Success.', data: [] };
+        await Promise.all(query.map(q => pool.execute(q)));
+
+        return { status: true, message: 'Success.', data: [] };
     } catch (error) {
         console.error("Staff Role Change Update Error:", error);
         return { status: false, message: 'Error occurred while updating staff role.', data: [] };
     }
-    
+
 
 
 }
