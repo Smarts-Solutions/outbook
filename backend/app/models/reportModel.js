@@ -1880,6 +1880,8 @@ const getTimesheetReportData = async (Report) => {
             if (f === 'staff_id') return "CONCAT(s.first_name,' ',s.last_name)";
             if (f === 'customer_id') return "c.id";
             if (f === 'client_id') return "cl.id";
+            if (f === 'job_id') return "j.id";
+            if (f === 'task_id') return "t.id";
             return f;
         }).join(", ' - ', ");
 
@@ -1900,38 +1902,40 @@ const getTimesheetReportData = async (Report) => {
                    staff_id,
                    customer_id,
                    client_id,
+                   job_id,
+                   task_id,
                    ${groupValueSQL},
                    monday_date AS work_date,
                    monday_hours AS work_hours,
                    task_type
             FROM timesheet WHERE monday_date IS NOT NULL
             UNION ALL
-            SELECT id, staff_id, customer_id, client_id,
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
                    ${groupValueSQL},
                    tuesday_date, tuesday_hours, task_type
             FROM timesheet WHERE tuesday_date IS NOT NULL
             UNION ALL
-            SELECT id, staff_id, customer_id, client_id,
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
                    ${groupValueSQL},
                    wednesday_date, wednesday_hours, task_type
             FROM timesheet WHERE wednesday_date IS NOT NULL
             UNION ALL
-            SELECT id, staff_id, customer_id, client_id,
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
                    ${groupValueSQL},
                    thursday_date, thursday_hours, task_type
             FROM timesheet WHERE thursday_date IS NOT NULL
             UNION ALL
-            SELECT id, staff_id, customer_id, client_id,
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
                    ${groupValueSQL},
                    friday_date, friday_hours, task_type
             FROM timesheet WHERE friday_date IS NOT NULL
             UNION ALL
-            SELECT id, staff_id, customer_id, client_id,
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
                    ${groupValueSQL},
                    saturday_date, saturday_hours, task_type
             FROM timesheet WHERE saturday_date IS NOT NULL
             UNION ALL
-            SELECT id, staff_id, customer_id, client_id,
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
                    ${groupValueSQL},
                    sunday_date, sunday_hours, task_type
             FROM timesheet WHERE sunday_date IS NOT NULL
@@ -1939,6 +1943,8 @@ const getTimesheetReportData = async (Report) => {
         LEFT JOIN staffs s ON raw.staff_id = s.id
         LEFT JOIN customers c ON raw.customer_id = c.id
         LEFT JOIN clients cl ON raw.client_id = cl.id
+        LEFT JOIN jobs j ON raw.job_id = j.id
+        LEFT JOIN task t ON raw.task_id = t.id
         ${where}
         ORDER BY group_value, work_date
         `;
