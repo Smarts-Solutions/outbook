@@ -787,8 +787,8 @@ function TimesheetReport() {
           </div>
         ) : (
           <table
-            //className="table rdt_Table"
-            className="table table-bordered"
+            className="table rdt_Table"
+           // className="table table-bordered"
             // style={{
             //   fontSize: "14px",
             //   width: "100%",
@@ -804,7 +804,7 @@ function TimesheetReport() {
               >
                 {showData?.columns?.map((col, idx) => (
                   <th key={idx} 
-                  style={{  textAlign: "center" ,fontWeight: "bold"}}
+                  style={{ fontSize:"17px", textAlign: "center" ,fontWeight: "bold"}}
                   >
                     {getColumnName(col)}
                   </th>
@@ -847,7 +847,7 @@ function getColumnName(columnKey) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(columnKey)) {
     const date = new Date(columnKey); // convert string to Date
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return `${days[date.getDay()]} (hrs) ${columnKey}`; 
+    return `${columnKey} ${days[date.getDay()]} (hrs)`; 
   }
 
   // fallback from map
