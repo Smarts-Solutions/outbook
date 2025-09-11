@@ -26,8 +26,8 @@ function TimesheetReport() {
     internal_external: "2",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
-    timePeriod: "this_week",
-    displayBy: "Daily",
+    timePeriod: "this_month",
+    displayBy: "Weekly",
     fromDate: null,
     toDate: null,
   });
@@ -744,6 +744,8 @@ function TimesheetReport() {
             <option value={"Daily"}>Daily</option>
             <option value={"Weekly"}>Weekly</option>
             <option value={"Monthly"}>Monthly</option>
+            <option value={"Fortnightly"}>Fortnightly</option>
+            <option value={"Quarterly"}>Quarterly</option>
             <option value={"Yearly"}>Yearly</option>
           </select>
         </div>

@@ -1801,20 +1801,58 @@ function getPeriodKey(displayBy, dateStr) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
 
+    // switch ((displayBy || 'daily').toLowerCase()) {
+    //     case 'daily': return `${y}-${mm}-${dd}`;           // 2025-09-08
+    //     case 'monthly': return `${y}-${mm}`;               // 2025-09
+    //     case 'yearly': return `${y}`;                      // 2025
+    //     case 'weekly': {
+    //         // week label = week-start (Monday) date
+    //         const jsDay = (d.getDay() + 6) % 7; // Monday=0
+    //         const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - jsDay);
+    //         const my = monday.getFullYear();
+    //         const mmm = String(monday.getMonth() + 1).padStart(2, '0');
+    //         const mdd = String(monday.getDate()).padStart(2, '0');
+    //         return `${my}-${mmm}-${mdd}`;
+    //     }
+    //     default: return `${y}-${mm}-${dd}`;
+    // }
     switch ((displayBy || 'daily').toLowerCase()) {
-        case 'daily': return `${y}-${mm}-${dd}`;           // 2025-09-08
-        case 'monthly': return `${y}-${mm}`;               // 2025-09
-        case 'yearly': return `${y}`;                      // 2025
-        case 'weekly': {
-            // week label = week-start (Monday) date
-            const jsDay = (d.getDay() + 6) % 7; // Monday=0
-            const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - jsDay);
-            const my = monday.getFullYear();
-            const mmm = String(monday.getMonth() + 1).padStart(2, '0');
-            const mdd = String(monday.getDate()).padStart(2, '0');
-            return `${my}-${mmm}-${mdd}`;
+        case 'daily':
+            return `${y}-${mm}-${dd}`;  // 2025-09-08
+
+        case 'monthly': {
+            const monthName = d.toLocaleString('default', { month: 'short' }); // Jan, Feb, Mar...
+            return `${monthName} ${y}`; // Sept 2025
         }
-        default: return `${y}-${mm}-${dd}`;
+
+        case 'quarterly': {
+            const quarter = Math.floor((d.getMonth()) / 3) + 1; // Q1..Q4
+            return `${y}-Q${quarter}`;   // 2025-Q3
+        }
+
+        case 'yearly':
+            return `${y}`;
+        // 2025
+        case 'weekly': {
+            // Week ending = Sunday date
+            const jsDay = d.getDay(); // Sunday = 0
+            const sunday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (7 - jsDay) % 7);
+            const day = sunday.getDate();
+            const month = sunday.toLocaleString('default', { month: 'short' }); // Sep
+            const year = sunday.getFullYear();
+            return `week ending ${day} ${month.toLowerCase()} ${year}`;
+        }
+
+        case 'fortnightly': {
+            const day = d.getDate();
+            const monthName = d.toLocaleString('default', { month: 'short' }); // Sep
+            const year = d.getFullYear();
+            const half = (day <= 15) ? "H1" : "H2";
+            return `${monthName} ${year} ${half}`;
+        }
+
+        default:
+            return `${y}-${mm}-${dd}`;
     }
 }
 
@@ -1833,7 +1871,7 @@ const getTimesheetReportData = async (Report) => {
 
     console.log("groupBy", groupBy);
     console.log("fieldsToDisplayId", fieldsToDisplayId);
-    if(groupBy.length == 0){
+    if (groupBy.length == 0) {
         return { status: false, message: `empty groupBy field`, data: [] };
     }
     //    groupBy = ['staff_id','customer_id','client_id'];
@@ -1866,7 +1904,7 @@ const getTimesheetReportData = async (Report) => {
 
         let lastIndexValue = groupBy[groupBy.length - 1];
         if (!["", null, undefined].includes(fieldsToDisplayId)) {
-           
+
             if (lastIndexValue == "staff_id") {
                 where.push(`raw.staff_id = ${fieldsToDisplayId}`);
             } else if (lastIndexValue == "customer_id") {
@@ -1936,7 +1974,7 @@ const getTimesheetReportData = async (Report) => {
                  CASE 
                     WHEN raw.task_type = '1' THEN sub_internal.name
                     WHEN raw.task_type = '2' THEN t.name
-                END AS task_name`;                      
+                END AS task_name`;
 
         // Unpivot query
         const unpivotSQL = `
@@ -2023,7 +2061,7 @@ const getTimesheetReportData = async (Report) => {
         for (const r of rows) {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
-             
+
             const gid = r.group_value || 'NULL';
             const label = r.group_label;
             const staffName = r.staff_name;
@@ -2086,10 +2124,10 @@ const getTimesheetReportData = async (Report) => {
             // row.total_records = g.timesheetIds.size;
             outRows.push(row);
         }
-       
-       
+
+
         // const columns = ['group', ...periods, 'total_hours', 'total_records'];
-        const columns = [...groupBy ,...periods, 'total_hours'];
+        const columns = [...groupBy, ...periods, 'total_hours'];
         console.log("columns", columns);
 
         return {
