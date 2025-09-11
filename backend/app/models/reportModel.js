@@ -1832,6 +1832,7 @@ const getTimesheetReportData = async (Report) => {
     } = data.filters;
 
     console.log("groupBy", groupBy);
+    console.log("fieldsToDisplayId", fieldsToDisplayId);
     //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
     const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
@@ -1859,6 +1860,25 @@ const getTimesheetReportData = async (Report) => {
         if (internal_external) {
             where.push(`raw.task_type = '${internal_external}'`);
         }
+
+        let lastIndexValue = groupBy[groupBy.length - 1];
+        if (!["", null, undefined].includes(fieldsToDisplayId)) {
+           
+            if (lastIndexValue == "staff_id") {
+                where.push(`raw.staff_id = ${fieldsToDisplayId}`);
+            } else if (lastIndexValue == "customer_id") {
+                where.push(`raw.customer_id = ${fieldsToDisplayId}`);
+            } else if (lastIndexValue == "client_id") {
+                where.push(`raw.client_id = ${fieldsToDisplayId}`);
+            } else if (lastIndexValue == "job_id") {
+                where.push(`raw.job_id = ${fieldsToDisplayId}`);
+            } else if (lastIndexValue == "task_id") {
+                where.push(`raw.task_id = ${fieldsToDisplayId}`);
+            }
+        }
+
+
+
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : '';
 
