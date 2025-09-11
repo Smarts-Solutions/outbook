@@ -23,7 +23,7 @@ function TimesheetReport() {
 
   const [filters, setFilters] = useState({
     groupBy: ["staff_id"],
-    internal_external: "1",
+    internal_external: "2",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
     timePeriod: "this_week",
@@ -291,7 +291,7 @@ function TimesheetReport() {
       let gropByArray = sortByReference(values)
 
       let lastIndexValue = gropByArray[gropByArray.length - 1];
-      console.log("lastIndexValue ", lastIndexValue);
+    //  console.log("lastIndexValue ", lastIndexValue);
 
       if (lastIndexValue == "staff_id") {
         staffData()
@@ -346,11 +346,29 @@ function TimesheetReport() {
 
     }
     else if (key === "internal_external") {
+      
+      
+
       setFilters((prev) => ({
         ...prev,
         [key]: value
       }));
-      let lastIndexValue = filters.groupBy[filters.groupBy.length - 1];
+
+      let remainingPart = filters?.groupBy
+      if(value == "1"){
+        setOptions([])
+        let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
+        setFilters((prev) => ({
+        ...prev,
+        [key]: value,
+        groupBy: remainingPart,
+        fieldsToDisplay: null,
+        fieldsToDisplayId: null
+       }));
+      }
+
+
+      let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == 'job_id') {
         setOptions([])
         console.log("Internal/External changed, calling GetAllJobs with: ", value);
@@ -446,13 +464,24 @@ function TimesheetReport() {
     staffData();
   }
 
+  // const optionGroupBy = [
+  //   { value: "staff_id", label: "Staff" },
+  //   { value: "customer_id", label: "Customer" },
+  //   { value: "client_id", label: "Client" },
+  //   { value: "job_id", label: "Job" },
+  //   { value: "task_id", label: "Task" }
+  // ];
+
   const optionGroupBy = [
     { value: "staff_id", label: "Staff" },
-    { value: "customer_id", label: "Customer" },
-    { value: "client_id", label: "Client" },
+    ...(filters?.internal_external == '2' ? [{ value: "customer_id", label: "Customer" }] : []),
+    ...(filters?.internal_external == '2' ? [{ value: "client_id", label: "Client" }] : []),
     { value: "job_id", label: "Job" },
     { value: "task_id", label: "Task" }
   ];
+
+
+
   const orderMap = {};
   for (let i = 0; i < optionGroupBy.length; i++) {
     orderMap[optionGroupBy[i].value] = i;
