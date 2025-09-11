@@ -789,17 +789,23 @@ function TimesheetReport() {
           <table
             //className="table rdt_Table"
             className="table table-bordered"
-            style={{
-              fontSize: "14px",
-              width: "100%",
-              overflowX: "auto",
-              display: "block",
-            }}
+            // style={{
+            //   fontSize: "14px",
+            //   width: "100%",
+            //   overflowX: "auto",
+            //   display: "block",
+            // }}
           >
-            <thead className="rdt_TableHead">
-              <tr className="rdt_TableHeadRow">
+            <thead 
+           // className="rdt_TableHead"
+            >
+              <tr 
+              className="rdt_TableHeadRow"
+              >
                 {showData?.columns?.map((col, idx) => (
-                  <th key={idx} style={{ padding: "8px", textAlign: "left" }}>
+                  <th key={idx} 
+                  style={{  textAlign: "center" ,fontWeight: "bold"}}
+                  >
                     {getColumnName(col)}
                   </th>
                 ))}
@@ -809,7 +815,7 @@ function TimesheetReport() {
               {showData?.rows?.map((row, rowIdx) => (
                 <tr key={rowIdx}>
                   {showData?.columns?.map((col, colIdx) => (
-                    <td key={colIdx} style={{ padding: "8px" }}>
+                    <td key={colIdx} style={{ padding: "8px" , textAlign: "center" }}>
                       {row[col] !== undefined ? row[col] : ""}
                     </td>
                   ))}
