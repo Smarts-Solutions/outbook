@@ -32,7 +32,10 @@ function TimesheetReport() {
     toDate: null,
   });
 
-  // console.log("staffDetails ", staffDetails);
+ let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
+
+
+   console.log("lastGroupValue ", lastGroupValue);
 
 
 
@@ -452,7 +455,7 @@ function TimesheetReport() {
   const resetFunction = () => {
     setFilters({
       groupBy: ["staff_id"],
-      internal_external: "1",
+      internal_external: "2",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
       timePeriod: "this_week",
@@ -479,6 +482,14 @@ function TimesheetReport() {
     { value: "job_id", label: "Job" },
     { value: "task_id", label: "Task" }
   ];
+
+  const labels = {
+  staff_id: "Staff",
+  customer_id: "Customer",
+  client_id: "Client",
+  job_id: "Job",
+  task_id: "Task"
+};
 
 
 
@@ -586,16 +597,12 @@ function TimesheetReport() {
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">
             {
-              'Select '
+              `Select ${labels[lastGroupValue] || "..." }`
             }
-
-            {/* {filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)
-            } */}
 
             {
-              filters.groupBy == "job" || filters.groupBy == "task" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
+              lastGroupValue == "job_id" || lastGroupValue == "task_id" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
             }
-
 
           </label>
 
