@@ -1887,17 +1887,17 @@ const getTimesheetReportData = async (Report) => {
             //console.log("g", g);
 
             for (const p of periods) {
-                 row[p] = (g.periodSeconds[p] || 0);
+                 row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
             }
              
-            row.total_hours = g.totalSeconds;
+            row.total_hours = parseFloat(g?.totalSeconds)?.toFixed(2);
            // row.total_records = g.timesheetIds.size;
 
             outRows.push(row);
         }
 
 
-
+        
         //columns: groupField, ...periods, total_hours, total_records
         const columns = [groupField, ...periods, 'total_hours', 'total_records'];
         console.log("columns", columns);
@@ -1913,19 +1913,6 @@ const getTimesheetReportData = async (Report) => {
         return res.status(500).json({ error: err.message || 'server error' });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    return { status: true, message: 'Success.', data: "" };
 
 }
 
