@@ -817,7 +817,7 @@ function TimesheetReport() {
           //   </tbody>
           // </table>
           <table
-            // className="table rdt_Table"
+            //className="table rdt_Table"
             className="table table-bordered"
             style={{
               fontSize: "14px",
@@ -859,6 +859,10 @@ function TimesheetReport() {
 function getColumnName(columnKey) {
   const dayMap = {
     staff_id: "Staff",
+    customer_id: "Customer",
+    client_id: "Client",
+    job_id: "Job",
+    task_id: "Task",
     total_hours: "Total Hours",
     total_records: "Total Records",
   };

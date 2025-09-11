@@ -1907,6 +1907,33 @@ const getTimesheetReportData = async (Report) => {
         }).join(", ' - ', ");
 
         const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
+        const staffName = `CONCAT(s.first_name,' ',s.last_name) AS staff_name`;
+        const customerName = `c.trading_name AS customer_name`;
+        const clientName = `CONCAT(
+                            'cli_', 
+                            SUBSTRING(c.trading_name, 1, 3), '_',
+                            SUBSTRING(cl.trading_name, 1, 3), '_',
+                            SUBSTRING(cl.client_code, 1, 15)
+                        ) AS client_name`;
+        const jobName = `
+                 CASE 
+                    WHEN raw.task_type = '1' THEN internal.name
+                    WHEN raw.task_type = '2' THEN 
+
+                    CONCAT(
+                        SUBSTRING(c.trading_name, 1, 3), '_',
+                        SUBSTRING(cl.trading_name, 1, 3), '_',
+                        SUBSTRING(job_types.type, 1, 4), '_',
+                        SUBSTRING(j.job_id, 1, 15)
+                        )
+
+
+                END AS job_name`;
+        const taskName = `
+                 CASE 
+                    WHEN raw.task_type = '1' THEN sub_internal.name
+                    WHEN raw.task_type = '2' THEN t.name
+                END AS task_name`;                      
 
         // Unpivot query
         const unpivotSQL = `
@@ -1917,7 +1944,12 @@ const getTimesheetReportData = async (Report) => {
             work_hours,
             group_value,
             task_type,
-            ${groupLabelFinal}
+            ${groupLabelFinal},
+            ${staffName},
+            ${customerName},
+            ${clientName},
+            ${jobName},
+            ${taskName}
         FROM (
             SELECT id AS timesheet_id,
                    staff_id,
@@ -1967,6 +1999,7 @@ const getTimesheetReportData = async (Report) => {
 
         LEFT JOIN internal ON (task_type = '1' AND raw.job_id = internal.id)
         LEFT JOIN jobs j ON (task_type = '2' AND raw.job_id = j.id)
+        LEFT JOIN job_types ON j.job_type_id = job_types.id 
 
         LEFT JOIN sub_internal ON (task_type = '1' AND raw.task_id = sub_internal.id)
         LEFT JOIN task t ON (task_type = '2' AND raw.task_id = t.id)
@@ -1987,9 +2020,14 @@ const getTimesheetReportData = async (Report) => {
         for (const r of rows) {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
-
+             
             const gid = r.group_value || 'NULL';
             const label = r.group_label;
+            const staffName = r.staff_name;
+            const customerName = r.customer_name;
+            const clientName = r.client_name;
+            const jobName = r.job_name;
+            const taskName = r.task_name;
 
             const secs = r.work_hours;
             const periodKey = getPeriodKey(displayBy, workDateStr);
@@ -2001,6 +2039,11 @@ const getTimesheetReportData = async (Report) => {
                 groups[gid] = {
                     group_value: gid,
                     group_label: label,
+                    staff_name: staffName,
+                    customer_name: customerName,
+                    client_name: clientName,
+                    job_name: jobName,
+                    task_name: taskName,
                     totalSeconds: 0,
                     timesheetIds: new Set(),
                     periodSeconds: {}
@@ -2024,7 +2067,13 @@ const getTimesheetReportData = async (Report) => {
         for (const gid of groupKeys) {
             const g = groups[gid];
             const row = {};
-            row['group'] = g.group_label;  // final readable label
+            console.log("g", g);
+
+            row['staff_id'] = g.staff_name;  // final readable label
+            row['customer_id'] = g.customer_name;
+            row['client_id'] = g.client_name;
+            row['job_id'] = g.job_name;
+            row['task_id'] = g.task_name;
 
             for (const p of periods) {
                 row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
@@ -2034,9 +2083,11 @@ const getTimesheetReportData = async (Report) => {
             // row.total_records = g.timesheetIds.size;
             outRows.push(row);
         }
-
+       
+       
         // const columns = ['group', ...periods, 'total_hours', 'total_records'];
-        const columns = ['group', ...periods, 'total_hours'];
+        const columns = [...groupBy ,...periods, 'total_hours'];
+        console.log("columns", columns);
 
         return {
             status: true,
