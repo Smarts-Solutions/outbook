@@ -22,7 +22,7 @@ function TimesheetReport() {
   console.log("showData ", showData);
 
   const [filters, setFilters] = useState({
-    groupBy: "employee",
+    groupBy: ["staff_id"],
     internal_external: "1",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
@@ -293,23 +293,23 @@ function TimesheetReport() {
       let lastIndexValue = gropByArray[gropByArray.length - 1];
       console.log("lastIndexValue ", lastIndexValue);
 
-      if (lastIndexValue == "employee") {
+      if (lastIndexValue == "staff_id") {
         staffData()
       }
 
-      else if (lastIndexValue == "customer") {
+      else if (lastIndexValue == "customer_id") {
         GetAllCustomer()
       }
 
-      else if (lastIndexValue == "client") {
+      else if (lastIndexValue == "client_id") {
         GetAllClient()
       }
 
-      else if (lastIndexValue == "job") {
+      else if (lastIndexValue == "job_id") {
         GetAllJobs(filters.internal_external)
       }
 
-      else if (lastIndexValue == "task") {
+      else if (lastIndexValue == "task_id") {
         GetAllTask(filters.internal_external)
       }
 
@@ -351,11 +351,11 @@ function TimesheetReport() {
         [key]: value
       }));
       let lastIndexValue = filters.groupBy[filters.groupBy.length - 1];
-      if (lastIndexValue == 'job') {
+      if (lastIndexValue == 'job_id') {
         setOptions([])
         console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value)
-      } else if (lastIndexValue == 'task') {
+      } else if (lastIndexValue == 'task_id') {
         setOptions([])
         GetAllTask(value)
       }
@@ -423,7 +423,7 @@ function TimesheetReport() {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy]);
 
 
 
@@ -433,7 +433,7 @@ function TimesheetReport() {
 
   const resetFunction = () => {
     setFilters({
-      groupBy: "employee",
+      groupBy: ["staff_id"],
       internal_external: "1",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
@@ -447,11 +447,11 @@ function TimesheetReport() {
   }
 
   const optionGroupBy = [
-    { value: "employee", label: "Staff" },
-    { value: "customer", label: "Customer" },
-    { value: "client", label: "Client" },
-    { value: "job", label: "Job" },
-    { value: "task", label: "Task" }
+    { value: "staff_id", label: "Staff" },
+    { value: "customer_id", label: "Customer" },
+    { value: "client_id", label: "Client" },
+    { value: "job_id", label: "Job" },
+    { value: "task_id", label: "Task" }
   ];
   const orderMap = {};
   for (let i = 0; i < optionGroupBy.length; i++) {
@@ -739,7 +739,7 @@ function TimesheetReport() {
       {/* Filtered Data Display */}
       <div className='datatable-container'>
         {/* <h6>Filtered Data:</h6> */}
-        {showData.length === 0 ? (
+        {showData?.rows?.length === 0 ? (
           <div className='text-center'>
             <img
               src={noDataImage}
@@ -788,7 +788,8 @@ function TimesheetReport() {
           //   </tbody>
           // </table>
           <table
-            className="table rdt_Table"
+            // className="table rdt_Table"
+            className="table table-bordered"
             style={{
               fontSize: "14px",
               width: "100%",
@@ -800,7 +801,7 @@ function TimesheetReport() {
               <tr className="rdt_TableHeadRow">
                 {showData?.columns?.map((col, idx) => (
                   <th key={idx} style={{ padding: "8px", textAlign: "left" }}>
-                    {col}
+                    {getColumnName(col)}
                   </th>
                 ))}
               </tr>
@@ -823,9 +824,25 @@ function TimesheetReport() {
     </div>
   );
 
+}
 
 
+function getColumnName(columnKey) {
+  const dayMap = {
+    staff_id: "Staff",
+    total_hours: "Total Hours",
+    total_records: "Total Records",
+  };
 
+  // ✅ check if columnKey is a date string (yyyy-mm-dd format)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(columnKey)) {
+    const date = new Date(columnKey); // convert string to Date
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return `${days[date.getDay()]} (hrs) ${columnKey}`; 
+  }
+
+  // fallback from map
+  return dayMap[columnKey] || columnKey;
 }
 
 export default TimesheetReport;

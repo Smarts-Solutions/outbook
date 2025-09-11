@@ -1250,7 +1250,7 @@ const getInternalTasks = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
-// const getTimesheetReportData = async (Report) => {
+// const getTimesheetReportData1 = async (Report) => {
 //     const { StaffUserId, data } = Report;
 //     // console.log("Report in getTimesheetReportData", data.filters);
 //     let {
@@ -1267,247 +1267,6 @@ const getInternalTasks = async (Report) => {
 //     console.log("groupBy", data.filters);
 
 //     let where = [];
-
-//     const baseQuery = `
-//   SELECT staff_id, monday_date AS work_date, monday_hours AS work_hours FROM timesheet WHERE monday_date IS NOT NULL
-//   UNION ALL
-//   SELECT staff_id, tuesday_date, tuesday_hours FROM timesheet WHERE tuesday_date IS NOT NULL
-//   UNION ALL
-//   SELECT staff_id, wednesday_date, wednesday_hours FROM timesheet WHERE wednesday_date IS NOT NULL
-//   UNION ALL
-//   SELECT staff_id, thursday_date, thursday_hours FROM timesheet WHERE thursday_date IS NOT NULL
-//   UNION ALL
-//   SELECT staff_id, friday_date, friday_hours FROM timesheet WHERE friday_date IS NOT NULL
-//   UNION ALL
-//   SELECT staff_id, saturday_date, saturday_hours FROM timesheet WHERE saturday_date IS NOT NULL
-//   UNION ALL
-//   SELECT staff_id, sunday_date, sunday_hours FROM timesheet WHERE sunday_date IS NOT NULL
-// `;
-
-//     function getDateRange(timePeriod) {
-//         const today = new Date();
-//         let start, end;
-
-//         switch (timePeriod) {
-//             case "this_week": {
-//                 const day = today.getDay();
-//                 const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Monday start
-//                 start = new Date(today.getFullYear(), today.getMonth(), diff);
-//                 end = new Date(start);
-//                 end.setDate(start.getDate() + 6);
-//                 break;
-//             }
-//             case 'last_week': {
-//                 const day = today.getDay();
-//                 const diff = today.getDate() - day - 6;
-//                 start = new Date(today.getFullYear(), today.getMonth(), diff);
-//                 end = new Date(start);
-//                 end.setDate(start.getDate() + 6);
-//                 break;
-//             }
-//             case "this_month": {
-//                 start = new Date(today.getFullYear(), today.getMonth(), 1);
-//                 end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-//                 break;
-//             }
-//             case "last_month": {
-//                 start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-//                 end = new Date(today.getFullYear(), today.getMonth(), 0);
-//                 break;
-//             }
-//             case 'this_quarter': {
-//                 const currentMonth = today.getMonth();
-//                 const quarterStartMonth = currentMonth - (currentMonth % 3);
-//                 start = new Date(today.getFullYear(), quarterStartMonth, 1);
-//                 end = new Date(today.getFullYear(), quarterStartMonth + 3, 0);
-//                 break;
-//             }
-//             case 'last_quarter': {
-//                 const currentMonth = today.getMonth();
-//                 const quarterStartMonth = currentMonth - (currentMonth % 3) - 3;
-//                 start = new Date(today.getFullYear(), quarterStartMonth, 1);
-//                 end = new Date(today.getFullYear(), quarterStartMonth + 3, 0);
-//                 break;
-//             }
-//             case "this_year": {
-//                 start = new Date(today.getFullYear(), 0, 1);
-//                 end = new Date(today);
-//                 break;
-//             }
-//             case "last_year": {
-//                 start = new Date(today.getFullYear() - 1, 0, 1);
-//                 end = new Date(today.getFullYear() - 1, 11, 31);
-//                 break;
-//             }
-//             default:
-//                 start = new Date(today.getFullYear(), today.getMonth(), 1);
-//                 end = today;
-//         }
-//         start.setHours(0, 0, 0, 0);
-//         end.setHours(23, 59, 59, 999);
-//         return { start, end };
-//     }
-
-//     // generate series of keys based on displayBy
-//     function generatePeriods(displayBy, start, end) {
-//         const periods = [];
-//         let cursor = new Date(start);
-
-//         if (displayBy === "daily") {
-//             while (cursor <= end) {
-//                 periods.push(cursor.toISOString().split("T")[0]);
-//                 cursor.setDate(cursor.getDate() + 1);
-//             }
-//         }
-//         else if (displayBy === "monthly") {
-//             while (cursor <= end) {
-//                 periods.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`);
-//                 cursor.setMonth(cursor.getMonth() + 1);
-//             }
-//         } else if (displayBy === "yearly") {
-//             while (cursor <= end) {
-//                 periods.push(cursor.getFullYear().toString());
-//                 cursor.setFullYear(cursor.getFullYear() + 1);
-//             }
-//         }
-//         return periods;
-//     }
-
-//     async function getPivotReport(options) {
-//         const {
-//             displayBy = "daily",
-//             timePeriod = "this_week",
-//             fromDate = null,
-//             toDate = null,
-//         } = options;
-
-//         const conn = await pool.getConnection();
-//         try {
-//             const { start, end } = fromDate && toDate
-//                 ? { start: new Date(fromDate), end: new Date(toDate) }
-//                 : getDateRange(timePeriod);
-
-//             // dynamic period expression
-//             let periodExpr;
-//             switch (displayBy.toLowerCase()) {
-//                 case "daily": periodExpr = "DATE(work_date)"; break;
-//                 case "monthly": periodExpr = "DATE_FORMAT(work_date, '%Y-%m')"; break;
-//                 case "yearly": periodExpr = "YEAR(work_date)"; break;
-//                 default: periodExpr = "DATE(work_date)";
-//             }
-
-//             // const query = `
-//             //   SELECT 
-//             //     staff_id,
-//             //     ${periodExpr} AS period_key,
-//             //     SUM(TIME_TO_SEC(STR_TO_DATE(work_hours, '%H:%i'))) AS total_secs
-//             //   FROM (${baseQuery}) x
-//             //   WHERE work_date BETWEEN ? AND ?
-//             //   GROUP BY staff_id, period_key
-//             //   ORDER BY staff_id, period_key
-//             // `;
-//             const query = `
-//                     SELECT 
-//                         staff_id,
-//                         ${periodExpr} AS period_key,
-//                         SUM(
-//                         TIME_TO_SEC(
-//                             MAKETIME(
-//                             SUBSTRING_INDEX(work_hours, ':', 1),
-//                             SUBSTRING_INDEX(work_hours, ':', -1),
-//                             0
-//                             )
-//                         )
-//                         ) AS total_secs
-//                     FROM (${baseQuery}) x
-//                     WHERE work_date BETWEEN ? AND ?
-//                     GROUP BY staff_id, period_key
-//                     ORDER BY staff_id, period_key
-//                     `;
-//             const [rows] = await conn.query(query, [start, end]);
-
-//             console.log("SQL Query:", query);
-//             console.log("Query Params:", [start, end]);
-//             console.log("Query Result Rows:", rows);
-//             // make staff -> periods map
-//             const groups = {};
-//             for (const r of rows) {
-//                 const gid = r.staff_id;
-//                 const key = r.period_key;
-//                 const secs = r.total_secs || 0;
-//                 if (!groups[gid]) {
-//                     groups[gid] = { staff_id: gid, total: 0, periods: {} };
-//                 }
-//                 groups[gid].periods[key] = secs;
-//                 groups[gid].total += secs;
-//             }
-
-//             // generate complete list of periods
-//             const periodList = generatePeriods(displayBy.toLowerCase(), start, end);
-
-//             // formatting helper
-//             function formatHours(secs) {
-//                 const h = Math.floor(secs / 3600);
-//                 const m = Math.floor((secs % 3600) / 60);
-//                 return `${h}:${m.toString().padStart(2, "0")}`;
-//             }
-
-//             // build final result
-//             const result = [];
-//             for (const gid in groups) {
-//                 const g = groups[gid];
-//                 const row = { staff_id: gid };
-
-//                 for (const p of periodList) {
-//                     row[p] = formatHours(g.periods[p] || 0);
-//                 }
-//                 row.total_hours = formatHours(g.total);
-//                 result.push(row);
-//             }
-
-//             return result;
-//         } finally {
-//             conn.release();
-//         }
-//     }
-
-//     console.log("displayBy", displayBy);
-//     console.log("timePeriod", timePeriod);
-//     console.log("fromDate", fromDate);
-//     console.log("toDate", toDate);
-
-//     const report = await getPivotReport({
-//         displayBy,
-//         timePeriod,
-//         fromDate,
-//         toDate
-//     });
-
-
-
-//     console.log("report", report);
-
-//     return { status: true, message: 'Success.', data: report };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//     /////////////////
-
-
 
 //     // group by employee condition
 //     if (groupBy == "employee") {
@@ -1729,7 +1488,11 @@ const getInternalTasks = async (Report) => {
 //     return { status: true, message: 'Success.', data: result };
 // }
 
-const getTimesheetReportData = async (Report) => {
+
+
+
+
+const getTimesheetReportData2 = async (Report) => {
     const { StaffUserId, data } = Report;
     // console.log("Report in getTimesheetReportData", data.filters);
     var {
@@ -1753,7 +1516,6 @@ const getTimesheetReportData = async (Report) => {
 
         if (!ALLOWED_GROUP_FIELDS.includes(groupField)) {
             return { status: false, message: 'Invalid groupBy field', data: [] };
-
         }
 
         // compute date range
@@ -1770,46 +1532,51 @@ const getTimesheetReportData = async (Report) => {
 
         console.log("fromDate -- ", fromDate);
         console.log("toDate - -- ", toDate);
+        console.log("toDate - -- ", toDate);
+
+        let where = [];
+        where.push(`work_date BETWEEN ? AND ? AND raw.task_type = '${internal_external}'`);
+
+        // if (internal_external == "1" || internal_external == "2") {
+        //     where.push(`task_type = '${internal_external}'`);
+        // }
+
+        if (where.length > 0) {
+            where = `WHERE ${where.join(" AND ")}`;
+        } else {
+            where = "";
+        }
 
         // UNPIVOT query (get each day as a separate row)
         // Note: groupField is validated above thus safe to interpolate
         const unpivotSQL = `
-      SELECT timesheet_id, group_value, work_date, work_hours ,CONCAT(staffs.first_name,' ',staffs.last_name ) AS staff_name
+      SELECT 
+      timesheet_id, 
+      group_value, 
+      work_date, 
+      work_hours ,
+      CONCAT(staffs.first_name,' ',staffs.last_name ) AS staff_name,
+      task_type
 
       FROM (
-        SELECT id AS timesheet_id, ${groupField} AS group_value, monday_date AS work_date, monday_hours AS work_hours FROM timesheet WHERE monday_date IS NOT NULL
+        SELECT id AS timesheet_id, ${groupField} AS group_value, monday_date AS work_date, monday_hours AS work_hours ,task_type FROM timesheet WHERE monday_date IS NOT NULL
         UNION ALL
-        SELECT id, ${groupField}, tuesday_date, tuesday_hours FROM timesheet WHERE tuesday_date IS NOT NULL
+        SELECT id, ${groupField}, tuesday_date, tuesday_hours,task_type FROM timesheet WHERE tuesday_date IS NOT NULL
         UNION ALL
-        SELECT id, ${groupField}, wednesday_date, wednesday_hours FROM timesheet WHERE wednesday_date IS NOT NULL
+        SELECT id, ${groupField}, wednesday_date, wednesday_hours,task_type FROM timesheet WHERE wednesday_date IS NOT NULL
         UNION ALL
-        SELECT id, ${groupField}, thursday_date, thursday_hours FROM timesheet WHERE thursday_date IS NOT NULL
+        SELECT id, ${groupField}, thursday_date, thursday_hours ,task_type FROM timesheet WHERE thursday_date IS NOT NULL
         UNION ALL
-        SELECT id, ${groupField}, friday_date, friday_hours FROM timesheet WHERE friday_date IS NOT NULL
+        SELECT id, ${groupField}, friday_date, friday_hours ,task_type FROM timesheet WHERE friday_date IS NOT NULL
         UNION ALL
-        SELECT id, ${groupField}, saturday_date, saturday_hours FROM timesheet WHERE saturday_date IS NOT NULL
+        SELECT id, ${groupField},saturday_date, saturday_hours ,task_type FROM timesheet WHERE saturday_date IS NOT NULL
         UNION ALL
-        SELECT id, ${groupField}, sunday_date, sunday_hours FROM timesheet WHERE sunday_date IS NOT NULL
+        SELECT id, ${groupField}, sunday_date, sunday_hours ,task_type FROM timesheet WHERE sunday_date IS NOT NULL
       ) AS raw
         JOIN staffs ON (raw.group_value = staffs.id AND '${groupField}' = 'staff_id')
-      WHERE work_date BETWEEN ? AND ?
+        ${where}
       ORDER BY group_value, work_date;
     `;
-
-        // const unpivotSQL = `
-        // SELECT id AS timesheet_id, ${groupField} AS group_value, monday_date AS work_date, monday_hours AS work_hours FROM timesheet
-        // UNION ALL
-        // SELECT id, ${groupField}, tuesday_date, tuesday_hours FROM timesheet
-        // UNION ALL
-        // SELECT id, ${groupField}, wednesday_date, wednesday_hours FROM timesheet
-        // UNION ALL
-        // SELECT id, ${groupField}, thursday_date, thursday_hours FROM timesheet
-        // UNION ALL
-        // SELECT id, ${groupField}, friday_date, friday_hours FROM timesheet
-        // UNION ALL
-        // SELECT id, ${groupField}, saturday_date, saturday_hours FROM timesheet
-        // UNION ALL
-        // SELECT id, ${groupField}, sunday_date, sunday_hours FROM timesheet`
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
@@ -1817,7 +1584,7 @@ const getTimesheetReportData = async (Report) => {
         console.log("unpivotSQL", unpivotSQL);
         console.log("Query Params:", [fromDate, toDate]);
         console.log("Unpivot Rows:", rows.length);
-       console.log("Unpivot Rows Data:", rows);
+        //  console.log("Unpivot Rows Data:", rows);
         // Aggregate in JS to build dynamic pivot
         const groups = {};         // group_value -> { timesheetIds:Set, totalSeconds, periodSeconds: {period:secs} }
         const periodSet = new Set();
@@ -1833,10 +1600,10 @@ const getTimesheetReportData = async (Report) => {
             } else {
                 continue;
             }
-            console.log("r", r);
+            // console.log("r", r);
             const gid = r.group_value == null ? 'NULL' : String(r.group_value);
             const staff_name = r.staff_name;
-           // const secs = parseHoursToSeconds(r.work_hours);
+            // const secs = parseHoursToSeconds(r.work_hours);
             const secs = r.work_hours;
             // console.log("displayBy",displayBy, "workDateStr", workDateStr);
             const periodKey = getPeriodKey(displayBy, workDateStr);
@@ -1859,13 +1626,13 @@ const getTimesheetReportData = async (Report) => {
             g.timesheetIds.add(r.timesheet_id);
             g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
 
-           
+
         }
 
         // sort periods
         const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
 
-       // console.log("periods", periods);
+        // console.log("periods", periods);
         // build rows
         const outRows = [];
         // sort group keys numerically if they look numeric
@@ -1876,38 +1643,40 @@ const getTimesheetReportData = async (Report) => {
         });
 
         for (const gid of groupKeys) {
-             console.log("Processing group:", gid);
+            // console.log("Processing group:", gid);
             const g = groups[gid];
-            console.log("Group data:", g);
+            // console.log("Group data:", g);
             const row = {};
             // group value typed similarly as DB: number if numeric else null/string
             // row[groupField] = (gid === 'NULL') ? null : (!Number.isNaN(Number(gid)) ? Number(gid) : gid);
-             row[groupField] = g.staff_name;
+            row[groupField] = g.staff_name;
 
             //console.log("g", g);
 
             for (const p of periods) {
-                 row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
+                row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
             }
-             
+
             row.total_hours = parseFloat(g?.totalSeconds)?.toFixed(2);
-           // row.total_records = g.timesheetIds.size;
+            row.total_records = g.timesheetIds.size;
 
             outRows.push(row);
         }
 
 
-        
+
         //columns: groupField, ...periods, total_hours, total_records
         const columns = [groupField, ...periods, 'total_hours', 'total_records'];
         console.log("columns", columns);
-        console.log("outRows", outRows);
-      //  return { status: true, message: 'Success.', data: [] };
-        return { status: true, message: 'Success.', data: {
-            meta: { fromDate, toDate, groupField, displayBy, timePeriod },
-            columns,
-            rows: outRows
-        }};
+        //console.log("outRows", outRows);
+        //  return { status: true, message: 'Success.', data: [] };
+        return {
+            status: true, message: 'Success.', data: {
+                meta: { fromDate, toDate, groupField, displayBy, timePeriod },
+                columns,
+                rows: outRows
+            }
+        };
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: err.message || 'server error' });
@@ -1917,15 +1686,9 @@ const getTimesheetReportData = async (Report) => {
 }
 
 
-
-
-
-
-
-
 /** get date range for timePeriod */
 async function getDateRange(timePeriod, fromDateParam, toDateParam) {
-   
+
     const today = new Date();
     // normalize to local date start
     const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -2054,6 +1817,226 @@ function getPeriodKey(displayBy, dateStr) {
         default: return `${y}-${mm}-${dd}`;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+const getTimesheetReportData = async (Report) => {
+    const { StaffUserId, data } = Report;
+    var {
+        groupBy = ['staff_id'],   // now array
+        internal_external,
+        fieldsToDisplay,
+        fieldsToDisplayId,
+        timePeriod,
+        displayBy,
+        fromDate,
+        toDate
+    } = data.filters;
+
+    console.log("groupBy", groupBy);
+//    groupBy = ['staff_id','customer_id','client_id'];
+    // allowed fields
+    const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
+
+    // validate groupBy
+    if (!Array.isArray(groupBy)) groupBy = [groupBy];
+    for (const g of groupBy) {
+        if (!ALLOWED_GROUP_FIELDS.includes(g)) {
+            return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
+        }
+    }
+
+    try {
+        // compute date range
+        let range;
+        try {
+            range = await getDateRange(timePeriod, fromDate, toDate);
+        } catch (err) {
+            return { status: false, message: err.message || 'Invalid date range', data: [] };
+        }
+
+        var { fromDate, toDate } = range;
+
+        let where = [`work_date BETWEEN ? AND ?`];
+        if (internal_external) {
+            where.push(`raw.task_type = '${internal_external}'`);
+        }
+
+        where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+
+        // Build group_value for SQL
+        const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
+
+        // Build readable group_label
+        const groupLabelSQL = groupBy.map(f => {
+            if (f === 'staff_id') return "CONCAT(s.first_name,' ',s.last_name)";
+            if (f === 'customer_id') return "c.id";
+            if (f === 'client_id') return "cl.id";
+            return f;
+        }).join(", ' - ', ");
+
+        const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
+
+        // Unpivot query
+        const unpivotSQL = `
+        SELECT
+            timesheet_id,
+            group_value,
+            work_date,
+            work_hours,
+            group_value,
+            task_type,
+            ${groupLabelFinal}
+        FROM (
+            SELECT id AS timesheet_id,
+                   staff_id,
+                   customer_id,
+                   client_id,
+                   ${groupValueSQL},
+                   monday_date AS work_date,
+                   monday_hours AS work_hours,
+                   task_type
+            FROM timesheet WHERE monday_date IS NOT NULL
+            UNION ALL
+            SELECT id, staff_id, customer_id, client_id,
+                   ${groupValueSQL},
+                   tuesday_date, tuesday_hours, task_type
+            FROM timesheet WHERE tuesday_date IS NOT NULL
+            UNION ALL
+            SELECT id, staff_id, customer_id, client_id,
+                   ${groupValueSQL},
+                   wednesday_date, wednesday_hours, task_type
+            FROM timesheet WHERE wednesday_date IS NOT NULL
+            UNION ALL
+            SELECT id, staff_id, customer_id, client_id,
+                   ${groupValueSQL},
+                   thursday_date, thursday_hours, task_type
+            FROM timesheet WHERE thursday_date IS NOT NULL
+            UNION ALL
+            SELECT id, staff_id, customer_id, client_id,
+                   ${groupValueSQL},
+                   friday_date, friday_hours, task_type
+            FROM timesheet WHERE friday_date IS NOT NULL
+            UNION ALL
+            SELECT id, staff_id, customer_id, client_id,
+                   ${groupValueSQL},
+                   saturday_date, saturday_hours, task_type
+            FROM timesheet WHERE saturday_date IS NOT NULL
+            UNION ALL
+            SELECT id, staff_id, customer_id, client_id,
+                   ${groupValueSQL},
+                   sunday_date, sunday_hours, task_type
+            FROM timesheet WHERE sunday_date IS NOT NULL
+        ) AS raw
+        LEFT JOIN staffs s ON raw.staff_id = s.id
+        LEFT JOIN customers c ON raw.customer_id = c.id
+        LEFT JOIN clients cl ON raw.client_id = cl.id
+        ${where}
+        ORDER BY group_value, work_date
+        `;
+
+      //  console.log("unpivotSQL", unpivotSQL);
+
+        const conn = await pool.getConnection();
+        const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
+        conn.release();
+
+        // Aggregate JS
+        const groups = {};
+        const periodSet = new Set();
+
+        for (const r of rows) {
+            let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0,10);
+            if (!workDateStr) continue;
+
+            const gid = r.group_value || 'NULL';
+            const label = r.group_label;
+
+            const secs = r.work_hours;
+            const periodKey = getPeriodKey(displayBy, workDateStr);
+            if (!periodKey) continue;
+
+            periodSet.add(periodKey);
+
+            if (!groups[gid]) {
+                groups[gid] = {
+                    group_value: gid,
+                    group_label: label,
+                    totalSeconds: 0,
+                    timesheetIds: new Set(),
+                    periodSeconds: {}
+                };
+            }
+
+            const g = groups[gid];
+            g.totalSeconds += parseFloat(secs?.replace(':', '.'));
+            g.timesheetIds.add(r.timesheet_id);
+            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
+        }
+
+        const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+        const outRows = [];
+        const groupKeys = Object.keys(groups).sort((a,b) => {
+            const na = Number(a), nb = Number(b);
+            if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+            return a.localeCompare(b);
+        });
+
+        for (const gid of groupKeys) {
+            const g = groups[gid];
+            const row = {};
+            row['group'] = g.group_label;  // final readable label
+
+            for (const p of periods) {
+                row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
+            }
+
+            row.total_hours = parseFloat(g.totalSeconds)?.toFixed(2);
+            row.total_records = g.timesheetIds.size;
+            outRows.push(row);
+        }
+
+        const columns = ['group', ...periods, 'total_hours', 'total_records'];
+
+        return {
+            status: true,
+            message: 'Success.',
+            data: {
+                meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
+                columns,
+                rows: outRows
+            }
+        };
+
+    } catch (err) {
+        console.error(err);
+        return { status: false, message: err.message || 'server error', data: [] };
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const missingTimesheetReport = async (Report) => {
     //   console.log("Missing Timesheet Report:", Report);
@@ -2353,59 +2336,4 @@ module.exports = {
 
 
 
-function pivotWithZeros(unpivotRows, fromDate, toDate, displayBy = "daily") {
-    // 1. Date range generate करो
-    const dates = [];
-    let cur = new Date(fromDate);
-    const end = new Date(toDate);
 
-    while (cur <= end) {
-        dates.push(getPeriodKey(displayBy, toYMD(cur))); // daily, weekly, monthly, yearly
-        // increment सही तरीके से करो
-        switch (displayBy.toLowerCase()) {
-            case "monthly":
-                cur.setMonth(cur.getMonth() + 1);
-                break;
-            case "yearly":
-                cur.setFullYear(cur.getFullYear() + 1);
-                break;
-            case "weekly":
-                cur.setDate(cur.getDate() + 7);
-                break;
-            default: // daily
-                cur.setDate(cur.getDate() + 1);
-        }
-    }
-
-    // 2. Staff-wise group बनाओ
-    const groups = {};
-    for (const r of unpivotRows) {
-        const secs = parseHoursToSeconds(r.work_hours);
-        if (!groups[r.group_value]) {
-            groups[r.group_value] = { staff_id: r.group_value, total_secs: 0, total_records: 0, data: {} };
-        }
-
-        const periodKey = getPeriodKey(displayBy, r.work_date);
-        groups[r.group_value].data[periodKey] = formatSecondsToHMM(secs);
-
-        groups[r.group_value].total_secs += secs;
-        groups[r.group_value].total_records += 1;
-    }
-
-    // 3. Final rows (missing dates → "0:00")
-    const result = [];
-    for (const staffId in groups) {
-        const g = groups[staffId];
-        const row = { staff_id: staffId };
-
-        for (const d of dates) {
-            row[d] = g.data[d] || "0:00";
-        }
-
-        row.total_hours = formatSecondsToHMM(g.total_secs);
-        row.total_records = g.total_records;
-        result.push(row);
-    }
-
-    return { columns: ["staff_id", ...dates, "total_hours", "total_records"], outRows: result };
-}
