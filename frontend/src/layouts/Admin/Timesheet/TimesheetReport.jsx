@@ -19,7 +19,7 @@ function TimesheetReport() {
   const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
 
-  // console.log("showData ", showData);
+  console.log("showData ", showData);
 
   const [filters, setFilters] = useState({
     groupBy: "employee",
@@ -749,44 +749,75 @@ function TimesheetReport() {
             <p className='fs-16'>There are no records to display</p>
           </div>
         ) : (
-          <table className="table rdt_Table" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
-            <thead className=' rdt_TableHead'>
-              <tr className='rdt_TableHeadRow'>
-                <th className='rdt_TableCol border-bottom-0 '>Staff</th>
-                <th className='rdt_TableCol border-bottom-0'>Internal/External</th>
-                <th className='rdt_TableCol border-bottom-0'>Customer</th>
-                <th className='rdt_TableCol border-bottom-0'>Client</th>
-                <th className='rdt_TableCol border-bottom-0'>Job</th>
-                <th className='rdt_TableCol border-bottom-0'>Task</th>
-                <th className='rdt_TableCol border-bottom-0'>Mon (hrs)</th>
-                <th className='rdt_TableCol border-bottom-0'>Tue (hrs)</th>
-                <th className='rdt_TableCol border-bottom-0'>Wed (hrs)</th>
-                <th className='rdt_TableCol border-bottom-0'>Thu (hrs)</th>
-                <th className='rdt_TableCol border-bottom-0'>Fri (hrs)</th>
-                <th className='rdt_TableCol border-bottom-0'>Date</th>
+          // <table className="table rdt_Table" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
+          //   <thead className=' rdt_TableHead'>
+          //     <tr className='rdt_TableHeadRow'>
+          //       <th className='rdt_TableCol border-bottom-0 '>Staff</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Internal/External</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Customer</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Client</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Job</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Task</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Mon (hrs)</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Tue (hrs)</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Wed (hrs)</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Thu (hrs)</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Fri (hrs)</th>
+          //       <th className='rdt_TableCol border-bottom-0'>Date</th>
+          //     </tr>
+          //   </thead>
+          //   <tbody>
+          //     {showData && showData?.map((item, idx) => (
+          //       <tr key={idx}>
+          //         {/* <td>{`${item.staff_fullname} (${item.staff_email})`}</td> */}
+          //         <td>{`${item.staff_fullname}`}</td>
+          //         <td>{item.internal_external}</td>
+          //         <td>{item.customer_name ?? '-'}</td>
+          //         <td>{item.client_code ?? '-'}</td>
+          //         <td>{item.job_name}</td>
+          //         <td>{item.task_name}</td>
+          //         <td>{item.monday_hours || "-"}</td>
+          //         <td>{item.tuesday_hours || "-"}</td>
+          //         <td>{item.wednesday_hours || "-"}</td>
+          //         <td>{item.thursday_hours || "-"}</td>
+          //         <td>{item.friday_hours || "-"}</td>
+          //         <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>
+
+          //       </tr>
+          //     ))}
+          //   </tbody>
+          // </table>
+          <table
+            className="table rdt_Table"
+            style={{
+              fontSize: "14px",
+              width: "100%",
+              overflowX: "auto",
+              display: "block",
+            }}
+          >
+            <thead className="rdt_TableHead">
+              <tr className="rdt_TableHeadRow">
+                {showData?.columns?.map((col, idx) => (
+                  <th key={idx} style={{ padding: "8px", textAlign: "left" }}>
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {showData && showData?.map((item, idx) => (
-                <tr key={idx}>
-                  {/* <td>{`${item.staff_fullname} (${item.staff_email})`}</td> */}
-                  <td>{`${item.staff_fullname}`}</td>
-                  <td>{item.internal_external}</td>
-                  <td>{item.customer_name ?? '-'}</td>
-                  <td>{item.client_code ?? '-'}</td>
-                  <td>{item.job_name}</td>
-                  <td>{item.task_name}</td>
-                  <td>{item.monday_hours || "-"}</td>
-                  <td>{item.tuesday_hours || "-"}</td>
-                  <td>{item.wednesday_hours || "-"}</td>
-                  <td>{item.thursday_hours || "-"}</td>
-                  <td>{item.friday_hours || "-"}</td>
-                  <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>
-
+              {showData?.rows?.map((row, rowIdx) => (
+                <tr key={rowIdx}>
+                  {showData?.columns?.map((col, colIdx) => (
+                    <td key={colIdx} style={{ padding: "8px" }}>
+                      {row[col] !== undefined ? row[col] : ""}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
           </table>
+
         )}
       </div>
     </div>

@@ -1745,7 +1745,7 @@ const getTimesheetReportData = async (Report) => {
     console.log("groupBy", data.filters);
     const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
 
-  
+
 
     try {
         groupBy = 'staff_id';
@@ -1753,15 +1753,12 @@ const getTimesheetReportData = async (Report) => {
 
         if (!ALLOWED_GROUP_FIELDS.includes(groupField)) {
             return { status: false, message: 'Invalid groupBy field', data: [] };
-            
+
         }
 
         // compute date range
         let range;
         try {
-            console.log("timePeriod --", timePeriod);
-            console.log("timePeriod --", timePeriod);
-            console.log("timePeriod --", timePeriod);
             range = await getDateRange(timePeriod, fromDate, toDate);
             console.log("range -- ", range);
         } catch (err) {
@@ -1777,7 +1774,8 @@ const getTimesheetReportData = async (Report) => {
         // UNPIVOT query (get each day as a separate row)
         // Note: groupField is validated above thus safe to interpolate
         const unpivotSQL = `
-      SELECT timesheet_id, group_value, work_date, work_hours
+      SELECT timesheet_id, group_value, work_date, work_hours ,CONCAT(staffs.first_name,' ',staffs.last_name ) AS staff_name
+
       FROM (
         SELECT id AS timesheet_id, ${groupField} AS group_value, monday_date AS work_date, monday_hours AS work_hours FROM timesheet WHERE monday_date IS NOT NULL
         UNION ALL
@@ -1793,9 +1791,25 @@ const getTimesheetReportData = async (Report) => {
         UNION ALL
         SELECT id, ${groupField}, sunday_date, sunday_hours FROM timesheet WHERE sunday_date IS NOT NULL
       ) AS raw
+        JOIN staffs ON (raw.group_value = staffs.id AND '${groupField}' = 'staff_id')
       WHERE work_date BETWEEN ? AND ?
       ORDER BY group_value, work_date;
     `;
+
+        // const unpivotSQL = `
+        // SELECT id AS timesheet_id, ${groupField} AS group_value, monday_date AS work_date, monday_hours AS work_hours FROM timesheet
+        // UNION ALL
+        // SELECT id, ${groupField}, tuesday_date, tuesday_hours FROM timesheet
+        // UNION ALL
+        // SELECT id, ${groupField}, wednesday_date, wednesday_hours FROM timesheet
+        // UNION ALL
+        // SELECT id, ${groupField}, thursday_date, thursday_hours FROM timesheet
+        // UNION ALL
+        // SELECT id, ${groupField}, friday_date, friday_hours FROM timesheet
+        // UNION ALL
+        // SELECT id, ${groupField}, saturday_date, saturday_hours FROM timesheet
+        // UNION ALL
+        // SELECT id, ${groupField}, sunday_date, sunday_hours FROM timesheet`
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
@@ -1803,15 +1817,12 @@ const getTimesheetReportData = async (Report) => {
         console.log("unpivotSQL", unpivotSQL);
         console.log("Query Params:", [fromDate, toDate]);
         console.log("Unpivot Rows:", rows.length);
-        console.log("Unpivot Rows Data:", rows);
-
-        // rows: { timesheet_id, group_value, work_date, work_hours }
+       console.log("Unpivot Rows Data:", rows);
         // Aggregate in JS to build dynamic pivot
         const groups = {};         // group_value -> { timesheetIds:Set, totalSeconds, periodSeconds: {period:secs} }
         const periodSet = new Set();
 
         for (const r of rows) {
-            
             // normalize work_date to YYYY-MM-DD string
             let workDateStr = null;
             if (r.work_date instanceof Date) {
@@ -1822,12 +1833,12 @@ const getTimesheetReportData = async (Report) => {
             } else {
                 continue;
             }
-       
+            console.log("r", r);
             const gid = r.group_value == null ? 'NULL' : String(r.group_value);
-            const secs = parseHoursToSeconds(r.work_hours);
-
+            const staff_name = r.staff_name;
+           // const secs = parseHoursToSeconds(r.work_hours);
+            const secs = r.work_hours;
             // console.log("displayBy",displayBy, "workDateStr", workDateStr);
-
             const periodKey = getPeriodKey(displayBy, workDateStr);
             // console.log("periodKey", periodKey);
             if (!periodKey) continue;
@@ -1837,22 +1848,24 @@ const getTimesheetReportData = async (Report) => {
             if (!groups[gid]) {
                 groups[gid] = {
                     group_value: gid,
+                    staff_name: staff_name,
                     totalSeconds: 0,
                     timesheetIds: new Set(),
                     periodSeconds: {}
                 };
             }
-
             const g = groups[gid];
-            g.totalSeconds += secs;
+            g.totalSeconds += parseFloat(secs?.replace(':', '.'));
             g.timesheetIds.add(r.timesheet_id);
-            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + secs;
+            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
+
+           
         }
 
         // sort periods
         const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
-       
-        console.log("periods", periods);
+
+       // console.log("periods", periods);
         // build rows
         const outRows = [];
         // sort group keys numerically if they look numeric
@@ -1863,38 +1876,38 @@ const getTimesheetReportData = async (Report) => {
         });
 
         for (const gid of groupKeys) {
+             console.log("Processing group:", gid);
             const g = groups[gid];
+            console.log("Group data:", g);
             const row = {};
             // group value typed similarly as DB: number if numeric else null/string
-            row[groupField] = (gid === 'NULL') ? null : (!Number.isNaN(Number(gid)) ? Number(gid) : gid);
+            // row[groupField] = (gid === 'NULL') ? null : (!Number.isNaN(Number(gid)) ? Number(gid) : gid);
+             row[groupField] = g.staff_name;
+
+            //console.log("g", g);
 
             for (const p of periods) {
-                row[p] = formatSecondsToHMM(g.periodSeconds[p] || 0);
+                 row[p] = (g.periodSeconds[p] || 0);
             }
-
-            row.total_hours = formatSecondsToHMM(g.totalSeconds);
-            row.total_records = g.timesheetIds.size;
+             
+            row.total_hours = g.totalSeconds;
+           // row.total_records = g.timesheetIds.size;
 
             outRows.push(row);
         }
 
-        
 
-       //columns: groupField, ...periods, total_hours, total_records
+
+        //columns: groupField, ...periods, total_hours, total_records
         const columns = [groupField, ...periods, 'total_hours', 'total_records'];
-        
-
-        
-       
         console.log("columns", columns);
         console.log("outRows", outRows);
-        
-        return { status: true, message: 'Success.', data: [] };
-        return res.json({
+      //  return { status: true, message: 'Success.', data: [] };
+        return { status: true, message: 'Success.', data: {
             meta: { fromDate, toDate, groupField, displayBy, timePeriod },
             columns,
             rows: outRows
-        });
+        }};
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: err.message || 'server error' });
@@ -1915,140 +1928,145 @@ const getTimesheetReportData = async (Report) => {
     return { status: true, message: 'Success.', data: "" };
 
 }
+
+
+
+
+
+
+
+
+/** get date range for timePeriod */
+async function getDateRange(timePeriod, fromDateParam, toDateParam) {
    
-/** Pivot rows into columns and fill missing dates with "0:00" */
+    const today = new Date();
+    // normalize to local date start
+    const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const copy = (d) => new Date(d.getTime());
 
- /** get date range for timePeriod */
-    async function getDateRange(timePeriod, fromDateParam, toDateParam) {
-        console.log("timePeriod -- lllllllllll", timePeriod);
-        const today = new Date();
-        // normalize to local date start
-        const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const copy = (d) => new Date(d.getTime());
+    let start, end;
 
-        let start, end;
-      
-        switch ((timePeriod || '').toLowerCase()) {
-            case 'this_week': {
-                // week start Monday
-                const cur = copy(today);
-                const day = (cur.getDay() + 6) % 7; // Monday=0
-                start = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
-                end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
-                break;
-            }
-            case 'last_week': {
-                const cur = copy(today);
-                const day = (cur.getDay() + 6) % 7;
-                const startThisWeek = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
-                start = new Date(startThisWeek.getFullYear(), startThisWeek.getMonth(), startThisWeek.getDate() - 7);
-                end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
-                break;
-            }
-            case 'this_month': {
-                start = new Date(today.getFullYear(), today.getMonth(), 1);
-                end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                break;
-            }
-            case 'last_month': {
-                start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                end = new Date(today.getFullYear(), today.getMonth(), 0);
-                break;
-            }
-            case 'this_year': {
-                start = new Date(today.getFullYear(), 0, 1);
-                end = new Date(today.getFullYear(), 11, 31);
-                break;
-            }
-            case 'last_year': {
-                start = new Date(today.getFullYear() - 1, 0, 1);
-                end = new Date(today.getFullYear() - 1, 11, 31);
-                break;
-            }
-            case 'custom': {
-                if (!fromDateParam || !toDateParam) throw new Error('custom requires fromDate and toDate');
-                return { fromDate: fromDateParam, toDate: toDateParam };
-            }
-            case 'all':
-            case '':
-            case undefined:
-                // default last 30 days
-                end = startOfDay(today);
-                start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
-                break;
-            default:
-                // fallback last 30 days
-                end = startOfDay(today);
-                start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
+    switch ((timePeriod || '').toLowerCase()) {
+        case 'this_week': {
+            // week start Monday
+            const cur = copy(today);
+            const day = (cur.getDay() + 6) % 7; // Monday=0
+            start = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
+            end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+            break;
         }
-       console.log("start", start);
-       console.log("end", end);
-        return { fromDate: toYMD(start), toDate: toYMD(end) };
-    }
-      /** Helper: format Date -> YYYY-MM-DD */
-    function toYMD(date) {
-        const d = new Date(date);
-        if (Number.isNaN(d.getTime())) return null;
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    }
-    /** parse "H:MM" or "HH:MM" into seconds (accepts minute >= 60) */
-    function parseHoursToSeconds(str) {
-        if (!str && str !== 0) return 0;
-        const s = String(str).trim();
-        // match "H:MM" or "H.MM" or "H" or "H.MM.SS" not expected but keep simple
-        const m = s.match(/^(\d+)\s*[:.]\s*(\d+)$/);
-        if (m) {
-            const h = parseInt(m[1], 10) || 0;
-            const mm = parseInt(m[2], 10) || 0;
-            return h * 3600 + mm * 60;
+        case 'last_week': {
+            const cur = copy(today);
+            const day = (cur.getDay() + 6) % 7;
+            const startThisWeek = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
+            start = new Date(startThisWeek.getFullYear(), startThisWeek.getMonth(), startThisWeek.getDate() - 7);
+            end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+            break;
         }
-        // if just number treat as hours (e.g., "2")
-        const n = parseFloat(s);
-        if (!Number.isNaN(n)) {
-            const h = Math.floor(n);
-            const frac = n - h;
-            return Math.round(h * 3600 + frac * 3600);
+        case 'this_month': {
+            start = new Date(today.getFullYear(), today.getMonth(), 1);
+            end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            break;
         }
-        return 0;
-    }
-
-    /** format seconds -> H:MM (no seconds, more compact) */
-    function formatSecondsToHMM(sec) {
-        const total = Math.max(0, Math.floor(sec || 0));
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        return `${h}:${String(m).padStart(2, '0')}`;
-    }
-
-    /** get period key label for a date string (YYYY-MM-DD) */
-    function getPeriodKey(displayBy, dateStr) {
-        if (!dateStr) return null;
-        // ensure dateStr is YYYY-MM-DD
-        const d = new Date(dateStr + 'T00:00:00'); // safe parsing
-        if (Number.isNaN(d.getTime())) return null;
-        const y = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-
-        switch ((displayBy || 'daily').toLowerCase()) {
-            case 'daily': return `${y}-${mm}-${dd}`;           // 2025-09-08
-            case 'monthly': return `${y}-${mm}`;               // 2025-09
-            case 'yearly': return `${y}`;                      // 2025
-            case 'weekly': {
-                // week label = week-start (Monday) date
-                const jsDay = (d.getDay() + 6) % 7; // Monday=0
-                const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - jsDay);
-                const my = monday.getFullYear();
-                const mmm = String(monday.getMonth() + 1).padStart(2, '0');
-                const mdd = String(monday.getDate()).padStart(2, '0');
-                return `${my}-${mmm}-${mdd}`;
-            }
-            default: return `${y}-${mm}-${dd}`;
+        case 'last_month': {
+            start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            end = new Date(today.getFullYear(), today.getMonth(), 0);
+            break;
         }
+        case 'this_year': {
+            start = new Date(today.getFullYear(), 0, 1);
+            end = new Date(today.getFullYear(), 11, 31);
+            break;
+        }
+        case 'last_year': {
+            start = new Date(today.getFullYear() - 1, 0, 1);
+            end = new Date(today.getFullYear() - 1, 11, 31);
+            break;
+        }
+        case 'custom': {
+            if (!fromDateParam || !toDateParam) throw new Error('custom requires fromDate and toDate');
+            return { fromDate: fromDateParam, toDate: toDateParam };
+        }
+        case 'all':
+        case '':
+        case undefined:
+            // default last 30 days
+            end = startOfDay(today);
+            start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
+            break;
+        default:
+            // fallback last 30 days
+            end = startOfDay(today);
+            start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
     }
+    console.log("start", start);
+    console.log("end", end);
+    return { fromDate: toYMD(start), toDate: toYMD(end) };
+}
+/** Helper: format Date -> YYYY-MM-DD */
+function toYMD(date) {
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return null;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+/** parse "H:MM" or "HH:MM" into seconds (accepts minute >= 60) */
+function parseHoursToSeconds(str) {
+    if (!str && str !== 0) return 0;
+    const s = String(str).trim();
+    // match "H:MM" or "H.MM" or "H" or "H.MM.SS" not expected but keep simple
+    const m = s.match(/^(\d+)\s*[:.]\s*(\d+)$/);
+    if (m) {
+        const h = parseInt(m[1], 10) || 0;
+        const mm = parseInt(m[2], 10) || 0;
+        return h * 3600 + mm * 60;
+    }
+    // if just number treat as hours (e.g., "2")
+    const n = parseFloat(s);
+    if (!Number.isNaN(n)) {
+        const h = Math.floor(n);
+        const frac = n - h;
+        return Math.round(h * 3600 + frac * 3600);
+    }
+    return 0;
+}
+
+/** format seconds -> H:MM (no seconds, more compact) */
+function formatSecondsToHMM(sec) {
+    const total = Math.max(0, Math.floor(sec || 0));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    return `${h}:${String(m).padStart(2, '0')}`;
+}
+
+/** get period key label for a date string (YYYY-MM-DD) */
+function getPeriodKey(displayBy, dateStr) {
+    if (!dateStr) return null;
+    // ensure dateStr is YYYY-MM-DD
+    const d = new Date(dateStr + 'T00:00:00'); // safe parsing
+    if (Number.isNaN(d.getTime())) return null;
+    const y = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    switch ((displayBy || 'daily').toLowerCase()) {
+        case 'daily': return `${y}-${mm}-${dd}`;           // 2025-09-08
+        case 'monthly': return `${y}-${mm}`;               // 2025-09
+        case 'yearly': return `${y}`;                      // 2025
+        case 'weekly': {
+            // week label = week-start (Monday) date
+            const jsDay = (d.getDay() + 6) % 7; // Monday=0
+            const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - jsDay);
+            const my = monday.getFullYear();
+            const mmm = String(monday.getMonth() + 1).padStart(2, '0');
+            const mdd = String(monday.getDate()).padStart(2, '0');
+            return `${my}-${mmm}-${mdd}`;
+        }
+        default: return `${y}-${mm}-${dd}`;
+    }
+}
 
 const missingTimesheetReport = async (Report) => {
     //   console.log("Missing Timesheet Report:", Report);
