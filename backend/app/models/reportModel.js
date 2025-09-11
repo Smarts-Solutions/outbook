@@ -1833,6 +1833,9 @@ const getTimesheetReportData = async (Report) => {
 
     console.log("groupBy", groupBy);
     console.log("fieldsToDisplayId", fieldsToDisplayId);
+    if(groupBy.length == 0){
+        return { status: false, message: `empty groupBy field`, data: [] };
+    }
     //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
     const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
