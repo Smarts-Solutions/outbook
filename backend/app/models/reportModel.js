@@ -1818,16 +1818,6 @@ function getPeriodKey(displayBy, dateStr) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
     var {
@@ -1842,7 +1832,7 @@ const getTimesheetReportData = async (Report) => {
     } = data.filters;
 
     console.log("groupBy", groupBy);
-//    groupBy = ['staff_id','customer_id','client_id'];
+    //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
     const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
 
@@ -1880,8 +1870,19 @@ const getTimesheetReportData = async (Report) => {
             if (f === 'staff_id') return "CONCAT(s.first_name,' ',s.last_name)";
             if (f === 'customer_id') return "c.id";
             if (f === 'client_id') return "cl.id";
-            if (f === 'job_id') return "j.id";
-            if (f === 'task_id') return "t.id";
+            if (f === 'job_id') {
+                return `CASE 
+                    WHEN raw.task_type = '1' THEN internal.name
+                    WHEN raw.task_type = '2' THEN j.job_id
+                END`;
+            }
+
+            if (f === 'task_id') {
+                return `CASE 
+                    WHEN raw.task_type = '1' THEN sub_internal.name
+                    WHEN raw.task_type = '2' THEN t.name
+                END`;
+            }
             return f;
         }).join(", ' - ', ");
 
@@ -1943,13 +1944,17 @@ const getTimesheetReportData = async (Report) => {
         LEFT JOIN staffs s ON raw.staff_id = s.id
         LEFT JOIN customers c ON raw.customer_id = c.id
         LEFT JOIN clients cl ON raw.client_id = cl.id
-        LEFT JOIN jobs j ON raw.job_id = j.id
-        LEFT JOIN task t ON raw.task_id = t.id
+
+        LEFT JOIN internal ON (task_type = '1' AND raw.job_id = internal.id)
+        LEFT JOIN jobs j ON (task_type = '2' AND raw.job_id = j.id)
+
+        LEFT JOIN sub_internal ON (task_type = '1' AND raw.task_id = sub_internal.id)
+        LEFT JOIN task t ON (task_type = '2' AND raw.task_id = t.id)
         ${where}
         ORDER BY group_value, work_date
         `;
 
-      //  console.log("unpivotSQL", unpivotSQL);
+        //  console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
@@ -1960,7 +1965,7 @@ const getTimesheetReportData = async (Report) => {
         const periodSet = new Set();
 
         for (const r of rows) {
-            let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0,10);
+            let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
             const gid = r.group_value || 'NULL';
@@ -1990,7 +1995,7 @@ const getTimesheetReportData = async (Report) => {
 
         const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
         const outRows = [];
-        const groupKeys = Object.keys(groups).sort((a,b) => {
+        const groupKeys = Object.keys(groups).sort((a, b) => {
             const na = Number(a), nb = Number(b);
             if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
             return a.localeCompare(b);
@@ -2006,11 +2011,12 @@ const getTimesheetReportData = async (Report) => {
             }
 
             row.total_hours = parseFloat(g.totalSeconds)?.toFixed(2);
-            row.total_records = g.timesheetIds.size;
+            // row.total_records = g.timesheetIds.size;
             outRows.push(row);
         }
 
-        const columns = ['group', ...periods, 'total_hours', 'total_records'];
+        // const columns = ['group', ...periods, 'total_hours', 'total_records'];
+        const columns = ['group', ...periods, 'total_hours'];
 
         return {
             status: true,
