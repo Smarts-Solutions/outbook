@@ -1250,441 +1250,6 @@ const getInternalTasks = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
-// const getTimesheetReportData1 = async (Report) => {
-//     const { StaffUserId, data } = Report;
-//     // console.log("Report in getTimesheetReportData", data.filters);
-//     let {
-//         groupBy,
-//         internal_external,
-//         fieldsToDisplay,
-//         fieldsToDisplayId,
-//         timePeriod,
-//         displayBy,
-//         fromDate,
-//         toDate
-//     } = data.filters;
-
-//     console.log("groupBy", data.filters);
-
-//     let where = [];
-
-//     // group by employee condition
-//     if (groupBy == "employee") {
-//         // Get Role
-//         const rows = await QueryRoleHelperFunction(StaffUserId)
-//         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
-//             if (fieldsToDisplayId !== null) {
-//                 where.push(`timesheet.staff_id = ${fieldsToDisplayId}`);
-//             }
-//         } else {
-//             where.push(`timesheet.staff_id = ${StaffUserId}`);
-//         }
-//     }
-
-//     if (groupBy != "employee") {
-//         // Get Role
-//         const rows = await QueryRoleHelperFunction(StaffUserId)
-//         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
-
-//         } else {
-//             where.push(`timesheet.staff_id = ${StaffUserId}`);
-//         }
-//     }
-
-//     // group by customer condition
-//     if (groupBy == "customer") {
-//         if (fieldsToDisplayId !== null) {
-//             where.push(`timesheet.customer_id = ${fieldsToDisplayId}`);
-//         }
-//     }
-
-//     // group by client condition
-//     if (groupBy == "client") {
-//         if (fieldsToDisplayId !== null) {
-//             where.push(`timesheet.client_id = ${fieldsToDisplayId}`);
-//         }
-//     }
-//     // group by job condition
-//     if (groupBy == "job") {
-//         if (fieldsToDisplayId !== null) {
-//             where.push(`task_type = '${internal_external}' AND timesheet.job_id = ${fieldsToDisplayId}`);
-//         }
-//     }
-//     // group by task condition
-//     if (groupBy == "task") {
-//         if (fieldsToDisplayId !== null) {
-//             where.push(`task_type = '${internal_external}' AND timesheet.task_id = ${fieldsToDisplayId}`);
-//         }
-//     }
-
-
-
-//     console.log("timePeriod", timePeriod);
-//     // time timePeriod
-//     if (timePeriod) {
-//         const currentDate = new Date();
-//         let startDate, endDate;
-
-//         switch (timePeriod) {
-//             case 'this_week':
-
-//                 const today = new Date();
-//                 // Sunday as first day of the week
-//                 const firstDayOfWeek = today.getDate() - today.getDay();
-//                 startDate = new Date(today);
-//                 startDate.setDate(firstDayOfWeek);
-
-//                 endDate = new Date(today);
-//                 endDate.setDate(firstDayOfWeek + 6);
-//                 break;
-//             case 'last_week':
-//                 const today2 = new Date();
-//                 const firstDayOfLastWeek = today2.getDate() - today2.getDay() - 7;
-//                 startDate = new Date(today2);
-//                 startDate.setDate(firstDayOfLastWeek);
-
-//                 endDate = new Date(today2);
-//                 endDate.setDate(firstDayOfLastWeek + 6);
-
-//                 break;
-//             case 'this_month':
-//                 startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-//                 endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-//                 break;
-//             case 'last_month':
-//                 startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-//                 endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
-//                 break;
-//             case 'this_quarter':
-//                 var currentQuarter = Math.floor(currentDate.getMonth() / 3) + 1;
-//                 startDate = new Date(currentDate.getFullYear(), (currentQuarter - 1) * 3, 1);
-//                 endDate = new Date(currentDate.getFullYear(), currentQuarter * 3, 0);
-//                 break;
-//             case 'last_quarter':
-//                 var currentQuarter = Math.floor(currentDate.getMonth() / 3) + 1
-//                 const lastQuarter = currentQuarter - 1;
-//                 startDate = new Date(currentDate.getFullYear(), (lastQuarter - 1) * 3, 1);
-//                 endDate = new Date(currentDate.getFullYear(), lastQuarter * 3, 0);
-//                 break;
-//             case 'this_year':
-//                 startDate = new Date(currentDate.getFullYear(), 0, 1);
-//                 endDate = new Date(currentDate.getFullYear(), 11, 31);
-//                 break;
-//             case 'last_year':
-//                 startDate = new Date(currentDate.getFullYear() - 1, 0, 1);
-//                 endDate = new Date(currentDate.getFullYear() - 1, 11, 31);
-//                 break;
-//             default:
-//                 startDate = null;
-//                 endDate = null;
-//         }
-
-//         if (startDate && endDate) {
-//             const formattedStartDate = startDate.toISOString().split('T')[0];
-//             const formattedEndDate = endDate.toISOString().split('T')[0];
-//             where.push(`timesheet.created_at BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'`);
-//         }
-//     }
-
-//     // fromDate and toDate
-//     if (timePeriod == "custom" || fromDate) {
-//         where.push(`timesheet.created_at >= '${fromDate}'`);
-//     }
-
-//     // toDate condition
-//     if (timePeriod == "custom" || toDate) {
-//         where.push(`timesheet.created_at <= '${toDate}'`);
-//     }
-
-//     if (internal_external == "1" || internal_external == "2") {
-//         where.push(`timesheet.task_type = '${internal_external}'`);
-//     }
-
-
-//     if (where.length > 0) {
-//         where = `WHERE ${where.join(" AND ")}`;
-//     } else {
-//         where = "";
-//     }
-
-//     // console.log("where", where);
-
-//     const query = `
-//     SELECT 
-//     staffs.email AS staff_email,
-//     CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
-//     customers.trading_name AS customer_name,
-//     clients.trading_name AS client_name,
-//     CONCAT(
-//         'cli_', 
-//         SUBSTRING(customers.trading_name, 1, 3), '_',
-//         SUBSTRING(clients.trading_name, 1, 3), '_',
-//         SUBSTRING(clients.client_code, 1, 15)
-//     ) AS client_code,
-
-
-//      CASE 
-//         WHEN timesheet.task_type = '1' THEN internal.name
-//         WHEN timesheet.task_type = '2' THEN 
-
-//         CONCAT(
-//             SUBSTRING(customers.trading_name, 1, 3), '_',
-//             SUBSTRING(clients.trading_name, 1, 3), '_',
-//             SUBSTRING(job_types.type, 1, 4), '_',
-//             SUBSTRING(jobs.job_id, 1, 15)
-//             )
-
-
-//     END AS job_name,
-
-
-//     CASE 
-//         WHEN timesheet.task_type = '1' THEN sub_internal.name
-//         WHEN timesheet.task_type = '2' THEN task.name
-//     END AS task_name,
-
-//     CASE
-//         WHEN timesheet.task_type = '1' THEN 'Internal'
-//         WHEN timesheet.task_type = '2' THEN 'External'
-//     END AS internal_external,
-
-
-
-//     timesheet.monday_date,
-//     timesheet.monday_hours,
-//     timesheet.tuesday_date,
-//     timesheet.tuesday_hours,
-//     timesheet.wednesday_date,
-//     timesheet.wednesday_hours,
-//     timesheet.thursday_date,
-//     timesheet.thursday_hours,
-//     timesheet.friday_date,
-//     timesheet.friday_hours,
-//     timesheet.saturday_date,
-//     timesheet.saturday_hours,
-//     timesheet.sunday_date,
-//     timesheet.sunday_hours,
-
-
-//     timesheet.created_at AS created_at
-
-//     FROM 
-//     timesheet
-//     JOIN staffs ON timesheet.staff_id = staffs.id
-//     LEFT JOIN customers ON timesheet.customer_id = customers.id
-//     LEFT JOIN clients ON timesheet.client_id = clients.id
-
-//     LEFT JOIN internal ON (timesheet.task_type = '1' AND timesheet.job_id = internal.id)
-//     LEFT JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
-//     LEFT JOIN job_types ON jobs.job_type_id = job_types.id 
-
-
-//     LEFT JOIN sub_internal ON (timesheet.task_type = '1' AND timesheet.task_id = sub_internal.id)
-//     LEFT JOIN task ON (timesheet.task_type = '2' AND timesheet.task_id = task.id)
-
-//     ${where}
-//     `;
-//     const [result] = await pool.execute(query);
-//     return { status: true, message: 'Success.', data: result };
-// }
-
-
-
-
-
-const getTimesheetReportData2 = async (Report) => {
-    const { StaffUserId, data } = Report;
-    // console.log("Report in getTimesheetReportData", data.filters);
-    var {
-        groupBy,
-        internal_external,
-        fieldsToDisplay,
-        fieldsToDisplayId,
-        timePeriod,
-        displayBy,
-        fromDate,
-        toDate
-    } = data.filters;
-    console.log("groupBy", data.filters);
-    const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
-
-
-
-    try {
-        groupBy = 'staff_id';
-        const groupField = String(groupBy);
-
-        if (!ALLOWED_GROUP_FIELDS.includes(groupField)) {
-            return { status: false, message: 'Invalid groupBy field', data: [] };
-        }
-
-        // compute date range
-        let range;
-        try {
-            range = await getDateRange(timePeriod, fromDate, toDate);
-            console.log("range -- ", range);
-        } catch (err) {
-
-            return { status: false, message: err.message || 'Invalid date range', data: [] };
-        }
-
-        var { fromDate, toDate } = range;
-
-        console.log("fromDate -- ", fromDate);
-        console.log("toDate - -- ", toDate);
-        console.log("toDate - -- ", toDate);
-
-        let where = [];
-        where.push(`work_date BETWEEN ? AND ? AND raw.task_type = '${internal_external}'`);
-
-        // if (internal_external == "1" || internal_external == "2") {
-        //     where.push(`task_type = '${internal_external}'`);
-        // }
-
-        if (where.length > 0) {
-            where = `WHERE ${where.join(" AND ")}`;
-        } else {
-            where = "";
-        }
-
-        // UNPIVOT query (get each day as a separate row)
-        // Note: groupField is validated above thus safe to interpolate
-        const unpivotSQL = `
-      SELECT 
-      timesheet_id, 
-      group_value, 
-      work_date, 
-      work_hours ,
-      CONCAT(staffs.first_name,' ',staffs.last_name ) AS staff_name,
-      task_type
-
-      FROM (
-        SELECT id AS timesheet_id, ${groupField} AS group_value, monday_date AS work_date, monday_hours AS work_hours ,task_type FROM timesheet WHERE monday_date IS NOT NULL
-        UNION ALL
-        SELECT id, ${groupField}, tuesday_date, tuesday_hours,task_type FROM timesheet WHERE tuesday_date IS NOT NULL
-        UNION ALL
-        SELECT id, ${groupField}, wednesday_date, wednesday_hours,task_type FROM timesheet WHERE wednesday_date IS NOT NULL
-        UNION ALL
-        SELECT id, ${groupField}, thursday_date, thursday_hours ,task_type FROM timesheet WHERE thursday_date IS NOT NULL
-        UNION ALL
-        SELECT id, ${groupField}, friday_date, friday_hours ,task_type FROM timesheet WHERE friday_date IS NOT NULL
-        UNION ALL
-        SELECT id, ${groupField},saturday_date, saturday_hours ,task_type FROM timesheet WHERE saturday_date IS NOT NULL
-        UNION ALL
-        SELECT id, ${groupField}, sunday_date, sunday_hours ,task_type FROM timesheet WHERE sunday_date IS NOT NULL
-      ) AS raw
-        JOIN staffs ON (raw.group_value = staffs.id AND '${groupField}' = 'staff_id')
-        ${where}
-      ORDER BY group_value, work_date;
-    `;
-
-        const conn = await pool.getConnection();
-        const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
-        conn.release();
-        console.log("unpivotSQL", unpivotSQL);
-        console.log("Query Params:", [fromDate, toDate]);
-        console.log("Unpivot Rows:", rows.length);
-        //  console.log("Unpivot Rows Data:", rows);
-        // Aggregate in JS to build dynamic pivot
-        const groups = {};         // group_value -> { timesheetIds:Set, totalSeconds, periodSeconds: {period:secs} }
-        const periodSet = new Set();
-
-        for (const r of rows) {
-            // normalize work_date to YYYY-MM-DD string
-            let workDateStr = null;
-            if (r.work_date instanceof Date) {
-                workDateStr = toYMD(r.work_date);
-            } else if (r.work_date) {
-                // sometimes mysql2 returns string
-                workDateStr = String(r.work_date).slice(0, 10);
-            } else {
-                continue;
-            }
-            // console.log("r", r);
-            const gid = r.group_value == null ? 'NULL' : String(r.group_value);
-            const staff_name = r.staff_name;
-            // const secs = parseHoursToSeconds(r.work_hours);
-            const secs = r.work_hours;
-            // console.log("displayBy",displayBy, "workDateStr", workDateStr);
-            const periodKey = getPeriodKey(displayBy, workDateStr);
-            // console.log("periodKey", periodKey);
-            if (!periodKey) continue;
-
-            periodSet.add(periodKey);
-
-            if (!groups[gid]) {
-                groups[gid] = {
-                    group_value: gid,
-                    staff_name: staff_name,
-                    totalSeconds: 0,
-                    timesheetIds: new Set(),
-                    periodSeconds: {}
-                };
-            }
-            const g = groups[gid];
-            g.totalSeconds += parseFloat(secs?.replace(':', '.'));
-            g.timesheetIds.add(r.timesheet_id);
-            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
-
-
-        }
-
-        // sort periods
-        const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
-
-        // console.log("periods", periods);
-        // build rows
-        const outRows = [];
-        // sort group keys numerically if they look numeric
-        const groupKeys = Object.keys(groups).sort((a, b) => {
-            const na = Number(a), nb = Number(b);
-            if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
-            return a.localeCompare(b);
-        });
-
-        for (const gid of groupKeys) {
-            // console.log("Processing group:", gid);
-            const g = groups[gid];
-            // console.log("Group data:", g);
-            const row = {};
-            // group value typed similarly as DB: number if numeric else null/string
-            // row[groupField] = (gid === 'NULL') ? null : (!Number.isNaN(Number(gid)) ? Number(gid) : gid);
-            row[groupField] = g.staff_name;
-
-            //console.log("g", g);
-
-            for (const p of periods) {
-                row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
-            }
-
-            row.total_hours = parseFloat(g?.totalSeconds)?.toFixed(2);
-            row.total_records = g.timesheetIds.size;
-
-            outRows.push(row);
-        }
-
-
-
-        //columns: groupField, ...periods, total_hours, total_records
-        const columns = [groupField, ...periods, 'total_hours', 'total_records'];
-        console.log("columns", columns);
-        //console.log("outRows", outRows);
-        //  return { status: true, message: 'Success.', data: [] };
-        return {
-            status: true, message: 'Success.', data: {
-                meta: { fromDate, toDate, groupField, displayBy, timePeriod },
-                columns,
-                rows: outRows
-            }
-        };
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: err.message || 'server error' });
-    }
-
-
-}
-
 
 /** get date range for timePeriod */
 async function getDateRange(timePeriod, fromDateParam, toDateParam) {
@@ -1762,35 +1327,6 @@ function toYMD(date) {
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
 }
-/** parse "H:MM" or "HH:MM" into seconds (accepts minute >= 60) */
-function parseHoursToSeconds(str) {
-    if (!str && str !== 0) return 0;
-    const s = String(str).trim();
-    // match "H:MM" or "H.MM" or "H" or "H.MM.SS" not expected but keep simple
-    const m = s.match(/^(\d+)\s*[:.]\s*(\d+)$/);
-    if (m) {
-        const h = parseInt(m[1], 10) || 0;
-        const mm = parseInt(m[2], 10) || 0;
-        return h * 3600 + mm * 60;
-    }
-    // if just number treat as hours (e.g., "2")
-    const n = parseFloat(s);
-    if (!Number.isNaN(n)) {
-        const h = Math.floor(n);
-        const frac = n - h;
-        return Math.round(h * 3600 + frac * 3600);
-    }
-    return 0;
-}
-
-/** format seconds -> H:MM (no seconds, more compact) */
-function formatSecondsToHMM(sec) {
-    const total = Math.max(0, Math.floor(sec || 0));
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    return `${h}:${String(m).padStart(2, '0')}`;
-}
-
 /** get period key label for a date string (YYYY-MM-DD) */
 function getPeriodKey(displayBy, dateStr) {
     if (!dateStr) return null;
@@ -1801,21 +1337,7 @@ function getPeriodKey(displayBy, dateStr) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
 
-    // switch ((displayBy || 'daily').toLowerCase()) {
-    //     case 'daily': return `${y}-${mm}-${dd}`;           // 2025-09-08
-    //     case 'monthly': return `${y}-${mm}`;               // 2025-09
-    //     case 'yearly': return `${y}`;                      // 2025
-    //     case 'weekly': {
-    //         // week label = week-start (Monday) date
-    //         const jsDay = (d.getDay() + 6) % 7; // Monday=0
-    //         const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - jsDay);
-    //         const my = monday.getFullYear();
-    //         const mmm = String(monday.getMonth() + 1).padStart(2, '0');
-    //         const mdd = String(monday.getDate()).padStart(2, '0');
-    //         return `${my}-${mmm}-${mdd}`;
-    //     }
-    //     default: return `${y}-${mm}-${dd}`;
-    // }
+   
     switch ((displayBy || 'daily').toLowerCase()) {
         // case 'daily':
         //     return `${y}-${mm}-${dd}`;  // 2025-09-08
@@ -1861,6 +1383,110 @@ function getPeriodKey(displayBy, dateStr) {
         default:
             return `${y}-${mm}-${dd}`;
     }
+}
+
+function normalizeRows(columns, outRows) {
+    return outRows.map(row => {
+        const newRow = { ...row };
+        for (const col of columns) {
+            if (!(col in newRow) && col !== "staff_id" && col !== "total_hours") {
+                // केवल missing होने पर ही add करो
+                newRow[col] = 0;
+            }
+        }
+        return newRow;
+    });
+}
+
+function getWeekEndings(fromDate, toDate, displayBy = "daily") {
+    const result = [];
+    let current = new Date(fromDate);
+
+    // date return current date
+    const today = new Date();
+    if (toDate > today) {
+        toDate = today;
+    }
+
+    while (current <= toDate) {
+        const d = new Date(current);
+        const y = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+
+        switch ((displayBy || "daily").toLowerCase()) {
+            // case "daily": {
+            //     result.push(`${y}-${mm}-${dd}`); // 2025-09-08
+            //     current.setDate(current.getDate() + 1);
+            //     break;
+            // }
+            case "daily": {
+                const weekday = d.toLocaleString("default", { weekday: "short" });
+                const day = String(d.getDate()).padStart(2, "0");
+                const monthName = d.toLocaleString("default", { month: "short" });
+                const yearShort = String(d.getFullYear()).slice(-2);    
+                result.push(`${weekday} ${day} ${monthName} ${yearShort}`); // Mon 08 Sep 25
+                current.setDate(current.getDate() + 1);
+                break;
+            }
+
+            case "monthly": {
+                const monthName = d.toLocaleString("default", { month: "short" });
+                result.push(`${monthName} ${y}`); // Sep 2025
+                current.setMonth(current.getMonth() + 1);
+                break;
+            }
+
+            case "quarterly": {
+                const quarter = Math.floor(d.getMonth() / 3) + 1;
+                result.push(`${y}-Q${quarter}`); // 2025-Q3
+                current.setMonth(current.getMonth() + 3);
+                break;
+            }
+
+            case "yearly": {
+                result.push(`${y}`); // 2025
+                current.setFullYear(current.getFullYear() + 1);
+                break;
+            }
+
+            case "weekly": {
+                // sunday ko week ending
+                const jsDay = d.getDay();
+                const sunday = new Date(d);
+                sunday.setDate(sunday.getDate() + ((7 - jsDay) % 7));
+                const day = sunday.getDate();
+                const month = sunday.toLocaleString("default", { month: "short" }).toLowerCase();
+                const year = sunday.getFullYear();
+                result.push(`week ending ${day} ${month} ${year}`);
+                current.setDate(current.getDate() + 7);
+                break;
+            }
+
+            case "fortnightly": {
+                const day = d.getDate();
+                const monthName = d.toLocaleString("default", { month: "short" });
+                const year = d.getFullYear();
+                const half = day <= 15 ? "H1" : "H2";
+                result.push(`${monthName} ${year} ${half}`); // Sep 2025 H1/H2
+
+                // अगली fortnight पर ले जाओ
+                if (day <= 15) {
+                    current.setDate(16);
+                } else {
+                    current.setMonth(current.getMonth() + 1, 1);
+                }
+                break;
+            }
+
+            default: {
+                result.push(`${y}-${mm}-${dd}`);
+                current.setDate(current.getDate() + 1);
+            }
+        }
+    }
+
+    return [...new Set(result)]; // duplicate हटाने के लिए
 }
 
 const getTimesheetReportData = async (Report) => {
@@ -2177,132 +1803,6 @@ const getTimesheetReportData = async (Report) => {
         return { status: false, message: err.message || 'server error', data: [] };
     }
 };
-
-
-//  function normalizeRows(columns, outRows) {
-//   return outRows.map(row => {
-//     const newRow = { ...row };
-//     for (const col of columns) {
-//       if (!(col in newRow) && col !== "staff_id" && col !== "total_hours") {
-//         newRow[col] = 0;
-//       }
-//     }
-//     return newRow;
-//   });
-// }
-
-function normalizeRows(columns, outRows) {
-    return outRows.map(row => {
-        const newRow = { ...row };
-        for (const col of columns) {
-            if (!(col in newRow) && col !== "staff_id" && col !== "total_hours") {
-                // केवल missing होने पर ही add करो
-                newRow[col] = 0;
-            }
-        }
-        return newRow;
-    });
-}
-
-
-function getWeekEndings(fromDate, toDate, displayBy = "daily") {
-    const result = [];
-    let current = new Date(fromDate);
-
-    // date return current date
-    const today = new Date();
-    if (toDate > today) {
-        toDate = today;
-    }
-
-    while (current <= toDate) {
-        const d = new Date(current);
-        const y = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
-
-        switch ((displayBy || "daily").toLowerCase()) {
-            // case "daily": {
-            //     result.push(`${y}-${mm}-${dd}`); // 2025-09-08
-            //     current.setDate(current.getDate() + 1);
-            //     break;
-            // }
-            case "daily": {
-                const weekday = d.toLocaleString("default", { weekday: "short" });
-                const day = String(d.getDate()).padStart(2, "0");
-                const monthName = d.toLocaleString("default", { month: "short" });
-                const yearShort = String(d.getFullYear()).slice(-2);    
-                result.push(`${weekday} ${day} ${monthName} ${yearShort}`); // Mon 08 Sep 25
-                current.setDate(current.getDate() + 1);
-                break;
-            }
-
-            case "monthly": {
-                const monthName = d.toLocaleString("default", { month: "short" });
-                result.push(`${monthName} ${y}`); // Sep 2025
-                current.setMonth(current.getMonth() + 1);
-                break;
-            }
-
-            case "quarterly": {
-                const quarter = Math.floor(d.getMonth() / 3) + 1;
-                result.push(`${y}-Q${quarter}`); // 2025-Q3
-                current.setMonth(current.getMonth() + 3);
-                break;
-            }
-
-            case "yearly": {
-                result.push(`${y}`); // 2025
-                current.setFullYear(current.getFullYear() + 1);
-                break;
-            }
-
-            case "weekly": {
-                // sunday ko week ending
-                const jsDay = d.getDay();
-                const sunday = new Date(d);
-                sunday.setDate(sunday.getDate() + ((7 - jsDay) % 7));
-                const day = sunday.getDate();
-                const month = sunday.toLocaleString("default", { month: "short" }).toLowerCase();
-                const year = sunday.getFullYear();
-                result.push(`week ending ${day} ${month} ${year}`);
-                current.setDate(current.getDate() + 7);
-                break;
-            }
-
-            case "fortnightly": {
-                const day = d.getDate();
-                const monthName = d.toLocaleString("default", { month: "short" });
-                const year = d.getFullYear();
-                const half = day <= 15 ? "H1" : "H2";
-                result.push(`${monthName} ${year} ${half}`); // Sep 2025 H1/H2
-
-                // अगली fortnight पर ले जाओ
-                if (day <= 15) {
-                    current.setDate(16);
-                } else {
-                    current.setMonth(current.getMonth() + 1, 1);
-                }
-                break;
-            }
-
-            default: {
-                result.push(`${y}-${mm}-${dd}`);
-                current.setDate(current.getDate() + 1);
-            }
-        }
-    }
-
-    return [...new Set(result)]; // duplicate हटाने के लिए
-}
-
-
-
-
-
-
-
-
 
 
 
