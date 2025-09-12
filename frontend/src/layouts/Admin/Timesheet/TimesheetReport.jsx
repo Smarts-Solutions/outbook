@@ -35,7 +35,7 @@ function TimesheetReport() {
  let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
 
 
-   console.log("lastGroupValue ", lastGroupValue);
+  //  console.log("lastGroupValue ", lastGroupValue);
 
 
 
@@ -221,66 +221,104 @@ function TimesheetReport() {
   };
 
 
-  const exportToCSV = (showData) => {
-    if (!showData || showData.length === 0) {
-      alert("No data to export!");
-      return;
-    }
+  // const exportToCSV = (showData) => {
+  //   if (!showData || showData.length === 0) {
+  //     alert("No data to export!");
+  //     return;
+  //   }
 
-    // Headers as per <thead>
-    const headers = [
-      "Staff",
-      "Internal/External",
-      "Customer",
-      "Client",
-      "Job",
-      "Task",
-      "Mon (hrs)",
-      "Tue (hrs)",
-      "Wed (hrs)",
-      "Thu (hrs)",
-      "Fri (hrs)",
-      "Date",
-    ];
+  //   // Headers as per <thead>
+  //   const headers = [
+  //     "Staff",
+  //     "Internal/External",
+  //     "Customer",
+  //     "Client",
+  //     "Job",
+  //     "Task",
+  //     "Mon (hrs)",
+  //     "Tue (hrs)",
+  //     "Wed (hrs)",
+  //     "Thu (hrs)",
+  //     "Fri (hrs)",
+  //     "Date",
+  //   ];
 
-    // Rows mapping data keys to headers
-    const rows = showData.map((item) => {
-      return [
-        item.staff_fullname || "-", // Staff
-        item.internal_external || "-", // Internal/External
-        item.customer_name ?? "-", // Customer
-        item.client_code ?? "-", // Client
-        item.job_name || "-", // Job
-        item.task_name || "-", // Task
-        item.monday_hours || "-", // Mon
-        item.tuesday_hours || "-", // Tue
-        item.wednesday_hours || "-", // Wed
-        item.thursday_hours || "-", // Thu
-        item.friday_hours || "-", // Fri
-        item.created_at ? dayjs(item.created_at).format("DD-MM-YYYY") : "-", // Date
-      ];
+  //   // Rows mapping data keys to headers
+  //   const rows = showData.map((item) => {
+  //     return [
+  //       item.staff_fullname || "-", // Staff
+  //       item.internal_external || "-", // Internal/External
+  //       item.customer_name ?? "-", // Customer
+  //       item.client_code ?? "-", // Client
+  //       item.job_name || "-", // Job
+  //       item.task_name || "-", // Task
+  //       item.monday_hours || "-", // Mon
+  //       item.tuesday_hours || "-", // Tue
+  //       item.wednesday_hours || "-", // Wed
+  //       item.thursday_hours || "-", // Thu
+  //       item.friday_hours || "-", // Fri
+  //       item.created_at ? dayjs(item.created_at).format("DD-MM-YYYY") : "-", // Date
+  //     ];
+  //   });
+
+  //   // CSV content
+  //   const csvContent = [headers, ...rows]
+  //     .map((row) =>
+  //       row
+  //         .map((val) =>
+  //           typeof val === "string" && val.includes(",")
+  //             ? `"${val}"` // agar string me comma ho to quotes me wrap
+  //             : val
+  //         )
+  //         .join(",")
+  //     )
+  //     .join("\n");
+
+  //   // Download CSV
+  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //   const link = document.createElement("a");
+  //   link.href = URL.createObjectURL(blob);
+  //   link.download = "TimeSheetReportData.csv";
+  //   link.click();
+  // };
+
+  const exportToCSV = (data) => {
+  if (!data || !data.rows || data.rows.length === 0) {
+    alert("No data to export!");
+    return;
+  }
+
+  // 1 Headers dynamically from data.columns
+  const headers = data.columns;
+
+  console.log("headers ", headers);
+
+  // 2 Map rows dynamically based on headers
+  const rows = data.rows.map((row) => {
+    return headers.map((col) => {
+  
+      let val = row[col];
+      if (val === undefined || val === null) val = "-";
+
+
+      if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
+      return val;
     });
+  });
 
-    // CSV content
-    const csvContent = [headers, ...rows]
-      .map((row) =>
-        row
-          .map((val) =>
-            typeof val === "string" && val.includes(",")
-              ? `"${val}"` // agar string me comma ho to quotes me wrap
-              : val
-          )
-          .join(",")
-      )
-      .join("\n");
+  // 3️⃣ CSV content
+  const csvContent = [headers, ...rows]
+    .map((r) => r.join(",")) // join by comma
+    .join("\n"); // join rows by newline
 
-    // Download CSV
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "TimeSheetReportData.csv";
-    link.click();
-  };
+  // 4️⃣ Download CSV
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "TimeSheetReportData.csv";
+  link.click();
+};
+
 
 
   const handleFilterChange = (e) => {
@@ -447,9 +485,6 @@ function TimesheetReport() {
   }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy]);
 
 
-
-
-
   // console.log("filters ", filters);
 
   const resetFunction = () => {
@@ -504,7 +539,7 @@ function TimesheetReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
-  console.log("Filters after reset: ", filters);
+  console.log("Filters: ", filters);
 
 
 
@@ -764,17 +799,6 @@ function TimesheetReport() {
 
       </div>
 
-
-
-
-      {/* Buttons */}
-      {/* <div className="d-flex gap-2 align-items-center mb-4">
-    
-        <button className="btn btn-info" id="btn-export"
-          onClick={exportExcel}>
-          Export Data
-        </button>
-      </div> */}
 
       {/* Filtered Data Display */}
       <div className='datatable-container'>
