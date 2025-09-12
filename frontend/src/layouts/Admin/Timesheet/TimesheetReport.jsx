@@ -788,6 +788,7 @@ function TimesheetReport() {
             <p className='fs-16'>There are no records to display</p>
           </div>
         ) : (
+          <div className='table-responsive'>
           <table
             className="table rdt_Table"
            // className="table table-bordered"
@@ -806,7 +807,7 @@ function TimesheetReport() {
               >
                 {showData?.columns?.map((col, idx) => (
                   <th key={idx} 
-                  style={{ fontSize:"17px", textAlign: "center" ,fontWeight: "bold"}}
+                  style={{ fontSize:"15px", textAlign: "center" ,fontWeight: "bold", minWidth: "130px" }}
                   >
                     {getColumnName(col)}
                   </th>
@@ -825,6 +826,7 @@ function TimesheetReport() {
               ))}
             </tbody>
           </table>
+          </div>
 
         )}
       </div>

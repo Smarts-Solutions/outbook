@@ -1817,8 +1817,15 @@ function getPeriodKey(displayBy, dateStr) {
     //     default: return `${y}-${mm}-${dd}`;
     // }
     switch ((displayBy || 'daily').toLowerCase()) {
-        case 'daily':
-            return `${y}-${mm}-${dd}`;  // 2025-09-08
+        // case 'daily':
+        //     return `${y}-${mm}-${dd}`;  // 2025-09-08
+        case "daily": {
+            const weekday = d.toLocaleString("default", { weekday: "short" }); // Mon
+            const day = String(d.getDate()).padStart(2, "0"); // 08
+            const monthName = d.toLocaleString("default", { month: "short" }); // Sep
+            const yearShort = String(d.getFullYear()).slice(-2); // 25
+            return `${weekday} ${day} ${monthName} ${yearShort}`; // Mon 08 Sep 25
+        }
 
         case 'monthly': {
             const monthName = d.toLocaleString('default', { month: 'short' }); // Jan, Feb, Mar...
@@ -2129,14 +2136,14 @@ const getTimesheetReportData = async (Report) => {
 
         // const columns = ['group', ...periods, 'total_hours', 'total_records'];
 
-       const weeks =  getWeekEndings(new Date(fromDate), new Date(toDate) , displayBy);
+        const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
 
         const columnsWeeks = [...groupBy, ...weeks, 'total_hours'];
         const columns = [...groupBy, ...periods, 'total_hours'];
-        
-        console.log("Time Period", timePeriod , "fromDate, ", fromDate,  " toDate ", toDate);
+
+        console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
         console.log("displayBy, ", displayBy);
-         const finalRows = normalizeRows(columnsWeeks, outRows);
+        const finalRows = normalizeRows(columnsWeeks, outRows);
 
         console.log("columns", columns);
         console.log("outRows", outRows);
@@ -2185,16 +2192,16 @@ const getTimesheetReportData = async (Report) => {
 // }
 
 function normalizeRows(columns, outRows) {
-  return outRows.map(row => {
-    const newRow = { ...row };
-    for (const col of columns) {
-      if (!(col in newRow) && col !== "staff_id" && col !== "total_hours") {
-        // केवल missing होने पर ही add करो
-        newRow[col] = 0;
-      }
-    }
-    return newRow;
-  });
+    return outRows.map(row => {
+        const newRow = { ...row };
+        for (const col of columns) {
+            if (!(col in newRow) && col !== "staff_id" && col !== "total_hours") {
+                // केवल missing होने पर ही add करो
+                newRow[col] = 0;
+            }
+        }
+        return newRow;
+    });
 }
 
 
@@ -2220,79 +2227,88 @@ function normalizeRows(columns, outRows) {
 
 
 function getWeekEndings(fromDate, toDate, displayBy = "daily") {
-  const result = [];
-  let current = new Date(fromDate);
+    const result = [];
+    let current = new Date(fromDate);
 
-  while (current <= toDate) {
-    const d = new Date(current);
-    const y = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
+    while (current <= toDate) {
+        const d = new Date(current);
+        const y = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
 
-    switch ((displayBy || "daily").toLowerCase()) {
-      case "daily": {
-        result.push(`${y}-${mm}-${dd}`); // 2025-09-08
-        current.setDate(current.getDate() + 1);
-        break;
-      }
+        switch ((displayBy || "daily").toLowerCase()) {
+            // case "daily": {
+            //     result.push(`${y}-${mm}-${dd}`); // 2025-09-08
+            //     current.setDate(current.getDate() + 1);
+            //     break;
+            // }
+            case "daily": {
+                const weekday = d.toLocaleString("default", { weekday: "short" });
+                const day = String(d.getDate()).padStart(2, "0");
+                const monthName = d.toLocaleString("default", { month: "short" });
+                const yearShort = String(d.getFullYear()).slice(-2);    
+                result.push(`${weekday} ${day} ${monthName} ${yearShort}`); // Mon 08 Sep 25
+                current.setDate(current.getDate() + 1);
+                break;
+            }
 
-      case "monthly": {
-        const monthName = d.toLocaleString("default", { month: "short" });
-        result.push(`${monthName} ${y}`); // Sep 2025
-        current.setMonth(current.getMonth() + 1);
-        break;
-      }
+            case "monthly": {
+                const monthName = d.toLocaleString("default", { month: "short" });
+                result.push(`${monthName} ${y}`); // Sep 2025
+                current.setMonth(current.getMonth() + 1);
+                break;
+            }
 
-      case "quarterly": {
-        const quarter = Math.floor(d.getMonth() / 3) + 1;
-        result.push(`${y}-Q${quarter}`); // 2025-Q3
-        current.setMonth(current.getMonth() + 3);
-        break;
-      }
+            case "quarterly": {
+                const quarter = Math.floor(d.getMonth() / 3) + 1;
+                result.push(`${y}-Q${quarter}`); // 2025-Q3
+                current.setMonth(current.getMonth() + 3);
+                break;
+            }
 
-      case "yearly": {
-        result.push(`${y}`); // 2025
-        current.setFullYear(current.getFullYear() + 1);
-        break;
-      }
+            case "yearly": {
+                result.push(`${y}`); // 2025
+                current.setFullYear(current.getFullYear() + 1);
+                break;
+            }
 
-      case "weekly": {
-        // sunday ko week ending
-        const jsDay = d.getDay();
-        const sunday = new Date(d);
-        sunday.setDate(sunday.getDate() + ((7 - jsDay) % 7));
-        const day = sunday.getDate();
-        const month = sunday.toLocaleString("default", { month: "short" }).toLowerCase();
-        const year = sunday.getFullYear();
-        result.push(`week ending ${day} ${month} ${year}`);
-        current.setDate(current.getDate() + 7);
-        break;
-      }
+            case "weekly": {
+                // sunday ko week ending
+                const jsDay = d.getDay();
+                const sunday = new Date(d);
+                sunday.setDate(sunday.getDate() + ((7 - jsDay) % 7));
+                const day = sunday.getDate();
+                const month = sunday.toLocaleString("default", { month: "short" }).toLowerCase();
+                const year = sunday.getFullYear();
+                result.push(`week ending ${day} ${month} ${year}`);
+                current.setDate(current.getDate() + 7);
+                break;
+            }
 
-      case "fortnightly": {
-        const day = d.getDate();
-        const monthName = d.toLocaleString("default", { month: "short" });
-        const year = d.getFullYear();
-        const half = day <= 15 ? "H1" : "H2";
-        result.push(`${monthName} ${year} ${half}`); // Sep 2025 H1/H2
+            case "fortnightly": {
+                const day = d.getDate();
+                const monthName = d.toLocaleString("default", { month: "short" });
+                const year = d.getFullYear();
+                const half = day <= 15 ? "H1" : "H2";
+                result.push(`${monthName} ${year} ${half}`); // Sep 2025 H1/H2
 
-        // अगली fortnight पर ले जाओ
-        if (day <= 15) {
-          current.setDate(16);
-        } else {
-          current.setMonth(current.getMonth() + 1, 1);
+                // अगली fortnight पर ले जाओ
+                if (day <= 15) {
+                    current.setDate(16);
+                } else {
+                    current.setMonth(current.getMonth() + 1, 1);
+                }
+                break;
+            }
+
+            default: {
+                result.push(`${y}-${mm}-${dd}`);
+                current.setDate(current.getDate() + 1);
+            }
         }
-        break;
-      }
-
-      default: {
-        result.push(`${y}-${mm}-${dd}`);
-        current.setDate(current.getDate() + 1);
-      }
     }
-  }
 
-  return [...new Set(result)]; // duplicate हटाने के लिए
+    return [...new Set(result)]; // duplicate हटाने के लिए
 }
 
 
