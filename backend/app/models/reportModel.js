@@ -1879,6 +1879,8 @@ const missingTimesheetReport = async (Report) => {
         pool.query(query)
     ]);
 
+    console.log("filterDataWeekRows", filterDataWeekRows);
+
     // filter out "0" offsets at once
     const groupedWeekData = filterDataWeekRows
         .filter(item => item.valid_weekOffsets.trim() !== '0')
@@ -1898,6 +1900,10 @@ const missingTimesheetReport = async (Report) => {
         staffsCurrentWeek = filterDataWeekRows
             .filter(item => item.valid_weekOffsets.includes('0'))
             .map(i => i.staff_id);
+
+        //console.log("staffsCurrentWeek", staffsCurrentWeek);
+       // console.log("filterDataWeekRows", filterDataWeekRows);
+
     } else {
         staffsCurrentWeek = filterDataWeekRows
             .filter(item => item.valid_weekOffsets.includes(data.filterStaffIds))
