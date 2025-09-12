@@ -314,7 +314,10 @@ const Sidebar = () => {
                   </Link>
                 </li>
 
-                <li
+
+                {
+                  ["SUPERADMIN","ADMIN"].includes(role) ?
+                  <li
                   className={
                     activeLink === "/admin/timesheetReports" ? "active" : ""
                   }
@@ -331,6 +334,13 @@ const Sidebar = () => {
                     <span>Time Sheet Reports</span>
                   </Link>
                 </li>
+                  :""
+                  
+                }
+                
+
+
+
                 </>
               )}
             {((updatedShowTab && updatedShowTab.setting) ||
