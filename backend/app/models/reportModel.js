@@ -1509,7 +1509,7 @@ const getTimesheetReportData = async (Report) => {
 
     //console.log("groupBy", groupBy);
    // console.log("fieldsToDisplayId", fieldsToDisplayId);
-    if (groupBy.length == 0) {
+    if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
         return { status: false, message: `empty groupBy field`, data: [] };
     }
     //    groupBy = ['staff_id','customer_id','client_id'];

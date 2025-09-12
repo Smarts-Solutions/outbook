@@ -454,12 +454,12 @@ function TimesheetReport() {
 
   const resetFunction = () => {
     setFilters({
-      groupBy: ["staff_id"],
+      groupBy: [],
       internal_external: "2",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
-      timePeriod: "this_week",
-      displayBy: "Daily",
+      timePeriod: "",
+      displayBy: "",
       fromDate: null,
       toDate: null,
     })
@@ -644,6 +644,7 @@ function TimesheetReport() {
               })
             }
           >
+            <option value={""}>--Select--</option>
             <option value={"this_week"}>This week</option>
             <option value={"last_week"}>Last Week</option>
             <option value={"this_month"}>This month</option>
@@ -741,6 +742,7 @@ function TimesheetReport() {
               })
             }
           >
+            <option value={""}>--Select--</option>
             <option value={"Daily"}>Daily</option>
             <option value={"Weekly"}>Weekly</option>
             <option value={"Monthly"}>Monthly</option>
