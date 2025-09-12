@@ -1879,7 +1879,7 @@ const missingTimesheetReport = async (Report) => {
         pool.query(query)
     ]);
 
-    console.log("filterDataWeekRows", filterDataWeekRows);
+    // console.log("filterDataWeekRows", filterDataWeekRows);
 
     // filter out "0" offsets at once
     const groupedWeekData = filterDataWeekRows
