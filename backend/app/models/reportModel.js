@@ -2205,27 +2205,6 @@ function normalizeRows(columns, outRows) {
 }
 
 
-
-//  function getWeekEndings(fromDate, toDate , displayBy) {
-//   const result = [];
-//   let current = new Date(fromDate);
-//   if (current.getDay() !== 0) {
-//     current.setDate(current.getDate() + (7 - current.getDay()));
-//   }
-
-//   while (current <= toDate) {
-//     const d = new Date(current);
-//     const day = d.getDate();
-//     const month = d.toLocaleString("default", { month: "short" }).toLowerCase();
-//     const year = d.getFullYear();
-//     result.push(`week ending ${day} ${month} ${year}`);
-//     current.setDate(current.getDate() + 7);
-//   }
-//   return result;
-
-// }
-
-
 function getWeekEndings(fromDate, toDate, displayBy = "daily") {
     const result = [];
     let current = new Date(fromDate);
