@@ -1251,6 +1251,11 @@ const getInternalTasks = async (Report) => {
 }
 
 
+
+
+
+/////////////------  START Timesheet Report START-------//////////////////////
+
 /** get date range for timePeriod */
 async function getDateRange(timePeriod, fromDateParam, toDateParam) {
 
@@ -1502,8 +1507,8 @@ const getTimesheetReportData = async (Report) => {
         toDate
     } = data.filters;
 
-    console.log("groupBy", groupBy);
-    console.log("fieldsToDisplayId", fieldsToDisplayId);
+    //console.log("groupBy", groupBy);
+   // console.log("fieldsToDisplayId", fieldsToDisplayId);
     if (groupBy.length == 0) {
         return { status: false, message: `empty groupBy field`, data: [] };
     }
@@ -1704,7 +1709,7 @@ const getTimesheetReportData = async (Report) => {
             const taskName = r.task_name;
 
             const secs = r.work_hours;
-            console.log("displayBy", displayBy, "workDateStr", workDateStr);
+           // console.log("displayBy", displayBy, "workDateStr", workDateStr);
             const periodKey = getPeriodKey(displayBy, workDateStr);
             if (!periodKey) continue;
 
@@ -1767,16 +1772,15 @@ const getTimesheetReportData = async (Report) => {
         const columnsWeeks = [...groupBy, ...weeks, 'total_hours'];
         const columns = [...groupBy, ...periods, 'total_hours'];
 
-        console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
-        console.log("displayBy, ", displayBy);
+        // console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
+        // console.log("displayBy, ", displayBy);
         const finalRows = normalizeRows(columnsWeeks, outRows);
 
-        console.log("columns", columns);
-        console.log("outRows", outRows);
+        // console.log("columns", columns);
+        // console.log("outRows", outRows);
 
-
-        console.log("columnsWeeks", columnsWeeks);
-        console.log("finalRows", finalRows);
+        // console.log("columnsWeeks", columnsWeeks);
+        // console.log("finalRows", finalRows);
 
         // return {
         //     status: true,
@@ -1803,6 +1807,10 @@ const getTimesheetReportData = async (Report) => {
         return { status: false, message: err.message || 'server error', data: [] };
     }
 };
+
+
+
+/////////////------  END Timesheet Report END-------//////////////////////
 
 
 
