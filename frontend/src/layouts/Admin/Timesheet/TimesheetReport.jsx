@@ -32,7 +32,7 @@ function TimesheetReport() {
     toDate: null,
   });
 
- let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
+  let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
 
 
   //  console.log("lastGroupValue ", lastGroupValue);
@@ -283,41 +283,46 @@ function TimesheetReport() {
   // };
 
   const exportToCSV = (data) => {
-  if (!data || !data.rows || data.rows.length === 0) {
-    alert("No data to export!");
-    return;
-  }
+    if (!data || !data.rows || data.rows.length === 0) {
+      alert("No data to export!");
+      return;
+    }
 
-  // 1 Headers dynamically from data.columns
-  const headers = data.columns;
+    //  Headers dynamically from data.columns
+    //  const headers = data.columns;
+    const colMap = {
+      staff_id: "Staff Name",
+      customer_id: "Customer Name",
+      client_id: "Client Name",
+      job_id: "Job Name",
+      task_id: "Task Name",
+      total_hours: "Total Hours"
+    };
+    const headers = data.columns.map(col => colMap[col] || col);
 
-  console.log("headers ", headers);
-
-  // 2 Map rows dynamically based on headers
-  const rows = data.rows.map((row) => {
-    return headers.map((col) => {
-  
+ 
+    const rows = data.rows.map((row) => {
+    return data.columns.map((col) => {
       let val = row[col];
       if (val === undefined || val === null) val = "-";
-
 
       if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
       return val;
     });
   });
 
-  // 3️⃣ CSV content
-  const csvContent = [headers, ...rows]
-    .map((r) => r.join(",")) // join by comma
-    .join("\n"); // join rows by newline
+    //  CSV content
+    const csvContent = [headers, ...rows]
+      .map((r) => r.join(",")) // join by comma
+      .join("\n"); // join rows by newline
 
-  // 4️⃣ Download CSV
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "TimeSheetReportData.csv";
-  link.click();
-};
+    //  Download CSV
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "TimeSheetReportData.csv";
+    link.click();
+  };
 
 
 
@@ -332,7 +337,7 @@ function TimesheetReport() {
       let gropByArray = sortByReference(values)
 
       let lastIndexValue = gropByArray[gropByArray.length - 1];
-    //  console.log("lastIndexValue ", lastIndexValue);
+      //  console.log("lastIndexValue ", lastIndexValue);
 
       if (lastIndexValue == "staff_id") {
         staffData()
@@ -387,8 +392,8 @@ function TimesheetReport() {
 
     }
     else if (key === "internal_external") {
-      
-      
+
+
 
       setFilters((prev) => ({
         ...prev,
@@ -396,16 +401,16 @@ function TimesheetReport() {
       }));
 
       let remainingPart = filters?.groupBy
-      if(value == "1"){
+      if (value == "1") {
         setOptions([])
         let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
         setFilters((prev) => ({
-        ...prev,
-        [key]: value,
-        groupBy: remainingPart,
-        fieldsToDisplay: null,
-        fieldsToDisplayId: null
-       }));
+          ...prev,
+          [key]: value,
+          groupBy: remainingPart,
+          fieldsToDisplay: null,
+          fieldsToDisplayId: null
+        }));
       }
 
 
@@ -519,12 +524,12 @@ function TimesheetReport() {
   ];
 
   const labels = {
-  staff_id: "Staff",
-  customer_id: "Customer",
-  client_id: "Client",
-  job_id: "Job",
-  task_id: "Task"
-};
+    staff_id: "Staff",
+    customer_id: "Customer",
+    client_id: "Client",
+    job_id: "Job",
+    task_id: "Task"
+  };
 
 
 
@@ -632,7 +637,7 @@ function TimesheetReport() {
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">
             {
-              `Select ${labels[lastGroupValue] || "..." }`
+              `Select ${labels[lastGroupValue] || "..."}`
             }
 
             {
@@ -815,43 +820,43 @@ function TimesheetReport() {
           </div>
         ) : (
           <div className='table-responsive'>
-          <table
-            className="table rdt_Table"
-           // className="table table-bordered"
+            <table
+              className="table rdt_Table"
+            // className="table table-bordered"
             // style={{
             //   fontSize: "14px",
             //   width: "100%",
             //   overflowX: "auto",
             //   display: "block",
             // }}
-          >
-            <thead 
-           // className="rdt_TableHead"
             >
-              <tr 
-              className="rdt_TableHeadRow"
+              <thead
+              // className="rdt_TableHead"
               >
-                {showData?.columns?.map((col, idx) => (
-                  <th key={idx} 
-                  style={{ fontSize:"15px", textAlign: "center" ,fontWeight: "bold", minWidth: "130px" }}
-                  >
-                    {getColumnName(col)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {showData?.rows?.map((row, rowIdx) => (
-                <tr key={rowIdx}>
-                  {showData?.columns?.map((col, colIdx) => (
-                    <td key={colIdx} style={{ padding: "8px" , textAlign: "center" }}>
-                      {row[col] !== undefined ? row[col] : ""}
-                    </td>
+                <tr
+                  className="rdt_TableHeadRow"
+                >
+                  {showData?.columns?.map((col, idx) => (
+                    <th key={idx}
+                      style={{ fontSize: "15px", textAlign: "center", fontWeight: "bold", minWidth: "130px" }}
+                    >
+                      {getColumnName(col)}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {showData?.rows?.map((row, rowIdx) => (
+                  <tr key={rowIdx}>
+                    {showData?.columns?.map((col, colIdx) => (
+                      <td key={colIdx} style={{ padding: "8px", textAlign: "center" }}>
+                        {row[col] !== undefined ? row[col] : ""}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
         )}
@@ -877,7 +882,7 @@ function getColumnName(columnKey) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(columnKey)) {
     const date = new Date(columnKey); // convert string to Date
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return `${columnKey} ${days[date.getDay()]} (hrs)`; 
+    return `${columnKey} ${days[date.getDay()]} (hrs)`;
   }
 
   // fallback from map
