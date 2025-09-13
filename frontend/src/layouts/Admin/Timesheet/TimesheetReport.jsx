@@ -393,26 +393,41 @@ function TimesheetReport() {
     }
     else if (key === "internal_external") {
 
-
-
       setFilters((prev) => ({
         ...prev,
         [key]: value
       }));
 
       let remainingPart = filters?.groupBy
+
+      
       if (value == "1") {
         setOptions([])
         let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
+
+        let lastIndexValue = remainingPart[remainingPart.length - 1];
+        console.log("lastIndexValue --- internal ", lastIndexValue);
+        
+        let fieldsToDisplayId = null;
+        if(lastIndexValue == 'staff_id'){
+          fieldsToDisplayId = filters.fieldsToDisplayId
+        }else{
+          fieldsToDisplayId = null
+        }
+
+        
+
+
+
         setFilters((prev) => ({
           ...prev,
           [key]: value,
           groupBy: remainingPart,
           fieldsToDisplay: null,
-          fieldsToDisplayId: null
+          fieldsToDisplayId: fieldsToDisplayId
         }));
       }
-
+      
 
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == 'job_id') {
@@ -422,6 +437,10 @@ function TimesheetReport() {
       } else if (lastIndexValue == 'task_id') {
         setOptions([])
         GetAllTask(value)
+      }
+      else if(lastIndexValue == 'staff_id'){
+        setOptions([])
+        staffData()
       }
 
     }
