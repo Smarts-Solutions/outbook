@@ -371,7 +371,7 @@ function TimesheetReport() {
 
 
     const { key, value, label } = e.target;
-    console.log("Filter changed: ", key, value, label);
+    // console.log("Filter changed: ", key, value, label);
     if (key === "fieldsToDisplay") {
 
       //console.log("Fields to Display changed field: ", value);
@@ -406,7 +406,6 @@ function TimesheetReport() {
         let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
 
         let lastIndexValue = remainingPart[remainingPart.length - 1];
-        console.log("lastIndexValue --- internal ", lastIndexValue);
         
         let fieldsToDisplayId = null;
         if(lastIndexValue == 'staff_id'){
