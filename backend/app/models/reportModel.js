@@ -1342,7 +1342,7 @@ function getPeriodKey(displayBy, dateStr) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
 
-   
+
     switch ((displayBy || 'daily').toLowerCase()) {
         // case 'daily':
         //     return `${y}-${mm}-${dd}`;  // 2025-09-08
@@ -1429,7 +1429,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
                 const weekday = d.toLocaleString("default", { weekday: "short" });
                 const day = String(d.getDate()).padStart(2, "0");
                 const monthName = d.toLocaleString("default", { month: "short" });
-                const yearShort = String(d.getFullYear()).slice(-2);    
+                const yearShort = String(d.getFullYear()).slice(-2);
                 result.push(`${weekday} ${day} ${monthName} ${yearShort}`); // Mon 08 Sep 25
                 current.setDate(current.getDate() + 1);
                 break;
@@ -1508,7 +1508,7 @@ const getTimesheetReportData = async (Report) => {
     } = data.filters;
 
     //console.log("groupBy", groupBy);
-   // console.log("fieldsToDisplayId", fieldsToDisplayId);
+    // console.log("fieldsToDisplayId", fieldsToDisplayId);
     if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
         return { status: false, message: `empty groupBy field`, data: [] };
     }
@@ -1709,7 +1709,7 @@ const getTimesheetReportData = async (Report) => {
             const taskName = r.task_name;
 
             const secs = r.work_hours;
-           // console.log("displayBy", displayBy, "workDateStr", workDateStr);
+            // console.log("displayBy", displayBy, "workDateStr", workDateStr);
             const periodKey = getPeriodKey(displayBy, workDateStr);
             if (!periodKey) continue;
 
@@ -1770,11 +1770,21 @@ const getTimesheetReportData = async (Report) => {
         const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
 
         const columnsWeeks = [...groupBy, ...weeks, 'total_hours'];
-        const columns = [...groupBy, ...periods, 'total_hours'];
+       // const columns = [...groupBy, ...periods, 'total_hours'];
+
+        // console.log("columnsWeeks", columnsWeeks);
+
+       
 
         // console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
         // console.log("displayBy, ", displayBy);
         const finalRows = normalizeRows(columnsWeeks, outRows);
+
+        const fixed = [...groupBy,'total_hours'];
+        const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
+        const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
+
+
 
         // console.log("columns", columns);
         // console.log("outRows", outRows);
@@ -1797,7 +1807,8 @@ const getTimesheetReportData = async (Report) => {
             message: 'Success.',
             data: {
                 meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
-                columns: columnsWeeks,
+                //columns: columnsWeeks,
+                columns: columnsWeeksDecOrder,
                 rows: finalRows
             }
         };
@@ -1902,7 +1913,7 @@ const missingTimesheetReport = async (Report) => {
             .map(i => i.staff_id);
 
         //console.log("staffsCurrentWeek", staffsCurrentWeek);
-       // console.log("filterDataWeekRows", filterDataWeekRows);
+        // console.log("filterDataWeekRows", filterDataWeekRows);
 
     } else {
         staffsCurrentWeek = filterDataWeekRows
