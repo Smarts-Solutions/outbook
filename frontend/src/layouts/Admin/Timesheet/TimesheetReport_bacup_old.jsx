@@ -19,23 +19,20 @@ function TimesheetReport() {
   const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
 
-  console.log("showData ", showData);
+  // console.log("showData ", showData);
 
   const [filters, setFilters] = useState({
-    groupBy: ["staff_id"],
-    internal_external: "2",
+    groupBy: "employee",
+    internal_external: "1",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
-    timePeriod: "this_month",
-    displayBy: "Weekly",
+    timePeriod: "this_week",
+    displayBy: "Daily",
     fromDate: null,
     toDate: null,
   });
 
-  let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
-
-
-  //  console.log("lastGroupValue ", lastGroupValue);
+  // console.log("staffDetails ", staffDetails);
 
 
 
@@ -221,109 +218,66 @@ function TimesheetReport() {
   };
 
 
-  // const exportToCSV = (showData) => {
-  //   if (!showData || showData.length === 0) {
-  //     alert("No data to export!");
-  //     return;
-  //   }
-
-  //   // Headers as per <thead>
-  //   const headers = [
-  //     "Staff",
-  //     "Internal/External",
-  //     "Customer",
-  //     "Client",
-  //     "Job",
-  //     "Task",
-  //     "Mon (hrs)",
-  //     "Tue (hrs)",
-  //     "Wed (hrs)",
-  //     "Thu (hrs)",
-  //     "Fri (hrs)",
-  //     "Date",
-  //   ];
-
-  //   // Rows mapping data keys to headers
-  //   const rows = showData.map((item) => {
-  //     return [
-  //       item.staff_fullname || "-", // Staff
-  //       item.internal_external || "-", // Internal/External
-  //       item.customer_name ?? "-", // Customer
-  //       item.client_code ?? "-", // Client
-  //       item.job_name || "-", // Job
-  //       item.task_name || "-", // Task
-  //       item.monday_hours || "-", // Mon
-  //       item.tuesday_hours || "-", // Tue
-  //       item.wednesday_hours || "-", // Wed
-  //       item.thursday_hours || "-", // Thu
-  //       item.friday_hours || "-", // Fri
-  //       item.created_at ? dayjs(item.created_at).format("DD-MM-YYYY") : "-", // Date
-  //     ];
-  //   });
-
-  //   // CSV content
-  //   const csvContent = [headers, ...rows]
-  //     .map((row) =>
-  //       row
-  //         .map((val) =>
-  //           typeof val === "string" && val.includes(",")
-  //             ? `"${val}"` // agar string me comma ho to quotes me wrap
-  //             : val
-  //         )
-  //         .join(",")
-  //     )
-  //     .join("\n");
-
-  //   // Download CSV
-  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  //   const link = document.createElement("a");
-  //   link.href = URL.createObjectURL(blob);
-  //   link.download = "TimeSheetReportData.csv";
-  //   link.click();
-  // };
-
-  const exportToCSV = (data) => {
-    if (!data || !data.rows || data.rows.length === 0) {
+  const exportToCSV = (showData) => {
+    if (!showData || showData.length === 0) {
       alert("No data to export!");
       return;
     }
 
-    //  Headers dynamically from data.columns
-    //  const headers = data.columns;
-    const colMap = {
-      staff_id: "Staff Name",
-      customer_id: "Customer Name",
-      client_id: "Client Name",
-      job_id: "Job Name",
-      task_id: "Task Name",
-      total_hours: "Total Hours"
-    };
-    const headers = data.columns.map(col => colMap[col] || col);
+    // Headers as per <thead>
+    const headers = [
+      "Staff",
+      "Internal/External",
+      "Customer",
+      "Client",
+      "Job",
+      "Task",
+      "Mon (hrs)",
+      "Tue (hrs)",
+      "Wed (hrs)",
+      "Thu (hrs)",
+      "Fri (hrs)",
+      "Date",
+    ];
 
- 
-    const rows = data.rows.map((row) => {
-    return data.columns.map((col) => {
-      let val = row[col];
-      if (val === undefined || val === null) val = "-";
-
-      if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
-      return val;
+    // Rows mapping data keys to headers
+    const rows = showData.map((item) => {
+      return [
+        item.staff_fullname || "-", // Staff
+        item.internal_external || "-", // Internal/External
+        item.customer_name ?? "-", // Customer
+        item.client_code ?? "-", // Client
+        item.job_name || "-", // Job
+        item.task_name || "-", // Task
+        item.monday_hours || "-", // Mon
+        item.tuesday_hours || "-", // Tue
+        item.wednesday_hours || "-", // Wed
+        item.thursday_hours || "-", // Thu
+        item.friday_hours || "-", // Fri
+        item.created_at ? dayjs(item.created_at).format("DD-MM-YYYY") : "-", // Date
+      ];
     });
-  });
 
-    //  CSV content
+    // CSV content
     const csvContent = [headers, ...rows]
-      .map((r) => r.join(",")) // join by comma
-      .join("\n"); // join rows by newline
+      .map((row) =>
+        row
+          .map((val) =>
+            typeof val === "string" && val.includes(",")
+              ? `"${val}"` // agar string me comma ho to quotes me wrap
+              : val
+          )
+          .join(",")
+      )
+      .join("\n");
 
-    //  Download CSV
+    // Download CSV
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "TimeSheetReportData.csv";
     link.click();
   };
-
 
 
   const handleFilterChange = (e) => {
@@ -334,30 +288,48 @@ function TimesheetReport() {
       const labels = e.map((opt) => opt.label);
       // console.log("Filter changed (multi): ", "groupBy", values, labels);
       setOptions([]);
-      let gropByArray = sortByReference(values)
+     let gropByArray = sortByReference(values)
 
-      let lastIndexValue = gropByArray[gropByArray.length - 1];
-      //  console.log("lastIndexValue ", lastIndexValue);
+     let lastIndexValue = gropByArray[gropByArray.length - 1];
+      console.log("lastIndexValue ", lastIndexValue);
 
-      if (lastIndexValue == "staff_id") {
+     if (lastIndexValue == "employee") {
         staffData()
       }
 
-      else if (lastIndexValue == "customer_id") {
+      else if (lastIndexValue == "customer") {
         GetAllCustomer()
       }
 
-      else if (lastIndexValue == "client_id") {
+      else if (lastIndexValue == "client") {
         GetAllClient()
       }
 
-      else if (lastIndexValue == "job_id") {
+      else if (lastIndexValue == "job") {
         GetAllJobs(filters.internal_external)
       }
 
-      else if (lastIndexValue == "task_id") {
+      else if (lastIndexValue == "task") {
         GetAllTask(filters.internal_external)
       }
+
+
+      // multiple selected values ke hisab se apne functions call karna h
+      // if (values.includes("employee")) {
+      //   staffData();
+      // }
+      // if (values.includes("customer")) {
+      //   GetAllCustomer();
+      // }
+      // if (values.includes("client")) {
+      //   GetAllClient();
+      // }
+      // if (values.includes("job")) {
+      //   GetAllJobs(filters.internal_external);
+      // }
+      // if (values.includes("task")) {
+      //   GetAllTask(filters.internal_external);
+      // }
 
       setFilters((prev) => ({
         ...prev,
@@ -370,9 +342,44 @@ function TimesheetReport() {
     }
 
 
+
+
+
     const { key, value, label } = e.target;
-    // console.log("Filter changed: ", key, value, label);
-    if (key === "fieldsToDisplay") {
+     console.log("Filter changed: ", key, value, label);
+
+    if (key === "groupBy") {
+      setOptions([])
+      //console.log("Group By changed: ", value);
+      if (value == "employee") {
+        staffData()
+      }
+
+      else if (value == "customer") {
+        GetAllCustomer()
+      }
+
+      else if (value == "client") {
+        GetAllClient()
+      }
+
+      else if (value == "job") {
+        GetAllJobs(filters.internal_external)
+      }
+
+      else if (value == "task") {
+        GetAllTask(filters.internal_external)
+      }
+
+      setFilters((prev) => ({
+        ...prev,
+        fieldsToDisplay: null,
+        fieldsToDisplayId: null,
+        [key]: value
+      }));
+
+    }
+    else if (key === "fieldsToDisplay") {
 
       //console.log("Fields to Display changed field: ", value);
 
@@ -392,54 +399,18 @@ function TimesheetReport() {
 
     }
     else if (key === "internal_external") {
-
       setFilters((prev) => ({
         ...prev,
         [key]: value
       }));
-
-      let remainingPart = filters?.groupBy
-
-      
-      if (value == "1") {
-        setOptions([])
-        let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
-
-        let lastIndexValue = remainingPart[remainingPart.length - 1];
-        
-        let fieldsToDisplayId = null;
-        if(lastIndexValue == 'staff_id'){
-          fieldsToDisplayId = filters.fieldsToDisplayId
-        }else{
-          fieldsToDisplayId = null
-        }
-
-        
-
-
-
-        setFilters((prev) => ({
-          ...prev,
-          [key]: value,
-          groupBy: remainingPart,
-          fieldsToDisplay: null,
-          fieldsToDisplayId: fieldsToDisplayId
-        }));
-      }
-      
-
-      let lastIndexValue = remainingPart[remainingPart.length - 1];
-      if (lastIndexValue == 'job_id') {
+      let lastIndexValue = filters.groupBy[filters.groupBy.length - 1];
+      if (lastIndexValue == 'job') {
         setOptions([])
         console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value)
-      } else if (lastIndexValue == 'task_id') {
+      } else if (lastIndexValue == 'task') {
         setOptions([])
         GetAllTask(value)
-      }
-      else if(lastIndexValue == 'staff_id'){
-        setOptions([])
-        staffData()
       }
 
     }
@@ -505,19 +476,22 @@ function TimesheetReport() {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external]);
+
+
+
 
 
   // console.log("filters ", filters);
 
   const resetFunction = () => {
     setFilters({
-      groupBy: [],
-      internal_external: "2",
+      groupBy: "employee",
+      internal_external: "1",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
-      timePeriod: "",
-      displayBy: "",
+      timePeriod: "this_week",
+      displayBy: "Daily",
       fromDate: null,
       toDate: null,
     })
@@ -525,32 +499,13 @@ function TimesheetReport() {
     staffData();
   }
 
-  // const optionGroupBy = [
-  //   { value: "staff_id", label: "Staff" },
-  //   { value: "customer_id", label: "Customer" },
-  //   { value: "client_id", label: "Client" },
-  //   { value: "job_id", label: "Job" },
-  //   { value: "task_id", label: "Task" }
-  // ];
-
   const optionGroupBy = [
-    { value: "staff_id", label: "Staff" },
-    ...(filters?.internal_external == '2' ? [{ value: "customer_id", label: "Customer" }] : []),
-    ...(filters?.internal_external == '2' ? [{ value: "client_id", label: "Client" }] : []),
-    { value: "job_id", label: "Job" },
-    { value: "task_id", label: "Task" }
+    { value: "employee", label: "Staff" },
+    { value: "customer", label: "Customer" },
+    { value: "client", label: "Client" },
+    { value: "job", label: "Job" },
+    { value: "task", label: "Task" }
   ];
-
-  const labels = {
-    staff_id: "Staff",
-    customer_id: "Customer",
-    client_id: "Client",
-    job_id: "Job",
-    task_id: "Task"
-  };
-
-
-
   const orderMap = {};
   for (let i = 0; i < optionGroupBy.length; i++) {
     orderMap[optionGroupBy[i].value] = i;
@@ -562,7 +517,7 @@ function TimesheetReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
-  console.log("Filters: ", filters);
+  console.log("Filters after reset: ", filters);
 
 
 
@@ -655,12 +610,16 @@ function TimesheetReport() {
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">
             {
-              `Select ${labels[lastGroupValue] || "..."}`
+              'Select '
             }
 
+            {/* {filters.groupBy == "employee" ? "Staff" : filters.groupBy.charAt(0).toUpperCase() + filters.groupBy.slice(1)
+            } */}
+
             {
-              lastGroupValue == "job_id" || lastGroupValue == "task_id" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
+              filters.groupBy == "job" || filters.groupBy == "task" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
             }
+
 
           </label>
 
@@ -702,7 +661,6 @@ function TimesheetReport() {
               })
             }
           >
-            <option value={""}>--Select--</option>
             <option value={"this_week"}>This week</option>
             <option value={"last_week"}>Last Week</option>
             <option value={"this_month"}>This month</option>
@@ -800,12 +758,9 @@ function TimesheetReport() {
               })
             }
           >
-            <option value={""}>--Select--</option>
             <option value={"Daily"}>Daily</option>
             <option value={"Weekly"}>Weekly</option>
             <option value={"Monthly"}>Monthly</option>
-            <option value={"Fortnightly"}>Fortnightly</option>
-            <option value={"Quarterly"}>Quarterly</option>
             <option value={"Yearly"}>Yearly</option>
           </select>
         </div>
@@ -823,11 +778,21 @@ function TimesheetReport() {
       </div>
 
 
+
+
+      {/* Buttons */}
+      {/* <div className="d-flex gap-2 align-items-center mb-4">
+    
+        <button className="btn btn-info" id="btn-export"
+          onClick={exportExcel}>
+          Export Data
+        </button>
+      </div> */}
+
       {/* Filtered Data Display */}
       <div className='datatable-container'>
         {/* <h6>Filtered Data:</h6> */}
-        {console.log("showData?.rows ", showData?.rows)}
-        {showData?.rows == undefined || showData?.rows?.length === 0 ? (
+        {showData.length === 0 ? (
           <div className='text-center'>
             <img
               src={noDataImage}
@@ -837,74 +802,52 @@ function TimesheetReport() {
             <p className='fs-16'>There are no records to display</p>
           </div>
         ) : (
-          <div className='table-responsive'>
-            <table
-              className="table rdt_Table"
-            // className="table table-bordered"
-            // style={{
-            //   fontSize: "14px",
-            //   width: "100%",
-            //   overflowX: "auto",
-            //   display: "block",
-            // }}
-            >
-              <thead
-              // className="rdt_TableHead"
-              >
-                <tr
-                  className="rdt_TableHeadRow"
-                >
-                  {showData?.columns?.map((col, idx) => (
-                    <th key={idx}
-                      style={{ fontSize: "15px", textAlign: "center", fontWeight: "bold", minWidth: "130px" }}
-                    >
-                      {getColumnName(col)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {showData?.rows?.map((row, rowIdx) => (
-                  <tr key={rowIdx}>
-                    {showData?.columns?.map((col, colIdx) => (
-                      <td key={colIdx} style={{ padding: "8px", textAlign: "center" }}>
-                        {row[col] !== undefined ? row[col] : ""}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <table className="table rdt_Table" style={{ fontSize: '14px', width: '100%', overflowX: 'auto', display: 'block' }}>
+            <thead className=' rdt_TableHead'>
+              <tr className='rdt_TableHeadRow'>
+                <th className='rdt_TableCol border-bottom-0 '>Staff</th>
+                <th className='rdt_TableCol border-bottom-0'>Internal/External</th>
+                <th className='rdt_TableCol border-bottom-0'>Customer</th>
+                <th className='rdt_TableCol border-bottom-0'>Client</th>
+                <th className='rdt_TableCol border-bottom-0'>Job</th>
+                <th className='rdt_TableCol border-bottom-0'>Task</th>
+                <th className='rdt_TableCol border-bottom-0'>Mon (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Tue (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Wed (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Thu (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Fri (hrs)</th>
+                <th className='rdt_TableCol border-bottom-0'>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {showData && showData?.map((item, idx) => (
+                <tr key={idx}>
+                  {/* <td>{`${item.staff_fullname} (${item.staff_email})`}</td> */}
+                  <td>{`${item.staff_fullname}`}</td>
+                  <td>{item.internal_external}</td>
+                  <td>{item.customer_name ?? '-'}</td>
+                  <td>{item.client_code ?? '-'}</td>
+                  <td>{item.job_name}</td>
+                  <td>{item.task_name}</td>
+                  <td>{item.monday_hours || "-"}</td>
+                  <td>{item.tuesday_hours || "-"}</td>
+                  <td>{item.wednesday_hours || "-"}</td>
+                  <td>{item.thursday_hours || "-"}</td>
+                  <td>{item.friday_hours || "-"}</td>
+                  <td>{dayjs(item.created_at).format("DD-MM-YYYY")}</td>
 
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
   );
 
-}
 
 
-function getColumnName(columnKey) {
-  const dayMap = {
-    staff_id: "Staff",
-    customer_id: "Customer",
-    client_id: "Client",
-    job_id: "Job",
-    task_id: "Task",
-    total_hours: "Total Hours",
-    total_records: "Total Records",
-  };
 
-  // ✅ check if columnKey is a date string (yyyy-mm-dd format)
-  if (/^\d{4}-\d{2}-\d{2}$/.test(columnKey)) {
-    const date = new Date(columnKey); // convert string to Date
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return `${columnKey} ${days[date.getDay()]} (hrs)`;
-  }
-
-  // fallback from map
-  return dayMap[columnKey] || columnKey;
 }
 
 export default TimesheetReport;
