@@ -4684,9 +4684,9 @@ select#tabSelect {
   padding: 0 !important;
 }
 
-.rdt_TableHead {
+/* .rdt_TableHead {
   z-index: unset !important;
-}
+} */
 i.exp_icon {
   color: #00afef;
   margin-top: 3px;
@@ -4831,3 +4831,26 @@ tbody.list.form-check-all tr:last-child td {
 .css-13cymwt-control{
   border-radius: 20px !important;
 }
+.fixed-table-header {
+  max-height: 400px; /* scrollable height */
+  overflow-y: auto;  /* vertical scroll enable */
+}
+
+.fixed-table-header .rdt_Table thead th {
+  position: sticky;  /* sticky header */
+  top: 0;            /* top position */
+  text-align: left;
+ 
+}
+
+
+.fixed-table-header  .rdt_Table {
+  border-collapse: separate; 
+  border-spacing: 0 10px;   
+  width: 100%;
+}
+.fixed-table-header  .rdt_Table  td {
+border-bottom-width: 4px;
+    text-align: left;
+}
+
