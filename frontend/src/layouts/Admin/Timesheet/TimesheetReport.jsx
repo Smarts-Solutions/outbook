@@ -432,7 +432,7 @@ function TimesheetReport() {
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == 'job_id') {
         setOptions([])
-        console.log("Internal/External changed, calling GetAllJobs with: ", value);
+       // console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value)
       } 
       else if (lastIndexValue == 'task_id') {
