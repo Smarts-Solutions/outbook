@@ -393,14 +393,8 @@ function TimesheetReport() {
     }
     else if (key === "internal_external") {
 
-      setFilters((prev) => ({
-        ...prev,
-        [key]: value
-      }));
-
       let remainingPart = filters?.groupBy
 
-      
       if (value == "1") {
         setOptions([])
         let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
@@ -408,14 +402,16 @@ function TimesheetReport() {
         let lastIndexValue = remainingPart[remainingPart.length - 1];
         
         let fieldsToDisplayId = null;
-        if(lastIndexValue == 'staff_id'){
-          fieldsToDisplayId = filters.fieldsToDisplayId
-        }else{
+         if(lastIndexValue == 'staff_id'){
+          if(filters?.groupBy.some(item => ['customer_id','client_id'].includes(item))){
+            fieldsToDisplayId = null
+          }else{
+            fieldsToDisplayId = filters.fieldsToDisplayId
+          }
+          staffData()
+         }else{
           fieldsToDisplayId = null
         }
-
-        
-
 
 
         setFilters((prev) => ({
@@ -425,6 +421,11 @@ function TimesheetReport() {
           fieldsToDisplay: null,
           fieldsToDisplayId: fieldsToDisplayId
         }));
+      }else{
+        setFilters((prev) => ({
+        ...prev,
+        [key]: value
+      }));
       }
       
 
@@ -433,7 +434,8 @@ function TimesheetReport() {
         setOptions([])
         console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value)
-      } else if (lastIndexValue == 'task_id') {
+      } 
+      else if (lastIndexValue == 'task_id') {
         setOptions([])
         GetAllTask(value)
       }
