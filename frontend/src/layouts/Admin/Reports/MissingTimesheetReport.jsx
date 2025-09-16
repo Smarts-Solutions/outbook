@@ -13,7 +13,6 @@ const MissingTimesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [missingTimesheetReportData, setMissingTimesheetReportData] = useState([]);
 
-
   useEffect(() => {
     MissingTimesheet();
   }, []);
