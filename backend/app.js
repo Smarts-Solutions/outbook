@@ -13,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 require("./app/routes")(app);
+require("./app/cron/cron")(app);
 
 // Get Token Process
 // const client_id = "376ee1a2-3c24-48ac-b7cc-9a09f66b9e21";
