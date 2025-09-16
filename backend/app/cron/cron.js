@@ -5,8 +5,9 @@ const { missingTimesheetReport } = require("../models/reportModel");
 const { commonEmail } = require("../utils/commonEmail");
 module.exports = (app) => {
   // Schedule tasks to be run on the server.
-  cron.schedule("03 15 * * *", async () => {
-    console.log("Running a task every minute");
+//   cron.schedule("03 15 * * *", async () => {
+  cron.schedule("0 9 * * 1", async () => {
+  //  console.log("Running a task every Monday at 09:00 AM");
     try {
       const reportData = await missingTimesheetReport({ StaffUserId: 1, data: { action: 'missingTimesheetReport' } });
        // console.log("Missing Timesheet Report Data:", reportData);
