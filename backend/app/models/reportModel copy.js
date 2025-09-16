@@ -1843,7 +1843,100 @@ const missingTimesheetReport = async (Report) => {
     }
 
     where = `WHERE ${where.join(" AND ")}`;
-    let query_last_week_filter = `
+
+    //  Main staff query (already grouped by staff)
+    //     let query = `
+    //     SELECT 
+    //        CONCAT(st.first_name,' ',st.last_name) AS staff_fullname,
+    //        st.email AS staff_email,
+    //        st.id AS staff_id
+    //     FROM timesheet ts
+    //     JOIN staffs st ON st.id = ts.staff_id
+    //     ${where}
+    //     GROUP BY ts.staff_id
+    //   `;
+
+    let query = `
+      SELECT 
+        CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+        st.email AS staff_email,
+        st.id AS staff_id
+        FROM staffs st
+        LEFT JOIN timesheet ts ON st.id = ts.staff_id
+        ${where}   
+        GROUP BY st.id, st.first_name, st.last_name, st.email;
+        `;
+
+
+    console.log("query", query);
+
+
+
+    //  Optimized week filter query
+    //     let query_week_filter = `
+    //     SELECT  
+    //       ts.id,
+    //       ts.staff_id,
+    //       COALESCE(
+    //         DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+    //         DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+    //         DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+    //         DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+    //         DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+    //         DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+    //         DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+    //       ) AS month_date,
+    //       CONCAT(
+    //         TIMESTAMPDIFF(WEEK, CURDATE(), 
+    //           COALESCE(ts.monday_date, ts.tuesday_date, ts.wednesday_date, ts.thursday_date, ts.friday_date, ts.saturday_date, ts.sunday_date)
+    //         ), ' '
+    //       ) AS valid_weekOffsets
+    //     FROM timesheet ts
+    //     ${where}
+    //     GROUP BY ts.staff_id, valid_weekOffsets, month_date
+    //     ORDER BY valid_weekOffsets ASC
+    //   `;
+
+//     let query_week_filter = `
+//   SELECT  
+//     CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+//     st.email AS staff_email,
+//     st.id AS staff_id,
+//     COALESCE(
+//       DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+//       DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+//       DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+//       DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+//       DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+//       DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+//       DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+//     ) AS month_date,
+
+//     CONCAT(
+//       TIMESTAMPDIFF(
+//         WEEK,
+//         CURDATE(),
+//         COALESCE(
+//           ts.monday_date,
+//           ts.tuesday_date,
+//           ts.wednesday_date,
+//           ts.thursday_date,
+//           ts.friday_date,
+//           ts.saturday_date,
+//           ts.sunday_date
+//         )
+//       ), ' '
+//     ) AS valid_weekOffsets
+
+//   FROM staffs st
+//   LEFT JOIN timesheet ts ON st.id = ts.staff_id
+//   ${where}
+//   GROUP BY 
+//     st.id, st.first_name, st.last_name, st.email, valid_weekOffsets, month_date
+//   ORDER BY valid_weekOffsets ASC;
+// `;
+
+    let query_week_filter = `
             SELECT 
             CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
             st.email AS staff_email,
@@ -1877,14 +1970,87 @@ const missingTimesheetReport = async (Report) => {
         ORDER BY st.first_name ASC;
     `
 
-    const [result] = await pool.execute(query_last_week_filter);
-    console.log("result", result);
+
+
+    //  Optimized week filter query
+
+
+    // run queries in parallel
+    const [[filterDataWeekRows], [staffRows]] = await Promise.all([
+        pool.query(query_week_filter),
+        pool.query(query)
+    ]);
+
+    console.log("filterDataWeekRows", filterDataWeekRows);
+    console.log("staffRows", staffRows);
+
+    // filter out "0" offsets at once
+    // const groupedWeekData = filterDataWeekRows
+    //     .filter(item => item.valid_weekOffsets.trim() !== '0')
+    //     .reduce((acc, item) => {
+    //         const key = item.valid_weekOffsets + '_' + item.month_date;
+    //         if (!acc[key]) {
+    //             acc[key] = {
+    //                 valid_weekOffsets: item.valid_weekOffsets,
+    //                 month_date: item.month_date
+    //             };
+    //         }
+    //         return acc;
+    //     }, {});
+
+    const groupedWeekData = filterDataWeekRows
+        .filter(item => {
+            const val = item.valid_weekOffsets;
+            // null / undefined handle + only skip exact '0'
+            return val !== null && val !== undefined && String(val).trim() !== '0';
+        })
+        .reduce((acc, item) => {
+            const key = `${item.valid_weekOffsets || 'NA'}_${item.month_date || 'NA'}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    valid_weekOffsets: item.valid_weekOffsets,
+                    month_date: item.month_date
+                };
+            }
+            return acc;
+        }, {});
+
+    let staffsCurrentWeek;
+    if (data.filterStaffIds === "") {
+        // staffsCurrentWeek = filterDataWeekRows
+        //     .filter(item => item.valid_weekOffsets.includes('0'))
+        //     .map(i => i.staff_id);
+
+        staffsCurrentWeek = filterDataWeekRows
+            .filter(item =>
+                item.submit_status === '0' ||
+                item.submit_status === 0 ||
+                item.submit_status === null
+            )?.map(i => i.staff_id);
+
+
+
+        //console.log("staffsCurrentWeek", staffsCurrentWeek);
+        // console.log("filterDataWeekRows", filterDataWeekRows);
+
+    } else {
+        staffsCurrentWeek = filterDataWeekRows
+            .filter(item => item.valid_weekOffsets.includes(data.filterStaffIds))
+            .map(i => i.staff_id);
+    }
+
+
+    console.log("staffsCurrentWeek", staffsCurrentWeek);
+
+    // only keep staff in current week
+    const filteredStaff = staffRows.filter(s => staffsCurrentWeek.includes(s.staff_id));
 
     return {
         status: true,
         message: 'Success.',
         data: {
-            result: result
+            result: filteredStaff,
+            filterDataWeek: Object.values(groupedWeekData)
         }
     };
 };
