@@ -859,6 +859,11 @@ const CreateJob = () => {
             "500+",
           ],
         },
+        {
+          name: "Year Ending",
+          key: "Year_Ending_id_1",
+          type: "date",   // date input field
+        },
       ],
     },
     {
@@ -1113,6 +1118,23 @@ const CreateJob = () => {
             "Other",
           ],
         },
+        {
+          name: "Tax Year",
+          key: "Tax_Year_id_4",
+          type: "dropdown",
+          options: [
+            "2018/19",
+            "2019/20",
+            "2020/21",
+            "2021/22",
+            "2022/23",
+            "2023/24",
+            "2024/25",
+            "2025/26",
+            "2026/27",
+            "2027/28",
+          ],
+        },
       ],
     },
     {
@@ -1127,6 +1149,16 @@ const CreateJob = () => {
           key: "Management_Accounts_Frequency_id_6",
           type: "dropdown",
           options: ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly"],
+        },
+        {
+          name: "From Date",
+          key: "Management_Accounts_FromDate_id_6",
+          type: "date",
+        },
+        {
+          name: "To Date",
+          key: "Management_Accounts_ToDate_id_6",
+          type: "date",
         },
       ],
     },
@@ -1366,6 +1398,43 @@ const CreateJob = () => {
           name: "Year Ending",
           key: "Audit_Year_Ending_id_27",
           type: "date",   // date input field
+        },
+      ],
+    },
+    {
+      id: 8, // VAT Returns
+      fields: [
+        {
+          name: "Filing Frequency",
+          key: "Filing_Frequency_id_8",
+          type: "dropdown",
+          options: ["Monthly", "Quarterly", "Yearly"],
+        },
+        {
+          name: "Period Ending Date",
+          key: "Period_Ending_Date_id_8",
+          type: "date",
+          showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] },
+        },
+        {
+          name: "Filing Date",
+          key: "Filing_Date_id_8",
+          type: "date",
+          showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] },
+        },
+      ],
+    },
+    {
+      id: 28, // Aus - SMSF
+      fields: [
+        {
+          name: "Year",
+          key: "Year_id_28",
+          type: "dropdown",
+          options: Array.from({ length: 5 }, (_, i) => {
+            const year = new Date().getFullYear() - (i + 1);
+            return year.toString();
+          }),
         },
       ],
     }
