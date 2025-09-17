@@ -353,7 +353,7 @@ const jobAdd = async (job) => {
   } = job;
 
   // console.log("selectedStaffData", selectedStaffData);
-   console.log("job", job);
+  // console.log("job", job);
 
   
 
