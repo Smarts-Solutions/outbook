@@ -1291,7 +1291,7 @@ const EditJob = () => {
         // ==================== WEEKLY ====================
         {
           name: "Year",
-          key: "Payroll_Week_Year_id_31",
+          key: "Payroll_Week_Year_id_3",
           type: "dropdown",
           options: getLastFiveYears(),
           showIf: { Payroll_Frequency_id_3: "Weekly" },

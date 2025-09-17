@@ -988,6 +988,9 @@ const CreateJob = () => {
           showIf: { Bookkeeping_Frequency_id_2: "Other"},
         },
 
+
+
+
         {
           name: "Number of Total Transactions",
           key: "Number_of_Total_Transactions_id_2",
@@ -1117,7 +1120,7 @@ const CreateJob = () => {
         // ==================== WEEKLY ====================
         {
           name: "Year",
-          key: "Payroll_Week_Year_id_31",
+          key: "Payroll_Week_Year_id_3",
           type: "dropdown",
           options: getLastFiveYears(),
           showIf: { Payroll_Frequency_id_3: "Weekly" },
