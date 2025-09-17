@@ -1102,11 +1102,33 @@ const CreateJob = () => {
       id: 7, // Company Secretarial
       fields: [],
     },
+    {
+      id: 33, // Aus - Compliance
+      // Aus - Compliance: Year - This should be dropdown of all the years starting with previous 5 years
+      fields: [
+        {
+          name: "Previous Year",
+          key: "Previous_Year_id_33",
+          type: "dropdown",
+          options: Array.from({ length: 11 }, (_, i) => {
+            const year = new Date().getFullYear() - 5 + i;
+            return year.toString();
+          }),
+        },
+      ],
+    },
+    
   ];
+
+
+  console.log("serviceFields", serviceFields);
+  console.log("jobData?.Service", jobData?.Service);
+
 
   useEffect(() => {
     setServiceFieldsData(
-      serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+    //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+      serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
     );
 
 
@@ -1121,6 +1143,8 @@ const CreateJob = () => {
     }
 
   }, [jobData?.Service]);
+
+
 
 
 
