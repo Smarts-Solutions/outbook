@@ -876,11 +876,118 @@ const CreateJob = () => {
           options: [
             "Daily",
             "Weekly",
+            "Fortnightly",
             "Monthly",
             "Quarterly",
             "Yearly",
+            "Other",
           ],
         },
+
+
+         // Day
+        {
+          name: "Select Date",
+          key: "Day_Date_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Daily" },
+        },
+        // Week
+        {
+          name: "Year",
+          key: "Week_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+        },
+        {
+          name: "Month",
+          key: "Week_Month_id_2",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
+        },
+        {
+          name: "Week",
+          key: "Week_id_2",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
+        },
+        // Fortnight
+        {
+          name: "Year",
+          key: "Fortnight_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
+        },
+        {
+          name: "Month",
+          key: "Fortnight_Month_id_2",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
+        },
+        {
+          name: "Fortnight",
+          key: "Fortnight_id_2",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
+        },
+        // Month
+        {
+          name: "Year",
+          key: "Month_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
+        },
+        {
+          name: "Month",
+          key: "Month_id_2",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
+        },
+        // Quarter
+        {
+          name: "Year",
+          key: "Quarter_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
+        },
+        {
+          name: "Quarter",
+          key: "Quarter_id_2",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
+        },
+        // Year
+        {
+          name: "Year",
+          key: "Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Yearly"},
+        },
+        // Other
+        {
+          name: "From Date",
+          key: "Other_FromDate_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Other"},
+        },
+        {
+          name: "To Date",
+          key: "Other_ToDate_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Other"},
+        },
+
         {
           name: "Number of Total Transactions",
           key: "Number_of_Total_Transactions_id_2",
@@ -1000,12 +1107,112 @@ const CreateJob = () => {
           type: "dropdown",
           options: [
             "Weekly",
+            "Fortnightly",
             "Monthly",
             "Quarterly",
             "Yearly",
-            "Weekly & Monthly",
           ],
         },
+
+        // ==================== WEEKLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Week_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Week_Month_id_3",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+        {
+          name: "Week",
+          key: "Payroll_Week_id_3",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+
+        // ==================== FORTNIGHTLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Fortnight_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Fortnightly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Fortnight_Month_id_3",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_3: "Fortnightly" },
+        },
+        {
+          name: "Fortnight",
+          key: "Payroll_Fortnight_id_3",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Payroll_Frequency_id_3: "Fortnightly" },
+        },
+
+        // ==================== MONTHLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Month_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Monthly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Month_id_3",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_3: "Monthly" },
+        },
+
+        // ==================== QUARTERLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Quarter_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Quarterly" },
+        },
+        {
+          name: "Quarter",
+          key: "Payroll_Quarter_id_3",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Payroll_Frequency_id_3: "Quarterly" },
+        },
+
+        // ==================== YEARLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Yearly" },
+        },
+
+
+
+
+
+
+
+
+
+
+
+
+
         {
           name: "Type of Payslip",
           key: "Type_of_Payslip_id_3",
@@ -1170,8 +1377,8 @@ const CreateJob = () => {
       id: 33, // Aus - Compliance
       fields: [
         {
-          name: "Previous Year",
-          key: "Previous_Year_id_33",
+          name: "Year",
+          key: "Year_id_33",
           type: "dropdown",
           options: Array.from({ length: 5 }, (_, i) => {
             const year = new Date().getFullYear() - (i + 1);
