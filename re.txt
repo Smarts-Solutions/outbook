@@ -52,7 +52,8 @@ P & P Infotech
 1
 Unblock Amenit...
 2,379
-c. Aus - Payroll: First ask the frequency with the options as Weekly, Fortnightly, Monthly, Quarterly, Yearly. Then based on the selection, ask the further details as explained above d. Aus - SMSF: Year - this should be dropdown starting with previous 5 years
+c. Aus - Payroll: First ask the frequency with the options as Weekly, Fortnightly, Monthly, Quarterly, Yearly. Then based on the selection, ask the further details as explained above 
+d. Aus - SMSF: Year - this should be dropdown starting with previous 5 years
 e. Audit: Year Ending - this should be a date field
 g. VAT Returns - Dropdown which is either Monthly, Quarterly or Yearly. Based on the selection then Show the Period Ending Date - it should be a date field. Then Filing Date h. Company Secretarial: Year End Date - this is a date field
 i. Management Accounts: From Date and To Date

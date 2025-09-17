@@ -731,6 +731,38 @@ const CreateJob = () => {
     jobModalSetStatus(false);
   };
 
+
+
+  // Years (last 5 + current)
+  const getLastFiveYears = () => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+  };
+
+  // Months
+  const getMonths = () => [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Quarters
+  const getQuarters = () => ["Q1", "Q2", "Q3", "Q4"];
+
+
+  // helper functions (copy once globally)
+  const matchesCondition = (expected, actual) => {
+    if (Array.isArray(expected)) return expected.map(String).includes(String(actual));
+    return String(expected) === String(actual);
+  };
+
+  const shouldShowField = (field, values) => {
+    if (!field.showIf) return true; // no condition → always show
+    return Object.entries(field.showIf).every(([depKey, depVal]) => {
+      return matchesCondition(depVal, values[depKey]);
+    });
+  };
+
+
   const serviceFields = [
     {
       id: 0, // Common fields (default)
@@ -1116,6 +1148,229 @@ const CreateJob = () => {
         },
       ],
     },
+    {
+      id: 32, // Aus - Bookkeeping
+      fields: [
+        {
+          name: "Period",
+          key: "Period_id_32",
+          type: "dropdown",
+          options: ["Day", "Week", "Fortnight", "Month", "Quarter", "Year", "Other"],
+        },
+        // Day
+        {
+          name: "Select Date",
+          key: "Day_Date_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Day" },
+        },
+        // Week
+        {
+          name: "Year",
+          key: "Week_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Week" },
+        },
+        {
+          name: "Month",
+          key: "Week_Month_id_32",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Period_id_32: "Week" },
+        },
+        {
+          name: "Week",
+          key: "Week_id_32",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Period_id_32: "Week" },
+        },
+        // Fortnight
+        {
+          name: "Year",
+          key: "Fortnight_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Fortnight" },
+        },
+        {
+          name: "Month",
+          key: "Fortnight_Month_id_32",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Period_id_32: "Fortnight" },
+        },
+        {
+          name: "Fortnight",
+          key: "Fortnight_id_32",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Period_id_32: "Fortnight" },
+        },
+        // Month
+        {
+          name: "Year",
+          key: "Month_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Month" },
+        },
+        {
+          name: "Month",
+          key: "Month_id_32",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Period_id_32: "Month" },
+        },
+        // Quarter
+        {
+          name: "Year",
+          key: "Quarter_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Quarter" },
+        },
+        {
+          name: "Quarter",
+          key: "Quarter_id_32",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Period_id_32: "Quarter" },
+        },
+        // Year
+        {
+          name: "Year",
+          key: "Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Year" },
+        },
+        // Other
+        {
+          name: "From Date",
+          key: "Other_FromDate_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Other" },
+        },
+        {
+          name: "To Date",
+          key: "Other_ToDate_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Other" },
+        },
+      ],
+    },
+    {
+      id: 31, // Aus - Payroll
+      fields: [
+        {
+          name: "Frequency",
+          key: "Payroll_Frequency_id_31",
+          type: "dropdown",
+          options: ["Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"],
+        },
+
+        // ==================== WEEKLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Week_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Week_Month_id_31",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+        {
+          name: "Week",
+          key: "Payroll_Week_id_31",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+
+        // ==================== FORTNIGHTLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Fortnight_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Fortnightly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Fortnight_Month_id_31",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_31: "Fortnightly" },
+        },
+        {
+          name: "Fortnight",
+          key: "Payroll_Fortnight_id_31",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Payroll_Frequency_id_31: "Fortnightly" },
+        },
+
+        // ==================== MONTHLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Month_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Monthly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Month_id_31",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_31: "Monthly" },
+        },
+
+        // ==================== QUARTERLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Quarter_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Quarterly" },
+        },
+        {
+          name: "Quarter",
+          key: "Payroll_Quarter_id_31",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Payroll_Frequency_id_31: "Quarterly" },
+        },
+
+        // ==================== YEARLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Yearly" },
+        },
+      ],
+    },
+    {
+      id: 27, // Audit
+      fields: [
+        {
+          name: "Year Ending",
+          key: "Audit_Year_Ending_id_27",
+          type: "date",   // date input field
+        },
+      ],
+    }
+
+
 
   ];
 
@@ -2271,50 +2526,91 @@ const CreateJob = () => {
                               </div>
                               <div className="card-body">
                                 <div className="" style={{ marginTop: 15 }}>
+                                  {/* <div className="row">
+                                  {serviceFieldsData?.length > 0 &&
+                                    serviceFieldsData?.map((field, index) => (
+                                      <div
+                                        className="col-lg-4 mb-3"
+                                        key={index}
+                                      >
+                                        <label className="form-label">
+                                          {field.name}
+                                        </label>
+                                        {field.type === "dropdown" ? (
+                                          <select
+                                            className="form-control"
+                                            name={field.key}
+                                            onChange={(e) => HandleChange(e)}
+                                            value={jobData[field.key]}
+                                          >
+                                            {field.options?.map(
+                                              (option, i) => (
+                                                <option
+                                                  value={option}
+                                                  key={i}
+                                                >
+                                                  {option}
+                                                </option>
+                                              )
+                                            )}
+                                          </select>
+                                        ) : (
+                                          <input
+                                            type={field.type || "text"}
+                                            className="form-control"
+                                            placeholder={field.name}
+                                            name={field.key}
+                                            min={field.min}
+                                            max={field.max}
+                                            onChange={(e) => HandleChange(e)}
+                                            value={jobData[field.key]}
+
+                                          />
+                                        )}
+                                      </div>
+                                    ))}
+                                </div> */}
                                   <div className="row">
                                     {serviceFieldsData?.length > 0 &&
-                                      serviceFieldsData?.map((field, index) => (
-                                        <div
-                                          className="col-lg-4 mb-3"
-                                          key={index}
-                                        >
-                                          <label className="form-label">
-                                            {field.name}
-                                          </label>
-                                          {field.type === "dropdown" ? (
-                                            <select
-                                              className="form-control"
-                                              name={field.key}
-                                              onChange={(e) => HandleChange(e)}
-                                              value={jobData[field.key]}
-                                            >
-                                              {field.options?.map(
-                                                (option, i) => (
-                                                  <option
-                                                    value={option}
-                                                    key={i}
-                                                  >
+                                      serviceFieldsData?.map((field, index) => {
+                                        // 👇 check if field should be visible
+                                        const isVisible = shouldShowField(field, jobData);
+                                        if (!isVisible) return null;
+
+                                        return (
+                                          <div className="col-lg-4 mb-3" key={index}>
+                                            <label className="form-label">{field.name}</label>
+                                            {field.type === "dropdown" ? (
+                                              <select
+                                                className="form-control"
+                                                name={field.key}
+                                                onChange={(e) => HandleChange(e)}
+                                                value={jobData[field.key] || ""}
+                                              >
+                                                <option value="">-- Select --</option>
+                                                {field.options?.map((option, i) => (
+                                                  <option value={option} key={i}>
                                                     {option}
                                                   </option>
-                                                )
-                                              )}
-                                            </select>
-                                          ) : (
-                                            <input
-                                              type={field.type || "text"}
-                                              className="form-control"
-                                              placeholder={field.name}
-                                              name={field.key}
-                                              min={field.min}
-                                              max={field.max}
-                                              onChange={(e) => HandleChange(e)}
-                                              value={jobData[field.key]}
-
-                                            />
-                                          )}
-                                        </div>
-                                      ))}
+                                                ))}
+                                              </select>
+                                            ) : (
+                                              <input
+                                                type={field.type || "text"}
+                                                className="form-control"
+                                                placeholder={field.name}
+                                                name={field.key}
+                                                min={field.min}
+                                                max={field.max}
+                                                onChange={(e) => HandleChange(e)}
+                                                value={jobData[field.key] || ""}
+                                              />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                   </div>
+
                                 </div>
                               </div>
                             </div>
