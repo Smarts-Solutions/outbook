@@ -1693,6 +1693,7 @@ const CreateJob = () => {
       Who_Did_The_Bookkeeping_id_1: "Outbooks",
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
+      Year_Ending_id_1: new Date().toISOString().split("T")[0],
     //  Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
@@ -1721,6 +1722,9 @@ const CreateJob = () => {
       If_Landlord_Number_of_Properties_id_4: "1",
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
       Management_Accounts_Frequency_id_6: "Quarterly",
+      Year_id_33: null,
+
+      
 
 
     }));

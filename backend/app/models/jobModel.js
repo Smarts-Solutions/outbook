@@ -353,6 +353,9 @@ const jobAdd = async (job) => {
   } = job;
 
   // console.log("selectedStaffData", selectedStaffData);
+   console.log("job", job);
+
+  
 
   let notes = job.notes == undefined ? "" : job.notes;
 
