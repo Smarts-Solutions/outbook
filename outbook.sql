@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 08, 2025 at 05:58 AM
+-- Generation Time: Sep 17, 2025 at 06:07 AM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -1443,13 +1443,6 @@ CREATE TABLE IF NOT EXISTS `line_managers` (
   KEY `staff_to` (`staff_to`)
 ) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
---
--- Dumping data for table `line_managers`
---
-
-INSERT INTO `line_managers` (`id`, `staff_by`, `staff_to`, `created_at`, `updated_at`) VALUES
-(3, 16, 7, '2025-02-08 05:24:21', '2025-08-20 09:22:08');
-
 -- --------------------------------------------------------
 
 --
@@ -1662,7 +1655,7 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `role_name` (`role_name`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `roles`
@@ -1814,7 +1807,11 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `created_at`, `updat
 (4, 15, '2025-07-24 11:33:24', '2025-07-24 11:33:24'),
 (3, 18, '2025-08-13 11:33:33', '2025-08-13 11:33:33'),
 (3, 14, '2025-08-13 11:33:33', '2025-08-13 11:33:33'),
-(3, 28, '2025-08-20 08:23:29', '2025-08-20 08:23:29');
+(3, 28, '2025-08-20 08:23:29', '2025-08-20 08:23:29'),
+(11, 29, '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(11, 30, '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(11, 31, '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(11, 32, '2025-09-08 07:28:38', '2025-09-08 07:28:38');
 
 -- --------------------------------------------------------
 
@@ -1826,13 +1823,13 @@ DROP TABLE IF EXISTS `services`;
 CREATE TABLE IF NOT EXISTS `services` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `is_disable` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL COMMENT '0: deactive, 1: active',
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `services`
@@ -1846,8 +1843,15 @@ INSERT INTO `services` (`id`, `name`, `is_disable`, `status`, `created_at`, `upd
 (5, 'Admin Support', '1', '1', '2025-01-28 03:39:08', '2025-01-28 11:20:21'),
 (6, 'Management Accounts', '1', '1', '2025-01-28 03:39:40', '2025-01-28 03:40:11'),
 (7, 'Company Secretarial', '1', '1', '2025-01-28 03:39:46', '2025-01-28 03:39:54'),
-(8, 'VAT Returns', '1', '1', '2025-01-28 09:23:31', '2025-02-01 06:48:09'),
-(9, 'demo', '0', '1', '2025-02-06 05:16:27', '2025-02-06 05:16:27');
+(8, 'VAT Returns', '1', '1', '2025-01-28 09:23:31', '2025-02-01 06:57:36'),
+(27, 'Audit ', '1', '1', '2025-06-24 14:01:13', '2025-09-17 05:51:20'),
+(32, 'Aus - Bookkeeping', '1', '1', '2025-07-18 10:16:20', '2025-09-17 05:50:35'),
+(30, 'Aus - Admin Support', '1', '1', '2025-07-18 10:15:52', '2025-09-17 05:52:22'),
+(31, 'Aus - Payroll', '1', '1', '2025-07-18 10:16:07', '2025-09-17 05:50:42'),
+(26, 'Reporting', '1', '1', '2025-06-18 14:50:13', '2025-09-17 05:51:42'),
+(28, 'Aus - SMSF', '1', '1', '2025-07-18 09:32:05', '2025-09-17 05:51:12'),
+(29, 'Aus - Company Secretarial (ASIC)', '1', '1', '2025-07-18 10:15:20', '2025-09-17 05:52:18'),
+(33, 'Aus - Compliance ', '1', '1', '2025-07-18 10:16:29', '2025-09-17 05:50:26');
 
 -- --------------------------------------------------------
 
@@ -1900,14 +1904,14 @@ CREATE TABLE IF NOT EXISTS `staffs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `role_id` (`role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staffs`
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-09-02 10:52:30', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1NjgxMDM1MCwiZXhwIjoxNzU2ODQ2MzUwfQ.OcH3SdH_pkpaSxzXyIDlcE2yv4TbgYsPThHoVh4ZDiw'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-09-17 05:57:43', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1ODA4ODY2MywiZXhwIjoxNzU4MTI0NjYzfQ.0oFXIO8fGD6kE5OqqbZ5TpSUHRFmLbNzTHwD3k4_Wes'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$UGh8LOFOP9Kwtha4kypOcuJL.YZYwwyRsSrzaYsRvMiBiwMomGvdW', '659:00', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-06 08:46:14', ''),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 2, '2025-02-06 07:27:58', '2025-08-13 11:03:43', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1NTA4MzAyMywiZXhwIjoxNzU1MTE5MDIzfQ.rhXs3PuL-WvJsAhZND8XGRSaftkEznyELR1mhGVZxeo'),
@@ -1919,8 +1923,8 @@ INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phon
 (13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, '2025-06-11 09:18:34', '2025-08-13 05:44:58', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NTUwNjM4OTgsImV4cCI6MTc1NTA5OTg5OH0.WQfMEG6-OXq616_AV46UByVbu8rdPo7vG8Y-BVOEyPU'),
 (14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, '2025-07-11 10:42:49', '2025-09-02 10:55:16', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NTY4MTA1MTYsImV4cCI6MTc1Njg0NjUxNn0.pOIoSGJbKJweK0dTtJmI4C6tZneJnd9rLxVu3kzpY4c'),
 (15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, '2025-07-11 10:48:30', '2025-08-16 13:17:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTUzNTAyNDEsImV4cCI6MTc1NTM4NjI0MX0.XgV3T05OQ21s2XM5ZIXlLWHl-RcqyWTuh8WfM-NOGig'),
-(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, '2025-08-13 11:32:32', '2025-08-20 08:21:42', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTU2NzgxMDIsImV4cCI6MTc1NTcxNDEwMn0.c8hCN1zuw7zwL7pqGOmtqVDy6sykdO07Hdi9U4nl828'),
-(17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, '2025-08-18 08:20:15', '2025-08-23 05:27:07', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTU5MjY4MjcsImV4cCI6MTc1NTk2MjgyN30.2iXhODgPNebuPB_31YOjgYSXw5fivJxxnjgOt7VvHi4');
+(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, '2025-08-13 11:32:32', '2025-09-10 07:08:53', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTc0ODgxMzMsImV4cCI6MTc1NzUyNDEzM30.6G8TvdWSFJHE0x_Y5QQcYZm9kHbnramPEbUEQOs6-ps'),
+(17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, '2025-08-18 08:20:15', '2025-09-12 12:49:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTc2ODEzNDQsImV4cCI6MTc1NzcxNzM0NH0.2YnanHOg5C5tVsHPxlZaSWuJ_ftMRayCJfh4qqHYdzI');
 
 -- --------------------------------------------------------
 
@@ -1959,7 +1963,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=813 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=840 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -2780,7 +2784,35 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (809, 1, '2025-09-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-02 10:52:18', '2025-09-02 10:52:18'),
 (810, 1, '2025-09-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-02 10:52:30', '2025-09-02 10:52:30'),
 (811, 14, '2025-09-02', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-09-02 10:54:52', '2025-09-02 10:54:52'),
-(812, 14, '2025-09-02', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-02 10:55:16', '2025-09-02 10:55:16');
+(812, 14, '2025-09-02', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-02 10:55:16', '2025-09-02 10:55:16'),
+(813, 1, '2025-09-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-09-08 05:59:42', '2025-09-08 05:59:42'),
+(814, 1, '2025-09-08', 'staff', 18, 'created staff FDGFDD sf', 'Super Admin System Super Super Admin created staff FDGFDD sf ', 'created', '122.168.114.106', '2025-09-08 06:05:09', '2025-09-08 06:05:09'),
+(815, 1, '2025-09-08', 'staff', 19, 'created staff DEGWSEFg dff', 'Super Admin System Super Super Admin created staff DEGWSEFg dff ', 'created', '122.168.114.106', '2025-09-08 07:26:11', '2025-09-08 07:26:11'),
+(816, 1, '2025-09-08', 'role', 11, 'created role TEST', 'Super Admin System Super Super Admin created role TEST ', 'created', '122.168.114.106', '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(817, 1, '2025-09-08', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-08 12:44:31', '2025-09-08 12:44:31'),
+(818, 1, '2025-09-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-08 12:44:38', '2025-09-08 12:44:38'),
+(819, 1, '2025-09-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-09 06:22:44', '2025-09-09 06:22:44'),
+(820, 1, '2025-09-09', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-09 06:22:52', '2025-09-09 06:22:52'),
+(821, 1, '2025-09-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-09 06:23:13', '2025-09-09 06:23:13'),
+(822, 1, '2025-09-09', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 5:30 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 5:30 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-09-09 13:03:37', '2025-09-09 13:03:37'),
+(823, 1, '2025-09-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-10 06:09:16', '2025-09-10 06:09:16'),
+(824, 17, '2025-09-10', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', NULL, '2025-09-10 07:07:25', '2025-09-10 07:07:25'),
+(825, 17, '2025-09-10', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:b', 'Processor STAFF ELEVEN created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:b ', 'updated', '0.0.0.0', '2025-09-10 07:08:01', '2025-09-10 07:08:01'),
+(826, 17, '2025-09-10', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:ddddd, Task name:bb', 'Processor STAFF ELEVEN created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:ddddd, Task name:bb ', 'updated', '0.0.0.0', '2025-09-10 07:08:22', '2025-09-10 07:08:22'),
+(827, 17, '2025-09-10', '-', 0, ' Logged Out', 'Processor STAFF ELEVEN  Logged Out ', '-', '122.168.114.106', '2025-09-10 07:08:25', '2025-09-10 07:08:25'),
+(828, 16, '2025-09-10', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-09-10 07:08:53', '2025-09-10 07:08:53'),
+(829, 16, '2025-09-10', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF, Task type:External,  Date: 2025-09-08, Hours : 6:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF and Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:a', 'Processor STAFF TEN created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF, Task type:External,  Date: 2025-09-08, Hours : 6:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF and Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:a ', 'updated', '0.0.0.0', '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
+(830, 1, '2025-09-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-11 04:52:52', '2025-09-11 04:52:52');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(831, 1, '2025-09-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-09-08, Updated hours : 6:50 ,Job code:abc, Task name:c and created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:30 ,Job code:SFF_GGG_VAT2_000013, Task name:A', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,  Date: 2025-09-08, Updated hours : 6:50 ,Job code:abc, Task name:c and created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:30 ,Job code:SFF_GGG_VAT2_000013, Task name:A ', 'updated', '0.0.0.0', '2025-09-11 09:57:38', '2025-09-11 09:57:38'),
+(832, 1, '2025-09-11', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-09-10, Updated hours : 5:60 ,Job code:SFF_GGG_VAT2_000013, Task name:A', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-09-10, Updated hours : 5:60 ,Job code:SFF_GGG_VAT2_000013, Task name:A ', 'updated', '0.0.0.0', '2025-09-11 09:58:15', '2025-09-11 09:58:15'),
+(833, 1, '2025-09-11', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-09-09, Updated hours : 4:20 ,Job code:SFF_GGG_VAT2_000013, Task name:A', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-09-09, Updated hours : 4:20 ,Job code:SFF_GGG_VAT2_000013, Task name:A ', 'updated', '0.0.0.0', '2025-09-11 10:01:03', '2025-09-11 10:01:03'),
+(834, 1, '2025-09-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-12 05:10:31', '2025-09-12 05:10:31'),
+(835, 17, '2025-09-12', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', NULL, '2025-09-12 12:49:04', '2025-09-12 12:49:04'),
+(836, 1, '2025-09-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-13 05:00:39', '2025-09-13 05:00:39'),
+(837, 1, '2025-09-15', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-15 11:58:52', '2025-09-15 11:58:52'),
+(838, 1, '2025-09-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-16 05:45:05', '2025-09-16 05:45:05'),
+(839, 1, '2025-09-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-17 05:57:43', '2025-09-17 05:57:43');
 
 -- --------------------------------------------------------
 
@@ -2981,7 +3013,7 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
   KEY `client_id` (`client_id`),
   KEY `job_id` (`job_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `timesheet`
@@ -2992,9 +3024,17 @@ INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_i
 (2, 1, '2', 1, 1, 2, 2, '2025-07-07', '5:50', '2025-07-08', '5:50', '2025-07-09', '5:60', '2025-07-10', '5:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '1', '2025-07-09 12:11:46', '2025-07-09 13:05:10'),
 (3, 1, '1', 0, 0, 1, 3, NULL, NULL, '2025-07-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '1', '2025-07-09 12:11:46', '2025-07-09 13:05:10'),
 (4, 1, '1', 0, 0, 1, 3, '2025-07-14', '9:60', '2025-07-15', '9:60', '2025-07-16', '9:60', '2025-07-17', '9:60', '2025-07-18', '9:60', NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-07-14 10:55:57', '2025-07-14 10:55:57'),
-(5, 14, '2', 10, 8, 10, 10, '2025-08-25', '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-08-21 12:17:35', '2025-08-21 12:17:35'),
+(5, 14, '2', 10, 8, 10, 10, '2025-08-25', '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-08-21 12:17:35', '2025-09-16 06:32:45'),
 (6, 1, '1', 0, 0, 1, 3, '2025-09-01', '2:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:19:22', '2025-09-02 10:34:19'),
-(7, 1, '2', 1, 1, 5, 1, '2025-09-01', '5:60', '2025-09-02', '6:30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:20:10', '2025-09-02 10:20:10');
+(7, 1, '2', 1, 1, 5, 1, '2025-09-01', '5:60', '2025-09-02', '6:30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:20:10', '2025-09-02 10:20:10'),
+(8, 1, '1', 0, 0, 1, 3, '2025-09-08', '6:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-09 13:03:37', '2025-09-11 09:57:37'),
+(9, 17, '1', 0, 0, 1, 2, '2025-09-08', '3:00', '2025-09-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:08:01', '2025-09-10 13:25:21'),
+(10, 17, '1', 0, 0, 7, 10, '2025-09-08', '3:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:08:22', '2025-09-11 09:55:33'),
+(11, 16, '2', 10, 8, 10, 10, '2025-09-08', '9:85', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 05:19:50'),
+(12, 16, '2', 10, 8, 10, 10, '2025-09-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
+(13, 16, '1', 0, 0, 1, 1, '2025-09-08', '3:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 09:55:45'),
+(14, 1, '2', 5, 3, 13, 5, '2025-09-08', '9:30', '2025-09-09', '4:20', '2025-09-10', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-11 09:57:37', '2025-09-11 10:01:03'),
+(15, 14, '2', 10, 8, 10, 10, '2025-09-08', '2:00', '2025-09-09', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-08-21 12:17:35', '2025-09-16 06:42:19');
 
 -- --------------------------------------------------------
 
