@@ -114,7 +114,7 @@ const CreateJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
     notes: "",
-    Bookkeeping_Frequency_id_2: "Daily",
+    //Bookkeeping_Frequency_id_2: "Daily",
 
   });
 
@@ -1107,8 +1107,8 @@ const CreateJob = () => {
           type: "dropdown",
           options: [
             "Weekly",
-            "Fortnightly",
             "Monthly",
+            "Fortnightly",
             "Quarterly",
             "Yearly",
           ],
@@ -1690,7 +1690,7 @@ const CreateJob = () => {
       Who_Did_The_Bookkeeping_id_1: "Outbooks",
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
-      Bookkeeping_Frequency_id_2: "Daily",
+    //  Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
       Number_of_Purchase_Invoices_id_2: 0,
@@ -1707,7 +1707,7 @@ const CreateJob = () => {
       Sales_Reconciliation_Required_id_2: "No",
       Factoring_Account_id_2: "Provider Deducts Commission Only",
       Payment_Methods_id_2: "1",
-      Payroll_Frequency_id_3: "Weekly",
+     // Payroll_Frequency_id_3: "Weekly",
       Type_of_Payslip_id_3: "Wages Only",
       Percentage_of_Variable_Payslips_id_3: "0%",
       Is_CIS_Required_id_3: "No",
