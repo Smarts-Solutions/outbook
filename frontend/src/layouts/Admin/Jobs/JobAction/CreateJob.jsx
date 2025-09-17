@@ -66,7 +66,7 @@ const CreateJob = () => {
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
 
-  
+
 
   const [jobData, setJobData] = useState({
     CustomerDetails: [],
@@ -118,7 +118,7 @@ const CreateJob = () => {
 
   });
 
-   console.log("CustomerDetails", jobData.CustomerDetails);
+  console.log("CustomerDetails", jobData.CustomerDetails);
   // console.log("Reviewer", jobData.Reviewer);
   // console.log("staffCreatedId", staffCreatedId);
   // console.log("selectedStaffData", selectedStaffData);
@@ -482,7 +482,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
     const req = {
-      selectedStaffData:selectedStaffData,
+      selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
@@ -1104,20 +1104,19 @@ const CreateJob = () => {
     },
     {
       id: 33, // Aus - Compliance
-      // Aus - Compliance: Year - This should be dropdown of all the years starting with previous 5 years
       fields: [
         {
           name: "Previous Year",
           key: "Previous_Year_id_33",
           type: "dropdown",
-          options: Array.from({ length: 11 }, (_, i) => {
-            const year = new Date().getFullYear() - 5 + i;
+          options: Array.from({ length: 5 }, (_, i) => {
+            const year = new Date().getFullYear() - (i + 1);
             return year.toString();
           }),
         },
       ],
     },
-    
+
   ];
 
 
@@ -1127,7 +1126,7 @@ const CreateJob = () => {
 
   useEffect(() => {
     setServiceFieldsData(
-    //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+      //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
       serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
     );
 
@@ -1205,8 +1204,8 @@ const CreateJob = () => {
       label: service.service_name
     }))
   ];
-  
-  
+
+
   let isAssignDetails = jobData?.CustomerDetails.find(
     (detail) => detail.assigned_source === "assign_customer_service"
   );
@@ -2237,13 +2236,13 @@ const CreateJob = () => {
                                     >
                                       Allocated to (Other)
                                     </label>
-                                  
+
                                     <Select
                                       options={allStaffData
-                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId) 
+                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId)
                                         ?.map((data) => {
-                                        return { label: data.full_name, value: data.id };
-                                      })}
+                                          return { label: data.full_name, value: data.id };
+                                        })}
                                       isMulti
                                       closeMenuOnSelect={false}
                                       className="basic-multi-select"
