@@ -688,6 +688,13 @@ function TimesheetReport() {
       internal_external: "2",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
+      staff_id: null,
+      customer_id: null,
+      client_id: null,
+      job_id: null,
+      task_id: null,
+      internal_job_id: null,
+      internal_task_id: null,
       timePeriod: "",
       displayBy: "",
       fromDate: null,
@@ -700,8 +707,8 @@ function TimesheetReport() {
 
   const optionGroupBy = [
     { value: "staff_id", label: "Staff" },
-    ...(filters?.internal_external == '2' ? [{ value: "customer_id", label: "Customer" }] : []),
-    ...(filters?.internal_external == '2' ? [{ value: "client_id", label: "Client" }] : []),
+    ...((filters?.internal_external == '2' || filters?.internal_external == '0') ? [{ value: "customer_id", label: "Customer" }] : []),
+    ...((filters?.internal_external == '2' || filters?.internal_external == '0') ? [{ value: "client_id", label: "Client" }] : []),
     { value: "job_id", label: "Job" },
     { value: "task_id", label: "Task" }
   ];

@@ -1494,6 +1494,287 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
     return [...new Set(result)]; // duplicate हटाने के लिए
 }
 
+// const getTimesheetReportData = async (Report) => {
+//     const { StaffUserId, data } = Report;
+//     var {
+//         groupBy = ['staff_id'],
+//         internal_external,
+//         fieldsToDisplay,
+//         fieldsToDisplayId,
+//         timePeriod,
+//         displayBy,
+//         fromDate,
+//         toDate
+//     } = data.filters;
+//     if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
+//         return { status: false, message: `empty groupBy field`, data: [] };
+//     }
+//     const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
+
+//     if (!Array.isArray(groupBy)) groupBy = [groupBy];
+//     for (const g of groupBy) {
+//         if (!ALLOWED_GROUP_FIELDS.includes(g)) {
+//             return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
+//         }
+//     }
+
+//     try {
+//         let range;
+//         try {
+//             range = await getDateRange(timePeriod, fromDate, toDate);
+//         } catch (err) {
+//             return { status: false, message: err.message || 'Invalid date range', data: [] };
+//         }
+
+//         var { fromDate, toDate } = range;
+
+//         let where = [`work_date BETWEEN ? AND ?`];
+//         if (internal_external) {
+//             where.push(`raw.task_type = '${internal_external}'`);
+//         }
+
+//         let lastIndexValue = groupBy[groupBy.length - 1];
+//         if (!["", null, undefined].includes(fieldsToDisplayId)) {
+
+//             if (lastIndexValue == "staff_id") {
+//                 where.push(`raw.staff_id = ${fieldsToDisplayId}`);
+//             } else if (lastIndexValue == "customer_id") {
+//                 where.push(`raw.customer_id = ${fieldsToDisplayId}`);
+//             } else if (lastIndexValue == "client_id") {
+//                 where.push(`raw.client_id = ${fieldsToDisplayId}`);
+//             } else if (lastIndexValue == "job_id") {
+//                 where.push(`raw.job_id = ${fieldsToDisplayId}`);
+//             } else if (lastIndexValue == "task_id") {
+//                 where.push(`raw.task_id = ${fieldsToDisplayId}`);
+//             }
+//         }
+//         where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+//         const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
+//         const groupLabelSQL = groupBy.map(f => {
+//             if (f === 'staff_id') return "CONCAT(s.first_name,' ',s.last_name)";
+//             if (f === 'customer_id') return "c.id";
+//             if (f === 'client_id') return "cl.id";
+//             if (f === 'job_id') {
+//                 return `CASE 
+//                     WHEN raw.task_type = '1' THEN internal.name
+//                     WHEN raw.task_type = '2' THEN j.job_id
+//                 END`;
+//             }
+
+//             if (f === 'task_id') {
+//                 return `CASE 
+//                     WHEN raw.task_type = '1' THEN sub_internal.name
+//                     WHEN raw.task_type = '2' THEN t.name
+//                 END`;
+//             }
+//             return f;
+//         }).join(", ' - ', ");
+
+//         const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
+//         const staffName = `CONCAT(s.first_name,' ',s.last_name) AS staff_name`;
+//         const customerName = `c.trading_name AS customer_name`;
+//         const clientName = `CONCAT(
+//                             'cli_', 
+//                             SUBSTRING(c.trading_name, 1, 3), '_',
+//                             SUBSTRING(cl.trading_name, 1, 3), '_',
+//                             SUBSTRING(cl.client_code, 1, 15)
+//                         ) AS client_name`;
+//         const jobName = `
+//                  CASE 
+//                     WHEN raw.task_type = '1' THEN internal.name
+//                     WHEN raw.task_type = '2' THEN 
+
+//                     CONCAT(
+//                         SUBSTRING(c.trading_name, 1, 3), '_',
+//                         SUBSTRING(cl.trading_name, 1, 3), '_',
+//                         SUBSTRING(job_types.type, 1, 4), '_',
+//                         SUBSTRING(j.job_id, 1, 15)
+//                         )
+
+
+//                 END AS job_name`;
+//         const taskName = `
+//                  CASE 
+//                     WHEN raw.task_type = '1' THEN sub_internal.name
+//                     WHEN raw.task_type = '2' THEN t.name
+//                 END AS task_name`;
+
+       
+//         const unpivotSQL = `
+//         SELECT
+//             timesheet_id,
+//             group_value,
+//             work_date,
+//             work_hours,
+//             group_value,
+//             task_type,
+//             ${groupLabelFinal},
+//             ${staffName},
+//             ${customerName},
+//             ${clientName},
+//             ${jobName},
+//             ${taskName}
+//         FROM (
+//             SELECT id AS timesheet_id,
+//                    staff_id,
+//                    customer_id,
+//                    client_id,
+//                    job_id,
+//                    task_id,
+//                    ${groupValueSQL},
+//                    monday_date AS work_date,
+//                    monday_hours AS work_hours,
+//                    task_type
+//             FROM timesheet WHERE monday_date IS NOT NULL
+//             UNION ALL
+//             SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+//                    ${groupValueSQL},
+//                    tuesday_date, tuesday_hours, task_type
+//             FROM timesheet WHERE tuesday_date IS NOT NULL
+//             UNION ALL
+//             SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+//                    ${groupValueSQL},
+//                    wednesday_date, wednesday_hours, task_type
+//             FROM timesheet WHERE wednesday_date IS NOT NULL
+//             UNION ALL
+//             SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+//                    ${groupValueSQL},
+//                    thursday_date, thursday_hours, task_type
+//             FROM timesheet WHERE thursday_date IS NOT NULL
+//             UNION ALL
+//             SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+//                    ${groupValueSQL},
+//                    friday_date, friday_hours, task_type
+//             FROM timesheet WHERE friday_date IS NOT NULL
+//             UNION ALL
+//             SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+//                    ${groupValueSQL},
+//                    saturday_date, saturday_hours, task_type
+//             FROM timesheet WHERE saturday_date IS NOT NULL
+//             UNION ALL
+//             SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+//                    ${groupValueSQL},
+//                    sunday_date, sunday_hours, task_type
+//             FROM timesheet WHERE sunday_date IS NOT NULL
+//         ) AS raw
+//         LEFT JOIN staffs s ON raw.staff_id = s.id
+//         LEFT JOIN customers c ON raw.customer_id = c.id
+//         LEFT JOIN clients cl ON raw.client_id = cl.id
+
+//         LEFT JOIN internal ON (task_type = '1' AND raw.job_id = internal.id)
+//         LEFT JOIN jobs j ON (task_type = '2' AND raw.job_id = j.id)
+//         LEFT JOIN job_types ON j.job_type_id = job_types.id 
+
+//         LEFT JOIN sub_internal ON (task_type = '1' AND raw.task_id = sub_internal.id)
+//         LEFT JOIN task t ON (task_type = '2' AND raw.task_id = t.id)
+//         ${where}
+//         ORDER BY group_value, work_date
+//         `;
+
+
+//         const conn = await pool.getConnection();
+//         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
+//         conn.release();
+
+        
+//         const groups = {};
+//         const periodSet = new Set();
+
+//         for (const r of rows) {
+//             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
+//             if (!workDateStr) continue;
+
+//             const gid = r.group_value || 'NULL';
+//             const label = r.group_label;
+//             const staffName = r.staff_name;
+//             const customerName = r.customer_name;
+//             const clientName = r.client_name;
+//             const jobName = r.job_name;
+//             const taskName = r.task_name;
+
+//             const secs = r.work_hours;
+//             const periodKey = getPeriodKey(displayBy, workDateStr);
+//             if (!periodKey) continue;
+
+//             periodSet.add(periodKey);
+
+//             if (!groups[gid]) {
+//                 groups[gid] = {
+//                     group_value: gid,
+//                     group_label: label,
+//                     staff_name: staffName,
+//                     customer_name: customerName,
+//                     client_name: clientName,
+//                     job_name: jobName,
+//                     task_name: taskName,
+//                     totalSeconds: 0,
+//                     timesheetIds: new Set(),
+//                     periodSeconds: {}
+//                 };
+//             }
+
+//             const g = groups[gid];
+//             g.totalSeconds += parseFloat(secs?.replace(':', '.'));
+//             g.timesheetIds.add(r.timesheet_id);
+//             g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
+//         }
+
+//         const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+//         const outRows = [];
+//         const groupKeys = Object.keys(groups).sort((a, b) => {
+//             const na = Number(a), nb = Number(b);
+//             if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+//             return a.localeCompare(b);
+//         });
+
+//         for (const gid of groupKeys) {
+//             const g = groups[gid];
+//             const row = {};
+//             console.log("g", g);
+
+//             row['staff_id'] = g.staff_name;  // final readable label
+//             row['customer_id'] = g.customer_name;
+//             row['client_id'] = g.client_name;
+//             row['job_id'] = g.job_name;
+//             row['task_id'] = g.task_name;
+
+//             for (const p of periods) {
+//                 row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
+//             }
+
+//             row.total_hours = parseFloat(g.totalSeconds)?.toFixed(2);
+//             outRows.push(row);
+//         }
+
+
+//         const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+
+//         const columnsWeeks = [...groupBy, ...weeks, 'total_hours'];
+//         const finalRows = normalizeRows(columnsWeeks, outRows);
+
+//         const fixed = [...groupBy, 'total_hours'];
+//         const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
+//         const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
+
+//         return {
+//             status: true,
+//             message: 'Success.',
+//             data: {
+//                 meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
+//                 //columns: columnsWeeks,
+//                 columns: columnsWeeksDecOrder,
+//                 rows: finalRows
+//             }
+//         };
+
+//     } catch (err) {
+//         console.error(err);
+//         return { status: false, message: err.message || 'server error', data: [] };
+//     }
+// };
+
+
+
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
     var {
