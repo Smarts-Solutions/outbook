@@ -2286,7 +2286,59 @@ const capacityReport = async (Report) => {
 }
 
 
+//////// ---------- Save Filters Start --------- ////////////
+const saveFilters = async (Report) => {
+    console.log("Save Filters Report:", Report);
+    const { data, StaffUserId } = Report;
+    const { id,type, filters } = data;
+    // console.log("Save Filters Report id:", id);
+    // console.log("Save Filters Report type:", type);
+    // console.log("Save Filters Report filters:", filters);
+    if(!['', null, undefined].includes(id)){
+    const query = `
+        UPDATE timesheet_filter 
+        SET type = ?, staff_id = ?, filter_record = ?
+        WHERE id = ?
+        `;
+    const [result] = await pool.execute(query, [type, StaffUserId, JSON.stringify(filters), id]);
+    return { status: true, message: 'Record updated successfully.', data: result };
 
+    }else{   
+    const query = `
+        INSERT INTO timesheet_filter (type,staff_id,filter_record)
+        VALUES (?, ?, ?)
+        `;
+    const [result] = await pool.execute(query, [type, StaffUserId, JSON.stringify(filters)]);
+    return { status: true, message: 'Record added successfully', data: result };
+    }
+    
+   
+
+
+}
+
+
+const getAllFilters = async (Report) => {
+    console.log("Get All Filters Report:", Report);
+     const { data, StaffUserId } = Report;
+     const { type } = data;
+
+        let where = [`staff_id = ?`];
+        if(!['', null, undefined].includes(type)){
+            where.push(`type = '${type}'`);
+        }
+        where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+        const query = `
+        SELECT * FROM timesheet_filter
+        ${where}
+        `;
+        const [result] = await pool.execute(query, [StaffUserId]);
+        return { status: true, message: 'Success.', data: result };
+
+}
+
+
+//////// ---------- Save Filters End --------- ////////////
 
 
 
@@ -2394,7 +2446,9 @@ module.exports = {
     discrepancyReport,
     capacityReport,
     getChangedRoleStaff,
-    staffRoleChangeUpdate
+    staffRoleChangeUpdate,
+    saveFilters,
+    getAllFilters
 };
 
 

@@ -68,6 +68,14 @@ else if(data.action == "getChangedRoleStaff"){
 else if(data.action == "staffRoleChangeUpdate"){
   return reportModel.staffRoleChangeUpdate(Report);
 }
+
+// save Filters
+else if(data.action == "saveFilters"){
+  return reportModel.saveFilters(Report);
+}
+else if(data.action == "getAllFilters"){
+  return reportModel.getAllFilters(Report);
+}
 else{
   return;
 }

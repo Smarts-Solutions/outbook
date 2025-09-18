@@ -7,6 +7,7 @@ import Select from "react-select";
 import * as XLSX from "xlsx";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
+import sweatalert from "sweetalert2";
 
 
 function TimesheetReport() {
@@ -29,8 +30,14 @@ function TimesheetReport() {
 
   const [internalJobAllData, setInternalJobAllData] = useState([]);
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
+  
+  
+  const [getAllFilterData, setGetAllFilterData] = useState([]);
+  // set filter id
+  const [filterId, setFilterId] = useState(null);
 
-
+  console.log("filterId -------  ", filterId  );
+  console.log("getAllFilterData ", getAllFilterData);
 
 
 
@@ -92,8 +99,30 @@ function TimesheetReport() {
     }
   };
 
+  const getAllFilters = async () => {
+    var req = { action: "getAllFilters", type: "timesheet_report" };
+    var data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.filter_record
+          }));
+          setGetAllFilterData(data);
+        } else {
+          setGetAllFilterData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  }
+
   useEffect(() => {
     staffData();
+    getAllFilters();
   }, []);
 
 
@@ -346,7 +375,7 @@ function TimesheetReport() {
       task_id: "Task Name",
       total_hours: "Total Hours",
       task_type: "Task Type"
-      
+
     };
     const headers = data.columns.map(col => colMap[col] || col);
 
@@ -610,7 +639,7 @@ function TimesheetReport() {
             job_id: null,
             internal_job_id: null
           }));
-        }else if (filters.internal_external == "1") {
+        } else if (filters.internal_external == "1") {
           setInternalJobAllData([]);
           setFilters((prev) => ({
             ...prev,
@@ -679,7 +708,7 @@ function TimesheetReport() {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy ,filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id]);
 
 
   //console.log("filters ", filters);
@@ -736,7 +765,43 @@ function TimesheetReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
+
   console.log("Filters: ", filters);
+
+  const saveFilterFunction = async () => {
+
+    var req = { action: "saveFilters", filters: filters, id: filterId, type: "timesheet_report" };
+    var data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          
+         sweatalert.fire({
+            title: 'Success',
+            text: response.message,
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+          getAllFilters();
+
+        } else {
+          sweatalert.fire({
+            title: 'Error',
+            text: 'Failed to save filters. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+
+
+
+  }
 
 
 
@@ -749,6 +814,47 @@ function TimesheetReport() {
             <div className="col-12 col-sm-6">
               <h3 className="mt-0">Timesheet Reports</h3>
             </div>
+
+            {/* get filters Dropdown */}
+           
+           <label className="form-label fw-medium">
+              Select Saved Filters
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...getAllFilterData,
+              ]}
+              value={
+                getAllFilterData && getAllFilterData.length > 0
+                  ? getAllFilterData.find((opt) => Number(opt.value) === Number(filterId)) || null
+                  : null
+              }
+              onChange={(selected) => {
+                setFilterId(selected.value);
+                // set filters from selected
+                let selectedFilter = getAllFilterData.find((opt) => Number(opt.value) === Number(selected.value));
+                if (selectedFilter && selectedFilter.filters) {
+                  let parsedFilters = {};
+                  try {
+                    parsedFilters = JSON.parse(selectedFilter.filters);
+                    // console.log("Parsed Filters: ", parsedFilters);
+                    setFilters(parsedFilters);
+                  } catch (e) {
+                    console.error("Error parsing filters JSON: ", e);
+                  }
+                }
+              }}
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+            {/* end get filters Dropdown */}
+              
+
+
+
+
+
             <div className="col-12 col-sm-6">
               <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                 <button className="btn btn-info" id="btn-export"
@@ -1190,6 +1296,17 @@ function TimesheetReport() {
             onClick={() => resetFunction()}
           >
             Clear Filter
+          </button>
+        </div>
+
+        {/* Reset Save filters */}
+        <div className="col-lg-4 col-md-6">
+          <button
+            className="btn btn-outline-secondary shadow-sm rounded-pill"
+            id="btn-reset"
+            onClick={() => saveFilterFunction()}
+          >
+            Save Filters
           </button>
         </div>
 
