@@ -344,7 +344,9 @@ function TimesheetReport() {
       client_id: "Client Name",
       job_id: "Job Name",
       task_id: "Task Name",
-      total_hours: "Total Hours"
+      total_hours: "Total Hours",
+      task_type: "Task Type"
+      
     };
     const headers = data.columns.map(col => colMap[col] || col);
 
@@ -677,7 +679,7 @@ function TimesheetReport() {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy ,filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id]);
 
 
   //console.log("filters ", filters);
@@ -1267,6 +1269,7 @@ function getColumnName(columnKey) {
     task_id: "Task",
     total_hours: "Total Hours",
     total_records: "Total Records",
+    task_type: "Task Type"
   };
 
   // ✅ check if columnKey is a date string (yyyy-mm-dd format)

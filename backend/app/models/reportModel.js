@@ -1782,6 +1782,13 @@ const getTimesheetReportData = async (Report) => {
         internal_external,
         fieldsToDisplay,
         fieldsToDisplayId,
+        staff_id,
+        customer_id,
+        client_id,
+        job_id,
+        task_id,
+        internal_job_id,
+        internal_task_id,
         timePeriod,
         displayBy,
         fromDate,
@@ -1817,30 +1824,60 @@ const getTimesheetReportData = async (Report) => {
         var { fromDate, toDate } = range;
 
         let where = [`work_date BETWEEN ? AND ?`];
-        if (internal_external) {
+        
+
+        // let lastIndexValue = groupBy[groupBy.length - 1];
+        // if (!["", null, undefined].includes(fieldsToDisplayId)) {
+        //     if (lastIndexValue == "staff_id") {
+        //         where.push(`raw.staff_id = ${fieldsToDisplayId}`);
+        //     } else if (lastIndexValue == "customer_id") {
+        //         where.push(`raw.customer_id = ${fieldsToDisplayId}`);
+        //     } else if (lastIndexValue == "client_id") {
+        //         where.push(`raw.client_id = ${fieldsToDisplayId}`);
+        //     } else if (lastIndexValue == "job_id") {
+        //         where.push(`raw.job_id = ${fieldsToDisplayId}`);
+        //     } else if (lastIndexValue == "task_id") {
+        //         where.push(`raw.task_id = ${fieldsToDisplayId}`);
+        //     }
+        // }
+
+        if (!["", null, undefined].includes(staff_id)) {
+            where.push(`raw.staff_id = ${staff_id}`);
+        }
+        if (!["", null, undefined].includes(customer_id)) {
+            where.push(`raw.customer_id = ${customer_id}`);
+        }
+        if (!["", null, undefined].includes(client_id)) {
+            where.push(`raw.client_id = ${client_id}`);
+        }
+
+        if (internal_external == '1' || internal_external == '2') {
             where.push(`raw.task_type = '${internal_external}'`);
         }
 
-        let lastIndexValue = groupBy[groupBy.length - 1];
-        if (!["", null, undefined].includes(fieldsToDisplayId)) {
 
-            if (lastIndexValue == "staff_id") {
-                where.push(`raw.staff_id = ${fieldsToDisplayId}`);
-            } else if (lastIndexValue == "customer_id") {
-                where.push(`raw.customer_id = ${fieldsToDisplayId}`);
-            } else if (lastIndexValue == "client_id") {
-                where.push(`raw.client_id = ${fieldsToDisplayId}`);
-            } else if (lastIndexValue == "job_id") {
-                where.push(`raw.job_id = ${fieldsToDisplayId}`);
-            } else if (lastIndexValue == "task_id") {
-                where.push(`raw.task_id = ${fieldsToDisplayId}`);
-            }
+        if (!["", null, undefined].includes(job_id)) {
+            where.push(`raw.job_id = ${job_id}`);
         }
+        if (!["", null, undefined].includes(task_id)) {
+            where.push(`raw.task_id = ${task_id}`);
+        }
+
+        if (!["", null, undefined].includes(internal_job_id)) {
+            where.push(`(raw.task_type = '1' AND raw.job_id = ${internal_job_id})`);
+        }
+        if (!["", null, undefined].includes(internal_task_id)) {
+            where.push(`(raw.task_type = '1' AND raw.task_id = ${internal_task_id})`);
+        }
+
+
 
 
 
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+
+        console.log("where", where);
 
         // Build group_value for SQL
         const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
@@ -1894,6 +1931,11 @@ const getTimesheetReportData = async (Report) => {
                     WHEN raw.task_type = '1' THEN sub_internal.name
                     WHEN raw.task_type = '2' THEN t.name
                 END AS task_name`;
+        const taskType = `CASE
+                            WHEN raw.task_type = '1' THEN 'Internal'
+                            WHEN raw.task_type = '2' THEN 'External'
+                            ELSE 'Unknown'
+                          END AS task_type_label`;        
 
         // Unpivot query
         const unpivotSQL = `
@@ -1909,7 +1951,8 @@ const getTimesheetReportData = async (Report) => {
             ${customerName},
             ${clientName},
             ${jobName},
-            ${taskName}
+            ${taskName},
+            ${taskType}
         FROM (
             SELECT id AS timesheet_id,
                    staff_id,
@@ -1988,6 +2031,7 @@ const getTimesheetReportData = async (Report) => {
             const clientName = r.client_name;
             const jobName = r.job_name;
             const taskName = r.task_name;
+            const taskType = r.task_type_label;
 
             const secs = r.work_hours;
             // console.log("displayBy", displayBy, "workDateStr", workDateStr);
@@ -2005,6 +2049,7 @@ const getTimesheetReportData = async (Report) => {
                     client_name: clientName,
                     job_name: jobName,
                     task_name: taskName,
+                    task_type: taskType,
                     totalSeconds: 0,
                     timesheetIds: new Set(),
                     periodSeconds: {}
@@ -2041,6 +2086,7 @@ const getTimesheetReportData = async (Report) => {
             }
 
             row.total_hours = parseFloat(g.totalSeconds)?.toFixed(2);
+            row.task_type = g.task_type;
             // row.total_records = g.timesheetIds.size;
             outRows.push(row);
         }
@@ -2061,7 +2107,7 @@ const getTimesheetReportData = async (Report) => {
         // console.log("displayBy, ", displayBy);
         const finalRows = normalizeRows(columnsWeeks, outRows);
 
-        const fixed = [...groupBy, 'total_hours'];
+        const fixed = [...groupBy,'task_type','total_hours'];
         const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
         const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
 
