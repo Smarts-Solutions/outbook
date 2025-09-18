@@ -2156,7 +2156,7 @@ const jobUpdate = async (job) => {
              Filing_Frequency_id_8 = ?,
              Period_Ending_Date_id_8 = ?,
              Filing_Date_id_8 = ?,
-             Year_id_28 = ?,
+             Year_id_28 = ?
 
 
          WHERE id = ?
