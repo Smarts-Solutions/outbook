@@ -173,6 +173,87 @@ const EditJob = () => {
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
       Management_Accounts_Frequency_id_6: "Quarterly",
 
+     
+       ////////////////////////// 
+      Year_Ending_id_1: null,
+
+      Day_Date_id_2: null,
+      Week_Year_id_2: null,
+      Week_Month_id_2: null,
+      Week_id_2: null,
+      Fortnight_Year_id_2: null,
+      Fortnight_Month_id_2: null,
+      Fortnight_id_2: null,
+      Month_Year_id_2: null,
+      Month_id_2: null,
+      Quarter_Year_id_2: null,
+      Quarter_id_2: null,
+      Year_id_2: null,
+      Other_FromDate_id_2: null,
+      Other_ToDate_id_2: null,
+
+
+      Payroll_Week_Year_id_3: null,
+      Payroll_Week_Month_id_3: null,
+      Payroll_Week_id_3: null,
+      Payroll_Fortnight_Year_id_3: null,
+      Payroll_Fortnight_Month_id_3: null,
+      Payroll_Fortnight_id_3: null,
+      Payroll_Month_Year_id_3: null,
+      Payroll_Month_id_3: null,
+      Payroll_Quarter_Year_id_3: null,
+      Payroll_Quarter_id_3: null,
+      Payroll_Year_id_3: null,
+
+
+
+      Tax_Year_id_4: null,
+
+      Management_Accounts_FromDate_id_6: null,
+      Management_Accounts_ToDate_id_6: null,
+
+      Year_id_33: null,
+
+      Period_id_32: null,
+      Day_Date_id_32: null,
+      Week_Year_id_32: null,
+      Week_Month_id_32: null,
+      Week_id_32: null,
+      Fortnight_Year_id_32: null,
+      Fortnight_Month_id_32: null,
+      Fortnight_id_32: null,
+      Month_Year_id_32: null,
+      Month_id_32: null,
+      Quarter_Year_id_32: null,
+      Quarter_id_32: null,
+      Year_id_32: null,
+      Other_FromDate_id_32: null,
+      Other_ToDate_id_32: null,
+
+
+      Payroll_Frequency_id_31: null,
+      Payroll_Week_Year_id_31: null,
+      Payroll_Week_Month_id_31: null,
+      Payroll_Week_id_31: null,
+      Payroll_Fortnight_Year_id_31: null,
+      Payroll_Fortnight_Month_id_31: null,
+      Payroll_Fortnight_id_31: null,
+      Payroll_Month_Year_id_31: null,
+      Payroll_Month_id_31: null,
+      Payroll_Quarter_Year_id_31: null,
+      Payroll_Quarter_id_31: null,
+      Payroll_Year_id_31: null,
+
+      Audit_Year_Ending_id_27: null,
+
+      Filing_Frequency_id_8: null,
+      Period_Ending_Date_id_8: null,
+      Filing_Date_id_8: null,
+
+      Year_id_28: null,
+
+
+
 
     }));
   }, []);
@@ -348,7 +429,74 @@ const EditJob = () => {
                 response.data.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 ??
                 "",
               Management_Accounts_Frequency_id_6:
-                response.data.Management_Accounts_Frequency_id_6 ?? ""
+                response.data.Management_Accounts_Frequency_id_6 ?? "",
+
+              //////////////////////////
+              Year_Ending_id_1: response.data.Year_Ending_id_1 ?? null,
+              Day_Date_id_2: response.data.Day_Date_id_2 ?? null,
+              Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
+              Week_Month_id_2: response.data.Week_Month_id_2 ?? null,
+              Week_id_2: response.data.Week_id_2 ?? null,
+              Fortnight_Year_id_2: response.data.Fortnight_Year_id_2 ?? null,
+              Fortnight_Month_id_2: response.data.Fortnight_Month_id_2 ?? null,
+              Fortnight_id_2: response.data.Fortnight_id_2 ?? null,
+              Month_Year_id_2: response.data.Month_Year_id_2 ?? null,
+              Month_id_2: response.data.Month_id_2 ?? null,
+              Quarter_Year_id_2: response.data.Quarter_Year_id_2 ?? null,
+              Quarter_id_2: response.data.Quarter_id_2 ?? null,
+              Year_id_2: response.data.Year_id_2 ?? null,
+              Other_FromDate_id_2: response.data.Other_FromDate_id_2 ?? null,
+              Other_ToDate_id_2: response.data.Other_ToDate_id_2 ?? null,
+              Payroll_Week_Year_id_3: response.data.Payroll_Week_Year_id_3 ?? null,
+              Payroll_Week_Month_id_3: response.data.Payroll_Week_Month_id_3 ?? null,
+              Payroll_Week_id_3: response.data.Payroll_Week_id_3 ?? null,
+              Payroll_Fortnight_Year_id_3: response.data.Payroll_Fortnight_Year_id_3 ?? null,
+              Payroll_Fortnight_Month_id_3: response.data.Payroll_Fortnight_Month_id_3 ?? null,
+              Payroll_Fortnight_id_3: response.data.Payroll_Fortnight_id_3 ?? null,
+              Payroll_Month_Year_id_3: response.data.Payroll_Month_Year_id_3 ?? null,
+              Payroll_Month_id_3: response.data.Payroll_Month_id_3 ?? null,
+              Payroll_Quarter_Year_id_3: response.data.Payroll_Quarter_Year_id_3 ?? null,
+              Payroll_Quarter_id_3: response.data.Payroll_Quarter_id_3 ?? null,
+              Payroll_Year_id_3: response.data.Payroll_Year_id_3 ?? null,
+              Tax_Year_id_4: response.data.Tax_Year_id_4 ?? null,
+              Management_Accounts_FromDate_id_6: response.data.Management_Accounts_FromDate_id_6 ?? null,
+              Management_Accounts_ToDate_id_6: response.data.Management_Accounts_ToDate_id_6 ?? null,
+              Year_id_33: response.data.Year_id_33 ?? null,
+              Period_id_32: response.data.Period_id_32 ?? null,
+              Day_Date_id_32: response.data.Day_Date_id_32 ?? null,
+              Week_Year_id_32: response.data.Week_Year_id_32 ?? null,
+              Week_Month_id_32: response.data.Week_Month_id_32 ?? null,
+              Week_id_32: response.data.Week_id_32 ?? null,
+              Fortnight_Year_id_32: response.data.Fortnight_Year_id_32 ?? null,
+              Fortnight_Month_id_32: response.data.Fortnight_Month_id_32 ?? null,
+              Fortnight_id_32: response.data.Fortnight_id_32 ?? null,
+              Month_Year_id_32: response.data.Month_Year_id_32 ?? null,
+              Month_id_32: response.data.Month_id_32 ?? null,
+              Quarter_Year_id_32: response.data.Quarter_Year_id_32 ?? null,
+              Quarter_id_32: response.data.Quarter_id_32 ?? null,
+              Year_id_32: response.data.Year_id_32 ?? null,
+              Other_FromDate_id_32: response.data.Other_FromDate_id_32 ?? null,
+              Other_ToDate_id_32: response.data.Other_ToDate_id_32 ?? null,
+              Payroll_Frequency_id_31: response.data.Payroll_Frequency_id_31 ?? null,
+              Payroll_Week_Year_id_31: response.data.Payroll_Week_Year_id_31 ?? null,
+              Payroll_Week_Month_id_31: response.data.Payroll_Week_Month_id_31 ?? null,
+              Payroll_Week_id_31: response.data.Payroll_Week_id_31 ?? null,
+              Payroll_Fortnight_Year_id_31: response.data.Payroll_Fortnight_Year_id_31 ?? null,
+              Payroll_Fortnight_Month_id_31: response.data.Payroll_Fortnight_Month_id_31 ?? null,
+              Payroll_Fortnight_id_31: response.data.Payroll_Fortnight_id_31 ?? null,
+              Payroll_Month_Year_id_31: response.data.Payroll_Month_Year_id_31 ?? null,
+              Payroll_Month_id_31: response.data.Payroll_Month_id_31 ?? null,
+              Payroll_Quarter_Year_id_31: response.data.Payroll_Quarter_Year_id_31 ?? null,
+              Payroll_Quarter_id_31: response.data.Payroll_Quarter_id_31 ?? null,
+              Payroll_Year_id_31: response.data.Payroll_Year_id_31 ?? null,
+              Audit_Year_Ending_id_27: response.data.Audit_Year_Ending_id_27 ?? null,
+              Filing_Frequency_id_8: response.data.Filing_Frequency_id_8 ?? null,
+              Period_Ending_Date_id_8: response.data.Period_Ending_Date_id_8 ?? null,
+              Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
+              Year_id_28: response.data.Year_id_28 ?? null,
+              
+
+
             }));
           }
 

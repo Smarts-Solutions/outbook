@@ -1693,7 +1693,7 @@ const CreateJob = () => {
       Who_Did_The_Bookkeeping_id_1: "Outbooks",
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
-      Year_Ending_id_1: new Date().toISOString().split("T")[0],
+      
     //  Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
@@ -1721,8 +1721,88 @@ const CreateJob = () => {
       Number_of_Income_Sources_id_4: "1",
       If_Landlord_Number_of_Properties_id_4: "1",
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
+     
+
       Management_Accounts_Frequency_id_6: "Quarterly",
+     
+     ////////////////////////// 
+      Year_Ending_id_1: null,
+
+      Day_Date_id_2: null,
+      Week_Year_id_2: null,
+      Week_Month_id_2: null,
+      Week_id_2: null,
+      Fortnight_Year_id_2: null,
+      Fortnight_Month_id_2: null,
+      Fortnight_id_2: null,
+      Month_Year_id_2: null,
+      Month_id_2: null,
+      Quarter_Year_id_2: null,
+      Quarter_id_2: null,
+      Year_id_2: null,
+      Other_FromDate_id_2: null,
+      Other_ToDate_id_2: null,
+
+
+      Payroll_Week_Year_id_3: null,
+      Payroll_Week_Month_id_3: null,
+      Payroll_Week_id_3: null,
+      Payroll_Fortnight_Year_id_3: null,
+      Payroll_Fortnight_Month_id_3: null,
+      Payroll_Fortnight_id_3: null,
+      Payroll_Month_Year_id_3: null,
+      Payroll_Month_id_3: null,
+      Payroll_Quarter_Year_id_3: null,
+      Payroll_Quarter_id_3: null,
+      Payroll_Year_id_3: null,
+
+
+
+      Tax_Year_id_4: null,
+
+      Management_Accounts_FromDate_id_6: null,
+      Management_Accounts_ToDate_id_6: null,
+
       Year_id_33: null,
+
+      Period_id_32: null,
+      Day_Date_id_32: null,
+      Week_Year_id_32: null,
+      Week_Month_id_32: null,
+      Week_id_32: null,
+      Fortnight_Year_id_32: null,
+      Fortnight_Month_id_32: null,
+      Fortnight_id_32: null,
+      Month_Year_id_32: null,
+      Month_id_32: null,
+      Quarter_Year_id_32: null,
+      Quarter_id_32: null,
+      Year_id_32: null,
+      Other_FromDate_id_32: null,
+      Other_ToDate_id_32: null,
+
+
+      Payroll_Frequency_id_31: null,
+      Payroll_Week_Year_id_31: null,
+      Payroll_Week_Month_id_31: null,
+      Payroll_Week_id_31: null,
+      Payroll_Fortnight_Year_id_31: null,
+      Payroll_Fortnight_Month_id_31: null,
+      Payroll_Fortnight_id_31: null,
+      Payroll_Month_Year_id_31: null,
+      Payroll_Month_id_31: null,
+      Payroll_Quarter_Year_id_31: null,
+      Payroll_Quarter_id_31: null,
+      Payroll_Year_id_31: null,
+
+      Audit_Year_Ending_id_27: null,
+
+      Filing_Frequency_id_8: null,
+      Period_Ending_Date_id_8: null,
+      Filing_Date_id_8: null,
+
+      Year_id_28: null,
+
 
       
 
