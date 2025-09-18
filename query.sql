@@ -819,6 +819,20 @@ CREATE TABLE sharepoint_token (
 
 
 
+     CREATE TABLE timesheet_filter (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        type VARCHAR(100) NOT NULL,
+        staff_id INT NOT NULL,
+        filter_record LONGTEXT NOT NULL,
+        status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (staff_id) REFERENCES staffs(id)
+    );
+     
+
+
+
     
 
 
