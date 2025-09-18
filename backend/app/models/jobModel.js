@@ -533,11 +533,10 @@ Audit_Year_Ending_id_27,
 Filing_Frequency_id_8,
 Period_Ending_Date_id_8,
 Filing_Date_id_8,
-Year_id_28,
+Year_id_28
 )
 VALUES (
-    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
-    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
     
 )`;
 
@@ -687,7 +686,7 @@ VALUES (
       job.Filing_Frequency_id_8,
       job.Period_Ending_Date_id_8,
       job.Filing_Date_id_8,
-      job.Year_id_28,
+      job.Year_id_28
     ];
 
     // Apply the undefined check for each field
@@ -1831,6 +1830,70 @@ const getJobById = async (job) => {
         If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
           rows[0].If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
         Management_Accounts_Frequency_id_6: rows[0].Management_Accounts_Frequency_id_6,
+
+
+        Year_Ending_id_1 : rows[0].Year_Ending_id_1,
+        Day_Date_id_2 : rows[0].Day_Date_id_2,
+        Week_Year_id_2 : rows[0].Week_Year_id_2,
+        Week_Month_id_2 : rows[0].Week_Month_id_2,
+        Week_id_2 : rows[0].Week_id_2,
+        Fortnight_Year_id_2 : rows[0].Fortnight_Year_id_2,
+        Fortnight_Month_id_2 : rows[0].Fortnight_Month_id_2,
+        Fortnight_id_2 : rows[0].Fortnight_id_2,
+        Month_Year_id_2 : rows[0].Month_Year_id_2,
+        Month_id_2 : rows[0].Month_id_2,
+        Quarter_Year_id_2 : rows[0].Quarter_Year_id_2,
+        Quarter_id_2 : rows[0].Quarter_id_2,
+        Year_id_2 : rows[0].Year_id_2,
+        Other_FromDate_id_2 : rows[0].Other_FromDate_id_2,
+        Other_ToDate_id_2 : rows[0].Other_ToDate_id_2,
+        Payroll_Week_Year_id_3 : rows[0].Payroll_Week_Year_id_3,
+        Payroll_Week_Month_id_3 : rows[0].Payroll_Week_Month_id_3,
+        Payroll_Week_id_3 : rows[0].Payroll_Week_id_3,
+        Payroll_Fortnight_Year_id_3 : rows[0].Payroll_Fortnight_Year_id_3,
+        Payroll_Fortnight_Month_id_3 : rows[0].Payroll_Fortnight_Month_id_3,
+        Payroll_Fortnight_id_3 : rows[0].Payroll_Fortnight_id_3,
+        Payroll_Month_Year_id_3 : rows[0].Payroll_Month_Year_id_3,
+        Payroll_Month_id_3 : rows[0].Payroll_Month_id_3,
+        Payroll_Quarter_Year_id_3 : rows[0].Payroll_Quarter_Year_id_3,
+        Payroll_Quarter_id_3 : rows[0].Payroll_Quarter_id_3,
+        Payroll_Year_id_3 : rows[0].Payroll_Year_id_3,
+        Tax_Year_id_4 : rows[0].Tax_Year_id_4,
+        Management_Accounts_FromDate_id_6 : rows[0].Management_Accounts_FromDate_id_6,
+        Management_Accounts_ToDate_id_6 : rows[0].Management_Accounts_ToDate_id_6,
+        Year_id_33 : rows[0].Year_id_33,
+        Period_id_32 : rows[0].Period_id_32,
+        Day_Date_id_32 : rows[0].Day_Date_id_32,
+        Week_Year_id_32 : rows[0].Week_Year_id_32,
+        Week_Month_id_32 : rows[0].Week_Month_id_32,
+        Week_id_32 : rows[0].Week_id_32,
+        Fortnight_Year_id_32 : rows[0].Fortnight_Year_id_32,
+        Fortnight_Month_id_32 : rows[0].Fortnight_Month_id_32,
+        Fortnight_id_32 : rows[0].Fortnight_id_32,
+        Month_Year_id_32 : rows[0].Month_Year_id_32,
+        Month_id_32 : rows[0].Month_id_32,
+        Quarter_Year_id_32 : rows[0].Quarter_Year_id_32,
+        Quarter_id_32 : rows[0].Quarter_id_32,
+        Year_id_32 : rows[0].Year_id_32,
+        Other_FromDate_id_32 : rows[0].Other_FromDate_id_32,
+        Other_ToDate_id_32 : rows[0].Other_ToDate_id_32,
+        Payroll_Frequency_id_31 : rows[0].Payroll_Frequency_id_31,
+        Payroll_Week_Year_id_31 : rows[0].Payroll_Week_Year_id_31,
+        Payroll_Week_Month_id_31 : rows[0].Payroll_Week_Month_id_31,
+        Payroll_Week_id_31 : rows[0].Payroll_Week_id_31,
+        Payroll_Fortnight_Year_id_31 : rows[0].Payroll_Fortnight_Year_id_31,
+        Payroll_Fortnight_Month_id_31 : rows[0].Payroll_Fortnight_Month_id_31,
+        Payroll_Fortnight_id_31 : rows[0].Payroll_Fortnight_id_31,
+        Payroll_Month_Year_id_31 : rows[0].Payroll_Month_Year_id_31,
+        Payroll_Month_id_31 : rows[0].Payroll_Month_id_31,
+        Payroll_Quarter_Year_id_31 : rows[0].Payroll_Quarter_Year_id_31,
+        Payroll_Quarter_id_31 : rows[0].Payroll_Quarter_id_31,
+        Payroll_Year_id_31 : rows[0].Payroll_Year_id_31,
+        Audit_Year_Ending_id_27 : rows[0].Audit_Year_Ending_id_27,
+        Filing_Frequency_id_8 : rows[0].Filing_Frequency_id_8,
+        Period_Ending_Date_id_8 : rows[0].Period_Ending_Date_id_8,
+        Filing_Date_id_8 : rows[0].Filing_Date_id_8,
+        Year_id_28 : rows[0].Year_id_28,
         
 
 
