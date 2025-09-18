@@ -19,33 +19,18 @@ function TimesheetReport() {
   const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
 
-  //console.log("showData ", showData);
-
-  const [staffAllData, setStaffAllData] = useState([]);
-  const [customerAllData, setCustomerAllData] = useState([]);
-  const [clientAllData, setClientAllData] = useState([]);
-  const [jobAllData, setJobAllData] = useState([]);
-  const [taskAllData, setTaskAllData] = useState([]);
-
-  const [internalJobAllData, setInternalJobAllData] = useState([]);
-  const [internalTaskAllData, setInternalTaskAllData] = useState([]);
-
-
-
-
+  // console.log("showData ", showData);
 
   const [filters, setFilters] = useState({
     groupBy: ["staff_id"],
-    internal_external: "0",
+    internal_external: "2",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
-    staff_id: null,
-    customer_id: null,
-    client_id: null,
-    job_id: null,
-    task_id: null,
-    internal_job_id: null,
-    internal_task_id: null,
+    staffId: null,
+    customerId: null,
+    clientId: null,
+    jobId: null,
+    taskId: null,
     timePeriod: "this_month",
     displayBy: "Weekly",
     fromDate: null,
@@ -66,14 +51,14 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("response.data ", response.data);
+           // console.log("response.data ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`
             }));
-            setStaffAllData(data);
+            setOptions(data);
           } else {
-            setStaffAllData([]);
+            setOptions([]);
           }
         })
         .catch((error) => {
@@ -88,7 +73,7 @@ function TimesheetReport() {
         value: item.id,
         label: item.email
       }));
-      setStaffAllData(data);
+      setOptions(data);
     }
   };
 
@@ -108,9 +93,9 @@ function TimesheetReport() {
             value: item.id,
             label: item.trading_name
           }));
-          setCustomerAllData(data);
+          setOptions(data);
         } else {
-          setCustomerAllData([]);
+          setOptions([]);
         }
       })
       .catch((error) => {
@@ -130,9 +115,9 @@ function TimesheetReport() {
             value: item.id,
             label: item.client_name + " (" + item.client_code + ")"
           }));
-          setClientAllData(data);
+          setOptions(data);
         } else {
-          setClientAllData([]);
+          setOptions([]);
         }
       })
       .catch((error) => {
@@ -142,193 +127,165 @@ function TimesheetReport() {
 
   // Get All Jobs
   const GetAllJobs = async (internal_external) => {
-    if (internal_external == "0") {
-      var req = { action: "getInternalJobs" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            // console.log("Internal jobs response: ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setInternalJobAllData(data);
-          } else {
-            setInternalJobAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-
-
-      // External get All jobs
-      var req = { action: "getByCustomer", customer_id: "" };
-      var data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.job_id,
-              label: item.job_code_id
-            }));
-            setJobAllData(data);
-          } else {
-            setJobAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-
-
-      return
-    }
-
-    else if (internal_external == "1") {
-      var req = { action: "getInternalJobs" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            // console.log("Internal jobs response: ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setInternalJobAllData(data);
-          } else {
-            setInternalJobAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    }
-
-    else if (internal_external == "2") {
-      // External get All jobs
-      const req = { action: "getByCustomer", customer_id: "" };
+    if (internal_external == "1") {
+      const req = { action: "getInternalJobs" };
       const data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
+      await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
+
+            // console.log("Internal jobs response: ", response.data);
             const data = response?.data?.map((item) => ({
-              value: item.job_id,
-              label: item.job_code_id
+              value: item.id,
+              label: item.name
             }));
-            setJobAllData(data);
+            setOptions(data);
           } else {
-            setJobAllData([]);
+            setOptions([]);
           }
         })
         .catch((error) => {
           return;
         });
+
+
       return
+
     }
 
+
+    // External get All jobs
+    const req = { action: "getByCustomer", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.job_id,
+            label: item.job_code_id
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
   };
 
   // Get All task
   const GetAllTask = async (internal_external) => {
-    if (internal_external == "0") {
-      var req = { action: "getInternalTasks" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            // console.log("Internal tasks response: ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setInternalTaskAllData(data);
-          } else {
-            setInternalTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-
-      // External Task
-      var req = { action: "get" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.task_id,
-              label: item.task_name
-            }));
-            setTaskAllData(data);
-          } else {
-            setTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    }
-    else if (internal_external == "1") {
-      var req = { action: "getInternalTasks" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            // console.log("Internal tasks response: ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setInternalTaskAllData(data);
-          } else {
-            setInternalTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    }
-    else if (internal_external == "2") {
-      // External Task
-      const req = { action: "get" };
+    if (internal_external == "1") {
+      const req = { action: "getInternalTasks" };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
+
+            // console.log("Internal tasks response: ", response.data);
             const data = response?.data?.map((item) => ({
-              value: item.task_id,
-              label: item.task_name
+              value: item.id,
+              label: item.name
             }));
-            setTaskAllData(data);
+            setOptions(data);
           } else {
-            setTaskAllData([]);
+            setOptions([]);
           }
         })
         .catch((error) => {
           return;
         });
+
       return
     }
+
+
+    // External Task
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.task_id,
+            label: item.task_name
+          }));
+          setOptions(data);
+        } else {
+          setOptions([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
   };
+
+
+  // const exportToCSV = (showData) => {
+  //   if (!showData || showData.length === 0) {
+  //     alert("No data to export!");
+  //     return;
+  //   }
+
+  //   // Headers as per <thead>
+  //   const headers = [
+  //     "Staff",
+  //     "Internal/External",
+  //     "Customer",
+  //     "Client",
+  //     "Job",
+  //     "Task",
+  //     "Mon (hrs)",
+  //     "Tue (hrs)",
+  //     "Wed (hrs)",
+  //     "Thu (hrs)",
+  //     "Fri (hrs)",
+  //     "Date",
+  //   ];
+
+  //   // Rows mapping data keys to headers
+  //   const rows = showData.map((item) => {
+  //     return [
+  //       item.staff_fullname || "-", // Staff
+  //       item.internal_external || "-", // Internal/External
+  //       item.customer_name ?? "-", // Customer
+  //       item.client_code ?? "-", // Client
+  //       item.job_name || "-", // Job
+  //       item.task_name || "-", // Task
+  //       item.monday_hours || "-", // Mon
+  //       item.tuesday_hours || "-", // Tue
+  //       item.wednesday_hours || "-", // Wed
+  //       item.thursday_hours || "-", // Thu
+  //       item.friday_hours || "-", // Fri
+  //       item.created_at ? dayjs(item.created_at).format("DD-MM-YYYY") : "-", // Date
+  //     ];
+  //   });
+
+  //   // CSV content
+  //   const csvContent = [headers, ...rows]
+  //     .map((row) =>
+  //       row
+  //         .map((val) =>
+  //           typeof val === "string" && val.includes(",")
+  //             ? `"${val}"` // agar string me comma ho to quotes me wrap
+  //             : val
+  //         )
+  //         .join(",")
+  //     )
+  //     .join("\n");
+
+  //   // Download CSV
+  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //   const link = document.createElement("a");
+  //   link.href = URL.createObjectURL(blob);
+  //   link.download = "TimeSheetReportData.csv";
+  //   link.click();
+  // };
 
   const exportToCSV = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
@@ -348,16 +305,16 @@ function TimesheetReport() {
     };
     const headers = data.columns.map(col => colMap[col] || col);
 
-
+ 
     const rows = data.rows.map((row) => {
-      return data.columns.map((col) => {
-        let val = row[col];
-        if (val === undefined || val === null) val = "-";
+    return data.columns.map((col) => {
+      let val = row[col];
+      if (val === undefined || val === null) val = "-";
 
-        if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
-        return val;
-      });
+      if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
+      return val;
     });
+  });
 
     //  CSV content
     const csvContent = [headers, ...rows]
@@ -372,15 +329,41 @@ function TimesheetReport() {
     link.click();
   };
 
+
+
   const handleFilterChange = (e) => {
 
     if (Array.isArray(e)) {
-      // this case is for multi-select (Group By)
+      // ye case sirf "groupBy" ke liye handle karte h
       const values = e.map((opt) => opt.value);
       const labels = e.map((opt) => opt.label);
-      //console.log("Filter changed (multi): ", "groupBy", values, labels);
+      // console.log("Filter changed (multi): ", "groupBy", values, labels);
       setOptions([]);
       let gropByArray = sortByReference(values)
+
+      let lastIndexValue = gropByArray[gropByArray.length - 1];
+      //  console.log("lastIndexValue ", lastIndexValue);
+
+      if (lastIndexValue == "staff_id") {
+        staffData()
+      }
+
+      else if (lastIndexValue == "customer_id") {
+        GetAllCustomer()
+      }
+
+      else if (lastIndexValue == "client_id") {
+        GetAllClient()
+      }
+
+      else if (lastIndexValue == "job_id") {
+        GetAllJobs(filters.internal_external)
+      }
+
+      else if (lastIndexValue == "task_id") {
+        GetAllTask(filters.internal_external)
+      }
+
       setFilters((prev) => ({
         ...prev,
         fieldsToDisplay: null,
@@ -388,81 +371,33 @@ function TimesheetReport() {
         groupBy: sortByReference(gropByArray)
       }));
 
-      return; // multi-select
-
-      // let lastIndexValue = gropByArray[gropByArray.length - 1];
-      // //  console.log("lastIndexValue ", lastIndexValue);
-
-      // if (lastIndexValue == "staff_id") {
-      //   staffData()
-      // }
-
-      // else if (lastIndexValue == "customer_id") {
-      //   GetAllCustomer()
-      // }
-
-      // else if (lastIndexValue == "client_id") {
-      //   GetAllClient()
-      // }
-
-      // else if (lastIndexValue == "job_id") {
-      //   GetAllJobs(filters.internal_external)
-      // }
-
-      // else if (lastIndexValue == "task_id") {
-      //   GetAllTask(filters.internal_external)
-      // }
-
-      // setFilters((prev) => ({
-      //   ...prev,
-      //   fieldsToDisplay: null,
-      //   fieldsToDisplayId: null,
-      //   groupBy: sortByReference(gropByArray)
-      // }));
-
-      // return;
+      return; // multi-select ke liye yahi enough hai
     }
 
-
-
+   
+    console.log("DATAAA: ");
 
     const { key, value, label } = e.target;
     // console.log("Filter changed: ", key, value, label);
-    // if (key === "fieldsToDisplay") {
+    if (key === "fieldsToDisplay") {
 
-    //   //console.log("Fields to Display changed field: ", value);
+      //console.log("Fields to Display changed field: ", value);
 
-    //   if ([null, undefined, ""].includes(value)) {
-    //     setFilters((prev) => ({
-    //       ...prev,
-    //       [key]: null,
-    //       [key + "Id"]: null
-    //     }));
-    //   } else {
-    //     setFilters((prev) => ({
-    //       ...prev,
-    //       [key]: label,
-    //       [key + "Id"]: value
-    //     }));
-    //   }
-
-    // }
-
-
-    if (key === "staff_id" || key === "customer_id" || key === "client_id" || key === "job_id" || key === "task_id" || key === "internal_job_id" || key === "internal_task_id") {
       if ([null, undefined, ""].includes(value)) {
         setFilters((prev) => ({
           ...prev,
-          [key]: null
+          [key]: null,
+          [key + "Id"]: null
         }));
       } else {
         setFilters((prev) => ({
           ...prev,
-          [key]: value
+          [key]: label,
+          [key + "Id"]: value
         }));
       }
-    }
 
+    }
     else if (key === "internal_external") {
 
       let remainingPart = filters?.groupBy
@@ -472,16 +407,16 @@ function TimesheetReport() {
         let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
 
         let lastIndexValue = remainingPart[remainingPart.length - 1];
-
+        
         let fieldsToDisplayId = null;
-        if (lastIndexValue == 'staff_id') {
-          if (filters?.groupBy.some(item => ['customer_id', 'client_id'].includes(item))) {
+         if(lastIndexValue == 'staff_id'){
+          if(filters?.groupBy.some(item => ['customer_id','client_id'].includes(item))){
             fieldsToDisplayId = null
-          } else {
+          }else{
             fieldsToDisplayId = filters.fieldsToDisplayId
           }
           staffData()
-        } else {
+         }else{
           fieldsToDisplayId = null
         }
 
@@ -493,25 +428,25 @@ function TimesheetReport() {
           fieldsToDisplay: null,
           fieldsToDisplayId: fieldsToDisplayId
         }));
-      } else {
+      }else{
         setFilters((prev) => ({
-          ...prev,
-          [key]: value
-        }));
+        ...prev,
+        [key]: value
+      }));
       }
-
+      
 
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == 'job_id') {
         setOptions([])
-        // console.log("Internal/External changed, calling GetAllJobs with: ", value);
+       // console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value)
-      }
+      } 
       else if (lastIndexValue == 'task_id') {
         setOptions([])
         GetAllTask(value)
       }
-      else if (lastIndexValue == 'staff_id') {
+      else if(lastIndexValue == 'staff_id'){
         setOptions([])
         staffData()
       }
@@ -554,104 +489,6 @@ function TimesheetReport() {
 
   };
 
-  const addAndRemoveGroupBy = (value, type) => {
-    if (type == 'add') {
-      if (value == 'staff_id') {
-        staffData()
-      }
-      else if (value == 'customer_id') {
-        GetAllCustomer()
-      }
-      else if (value == 'client_id') {
-        GetAllClient()
-      }
-      else if (value == 'job_id') {
-        GetAllJobs(filters.internal_external)
-      }
-      else if (value == 'task_id') {
-        GetAllTask(filters.internal_external)
-      }
-
-    }
-
-    else if (type == 'remove') {
-
-      // console.log("Removed value: ---------------- ", value);
-      if (value == 'staff_id') {
-        setStaffAllData([]);
-        setFilters((prev) => ({
-          ...prev,
-          [value]: null
-        }));
-
-      } else if (value == 'customer_id') {
-        setCustomerAllData([]);
-        setFilters((prev) => ({
-          ...prev,
-          [value]: null
-        }));
-
-      } else if (value == 'client_id') {
-        setClientAllData([]);
-        setFilters((prev) => ({
-          ...prev,
-          [value]: null
-        }));
-
-      } else if (value == 'job_id') {
-
-        if (filters.internal_external == "0") {
-          setJobAllData([]);
-          setInternalJobAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            job_id: null,
-            internal_job_id: null
-          }));
-        }else if (filters.internal_external == "1") {
-          setInternalJobAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            internal_job_id: null
-          }));
-        } else if (filters.internal_external == "2") {
-          setJobAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            job_id: null
-          }));
-        }
-
-
-      } else if (value == 'task_id') {
-        if (filters.internal_external == "0") {
-          setTaskAllData([]);
-          setInternalTaskAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            task_id: null,
-            internal_task_id: null
-          }));
-        } else if (filters.internal_external == "1") {
-          setInternalTaskAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            internal_task_id: null
-          }));
-        } else if (filters.internal_external == "2") {
-          setTaskAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            task_id: null
-          }));
-        }
-      }
-
-
-
-    }
-  }
-
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
@@ -680,7 +517,7 @@ function TimesheetReport() {
   }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy]);
 
 
-  //console.log("filters ", filters);
+  // console.log("filters ", filters);
 
   const resetFunction = () => {
     setFilters({
@@ -697,6 +534,13 @@ function TimesheetReport() {
     staffData();
   }
 
+  // const optionGroupBy = [
+  //   { value: "staff_id", label: "Staff" },
+  //   { value: "customer_id", label: "Customer" },
+  //   { value: "client_id", label: "Client" },
+  //   { value: "job_id", label: "Job" },
+  //   { value: "task_id", label: "Task" }
+  // ];
 
   const optionGroupBy = [
     { value: "staff_id", label: "Staff" },
@@ -727,7 +571,7 @@ function TimesheetReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
-  console.log("Filters: ", filters);
+  // console.log("Filters: ", filters);
 
 
 
@@ -763,33 +607,31 @@ function TimesheetReport() {
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
-
-          {/* <Select
-            isMulti
-            options={optionGroupBy}
-            value={optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value))}
-            onChange={handleFilterChange}
-            className="basic-multi-select"
-            classNamePrefix="select"
-          /> */}
+          {/* <select
+            className="form-select shadow-sm  rounded-pill"
+            id="groupBy"
+            value={filters.groupBy}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "groupBy",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text
+                }
+              })
+            }
+          >
+            <option value="employee">Staff</option>
+            <option value="customer">Customer</option>
+            <option value="client">Client</option>
+            <option value="job">Job</option>
+            <option value="task">Task</option>
+          </select> */}
           <Select
             isMulti
             options={optionGroupBy}
             value={optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value))}
-            onChange={(selectedOptions, actionMeta) => {
-              // console.log("Selected Options:", selectedOptions);
-              //console.log("Action Meta:", actionMeta);
-
-              if (actionMeta.action === "remove-value") {
-                console.log("Removed value:", actionMeta.removedValue.value);
-                addAndRemoveGroupBy(actionMeta.removedValue.value, 'remove');
-              }
-              if (actionMeta.action === "select-option") {
-                console.log("Added value:", actionMeta.option.value);
-                addAndRemoveGroupBy(actionMeta.option.value, 'add');
-              }
-              handleFilterChange(selectedOptions);
-            }}
+            onChange={handleFilterChange}
             className="basic-multi-select"
             classNamePrefix="select"
           />
@@ -812,7 +654,6 @@ function TimesheetReport() {
               })
             }
           >
-            <option value="0">Both</option>
             <option value="1">Internal</option>
             <option value="2">External</option>
           </select>
@@ -820,11 +661,12 @@ function TimesheetReport() {
 
 
         {/* Field To Display */}
-        {/* <div className="col-lg-4 col-md-6">
+        <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">
             {
               `Select ${labels[lastGroupValue] || "..."}`
             }
+
             {
               lastGroupValue == "job_id" || lastGroupValue == "task_id" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
             }
@@ -832,6 +674,7 @@ function TimesheetReport() {
           </label>
 
           <Select
+            //options={options}
             options={[
               { value: "", label: "Select..." },
               ...options,
@@ -849,206 +692,8 @@ function TimesheetReport() {
             isSearchable
             className="shadow-sm select-staff rounded-pill"
           />
-        </div> */}
 
-
-
-        {/* Field To Display Staff */}
-        {filters?.groupBy?.includes('staff_id') && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Staff
-            </label>
-
-            <Select
-
-              options={[
-                { value: "", label: "Select..." },
-                ...staffAllData,
-              ]}
-              value={
-                staffAllData && staffAllData.length > 0
-                  ? staffAllData.find((opt) => Number(opt.value) === Number(filters.staff_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "staff_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
-
-
-        {/* Field To Display Customer */}
-        {filters?.groupBy?.includes('customer_id') && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Customer
-            </label>
-            <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...customerAllData,
-              ]}
-              value={
-                customerAllData && customerAllData.length > 0
-                  ? customerAllData.find((opt) => Number(opt.value) === Number(filters.customer_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "customer_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
-
-
-        {/* Field To Display Client */}
-        {filters?.groupBy?.includes('client_id') && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Client
-            </label>
-            <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...clientAllData,
-              ]}
-              value={
-                clientAllData && clientAllData.length > 0
-                  ? clientAllData.find((opt) => Number(opt.value) === Number(filters.client_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "client_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
-
-
-        {/* Field To Display Job */}
-        {(filters?.groupBy?.includes('job_id') && filters.internal_external != "1") && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Job
-            </label>
-            <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...jobAllData,
-              ]}
-              value={
-                jobAllData && jobAllData.length > 0
-                  ? jobAllData.find((opt) => Number(opt.value) === Number(filters.job_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "job_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
-
-
-        {/* Field To Display task */}
-        {(filters?.groupBy?.includes('task_id') && filters.internal_external != "1") && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Task
-            </label>
-            <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...taskAllData,
-              ]}
-              value={
-                taskAllData && taskAllData.length > 0
-                  ? taskAllData.find((opt) => Number(opt.value) === Number(filters.task_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "task_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
-
-
-        {/* Field To Display Internal Job */}
-        {(filters?.groupBy?.includes('job_id') && filters.internal_external != "2") && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Internal Job
-            </label>
-            <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...internalJobAllData,
-              ]}
-              value={
-                internalJobAllData && internalJobAllData.length > 0
-                  ? internalJobAllData.find((opt) => Number(opt.value) === Number(filters.internal_job_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "internal_job_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
-
-
-        {/* Field To Display Internal Task */}
-        {(filters?.groupBy?.includes('task_id') && filters.internal_external != "2") && (
-          <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">
-              Select Internal Task
-            </label>
-            <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...internalTaskAllData,
-              ]}
-              value={
-                internalTaskAllData && internalTaskAllData.length > 0
-                  ? internalTaskAllData.find((opt) => Number(opt.value) === Number(filters.internal_task_id)) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: { key: "internal_task_id", value: selected.value, label: selected.label },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            />
-          </div>
-        )}
+        </div>
 
 
 
@@ -1191,7 +836,7 @@ function TimesheetReport() {
       <div className='datatable-container'>
         {/* <h6>Filtered Data:</h6> */}
         {
-          //console.log("showData?.rows ", showData?.rows)
+        //console.log("showData?.rows ", showData?.rows)
         }
         {showData?.rows == undefined || showData?.rows?.length === 0 ? (
           <div className='text-center'>
@@ -1222,7 +867,7 @@ function TimesheetReport() {
                 >
                   {showData?.columns?.map((col, idx) => (
                     <th className='border-bottom-0' key={idx}
-                      style={{ fontSize: "15px", fontWeight: "bold", minWidth: "130px" }}
+                      style={{ fontSize: "15px",  fontWeight: "bold", minWidth: "130px" }}
                     >
                       {getColumnName(col)}
                     </th>
@@ -1233,7 +878,7 @@ function TimesheetReport() {
                 {showData?.rows?.map((row, rowIdx) => (
                   <tr key={rowIdx}>
                     {showData?.columns?.map((col, colIdx) => (
-                      <td key={colIdx} style={{ padding: "10px", }}>
+                      <td key={colIdx} style={{ padding: "10px",  }}>
                         {row[col] !== undefined ? row[col] : ""}
                       </td>
                     ))}
