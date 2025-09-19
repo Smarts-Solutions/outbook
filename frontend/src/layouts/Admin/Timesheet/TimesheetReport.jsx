@@ -30,13 +30,13 @@ function TimesheetReport() {
 
   const [internalJobAllData, setInternalJobAllData] = useState([]);
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
-  
-  
+
+
   const [getAllFilterData, setGetAllFilterData] = useState([]);
   // set filter id
   const [filterId, setFilterId] = useState(null);
 
-  console.log("filterId -------  ", filterId  );
+  console.log("filterId -------  ", filterId);
   console.log("getAllFilterData ", getAllFilterData);
 
 
@@ -108,7 +108,8 @@ function TimesheetReport() {
         if (response.status) {
           const data = response?.data?.map((item) => ({
             value: item.id,
-            label: item.filter_record
+            label: item.filter_record,
+            filters: item.filter_record
           }));
           setGetAllFilterData(data);
         } else {
@@ -776,8 +777,8 @@ function TimesheetReport() {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          
-         sweatalert.fire({
+
+          sweatalert.fire({
             title: 'Success',
             text: response.message,
             icon: 'success',
@@ -803,7 +804,50 @@ function TimesheetReport() {
 
   }
 
+  const handleFilterSelect = (selected) => {
+    setFilterId(selected.value);
+    // set filters from selected
+    console.log("selected  1 --", selected);
+    let selectedFilter = getAllFilterData?.find((opt) => Number(opt?.value) === Number(selected?.value));
 
+    console.log("selectedFilter  2 --", selectedFilter);
+    console.log("selectedFilter  3 --", selectedFilter?.filters);
+    if (selectedFilter != undefined && selectedFilter.filters) {
+      let parsedFilters = {};
+      try {
+
+        parsedFilters = JSON.parse(selectedFilter.filters);
+        console.log("Parsed Filters: 4  ", parsedFilters);
+        // console.log("Parsed Filters: ", parsedFilters);
+        setFilters(parsedFilters);
+        callFilterApi();
+      } catch (e) {
+        console.error("Error parsing filters JSON: ", e);
+      }
+    } else {
+
+      setFilters({
+        groupBy: ["staff_id"],
+        internal_external: "0",
+        fieldsToDisplay: null,
+        fieldsToDisplayId: null,
+        staff_id: null,
+        customer_id: null,
+        client_id: null,
+        job_id: null,
+        task_id: null,
+        internal_job_id: null,
+        internal_task_id: null,
+        timePeriod: "this_month",
+        displayBy: "Weekly",
+        fromDate: null,
+        toDate: null,
+     })
+
+    }
+  };
+
+  console.log("setFilterId -----  ", filterId);
 
   return (
     <div className="container-fluid pb-3">
@@ -816,11 +860,11 @@ function TimesheetReport() {
             </div>
 
             {/* get filters Dropdown */}
-           
-           <label className="form-label fw-medium">
+
+            <label className="form-label fw-medium">
               Select Saved Filters
             </label>
-            <Select
+            {/* <Select
               options={[
                 { value: "", label: "Select..." },
                 ...getAllFilterData,
@@ -847,9 +891,28 @@ function TimesheetReport() {
               }}
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...getAllFilterData,
+              ]}
+              value={
+                getAllFilterData && getAllFilterData.length > 0
+                  ? getAllFilterData.find(
+                    (opt) => Number(opt.value) === Number(filterId)
+                  ) || null
+                  : null
+              }
+              onChange={handleFilterSelect}
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
+
+
             {/* end get filters Dropdown */}
-              
+
 
 
 
