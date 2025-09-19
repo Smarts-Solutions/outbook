@@ -869,7 +869,7 @@ function TimesheetReport() {
   };
 
   const deleteFilterIdFunction = async () => {
-  // confirm before delete
+    // confirm before delete
     const result = await sweatalert.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -880,40 +880,40 @@ function TimesheetReport() {
       confirmButtonText: 'Yes, delete it!'
     });
     if (result.isConfirmed) {
-     var req = { action: "deleteFilterId", filterId: filterId, type: "timesheet_report" };
-    var data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
+      var req = { action: "deleteFilterId", filterId: filterId, type: "timesheet_report" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
 
-          sweatalert.fire({
-            title: 'Success',
-            text: response.message,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          getAllFilters();
-          resetFunction();
+            sweatalert.fire({
+              title: 'Success',
+              text: response.message,
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+            getAllFilters();
+            resetFunction();
 
-        } else {
-          sweatalert.fire({
-            title: 'Error',
-            text: 'Failed to save filters. Please try again.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
+          } else {
+            sweatalert.fire({
+              title: 'Error',
+              text: 'Failed to save filters. Please try again.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
 
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-    }else{
-     return
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    } else {
+      return
     }
 
-    
+
   }
 
   console.log("setFilterId -----  ", filterId);
@@ -929,7 +929,8 @@ function TimesheetReport() {
                 <h3 className="mt-0">Timesheet Reports</h3>
 
               </div>
-              <div className='w-50 mt-2'>
+
+              {/* <div className='w-50 mt-2'>
                 <label className="form-label fw-medium form-label fw-medium mt-2 mb-1">
                   Select Saved Filters
                 </label>
@@ -951,22 +952,58 @@ function TimesheetReport() {
                 />
 
 
-              </div>
-              {
-                !['', null, undefined].includes(filterId) ?
-                  // <button
-                  //   className="btn btn-danger"
-                  //   id="btn-reset"
-                  //   onClick={() => deleteFilterIdFunction()}
-                  // >
+                {
+                  !['', null, undefined].includes(filterId) ?
+
                     <i className="fa fa-trash"
                       title="Delete Filter"
                       onClick={() => deleteFilterIdFunction()}
                       style={{ cursor: "pointer", color: "red" }}
                     ></i>
-                  // </button>
-                  : ""
-              }
+
+                    : ""
+                }
+
+
+              </div> */}
+              <div className='w-50 mt-2'>
+                <label className="form-label fw-medium mt-2 mb-1">
+                  Select Saved Filters
+                </label>
+
+                <div className="d-flex align-items-center gap-2">
+                  <Select
+                    options={[
+                      { value: "", label: "Select..." },
+                      ...getAllFilterData,
+                    ]}
+                    value={
+                      getAllFilterData && getAllFilterData.length > 0
+                        ? getAllFilterData.find(
+                          (opt) => Number(opt.value) === Number(filterId)
+                        ) || null
+                        : null
+                    }
+                    onChange={handleFilterSelect}
+                    isSearchable
+                    className="shadow-sm select-staff rounded-pill flex-grow-1"
+                  />
+                 
+                  {
+                    
+                    !['', null, undefined].includes(filterId) && (
+                      <i
+                        className="fa fa-trash"
+                        title="Delete Filter"
+                        onClick={() => deleteFilterIdFunction()}
+                        style={{ cursor: "pointer", color: "red" }}
+                      ></i>
+                    )
+                  }
+                 
+                </div>
+              </div>
+
 
             </div>
 
