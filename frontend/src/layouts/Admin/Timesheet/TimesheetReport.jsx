@@ -734,8 +734,18 @@ function TimesheetReport() {
       fromDate: null,
       toDate: null,
     })
+    setFilterId(null)
     setShowData([]);
-    staffData();
+    
+    setStaffAllData([]);
+    setCustomerAllData([]);
+    setClientAllData([]);
+    setJobAllData([]);
+    setTaskAllData([]);
+    setInternalJobAllData([]);
+    setInternalTaskAllData([]);
+
+    //staffData();
   }
 
 
@@ -865,46 +875,17 @@ function TimesheetReport() {
       {/* Page Title */}
       <div className="content-title">
         <div className="tab-title mb-3">
-          <div className="row align-items-center">
-            <div className="col-12 col-sm-6">
+          <div className="row align-items-start">
+            <div className="col-12 col-sm-7 ">
+              <div>
               <h3 className="mt-0">Timesheet Reports</h3>
+             
             </div>
-
-            {/* get filters Dropdown */}
-
-            <label className="form-label fw-medium">
+            <div className='w-50 mt-2'>
+               <label className="form-label fw-medium form-label fw-medium mt-2 mb-1">
               Select Saved Filters
             </label>
-            {/* <Select
-              options={[
-                { value: "", label: "Select..." },
-                ...getAllFilterData,
-              ]}
-              value={
-                getAllFilterData && getAllFilterData.length > 0
-                  ? getAllFilterData.find((opt) => Number(opt.value) === Number(filterId)) || null
-                  : null
-              }
-              onChange={(selected) => {
-                setFilterId(selected.value);
-                // set filters from selected
-                let selectedFilter = getAllFilterData.find((opt) => Number(opt.value) === Number(selected.value));
-                if (selectedFilter && selectedFilter.filters) {
-                  let parsedFilters = {};
-                  try {
-                    parsedFilters = JSON.parse(selectedFilter.filters);
-                    // console.log("Parsed Filters: ", parsedFilters);
-                    setFilters(parsedFilters);
-                  } catch (e) {
-                    console.error("Error parsing filters JSON: ", e);
-                  }
-                }
-              }}
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            /> */}
-
-            <Select
+             <Select
               options={[
                 { value: "", label: "Select..." },
                 ...getAllFilterData,
@@ -920,7 +901,13 @@ function TimesheetReport() {
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             />
+            
+            </div>
+            </div>
 
+            {/* get filters Dropdown */}
+
+        
 
             {/* end get filters Dropdown */}
 
@@ -929,7 +916,7 @@ function TimesheetReport() {
 
 
 
-            <div className="col-12 col-sm-6">
+            <div className="col-12 col-sm-5">
               <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                 <button className="btn btn-info" id="btn-export"
                   onClick={() => exportToCSV(showData)}>
@@ -953,14 +940,6 @@ function TimesheetReport() {
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
 
-          {/* <Select
-            isMulti
-            options={optionGroupBy}
-            value={optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value))}
-            onChange={handleFilterChange}
-            className="basic-multi-select"
-            classNamePrefix="select"
-          /> */}
           <Select
             isMulti
             options={optionGroupBy}
@@ -1365,24 +1344,22 @@ function TimesheetReport() {
         {/* Reset Button */}
         <div className="col-lg-4 col-md-6">
           <button
-            className="btn btn-outline-secondary shadow-sm rounded-pill"
+            className="btn btn-outline-secondary shadow-sm rounded-pill border-3 fw-bold"
             id="btn-reset"
             onClick={() => resetFunction()}
           >
             Clear Filter
           </button>
-        </div>
-
-        {/* Reset Save filters */}
-        <div className="col-lg-4 col-md-6">
-          <button
-            className="btn btn-outline-secondary shadow-sm rounded-pill"
+           <button
+            className="btn btn-info shadow-sm rounded-pill ms-3"
             id="btn-reset"
             onClick={() => saveFilterFunction()}
           >
             Save Filters
           </button>
         </div>
+
+     
 
       </div>
 
