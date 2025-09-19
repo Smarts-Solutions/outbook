@@ -108,7 +108,9 @@ function TimesheetReport() {
         if (response.status) {
           const data = response?.data?.map((item) => ({
             value: item.id,
-            label: item.filter_record,
+            // label: item.filter_record,
+            label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
+
             filters: item.filter_record
           }));
           setGetAllFilterData(data);
@@ -767,9 +769,20 @@ function TimesheetReport() {
   }
 
 
-  console.log("Filters: ", filters);
+//  console.log("Filters: ", filters);
 
   const saveFilterFunction = async () => {
+
+    if (filters?.groupBy?.length == 0) {
+      sweatalert.fire({
+        title: 'Warning',
+        text: 'Please select group by one value',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
+
+      return
+    }
 
     var req = { action: "saveFilters", filters: filters, id: filterId, type: "timesheet_report" };
     var data = { req: req, authToken: token };
@@ -807,7 +820,7 @@ function TimesheetReport() {
   const handleFilterSelect = (selected) => {
     setFilterId(selected.value);
     // set filters from selected
-   // console.log("selected  1 --", selected);
+    // console.log("selected  1 --", selected);
     let selectedFilter = getAllFilterData?.find((opt) => Number(opt?.value) === Number(selected?.value));
 
     //console.log("selectedFilter  2 --", selectedFilter);
@@ -840,7 +853,7 @@ function TimesheetReport() {
         displayBy: "Weekly",
         fromDate: null,
         toDate: null,
-     })
+      })
 
     }
   };

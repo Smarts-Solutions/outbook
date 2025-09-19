@@ -2293,7 +2293,27 @@ const saveFilters = async (Report) => {
     const { id,type, filters } = data;
     // console.log("Save Filters Report id:", id);
     // console.log("Save Filters Report type:", type);
-    // console.log("Save Filters Report filters:", filters);
+     console.log("Save Filters Report filters:", filters);
+
+
+//   Save Filters Report filters: {
+//   groupBy: [ 'staff_id' ],
+//   internal_external: '0',
+//   fieldsToDisplay: null,
+//   fieldsToDisplayId: null,
+//   staff_id: null,
+//   customer_id: null,
+//   client_id: null,
+//   job_id: null,
+//   task_id: null,
+//   internal_job_id: null,
+//   internal_task_id: null,
+//   timePeriod: 'this_month',
+//   displayBy: 'Weekly',
+//   fromDate: null,
+//   toDate: null
+// }
+
     if(!['', null, undefined].includes(id)){
     const query = `
         UPDATE timesheet_filter 
@@ -2323,15 +2343,73 @@ const getAllFilters = async (Report) => {
      const { data, StaffUserId } = Report;
      const { type } = data;
 
-        let where = [`staff_id = ?`];
+        let where = [`timesheet_filter.staff_id = ?`];
         if(!['', null, undefined].includes(type)){
-            where.push(`type = '${type}'`);
+            where.push(`timesheet_filter.type = '${type}'`);
         }
         where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+        // const query = `
+        // SELECT 
+        // * 
+        // FROM 
+        // timesheet_filter
+        // ${where}
+        // `;
+
         const query = `
-        SELECT * FROM timesheet_filter
+        SELECT 
+        timesheet_filter.*,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.groupBy')) AS groupBy,
+        staffs.id AS filter_staff_id,
+        CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
+        customers.id AS filter_customer_id,
+        customers.trading_name AS customer_name,
+        clients.id AS filter_client_id,
+        CONCAT(
+          'cli_', 
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(clients.client_code, 1, 15)
+          ) AS client_name,
+
+        jobs.id AS filter_job_id,
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+          ) AS job_name,
+
+        task.id AS filter_task_id,
+        task.name AS task_name,  
+        
+        internal.id AS filter_internal_job_id,
+        internal.name AS internal_job_name,
+       
+        sub_internal.id AS filter_internal_task_id,
+        sub_internal.name AS internal_task_name
+
+        
+
+        FROM 
+        timesheet_filter
+        LEFT JOIN staffs ON staffs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.staff_id'))
+        LEFT JOIN customers ON customers.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.customer_id'))
+        LEFT JOIN clients ON clients.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.client_id'))
+        LEFT JOIN jobs ON jobs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.job_id'))
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN task ON task.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.task_id'))
+        LEFT JOIN internal ON internal.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.internal_job_id'))
+        LEFT JOIN sub_internal ON sub_internal.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.internal_task_id'))
         ${where}
+        ORDER BY timesheet_filter.id DESC
         `;
+
+
+
+         
+        console.log("query -- ",query)
+        
         const [result] = await pool.execute(query, [StaffUserId]);
         return { status: true, message: 'Success.', data: result };
 
