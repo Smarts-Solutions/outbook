@@ -78,42 +78,29 @@ const DiscrepancyReport = () => {
 
 
   const columns = [
-    {
-      name: 'Staff Name',
-      selector: row => row.staff_fullname,
-      sortable: true
-    },
-
-    {
-      name: 'Role',
-      selector: row => row.role_name,
-      sortable: true
-    },
-
-    {
-      name: 'Timesheet Total Hours',
-      // selector: row => (convertTimeFormatString(convertTimeFormat(row.timesheet_total_hours))),
-      cell: (row) => (
-        <span
-          onClick={() => handleClickTimesheet(row)}
-          style={{ cursor: "pointer" }}
-          className="btn btn-sm btn-outline-info px-3 py-1"
-          
-        >
-          {convertTimeFormatString(convertTimeFormat(row.timesheet_total_hours))}
-        </span>
-      ),
-      sortable: true
-    },
-
-    {
+   {
       name: 'Job Name',
       selector: row => row.job_code_id, sortable: true
+    },
+    {
+      name: 'Timesheet Total Hours',
+       selector: row => (convertTimeFormatString(convertTimeFormat(row.total_spent_hours))),
+      // cell: (row) => (
+      //   <span
+      //     onClick={() => handleClickTimesheet(row)}
+      //     style={{ cursor: "pointer" }}
+      //     className="btn btn-sm btn-outline-info px-3 py-1"
+          
+      //   >
+      //     {convertTimeFormatString(convertTimeFormat(row.timesheet_total_hours))}
+      //   </span>
+      // ),
+      sortable: true
     },
 
     {
       name: 'Job Total Hours',
-      selector: row => convertTimeFormatString(row.job_budgeted_hours),
+      selector: row => convertTimeFormatString(row.job_total_time),
       sortable: true
     },
 

@@ -2225,46 +2225,79 @@ const discrepancyReport = async (Report) => {
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
 
-    let query = `
-        SELECT 
-        timesheet.id AS timsheet_id,
-        timesheet.staff_id,
-        timesheet.monday_hours,
-        timesheet.tuesday_hours,
-        timesheet.wednesday_hours,
-        timesheet.thursday_hours,
-        timesheet.friday_hours,
-        (
-        COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
-        COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
-        COALESCE(CAST(REPLACE(timesheet.wednesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
-        COALESCE(CAST(REPLACE(timesheet.thursday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
-        COALESCE(CAST(REPLACE(timesheet.friday_hours, ':', '.') AS DECIMAL(10,2)), 0)
-        ) AS timesheet_total_hours,
+    // let query = `
+    //     SELECT 
+    //     timesheet.id AS timsheet_id,
+    //     timesheet.staff_id,
+    //     timesheet.monday_hours,
+    //     timesheet.tuesday_hours,
+    //     timesheet.wednesday_hours,
+    //     timesheet.thursday_hours,
+    //     timesheet.friday_hours,
+    //     (
+    //     COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+    //     COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+    //     COALESCE(CAST(REPLACE(timesheet.wednesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+    //     COALESCE(CAST(REPLACE(timesheet.thursday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+    //     COALESCE(CAST(REPLACE(timesheet.friday_hours, ':', '.') AS DECIMAL(10,2)), 0)
+    //     ) AS timesheet_total_hours,
 
-        CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_fullname,
-        staffs.email AS staff_email,
+    //     CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_fullname,
+    //     staffs.email AS staff_email,
 
-        roles.role AS role_name,
+    //     roles.role AS role_name,
 
-        jobs.id AS job_id,
-        jobs.budgeted_hours AS job_budgeted_hours,
+    //     jobs.id AS job_id,
+    //     jobs.total_time AS job_total_time,
 
-        CONCAT(
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(clients.trading_name, 1, 3), '_',
-            SUBSTRING(job_types.type, 1, 4), '_',
-            SUBSTRING(jobs.job_id, 1, 15)
-            ) AS job_code_id
+    //     CONCAT(
+    //         SUBSTRING(customers.trading_name, 1, 3), '_',
+    //         SUBSTRING(clients.trading_name, 1, 3), '_',
+    //         SUBSTRING(job_types.type, 1, 4), '_',
+    //         SUBSTRING(jobs.job_id, 1, 15)
+    //         ) AS job_code_id
         
-    FROM timesheet
-    JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
-    JOIN staffs ON staffs.id = timesheet.staff_id
-    JOIN roles ON roles.id = staffs.role_id
-    JOIN customers ON customers.id = jobs.customer_id
-    JOIN clients ON clients.id = jobs.client_id
-    JOIN job_types ON jobs.job_type_id = job_types.id
+    // FROM timesheet
+    // JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
+    // JOIN staffs ON staffs.id = timesheet.staff_id
+    // JOIN roles ON roles.id = staffs.role_id
+    // JOIN customers ON customers.id = jobs.customer_id
+    // JOIN clients ON clients.id = jobs.client_id
+    // JOIN job_types ON jobs.job_type_id = job_types.id
+    // `;
+
+
+       let query = `
+        SELECT 
+            jobs.id AS job_id,
+            CONCAT(
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(clients.trading_name, 1, 3), '_',
+                SUBSTRING(job_types.type, 1, 4), '_',
+                SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+            jobs.total_time AS job_total_time,
+
+            SUM(
+                COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.wednesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.thursday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.friday_hours, ':', '.') AS DECIMAL(10,2)), 0)
+            ) AS total_spent_hours
+
+        FROM timesheet
+        JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
+        JOIN staffs ON staffs.id = timesheet.staff_id
+        JOIN roles ON roles.id = staffs.role_id
+        JOIN customers ON customers.id = jobs.customer_id
+        JOIN clients ON clients.id = jobs.client_id
+        JOIN job_types ON jobs.job_type_id = job_types.id
+
+        GROUP BY jobs.id, job_code_id, jobs.total_time
     `;
+    
 
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
         // Allow access to all data
