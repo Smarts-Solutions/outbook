@@ -807,18 +807,16 @@ function TimesheetReport() {
   const handleFilterSelect = (selected) => {
     setFilterId(selected.value);
     // set filters from selected
-    console.log("selected  1 --", selected);
+   // console.log("selected  1 --", selected);
     let selectedFilter = getAllFilterData?.find((opt) => Number(opt?.value) === Number(selected?.value));
 
-    console.log("selectedFilter  2 --", selectedFilter);
-    console.log("selectedFilter  3 --", selectedFilter?.filters);
+    //console.log("selectedFilter  2 --", selectedFilter);
     if (selectedFilter != undefined && selectedFilter.filters) {
       let parsedFilters = {};
       try {
 
         parsedFilters = JSON.parse(selectedFilter.filters);
-        console.log("Parsed Filters: 4  ", parsedFilters);
-        // console.log("Parsed Filters: ", parsedFilters);
+        //console.log("Parsed Filters: 4  ", parsedFilters);
         setFilters(parsedFilters);
         callFilterApi();
       } catch (e) {
