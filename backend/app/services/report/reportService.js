@@ -76,6 +76,11 @@ else if(data.action == "saveFilters"){
 else if(data.action == "getAllFilters"){
   return reportModel.getAllFilters(Report);
 }
+else if(data.action == "deleteFilterId"){
+  return reportModel.deleteFilterId(Report);
+}
+
+
 else{
   return;
 }

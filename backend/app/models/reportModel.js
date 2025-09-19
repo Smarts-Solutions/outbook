@@ -2415,6 +2415,22 @@ const getAllFilters = async (Report) => {
 
 }
 
+const deleteFilterId = async (Report) => {
+    console.log("Save Filters Report:", Report);
+    const { data, StaffUserId } = Report;
+    const { type, filterId } = data;
+
+    if (['', null, undefined].includes(filterId)) {
+        return { status: false, message: 'Filter ID is required.', data: [] };
+    }
+    const query = `
+        DELETE FROM timesheet_filter 
+        WHERE id = ? AND staff_id = ?
+        `;
+    const [result] = await pool.execute(query, [filterId, StaffUserId]);
+    return { status: true, message: 'Record deleted successfully.', data: result };
+
+}
 
 //////// ---------- Save Filters End --------- ////////////
 
@@ -2526,7 +2542,8 @@ module.exports = {
     getChangedRoleStaff,
     staffRoleChangeUpdate,
     saveFilters,
-    getAllFilters
+    getAllFilters,
+    deleteFilterId
 };
 
 
