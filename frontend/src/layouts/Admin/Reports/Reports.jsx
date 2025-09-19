@@ -11,6 +11,7 @@ import TextWeelyReport from './TextWeelyReport';
 import AverageTatReport from './AverageTatReport';
 import MissingTimesheetReport from './MissingTimesheetReport';
 import DiscrepancyReport from './DiscrepancyReport';
+import DiscrepancyReportProcessor from './DiscrepancyReportProcessor';
 import CapacityReport from './CapacityReport';
 
 
@@ -49,6 +50,8 @@ function Reportsnew() {
         return <MissingTimesheetReport />;
       case 'discrepancyReport':
         return <DiscrepancyReport />;
+      case 'discrepancyReportProcessor':
+        return <DiscrepancyReportProcessor />;
       case 'capacityReport':
         return <CapacityReport />;
       default:
@@ -80,7 +83,8 @@ function Reportsnew() {
                     <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
                     <option value="averageTATReport">Average TAT Report</option>
                     <option value="missingTimesheetReport">Missing Timesheet Report</option>
-                    <option value="discrepancyReport">Discrepancy Report</option>
+                    <option value="discrepancyReport">Discrepancy Report Job</option>
+                    <option value="discrepancyReportProcessor">Discrepancy Report Processor</option>
                     <option value="capacityReport">Capacity Report</option>
                   </select>
                 </>

@@ -57,6 +57,10 @@ else if(data.action == "missingTimesheetReport"){
 else if(data.action == "discrepancyReport"){
   return reportModel.discrepancyReport(Report);
 }
+else if(data.action == "discrepancyReportProcessor"){
+  return reportModel.discrepancyReportProcessor(Report);
+}
+
 else if(data.action == "capacityReport"){
   return reportModel.capacityReport(Report);
 }

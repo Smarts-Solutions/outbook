@@ -2311,6 +2311,70 @@ const discrepancyReport = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
+const discrepancyReportProcessor = async (Report) => {
+    // console.log("Discrepancy Report:", Report);
+    let { StaffUserId } = Report;
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
+
+
+     let query = `
+    SELECT 
+        jobs.id AS job_id,
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+        ) AS job_code_id,
+
+        jobs.total_preparation_time AS total_preparation_time,
+        jobs.feedback_incorporation_time AS feedback_incorporation_time,
+
+        SEC_TO_TIME(
+            COALESCE(TIME_TO_SEC(jobs.total_preparation_time), 0) + 
+            COALESCE(TIME_TO_SEC(jobs.feedback_incorporation_time), 0)
+        ) AS job_total_time_processor,
+
+
+        SUM(
+            COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(timesheet.wednesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(timesheet.thursday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(timesheet.friday_hours, ':', '.') AS DECIMAL(10,2)), 0)
+        ) AS total_spent_hours
+
+    FROM timesheet
+    JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
+    JOIN staffs ON staffs.id = timesheet.staff_id
+    JOIN roles ON roles.id = staffs.role_id
+    JOIN customers ON customers.id = jobs.customer_id
+    JOIN clients ON clients.id = jobs.client_id
+    JOIN job_types ON jobs.job_type_id = job_types.id
+
+    WHERE staffs.role_id = 3 -- Only Processors
+    GROUP BY jobs.id, job_code_id, jobs.total_time
+`;
+
+    
+
+    if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
+        // Allow access to all data
+    } else {
+        // Restrict access to specific data
+        query += ` WHERE timesheet.staff_id IN (${LineManageStaffId})`;
+    }
+
+
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+}
+
+
+
 const capacityReport = async (Report) => {
     console.log("Capacity Report:", Report);
 
@@ -2571,6 +2635,7 @@ module.exports = {
     getInternalTasks,
     missingTimesheetReport,
     discrepancyReport,
+    discrepancyReportProcessor,
     capacityReport,
     getChangedRoleStaff,
     staffRoleChangeUpdate,
