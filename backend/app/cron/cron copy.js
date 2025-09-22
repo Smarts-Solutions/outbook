@@ -1,9 +1,6 @@
 console.log("Cron Job Initialized");
-const pool = require('../config/database');
 
 const cron = require("node-cron");
-const { Worker } = require("worker_threads");
-const { join } = require("path");
 const { missingTimesheetReport } = require("../models/reportModel");
 const { commonEmail } = require("../utils/commonEmail");
 module.exports = (app) => {
@@ -45,53 +42,6 @@ module.exports = (app) => {
         return false;
     }
     });
-
-
-  cron.schedule("52 15 * * *", async () => {
-   
-
-    
-   const [result] = await pool.query("CALL GetAllStaffMissingTimesheetReports()");
-   console.log("result , ",result); 
-
-
-
-
-
-
-
-  //  let rows = [{ staff_fullname: "Vikas", staff_email: "vikaspnpinfotech@gmail.com@gmail.com"},
-  //   { staff_fullname: "Shakir", staff_email: "shakirpnp@gmail.com"}
-  //  ]
-
-
-
-  //   sendEmailInWorker(rows || []);
-    console.log("Running a task every Monday at 09:00 AM to send individual emails");
-  })
-
-
-
 };
 
-
-
-// function sendEmailInWorker(row) {
-//   const worker = new Worker("./emailWorker.js", { type: "module" });
-//   worker.postMessage(row);
-//   worker.on("message", (msg) => console.log("MESSAGEEEE--- ",msg));
-// }
-
-
-function sendEmailInWorker(rows) {
-  const worker = new Worker(join(__dirname, "missingTimesheetReportEmail.js"), { type: "module" });
-
-  worker.postMessage(rows); 
-
-  worker.on("message", (msg) => console.log("RECEVIE MSG--",msg));
-  worker.on("error", (err) => console.error("Worker error --:", err));
-  worker.on("exit", (code) => {
-    if (code !== 0) console.error(`Worker stopped with exit code ${code}`);
-  });
-}
 

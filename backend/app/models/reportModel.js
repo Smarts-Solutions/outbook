@@ -2154,19 +2154,44 @@ const getTimesheetReportData = async (Report) => {
 
 
 const missingTimesheetReport = async (Report) => {
-       console.log("Missing Timesheet Report:", Report);
+//    console.log("Missing Timesheet Report:", Report);
     const { data, StaffUserId } = Report;
     // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    //const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
+
+    async function getAllLineManageStaffIds(staff_id) {
+    const allStaffIds = new Set(); // To avoid duplicates
+    const queue = [staff_id];
+
+    while (queue.length > 0) {
+        const currentId = queue.shift();
+        if (!allStaffIds.has(currentId)) {
+            allStaffIds.add(currentId);
+
+            const [rows] = await pool.execute(
+                `SELECT staff_to FROM line_managers WHERE staff_by = ?`,
+                [currentId]
+            );
+
+            const subordinates = rows.map(row => row.staff_to);
+            queue.push(...subordinates);
+        }
+    }
+
+    return Array.from(allStaffIds);
+}
+
+ const LineManageStaffId = await getAllLineManageStaffIds(StaffUserId);
+ console.log("LineManageStaffId", LineManageStaffId);
 
     let where = [];
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
         // Allow access to all data
         where.push(`ts.submit_status = '0' OR ts.submit_status IS NULL`);
     } else {
-        where.push(`(ts.submit_status = '0' OR ts.submit_status IS NULL) AND ts.staff_id IN (${LineManageStaffId})`);
+        where.push(`(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (${LineManageStaffId})`);
     }
 
     where = `WHERE ${where.join(" AND ")}`;
@@ -2202,7 +2227,10 @@ const missingTimesheetReport = async (Report) => {
         ${where} 
         GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
         ORDER BY st.first_name ASC;
+        
     `
+
+    console.log("query_last_week_filter", query_last_week_filter);
 
     const [result] = await pool.execute(query_last_week_filter);
     console.log("result", result);
@@ -2643,6 +2671,129 @@ module.exports = {
     getAllFilters,
     deleteFilterId
 };
+
+
+
+
+
+
+
+
+
+
+
+
+// DELIMITER $$
+
+// CREATE PROCEDURE GetLastWeekMissingTimesheetReport(IN p_StaffUserId INT)
+// BEGIN
+//     DECLARE v_role_name VARCHAR(50);
+//     DECLARE done INT DEFAULT 0;
+//     DECLARE current_staff INT;
+
+//     -- 1. Get role
+//     SELECT r.role INTO v_role_name
+//     FROM staffs s
+//     JOIN roles r ON s.role_id = r.id
+//     WHERE s.id = p_StaffUserId
+//     LIMIT 1;
+
+//     -- 2. Temporary table for queue (simulate JS queue)
+//     CREATE TEMPORARY TABLE tmp_queue (
+//         staff_id INT PRIMARY KEY
+//     );
+//     TRUNCATE TABLE tmp_queue;
+
+//     -- 3. Temporary table for all collected staff IDs
+//     CREATE TEMPORARY TABLE tmp_all_staffs (
+//         staff_id INT PRIMARY KEY
+//     );
+//     TRUNCATE TABLE tmp_all_staffs;
+
+//     -- Insert initial staff into both tables
+//     INSERT INTO tmp_queue(staff_id) VALUES (p_StaffUserId);
+//     INSERT INTO tmp_all_staffs(staff_id) VALUES (p_StaffUserId);
+
+//     -- 4. Iterative loop simulating JS queue
+//     WHILE EXISTS (SELECT 1 FROM tmp_queue) DO
+//         -- Take one staff from queue
+//         SELECT staff_id INTO current_staff FROM tmp_queue LIMIT 1;
+
+//         -- Delete it from queue
+//         DELETE FROM tmp_queue WHERE staff_id = current_staff;
+
+//         -- Insert subordinates who are not already in all_staffs
+//         INSERT IGNORE INTO tmp_queue(staff_id)
+//         SELECT staff_to
+//         FROM line_managers
+//         WHERE staff_by = current_staff
+//         AND staff_to NOT IN (SELECT staff_id FROM tmp_all_staffs);
+
+//         -- Insert the same new staff into all_staffs
+//         INSERT IGNORE INTO tmp_all_staffs(staff_id)
+//         SELECT staff_to
+//         FROM line_managers
+//         WHERE staff_by = current_staff;
+//     END WHILE;
+
+//     -- 5. Build WHERE clause
+//     SET @where_clause = '';
+//     IF v_role_name = 'SUPERADMIN' THEN
+//         SET @where_clause = "ts.submit_status = '0' OR ts.submit_status IS NULL";
+//     ELSE
+//         SET @where_clause = "(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
+//     END IF;
+
+//     -- 6. Final dynamic SQL
+//     SET @sql = CONCAT("
+//         SELECT 
+//             CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+//             st.email AS staff_email,
+//             st.id AS staff_id,
+//             COALESCE(ts.submit_status, 0) AS submit_status,
+//             COALESCE(
+//                 DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+//                 DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+//                 DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+//                 DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+//                 DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+//                 DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+//                 DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+//             ) AS week_date
+//         FROM staffs st
+//         LEFT JOIN timesheet ts 
+//             ON st.id = ts.staff_id
+//             AND YEARWEEK(
+//                 COALESCE(
+//                     ts.monday_date,
+//                     ts.tuesday_date,
+//                     ts.wednesday_date,
+//                     ts.thursday_date,
+//                     ts.friday_date,
+//                     ts.saturday_date,
+//                     ts.sunday_date
+//                 ), 1
+//             ) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+//         WHERE ", @where_clause, "
+//         GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+//         ORDER BY st.first_name ASC
+//     ");
+
+//     -- 7. Execute
+//     PREPARE stmt FROM @sql;
+//     EXECUTE stmt;
+//     DEALLOCATE PREPARE stmt;
+
+//     -- 8. Cleanup
+//     DROP TEMPORARY TABLE IF EXISTS tmp_queue;
+//     DROP TEMPORARY TABLE IF EXISTS tmp_all_staffs;
+
+// END $$
+
+// DELIMITER ;
+
+
+
 
 
 

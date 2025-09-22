@@ -6,6 +6,8 @@ const axios = require('axios');
 const fs = require('fs');
 const qs = require('qs');
 const FormData = require('form-data');
+
+const { Worker } = require("worker_threads");
 // const authRoutes = require('./routes/authRoutes');
 // const userRoutes = require('./routes/userRoutes');
 
@@ -76,9 +78,19 @@ app.get('/',async(req,res)=>{
 });
 
 app.get('/testing',async(req,res)=>{
+    // main.js
 
+ let row = { staff_fullname: "John Doe", staff_email: "shakirpnp@gmail.com"}
+
+ sendEmailInWorker(row);
  res.send("Hello Out Book")
 });
+
+function sendEmailInWorker(row) {
+  const worker = new Worker("./emailWorker.js", { type: "module" });
+  worker.postMessage(row);
+  worker.on("message", (msg) => console.log("MESSAGEEEE--- ",msg));
+}
 
 
 // app.use('/api/auth', authRoutes);
