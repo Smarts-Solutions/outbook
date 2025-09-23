@@ -1,6 +1,5 @@
 console.log("Cron Job Initialized");
 const pool = require('../config/database');
-
 const cron = require("node-cron");
 const { Worker } = require("worker_threads");
 const { join } = require("path");
@@ -11,9 +10,9 @@ module.exports = (app) => {
 
 // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
   cron.schedule("0 9 * * 1", async () => {
-    console.log("Running a task every Monday at 09:00 AM to send individual emails");
-  //cron.schedule("20 11 * * *", async () => {
-   const [staffResult] = await pool.query(`
+    //console.log("Running a task every Monday at 09:00 AM to send individual emails");
+  //cron.schedule("38 12 * * *", async () => {
+   const [staffResult] = await pool.execute(`
     SELECT 
     id,
     CONCAT(first_name, ' ', last_name) AS staff_fullname,
@@ -28,7 +27,7 @@ module.exports = (app) => {
 
     ////////-----------Submit Timesheet Reminder Email --------------------//////
 
-   const [staffResultSubmitTimeSheet] = await pool.query(`
+   const [staffResultSubmitTimeSheet] = await pool.execute(`
     SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -42,10 +41,7 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
 
-  sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet || []);
-
-  
-
+  sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet  || []);
 
 
   })
