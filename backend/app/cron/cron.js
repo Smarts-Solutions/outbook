@@ -24,6 +24,10 @@ module.exports = (app) => {
   // console.log("staffResult , ",staffResult); 
     sendEmailInWorker(staffResult || []);
     console.log("Running a task every Monday at 09:00 AM to send individual emails");
+
+
+
+    
   })
 
 };

@@ -2738,7 +2738,7 @@ module.exports = {
 
 //     -- 5. Build WHERE clause
 //     SET @where_clause = '';
-//     IF v_role_name = 'SUPERADMIN' THEN
+//     IF v_role_name IN ('SUPERADMIN', 'ADMIN', 'MANAGEMENT') THEN
 //         SET @where_clause = "ts.submit_status = '0' OR ts.submit_status IS NULL";
 //     ELSE
 //         SET @where_clause = "(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
@@ -2854,7 +2854,7 @@ module.exports = {
 
 //     -- 5. Build WHERE clause
 //     SET @where_clause = '';
-//     IF v_role_name = 'SUPERADMIN' THEN
+//     IF v_role_name IN ('SUPERADMIN', 'ADMIN', 'MANAGEMENT') THEN
 //         SET @where_clause = "ts.submit_status = '1'";
 //     ELSE
 //         SET @where_clause = "(ts.submit_status = '1') AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
