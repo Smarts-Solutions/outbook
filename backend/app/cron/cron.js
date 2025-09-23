@@ -8,90 +8,38 @@ const { missingTimesheetReport } = require("../models/reportModel");
 const { commonEmail } = require("../utils/commonEmail");
 module.exports = (app) => {
   // Schedule tasks to be run on the server.
-//   cron.schedule("03 15 * * *", async () => {
+
+// Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
   cron.schedule("0 9 * * 1", async () => {
-  //  console.log("Running a task every Monday at 09:00 AM");
-    try {
-      const reportData = await missingTimesheetReport({ StaffUserId: 1, data: { action: 'missingTimesheetReport' } });
-       // console.log("Missing Timesheet Report Data:", reportData);
-       
-        if (reportData.status == true && reportData.data.result.length > 0) {
-            let csvContent = "Staff Name,Staff Email\n";
-            reportData?.data?.result?.forEach(row => {
-                csvContent += `${row.staff_fullname},${row.staff_email}\n`;
-            }
-            );
-
-            let toEmail = "vikaspnpinfotech@gmail.com"
-            let subjectEmail = "Missing Timesheet Report"
-            let htmlEmail = "<h3>Please find the attached Missing Timesheet Report.</h3>"
-            const dynamic_attachment = csvContent;
-            const filename = "MissingTimesheetReport.csv";
-
-            const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment , filename);
-            if (emailSent) {
-                console.log("Missing Timesheet Report email sent successfully.");
-                return true;
-            } else {
-                console.log("Failed to send Missing Timesheet Report email.");
-                return false;
-            }
-        } else {
-            console.log("No missing timesheet data to report.");
-            return true;
-        }
-    } catch (error) {
-      console.error("Error generating or sending Missing Timesheet Report:", error);
-        return false;
-    }
-    });
-
-
-  cron.schedule("52 15 * * *", async () => {
-   
-
-    
-   const [result] = await pool.query("CALL GetAllStaffMissingTimesheetReports()");
-   console.log("result , ",result); 
-
-
-
-
-
-
-
-  //  let rows = [{ staff_fullname: "Vikas", staff_email: "vikaspnpinfotech@gmail.com@gmail.com"},
-  //   { staff_fullname: "Shakir", staff_email: "shakirpnp@gmail.com"}
-  //  ]
-
-
-
-  //   sendEmailInWorker(rows || []);
+  //cron.schedule("20 11 * * *", async () => {
+   const [staffResult] = await pool.query(`
+    SELECT 
+    id,
+    CONCAT(first_name, ' ', last_name) AS staff_fullname,
+    email AS staff_email
+    FROM 
+    staffs 
+    WHERE status = '1'
+    `);
+  // console.log("staffResult , ",staffResult); 
+    sendEmailInWorker(staffResult || []);
     console.log("Running a task every Monday at 09:00 AM to send individual emails");
   })
-
-
 
 };
 
 
 
-// function sendEmailInWorker(row) {
-//   const worker = new Worker("./emailWorker.js", { type: "module" });
-//   worker.postMessage(row);
-//   worker.on("message", (msg) => console.log("MESSAGEEEE--- ",msg));
-// }
-
 
 function sendEmailInWorker(rows) {
   const worker = new Worker(join(__dirname, "missingTimesheetReportEmail.js"), { type: "module" });
-
   worker.postMessage(rows); 
-
-  worker.on("message", (msg) => console.log("RECEVIE MSG--",msg));
-  worker.on("error", (err) => console.error("Worker error --:", err));
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--",msg)
+  });
+  worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
-    if (code !== 0) console.error(`Worker stopped with exit code ${code}`);
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
   });
 }
 
