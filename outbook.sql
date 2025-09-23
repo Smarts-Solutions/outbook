@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 19, 2025 at 10:52 AM
+-- Generation Time: Sep 23, 2025 at 12:35 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -92,106 +92,213 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetCustomersData` (IN `LineManageSt
     DEALLOCATE PREPARE stmt2;
 END$$
 
-DROP PROCEDURE IF EXISTS `GetTimesheetReportsNormalized`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetTimesheetReportsNormalized` (IN `p_time_period` VARCHAR(255), IN `p_from_date` DATE, IN `p_to_date` DATE, IN `p_group_by` VARCHAR(255), IN `p_display_by` VARCHAR(255))  BEGIN
-    DECLARE v_start_date DATE;
-    DECLARE v_end_date DATE;
+DROP PROCEDURE IF EXISTS `GetLastWeekMissingTimesheetReport`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetLastWeekMissingTimesheetReport` (IN `p_StaffUserId` INT)  BEGIN
+    DECLARE v_role_name VARCHAR(50);
+    DECLARE done INT DEFAULT 0;
+    DECLARE current_staff INT;
 
-    
-       IF p_time_period = 'this_week' THEN
-        SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY);
-        SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
+    -- 1. Get role
+    SELECT r.role INTO v_role_name
+    FROM staffs s
+    JOIN roles r ON s.role_id = r.id
+    WHERE s.id = p_StaffUserId
+    LIMIT 1;
 
-    ELSEIF p_time_period = 'last_week' THEN
-        SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())+7) DAY);
-        SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
+    -- 2. Temporary table for queue (simulate JS queue)
+    CREATE TEMPORARY TABLE tmp_queue (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_queue;
 
-    ELSEIF p_time_period = 'this_month' THEN
-        SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY);
-        SET v_end_date   = LAST_DAY(CURDATE());
+    -- 3. Temporary table for all collected staff IDs
+    CREATE TEMPORARY TABLE tmp_all_staffs (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_all_staffs;
 
-    ELSEIF p_time_period = 'last_month' THEN
-        SET v_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH);
-        SET v_end_date   = LAST_DAY(v_start_date);
+    -- Insert initial staff into both tables
+    INSERT INTO tmp_queue(staff_id) VALUES (p_StaffUserId);
+    INSERT INTO tmp_all_staffs(staff_id) VALUES (p_StaffUserId);
 
-    ELSEIF p_time_period = 'this_quarter' THEN
-        SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL QUARTER(CURDATE())*3-3 MONTH;
-        SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
+    -- 4. Iterative loop simulating JS queue
+    WHILE EXISTS (SELECT 1 FROM tmp_queue) DO
+        -- Take one staff from queue
+        SELECT staff_id INTO current_staff FROM tmp_queue LIMIT 1;
 
-    ELSEIF p_time_period = 'last_quarter' THEN
-        SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL (QUARTER(CURDATE())-2)*3 MONTH;
-        SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
+        -- Delete it from queue
+        DELETE FROM tmp_queue WHERE staff_id = current_staff;
 
-    ELSEIF p_time_period = 'this_year' THEN
-        SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1);
-        SET v_end_date   = MAKEDATE(YEAR(CURDATE()), 365);
+        -- Insert subordinates who are not already in all_staffs
+        INSERT IGNORE INTO tmp_queue(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff
+        AND staff_to NOT IN (SELECT staff_id FROM tmp_all_staffs);
 
-    ELSEIF p_time_period = 'last_year' THEN
-        SET v_start_date = MAKEDATE(YEAR(CURDATE())-1, 1);
-        SET v_end_date   = MAKEDATE(YEAR(CURDATE())-1, 365);
+        -- Insert the same new staff into all_staffs
+        INSERT IGNORE INTO tmp_all_staffs(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff;
+    END WHILE;
 
-    ELSEIF p_time_period = 'custom' THEN
-        SET v_start_date = p_from_date;
-        SET v_end_date   = p_to_date;
+    -- 5. Build WHERE clause
+    SET @where_clause = '';
+    IF v_role_name IN ('SUPERADMIN', 'ADMIN', 'MANAGEMENT') THEN
+        SET @where_clause = "ts.submit_status = '0' OR ts.submit_status IS NULL";
+    ELSE
+        SET @where_clause = "(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
     END IF;
 
-   
-    SELECT 
-        t.staff_id,
-        CONCAT(s.first_name,' ',s.last_name) AS staff_fullname,
-        c.trading_name AS customer_name,
-        cl.trading_name AS client_name,
-        COALESCE(j.job_id, i.name) AS job_name,
-        COALESCE(tsk.name, si.name) AS task_name,
-        CASE WHEN t.task_type = 1 THEN 'Internal' ELSE 'External' END AS internal_external,
-        t.work_date,
-        t.work_hours,
-        -- Display By
-        CASE 
-            WHEN p_display_by = 'Daily' THEN DATE(t.work_date)
-            WHEN p_display_by = 'Weekly' THEN YEARWEEK(t.work_date, 1)
-            WHEN p_display_by = 'Monthly' THEN DATE_FORMAT(t.work_date, '%Y-%m')
-            WHEN p_display_by = 'Yearly' THEN YEAR(t.work_date)
-        END AS display_period
-    FROM (
-        -- Normalized dataset
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               monday_date AS work_date, monday_hours AS work_hours
-        FROM timesheet WHERE monday_date IS NOT NULL
-        UNION ALL
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               tuesday_date, tuesday_hours
-        FROM timesheet WHERE tuesday_date IS NOT NULL
-        UNION ALL
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               wednesday_date, wednesday_hours
-        FROM timesheet WHERE wednesday_date IS NOT NULL
-        UNION ALL
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               thursday_date, thursday_hours
-        FROM timesheet WHERE thursday_date IS NOT NULL
-        UNION ALL
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               friday_date, friday_hours
-        FROM timesheet WHERE friday_date IS NOT NULL
-        UNION ALL
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               saturday_date, saturday_hours
-        FROM timesheet WHERE saturday_date IS NOT NULL
-        UNION ALL
-        SELECT id, staff_id, task_type, customer_id, client_id, job_id, task_id,
-               sunday_date, sunday_hours
-        FROM timesheet WHERE sunday_date IS NOT NULL
-    ) t
-    JOIN staffs s ON s.id = t.staff_id
-    LEFT JOIN customers c ON c.id = t.customer_id
-    LEFT JOIN clients cl ON cl.id = t.client_id
-    LEFT JOIN jobs j ON j.id = t.job_id AND t.task_type = 2
-    LEFT JOIN internal i ON i.id = t.job_id AND t.task_type = 1
-    LEFT JOIN task tsk ON tsk.id = t.task_id AND t.task_type = 2
-    LEFT JOIN sub_internal si ON si.id = t.task_id AND t.task_type = 1
-    WHERE t.work_date BETWEEN v_start_date AND v_end_date
-    ORDER BY t.work_date;
+    -- 6. Final dynamic SQL
+    SET @sql = CONCAT("
+        SELECT 
+            CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+            st.email AS staff_email,
+            st.id AS staff_id,
+            COALESCE(ts.submit_status, 0) AS submit_status,
+            COALESCE(
+                DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+            ) AS week_date
+        FROM staffs st
+        LEFT JOIN timesheet ts 
+            ON st.id = ts.staff_id
+            AND YEARWEEK(
+                COALESCE(
+                    ts.monday_date,
+                    ts.tuesday_date,
+                    ts.wednesday_date,
+                    ts.thursday_date,
+                    ts.friday_date,
+                    ts.saturday_date,
+                    ts.sunday_date
+                ), 1
+            ) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+        WHERE ", @where_clause, "
+        GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+        ORDER BY st.first_name ASC
+    ");
+
+    -- 7. Execute
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- 8. Cleanup
+    DROP TEMPORARY TABLE IF EXISTS tmp_queue;
+    DROP TEMPORARY TABLE IF EXISTS tmp_all_staffs;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `GetLastWeekSubmitTimesheetReport`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetLastWeekSubmitTimesheetReport` (IN `p_StaffUserId` INT)  BEGIN
+    DECLARE v_role_name VARCHAR(50);
+    DECLARE done INT DEFAULT 0;
+    DECLARE current_staff INT;
+
+    -- 1. Get role
+    SELECT r.role INTO v_role_name
+    FROM staffs s
+    JOIN roles r ON s.role_id = r.id
+    WHERE s.id = p_StaffUserId
+    LIMIT 1;
+
+    -- 2. Temporary table for queue (simulate JS queue)
+    CREATE TEMPORARY TABLE tmp_queue (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_queue;
+
+    -- 3. Temporary table for all collected staff IDs
+    CREATE TEMPORARY TABLE tmp_all_staffs (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_all_staffs;
+
+    -- Insert initial staff into both tables
+    INSERT INTO tmp_queue(staff_id) VALUES (p_StaffUserId);
+    INSERT INTO tmp_all_staffs(staff_id) VALUES (p_StaffUserId);
+
+    -- 4. Iterative loop simulating JS queue
+    WHILE EXISTS (SELECT 1 FROM tmp_queue) DO
+        -- Take one staff from queue
+        SELECT staff_id INTO current_staff FROM tmp_queue LIMIT 1;
+
+        -- Delete it from queue
+        DELETE FROM tmp_queue WHERE staff_id = current_staff;
+
+        -- Insert subordinates who are not already in all_staffs
+        INSERT IGNORE INTO tmp_queue(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff
+        AND staff_to NOT IN (SELECT staff_id FROM tmp_all_staffs);
+
+        -- Insert the same new staff into all_staffs
+        INSERT IGNORE INTO tmp_all_staffs(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff;
+    END WHILE;
+
+    -- 5. Build WHERE clause
+    SET @where_clause = '';
+    IF v_role_name IN ('SUPERADMIN', 'ADMIN', 'MANAGEMENT') THEN
+        SET @where_clause = "ts.submit_status = '1'";
+    ELSE
+        SET @where_clause = "(ts.submit_status = '1') AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
+    END IF;
+
+    -- 6. Final dynamic SQL
+    SET @sql = CONCAT("
+        SELECT 
+            CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+            st.email AS staff_email,
+            st.id AS staff_id,
+            COALESCE(ts.submit_status, 0) AS submit_status,
+            COALESCE(
+                DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+            ) AS week_date
+        FROM staffs st
+        LEFT JOIN timesheet ts 
+            ON st.id = ts.staff_id
+            AND YEARWEEK(
+                COALESCE(
+                    ts.monday_date,
+                    ts.tuesday_date,
+                    ts.wednesday_date,
+                    ts.thursday_date,
+                    ts.friday_date,
+                    ts.saturday_date,
+                    ts.sunday_date
+                ), 1
+            ) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+        WHERE ", @where_clause, "
+        GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+        ORDER BY st.first_name ASC
+    ");
+
+    -- 7. Execute
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- 8. Cleanup
+    DROP TEMPORARY TABLE IF EXISTS tmp_queue;
+    DROP TEMPORARY TABLE IF EXISTS tmp_all_staffs;
 
 END$$
 
@@ -1533,7 +1640,15 @@ CREATE TABLE IF NOT EXISTS `line_managers` (
   PRIMARY KEY (`id`),
   KEY `staff_by` (`staff_by`),
   KEY `staff_to` (`staff_to`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `line_managers`
+--
+
+INSERT INTO `line_managers` (`id`, `staff_by`, `staff_to`, `created_at`, `updated_at`) VALUES
+(15, 14, 15, '2025-09-22 11:09:50', '2025-09-22 11:09:50'),
+(14, 15, 16, '2025-09-22 10:41:54', '2025-09-22 10:41:54');
 
 -- --------------------------------------------------------
 
@@ -1760,7 +1875,7 @@ INSERT INTO `roles` (`id`, `role_name`, `role`, `hourminute`, `status`, `is_disa
 (4, 'Manager', 'MANAGER', '2:5', '1', '1', '2024-09-07 09:17:08', '2025-02-06 12:43:48'),
 (5, 'Leadership', 'LEADERSHIP', NULL, '1', '1', '2024-09-07 09:17:08', '2025-02-06 12:43:48'),
 (6, 'Reviewer', 'REVIEWER', NULL, '1', '1', '2024-09-07 09:17:38', '2025-02-06 12:43:48'),
-(8, 'Management', 'MANAGEMENT', NULL, '1', '0', '2024-10-14 09:00:37', '2025-02-06 12:43:55'),
+(8, 'Management', 'MANAGEMENT', NULL, '1', '1', '2024-10-14 09:00:37', '2025-09-23 06:39:46'),
 (9, 'DEMO', 'DEMO', '00:00', '1', '0', '2025-02-06 05:19:54', '2025-02-06 12:43:58');
 
 -- --------------------------------------------------------
@@ -1996,27 +2111,28 @@ CREATE TABLE IF NOT EXISTS `staffs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `role_id` (`role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staffs`
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-09-19 04:59:30', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1ODI1Nzk3MCwiZXhwIjoxNzU4MjkzOTcwfQ.MZuUiqg5cf2yW0FmWAkuV0BJykduOMwmnC2fFVYBKMI'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, '2024-06-28 12:02:41', '2025-09-23 05:41:30', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1ODYwNjA5MCwiZXhwIjoxNzU4NjQyMDkwfQ.cOEm9i6WKGZGma2oLKSM5OYwsVu5lZKMzO_BVjspIas'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$UGh8LOFOP9Kwtha4kypOcuJL.YZYwwyRsSrzaYsRvMiBiwMomGvdW', '659:00', '1', '1', 2, '2024-07-08 07:25:41', '2025-02-06 08:46:14', ''),
-(5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 2, '2025-02-06 07:27:58', '2025-08-13 11:03:43', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1NTA4MzAyMywiZXhwIjoxNzU1MTE5MDIzfQ.rhXs3PuL-WvJsAhZND8XGRSaftkEznyELR1mhGVZxeo'),
+(5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 2, '2025-02-06 07:27:58', '2025-09-22 09:36:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
 (6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 1, '2025-02-06 07:28:28', '2025-08-13 09:32:51', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc1NTA3NzU3MSwiZXhwIjoxNzU1MTEzNTcxfQ.j6OgC4_HWDQnCVp5LL0GqVC5spS-SxJg3aiKqpPIQU4'),
 (11, 4, 'STAFF', 'SIX', 'sss@gmail.com', '+44', '2777777777', '$2a$10$a7sfTgDavJUrU.8kFfbKIe0525d3EF4yABvGUlcZAxV/Amy1qgCVa', '2:5', '1', '0', 2, '2025-02-08 11:43:22', '2025-08-04 09:49:43', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJpYXQiOjE3NTQzMDA5ODMsImV4cCI6MTc1NDMzNjk4M30.3eqJG4600wZR8rOgwQHHiGd6mnP_D30lvnp2cQkFoFw'),
 (7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 1, '2025-02-07 12:50:36', '2025-08-11 10:03:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc1NDkwNjYwMSwiZXhwIjoxNzU0OTQyNjAxfQ.HdhwmS5nBwiYQI8t--vxdl3Ki42iJYnUU2z30bEU9k4'),
 (10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, '2025-02-08 11:36:28', '2025-08-13 11:13:13', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTUwODMwNTUsImV4cCI6MTc1NTExOTA1NX0.EFJVIW4mb7SHDB9A0M4Fd5TILD50mrTFzWSSWwXqcz0'),
 (12, 6, 'STAFF 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, '2025-04-17 05:56:18', '2025-08-13 09:34:03', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NTUwNzc2NDMsImV4cCI6MTc1NTExMzY0M30.eKKc_Tbt6E9e9nA_dhjO_do_zDAJFeldlr3ti1ip3pM'),
 (13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, '2025-06-11 09:18:34', '2025-08-13 05:44:58', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NTUwNjM4OTgsImV4cCI6MTc1NTA5OTg5OH0.WQfMEG6-OXq616_AV46UByVbu8rdPo7vG8Y-BVOEyPU'),
-(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, '2025-07-11 10:42:49', '2025-09-02 10:55:16', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NTY4MTA1MTYsImV4cCI6MTc1Njg0NjUxNn0.pOIoSGJbKJweK0dTtJmI4C6tZneJnd9rLxVu3kzpY4c'),
-(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, '2025-07-11 10:48:30', '2025-08-16 13:17:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTUzNTAyNDEsImV4cCI6MTc1NTM4NjI0MX0.XgV3T05OQ21s2XM5ZIXlLWHl-RcqyWTuh8WfM-NOGig'),
+(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, '2025-07-11 10:42:49', '2025-09-22 11:08:23', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NTg1MzkzMDMsImV4cCI6MTc1ODU3NTMwM30.YAQrb3VYc1l2L-gOPJZ7NfLwnYJ2NBg3ACp7iTiaKSc'),
+(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, '2025-07-11 10:48:30', '2025-09-22 09:02:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTg1MzE3NjcsImV4cCI6MTc1ODU2Nzc2N30.yoy6kKljmU8h4LE1Qv6zhEAVMqPa-pLaNDeCVaAOjXs'),
 (16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, '2025-08-13 11:32:32', '2025-09-10 07:08:53', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTc0ODgxMzMsImV4cCI6MTc1NzUyNDEzM30.6G8TvdWSFJHE0x_Y5QQcYZm9kHbnramPEbUEQOs6-ps'),
-(17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, '2025-08-18 08:20:15', '2025-09-12 12:49:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTc2ODEzNDQsImV4cCI6MTc1NzcxNzM0NH0.2YnanHOg5C5tVsHPxlZaSWuJ_ftMRayCJfh4qqHYdzI');
+(17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, '2025-08-18 08:20:15', '2025-09-12 12:49:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTc2ODEzNDQsImV4cCI6MTc1NzcxNzM0NH0.2YnanHOg5C5tVsHPxlZaSWuJ_ftMRayCJfh4qqHYdzI'),
+(20, 8, 'SAHAKI-MANAGE', 'ddddd', 'sasdasfwsf@gmail.com', '+44', '44020890320', '$2a$10$snor8L/CMAboV6UHDlzibufXa6WDscXEA65yIzOLql2qEPC5JeHFO', NULL, '1', '0', 1, '2025-09-23 06:27:54', '2025-09-23 07:07:22', NULL);
 
 -- --------------------------------------------------------
 
@@ -2055,7 +2171,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=851 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=861 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -2915,7 +3031,17 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (847, 1, '2025-09-18', 'job', 15, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000015', 'updated', '122.168.114.106', '2025-09-18 06:08:42', '2025-09-18 06:08:42'),
 (848, 1, '2025-09-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-19 04:59:30', '2025-09-19 04:59:30'),
 (849, 1, '2025-09-19', 'job', 15, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000015', 'updated', '122.168.114.106', '2025-09-19 09:28:27', '2025-09-19 09:28:27'),
-(850, 1, '2025-09-19', 'job', 10, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_VAT2_000010', 'updated', '122.168.114.106', '2025-09-19 10:09:49', '2025-09-19 10:09:49');
+(850, 1, '2025-09-19', 'job', 10, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_VAT2_000010', 'updated', '122.168.114.106', '2025-09-19 10:09:49', '2025-09-19 10:09:49'),
+(851, 1, '2025-09-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-22 04:53:16', '2025-09-22 04:53:16'),
+(852, 15, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', NULL, '2025-09-22 08:59:47', '2025-09-22 08:59:47'),
+(853, 15, '2025-09-22', '-', 0, ' Logged Out', 'Manager STAFF NINE  Logged Out ', '-', '122.168.114.106', '2025-09-22 09:00:24', '2025-09-22 09:00:24'),
+(854, 14, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-22 09:00:37', '2025-09-22 09:00:37'),
+(855, 15, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-09-22 09:02:47', '2025-09-22 09:02:47'),
+(856, 5, '2025-09-22', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', '122.168.114.106', '2025-09-22 09:36:04', '2025-09-22 09:36:04'),
+(857, 5, '2025-09-22', '-', 0, ' Logged Out', 'Processor STAFF ONE  Logged Out ', '-', '122.168.114.106', '2025-09-22 11:07:56', '2025-09-22 11:07:56'),
+(858, 14, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-22 11:08:23', '2025-09-22 11:08:23'),
+(859, 1, '2025-09-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-23 05:41:30', '2025-09-23 05:41:30'),
+(860, 1, '2025-09-23', 'staff', 20, 'created staff SAHAKI-MANAGE ddddd', 'Super Admin System Super Super Admin created staff SAHAKI-MANAGE ddddd ', 'created', '122.168.114.106', '2025-09-23 06:27:54', '2025-09-23 06:27:54');
 
 -- --------------------------------------------------------
 
@@ -3116,17 +3242,17 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
   KEY `client_id` (`client_id`),
   KEY `job_id` (`job_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `timesheet`
 --
 
 INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_id`, `job_id`, `task_id`, `monday_date`, `monday_hours`, `tuesday_date`, `tuesday_hours`, `wednesday_date`, `wednesday_hours`, `thursday_date`, `thursday_hours`, `friday_date`, `friday_hours`, `saturday_date`, `saturday_hours`, `sunday_date`, `sunday_hours`, `remark`, `final_remark`, `status`, `submit_status`, `created_at`, `updated_at`) VALUES
-(1, 1, '1', 0, 0, 1, 3, '2025-07-07', '2:20', NULL, NULL, '2025-07-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '1', '2025-07-09 12:11:46', '2025-07-09 13:05:10'),
-(2, 1, '2', 1, 1, 2, 2, '2025-07-07', '5:50', '2025-07-08', '5:50', '2025-07-09', '5:60', '2025-07-10', '5:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '1', '2025-07-09 12:11:46', '2025-07-09 13:05:10'),
-(3, 1, '1', 0, 0, 1, 3, NULL, NULL, '2025-07-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '1', '2025-07-09 12:11:46', '2025-07-09 13:05:10'),
-(4, 1, '1', 0, 0, 1, 3, '2025-07-14', '9:60', '2025-07-15', '9:60', '2025-07-16', '9:60', '2025-07-17', '9:60', '2025-07-18', '9:60', NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-07-14 10:55:57', '2025-07-14 10:55:57'),
+(1, 1, '1', 0, 0, 1, 3, '2025-07-07', '2:20', NULL, NULL, '2025-07-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:32:02'),
+(2, 1, '2', 1, 1, 2, 2, '2025-07-07', '5:50', '2025-07-08', '5:50', '2025-07-09', '5:60', '2025-07-10', '5:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:31:59'),
+(3, 1, '1', 0, 0, 1, 3, NULL, NULL, '2025-07-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:31:56'),
+(4, 1, '1', 0, 0, 1, 3, '2025-07-14', '9:60', '2025-07-15', '9:60', '2025-07-16', '9:60', '2025-07-17', '9:60', '2025-07-18', '9:60', NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-07-14 10:55:57', '2025-09-23 06:31:53'),
 (5, 14, '2', 10, 8, 10, 10, '2025-08-25', '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-08-21 12:17:35', '2025-09-16 06:32:45'),
 (6, 1, '1', 0, 0, 1, 3, '2025-09-01', '2:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:19:22', '2025-09-02 10:34:19'),
 (7, 1, '2', 1, 1, 5, 1, '2025-09-01', '5:60', '2025-09-02', '6:30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:20:10', '2025-09-02 10:20:10'),
@@ -3137,7 +3263,9 @@ INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_i
 (12, 16, '2', 10, 8, 10, 10, '2025-09-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
 (13, 16, '1', 0, 0, 1, 1, '2025-09-08', '3:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 09:55:45'),
 (14, 1, '2', 5, 3, 13, 5, '2025-09-08', '9:30', '2025-09-09', '4:20', '2025-09-10', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-11 09:57:37', '2025-09-11 10:01:03'),
-(15, 14, '2', 10, 8, 10, 10, '2025-09-08', '2:00', '2025-09-09', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-08-21 12:17:35', '2025-09-16 06:42:19');
+(15, 14, '2', 10, 8, 10, 10, '2025-09-15', '2:00', '2025-09-09', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-08-21 12:17:35', '2025-09-23 06:03:39'),
+(16, 15, '2', 5, 3, 13, 5, '2025-09-15', '9:30', '2025-09-16', '4:20', '2025-09-17', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-19 09:57:37', '2025-09-22 07:21:25'),
+(17, 14, '2', 10, 8, 10, 10, '2025-09-15', '2:00', '2025-09-16', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-18 12:17:35', '2025-09-22 09:03:47');
 
 -- --------------------------------------------------------
 
