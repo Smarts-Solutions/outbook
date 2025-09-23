@@ -1778,7 +1778,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
     var {
-        groupBy = ['staff_id'],   // now array
+        groupBy = ['staff_id'], 
         internal_external,
         fieldsToDisplay,
         fieldsToDisplayId,
@@ -2010,7 +2010,8 @@ const getTimesheetReportData = async (Report) => {
         ORDER BY group_value, work_date
         `;
 
-        //  console.log("unpivotSQL", unpivotSQL);
+        //   console.log("fromDate ,", fromDate , 'toDate ', toDate);
+        //   console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
@@ -2024,7 +2025,8 @@ const getTimesheetReportData = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
-            const gid = r.group_value || 'NULL';
+          //  const gid = r.group_value || 'NULL';
+            const gid = r.group_value+'_'+r.task_type || 'NULL';
             const label = r.group_label;
             const staffName = r.staff_name;
             const customerName = r.customer_name;
@@ -2073,7 +2075,7 @@ const getTimesheetReportData = async (Report) => {
         for (const gid of groupKeys) {
             const g = groups[gid];
             const row = {};
-            console.log("g", g);
+            // console.log("g", g);
 
             row['staff_id'] = g.staff_name;  // final readable label
             row['customer_id'] = g.customer_name;
@@ -2233,7 +2235,7 @@ const missingTimesheetReport = async (Report) => {
     console.log("query_last_week_filter", query_last_week_filter);
 
     const [result] = await pool.execute(query_last_week_filter);
-    console.log("result", result);
+    // console.log("result", result);
 
     return {
         status: true,
