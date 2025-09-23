@@ -2881,6 +2881,7 @@ const CreateJob = () => {
                             </div>
                           </div>
                           {serviceFieldsData?.length > 0 && (
+                             <div className="col-lg-12">
                             <div className="card card_shadow">
                               <div className="card-header card-header-light-blue align-items-center d-flex">
                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">
@@ -2976,6 +2977,7 @@ const CreateJob = () => {
 
                                 </div>
                               </div>
+                            </div>
                             </div>
                           )}
 
