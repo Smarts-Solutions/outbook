@@ -108,8 +108,18 @@ function TimesheetReport() {
         if (response.status) {
           const data = response?.data?.map((item) => ({
             value: item.id,
-            // label: item.filter_record,
-            label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
+            // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
+            label: `
+            Group By : [${JSON.parse(item?.groupBy)}]<br/>
+            ${item.staff_fullname ? `⮞ Staff : ${item.staff_fullname}<br/>` : ""}
+            ${item.customer_name ? `⮞ Customer : ${item.customer_name}<br/>` : ""}
+            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
+            ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
+            ${item.task_name ? `⮞ Task : ${item.task_name}<br/>` : ""}
+            ${item.internal_job_name ? `⮞ Internal Job : ${item.internal_job_name}<br/>` : ""}
+            ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}` : ""}
+          `.trim(),
+
 
             filters: item.filter_record
           }));
@@ -973,9 +983,16 @@ function TimesheetReport() {
 
                 <div className="d-flex align-items-center gap-2">
                   <Select
-                    options={[
+                    // options={[
+                    //   { value: "", label: "Select..." },
+                    //   ...getAllFilterData,
+                    // ]}
+                     options={[
                       { value: "", label: "Select..." },
-                      ...getAllFilterData,
+                      ...getAllFilterData.map(opt => ({
+                        value: opt.value,
+                        label: <span dangerouslySetInnerHTML={{ __html: opt.label }} />
+                      }))
                     ]}
                     value={
                       getAllFilterData && getAllFilterData.length > 0
@@ -988,9 +1005,9 @@ function TimesheetReport() {
                     isSearchable
                     className="shadow-sm select-staff rounded-pill flex-grow-1"
                   />
-                 
+
                   {
-                    
+
                     !['', null, undefined].includes(filterId) && (
                       <i
                         className="fa fa-trash"
@@ -1000,7 +1017,7 @@ function TimesheetReport() {
                       ></i>
                     )
                   }
-                 
+
                 </div>
               </div>
 
