@@ -1654,8 +1654,8 @@ const CreateJob = () => {
   ];
 
 
-  console.log("serviceFields", serviceFields);
-  console.log("jobData?.Service", jobData?.Service);
+  // console.log("serviceFields", serviceFields);
+  // console.log("jobData?.Service", jobData?.Service);
 
 
   useEffect(() => {

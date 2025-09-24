@@ -353,7 +353,8 @@ const jobAdd = async (job) => {
   } = job;
 
   // console.log("selectedStaffData", selectedStaffData);
-  // console.log("job", job);
+   console.log("job", job);
+   
 
   
 
@@ -692,6 +693,10 @@ VALUES (
     // Apply the undefined check for each field
     const cleanedValues = values.map(handleUndefined);
 
+   // console.log("cleanedValues", JSON.stringify(cleanedValues));
+    //console.log("query", query);
+
+  //  return
 
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
@@ -1588,8 +1593,12 @@ const getJobById = async (job) => {
   jobs.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 AS If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
   jobs.Management_Accounts_Frequency_id_6 AS Management_Accounts_Frequency_id_6,
 
-  jobs.Year_Ending_id_1 AS Year_Ending_id_1,
-  jobs.Day_Date_id_2 AS Day_Date_id_2,
+  
+  DATE_FORMAT(jobs.Year_Ending_id_1, '%Y-%m-%d') AS Year_Ending_id_1,
+ 
+ 
+  DATE_FORMAT(jobs.Day_Date_id_2, '%Y-%m-%d') AS Day_Date_id_2,
+
   jobs.Week_Year_id_2 AS Week_Year_id_2,
   jobs.Week_Month_id_2 AS Week_Month_id_2,
   jobs.Week_id_2 AS Week_id_2,
@@ -1601,8 +1610,8 @@ const getJobById = async (job) => {
   jobs.Quarter_Year_id_2 AS Quarter_Year_id_2,
   jobs.Quarter_id_2 AS Quarter_id_2,
   jobs.Year_id_2 AS Year_id_2,
-  jobs.Other_FromDate_id_2 AS Other_FromDate_id_2,
-  jobs.Other_ToDate_id_2 AS Other_ToDate_id_2,
+  DATE_FORMAT(jobs.Other_FromDate_id_2, '%Y-%m-%d') AS Other_FromDate_id_2,
+  DATE_FORMAT(jobs.Other_ToDate_id_2, '%Y-%m-%d') AS Other_ToDate_id_2,
   jobs.Payroll_Week_Year_id_3 AS Payroll_Week_Year_id_3,
   jobs.Payroll_Week_Month_id_3 AS Payroll_Week_Month_id_3,
   jobs.Payroll_Week_id_3 AS Payroll_Week_id_3,
@@ -1615,11 +1624,11 @@ const getJobById = async (job) => {
   jobs.Payroll_Quarter_id_3 AS Payroll_Quarter_id_3,
   jobs.Payroll_Year_id_3 AS Payroll_Year_id_3,
   jobs.Tax_Year_id_4 AS Tax_Year_id_4,
-  jobs.Management_Accounts_FromDate_id_6 AS Management_Accounts_FromDate_id_6,
-  jobs.Management_Accounts_ToDate_id_6 AS Management_Accounts_ToDate_id_6,
+  DATE_FORMAT(jobs.Management_Accounts_FromDate_id_6, '%Y-%m-%d') AS Management_Accounts_FromDate_id_6,
+  DATE_FORMAT(jobs.Management_Accounts_ToDate_id_6, '%Y-%m-%d') AS Management_Accounts_ToDate_id_6,
   jobs.Year_id_33 AS Year_id_33,
   jobs.Period_id_32 AS Period_id_32,
-  jobs.Day_Date_id_32 AS Day_Date_id_32,
+  DATE_FORMAT(jobs.Day_Date_id_32, '%Y-%m-%d') AS Day_Date_id_32,
   jobs.Week_Year_id_32 AS Week_Year_id_32,
   jobs.Week_Month_id_32 AS Week_Month_id_32,
   jobs.Week_id_32 AS Week_id_32,
@@ -1631,8 +1640,8 @@ const getJobById = async (job) => {
   jobs.Quarter_Year_id_32 AS Quarter_Year_id_32,
   jobs.Quarter_id_32 AS Quarter_id_32,
   jobs.Year_id_32 AS Year_id_32,
-  jobs.Other_FromDate_id_32 AS Other_FromDate_id_32,
-  jobs.Other_ToDate_id_32 AS Other_ToDate_id_32,
+  DATE_FORMAT(jobs.Other_FromDate_id_32, '%Y-%m-%d') AS Other_FromDate_id_32,
+  DATE_FORMAT(jobs.Other_ToDate_id_32, '%Y-%m-%d') AS Other_ToDate_id_32,
   jobs.Payroll_Frequency_id_31 AS Payroll_Frequency_id_31,
   jobs.Payroll_Week_Year_id_31 AS Payroll_Week_Year_id_31,
   jobs.Payroll_Week_Month_id_31 AS Payroll_Week_Month_id_31,
@@ -1645,10 +1654,10 @@ const getJobById = async (job) => {
   jobs.Payroll_Quarter_Year_id_31 AS Payroll_Quarter_Year_id_31,
   jobs.Payroll_Quarter_id_31 AS Payroll_Quarter_id_31,
   jobs.Payroll_Year_id_31 AS Payroll_Year_id_31,
-  jobs.Audit_Year_Ending_id_27 AS Audit_Year_Ending_id_27,
+  DATE_FORMAT(jobs.Audit_Year_Ending_id_27, '%Y-%m-%d') AS Audit_Year_Ending_id_27,
   jobs.Filing_Frequency_id_8 AS Filing_Frequency_id_8,
-  jobs.Period_Ending_Date_id_8 AS Period_Ending_Date_id_8,
-  jobs.Filing_Date_id_8 AS Filing_Date_id_8,
+  DATE_FORMAT(jobs.Period_Ending_Date_id_8, '%Y-%m-%d') AS Period_Ending_Date_id_8,
+  DATE_FORMAT(jobs.Filing_Date_id_8, '%Y-%m-%d') AS Filing_Date_id_8,
   jobs.Year_id_28 AS Year_id_28,
 
      client_job_task.time AS task_budgeted_hour,
