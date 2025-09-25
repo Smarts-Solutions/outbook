@@ -812,30 +812,39 @@ id DESC;`;
 const getCustomer_dropdown_delete = async (customer) => {
     // const { StaffUserId ,staff_id } = customer;
     let StaffUserId = customer.staff_id;
-    // Line Manager
-    const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
-    let LineManageStaffId = LineManage?.map(item => item.staff_to);
+     // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
-    if (LineManageStaffId.length == 0) {
-        LineManageStaffId.push(StaffUserId);
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
+
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+        const query = `
+    SELECT  
+    customers.id AS id,
+    customers.status AS status,
+    customers.form_process AS form_process,
+    customers.trading_name AS trading_name,
+    CONCAT(
+    'cust_', 
+    SUBSTRING(customers.trading_name, 1, 3), '_',
+    SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers 
+ORDER BY 
+id DESC;`;
+
+        const [result] = await pool.execute(query);
+
+        return { status: true, message: 'Success..', data: result };
     }
-
-    const QueryRole = `
-  SELECT
-    staffs.id AS id,
-    staffs.role_id AS role_id,
-    roles.role AS role_name
-  FROM
-    staffs
-  JOIN
-    roles ON roles.id = staffs.role_id
-  WHERE
-    staffs.id = ${StaffUserId}
-  LIMIT 1
-  `
-    const [rows] = await pool.execute(QueryRole);
-
-    let query = `
+  
+        // other Role Data
+        let query = `
     SELECT  
         customers.id AS id,
         customers.customer_type AS customer_type,
@@ -850,8 +859,6 @@ const getCustomer_dropdown_delete = async (customer) => {
         customers.created_at AS created_at,
         customers.updated_at AS updated_at,
         customers.status AS status,
-        staff1.first_name AS staff_firstname, 
-        staff1.last_name AS staff_lastname,
         staff2.first_name AS account_manager_firstname, 
         staff2.last_name AS account_manager_lastname,
         customer_company_information.company_name AS company_name,
@@ -862,42 +869,122 @@ const getCustomer_dropdown_delete = async (customer) => {
             SUBSTRING(customers.customer_code, 1, 15)
         ) AS customer_code,
         CASE
-            WHEN clients.id IS NOT NULL THEN 1
-            ELSE 0
+        WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+        THEN 1 ELSE 0
         END AS is_client
         FROM 
-            customers  
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
+            customers
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
         LEFT JOIN
             assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
-        LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
-         LEFT JOIN customer_services ON customer_services.customer_id = customers.id
-        JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
         WHERE
-            (customers.staff_id = ?  OR customers.account_manager_id = ? OR assigned_jobs_staff_view.staff_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ? 
-
-            OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            OR staff_portfolio.staff_id IN (${LineManageStaffId}) OR customer_service_account_managers.account_manager_id IN (${LineManageStaffId})
-            )
+             customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
            ORDER BY customers.id DESC
 
          `;
-    try {
-        const [result] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
-        return { status: true, message: 'Success..', data: result };
-    } catch (err) {
-        console.error('Error executing query getCustomer_dropdown:', err);
-        return { status: false, message: 'Error executing query', data: err };
-    }
+         try {
+             const [result] = await pool.execute(query);
+             return { status: true, message: 'Success..', data: result };
+         } catch (err) {
+            console.error('Error executing query getCustomer_dropdown:', err);
+            return { status: false, message: 'Error executing query', data: err };
+         }
 
 }
+
+// const getCustomer_dropdown_delete = async (customer) => {
+//     // const { StaffUserId ,staff_id } = customer;
+//     let StaffUserId = customer.staff_id;
+//     // Line Manager
+//     const [LineManage] = await pool.execute('SELECT staff_to FROM line_managers WHERE staff_by = ?', [StaffUserId]);
+//     let LineManageStaffId = LineManage?.map(item => item.staff_to);
+
+//     if (LineManageStaffId.length == 0) {
+//         LineManageStaffId.push(StaffUserId);
+//     }
+
+//     const QueryRole = `
+//   SELECT
+//     staffs.id AS id,
+//     staffs.role_id AS role_id,
+//     roles.role AS role_name
+//   FROM
+//     staffs
+//   JOIN
+//     roles ON roles.id = staffs.role_id
+//   WHERE
+//     staffs.id = ${StaffUserId}
+//   LIMIT 1
+//   `
+//     const [rows] = await pool.execute(QueryRole);
+
+//     let query = `
+//     SELECT  
+//         customers.id AS id,
+//         customers.customer_type AS customer_type,
+//         customers.staff_id AS staff_id,
+//         customers.account_manager_id AS account_manager_id,
+//         customers.trading_name AS trading_name,
+//         customers.trading_address AS trading_address,
+//         customers.vat_registered AS vat_registered,
+//         customers.vat_number AS vat_number,
+//         customers.website AS website,
+//         customers.form_process AS form_process,
+//         customers.created_at AS created_at,
+//         customers.updated_at AS updated_at,
+//         customers.status AS status,
+//         staff1.first_name AS staff_firstname, 
+//         staff1.last_name AS staff_lastname,
+//         staff2.first_name AS account_manager_firstname, 
+//         staff2.last_name AS account_manager_lastname,
+//         customer_company_information.company_name AS company_name,
+//         customer_company_information.company_number AS company_number,
+//         CONCAT(
+//             'cust_', 
+//             SUBSTRING(customers.trading_name, 1, 3), '_',
+//             SUBSTRING(customers.customer_code, 1, 15)
+//         ) AS customer_code,
+//         CASE
+//             WHEN clients.id IS NOT NULL THEN 1
+//             ELSE 0
+//         END AS is_client
+//         FROM 
+//             customers  
+//         JOIN 
+//             staffs AS staff1 ON customers.staff_id = staff1.id
+//         JOIN 
+//             staffs AS staff2 ON customers.account_manager_id = staff2.id
+//         LEFT JOIN clients ON clients.customer_id = customers.id
+//         LEFT JOIN
+//             assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+//         LEFT JOIN
+//             customer_company_information ON customers.id = customer_company_information.customer_id
+//         LEFT JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
+//          LEFT JOIN customer_services ON customer_services.customer_id = customers.id
+//         JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+//         WHERE
+//             (customers.staff_id = ?  OR customers.account_manager_id = ? OR assigned_jobs_staff_view.staff_id = ? OR staff_portfolio.staff_id = ? OR customer_service_account_managers.account_manager_id = ? 
+
+//             OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+//             OR staff_portfolio.staff_id IN (${LineManageStaffId}) OR customer_service_account_managers.account_manager_id IN (${LineManageStaffId})
+//             )
+//            GROUP BY customers.id
+//            ORDER BY customers.id DESC
+
+//          `;
+//     try {
+//         const [result] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
+//         return { status: true, message: 'Success..', data: result };
+//     } catch (err) {
+//         console.error('Error executing query getCustomer_dropdown:', err);
+//         return { status: false, message: 'Error executing query', data: err };
+//     }
+
+// }
 
 const updateProcessCustomerServices = async (customerProcessData) => {
 

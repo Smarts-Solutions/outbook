@@ -41,6 +41,8 @@ const StaffPage = () => {
   });
   const [selectedStaff, setSelectedStaff] = useState(null);
 
+  // console.log("deleteStaffCustomer", deleteStaffCustomer);
+
   const handleDeleteClick = async () => {
 
     let data = {
@@ -202,7 +204,7 @@ const StaffPage = () => {
       .then(async (response) => {
         if (response.status) {
 
-          console.log("response.data ", response.data);
+          // console.log("response.data ", response.data);
 
           setStaffDataAll({ loading: false, data: response.data });
 
@@ -811,6 +813,24 @@ const StaffPage = () => {
     }
   };
 
+
+  const getCustomersNameChangeRole = async (id) => {
+    if (!id) return;
+    try {
+      const req = { action: "get_dropdown_delete", staff_id: id };
+      const data = { req, authToken: token };
+
+      const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+      if (response.status) {
+        setDeleteStaffCustomer(response.data);
+      } else {
+        setDeleteStaffCustomer([]);
+      }
+    } catch (error) {
+      console.error("Error fetching customer names:", error);
+    }
+  };
+
   useEffect(() => {
     getCustomersName(deleteStaff?.id);
   }, [deleteStaff?.id, token]);
@@ -820,7 +840,8 @@ const StaffPage = () => {
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
   const getChangedRoleStaff = async (staffData) => {
-    // console.log("Get Changed Role Staff:", role_id);
+    //  console.log("Get Changed Role Staff:", staffData);
+     getCustomersNameChangeRole(staffData.id);
     try {
       const req = { action: "getChangedRoleStaff", staffData: staffData };
       const data = { req: req, authToken: token };
@@ -884,7 +905,7 @@ const StaffPage = () => {
         .unwrap()
         .then((res) => {
           if (res.status) {
-            console.log("Changed Role Staff Data:", res);
+            // console.log("Changed Role Staff Data:", res);
             setChangeRole(false);
             setSelectedStaff(null);
             formik.resetForm();
@@ -1331,19 +1352,19 @@ const StaffPage = () => {
       </CommanModal>
 
      <CommanModal
-  isOpen={changeRole}
-  backdrop="static"
-  
-  title="Change Role - Staff"
-  hideBtn={true}
-  handleClose={() => {
-    setChangeRole(false);
-    setSelectedStaff(null);
-    formik.resetForm();
-    setEditStaffData({});
-    setChangedRoleStaffData([]);
-  }}
->
+        isOpen={changeRole}
+        backdrop="static"
+        
+        title="Change Role - Staff"
+        hideBtn={true}
+        handleClose={() => {
+          setChangeRole(false);
+          setSelectedStaff(null);
+          formik.resetForm();
+          setEditStaffData({});
+          setChangedRoleStaffData([]);
+        }}
+      >
   <div className="modal-body">
 
     {/* Select Staff to Replace */}
@@ -1412,6 +1433,25 @@ const StaffPage = () => {
         <i className="bi bi-x-circle me-1"></i> Cancel
       </button>
     </div>
+
+    {/* Customers List */}
+          {deleteStaffCustomer.length > 0 && (
+            <div className="mb-4">
+              <h6 className="fw-bold text-primary">
+                <i className="bi bi-people"></i> Customers Assigned:
+              </h6>
+              <ul className="list-group">
+                {deleteStaffCustomer.map((customer) => (
+                  <li key={customer.id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <span className="text-dark">
+                      {customer?.trading_name}{" "}
+                      <span className="badge bg-secondary">{customer?.customer_code}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
   </div>
 </CommanModal>
 
