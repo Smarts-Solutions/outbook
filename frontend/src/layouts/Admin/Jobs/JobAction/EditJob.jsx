@@ -2323,6 +2323,11 @@ const EditJob = () => {
                                     <Select
                                       name="Service"
                                       id="Service"
+                                       menuPortalTarget={document.body}   
+  styles={{
+    menuPortal: base => ({ ...base, zIndex: 9999 }), 
+    menu: base => ({ ...base, zIndex: 9999 })
+  }}
                                       options={serviceOptions}
                                       value={serviceOptions.find(
                                         (opt) => String(opt.value) === String(jobData.Service)
