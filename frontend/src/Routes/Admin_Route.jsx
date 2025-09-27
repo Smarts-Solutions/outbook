@@ -23,6 +23,8 @@ import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
 import SubInternal from "../layouts/Admin/Settings/SubInternal";
 
 import JobType from "../layouts/Admin/Settings/JobType";
+import Task from "../layouts/Admin/Settings/Task";
+
 import Subsource from "../layouts/Admin/Settings/Subsource";
 import { RoleAccess } from "../ReduxStore/Slice/Access/AccessSlice";
 
@@ -261,6 +263,7 @@ const Admin_Route = () => {
               <Route path="/access" element={<Access />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/add/jobtype" element={<JobType />} />
+              <Route path="/settings/task" element={<Task />} />
               <Route path="/setting" element={<Setting />} />
               <Route path="/addcustomer" element={<Addcustomer />} />
               <Route path="/customer" element={<Customer />} />

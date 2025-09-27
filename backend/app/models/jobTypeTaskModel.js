@@ -208,13 +208,26 @@ const getTask = async (task) => {
   const { service_id, job_type_id } = task;
 
   const query = `
-    SELECT id,name,service_id,job_type_id,status FROM task WHERE service_id = ? AND job_type_id = ?
+    SELECT 
+    task.id,
+    task.name,
+    task.service_id,
+    task.job_type_id,
+    task.status,
+    services.name AS service_name,
+    job_types.type AS job_type_type
+    FROM 
+    task
+    JOIN services ON services.id = task.service_id
+    JOIN job_types ON job_types.id = task.job_type_id
+    WHERE task.service_id = ? AND task.job_type_id = ?
     ORDER BY id DESC
     `;
   try {
     const [result] = await pool.execute(query, [service_id, job_type_id]);
     return { status: true, message: "task get successfully.", data: result };
   } catch (err) {
+    console.log("Error getting task:", err);
     return { status: false, message: "Error get task." };
   }
 };

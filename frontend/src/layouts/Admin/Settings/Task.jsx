@@ -18,7 +18,7 @@ const Setting = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [jobTypeData, setJobTypeData] = useState({ loading: true, data: [] });
+  const [taskData, setTaskData] = useState({ loading: true, data: [] });
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
@@ -26,51 +26,24 @@ const Setting = () => {
   const [getJobTypeId, setJobTypeId] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [taskInput, setTaskInput] = useState("");
+  const [budgetedHours, setBudgetedHours] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [tasks, setTasks] = useState([]);
-  const [ViewTaskData, setViewTaskData] = useState([]);
 
-  const JobTypeData = async (req) => {
-    if (location.state.Id) {
-      req = {
-        ...req,
-        service_id: location.state.Id,
-      };
-    }
+  const TaskData = async () => {
+    const req = { service_id: location?.state?.service_id, job_type_id: location?.state?.Id };
     const data = { req: req, authToken: token };
-    await dispatch(JobType(data))
+    await dispatch(GETTASKDATA(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
-          if (response.status) {
-            setJobTypeData({ loading: false, data: response.data });
-          } else {
-            setJobTypeData({ loading: false, data: [] });
-          }
+        if (response.status) {
+          console.log("response.data", response.data);
+          setTaskData({ loading: false, data: response.data });
         } else {
-          if (response.status) {
-            sweatalert.fire({
-              title: response.message,
-              icon: "success",
-              timer: 2000,
-            });
-            setTimeout(() => {
-              JobTypeData({ action: "get" });
-            }, 2000);
-          } else {
-            if (response.key == "warning") {
-              sweatalert.fire({
-                title: response.message,
-                icon: "warning",
-                timer: 2000,
-              });
-            } else {
-              sweatalert.fire({
-                title: response.message,
-                icon: "error",
-                timer: 2000,
-              });
-            }
-          }
+          setTaskData({ loading: false, data: [] });
+
         }
       })
       .catch((error) => {
@@ -79,98 +52,39 @@ const Setting = () => {
   };
 
   useEffect(() => {
-    fetchApiData();
+    TaskData();
   }, []);
 
-  const handleViewTask = async (row) => {
-    const req = { service_id: location?.state?.Id, job_type_id: row?.id };
-
-    const data = { req: req, authToken: token };
-    await dispatch(GETTASKDATA(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setViewTaskData(response.data);
-        } else {
-          setViewTaskData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
-
-  const fetchApiData = () => {
-    const req = {
-      action: "get",
-    };
-    JobTypeData(req);
-  };
 
   const columnJobType = [
     {
-      name: "Job Type",
-      selector: (row) => row.type,
+      name: "Task",
+      selector: (row) => row.name,
       sortable: true,
-      width: "60%",
+      width: "20%",
+    },
+    {
+      name: "Service Name",
+      selector: (row) => row.service_name,
+      sortable: true,
+      width: "20%",
+    },
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type,
+      sortable: true,
+      width: "20%",
+    },
+    {
+      name: "Budgeted Hour",
+      selector: (row) => row.budgeted_hour,
+      sortable: true,
+      width: "20%",
     },
     {
       name: "Actions",
       cell: (row) => (
         <>
-          <div className="dropdown d-lg-none setting-drop-down">
-            <button
-              className="btn"
-              type="button"
-              id="dropdownMenuButton"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
-            </button>
-            <div
-              className="dropdown-menu custom-dropdown"
-              aria-labelledby="dropdownMenuButton"
-            >
-              <div className="px-2">
-                <button
-                  className="edit-icon dropdown-item w-auto  mb-2"
-                  onClick={() => handleEdit(row)}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-                <button
-                  className="delete-icon dropdown-item w-auto  mb-2"
-                  onClick={() => handleDelete(row)}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-                <button
-                  className="view-icon dropdown-item w-auto  mb-2"
-                  onClick={(e) => {
-                    handleViewTask(row);
-                    setViewtask(true);
-                  }}
-                >
-                  <i className="fa-regular fa-eye " />
-                </button>
-
-                <button
-                  className="btn btn-sm btn-info text-white dropdown-item w-auto  mb-2"
-                  onClick={(e) => {
-                    setShowAddTask(true);
-                    setJobTypeId(row);
-                  }}
-                >
-                  <i className="fa fa-plus pe-1"></i> Add Task
-                </button>
-
-                
-              </div>
-            </div>
-          </div>
           <div className="d-lg-flex d-none">
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
@@ -178,41 +92,14 @@ const Setting = () => {
             <button className="delete-icon" onClick={() => handleDelete(row)}>
               <i className="ti-trash text-danger" />
             </button>
-            <button
-              className="view-icon"
-              onClick={(e) => {
-                handleViewTask(row);
-                setViewtask(true);
-              }}
-            >
-              <i className="fa-regular fa-eye " />
-            </button>
 
-            <button
-              className="btn btn-sm btn-info text-white"
-              onClick={(e) => {
-                setShowAddTask(true);
-                setJobTypeId(row);
-              }}
-            >
-              <i className="fa fa-plus pe-1"></i> Add Task
-            </button>
-
-             <button
-              className="btn btn-sm btn-info text-white"
-              onClick={(e) => {
-                navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab ,service_id : location.state.Id } });
-              }}
-            >
-              <i className="fa fa-plus pe-1"></i> Add Task Page
-            </button>
           </div>
         </>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "40%",
+      width: "20%",
     },
   ];
 
@@ -295,15 +182,17 @@ const Setting = () => {
       fields: [
         {
           type: "text",
-          name: "type",
-          label: "Job Type",
-          placeholder: "Enter Job Type",
+          name: "name",
+          label: "Task name",
+          placeholder: "Enter Task name",
         },
       ],
-      title: " Job Type",
+      title: "Task",
     });
-    setIsEdit(false);
-    setIsModalOpen(true);
+    // setIsEdit(false);
+    // setIsModalOpen(true);
+
+    setShowAddTask(true);
   };
 
   const handleEdit = (data) => {
@@ -312,10 +201,10 @@ const Setting = () => {
       fields: [
         {
           type: "text",
-          name: "type",
-          label: "Job Type",
-          placeholder: "Enter Job Type",
-          value: data.type,
+          name: "name",
+          label: "Task Name",
+          placeholder: "Enter Task Name",
+          value: data.name,
         },
         // {
         //   type: "select",
@@ -329,7 +218,7 @@ const Setting = () => {
         //   ],
         // },
       ],
-      title: "Job Type",
+      title: "Task",
 
       id: data.id,
     });
@@ -362,38 +251,15 @@ const Setting = () => {
         req.status = field.value;
       }
     });
-    JobTypeData(req);
+
+
+    console.log("req addd", req);
+    return
+
 
     setModalData({});
     setIsModalOpen(false);
   };
-
-  // const handleDelete = (data) => {
-  //   sweatalert
-  //     .fire({
-  //       title: "Are you sure?",
-  //       text: "You won't be able to revert this!",
-  //       icon: "warning",
-  //       showCancelButton: true,
-  //       confirmButtonColor: "#3085d6",
-  //       cancelButtonColor: "#d33",
-  //       confirmButtonText: "Yes, delete it!",
-  //     })
-  //     .then((result) => {
-  //       if (result.isConfirmed) {
-  //         const req = {
-  //           action: "delete",
-  //           id: data.id,
-  //         };
-  //         JobTypeData(req);
-  //         sweatalert.fire({
-  //           title: "Deleted!",
-  //           text: "Your file has been deleted.",
-  //           icon: "success",
-  //         });
-  //       }
-  //     });
-  // };
 
   const handleDelete = (data) => {
     sweatalert
@@ -413,7 +279,7 @@ const Setting = () => {
             action: "delete",
             id: data.id,
           };
-          JobTypeData(req);
+
           sweatalert.fire({
             title: "Deleted!",
             text: "Your file has been deleted.",
@@ -427,38 +293,31 @@ const Setting = () => {
     setTaskInput(e.target.value);
   };
 
-  const handleAddTask = () => {
-    if (taskInput.trim() !== "") {
-      setTasks([...tasks, taskInput]);
-      setTaskInput("");
-    }
-  };
-
-  // const handleFileUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   const reader = new FileReader();
-
-  //   reader.onload = (event) => {
-  //     const data = event.target.result;
-  //     const workbook = XLSX.read(data, { type: "binary" });
-  //     const sheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[sheetName];
-  //     const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-  //     const extractedTasks = jsonData.map(
-  //       (row) => row.Task || row.task || row["Task Name"]
-  //     );
-  //     setTasks([...tasks, ...extractedTasks]);
-  //   };
-
-  //   reader.readAsBinaryString(file);
+  // const handleAddTask = () => {
+  //   if (taskInput.trim() !== "") {
+  //     setTasks([...tasks, taskInput]);
+  //     setTaskInput("");
+  //   }
   // };
+
+  const handleAddTask = () => {
+  if (taskInput.trim() !== "") {
+    const newTask = {
+      name: taskInput,   
+      budgeted_hour: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+    };
+
+    setTasks([...tasks, newTask]);
+    setTaskInput("");
+  }
+};
+
 
   const handleSaveTask = async () => {
     let req = {
       name: tasks,
-      job_type_id: getJobTypeId.id,
-      service_id: location.state.Id,
+      job_type_id: location.state.Id,
+      service_id: location.state.service_id,
     };
 
     if (tasks.length == 0) {
@@ -469,6 +328,9 @@ const Setting = () => {
       });
       return;
     }
+
+    console.log("req addd task", req);
+    return;
 
     await dispatch(AddTask({ req, authToken: token }))
       .unwrap()
@@ -522,7 +384,7 @@ const Setting = () => {
             >
               <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
             </button>
-            <h4 className="card-title">Job Type</h4>
+            <h4 className="card-title">Tasks</h4>
           </div>
           <div className="card-body">
             <div className="d-flex justify-content-end align-items-center">
@@ -533,7 +395,7 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  <i className="fa fa-plus" /> Add Job Type
+                  <i className="fa fa-plus" /> Add Task
                 </button>
               </div>
             </div>
@@ -541,7 +403,7 @@ const Setting = () => {
               <Datatable
                 filter={true}
                 columns={columnJobType}
-                data={jobTypeData.data}
+                data={taskData?.data}
               />
             </div>
           </div>
@@ -598,6 +460,9 @@ const Setting = () => {
             <div className="row ">
               <div className="col-lg-9">
                 <div className="mb-3">
+                  {/* <label htmlFor="firstNameinput" className="form-label">
+                    Task Name
+                  </label> */}
                   <input
                     type="text"
                     className="form-control"
@@ -608,6 +473,75 @@ const Setting = () => {
                     onChange={handleInputChange}
                   />
                 </div>
+
+                <div className="mb-3">
+                  <label className="form-label">
+                    Budgeted Time
+                  </label>
+                  <div className="input-group">
+                    {/* Hours Input */}
+                    <div className="hours-div">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Hours"
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          // Only allow non-negative numbers for hours
+                          if (
+                            value === "" ||
+                            Number(value) >= 0
+                          ) {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              hours: value,
+                            });
+                          }
+                        }}
+                        value={budgetedHours?.hours || ""}
+                      />
+                      <span
+                        className="input-group-text"
+                        id="basic-addon2"
+                      >
+                        H
+                      </span>
+                    </div>
+
+                    {/* Minutes Input */}
+                    <div className="hours-div">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Minutes"
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          // Only allow minutes between 0 and 59
+                          if (
+                            value === "" ||
+                            (Number(value) >= 0 &&
+                              Number(value) <= 59)
+                          ) {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              minutes: value,
+                            });
+                          }
+                        }}
+                        value={budgetedHours?.minutes || ""}
+                      />
+                      <span
+                        className="input-group-text"
+                        id="basic-addon2"
+                      >
+                        M
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
               </div>
               <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
@@ -648,15 +582,18 @@ const Setting = () => {
                 <tr>
                   <th className="">Task Name</th>
 
+                  <th className="">Budgeted Hours</th>
+
                   <th className="tabel_left" width="80">
                     Action
                   </th>
                 </tr>
               </thead>
               <tbody className="list form-check-all">
-                {tasks.map((task, index) => (
+                {tasks && tasks?.map((task, index) => (
                   <tr className="tabel_new" key={index}>
-                    <td>{task}</td>
+                    <td>{task.name}</td>
+                    <td>{task.budgeted_hour}</td>
                     <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
@@ -688,43 +625,7 @@ const Setting = () => {
         </div>
       </CommanModal>
 
-      <CommanModal
-        isOpen={viewtask}
-        backdrop="static"
-        size="ms-5"
-        title="View Task"
-        hideBtn={true}
-        handleClose={() => {
-          setViewtask(false);
-        }}
-      >
-        <div className="">
-          <div
-            style={{ border: "2px hidden black" }}
-            className="table-responsive table-card mb-1"
-          >
-            <table
-              className="table align-middle table-nowrap"
-              id="customerTable"
-            >
-              <thead className="table-light">
-                <tr>
-                  <th className="">Sr. No</th>
-                  <th className="tabel_left">Task</th>
-                </tr>
-              </thead>
-              <tbody className="list form-check-all">
-                {ViewTaskData?.map((task, index) => (
-                  <tr className="tabel_new" key={index}>
-                    <td>{index + 1}</td>
-                    <td>{task.name}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </CommanModal>
+
     </div>
   );
 };
