@@ -308,12 +308,27 @@ const Setting = () => {
             action: "delete",
             id: data.id,
           };
-
-          sweatalert.fire({
-            title: "Deleted!",
-            text: "Your file has been deleted.",
-            icon: "success",
-          });
+          dispatch(AddTask({ req, authToken: token }))  
+            .unwrap()
+            .then(async (response) => {
+              if (response.status) {
+                TaskData();
+                sweatalert.fire({
+                  title: response.message,
+                  icon: "success",
+                  timer: 2000,
+                });
+              } else {
+                sweatalert.fire({
+                  title: response.message,
+                  icon: "error",
+                  timer: 2000,
+                });
+              }
+            })
+            .catch((error) => {
+              return;
+            });
         }
       });
   };

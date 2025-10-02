@@ -249,6 +249,29 @@ const updateTask = async (task) => {
  
 }
 
+const deleteTask = async (task) => {
+  const { id } = task;
+  try {
+    const [[existName]] = await pool.execute(`SELECT name FROM task WHERE id = ?`, [id]);
+    await pool.execute("DELETE FROM task WHERE id = ?", [id]);
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+        staff_id: task.StaffUserId,
+        ip: task.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "task",
+        log_message: `deleted task ${existName.name}`,
+        permission_type: "deleted",
+        module_id: id,
+      }
+    );
+    return { status: true, message: "Task deleted successfully." };
+  } catch (err) {
+    return { status: false, message: "Error deleting task." };
+  }
+};
+
 const getTask = async (task) => {
   const { service_id, job_type_id } = task;
 
@@ -791,6 +814,7 @@ module.exports = {
   getJobType,
   addTask,
   updateTask,
+  deleteTask,
   getTask,
   addChecklist,
   getChecklist,
