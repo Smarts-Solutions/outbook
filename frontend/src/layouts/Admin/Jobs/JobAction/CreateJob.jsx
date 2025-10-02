@@ -1896,6 +1896,21 @@ const CreateJob = () => {
   ];
 
 
+  const handleBudgetTime = (e ,index ,row ,type) => {
+    const { name, value } = e.target; 
+    if(type == "hour"){
+     
+    }
+    else if(type == "minute"){ 
+    }
+
+    console.log("e.SetAddTaskArr", AddTaskArr);
+    // setBudgetTime({ ...BudgetTime, [name]: value });
+    //let updatedRow = { ...row, [name]: value };
+
+  }
+
+
   return (
     <div>
       <div className="container-fluid">
@@ -3617,6 +3632,7 @@ const CreateJob = () => {
                                                       <td>
                                                         {checklist?.task_name}{" "}
                                                       </td>
+
                                                       <td>
                                                         {checklist?.budgeted_hour
                                                           ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
@@ -3671,7 +3687,7 @@ const CreateJob = () => {
                                                 <th>Action</th>
                                               </tr>
                                             </thead>
-                                            <tbody className="list form-check-all">
+                                            {/* <tbody className="list form-check-all">
                                               {AddTaskArr &&
                                                 AddTaskArr.map((checklist) => (
                                                   <tr className="">
@@ -3684,8 +3700,6 @@ const CreateJob = () => {
                                                         ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
                                                         : ""}
                                                     </td>
-
-                                                    {/* <td>{checklist.budgeted_hour} hr</td> */}
                                                     <td>
                                                       <div className="add">
                                                         <button className="delete-icon">
@@ -3702,7 +3716,75 @@ const CreateJob = () => {
                                                     </td>
                                                   </tr>
                                                 ))}
+                                            </tbody> */}
+                                            <tbody className="list form-check-all">
+                                              {AddTaskArr &&
+                                                AddTaskArr.map((checklist, index) => {
+                                                  // split hours and minutes safely
+                                                  const [hours, minutes] = (checklist?.budgeted_hour || "0:0").split(":");
+
+                                                  return (
+                                                    <tr key={checklist.task_id || index}>
+                                                      <td>{checklist.task_name} </td>
+
+                                                      {/* Editable Budgeted Hour/Minutes */}
+                                                      <td>
+                                                        <div className="input-group">
+                                                          {/* Hours */}
+                                                          <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            style={{ width: "60px" }}
+                                                            value={hours}
+                                                            min={0}
+                                                            // onChange={(e) => {
+                                                            //   const newHours = e.target.value;
+                                                            //   const updatedArr = [...AddTaskArr];
+                                                            //   const currentMinutes = updatedArr[index].budgeted_hour?.split(":")[1] || "0";
+                                                            //   updatedArr[index].budgeted_hour = `${newHours}:${currentMinutes}`;
+                                                            //    setAddTaskArr(updatedArr);
+                                                            // }}
+                                                            onChange={(e) => handleBudgetTime(e,index,checklist,"hour")}
+                                                          />
+                                                          <span className="input-group-text">h</span>
+
+                                                          {/* Minutes */}
+                                                          <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            style={{ width: "60px" }}
+                                                            value={minutes}
+                                                            min={0}
+                                                            max={59}
+                                                            // onChange={(e) => {
+                                                            //   let newMinutes = e.target.value;
+                                                            //   if (newMinutes === "" || (Number(newMinutes) >= 0 && Number(newMinutes) <= 59)) {
+                                                            //     const updatedArr = [...AddTaskArr];
+                                                            //     const currentHours = updatedArr[index].budgeted_hour?.split(":")[0] || "0";
+                                                            //     updatedArr[index].budgeted_hour = `${currentHours}:${newMinutes}`;
+                                                            //     setAddTaskArr(updatedArr);
+                                                            //   }
+                                                            // }}
+                                                          />
+                                                          <span className="input-group-text">m</span>
+                                                        </div>
+                                                      </td>
+
+                                                      <td>
+                                                        <div className="add">
+                                                          <button className="delete-icon">
+                                                            <i
+                                                              className="ti-trash text-danger"
+                                                              onClick={() => RemoveTask(checklist.task_id)}
+                                                            ></i>
+                                                          </button>
+                                                        </div>
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                })}
                                             </tbody>
+
                                           </table>
                                         </div>
                                       </div>
