@@ -205,6 +205,50 @@ const addTask = async (task) => {
   }
 };
 
+const updateTask = async (task) => {
+  const { id, name, service_id, job_type_id } = task;
+   // check task name already exist
+  const checkQuery = `
+    SELECT id , name FROM task WHERE name = ? AND service_id = ? AND job_type_id = ? AND id != ?
+  `;
+  const [existing] = await pool.execute(checkQuery, [
+    name,
+    service_id,
+    job_type_id,
+    id
+  ]);
+  if (existing.length > 0) {
+    return { status: false, message: "Task name already exists." };
+  }
+  const query = `
+    UPDATE task
+    SET name = ?
+    WHERE id = ? 
+    `;
+  try {
+    
+    const [result] = await pool.execute(query, [name,id]);
+    if (result.changedRows) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: task.StaffUserId,
+          ip: task.ip,
+          date: currentDate.toISOString().split("T")[0],
+          module_name: "task",
+          log_message: `edited task ${existing.name} to ${name}`,
+          permission_type: "updated",
+          module_id: id,
+        }
+      );
+    }
+    return { status: true, message: "Task updated successfully.", data: result.affectedRows };
+  } catch (err) {
+    return { status: false, message: "Error updating task." };
+  }
+ 
+}
+
 const getTask = async (task) => {
   const { service_id, job_type_id } = task;
 
@@ -233,7 +277,6 @@ const getTask = async (task) => {
     return { status: false, message: "Error get task." };
   }
 };
-
 
 
 const addChecklist = async (checklist) => {
@@ -747,6 +790,7 @@ module.exports = {
   updateJobType,
   getJobType,
   addTask,
+  updateTask,
   getTask,
   addChecklist,
   getChecklist,

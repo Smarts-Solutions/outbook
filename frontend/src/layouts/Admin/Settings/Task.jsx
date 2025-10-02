@@ -221,6 +221,9 @@ const Setting = () => {
       title: "Task",
 
       id: data.id,
+      budgeted_hour: data.budgeted_hour,
+      service_id: data.service_id,
+      job_type_id: data.job_type_id,
     });
 
     setIsEdit(true);
@@ -244,6 +247,9 @@ const Setting = () => {
     const req = { action: isEdit ? "update" : "add" };
     if (isEdit) {
       req.id = modalData.id;
+      req.budgeted_hour = modalData.budgeted_hour;
+      req.service_id = modalData.service_id;
+      req.job_type_id = modalData.job_type_id;
     }
     modalData.fields.map((field) => {
       req[field.name] = field.value;
@@ -251,11 +257,6 @@ const Setting = () => {
         req.status = field.value;
       }
     });
-
-
-    console.log("req addd", req);
-    return
-
 
     setModalData({});
     setIsModalOpen(false);

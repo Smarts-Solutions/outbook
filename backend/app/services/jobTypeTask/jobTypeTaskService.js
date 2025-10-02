@@ -20,7 +20,11 @@ const modifyJobType = async (JobType) => {
 };
 
 const addTask = async (task) => {
+  if(task?.action != undefined &&  task?.action === "update"){
+    return jobTypeTaskModel.updateTask(task);
+  }else{
   return jobTypeTaskModel.addTask(task);
+  }
 };
 
 const getTask = async (task) => {
