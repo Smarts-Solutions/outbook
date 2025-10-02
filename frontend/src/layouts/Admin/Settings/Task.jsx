@@ -89,9 +89,15 @@ const Setting = () => {
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
-            <button className="delete-icon" onClick={() => handleDelete(row)}>
-              <i className="ti-trash text-danger" />
-            </button>
+            {
+              row?.is_assigned != 1 && (
+                <button className="delete-icon" onClick={() => handleDelete(row)}>
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+            }
+            
+           
 
           </div>
         </>
