@@ -161,27 +161,30 @@ const updateJobType = async (JobType) => {
 // Task Module
 const addTask = async (task) => {
   const { name, service_id, job_type_id } = task;
+  console.log("task", task)
+  
   try {
     const query = `
-     INSERT INTO task (name,service_id,job_type_id)
-     VALUES (?, ?, ?)
+     INSERT INTO task (name,service_id,job_type_id,budgeted_hour)
+     VALUES (?, ?, ? ,?)
      `;
     let taskadd = ""
-    for (const valName of name) {
+    for (const val of name) {
       const checkQuery = `
                 SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
             `;
       const [existing] = await pool.execute(checkQuery, [
-        valName,
+        val.name,
         service_id,
         job_type_id,
       ]);
       if (existing.length === 0) {
-        taskadd += valName + ","
+        taskadd += val.name + ","
         const [result] = await pool.execute(query, [
-          valName,
+          val.name,
           service_id,
           job_type_id,
+          val.budgeted_hour
         ]);
       }
     }

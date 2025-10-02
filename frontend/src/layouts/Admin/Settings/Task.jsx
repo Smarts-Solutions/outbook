@@ -329,9 +329,6 @@ const Setting = () => {
       return;
     }
 
-    console.log("req addd task", req);
-    return;
-
     await dispatch(AddTask({ req, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -341,6 +338,7 @@ const Setting = () => {
             icon: "success",
             timer: 2000,
           });
+          TaskData();
           setTimeout(() => {
             setShowAddTask(false);
             setTasks([]);
