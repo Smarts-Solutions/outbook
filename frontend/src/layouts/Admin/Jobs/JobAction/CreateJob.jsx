@@ -1896,19 +1896,60 @@ const CreateJob = () => {
   ];
 
 
-  const handleBudgetTime = (e ,index ,row ,type) => {
-    const { name, value } = e.target; 
-    if(type == "hour"){
+
+
+  const handleBudgetTime = (e, index, row, type) => {
+  const { value } = e.target;
+  setAddTaskArr((prev) => {
+    // Copy array
+    const updated = [...prev];
+
+    // Split current budgeted_hour into [hour, minute]
+    let [hour, minute] = updated[index].budgeted_hour.split(":");
+
+    if (type === "hour") {
+      hour = value.padStart(2, "0"); // 2 digit maintain
+    } else if (type === "minute") {
+      minute = value.padStart(2, "0");
+    }
+
+    // Update budgeted_hour
+    updated[index] = {
+      ...updated[index],
+      budgeted_hour: `${hour}:${minute}`,
+    };
+
+    return updated;
+  });
+};
+
+
+// const handleBudgetTime = (e, taskId, type) => {
+//   const { value } = e.target;
+
+//   setAddTaskArr((prev) =>
+//     prev.map((task) => {
+//       if (task.task_id === taskId) {
      
-    }
-    else if(type == "minute"){ 
-    }
+//         let [hour, minute] = task.budgeted_hour.split(":");
 
-    console.log("e.SetAddTaskArr", AddTaskArr);
-    // setBudgetTime({ ...BudgetTime, [name]: value });
-    //let updatedRow = { ...row, [name]: value };
+//         if (type === "hour") {
+//           hour = value.padStart(2, "0");
+//         } else if (type === "minute") {
+//           minute = value.padStart(2, "0");
+//         }
 
-  }
+//         return {
+//           ...task,
+//           budgeted_hour: `${hour}:${minute}`,
+//         };
+//       }
+//       return task;
+//     })
+//   );
+// };
+
+
 
 
   return (
