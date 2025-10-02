@@ -230,7 +230,7 @@ const Setting = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (
       modalData.fields[0]?.value?.trim() == "" ||
@@ -257,6 +257,34 @@ const Setting = () => {
         req.status = field.value;
       }
     });
+
+
+    await dispatch(AddTask({ req, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: response.message,
+            icon: "success",
+            timer: 2000,
+          });
+          TaskData();
+          setTimeout(() => {
+            setShowAddTask(false);
+            setTasks([]);
+            formik.resetForm();
+          }, 2000);
+        } else {
+          sweatalert.fire({
+            title: response.message,
+            icon: "error",
+            timer: 2000,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
 
     setModalData({});
     setIsModalOpen(false);
