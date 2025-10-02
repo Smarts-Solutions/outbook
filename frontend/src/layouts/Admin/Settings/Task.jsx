@@ -77,7 +77,7 @@ const Setting = () => {
     },
     {
       name: "Budgeted Hour",
-      selector: (row) => row.budgeted_hour,
+      selector: (row) => row?.budgeted_hour,
       sortable: true,
       width: "20%",
     },

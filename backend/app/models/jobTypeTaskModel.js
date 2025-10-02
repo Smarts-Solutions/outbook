@@ -161,8 +161,6 @@ const updateJobType = async (JobType) => {
 // Task Module
 const addTask = async (task) => {
   const { name, service_id, job_type_id } = task;
-  console.log("task", task)
-  
   try {
     const query = `
      INSERT INTO task (name,service_id,job_type_id,budgeted_hour)
@@ -218,7 +216,8 @@ const getTask = async (task) => {
     task.job_type_id,
     task.status,
     services.name AS service_name,
-    job_types.type AS job_type_type
+    job_types.type AS job_type_type,
+    task.budgeted_hour
     FROM 
     task
     JOIN services ON services.id = task.service_id
