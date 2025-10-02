@@ -3775,17 +3775,10 @@ const CreateJob = () => {
                                                           <input
                                                             type="number"
                                                             className="form-control"
-                                                            style={{ width: "60px" }}
-                                                            value={hours}
+                                                            defaultValue={hours}
                                                             min={0}
-                                                            // onChange={(e) => {
-                                                            //   const newHours = e.target.value;
-                                                            //   const updatedArr = [...AddTaskArr];
-                                                            //   const currentMinutes = updatedArr[index].budgeted_hour?.split(":")[1] || "0";
-                                                            //   updatedArr[index].budgeted_hour = `${newHours}:${currentMinutes}`;
-                                                            //    setAddTaskArr(updatedArr);
-                                                            // }}
                                                             onChange={(e) => handleBudgetTime(e,index,checklist,"hour")}
+                                                            style={{ width: "80px", marginRight: "5px" }}
                                                           />
                                                           <span className="input-group-text">h</span>
 
@@ -3793,19 +3786,13 @@ const CreateJob = () => {
                                                           <input
                                                             type="number"
                                                             className="form-control"
-                                                            style={{ width: "60px" }}
-                                                            value={minutes}
+                                                            defaultValue={minutes}
                                                             min={0}
                                                             max={59}
-                                                            // onChange={(e) => {
-                                                            //   let newMinutes = e.target.value;
-                                                            //   if (newMinutes === "" || (Number(newMinutes) >= 0 && Number(newMinutes) <= 59)) {
-                                                            //     const updatedArr = [...AddTaskArr];
-                                                            //     const currentHours = updatedArr[index].budgeted_hour?.split(":")[0] || "0";
-                                                            //     updatedArr[index].budgeted_hour = `${currentHours}:${newMinutes}`;
-                                                            //     setAddTaskArr(updatedArr);
-                                                            //   }
-                                                            // }}
+                                                            onChange={(e) => handleBudgetTime(e,index,checklist,"minute")}
+                                                            style={{ width: "80px", marginRight: "5px" }}
+
+                                                            
                                                           />
                                                           <span className="input-group-text">m</span>
                                                         </div>
