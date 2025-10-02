@@ -188,7 +188,7 @@ const Setting = () => {
               <i className="fa-regular fa-eye " />
             </button>
 
-            <button
+            {/* <button
               className="btn btn-sm btn-info text-white"
               onClick={(e) => {
                 setShowAddTask(true);
@@ -196,7 +196,7 @@ const Setting = () => {
               }}
             >
               <i className="fa fa-plus pe-1"></i> Add Task
-            </button>
+            </button> */}
 
              <button
               className="btn btn-sm btn-info text-white"

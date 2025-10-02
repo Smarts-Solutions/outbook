@@ -96,9 +96,6 @@ const Setting = () => {
                 </button>
               )
             }
-            
-           
-
           </div>
         </>
       ),
