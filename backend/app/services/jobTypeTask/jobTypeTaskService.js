@@ -57,10 +57,10 @@ const checklistAction = async (checklist) => {
     return jobTypeTaskModel.getClientTypeChecklist(checklist);
   }
   else if(action === "getByServiceWithJobType"){
-    let client_id = checklist.clientId
-    if(client_id == undefined || client_id == ''){
-      return { status: false, message: 'Error getting checklist.' };
-    }
+    // let client_id = checklist.clientId
+    // if(client_id == undefined || client_id == ''){
+    //   return { status: false, message: 'Error getting checklist.' };
+    // }
     return jobTypeTaskModel.getByServiceWithJobType(checklist);
   }
   else{
