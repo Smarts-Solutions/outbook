@@ -204,7 +204,7 @@ const Setting = () => {
                 navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab ,service_id : location.state.Id } });
               }}
             >
-              <i className="fa fa-plus pe-1"></i> Add Task Page
+              <i className="fa fa-plus pe-1"></i> Add Task 
             </button>
           </div>
         </>
