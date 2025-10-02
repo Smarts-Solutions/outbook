@@ -3,33 +3,54 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
   GetAllJabData,
-  AddAllJobType,
+  UpdateJob,
   GET_ALL_CHECKLIST,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
+import { JobAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import { Modal, Button } from "react-bootstrap";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
+import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
-import { use } from "react";
 import Select from 'react-select';
 
-const CreateJob = () => {
+const EditJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const role = JSON.parse(localStorage.getItem("role"));
-
-
-
-
-
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
+  const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
-  const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
+
+  // customer Details
+
+  const [CustomerDetails, setCustomerDetails] = useState([]);
+
+
+  // console.log("location EDIT -", location);
+
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  const [getJobDetails, setGetJobDetails] = useState({
+    loading: false,
+    data: {},
+  });
   const [errors, setErrors] = useState({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [jobModalStatus, jobModalSetStatus] = useState(false);
+  const [showAddJobModal, setShowAddJobModal] = useState(false);
+  const [getChecklistId, setChecklistId] = useState("");
+  const [AllChecklist, setAllChecklist] = useState({
+    loading: false,
+    data: [],
+  });
+  const [AllChecklistData, setAllChecklistData] = useState({
+    loading: false,
+    data: [],
+  });
+  const [AddTaskArr, setAddTaskArr] = useState([]);
+  const [taskNameError, setTaskNameError] = useState("");
+  const [BudgetedHoureError, setBudgetedHourError] = useState("");
+  const [taskName, setTaskName] = useState("");
   const [PreparationTimne, setPreparationTimne] = useState({
     hours: "",
     minutes: "",
@@ -44,32 +65,26 @@ const CreateJob = () => {
     minutes: "",
   });
   const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" });
-  const [AllChecklistData, setAllChecklistData] = useState({
-    loading: false,
-    data: [],
-  });
-  const [getChecklistId, setChecklistId] = useState("");
-  const [AddTaskArr, setAddTaskArr] = useState([]);
-  const [showAddJobModal, setShowAddJobModal] = useState(false);
-  const [taskName, setTaskName] = useState("");
-  const [taskNameError, setTaskNameError] = useState("");
-  const [jobModalStatus, jobModalSetStatus] = useState(false);
   const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({
     hours: "",
     minutes: "",
   });
-  const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
+  const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
+  const [tempTaskArr, setTempTaskArr] = useState([]);
+  const [tempChecklistId, setTempChecklistId] = useState("");
 
-  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
 
 
+  // console.log("selectedStaffData", selectedStaffData);
+   console.log("CustomerDetails", CustomerDetails);
+
 
   const [jobData, setJobData] = useState({
-    CustomerDetails: [],
     AccountManager: "",
     Customer: "",
     Client: "",
@@ -92,7 +107,7 @@ const CreateJob = () => {
     DueOn: null,
     SubmissionDeadline: null,
     CustomerDeadlineDate: null,
-    SLADeadlineDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0],
+    SLADeadlineDate: null,
     InternalDeadlineDate: null,
     FilingWithCompaniesHouseRequired: "0",
     CompaniesHouseFilingDate: null,
@@ -102,7 +117,7 @@ const CreateJob = () => {
     OpeningBalanceAdjustmentDate: null,
     NumberOfTransactions: "",
     NumberOfTrialBalanceItems: "",
-    Turnover: "",
+    Turnover: "0.00",
     NoOfEmployees: "",
     VATReconciliation: "0",
     Bookkeeping: "0",
@@ -113,31 +128,463 @@ const CreateJob = () => {
     InvoiceDate: null,
     InvoiceHours: "",
     InvoiceRemark: "",
+    status_type: null,
     notes: "",
-    //Bookkeeping_Frequency_id_2: "Daily",
-
   });
 
-  console.log("CustomerDetails", jobData.CustomerDetails);
-  // console.log("Reviewer", jobData.Reviewer);
-  // console.log("staffCreatedId", staffCreatedId);
-  // console.log("selectedStaffData", selectedStaffData);
-
   useEffect(() => {
+    console.log("UPDATE ALL DEFAULT FEILDS");
     setJobData((prevState) => ({
       ...prevState,
-      AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
-      Customer: AllJobData?.data?.customer?.customer_trading_name || "",
-      CustomerDetails: AllJobData?.data?.customerDetails || [],
-      Client:
-        location.state.goto == "Customer"
-          ? ""
-          : location.state.clientName.client_name || "",
+      Turnover_Period_id_0: "Monthly",
+      Turnover_Currency_id_0: "GBP",
+      Turnover_id_0: 0,
+      VAT_Registered_id_0: "No",
+      VAT_Frequency_id_0: "Quarterly",
+      Who_Did_The_Bookkeeping_id_1: "Outbooks",
+      PAYE_Registered_id_1: "No",
+      Number_of_Trial_Balance_Items_id_1: "1 to 5",
+     // Bookkeeping_Frequency_id_2: "Daily",
+      Number_of_Total_Transactions_id_2: 0,
+      Number_of_Bank_Transactions_id_2: 0,
+      Number_of_Purchase_Invoices_id_2: 0,
+      Number_of_Sales_Invoices_id_2: 0,
+      Number_of_Petty_Cash_Transactions_id_2: 0,
+      Number_of_Journal_Entries_id_2: 0,
+      Number_of_Other_Transactions_id_2: 0,
+      Transactions_Posting_id_2: "Manual",
+      Quality_of_Paperwork_id_2: "Bad",
+      Number_of_Integration_Software_Platforms_id_2: "1",
+      CIS_id_2: "No",
+      Posting_Payroll_Journals_id_2: "Yes",
+      Department_Tracking_id_2: "No",
+      Sales_Reconciliation_Required_id_2: "No",
+      Factoring_Account_id_2: "Provider Deducts Commission Only",
+      Payment_Methods_id_2: "1",
+    //  Payroll_Frequency_id_3: "Weekly",
+      Type_of_Payslip_id_3: "Wages Only",
+      Percentage_of_Variable_Payslips_id_3: "0%",
+      Is_CIS_Required_id_3: "No",
+      CIS_Frequency_id_3: "Weekly",
+      Number_of_Sub_contractors_id_3: 0,
+      Whose_Tax_Return_is_it_id_4: "Director",
+      Number_of_Income_Sources_id_4: "1",
+      If_Landlord_Number_of_Properties_id_4: "1",
+      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
+      Management_Accounts_Frequency_id_6: "Quarterly",
+
+     
+       ////////////////////////// 
+      Year_Ending_id_1: null,
+
+      Day_Date_id_2: null,
+      Week_Year_id_2: null,
+      Week_Month_id_2: null,
+      Week_id_2: null,
+      Fortnight_Year_id_2: null,
+      Fortnight_Month_id_2: null,
+      Fortnight_id_2: null,
+      Month_Year_id_2: null,
+      Month_id_2: null,
+      Quarter_Year_id_2: null,
+      Quarter_id_2: null,
+      Year_id_2: null,
+      Other_FromDate_id_2: null,
+      Other_ToDate_id_2: null,
+
+
+      Payroll_Week_Year_id_3: null,
+      Payroll_Week_Month_id_3: null,
+      Payroll_Week_id_3: null,
+      Payroll_Fortnight_Year_id_3: null,
+      Payroll_Fortnight_Month_id_3: null,
+      Payroll_Fortnight_id_3: null,
+      Payroll_Month_Year_id_3: null,
+      Payroll_Month_id_3: null,
+      Payroll_Quarter_Year_id_3: null,
+      Payroll_Quarter_id_3: null,
+      Payroll_Year_id_3: null,
+
+
+
+      Tax_Year_id_4: null,
+
+      Management_Accounts_FromDate_id_6: null,
+      Management_Accounts_ToDate_id_6: null,
+
+      Year_id_33: null,
+
+      Period_id_32: null,
+      Day_Date_id_32: null,
+      Week_Year_id_32: null,
+      Week_Month_id_32: null,
+      Week_id_32: null,
+      Fortnight_Year_id_32: null,
+      Fortnight_Month_id_32: null,
+      Fortnight_id_32: null,
+      Month_Year_id_32: null,
+      Month_id_32: null,
+      Quarter_Year_id_32: null,
+      Quarter_id_32: null,
+      Year_id_32: null,
+      Other_FromDate_id_32: null,
+      Other_ToDate_id_32: null,
+
+
+      Payroll_Frequency_id_31: null,
+      Payroll_Week_Year_id_31: null,
+      Payroll_Week_Month_id_31: null,
+      Payroll_Week_id_31: null,
+      Payroll_Fortnight_Year_id_31: null,
+      Payroll_Fortnight_Month_id_31: null,
+      Payroll_Fortnight_id_31: null,
+      Payroll_Month_Year_id_31: null,
+      Payroll_Month_id_31: null,
+      Payroll_Quarter_Year_id_31: null,
+      Payroll_Quarter_id_31: null,
+      Payroll_Year_id_31: null,
+
+      Audit_Year_Ending_id_27: null,
+
+      Filing_Frequency_id_8: null,
+      Period_Ending_Date_id_8: null,
+      Filing_Date_id_8: null,
+
+      Year_id_28: null,
+
+
+
+
     }));
-  }, [AllJobData]);
+  }, []);
+
+
+  const JobDetails = async () => {
+    const req = { action: "getByJobId", job_id: location.state.job_id };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          if (Object.keys(response.data).length > 0) {
+           
+            setSelectedStaffData(response.data.selectedStaffData || []);
+            setChecklistId(response.data.tasks?.checklist_id ?? 0);
+            setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
+            setTempTaskArr(response.data.tasks?.task ?? []);
+            setAddTaskArr(response.data.tasks?.task ?? []);
+            setBudgetedHours({
+              hours: response.data.budgeted_hours?.split(":")[0] ?? "",
+              minutes: response.data.budgeted_hours?.split(":")[1] ?? "",
+            });
+            setTotalTime({
+              hours: response.data.total_time?.split(":")[0] ?? "",
+              minutes: response.data.total_time?.split(":")[1] ?? "",
+            });
+
+            setReviewTime({
+              hours: response.data.review_time?.split(":")[0] ?? "",
+              minutes: response.data.review_time?.split(":")[1] ?? "",
+            });
+
+            setFeedbackIncorporationTime({
+              hours:
+                response.data.feedback_incorporation_time?.split(":")[0] ?? "",
+              minutes:
+                response.data.feedback_incorporation_time?.split(":")[1] ?? "",
+            });
+
+            setPreparationTimne({
+              hours: response.data.total_preparation_time?.split(":")[0] ?? "",
+              minutes:
+                response.data.total_preparation_time?.split(":")[1] ?? "",
+            });
+
+            setInvoiceTime({
+              hours: response.data.invoice_hours?.split(":")[0] ?? "",
+              minutes: response.data.invoice_hours?.split(":")[1] ?? "",
+            });
+
+
+            setJobData((prevState) => ({
+              ...prevState,
+              AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
+                } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
+              Customer: response.data.customer_trading_name ?? "",
+              Client:
+                location.state.goto == "Customer"
+                  ? response.data.client_id
+                  : response.data.client_trading_name ?? "",
+              ClientJobCode: response.data.client_job_code ?? "",
+              CustomerAccountManager:
+                response.data.account_manager_officer_id ?? "",
+              Service: response.data.service_id ?? "",
+              JobType: response.data.job_type_id ?? "",
+              Reviewer: response.data.reviewer_id ?? "",
+              AllocatedTo: response.data.allocated_id ?? "",
+              AllocatedOn: response.data.allocated_on?.split("T")[0] ?? null,
+              DateReceivedOn:
+                response.data.date_received_on?.split("T")[0] ?? null,
+              YearEnd: response.data.year_end ?? "",
+              EngagementModel: response.data.engagement_model ?? "",
+              ExpectedDeliveryDate:
+                response.data.expected_delivery_date?.split("T")[0] ?? null,
+              DueOn: response.data.due_on?.split("T")[0] ?? null,
+              SubmissionDeadline:
+                response.data.submission_deadline?.split("T")[0] ?? null,
+              CustomerDeadlineDate:
+                response.data.customer_deadline_date?.split("T")[0] ?? null,
+              SLADeadlineDate:
+                response.data.sla_deadline_date?.split("T")[0] ?? null,
+              InternalDeadlineDate:
+                response.data.internal_deadline_date?.split("T")[0] ?? null,
+              FilingWithCompaniesHouseRequired:
+                response.data.filing_Companies_required ?? false,
+              CompaniesHouseFilingDate:
+                response.data.filing_Companies_date?.split("T")[0] ?? null,
+              FilingWithHMRCRequired:
+                response.data.filing_hmrc_required ?? false,
+              HMRCFilingDate:
+                response.data.filing_hmrc_date?.split("T")[0] ?? null,
+              OpeningBalanceAdjustmentRequired:
+                response.data.opening_balance_required ?? false,
+              OpeningBalanceAdjustmentDate:
+                response.data.opening_balance_date?.split("T")[0] ?? null,
+              NumberOfTransactions: response.data.number_of_transaction ?? 0,
+              NumberOfTrialBalanceItems:
+                response.data.number_of_balance_items ?? 0,
+              Turnover: response.data.turnover ?? 0.0,
+              NoOfEmployees: response.data.number_of_employees ?? 0,
+              VATReconciliation: response.data.vat_reconciliation ?? "",
+              Bookkeeping: response.data.bookkeeping ?? "",
+              ProcessingType: response.data.processing_type ?? "",
+              Invoiced: response.data.invoiced ?? false,
+              Currency: response.data.currency_id ?? "0",
+              InvoiceValue: response.data.invoice_value ?? 0,
+              InvoiceDate: response.data.invoice_date?.split("T")[0] ?? null,
+              InvoiceHours: response.data.invoice_hours ?? "",
+              InvoiceRemark: response.data.invoice_remark ?? "",
+              status_type: response.data.status_type ?? null,
+              notes: response.data.notes ?? "",
+              Turnover_Period_id_0: response.data.Turnover_Period_id_0 ?? "",
+              Turnover_Currency_id_0:
+                response.data.Turnover_Currency_id_0 ?? "",
+              Turnover_id_0: response.data.Turnover_id_0 ?? 0.0,
+              VAT_Registered_id_0: response.data.VAT_Registered_id_0 ?? "",
+              VAT_Frequency_id_0: response.data.VAT_Frequency_id_0 ?? "",
+              Who_Did_The_Bookkeeping_id_1:
+                response.data.Who_Did_The_Bookkeeping_id_1 ?? "",
+              PAYE_Registered_id_1: response.data.PAYE_Registered_id_1 ?? "",
+              Number_of_Trial_Balance_Items_id_1:
+                response.data.Number_of_Trial_Balance_Items_id_1 ?? "",
+              Bookkeeping_Frequency_id_2:
+                response.data.Bookkeeping_Frequency_id_2 ?? "",
+              Number_of_Total_Transactions_id_2:
+                response.data.Number_of_Total_Transactions_id_2 ?? 0,
+              Number_of_Bank_Transactions_id_2:
+                response.data.Number_of_Bank_Transactions_id_2 ?? 0,
+              Number_of_Purchase_Invoices_id_2:
+                response.data.Number_of_Purchase_Invoices_id_2 ?? 0,
+              Number_of_Sales_Invoices_id_2:
+                response.data.Number_of_Sales_Invoices_id_2 ?? 0,
+              Number_of_Petty_Cash_Transactions_id_2:
+                response.data.Number_of_Petty_Cash_Transactions_id_2 ?? 0,
+              Number_of_Journal_Entries_id_2:
+                response.data.Number_of_Journal_Entries_id_2 ?? 0,
+              Number_of_Other_Transactions_id_2:
+                response.data.Number_of_Other_Transactions_id_2 ?? 0,
+              Transactions_Posting_id_2:
+                response.data.Transactions_Posting_id_2 ?? "",
+              Quality_of_Paperwork_id_2:
+                response.data.Quality_of_Paperwork_id_2 ?? "",
+              Number_of_Integration_Software_Platforms_id_2:
+                response.data.Number_of_Integration_Software_Platforms_id_2 ??
+                "",
+              CIS_id_2: response.data.CIS_id_2 ?? "",
+              Posting_Payroll_Journals_id_2:
+                response.data.Posting_Payroll_Journals_id_2 ?? "",
+              Department_Tracking_id_2:
+                response.data.Department_Tracking_id_2 ?? "",
+              Sales_Reconciliation_Required_id_2:
+                response.data.Sales_Reconciliation_Required_id_2 ?? "",
+              Factoring_Account_id_2:
+                response.data.Factoring_Account_id_2 ?? "",
+              Payment_Methods_id_2: response.data.Payment_Methods_id_2 ?? "",
+              Payroll_Frequency_id_3:
+                response.data.Payroll_Frequency_id_3 ?? "",
+              Type_of_Payslip_id_3: response.data.Type_of_Payslip_id_3 ?? "",
+              Percentage_of_Variable_Payslips_id_3:
+                response.data.Percentage_of_Variable_Payslips_id_3 ?? "",
+              Is_CIS_Required_id_3: response.data.Is_CIS_Required_id_3 ?? "",
+              CIS_Frequency_id_3: response.data.CIS_Frequency_id_3 ?? "",
+              Number_of_Sub_contractors_id_3:
+                response.data.Number_of_Sub_contractors_id_3 ?? 0,
+              Whose_Tax_Return_is_it_id_4:
+                response.data.Whose_Tax_Return_is_it_id_4 ?? 0,
+              Number_of_Income_Sources_id_4:
+                response.data.Number_of_Income_Sources_id_4 ?? 0,
+              If_Landlord_Number_of_Properties_id_4:
+                response.data.If_Landlord_Number_of_Properties_id_4 ?? 0,
+              If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+                response.data.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 ??
+                "",
+              Management_Accounts_Frequency_id_6:
+                response.data.Management_Accounts_Frequency_id_6 ?? "",
+
+              //////////////////////////
+              Year_Ending_id_1: response.data.Year_Ending_id_1 ?? null,
+              Day_Date_id_2: response.data.Day_Date_id_2 ?? null,
+              Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
+              Week_Month_id_2: response.data.Week_Month_id_2 ?? null,
+              Week_id_2: response.data.Week_id_2 ?? null,
+              Fortnight_Year_id_2: response.data.Fortnight_Year_id_2 ?? null,
+              Fortnight_Month_id_2: response.data.Fortnight_Month_id_2 ?? null,
+              Fortnight_id_2: response.data.Fortnight_id_2 ?? null,
+              Month_Year_id_2: response.data.Month_Year_id_2 ?? null,
+              Month_id_2: response.data.Month_id_2 ?? null,
+              Quarter_Year_id_2: response.data.Quarter_Year_id_2 ?? null,
+              Quarter_id_2: response.data.Quarter_id_2 ?? null,
+              Year_id_2: response.data.Year_id_2 ?? null,
+              Other_FromDate_id_2: response.data.Other_FromDate_id_2 ?? null,
+              Other_ToDate_id_2: response.data.Other_ToDate_id_2 ?? null,
+              Payroll_Week_Year_id_3: response.data.Payroll_Week_Year_id_3 ?? null,
+              Payroll_Week_Month_id_3: response.data.Payroll_Week_Month_id_3 ?? null,
+              Payroll_Week_id_3: response.data.Payroll_Week_id_3 ?? null,
+              Payroll_Fortnight_Year_id_3: response.data.Payroll_Fortnight_Year_id_3 ?? null,
+              Payroll_Fortnight_Month_id_3: response.data.Payroll_Fortnight_Month_id_3 ?? null,
+              Payroll_Fortnight_id_3: response.data.Payroll_Fortnight_id_3 ?? null,
+              Payroll_Month_Year_id_3: response.data.Payroll_Month_Year_id_3 ?? null,
+              Payroll_Month_id_3: response.data.Payroll_Month_id_3 ?? null,
+              Payroll_Quarter_Year_id_3: response.data.Payroll_Quarter_Year_id_3 ?? null,
+              Payroll_Quarter_id_3: response.data.Payroll_Quarter_id_3 ?? null,
+              Payroll_Year_id_3: response.data.Payroll_Year_id_3 ?? null,
+              Tax_Year_id_4: response.data.Tax_Year_id_4 ?? null,
+              Management_Accounts_FromDate_id_6: response.data.Management_Accounts_FromDate_id_6 ?? null,
+              Management_Accounts_ToDate_id_6: response.data.Management_Accounts_ToDate_id_6 ?? null,
+              Year_id_33: response.data.Year_id_33 ?? null,
+              Period_id_32: response.data.Period_id_32 ?? null,
+              Day_Date_id_32: response.data.Day_Date_id_32 ?? null,
+              Week_Year_id_32: response.data.Week_Year_id_32 ?? null,
+              Week_Month_id_32: response.data.Week_Month_id_32 ?? null,
+              Week_id_32: response.data.Week_id_32 ?? null,
+              Fortnight_Year_id_32: response.data.Fortnight_Year_id_32 ?? null,
+              Fortnight_Month_id_32: response.data.Fortnight_Month_id_32 ?? null,
+              Fortnight_id_32: response.data.Fortnight_id_32 ?? null,
+              Month_Year_id_32: response.data.Month_Year_id_32 ?? null,
+              Month_id_32: response.data.Month_id_32 ?? null,
+              Quarter_Year_id_32: response.data.Quarter_Year_id_32 ?? null,
+              Quarter_id_32: response.data.Quarter_id_32 ?? null,
+              Year_id_32: response.data.Year_id_32 ?? null,
+              Other_FromDate_id_32: response.data.Other_FromDate_id_32 ?? null,
+              Other_ToDate_id_32: response.data.Other_ToDate_id_32 ?? null,
+              Payroll_Frequency_id_31: response.data.Payroll_Frequency_id_31 ?? null,
+              Payroll_Week_Year_id_31: response.data.Payroll_Week_Year_id_31 ?? null,
+              Payroll_Week_Month_id_31: response.data.Payroll_Week_Month_id_31 ?? null,
+              Payroll_Week_id_31: response.data.Payroll_Week_id_31 ?? null,
+              Payroll_Fortnight_Year_id_31: response.data.Payroll_Fortnight_Year_id_31 ?? null,
+              Payroll_Fortnight_Month_id_31: response.data.Payroll_Fortnight_Month_id_31 ?? null,
+              Payroll_Fortnight_id_31: response.data.Payroll_Fortnight_id_31 ?? null,
+              Payroll_Month_Year_id_31: response.data.Payroll_Month_Year_id_31 ?? null,
+              Payroll_Month_id_31: response.data.Payroll_Month_id_31 ?? null,
+              Payroll_Quarter_Year_id_31: response.data.Payroll_Quarter_Year_id_31 ?? null,
+              Payroll_Quarter_id_31: response.data.Payroll_Quarter_id_31 ?? null,
+              Payroll_Year_id_31: response.data.Payroll_Year_id_31 ?? null,
+              Audit_Year_Ending_id_27: response.data.Audit_Year_Ending_id_27 ?? null,
+              Filing_Frequency_id_8: response.data.Filing_Frequency_id_8 ?? null,
+              Period_Ending_Date_id_8: response.data.Period_Ending_Date_id_8 ?? null,
+              Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
+              Year_id_28: response.data.Year_id_28 ?? null,
+              
+
+
+            }));
+          }
+
+          setGetJobDetails({
+            loading: true,
+            data: response.data,
+          });
+        } else {
+          setGetJobDetails({
+            loading: true,
+            data: {},
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+    JobDetails();
+  }, []);
+
+  const getAllChecklist = async () => {
+    const req = {
+      action: "getByServiceWithJobType",
+      service_id: jobData.Service,
+      customer_id: getJobDetails?.data?.customer_id || 0,
+      job_type_id: jobData.JobType,
+      clientId: getJobDetails.data.client_id,
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(GET_ALL_CHECKLIST(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setAllChecklistData({
+            loading: true,
+            data: response.data,
+          });
+        } else {
+          setAllChecklistData({
+            loading: true,
+            data: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+    getAllChecklist();
+  }, [jobData.JobType]);
+
+  const getChecklistData = async () => {
+    const req = {
+      action: "getById",
+      checklist_id: getChecklistId && getChecklistId,
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(GET_ALL_CHECKLIST(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setAllChecklistData({
+            loading: true,
+            data: response.data.task || [],
+          });
+        } else {
+          setAllChecklistData({
+            loading: true,
+            data: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+    getChecklistData();
+  }, [getChecklistId]);
 
   const GetJobData = async () => {
-    const req = { customer_id: location.state.customer_id };
+    const req = { customer_id: getJobDetails?.data?.customer_id || 0 };
     const data = { req: req, authToken: token };
     await dispatch(GetAllJabData(data))
       .unwrap()
@@ -148,12 +595,7 @@ const CreateJob = () => {
             data: response.data,
           });
 
-          setJobData((prevState) => ({
-            ...prevState,
-            Service: response.data?.services?.[0]?.service_id,
-            CustomerAccountManager: response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id.toString() || "",
-            EngagementModel: Object.entries(response.data?.engagement_model[0]).find(([key, value]) => value === "1")?.[0] || "",
-          }));
+          setCustomerDetails(response.data.customerDetails || []);
 
           setAllStaffData(response?.data?.allStaff || []);
         } else {
@@ -161,7 +603,7 @@ const CreateJob = () => {
             loading: true,
             data: [],
           });
-          setAllStaffData([]);
+           setAllStaffData([]);
         }
       })
       .catch((error) => {
@@ -171,65 +613,7 @@ const CreateJob = () => {
 
   useEffect(() => {
     GetJobData();
-  }, []);
-
-  const getAllChecklist = async () => {
-    if (
-      AllJobData?.data?.client?.[0]?.client_id &&
-      jobData?.Service &&
-      AllJobData?.data?.customer?.customer_id &&
-      jobData?.JobType
-    ) {
-      const req = {
-        action: "getByServiceWithJobType",
-        service_id: jobData.Service,
-        customer_id: AllJobData?.data?.customer?.customer_id,
-        job_type_id: jobData.JobType,
-        // clientId: AllJobData?.data?.client[0]?.client_id,
-        clientId:
-          location?.state?.goto == "Customer"
-            ? Number(jobData.Client)
-            : location?.state?.clientName?.id,
-      };
-      const data = { req: req, authToken: token };
-
-
-
-      await dispatch(GET_ALL_CHECKLIST(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            if (response.data.length > 0) {
-
-              console.log("response.data", response.data)
-              setAllChecklistData({
-                loading: true,
-                data: response.data,
-              });
-            } else {
-              setAllChecklistData({
-                loading: true,
-                data: [],
-              });
-            }
-          } else {
-            setAllChecklistData({
-              loading: true,
-              data: [],
-            });
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    }
-  };
-
-  useEffect(() => {
-    getAllChecklist();
-  }, [jobData.JobType, AllJobData?.data]);
-
-  console.log("AllChecklistData", AllChecklistData);
+  }, [getJobDetails]);
 
   const GetJobType = async () => {
     const req = { action: "get", service_id: jobData.Service };
@@ -258,41 +642,8 @@ const CreateJob = () => {
     GetJobType();
   }, [jobData.Service]);
 
-  const getChecklistData = async () => {
-    const req = {
-      action: "getById",
-      checklist_id: getChecklistId && getChecklistId,
-    };
-
-
-    const data = { req: req, authToken: token };
-    await dispatch(GET_ALL_CHECKLIST(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setAllChecklistData({
-            loading: true,
-            data: response.data.task || [],
-          });
-        } else {
-          setAllChecklistData({
-            loading: true,
-            data: [],
-          });
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
-
-  useEffect(() => {
-    getChecklistData();
-  }, [getChecklistId]);
-
   const HandleChange = (e) => {
-    let name = e.target.name;
-    let value = e.target.value;
+    const { name, value } = e.target;
 
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
@@ -356,38 +707,15 @@ const CreateJob = () => {
         }));
       }
     }
-
-    if (
-      name == "NumberOfTransactions" ||
-      name == "NumberOfTrialBalanceItems" ||
-      name == "Turnover"
-    ) {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    if (
-      [
-        "BudgetedHours",
-        "TotalPreparationTime",
-        "ReviewTime",
-        "FeedbackIncorporationTime",
-      ].includes(name)
-    ) {
-      value = value.replace(":", "");
-    }
-
     setJobData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
-
     validate(name, value);
   };
 
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
-
     if (isSubmitting) {
       for (const key in CreateJobErrorMessage) {
         if (
@@ -426,16 +754,6 @@ const CreateJob = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in jobData) {
-      if (!validate(key, jobData[key], true)) {
-        isValid = false;
-      }
-    }
-    return isValid;
-  };
-
   function formatTime(hours, minutes) {
     const formattedHours =
       hours != "" || hours != null ? String(hours).padStart(2, "0") : "00";
@@ -446,66 +764,16 @@ const CreateJob = () => {
     return `${formattedHours}:${formattedMinutes}`;
   }
 
-  let budgeted_hour_totalTime = { hours: "", minutes: "" };
-  // if (AddTaskArr.length > 0) {
-  //   budgeted_hour_totalTime = AddTaskArr?.reduce(
-  //     (acc, task) => {
-  //       const [hours, minutes] = task?.budgeted_hour?.split(":").map(Number);
-
-  //       acc.hours += hours;
-  //       acc.minutes += minutes;
-
-  //       // Convert every 60 minutes into an hour
-  //       if (acc.minutes >= 60) {
-  //         acc.hours += Math.floor(acc.minutes / 60);
-  //         acc.minutes = acc.minutes % 60;
-  //       }
-  //       return acc;
-  //     },
-  //     { hours: 0, minutes: 0 }
-  //   );
-  // }
-  if (AddTaskArr.length > 0) {
-    budgeted_hour_totalTime = AddTaskArr.reduce(
-      (acc, task) => {
-        // safe split with default "0:0" if null/undefined/empty
-        const [hours, minutes] = (task?.budgeted_hour || "0:0")
-          .split(":")
-          .map(Number);
-
-        acc.hours += hours;
-        acc.minutes += minutes;
-
-        // Convert every 60 minutes into an hour
-        if (acc.minutes >= 60) {
-          acc.hours += Math.floor(acc.minutes / 60);
-          acc.minutes = acc.minutes % 60;
-        }
-
-        return acc;
-      },
-      { hours: 0, minutes: 0 }
-    );
-  }
-
-
-  useEffect(() => {
-    setBudgetedHours({
-      hours: budgeted_hour_totalTime.hours || "0",
-      minutes: budgeted_hour_totalTime.minutes || "0",
-    });
-  }, [AddTaskArr]);
-
   const handleSubmit = async () => {
     const req = {
-      selectedStaffData: selectedStaffData,
+      job_id: location.state.job_id,
+      ...jobData,
+      selectedStaffData:selectedStaffData,
       staffCreatedId: staffCreatedId,
-      account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
-      customer_id: AllJobData?.data?.customer?.customer_id,
-      client_id:
-        location?.state?.goto == "Customer"
-          ? Number(jobData.Client)
-          : location?.state?.clientName?.id,
+      account_manager_id:
+        getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
+      customer_id: getJobDetails.data && getJobDetails.data.customer_id,
+      client_id: getJobDetails.data && getJobDetails.data.client_id,
       client_job_code: jobData.ClientJobCode,
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
@@ -535,12 +803,7 @@ const CreateJob = () => {
       due_on: jobData.DueOn,
       submission_deadline: jobData.SubmissionDeadline,
       customer_deadline_date: jobData.CustomerDeadlineDate,
-
-
-      sla_deadline_date: jobData?.SLADeadlineDate
-        ? jobData?.SLADeadlineDate
-        : new Date().toISOString().split("T")[0],
-
+      sla_deadline_date: jobData.SLADeadlineDate,
       internal_deadline_date: jobData.InternalDeadlineDate,
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
@@ -555,26 +818,38 @@ const CreateJob = () => {
       vat_reconciliation: jobData.VATReconciliation,
       bookkeeping: jobData.Bookkeeping,
       processing_type: jobData.ProcessingType,
-      invoiced: jobData.Invoiced,
-      currency: jobData.Currency,
-      invoice_value: jobData.InvoiceValue,
-      invoice_date: jobData.InvoiceDate,
+      invoiced:
+        jobData.EngagementModel == "fte_dedicated_staffing"
+          ? ""
+          : jobData.Invoiced,
+      currency:
+        jobData.EngagementModel == "fte_dedicated_staffing"
+          ? ""
+          : Number(jobData.Currency),
+      invoice_value:
+        jobData.EngagementModel == "fte_dedicated_staffing"
+          ? ""
+          : jobData.InvoiceValue,
+      invoice_date:
+        jobData.EngagementModel == "fte_dedicated_staffing"
+          ? ""
+          : jobData.InvoiceDate,
       invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
-      invoice_remark: jobData.InvoiceRemark,
+      invoice_remark:
+        jobData.EngagementModel == "fte_dedicated_staffing"
+          ? ""
+          : jobData.InvoiceRemark,
+      status_type: jobData.status_type,
       notes: jobData.notes,
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr,
       },
-      ...jobData,
     };
 
-
     const data = { req: req, authToken: token };
-    setIsSubmitted(true);
-    const isValid = validateAllFields();
-    if (isValid) {
-      await dispatch(AddAllJobType(data))
+    if (validate()) {
+      await dispatch(UpdateJob(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -620,22 +895,6 @@ const CreateJob = () => {
       }, {})
     : {};
 
-  const totalHours =
-    Number(PreparationTimne.hours) * 60 +
-    Number(PreparationTimne.minutes) +
-    Number(reviewTime.hours) * 60 +
-    Number(reviewTime.minutes) +
-    Number(FeedbackIncorporationTime.hours) * 60 +
-    Number(FeedbackIncorporationTime.minutes);
-
-  useEffect(() => {
-    setTotalTime({
-      ...Totaltime,
-      hours: Math.floor(totalHours / 60),
-      minutes: totalHours % 60,
-    });
-  }, [totalHours]);
-
   const openJobModal = (e) => {
     if (e.target.value != "") {
       jobModalSetStatus(true);
@@ -653,7 +912,6 @@ const CreateJob = () => {
       const taskExists = prevTasks.some(
         (task) => task.task_id === filterData.task_id
       );
-
       if (taskExists) {
         return prevTasks;
       } else {
@@ -670,6 +928,7 @@ const CreateJob = () => {
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
+
     const validate = (field, setter, message) => {
       if (value.trim() === "" || isNaN(value) || value <= 0) {
         setter(message);
@@ -739,17 +998,59 @@ const CreateJob = () => {
   };
 
   const HandleReset1 = () => {
-    setAddTaskArr([]);
-    setChecklistId("");
+    setAddTaskArr(tempTaskArr);
+    setChecklistId(tempChecklistId);
   };
+
+  const totalHours =
+    Number(PreparationTimne.hours) * 60 +
+    Number(PreparationTimne.minutes) +
+    Number(reviewTime.hours) * 60 +
+    Number(reviewTime.minutes) +
+    Number(FeedbackIncorporationTime.hours) * 60 +
+    Number(FeedbackIncorporationTime.minutes);
+
+  useEffect(() => {
+    setTotalTime({
+      ...Totaltime,
+      hours: Math.floor(totalHours / 60),
+      minutes: totalHours % 60,
+    });
+  }, [totalHours]);
 
   const handleAddCheckList = () => {
     jobModalSetStatus(false);
+    setTempTaskArr(AddTaskArr);
+    setTempChecklistId(getChecklistId);
   };
 
+  let budgeted_hour_totalTime = { hours: "", minutes: "" };
+  if (AddTaskArr.length > 0) {
+    budgeted_hour_totalTime = AddTaskArr.reduce(
+      (acc, task) => {
+        if (task.budgeted_hour != null) {
+          const [hours, minutes] = task.budgeted_hour.split(":").map(Number);
+
+          acc.hours += hours;
+          acc.minutes += minutes;
+
+          // Convert every 60 minutes into an hour
+          if (acc.minutes >= 60) {
+            acc.hours += Math.floor(acc.minutes / 60);
+            acc.minutes = acc.minutes % 60;
+          }
+        }
+        return acc;
+      },
+      { hours: 0, minutes: 0 }
+    );
+  }
 
 
-  // Years (last 5 + current)
+
+
+
+    // Years (last 5 + current)
   const getLastFiveYears = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
@@ -777,7 +1078,6 @@ const CreateJob = () => {
       return matchesCondition(depVal, values[depKey]);
     });
   };
-
 
   const serviceFields = [
     {
@@ -900,7 +1200,6 @@ const CreateJob = () => {
           ],
         },
 
-
         // Day
         {
           name: "Select Date",
@@ -921,14 +1220,14 @@ const CreateJob = () => {
           key: "Week_Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
         },
         {
           name: "Week",
           key: "Week_id_2",
           type: "dropdown",
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
         },
         // Fortnight
         {
@@ -936,21 +1235,21 @@ const CreateJob = () => {
           key: "Fortnight_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
         },
         {
           name: "Month",
           key: "Fortnight_Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
         },
         {
           name: "Fortnight",
           key: "Fortnight_id_2",
           type: "dropdown",
           options: ["1st Half", "2nd Half"],
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
         },
         // Month
         {
@@ -958,14 +1257,14 @@ const CreateJob = () => {
           key: "Month_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
         },
         {
           name: "Month",
           key: "Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
         },
         // Quarter
         {
@@ -973,14 +1272,14 @@ const CreateJob = () => {
           key: "Quarter_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
         },
         {
           name: "Quarter",
           key: "Quarter_id_2",
           type: "dropdown",
           options: getQuarters(),
-          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
         },
         // Year
         {
@@ -988,21 +1287,24 @@ const CreateJob = () => {
           key: "Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Yearly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Yearly"},
         },
         // Other
         {
           name: "From Date",
           key: "Other_FromDate_id_2",
           type: "date",
-          showIf: { Bookkeeping_Frequency_id_2: "Other" },
+          showIf: { Bookkeeping_Frequency_id_2: "Other"},
         },
         {
           name: "To Date",
           key: "Other_ToDate_id_2",
           type: "date",
-          showIf: { Bookkeeping_Frequency_id_2: "Other" },
+          showIf: { Bookkeeping_Frequency_id_2: "Other"},
         },
+
+
+
 
 
 
@@ -1133,6 +1435,7 @@ const CreateJob = () => {
           ],
         },
 
+
         // ==================== WEEKLY ====================
         {
           name: "Year",
@@ -1219,14 +1522,6 @@ const CreateJob = () => {
           options: getLastFiveYears(),
           showIf: { Payroll_Frequency_id_3: "Yearly" },
         },
-
-
-
-
-
-
-
-
 
 
 
@@ -1344,7 +1639,7 @@ const CreateJob = () => {
             "Other",
           ],
         },
-        {
+         {
           name: "Tax Year",
           key: "Tax_Year_id_4",
           type: "dropdown",
@@ -1392,7 +1687,7 @@ const CreateJob = () => {
       id: 7, // Company Secretarial
       fields: [],
     },
-    {
+     {
       id: 33, // Aus - Compliance
       fields: [
         {
@@ -1664,220 +1959,17 @@ const CreateJob = () => {
         },
       ],
     }
-
-
-
   ];
-
-
-  // console.log("serviceFields", serviceFields);
-  // console.log("jobData?.Service", jobData?.Service);
-
 
   useEffect(() => {
     setServiceFieldsData(
-      //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
-      serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
+      // serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+        serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
     );
-
-
-    if (jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily") {
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-
-    }
-
   }, [jobData?.Service]);
 
 
-
-
-
-  useEffect(() => {
-    console.log("UPDATE ALL DEFAULT FEILDS");
-    setJobData((prevState) => ({
-      ...prevState,
-      Turnover_Period_id_0: "Monthly",
-      Turnover_Currency_id_0: "GBP",
-      Turnover_id_0: 0,
-      VAT_Registered_id_0: "No",
-      VAT_Frequency_id_0: "Quarterly",
-      Who_Did_The_Bookkeeping_id_1: "Outbooks",
-      PAYE_Registered_id_1: "No",
-      Number_of_Trial_Balance_Items_id_1: "1 to 5",
-
-      //  Bookkeeping_Frequency_id_2: "Daily",
-      Number_of_Total_Transactions_id_2: 0,
-      Number_of_Bank_Transactions_id_2: 0,
-      Number_of_Purchase_Invoices_id_2: 0,
-      Number_of_Sales_Invoices_id_2: 0,
-      Number_of_Petty_Cash_Transactions_id_2: 0,
-      Number_of_Journal_Entries_id_2: 0,
-      Number_of_Other_Transactions_id_2: 0,
-      Transactions_Posting_id_2: "Manual",
-      Quality_of_Paperwork_id_2: "Bad",
-      Number_of_Integration_Software_Platforms_id_2: "1",
-      CIS_id_2: "No",
-      Posting_Payroll_Journals_id_2: "Yes",
-      Department_Tracking_id_2: "No",
-      Sales_Reconciliation_Required_id_2: "No",
-      Factoring_Account_id_2: "Provider Deducts Commission Only",
-      Payment_Methods_id_2: "1",
-      // Payroll_Frequency_id_3: "Weekly",
-      Type_of_Payslip_id_3: "Wages Only",
-      Percentage_of_Variable_Payslips_id_3: "0%",
-      Is_CIS_Required_id_3: "No",
-      CIS_Frequency_id_3: "Weekly",
-      Number_of_Sub_contractors_id_3: 0,
-      Whose_Tax_Return_is_it_id_4: "Director",
-      Number_of_Income_Sources_id_4: "1",
-      If_Landlord_Number_of_Properties_id_4: "1",
-      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
-
-
-      Management_Accounts_Frequency_id_6: "Quarterly",
-
-      ////////////////////////// 
-      Year_Ending_id_1: null,
-
-      Day_Date_id_2: null,
-      Week_Year_id_2: null,
-      Week_Month_id_2: null,
-      Week_id_2: null,
-      Fortnight_Year_id_2: null,
-      Fortnight_Month_id_2: null,
-      Fortnight_id_2: null,
-      Month_Year_id_2: null,
-      Month_id_2: null,
-      Quarter_Year_id_2: null,
-      Quarter_id_2: null,
-      Year_id_2: null,
-      Other_FromDate_id_2: null,
-      Other_ToDate_id_2: null,
-
-
-      Payroll_Week_Year_id_3: null,
-      Payroll_Week_Month_id_3: null,
-      Payroll_Week_id_3: null,
-      Payroll_Fortnight_Year_id_3: null,
-      Payroll_Fortnight_Month_id_3: null,
-      Payroll_Fortnight_id_3: null,
-      Payroll_Month_Year_id_3: null,
-      Payroll_Month_id_3: null,
-      Payroll_Quarter_Year_id_3: null,
-      Payroll_Quarter_id_3: null,
-      Payroll_Year_id_3: null,
-
-
-
-      Tax_Year_id_4: null,
-
-      Management_Accounts_FromDate_id_6: null,
-      Management_Accounts_ToDate_id_6: null,
-
-      Year_id_33: null,
-
-      Period_id_32: null,
-      Day_Date_id_32: null,
-      Week_Year_id_32: null,
-      Week_Month_id_32: null,
-      Week_id_32: null,
-      Fortnight_Year_id_32: null,
-      Fortnight_Month_id_32: null,
-      Fortnight_id_32: null,
-      Month_Year_id_32: null,
-      Month_id_32: null,
-      Quarter_Year_id_32: null,
-      Quarter_id_32: null,
-      Year_id_32: null,
-      Other_FromDate_id_32: null,
-      Other_ToDate_id_32: null,
-
-
-      Payroll_Frequency_id_31: null,
-      Payroll_Week_Year_id_31: null,
-      Payroll_Week_Month_id_31: null,
-      Payroll_Week_id_31: null,
-      Payroll_Fortnight_Year_id_31: null,
-      Payroll_Fortnight_Month_id_31: null,
-      Payroll_Fortnight_id_31: null,
-      Payroll_Month_Year_id_31: null,
-      Payroll_Month_id_31: null,
-      Payroll_Quarter_Year_id_31: null,
-      Payroll_Quarter_id_31: null,
-      Payroll_Year_id_31: null,
-
-      Audit_Year_Ending_id_27: null,
-
-      Filing_Frequency_id_8: null,
-      Period_Ending_Date_id_8: null,
-      Filing_Date_id_8: null,
-
-      Year_id_28: null,
-
-
-
-
-
-    }));
-  }, []);
-
-
-  // console.log("jobData", jobData);
-
-  // SELECT OPTION 
-  // 1. Build service options
-  let serviceOptions = [
-    { value: '', label: 'Select Service' },
-    ...(AllJobData?.data?.services || []).map((service) => ({
-      value: service.service_id,
-      label: service.service_name
-    }))
-  ];
-
-
-  let isAssignDetails = jobData?.CustomerDetails.find(
-    (detail) => detail.assigned_source === "assign_customer_service"
-  );
-  if (isAssignDetails != undefined) {
-    //console.log("isAssignDetails", isAssignDetails);
-    serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
-  }
-
-  // 2. Build job type options based on selected service
-  const jobTypeOptions = [
-    { value: '', label: 'Select Job Type' },
-    ...(get_Job_Type?.data || []).map((jobtype) => ({
-      value: jobtype.id,
-      label: jobtype.type
-    }))
-  ];
-
-  // 3. Build reviewer options
-  const reviewerOptions = [
-    { value: '', label: 'Select Reviewer' },
-    ...(AllJobData?.data?.reviewer || []).map((reviewer) => ({
-      value: reviewer.reviewer_id,
-      label: `${reviewer.reviewer_name} (${reviewer?.reviewer_email})`
-    }))
-  ];
-
-
-  // 4. Build allocated to options
-  const allocatedStaffOptions = [
-    { value: '', label: 'Select Staff' },
-    ...(AllJobData?.data?.allocated || []).map((staff) => ({
-      value: staff.allocated_id,
-      label: `${staff.allocated_name} (${staff.allocated_email})`
-    }))
-  ];
-
-
-  // 5. Build customer account manager options
+  // Select options for Customer Account Manager
   const customerAccountManagerOptions = [
     { value: '', label: 'Select Customer Account Manager' },
     ...(AllJobData?.data?.customer_account_manager || []).map((manager) => ({
@@ -1886,14 +1978,65 @@ const CreateJob = () => {
     }))
   ];
 
-  // 6. Build client options
-  const clientOptions = [
-    { value: '', label: 'Select Client' },
-    ...(AllJobData?.data?.client || []).map((client) => ({
-      value: client.client_id,
-      label: client.client_trading_name
+  // Select options for Service
+  let  serviceOptions = [
+    { value: '', label: 'Select Service' },
+    ...(AllJobData?.data?.services || []).map((service) => ({
+      value: service.service_id,
+      label: service.service_name
     }))
   ];
+
+   let isAssignDetails = CustomerDetails.find(
+    (detail) => detail.assigned_source === "assign_customer_service"
+  );
+  if (isAssignDetails != undefined) {
+    //console.log("isAssignDetails", isAssignDetails);
+    serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+  }
+
+
+  // Select options for Job Type
+  const jobTypeOptions = [
+    { value: '', label: 'Select Job Type' },
+    ...(get_Job_Type?.data || []).map((jobtype) => ({
+      value: jobtype.id,
+      label: jobtype.type
+    }))
+  ];
+
+  // Select options for Reviewer
+  const reviewerOptions = [
+    { value: '', label: 'Select Reviewer' },
+    ...(AllJobData?.data?.reviewer || []).map((reviewer) => ({
+      value: reviewer.reviewer_id,
+      label: `${reviewer.reviewer_name} (${reviewer.reviewer_email})`
+    }))
+  ];
+
+  const isReviewerDisabled = !(
+    ["ADMIN", "SUPERADMIN"].includes(role) ||
+    (getJobDetails.data?.staff_created_id !== undefined &&
+      (getJobDetails.data.staff_created_id === staffCreatedId ||
+        getJobDetails.data.customer_staff_id === staffCreatedId))
+  );
+
+
+  // Select options for Allocated To
+  const allocatedStaffOptions = [
+    { value: '', label: 'Select Staff' },
+    ...(AllJobData?.data?.allocated || []).map((staff) => ({
+      value: staff.allocated_id,
+      label: `${staff.allocated_name} (${staff.allocated_email})`
+    }))
+  ];
+
+  const isAllocatedToDisabled = !(
+    ["ADMIN", "SUPERADMIN"].includes(role) ||
+    (getJobDetails.data?.staff_created_id !== undefined &&
+      (getJobDetails.data.staff_created_id === staffCreatedId ||
+        getJobDetails.data.customer_staff_id === staffCreatedId))
+  );
 
 
   return (
@@ -1902,9 +2045,9 @@ const CreateJob = () => {
         <div className="row mt-4">
           <div className="col-xl-12">
             <div className="card">
-              <div className="card-header step-header-blue d-flex align-items-center">
+              <div className="card-header d-flex  step-header-blue">
                 <button
-                  type="button "
+                  type="button"
                   className="btn p-0"
                   onClick={() => {
                     sessionStorage.setItem(
@@ -1914,9 +2057,9 @@ const CreateJob = () => {
                     window.history.back();
                   }}
                 >
-                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />{" "}
+                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
                 </button>
-                <h3 className="card-title mb-0">Create New Job</h3>
+                <h3 className="card-title mb-0">Update Job</h3>
               </div>
 
               <div className="card-body form-steps">
@@ -1927,8 +2070,8 @@ const CreateJob = () => {
                         <div className="row">
                           <div className="col-lg-12">
                             <div className="card card_shadow">
-                              <div className="card-header card-header-light-blue align-items-center d-flex">
-                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                              <div className="card-header align-items-center d-flex card-header-light-blue ">
+                                <h4 className="card-title mb-0 flex-grow-1">
                                   Job Information
                                 </h4>
                               </div>
@@ -1942,7 +2085,6 @@ const CreateJob = () => {
                                     </label>
                                     <input
                                       type="text"
-                                      //   className="form-control"
                                       className={
                                         errors["AccountManager"]
                                           ? "error-field form-control"
@@ -1996,8 +2138,7 @@ const CreateJob = () => {
                                         Client
                                         <span className="text-danger">*</span>
                                       </label>
-
-                                      {/* <select
+                                      <select
                                         className={
                                           errors["Client"]
                                             ? "error-field form-select"
@@ -2009,6 +2150,7 @@ const CreateJob = () => {
                                         value={jobData.Client}
                                       >
                                         <option value="">Select Client</option>
+
                                         {(AllJobData?.data?.client || []).map(
                                           (client) => (
                                             <option
@@ -2019,28 +2161,7 @@ const CreateJob = () => {
                                             </option>
                                           )
                                         )}
-                                      </select> */}
-                                      <Select
-                                        name="Client"
-                                        id="Client"
-                                        options={clientOptions}
-                                        value={clientOptions.find(
-                                          (opt) => String(opt.value) === String(jobData.Client)
-                                        )}
-                                        onChange={(selectedOption) => {
-                                          const e = {
-                                            target: {
-                                              name: 'Client',
-                                              value: selectedOption.value
-                                            }
-                                          };
-                                          HandleChange(e); // Original handler
-                                        }}
-                                        className={errors["Client"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
-                                        classNamePrefix="react-select"
-                                        isSearchable
-                                      />
-
+                                      </select>
                                       {errors["Client"] && (
                                         <div className="error-text">
                                           {errors["Client"]}
@@ -2048,7 +2169,7 @@ const CreateJob = () => {
                                       )}
                                     </div>
                                   ) : (
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
                                         <span className="text-danger">*</span>
@@ -2067,7 +2188,6 @@ const CreateJob = () => {
                                         value={jobData.Client}
                                         disabled
                                       />
-
                                       {errors["Client"] && (
                                         <div className="error-text">
                                           {errors["Client"]}
@@ -2092,8 +2212,8 @@ const CreateJob = () => {
                                       id="ClientJobCode"
                                       autoFocus={true}
                                       onChange={HandleChange}
-                                      maxLength={50}
                                       value={jobData.ClientJobCode}
+                                      maxLength={50}
                                     />
                                     {errors["ClientJobCode"] && (
                                       <div className="error-text">
@@ -2121,6 +2241,7 @@ const CreateJob = () => {
                                       <option value="">
                                         Select Customer Account Manager
                                       </option>
+
                                       {(
                                         AllJobData?.data
                                           ?.customer_account_manager || []
@@ -2139,7 +2260,6 @@ const CreateJob = () => {
                                         </option>
                                       ))}
                                     </select> */}
-
                                     <Select
                                       name="CustomerAccountManager"
                                       id="CustomerAccountManager"
@@ -2164,7 +2284,6 @@ const CreateJob = () => {
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
-
                                     {errors["CustomerAccountManager"] && (
                                       <div className="error-text">
                                         {errors["CustomerAccountManager"]}
@@ -2187,11 +2306,9 @@ const CreateJob = () => {
                                       id="Service"
                                       onChange={HandleChange}
                                       value={jobData.Service}
-                                      disabled={
-                                        jobData.Client == "" ? true : false
-                                      }
                                     >
                                       <option value="">Select Service</option>
+
                                       {(AllJobData?.data?.services || []).map(
                                         (service) => (
                                           <option
@@ -2206,6 +2323,11 @@ const CreateJob = () => {
                                     <Select
                                       name="Service"
                                       id="Service"
+                                       menuPortalTarget={document.body}   
+  styles={{
+    menuPortal: base => ({ ...base, zIndex: 9999 }), 
+    menu: base => ({ ...base, zIndex: 9999 })
+  }}
                                       options={serviceOptions}
                                       value={serviceOptions.find(
                                         (opt) => String(opt.value) === String(jobData.Service)
@@ -2219,9 +2341,8 @@ const CreateJob = () => {
                                         };
                                         HandleChange(e);
                                       }}
-                                      isDisabled={jobData.Client === ""}
-                                      className={errors["Service"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
-                                      classNamePrefix="react-select"
+                                      className={errors["Service"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                      classNamePrefix="react-select "
                                       isSearchable
                                     />
                                     {errors["Service"] && (
@@ -2233,7 +2354,7 @@ const CreateJob = () => {
 
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
-                                      Job Type{" "}
+                                      Job Type
                                       <span className="text-danger">*</span>
                                     </label>
                                     {/* <select
@@ -2266,7 +2387,9 @@ const CreateJob = () => {
                                       name="JobType"
                                       id="JobType"
                                       options={jobTypeOptions}
-                                      value={jobTypeOptions.find(opt => String(opt.value) === String(jobData.JobType))}
+                                      value={jobTypeOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.JobType)
+                                      )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
@@ -2278,11 +2401,14 @@ const CreateJob = () => {
                                         openJobModal(e);
                                       }}
                                       isLoading={get_Job_Type.loading}
-                                      className={errors["JobType"] ? "error-field react-select jobtype basic-multi-select" : "basic-multi-select react-select jobtype"}
+                                      className={
+                                        errors["JobType"]
+                                          ? "error-field react-select jobtype basic-multi-select "
+                                          : "react-select jobtype basic-multi-select"
+                                      }
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
-
                                     {errors["JobType"] && (
                                       <div className="error-text">
                                         {errors["JobType"]}
@@ -2296,7 +2422,6 @@ const CreateJob = () => {
                                         Budgeted Time
                                       </label>
                                       <div className="input-group">
-                                        {/* Hours Input */}
                                         <div className="hours-div">
                                           <input
                                             type="text"
@@ -2304,8 +2429,6 @@ const CreateJob = () => {
                                             placeholder="Hours"
                                             onChange={(e) => {
                                               const value = e.target.value;
-
-                                              // Only allow non-negative numbers for hours
                                               if (
                                                 value === "" ||
                                                 Number(value) >= 0
@@ -2317,6 +2440,12 @@ const CreateJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.hours || ""}
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.hours
+                                          //     : "0"
+                                          // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -2325,8 +2454,6 @@ const CreateJob = () => {
                                             H
                                           </span>
                                         </div>
-
-                                        {/* Minutes Input */}
                                         <div className="hours-div">
                                           <input
                                             type="text"
@@ -2334,8 +2461,6 @@ const CreateJob = () => {
                                             placeholder="Minutes"
                                             onChange={(e) => {
                                               const value = e.target.value;
-
-                                              // Only allow minutes between 0 and 59
                                               if (
                                                 value === "" ||
                                                 (Number(value) >= 0 &&
@@ -2348,6 +2473,12 @@ const CreateJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.minutes || ""}
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.minutes
+                                          //     : "0"
+                                          // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -2365,14 +2496,26 @@ const CreateJob = () => {
                                       Reviewer
                                     </label>
                                     {/* <select
-                                      className={
-                                        errors["Reviewer"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
+                                      className="form-select"
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
+                                      disabled={
+                                        ["ADMIN", "SUPERADMIN"].includes(role)
+                                          ? false
+                                          : getJobDetails.data
+                                            .staff_created_id != undefined
+                                            ? getJobDetails.data
+                                              .staff_created_id ===
+                                              staffCreatedId
+                                              ? false
+                                              : getJobDetails.data
+                                                .customer_staff_id ===
+                                                staffCreatedId
+                                                ? false
+                                                : true
+                                            : false
+                                      }
                                     >
                                       <option value=""> Select Reviewer</option>
                                       {(AllJobData?.data?.reviewer || []).map(
@@ -2403,9 +2546,10 @@ const CreateJob = () => {
                                             value: selectedOption.value
                                           }
                                         };
-                                        HandleChange(e);
+                                        HandleChange(e); // original function
                                       }}
-                                      className={errors["Reviewer"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                      isDisabled={isReviewerDisabled}
+                                      className="react-select basic-multi-select"
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
@@ -2421,15 +2565,26 @@ const CreateJob = () => {
                                       Allocated To
                                     </label>
                                     {/* <select
-                                      className={
-                                        errors["AllocatedTo"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
+                                      className="form-select"
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                    // disabled={ role === "SUPERADMIN" ? false : true}
+                                      disabled={
+                                        ["ADMIN", "SUPERADMIN"].includes(role)
+                                          ? false
+                                          : getJobDetails.data
+                                            .staff_created_id != undefined
+                                            ? getJobDetails.data
+                                              .staff_created_id ===
+                                              staffCreatedId
+                                              ? false
+                                              : getJobDetails.data
+                                                .customer_staff_id ===
+                                                staffCreatedId
+                                                ? false
+                                                : true
+                                            : false
+                                      }
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(
@@ -2460,13 +2615,12 @@ const CreateJob = () => {
                                             value: selectedOption.value
                                           }
                                         };
-                                        HandleChange(e);
+                                        HandleChange(e); // original handler
                                       }}
-                                      className={errors["AllocatedTo"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
+                                      isDisabled={isAllocatedToDisabled}
+                                      className="react-select basic-multi-select"
                                       classNamePrefix="react-select"
                                       isSearchable
-                                    // Uncomment below if you want to enable/disable based on role
-                                    // isDisabled={role !== "SUPERADMIN"}
                                     />
                                     {errors["AllocatedTo"] && (
                                       <div className="error-text">
@@ -2475,22 +2629,21 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4 mb-3">
+                                  <div className="col-lg-4">
                                     <label className="form-label">
                                       {" "}
                                       Allocated On{" "}
                                     </label>
                                     <input
                                       type="date"
-                                      className={
-                                        errors["AllocatedOn"]
-                                          ? "error-field form-control"
-                                          : "form-control"
-                                      }
+                                      className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
+                                      max={
+                                        new Date().toISOString().split("T")[0]
+                                      }
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -2499,21 +2652,20 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4 mb-3">
+                                  <div className="col-lg-4">
                                     <label className="form-label">
                                       Date Received On
                                     </label>
                                     <input
                                       type="date"
-                                      className={
-                                        errors["DateReceivedOn"]
-                                          ? "error-field form-control"
-                                          : "form-control"
-                                      }
+                                      className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn}
+                                      max={
+                                        new Date().toISOString().split("T")[0]
+                                      }
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
@@ -2542,6 +2694,7 @@ const CreateJob = () => {
                                       )}
                                     </div>
                                   </div> */}
+
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label">
@@ -2642,7 +2795,6 @@ const CreateJob = () => {
                                             H
                                           </span>
                                         </div>
-
                                         <div className="hours-div">
                                           <input
                                             type="text"
@@ -2671,7 +2823,6 @@ const CreateJob = () => {
                                           </span>
                                         </div>
                                       </div>
-
                                       {errors["TotalPreparationTime"] && (
                                         <div className="error-text">
                                           {errors["TotalPreparationTime"]}
@@ -2679,6 +2830,7 @@ const CreateJob = () => {
                                       )}
                                     </div>
                                   </div>
+
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label">
@@ -2735,6 +2887,7 @@ const CreateJob = () => {
                                               FeedbackIncorporationTime.minutes
                                             }
                                           />
+
                                           <span
                                             className="input-group-text"
                                             id="basic-addon2"
@@ -2821,10 +2974,7 @@ const CreateJob = () => {
                                     </div>
                                   </div>
 
-                                  <div
-                                    id="invoice_type"
-                                    className="col-lg-4 mb-3"
-                                  >
+                                  <div id="invoice_type" className="col-lg-4">
                                     <label
                                       htmlFor="firstNameinput"
                                       className="form-label"
@@ -2859,7 +3009,6 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-
                                   <div
                                     id="satff"
                                     className="col-lg-4 mb-3"
@@ -2870,13 +3019,13 @@ const CreateJob = () => {
                                     >
                                       Allocated to (Other)
                                     </label>
-
+                                  
                                     <Select
                                       options={allStaffData
-                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId)
+                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId) 
                                         ?.map((data) => {
-                                          return { label: data.full_name, value: data.id };
-                                        })}
+                                        return { label: data.full_name, value: data.id };
+                                      })}
                                       isMulti
                                       closeMenuOnSelect={false}
                                       className="basic-multi-select"
@@ -2891,129 +3040,28 @@ const CreateJob = () => {
 
                                   </div>
 
-
                                 </div>
                               </div>
                             </div>
                           </div>
-                          {serviceFieldsData?.length > 0 && (
-                            <div className="col-lg-12">
-                              <div className="card card_shadow">
-                                <div className="card-header card-header-light-blue align-items-center d-flex">
-                                  <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                    Other Data{" "}
-                                  </h4>
-                                </div>
-                                <div className="card-body">
-                                  <div className="" style={{ marginTop: 15 }}>
-                                    {/* <div className="row">
-                                  {serviceFieldsData?.length > 0 &&
-                                    serviceFieldsData?.map((field, index) => (
-                                      <div
-                                        className="col-lg-4 mb-3"
-                                        key={index}
-                                      >
-                                        <label className="form-label">
-                                          {field.name}
-                                        </label>
-                                        {field.type === "dropdown" ? (
-                                          <select
-                                            className="form-control"
-                                            name={field.key}
-                                            onChange={(e) => HandleChange(e)}
-                                            value={jobData[field.key]}
-                                          >
-                                            {field.options?.map(
-                                              (option, i) => (
-                                                <option
-                                                  value={option}
-                                                  key={i}
-                                                >
-                                                  {option}
-                                                </option>
-                                              )
-                                            )}
-                                          </select>
-                                        ) : (
-                                          <input
-                                            type={field.type || "text"}
-                                            className="form-control"
-                                            placeholder={field.name}
-                                            name={field.key}
-                                            min={field.min}
-                                            max={field.max}
-                                            onChange={(e) => HandleChange(e)}
-                                            value={jobData[field.key]}
-
-                                          />
-                                        )}
-                                      </div>
-                                    ))}
-                                </div> */}
-                                    <div className="row">
-                                      {serviceFieldsData?.length > 0 &&
-                                        serviceFieldsData?.map((field, index) => {
-                                          // 👇 check if field should be visible
-                                          const isVisible = shouldShowField(field, jobData);
-                                          if (!isVisible) return null;
-
-                                          return (
-                                            <div className="col-lg-4 mb-3" key={index}>
-                                              <label className="form-label">{field.name}</label>
-                                              {field.type === "dropdown" ? (
-                                                <select
-                                                  className="form-control"
-                                                  name={field.key}
-                                                  onChange={(e) => HandleChange(e)}
-                                                  value={jobData[field.key] || ""}
-                                                >
-                                                  <option value="">-- Select --</option>
-                                                  {field.options?.map((option, i) => (
-                                                    <option value={option} key={i}>
-                                                      {option}
-                                                    </option>
-                                                  ))}
-                                                </select>
-                                              ) : (
-                                                <input
-                                                  type={field.type || "text"}
-                                                  className="form-control"
-                                                  placeholder={field.name}
-                                                  name={field.key}
-                                                  min={field.min}
-                                                  max={field.max}
-                                                  onChange={(e) => HandleChange(e)}
-                                                  value={jobData[field.key] || ""}
-                                                />
-                                              )}
-                                            </div>
-                                          );
-                                        })}
-                                    </div>
-
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
 
                           <div className="col-lg-12">
                             <div className="card card_shadow">
                               <div className="card-header align-items-center d-flex card-header-light-blue">
-                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                <h4 className="card-title mb-0 flex-grow-1">
                                   Deadline
                                 </h4>
                               </div>
                               <div className="card-body">
                                 <div className="" style={{ marginTop: 15 }}>
                                   <div className="row">
-                                    <div className="col-lg-4 mb-3">
+                                    <div className="col-lg-4">
                                       <label className="form-label">
                                         Expected Delivery Date
                                       </label>
                                       <input
                                         type="date"
-                                        className="form-control"
+                                        className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
                                         onChange={HandleChange}
@@ -3025,13 +3073,13 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4 mb-3">
+                                    <div className="col-lg-4">
                                       <label className="form-label">
                                         Due On
                                       </label>
                                       <input
                                         type="date"
-                                        className="form-control"
+                                        className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="DueOn"
                                         onChange={HandleChange}
@@ -3043,13 +3091,13 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4 mb-3">
+                                    <div className="col-lg-4">
                                       <label className="form-label">
                                         Submission Deadline
                                       </label>
                                       <input
                                         type="date"
-                                        className="form-control"
+                                        className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
                                         onChange={HandleChange}
@@ -3061,13 +3109,13 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4 mb-3">
+                                    <div className="col-lg-4">
                                       <label className="form-label">
                                         Customer Deadline Date
                                       </label>
                                       <input
                                         type="date"
-                                        className="form-control"
+                                        className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
                                         onChange={HandleChange}
@@ -3079,13 +3127,13 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4 mb-3">
+                                    <div className="col-lg-4">
                                       <label className="form-label">
                                         SLA Deadline Date
                                       </label>
                                       <input
                                         type="date"
-                                        className="form-control"
+                                        className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SLADeadlineDate"
                                         onChange={HandleChange}
@@ -3103,7 +3151,7 @@ const CreateJob = () => {
                                       </label>
                                       <input
                                         type="date"
-                                        className="form-control"
+                                        className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
                                         onChange={HandleChange}
@@ -3123,8 +3171,8 @@ const CreateJob = () => {
 
                           <div className="col-lg-12">
                             <div className="card card_shadow">
-                              <div className="card-header card-header-light-blue align-items-center d-flex">
-                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                              <div className="card-header align-items-center d-flex card-header-light-blue">
+                                <h4 className="card-title mb-0 flex-grow-1">
                                   Other Task
                                 </h4>
                               </div>
@@ -3290,575 +3338,725 @@ const CreateJob = () => {
                                 </div>
                               </div>
                             </div>
+                            {serviceFieldsData?.length > 0 && (
+                              <div className="card card_shadow">
+                                <div className="card-header card-header-light-blue align-items-center d-flex">
+                                  <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                    Other Data{" "}
+                                  </h4>
+                                </div>
+                                <div className="card-body">
+                                  <div className="" style={{ marginTop: 15 }}>
+                                    {/* <div className="row">
+                                      {serviceFieldsData?.length > 0 &&
+                                        serviceFieldsData?.map(
+                                          (field, index) => (
+                                            <div
+                                              className="col-lg-4 mb-3"
+                                              key={index}
+                                            >
+                                              <label className="form-label">
+                                                {field.name}
+                                              </label>
+                                              {field.type === "dropdown" ? (
+                                                <select
+                                                  className="form-control"
+                                                  name={field.key}
+                                                  onChange={(e) =>
+                                                    HandleChange(e)
+                                                  }
+                                                  value={jobData[field.key]}
+                                                >
+
+                                                  {field.options?.map(
+                                                    (option, i) => (
+                                                      <option
+                                                        value={option}
+                                                        key={i}
+                                                      >
+                                                        {option}
+                                                      </option>
+                                                    )
+                                                  )}
+                                                </select>
+                                              ) : (
+                                                <input
+                                                  type={field.type || "text"}
+                                                  className="form-control"
+                                                  placeholder={field.name}
+                                                  name={field.key}
+                                                  min={field.min}
+                                                  max={field.max}
+                                                  onChange={(e) =>
+                                                    HandleChange(e)
+                                                  }
+                                                  value={jobData[field.key]}
+                                                />
+                                              )}
+                                            </div>
+                                          )
+                                        )}
+                                    </div> */}
+                                    <div className="row">
+                                    {serviceFieldsData?.length > 0 &&
+                                      serviceFieldsData?.map((field, index) => {
+                                        // 👇 check if field should be visible
+                                        const isVisible = shouldShowField(field, jobData);
+                                        if (!isVisible) return null;
+
+                                        return (
+                                          <div className="col-lg-4 mb-3" key={index}>
+                                            <label className="form-label">{field.name}</label>
+                                            {field.type === "dropdown" ? (
+                                              <select
+                                                className="form-control"
+                                                name={field.key}
+                                                onChange={(e) => HandleChange(e)}
+                                                value={jobData[field.key] || ""}
+                                              >
+                                                <option value="">-- Select --</option>
+                                                {field.options?.map((option, i) => (
+                                                  <option value={option} key={i}>
+                                                    {option}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            ) : (
+                                              <input
+                                                type={field.type || "text"}
+                                                className="form-control"
+                                                placeholder={field.name}
+                                                name={field.key}
+                                                min={field.min}
+                                                max={field.max}
+                                                onChange={(e) => HandleChange(e)}
+                                                value={jobData[field.key] || ""}
+                                              />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
 
-                          {/* sssj  {jobData.EngagementModel !=
-                            "fte_dedicated_staffing" && (
+                          {jobData.EngagementModel !=
+                            "fte_dedicated_staffing" &&
+                            (jobData?.status_type == 6 || jobData?.status_type == 7) && (
                               <div className="col-lg-12">
-                                <div className="col-lg-12">
-                                  <div className="card card_shadow">
-                                    <div className="card-header card-header-light-blue align-items-center d-flex">
-                                      <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                        Invoice
-                                      </h4>
-                                    </div>
-                                    <div className="card-body">
-                                      <div style={{ marginTop: 15 }}>
-                                        <div className="row">
-                                          <div className="col-lg-4 mb-3">
-                                            <label className="form-label">
-                                              Invoiced
-                                            </label>
-                                            <select
-                                              className="invoiced_dropdown form-select"
-                                              name="Invoiced"
-                                              onChange={HandleChange}
-                                              value={jobData.Invoiced}
-                                            >
-                                              <option value="">
-                                                Please Select Invoiced
-                                              </option>
-                                              <option value="1">Yes</option>
-                                              <option value="0">No</option>
-                                            </select>
-                                            {errors["Invoiced"] && (
-                                              <div className="error-text">
-                                                {errors["Invoiced"]}
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="col-lg-4 mb-3">
-                                            <label className="form-label">
-                                              Currency
-                                            </label>
-                                            <select
-                                              className="invoiced_dropdown form-select"
-                                              name="Currency"
-                                              onChange={HandleChange}
-                                              value={jobData.Currency}
-                                            >
-                                              <option value="">
-                                                Please Select Currency
-                                              </option>
-                                              {(
-                                                AllJobData?.data?.currency || []
-                                              ).map((currency) => (
-                                                <option
-                                                  value={currency.country_id}
-                                                  key={currency.country_id}
-                                                >
-                                                  {currency.currency_name}
-                                                </option>
-                                              ))}
-                                            </select>
-                                            {errors["Currency"] && (
-                                              <div className="error-text">
-                                                {errors["Currency"]}
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="col-lg-4 mb-3">
-                                            <label className="form-label">
-                                              Invoice Value
-                                            </label>
-                                            <input
-                                              type="text"
-                                              className="form-control"
-                                              placeholder="Invoice Value"
-                                              name="InvoiceValue"
-                                              onChange={HandleChange}
-                                              value={jobData.InvoiceValue}
-                                            />
-                                            {errors["InvoiceValue"] && (
-                                              <div className="error-text">
-                                                {errors["InvoiceValue"]}
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="col-lg-4 mb-3">
-                                            <label className="form-label">
-                                              Invoice Date
-                                            </label>
-                                            <input
-                                              type="date"
-                                              className="form-control"
-                                              placeholder="DD-MM-YYYY"
-                                              name="InvoiceDate"
-                                              onChange={HandleChange}
-                                              value={jobData.InvoiceDate}
-                                              max={
-                                                new Date()
-                                                  .toISOString()
-                                                  .split("T")[0]
-                                              }
-                                            />
-                                            {errors["InvoiceDate"] && (
-                                              <div className="error-text">
-                                                {errors["InvoiceDate"]}
-                                              </div>
-                                            )}
-                                          </div>
+                                <div className="card card_shadow">
+                                  <div className="card-header align-items-center d-flex card-header-light-blue">
+                                    <h4 className="card-title mb-0 flex-grow-1">
+                                      Invoice
+                                    </h4>
+                                  </div>
+                                  <div className="card-body">
+                                    <div style={{ marginTop: 15 }}>
+                                      <div className="row">
+                                        <div className="col-lg-4 mb-3">
+                                          <label className="form-label">
+                                            Invoiced
+                                          </label>
+                                          <select
+                                            className="invoiced_dropdown form-select"
+                                            name="Invoiced"
+                                            onChange={HandleChange}
+                                            value={jobData.Invoiced}
+                                          >
+                                            <option value="">
+                                              Please Select Invoiced
+                                            </option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                          </select>
+                                          {errors["Invoiced"] && (
+                                            <div className="error-text">
+                                              {errors["Invoiced"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="col-lg-4 mb-3">
+                                          <label className="form-label">
+                                            Currency
+                                          </label>
+                                          <select
+                                            className="invoiced_dropdown form-select"
+                                            name="Currency"
+                                            onChange={HandleChange}
+                                            value={jobData.Currency}
+                                          >
+                                            <option value="">
+                                              Please Select Currency
+                                            </option>
 
-                                          <div className="col-lg-4">
-                                            <div className="mb-3">
-                                              <label className="form-label">
-                                                Invoice{" "}
-                                              </label>
-                                              <div className="input-group">
-                                                <div className="hours-div">
-                                                  <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Hours"
-                                                    onChange={(e) => {
-                                                      const value =
-                                                        e.target.value;
-                                                      if (
-                                                        value === "" ||
-                                                        Number(value) >= 0
-                                                      ) {
-                                                        setInvoiceTime({
-                                                          ...invoiceTime,
-                                                          hours: value,
-                                                        });
+                                            {(
+                                              AllJobData?.data?.currency || []
+                                            ).map((currency) => (
+                                              <option
+                                                value={currency.country_id}
+                                                key={currency.country_id}
+                                              >
+                                                {currency.currency_name}
+                                              </option>
+                                            ))}
+                                          </select>
+                                          {errors["Currency"] && (
+                                            <div className="error-text">
+                                              {errors["Currency"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="col-lg-4 mb-3">
+                                          <label className="form-label">
+                                            {" "}
+                                            Invoice Value{" "}
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Invoice Value"
+                                            name="InvoiceValue"
+                                            onChange={HandleChange}
+                                            value={jobData.InvoiceValue}
+                                          />
+                                          {errors["InvoiceValue"] && (
+                                            <div className="error-text">
+                                              {errors["InvoiceValue"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="col-lg-4">
+                                          <label className="form-label">
+                                            {" "}
+                                            Invoice Date{" "}
+                                          </label>
+                                          <input
+                                            type="date"
+                                            className="form-control mb-3"
+                                            placeholder="DD-MM-YYYY"
+                                            name="InvoiceDate"
+                                            onChange={HandleChange}
+                                            value={jobData.InvoiceDate}
+                                            max={
+                                              new Date()
+                                                .toISOString()
+                                                .split("T")[0]
+                                            }
+                                          />
+                                          {errors["InvoiceDate"] && (
+                                            <div className="error-text">
+                                              {errors["InvoiceDate"]}
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <div className="col-lg-4">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              Invoice{" "}
+                                            </label>
+                                            <div className="input-group">
+                                              <div className="hours-div">
+                                                <input
+                                                  type="text"
+                                                  className="form-control"
+                                                  placeholder="Hours"
+                                                  onChange={(e) => {
+                                                    const value =
+                                                      e.target.value;
+                                                    if (
+                                                      value === "" ||
+                                                      Number(value) >= 0
+                                                    ) {
+                                                      setInvoiceTime({
+                                                        ...invoiceTime,
+                                                        hours: value,
+                                                      });
+                                                    }
+                                                  }}
+                                                  value={invoiceTime.hours}
+                                                />
+                                                <span
+                                                  className="input-group-text"
+                                                  id="basic-addon2"
+                                                >
+                                                  H
+                                                </span>
+                                              </div>
+                                              <div className="hours-div">
+                                                <input
+                                                  type="text"
+                                                  className="form-control"
+                                                  placeholder="Minutes"
+                                                  onChange={(e) => {
+                                                    const value =
+                                                      e.target.value;
+                                                    if (
+                                                      value === "" ||
+                                                      (Number(value) >= 0 &&
+                                                        Number(value) <= 59)
+                                                    ) {
+                                                      setInvoiceTime({
+                                                        ...invoiceTime,
+                                                        minutes: value,
+                                                      });
+                                                    }
+                                                  }}
+                                                  value={invoiceTime.minutes}
+                                                />
+                                                <span
+                                                  className="input-group-text"
+                                                  id="basic-addon2"
+                                                >
+                                                  M
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div
+                                          id="invoicedremark"
+                                          className="col-lg-4"
+                                        >
+                                          <label className="form-label">
+                                            Invoice Remark
+                                          </label>
+                                          <textarea
+                                            className="form-control"
+                                            placeholder="Invoice Remark"
+                                            name="InvoiceRemark"
+                                            onChange={HandleChange}
+                                            value={jobData.InvoiceRemark}
+                                            maxLength={500}
+                                          />
+
+                                          {errors["InvoiceRemark"] && (
+                                            <div className="error-text">
+                                              {errors["InvoiceRemark"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                          {jobModalStatus && (
+                            <>
+                              <Modal
+                                show={jobModalStatus}
+                                onHide={(e) => {
+                                  jobModalSetStatus(false);
+                                  HandleReset1();
+                                }}
+                                centered
+                                size="lg"
+                              >
+                                <Modal.Header closeButton>
+                                  <Modal.Title>Tasks</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                  <div className="tablelist-form">
+                                    <div className="modal-body">
+                                      <div className="row">
+                                        <div
+                                          className="col-md-12"
+                                          style={{ display: "flex" }}
+                                        >
+                                          <div className="col-lg-6">
+                                            {/* <select
+                                              id="search-select"
+                                              className="form-select"
+                                              aria-label="Default select example"
+                                              style={{
+                                                color: "#8a8c8e !important",
+                                              }}
+                                              onChange={(e) => {
+                                                setChecklistId(e.target.value);
+                                                setAddTaskArr([]);
+                                              }}
+                                              value={getChecklistId}
+                                            >
+                                              <option value="">
+                                                Select Checklist Name
+                                              </option>
+                                              {AllChecklist &&
+                                                AllChecklist.data.map(
+                                                  (checklist) => (
+                                                    <option
+                                                      value={
+                                                        checklist.checklists_id
                                                       }
-                                                    }}
-                                                    value={invoiceTime.hours}
-                                                  />
-                                                  <span
-                                                    className="input-group-text"
-                                                    id="basic-addon2"
-                                                  >
-                                                    H
-                                                  </span>
-                                                </div>
-                                                <div className="hours-div">
-                                                  <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Minutes"
-                                                    onChange={(e) => {
-                                                      const value =
-                                                        e.target.value;
-                                                      if (
-                                                        value === "" ||
-                                                        (Number(value) >= 0 &&
-                                                          Number(value) <= 59)
-                                                      ) {
-                                                        setInvoiceTime({
-                                                          ...invoiceTime,
-                                                          minutes: value,
-                                                        });
+                                                      key={
+                                                        checklist.checklists_id
                                                       }
-                                                    }}
-                                                    value={invoiceTime.minutes}
-                                                  />
-                                                  <span
-                                                    className="input-group-text"
-                                                    id="basic-addon2"
+                                                    >
+                                                      {
+                                                        checklist.check_list_name
+                                                      }
+                                                    </option>
+                                                  )
+                                                )}
+                                            </select> */}
+                                          </div>
+                                          <div className="col-lg-6">
+                                            <div className="">
+                                              <button
+                                                className="btn btn-info text-white float-end blue-btn"
+                                                onClick={() =>
+                                                  setShowAddJobModal(true)
+                                                }
+                                              >
+                                                <i className="fa fa-plus"></i>
+                                                Add Task
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          className="col-lg-6 column mt-3"
+                                          id="column1"
+                                        >
+                                          <div className="card">
+                                            <div className="card-body">
+                                              <div id="customerList">
+                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                  <table
+                                                    className="table align-middle table-nowrap"
+                                                    id="customerTable"
                                                   >
-                                                    M
-                                                  </span>
+                                                    <thead className="table-light">
+                                                      <tr>
+                                                        <th>Task Name</th>
+                                                        <th>Budgeted Hour</th>
+                                                        <th>Action</th>
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody className="list form-check-all">
+                                                      {AllChecklistData.data &&
+                                                        AllChecklistData.data.map(
+                                                          (checklist) => (
+                                                            <tr className="">
+                                                              <td>
+                                                                {
+                                                                  checklist.task_name
+                                                                }{" "}
+                                                              </td>
+
+                                                              <td>
+                                                                {" "}
+                                                                {
+                                                                  checklist.budgeted_hour.split(
+                                                                    ":"
+                                                                  )[0]
+                                                                }
+                                                                h{" "}
+                                                                {
+                                                                  checklist.budgeted_hour.split(
+                                                                    ":"
+                                                                  )[1]
+                                                                }
+                                                                m{" "}
+                                                              </td>
+                                                              <td>
+                                                                <div className="add">
+                                                                  {AddTaskArr &&
+                                                                    AddTaskArr.find(
+                                                                      (task) =>
+                                                                        task.task_id ==
+                                                                        checklist.task_id
+                                                                    ) ? (
+                                                                    ""
+                                                                  ) : (
+                                                                    <button
+                                                                      className=" btn-info text-white blue-btn"
+                                                                      onClick={() =>
+                                                                        AddTask(
+                                                                          checklist.task_id
+                                                                        )
+                                                                      }
+                                                                    >
+                                                                      +
+                                                                    </button>
+                                                                  )}
+                                                                </div>
+                                                              </td>
+                                                            </tr>
+                                                          )
+                                                        )}
+                                                    </tbody>
+                                                  </table>
                                                 </div>
                                               </div>
                                             </div>
                                           </div>
+                                        </div>
+                                        <div
+                                          className="col-lg-6 mt-3"
+                                          id="column2"
+                                        >
+                                          <div className="card">
+                                            <div className="card-body">
+                                              <div id="customerList">
+                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                  <table
+                                                    className="table align-middle table-nowrap"
+                                                    id="customerTable"
+                                                  >
+                                                    <thead className="table-light">
+                                                      <tr>
+                                                        <th>Task Name</th>
+                                                        <th>Budgeted Hour</th>
+                                                        <th>Action</th>
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody className="list form-check-all">
+                                                      {AddTaskArr &&
+                                                        AddTaskArr.map(
+                                                          (checklist) => (
+                                                            <tr className="">
+                                                              <td>
+                                                                {
+                                                                  checklist.task_name
+                                                                }{" "}
+                                                              </td>
+                                                              <td>
+                                                                {checklist.budgeted_hour !=
+                                                                  null
+                                                                  ? checklist.budgeted_hour.split(
+                                                                    ":"
+                                                                  )[0]
+                                                                  : "0"}
+                                                                h
+                                                                {checklist.budgeted_hour !=
+                                                                  null
+                                                                  ? checklist.budgeted_hour.split(
+                                                                    ":"
+                                                                  )[1]
+                                                                  : "0"}
+                                                                m
+                                                              </td>
 
-                                          <div
-                                            id="invoicedremark"
-                                            className="col-lg-4"
-                                          >
-                                            <label className="form-label">
-                                              Invoice Remark
-                                            </label>
-                                            <textarea
-                                              className="form-control"
-                                              placeholder="Invoice Remark"
-                                              name="InvoiceRemark"
-                                              onChange={HandleChange}
-                                              value={jobData.InvoiceRemark}
-                                              maxLength={500}
-                                            />
-
-                                            {errors["InvoiceRemark"] && (
-                                              <div className="error-text">
-                                                {errors["InvoiceRemark"]}
+                                                              {/* <td>{checklist.budgeted_hour} hr</td> */}
+                                                              <td>
+                                                                <div className="add">
+                                                                  <button className="delete-icon">
+                                                                    <i
+                                                                      className="ti-trash text-danger"
+                                                                      onClick={() =>
+                                                                        RemoveTask(
+                                                                          checklist.task_id
+                                                                        )
+                                                                      }
+                                                                    ></i>
+                                                                  </button>
+                                                                </div>
+                                                              </td>
+                                                            </tr>
+                                                          )
+                                                        )}
+                                                    </tbody>
+                                                  </table>
+                                                </div>
                                               </div>
-                                            )}
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              </div>
-                            )} */}
+                                </Modal.Body>
+                                <Modal.Footer>
+                                  <Button
+                                    variant="secondary"
+                                    onClick={() => {
+                                      jobModalSetStatus(false);
+                                      HandleReset1();
+                                    }}
+                                  >
+                                    {" "}
+                                    <i className="fa fa-times"></i> Close
+                                  </Button>
+                                  <Button
+                                    variant="btn btn-outline-success float-end "
+                                    onClick={handleAddCheckList}
+                                  >
+                                    {" "}
+                                    <i className="far fa-save pe-1"></i>Submit
+                                  </Button>
+                                </Modal.Footer>
+                              </Modal>
+                            </>
+                          )}
 
-                          <div className="col-lg-12">
-                            <div className="card card_shadow">
-                              <div className="card-header align-items-center d-flex card-header-light-blue">
-                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                  Notes
-                                </h4>
-                              </div>
-                              <div className="card-body">
-                                <div className="" style={{ marginTop: 15 }}>
-                                  <div className="row">
-                                    <div className="mb-3 col-lg-12">
-                                      <textarea
+                          {showAddJobModal && (
+                            <Modal
+                              show={showAddJobModal}
+                              onHide={() => {
+                                setShowAddJobModal(false);
+                                HandleReset();
+                              }}
+                              centered
+                              size="sm"
+                            >
+                              <Modal.Header closeButton>
+                                <Modal.Title>Add Task</Modal.Title>
+                              </Modal.Header>
+                              <Modal.Body>
+                                <div className="row">
+                                  <div className="col-lg-12">
+                                    <label className="form-label">
+                                      Task Name
+                                    </label>
+                                    <div>
+                                      <input
                                         type="text"
+                                        placeholder="Enter Task name"
+                                        name="taskname"
                                         className={
-                                          errors["notes"]
+                                          taskNameError
                                             ? "error-field form-control"
                                             : "form-control"
                                         }
-                                        placeholder="Enter Notes"
-                                        name="notes"
-                                        id="notes"
-                                        onChange={HandleChange}
-                                        value={jobData.notes}
+                                        // className=' form-control'
+                                        onChange={handleChange1}
+                                        value={taskName}
                                       />
-                                      {errors["notes"] && (
-                                        <div className="error-text">
-                                          {errors["notes"]}
+                                      {taskNameError && (
+                                        <div className="error-text text-danger">
+                                          {taskNameError}
                                         </div>
                                       )}
                                     </div>
                                   </div>
+                                  <div className="col-lg-12 mt-2">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Budgeted Time
+                                      </label>
+                                      <div className="input-group">
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            name="budgeted_hour"
+                                            onChange={(e) => {
+                                              handleChange1(e);
+                                            }}
+                                            value={BudgetedHoursAddTask.hours}
+                                          />
+                                        </div>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          placeholder="Minutes"
+                                          name="budgeted_minute"
+                                          onChange={(e) => {
+                                            handleChange1(e);
+                                          }}
+                                          value={BudgetedHoursAddTask.minutes}
+                                        />
+                                      </div>
+                                      {BudgetedHoureError ? (
+                                        <div className="error-text text-danger">
+                                          {BudgetedHoureError}
+                                        </div>
+                                      ) : BudgetedMinuteError ? (
+                                        <div className="error-text text-danger">
+                                          {BudgetedMinuteError}
+                                        </div>
+                                      ) : (
+                                        ""
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </Modal.Body>
+                              <Modal.Footer>
+                                <Button
+                                  variant="secondary"
+                                  onClick={() => {
+                                    setShowAddJobModal(false);
+                                    HandleReset();
+                                  }}
+                                >
+                                  <i className="fa fa-times"></i> Close
+                                </Button>
+                                <Button
+                                  variant="btn btn-info text-white float-end blue-btn"
+                                  onClick={handleAddTask}
+                                >
+                                  Add
+                                </Button>
+                              </Modal.Footer>
+                            </Modal>
+                          )}
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex card-header-light-blue ">
+                                <h4 className="card-title mb-0 flex-grow-1">
+                                  Notes
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="row">
+                                  <div className="mb-3 col-lg-12">
+                                    <input
+                                      type="text"
+                                      className={
+                                        errors["notes"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="Enter Notes"
+                                      name="notes"
+                                      id="notes"
+                                      onChange={HandleChange}
+                                      value={jobData.notes}
+                                    />
+                                    {errors["notes"] && (
+                                      <div className="error-text">
+                                        {errors["notes"]}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
+                          </div>
+
+                          <div className="hstack gap-2 justify-content-end">
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={() => {
+                                sessionStorage.setItem(
+                                  "activeTab",
+                                  location.state.activeTab
+                                );
+                                window.history.back();
+                              }}
+                            >
+                              <i className="fa fa-times"></i> Cancel
+                            </button>
+                            <button
+                              type="button"
+                              className="btn   float-end btn-outline-success"
+                              onClick={handleSubmit}
+                            >
+                              <i className="fa fa-edit"></i> Update
+                            </button>
                           </div>
                         </div>
                       </div>
-                    </div>
-
-                    {jobModalStatus && (
-                      <Modal
-                        show={jobModalStatus}
-                        onHide={(e) => {
-                          jobModalSetStatus(false);
-                          HandleReset1();
-                          setAddTaskArr([]);
-                        }}
-                        centered
-                        size="lg"
-                      >
-                        <Modal.Header closeButton>
-                          <Modal.Title>Tasks</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <div className="tablelist-form">
-                            <div className="">
-                              <div className="row">
-                                <div
-                                  className="col-md-12"
-                                  style={{ display: "flex" }}
-                                >
-                                  <div className="col-lg-6">
-                                    {/* <select
-                                      id="search-select"
-                                      className="form-select mb-3"
-                                      aria-label="Default select example"
-                                      style={{ color: "#8a8c8e !important" }}
-                                      onChange={(e) => {
-                                        setChecklistId(e.target.value);
-                                      }}
-                                      value={getChecklistId}
-                                    >
-                                      <option value="">
-                                        Select Checklist Name
-                                      </option>
-                                      {AllChecklist &&
-                                        AllChecklist.data.map((checklist) => (
-                                          <option
-                                            value={checklist.checklists_id}
-                                            key={checklist.checklists_id}
-                                          >
-                                            {checklist.check_list_name}
-                                          </option>
-                                        ))}
-                                    </select> */}
-                                  </div>
-                                  <div className="col-lg-6">
-                                    <div className="col-sm-auto">
-                                      <button
-                                        className="btn btn-info float-end mb-3"
-                                        // disabled={getChecklistId == ""}
-                                        onClick={() => setShowAddJobModal(true)}
-                                      >
-                                        <i className="fa fa-plus pe-1" /> Add
-                                        Task
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="col-lg-6 column" id="column1">
-                                  <div className="card">
-                                    <div className="card-body">
-                                      <div id="customerList">
-                                        <div className="table-responsive table-card mt-3 mb-1">
-                                          <table
-                                            className="table align-middle table-nowrap"
-                                            id="customerTable"
-                                          >
-                                            <thead className="table-light">
-                                              <tr>
-                                                <th>Task Name</th>
-                                                <th>Budgeted Hour</th>
-                                                <th>Action</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody className="list form-check-all">
-                                              {AllChecklistData?.data &&
-                                                AllChecklistData?.data.map(
-                                                  (checklist) => (
-                                                    <tr className="">
-                                                      <td>
-                                                        {checklist?.task_name}{" "}
-                                                      </td>
-                                                      <td>
-                                                        {checklist?.budgeted_hour
-                                                          ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
-                                                          : ""}
-                                                      </td>
-                                                      <td>
-                                                        <div className="add">
-                                                          {AddTaskArr &&
-                                                            AddTaskArr?.find(
-                                                              (task) =>
-                                                                task?.task_id ==
-                                                                checklist?.task_id
-                                                            ) ? (
-                                                            ""
-                                                          ) : (
-                                                            <button
-                                                              className=" btn-info text-white blue-btn"
-                                                              onClick={() =>
-                                                                AddTask(
-                                                                  checklist?.task_id
-                                                                )
-                                                              }
-                                                            >
-                                                              +
-                                                            </button>
-                                                          )}
-                                                        </div>
-                                                      </td>
-                                                    </tr>
-                                                  )
-                                                )}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="col-lg-6 " id="column2">
-                                  <div className="card">
-                                    <div className="card-body">
-                                      <div id="customerList">
-                                        <div className="table-responsive table-card mt-3 mb-1">
-                                          <table
-                                            className="table align-middle table-nowrap"
-                                            id="customerTable"
-                                          >
-                                            <thead className="table-light">
-                                              <tr>
-                                                <th>Task Name</th>
-                                                <th>Budgeted Hour</th>
-                                                <th>Action</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody className="list form-check-all">
-                                              {AddTaskArr &&
-                                                AddTaskArr.map((checklist) => (
-                                                  <tr className="">
-                                                    <td>
-                                                      {checklist.task_name}{" "}
-                                                    </td>
-                                                    
-                                                    <td>
-                                                      {checklist?.budgeted_hour
-                                                        ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
-                                                        : ""}
-                                                    </td>
-
-                                                    {/* <td>{checklist.budgeted_hour} hr</td> */}
-                                                    <td>
-                                                      <div className="add">
-                                                        <button className="delete-icon">
-                                                          <i
-                                                            className="ti-trash text-danger"
-                                                            onClick={() =>
-                                                              RemoveTask(
-                                                                checklist.task_id
-                                                              )
-                                                            }
-                                                          ></i>
-                                                        </button>
-                                                      </div>
-                                                    </td>
-                                                  </tr>
-                                                ))}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer>
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              jobModalSetStatus(false);
-                              HandleReset1();
-                              setAddTaskArr([]);
-                            }}
-                          >
-                            <i className="fa fa-times pe-1"></i>
-                            Close
-                          </Button>
-                          <Button
-                            variant="btn btn-outline-success float-end "
-                            onClick={handleAddCheckList}
-                          >
-                            <i className="far fa-save pe-1"></i>
-                            Submit
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    )}
-
-                    {showAddJobModal && (
-                      <Modal
-                        show={showAddJobModal}
-                        onHide={() => {
-                          setShowAddJobModal(false);
-                          HandleReset();
-                        }}
-                        centered
-                        size="sm"
-                      >
-                        <Modal.Header closeButton>
-                          <Modal.Title>Add Task</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <div className="row">
-                            <div className="col-lg-12">
-                              <label className="form-label ">Task Name</label>
-                              <div>
-                                <input
-                                  type="text"
-                                  placeholder="Enter Task name"
-                                  name="taskname"
-                                  className={
-                                    taskNameError
-                                      ? "error-field form-control"
-                                      : "form-control"
-                                  }
-                                  onChange={handleChange1}
-                                  value={taskName}
-                                />
-                                {taskNameError && (
-                                  <div className="error-text text-danger">
-                                    {taskNameError}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="col-lg-12 mt-2">
-                              <div className="mb-3">
-                                <label className="form-label">
-                                  Budgeted Time
-                                </label>
-                                <div className="input-group">
-                                  <div className="hours-div">
-                                    <input
-                                      type="text"
-                                      className={
-                                        BudgetedHoureError
-                                          ? "error-field form-control"
-                                          : "form-control"
-                                      }
-                                      placeholder="Hours"
-                                      name="budgeted_hour"
-                                      onChange={(e) => {
-                                        handleChange1(e);
-                                      }}
-                                      value={BudgetedHoursAddTask.hours}
-                                    />
-                                    <span className="input-group-text">H</span>
-                                  </div>
-                                  <div className="hours-div ">
-                                    <input
-                                      type="text"
-                                      className={
-                                        BudgetedMinuteError
-                                          ? "error-field form-control"
-                                          : "form-control"
-                                      }
-                                      placeholder="Minutes"
-                                      name="budgeted_minute"
-                                      onChange={(e) => {
-                                        handleChange1(e);
-                                      }}
-                                      value={BudgetedHoursAddTask.minutes}
-                                    />
-                                    <span className="input-group-text">M</span>
-                                  </div>
-                                </div>
-                                {BudgetedHoureError ? (
-                                  <div className="error-text text-danger">
-                                    {BudgetedHoureError}
-                                  </div>
-                                ) : BudgetedMinuteError ? (
-                                  <div className="error-text text-danger">
-                                    {BudgetedMinuteError}
-                                  </div>
-                                ) : (
-                                  ""
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer>
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              setShowAddJobModal(false);
-                              HandleReset();
-                            }}
-                          >
-                            <i className="fa fa-times pe-1"></i>
-                            Close
-                          </Button>
-                          <Button
-                            variant="btn btn-info text-white float-end blue-btn"
-                            onClick={handleAddTask}
-                          >
-                            <i className="fa fa-plus pe-1"></i>
-                            Add
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    )}
-
-                    <div className="hstack gap-2 justify-content-end">
-                      <button
-                        type="button"
-                        className="btn btn-info text-white float-end blue-btn"
-                        onClick={handleSubmit}
-                      >
-                        <i className="fa fa-plus pe-1"></i>Add Job
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -3871,4 +4069,4 @@ const CreateJob = () => {
   );
 };
 
-export default CreateJob;
+export default EditJob;

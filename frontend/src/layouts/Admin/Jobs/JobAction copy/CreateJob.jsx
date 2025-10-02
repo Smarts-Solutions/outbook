@@ -201,11 +201,22 @@ const CreateJob = () => {
           if (response.status) {
             if (response.data.length > 0) {
 
-              console.log("response.data", response.data)
-              setAllChecklistData({
-                loading: true,
-                data: response.data,
-              });
+              console.log("response.data",response.data)
+
+              const isIncluded = response.data[0].client_type_id
+                .split(",")
+                .includes(response.data[0].client_type);
+              if (isIncluded == true) {
+                setAllChecklistData({
+                  loading: true,
+                  data: response.data,
+                });
+              } else {
+                setAllChecklistData({
+                  loading: true,
+                  data: [],
+                });
+              }
             } else {
               setAllChecklistData({
                 loading: true,
@@ -228,8 +239,6 @@ const CreateJob = () => {
   useEffect(() => {
     getAllChecklist();
   }, [jobData.JobType, AllJobData?.data]);
-
-  console.log("AllChecklistData", AllChecklistData);
 
   const GetJobType = async () => {
     const req = { action: "get", service_id: jobData.Service };
@@ -447,31 +456,10 @@ const CreateJob = () => {
   }
 
   let budgeted_hour_totalTime = { hours: "", minutes: "" };
-  // if (AddTaskArr.length > 0) {
-  //   budgeted_hour_totalTime = AddTaskArr?.reduce(
-  //     (acc, task) => {
-  //       const [hours, minutes] = task?.budgeted_hour?.split(":").map(Number);
-
-  //       acc.hours += hours;
-  //       acc.minutes += minutes;
-
-  //       // Convert every 60 minutes into an hour
-  //       if (acc.minutes >= 60) {
-  //         acc.hours += Math.floor(acc.minutes / 60);
-  //         acc.minutes = acc.minutes % 60;
-  //       }
-  //       return acc;
-  //     },
-  //     { hours: 0, minutes: 0 }
-  //   );
-  // }
   if (AddTaskArr.length > 0) {
     budgeted_hour_totalTime = AddTaskArr.reduce(
       (acc, task) => {
-        // safe split with default "0:0" if null/undefined/empty
-        const [hours, minutes] = (task?.budgeted_hour || "0:0")
-          .split(":")
-          .map(Number);
+        const [hours, minutes] = task.budgeted_hour.split(":").map(Number);
 
         acc.hours += hours;
         acc.minutes += minutes;
@@ -481,13 +469,11 @@ const CreateJob = () => {
           acc.hours += Math.floor(acc.minutes / 60);
           acc.minutes = acc.minutes % 60;
         }
-
         return acc;
       },
       { hours: 0, minutes: 0 }
     );
   }
-
 
   useEffect(() => {
     setBudgetedHours({
@@ -901,7 +887,7 @@ const CreateJob = () => {
         },
 
 
-        // Day
+         // Day
         {
           name: "Select Date",
           key: "Day_Date_id_2",
@@ -921,14 +907,14 @@ const CreateJob = () => {
           key: "Week_Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
         },
         {
           name: "Week",
           key: "Week_id_2",
           type: "dropdown",
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
         },
         // Fortnight
         {
@@ -936,21 +922,21 @@ const CreateJob = () => {
           key: "Fortnight_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
         },
         {
           name: "Month",
           key: "Fortnight_Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
         },
         {
           name: "Fortnight",
           key: "Fortnight_id_2",
           type: "dropdown",
           options: ["1st Half", "2nd Half"],
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
         },
         // Month
         {
@@ -958,14 +944,14 @@ const CreateJob = () => {
           key: "Month_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
         },
         {
           name: "Month",
           key: "Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
         },
         // Quarter
         {
@@ -973,14 +959,14 @@ const CreateJob = () => {
           key: "Quarter_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
         },
         {
           name: "Quarter",
           key: "Quarter_id_2",
           type: "dropdown",
           options: getQuarters(),
-          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
         },
         // Year
         {
@@ -988,20 +974,20 @@ const CreateJob = () => {
           key: "Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Yearly" },
+          showIf: { Bookkeeping_Frequency_id_2: "Yearly"},
         },
         // Other
         {
           name: "From Date",
           key: "Other_FromDate_id_2",
           type: "date",
-          showIf: { Bookkeeping_Frequency_id_2: "Other" },
+          showIf: { Bookkeeping_Frequency_id_2: "Other"},
         },
         {
           name: "To Date",
           key: "Other_ToDate_id_2",
           type: "date",
-          showIf: { Bookkeeping_Frequency_id_2: "Other" },
+          showIf: { Bookkeeping_Frequency_id_2: "Other"},
         },
 
 
@@ -1709,8 +1695,8 @@ const CreateJob = () => {
       Who_Did_The_Bookkeeping_id_1: "Outbooks",
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
-
-      //  Bookkeeping_Frequency_id_2: "Daily",
+      
+    //  Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
       Number_of_Purchase_Invoices_id_2: 0,
@@ -1727,7 +1713,7 @@ const CreateJob = () => {
       Sales_Reconciliation_Required_id_2: "No",
       Factoring_Account_id_2: "Provider Deducts Commission Only",
       Payment_Methods_id_2: "1",
-      // Payroll_Frequency_id_3: "Weekly",
+     // Payroll_Frequency_id_3: "Weekly",
       Type_of_Payslip_id_3: "Wages Only",
       Percentage_of_Variable_Payslips_id_3: "0%",
       Is_CIS_Required_id_3: "No",
@@ -1737,11 +1723,11 @@ const CreateJob = () => {
       Number_of_Income_Sources_id_4: "1",
       If_Landlord_Number_of_Properties_id_4: "1",
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
-
+     
 
       Management_Accounts_Frequency_id_6: "Quarterly",
-
-      ////////////////////////// 
+     
+     ////////////////////////// 
       Year_Ending_id_1: null,
 
       Day_Date_id_2: null,
@@ -1820,7 +1806,7 @@ const CreateJob = () => {
       Year_id_28: null,
 
 
-
+      
 
 
     }));
@@ -2897,16 +2883,16 @@ const CreateJob = () => {
                             </div>
                           </div>
                           {serviceFieldsData?.length > 0 && (
-                            <div className="col-lg-12">
-                              <div className="card card_shadow">
-                                <div className="card-header card-header-light-blue align-items-center d-flex">
-                                  <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                    Other Data{" "}
-                                  </h4>
-                                </div>
-                                <div className="card-body">
-                                  <div className="" style={{ marginTop: 15 }}>
-                                    {/* <div className="row">
+                             <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header card-header-light-blue align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Other Data{" "}
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  {/* <div className="row">
                                   {serviceFieldsData?.length > 0 &&
                                     serviceFieldsData?.map((field, index) => (
                                       <div
@@ -2950,50 +2936,50 @@ const CreateJob = () => {
                                       </div>
                                     ))}
                                 </div> */}
-                                    <div className="row">
-                                      {serviceFieldsData?.length > 0 &&
-                                        serviceFieldsData?.map((field, index) => {
-                                          // 👇 check if field should be visible
-                                          const isVisible = shouldShowField(field, jobData);
-                                          if (!isVisible) return null;
+                                  <div className="row">
+                                    {serviceFieldsData?.length > 0 &&
+                                      serviceFieldsData?.map((field, index) => {
+                                        // 👇 check if field should be visible
+                                        const isVisible = shouldShowField(field, jobData);
+                                        if (!isVisible) return null;
 
-                                          return (
-                                            <div className="col-lg-4 mb-3" key={index}>
-                                              <label className="form-label">{field.name}</label>
-                                              {field.type === "dropdown" ? (
-                                                <select
-                                                  className="form-control"
-                                                  name={field.key}
-                                                  onChange={(e) => HandleChange(e)}
-                                                  value={jobData[field.key] || ""}
-                                                >
-                                                  <option value="">-- Select --</option>
-                                                  {field.options?.map((option, i) => (
-                                                    <option value={option} key={i}>
-                                                      {option}
-                                                    </option>
-                                                  ))}
-                                                </select>
-                                              ) : (
-                                                <input
-                                                  type={field.type || "text"}
-                                                  className="form-control"
-                                                  placeholder={field.name}
-                                                  name={field.key}
-                                                  min={field.min}
-                                                  max={field.max}
-                                                  onChange={(e) => HandleChange(e)}
-                                                  value={jobData[field.key] || ""}
-                                                />
-                                              )}
-                                            </div>
-                                          );
-                                        })}
-                                    </div>
-
+                                        return (
+                                          <div className="col-lg-4 mb-3" key={index}>
+                                            <label className="form-label">{field.name}</label>
+                                            {field.type === "dropdown" ? (
+                                              <select
+                                                className="form-control"
+                                                name={field.key}
+                                                onChange={(e) => HandleChange(e)}
+                                                value={jobData[field.key] || ""}
+                                              >
+                                                <option value="">-- Select --</option>
+                                                {field.options?.map((option, i) => (
+                                                  <option value={option} key={i}>
+                                                    {option}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            ) : (
+                                              <input
+                                                type={field.type || "text"}
+                                                className="form-control"
+                                                placeholder={field.name}
+                                                name={field.key}
+                                                min={field.min}
+                                                max={field.max}
+                                                onChange={(e) => HandleChange(e)}
+                                                value={jobData[field.key] || ""}
+                                              />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                   </div>
+
                                 </div>
                               </div>
+                            </div>
                             </div>
                           )}
 
@@ -3610,25 +3596,35 @@ const CreateJob = () => {
                                               </tr>
                                             </thead>
                                             <tbody className="list form-check-all">
-                                              {AllChecklistData?.data &&
-                                                AllChecklistData?.data.map(
+                                              {AllChecklistData.data &&
+                                                AllChecklistData.data.map(
                                                   (checklist) => (
                                                     <tr className="">
                                                       <td>
-                                                        {checklist?.task_name}{" "}
+                                                        {checklist.task_name}{" "}
                                                       </td>
+
                                                       <td>
-                                                        {checklist?.budgeted_hour
-                                                          ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
-                                                          : ""}
+                                                        {" "}
+                                                        {
+                                                          checklist.budgeted_hour.split(
+                                                            ":"
+                                                          )[0]
+                                                        }
+                                                        h{" "}
+                                                        {" " +
+                                                          checklist.budgeted_hour.split(
+                                                            ":"
+                                                          )[1]}
+                                                        m{" "}
                                                       </td>
                                                       <td>
                                                         <div className="add">
                                                           {AddTaskArr &&
-                                                            AddTaskArr?.find(
+                                                            AddTaskArr.find(
                                                               (task) =>
-                                                                task?.task_id ==
-                                                                checklist?.task_id
+                                                                task.task_id ==
+                                                                checklist.task_id
                                                             ) ? (
                                                             ""
                                                           ) : (
@@ -3636,7 +3632,7 @@ const CreateJob = () => {
                                                               className=" btn-info text-white blue-btn"
                                                               onClick={() =>
                                                                 AddTask(
-                                                                  checklist?.task_id
+                                                                  checklist.task_id
                                                                 )
                                                               }
                                                             >
@@ -3678,11 +3674,19 @@ const CreateJob = () => {
                                                     <td>
                                                       {checklist.task_name}{" "}
                                                     </td>
-                                                    
                                                     <td>
-                                                      {checklist?.budgeted_hour
-                                                        ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
-                                                        : ""}
+                                                      {
+                                                        checklist.budgeted_hour.split(
+                                                          ":"
+                                                        )[0]
+                                                      }
+                                                      h{" "}
+                                                      {
+                                                        checklist.budgeted_hour.split(
+                                                          ":"
+                                                        )[1]
+                                                      }
+                                                      m
                                                     </td>
 
                                                     {/* <td>{checklist.budgeted_hour} hr</td> */}
