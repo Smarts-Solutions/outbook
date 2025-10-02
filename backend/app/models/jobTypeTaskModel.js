@@ -284,11 +284,13 @@ const getTask = async (task) => {
     task.status,
     services.name AS service_name,
     job_types.type AS job_type_type,
-    task.budgeted_hour
+    task.budgeted_hour,
+    CASE WHEN client_job_task.task_id IS NOT NULL THEN 1 ELSE 0 END AS is_assigned
     FROM 
     task
     JOIN services ON services.id = task.service_id
     JOIN job_types ON job_types.id = task.job_type_id
+    LEFT JOIN client_job_task ON client_job_task.task_id = task.id
     WHERE task.service_id = ? AND task.job_type_id = ?
     ORDER BY id DESC
     `;
