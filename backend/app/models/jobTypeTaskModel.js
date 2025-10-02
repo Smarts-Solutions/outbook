@@ -303,7 +303,6 @@ const getTask = async (task) => {
   }
 };
 
-
 const addChecklist = async (checklist) => {
 
   const {
