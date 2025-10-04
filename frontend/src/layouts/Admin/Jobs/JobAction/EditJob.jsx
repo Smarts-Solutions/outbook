@@ -1033,7 +1033,7 @@ const EditJob = () => {
   };
 
   const HandleReset1 = () => {
-    setAddTaskArr(tempTaskArr);
+   // setAddTaskArr(tempTaskArr);
     setChecklistId(tempChecklistId);
   };
 
@@ -1084,7 +1084,7 @@ const EditJob = () => {
   };
 
   const handleAddCheckList = () => {
-    
+
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "warning",
