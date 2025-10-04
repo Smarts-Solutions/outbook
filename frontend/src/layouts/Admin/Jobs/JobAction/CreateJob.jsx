@@ -769,7 +769,6 @@ const CreateJob = () => {
     });
 
     setErrorsBudgetTimeTask(newErrors);
-
     // Return true if all valid
     return Object.keys(newErrors).length === 0;
   };
