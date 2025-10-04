@@ -1096,30 +1096,27 @@ const EditJob = () => {
     setTempChecklistId(getChecklistId);
   };
 
-  let budgeted_hour_totalTime = { hours: "", minutes: "" };
-  if (AddTaskArr.length > 0) {
-    budgeted_hour_totalTime = AddTaskArr.reduce(
-      (acc, task) => {
-        if (task.budgeted_hour != null) {
-          const [hours, minutes] = task.budgeted_hour.split(":").map(Number);
+  // let budgeted_hour_totalTime = { hours: "", minutes: "" };
+  // if (AddTaskArr.length > 0) {
+  //   budgeted_hour_totalTime = AddTaskArr.reduce(
+  //     (acc, task) => {
+  //       if (task.budgeted_hour != null) {
+  //         const [hours, minutes] = task.budgeted_hour.split(":").map(Number);
 
-          acc.hours += hours;
-          acc.minutes += minutes;
+  //         acc.hours += hours;
+  //         acc.minutes += minutes;
 
-          // Convert every 60 minutes into an hour
-          if (acc.minutes >= 60) {
-            acc.hours += Math.floor(acc.minutes / 60);
-            acc.minutes = acc.minutes % 60;
-          }
-        }
-        return acc;
-      },
-      { hours: 0, minutes: 0 }
-    );
-  }
-
-
-  //  console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
+  //         // Convert every 60 minutes into an hour
+  //         if (acc.minutes >= 60) {
+  //           acc.hours += Math.floor(acc.minutes / 60);
+  //           acc.minutes = acc.minutes % 60;
+  //         }
+  //       }
+  //       return acc;
+  //     },
+  //     { hours: 0, minutes: 0 }
+  //   );
+  // }
 
 
   // Years (last 5 + current)

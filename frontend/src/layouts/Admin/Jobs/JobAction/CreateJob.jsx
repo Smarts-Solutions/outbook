@@ -118,7 +118,7 @@ const CreateJob = () => {
 
   });
 
-  console.log("CustomerDetails", jobData.CustomerDetails);
+  // console.log("CustomerDetails", jobData.CustomerDetails);
   // console.log("Reviewer", jobData.Reviewer);
   // console.log("staffCreatedId", staffCreatedId);
   // console.log("selectedStaffData", selectedStaffData);
