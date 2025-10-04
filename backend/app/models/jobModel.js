@@ -1914,8 +1914,6 @@ const getJobById = async (job) => {
         Filing_Date_id_8 : rows[0].Filing_Date_id_8,
         Year_id_28 : rows[0].Year_id_28,
         
-
-
         tasks: {
           checklist_id: rows[0].checklist_id,
           task: tasks,
