@@ -853,6 +853,8 @@ const EditJob = () => {
       },
     };
 
+    
+
     const data = { req: req, authToken: token };
     if (validate()) {
       await dispatch(UpdateJob(data))
@@ -1024,7 +1026,71 @@ const EditJob = () => {
     });
   }, [totalHours]);
 
+  const [errorsBudgetTimeTask, setErrorsBudgetTimeTask] = useState({});
+  const validateBudgetedHours = (tasks) => {
+    const newErrors = {};
+
+    tasks.forEach((task) => {
+      const value = task.budgeted_hour || "";
+      const [hours, minutes] = value.split(":");
+
+      // Convert safely to numbers (default to 0 if NaN or empty)
+      const h = Number(hours) || 0;
+      const m = Number(minutes) || 0;
+
+      // Condition: invalid if missing ":" or both hour and minute are 0 or blank
+      if (
+        !value.includes(":") ||          // missing colon
+        hours === undefined ||           // missing hours
+        minutes === undefined ||         // missing minutes
+        hours.trim() === "" ||           // empty hours
+        minutes.trim() === "" ||         // empty minutes
+        (h === 0 && m === 0)             // both zero
+      ) {
+        newErrors[task.task_id] = "Please enter valid hours or minutes.";
+      }
+    });
+
+    setErrorsBudgetTimeTask(newErrors);
+    // Return true if all valid
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleAddCheckList = () => {
+
+    const isValid = validateBudgetedHours(AddTaskArr);
+    if (!isValid) {
+      console.log("Invalid inputs found");
+      return;
+    }
+
+
+    let budgeted_hour_totalTime = { hours: "", minutes: "" };
+    if (AddTaskArr.length > 0) {
+      budgeted_hour_totalTime = AddTaskArr.reduce(
+        (acc, task) => {
+          if (task.budgeted_hour != null) {
+            const [hours, minutes] = task.budgeted_hour.split(":").map(Number);
+
+            acc.hours += hours;
+            acc.minutes += minutes;
+
+            // Convert every 60 minutes into an hour
+            if (acc.minutes >= 60) {
+              acc.hours += Math.floor(acc.minutes / 60);
+              acc.minutes = acc.minutes % 60;
+            }
+          }
+          return acc;
+        },
+        { hours: 0, minutes: 0 }
+      );
+    }
+
+
+    //  console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
+    setBudgetedHours({ ...budgetedHours, hours: budgeted_hour_totalTime.hours, minutes: budgeted_hour_totalTime.minutes })
+
     jobModalSetStatus(false);
     setTempTaskArr(AddTaskArr);
     setTempChecklistId(getChecklistId);
@@ -1053,7 +1119,7 @@ const EditJob = () => {
   }
 
 
-
+  //  console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
 
 
   // Years (last 5 + current)
@@ -2043,6 +2109,44 @@ const EditJob = () => {
       (getJobDetails.data.staff_created_id === staffCreatedId ||
         getJobDetails.data.customer_staff_id === staffCreatedId))
   );
+
+
+  const handleBudgetTime = (e, index, row, type) => {
+    const { value } = e.target;
+
+    const isValid = /^\d*$/.test(value);
+    if (!isValid) {
+      return;
+    }
+
+    setAddTaskArr((prev) => {
+      // Copy array
+      const updated = [...prev];
+
+      // Split current budgeted_hour into [hour, minute]
+      let [hour, minute] = updated[index].budgeted_hour.split(":");
+
+      if (type === "hour") {
+        //hour = value.padStart(2, "0");
+        hour = value
+      } else if (type === "minute") {
+        // minute = value.padStart(2, "0");
+
+        let numValue = Number(value);
+        if (isNaN(numValue) || numValue < 0) numValue = 0;
+        if (numValue > 59) numValue = 59;
+        minute = numValue.toString()
+      }
+
+      // Update budgeted_hour
+      updated[index] = {
+        ...updated[index],
+        budgeted_hour: `${hour}:${minute}`,
+      };
+
+      return updated;
+    });
+  };
 
 
   return (
@@ -3827,7 +3931,7 @@ const EditJob = () => {
                                                         <th>Action</th>
                                                       </tr>
                                                     </thead>
-                                                    <tbody className="list form-check-all">
+                                                    {/* <tbody className="list form-check-all">
                                                       {AddTaskArr &&
                                                         AddTaskArr.map(
                                                           (checklist) => (
@@ -3837,23 +3941,6 @@ const EditJob = () => {
                                                                   checklist.task_name
                                                                 }{" "}
                                                               </td>
-                                                              {/* <td>
-                                                                {checklist.budgeted_hour !=
-                                                                  null
-                                                                  ? checklist.budgeted_hour.split(
-                                                                    ":"
-                                                                  )[0]
-                                                                  : "0"}
-                                                                h
-                                                                {checklist.budgeted_hour !=
-                                                                  null
-                                                                  ? checklist.budgeted_hour.split(
-                                                                    ":"
-                                                                  )[1]
-                                                                  : "0"}
-                                                                m
-                                                              </td> */}
-
                                                               <td>
                                                                 {checklist?.budgeted_hour
                                                                   ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
@@ -3878,6 +3965,63 @@ const EditJob = () => {
                                                             </tr>
                                                           )
                                                         )}
+                                                    </tbody> */}
+                                                    <tbody className="list form-check-all">
+                                                      {AddTaskArr &&
+                                                        AddTaskArr.map((checklist, index) => {
+                                                          // split hours and minutes safely
+                                                          const [hours, minutes] = (checklist?.budgeted_hour || "0:0").split(":");
+                                                          const error = errorsBudgetTimeTask[checklist.task_id];
+
+                                                          return (
+                                                            <tr key={checklist.task_id || index}>
+                                                              <td>{checklist.task_name} </td>
+
+                                                              {/* Editable Budgeted Hour/Minutes */}
+                                                              <td>
+                                                                <div className="input-group">
+                                                                  {/* Hours */}
+                                                                  <input
+                                                                    type="text"
+                                                                    className="form-control"
+                                                                    value={hours}
+                                                                    onChange={(e) => handleBudgetTime(e, index, checklist, "hour")}
+                                                                    style={{ width: "80px", marginRight: "5px" }}
+                                                                  />
+                                                                  <span className="input-group-text">h</span>
+
+                                                                  {/* Minutes */}
+                                                                  <input
+                                                                    type="text"
+                                                                    className="form-control"
+                                                                    value={minutes}
+                                                                    onChange={(e) => handleBudgetTime(e, index, checklist, "minute")}
+                                                                    style={{ width: "80px", marginRight: "5px" }}
+
+
+                                                                  />
+                                                                  <span className="input-group-text">m</span>
+                                                                </div>
+                                                                {error && (
+                                                                  <div className="error-text text-danger">
+                                                                    {error}
+                                                                  </div>
+                                                                )}
+                                                              </td>
+
+                                                              <td>
+                                                                <div className="add">
+                                                                  <button className="delete-icon">
+                                                                    <i
+                                                                      className="ti-trash text-danger"
+                                                                      onClick={() => RemoveTask(checklist.task_id)}
+                                                                    ></i>
+                                                                  </button>
+                                                                </div>
+                                                              </td>
+                                                            </tr>
+                                                          );
+                                                        })}
                                                     </tbody>
                                                   </table>
                                                 </div>

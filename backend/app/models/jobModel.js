@@ -8,7 +8,7 @@ const {
 } = require("../../app/utils/helper");
 
 const getAddJobData = async (job) => {
-  const { customer_id ,StaffUserId} = job;
+  const { customer_id, StaffUserId } = job;
   // customer Client
   try {
     const queryCustomerWithClient = `
@@ -30,7 +30,7 @@ const getAddJobData = async (job) => {
   `;
     const [rows] = await pool.execute(queryCustomerWithClient, [customer_id]);
 
-  
+
     let customer = [];
     let client = [];
     if (rows.length > 0) {
@@ -48,7 +48,7 @@ const getAddJobData = async (job) => {
     }
 
 
-     const queryCustomerDetails = `
+    const queryCustomerDetails = `
     SELECT  
         customers.id AS customer_id,
         customers.trading_name AS customer_trading_name,
@@ -67,7 +67,7 @@ const getAddJobData = async (job) => {
     const [customerDetails] = await pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
 
 
-   
+
 
 
     // CustomerAccountManager
@@ -354,9 +354,9 @@ const jobAdd = async (job) => {
 
   // console.log("selectedStaffData", selectedStaffData);
   //  console.log("job", job);
-   
 
-  
+
+
 
   let notes = job.notes == undefined ? "" : job.notes;
 
@@ -693,10 +693,10 @@ VALUES (
     // Apply the undefined check for each field
     const cleanedValues = values.map(handleUndefined);
 
-   // console.log("cleanedValues", JSON.stringify(cleanedValues));
+    // console.log("cleanedValues", JSON.stringify(cleanedValues));
     //console.log("query", query);
 
-  //  return
+    //  return
 
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
@@ -948,18 +948,18 @@ const getJobByCustomer = async (job) => {
     const [result] = await pool.execute(query);
 
 
-      //////-----START Assign Customer Service Data START----////////
-   let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
-   if(isExistAssignCustomer != undefined){
-    let matched = result?.filter(item =>
-      item?.assigned_source === 'assign_customer_service' &&
-      Number(item?.service_id_assign) === Number(item?.job_service_id)
-    )
-    let matched2 = result?.filter(item =>
-    item?.assigned_source !== 'assign_customer_service'
-    )
-    const resultAssignCustomer = [...matched, ...matched2]
-    return { status: true, message: "Success.", data: resultAssignCustomer };
+    //////-----START Assign Customer Service Data START----////////
+    let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+    if (isExistAssignCustomer != undefined) {
+      let matched = result?.filter(item =>
+        item?.assigned_source === 'assign_customer_service' &&
+        Number(item?.service_id_assign) === Number(item?.job_service_id)
+      )
+      let matched2 = result?.filter(item =>
+        item?.assigned_source !== 'assign_customer_service'
+      )
+      const resultAssignCustomer = [...matched, ...matched2]
+      return { status: true, message: "Success.", data: resultAssignCustomer };
     }
     //////-----END Assign Customer Service Data END----////////
 
@@ -976,8 +976,8 @@ const getJobByCustomer = async (job) => {
 async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
   try {
-    
-    
+
+
     const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
 
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -1044,8 +1044,8 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
       const [rows] = await pool.execute(query);
       return { status: true, message: "Success.", data: rows };
     }
-   
-   
+
+
     // Other Role data
     // const query = `
     //     SELECT 
@@ -1062,15 +1062,15 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
     //     jobs.total_hours AS total_hours,
     //     jobs.total_hours_status AS total_hours_status,
 
-   
+
     //     staffs.id AS allocated_id,
     //     staffs.first_name AS allocated_first_name,
     //     staffs.last_name AS allocated_last_name,
-   
+
     //     staffs2.id AS reviewer_id,
     //     staffs2.first_name AS reviewer_first_name,
     //     staffs2.last_name AS reviewer_last_name,
-   
+
     //     staffs3.id AS outbooks_acount_manager_id,
     //     staffs3.first_name AS outbooks_acount_manager_first_name,
     //     staffs3.last_name AS outbooks_acount_manager_last_name,
@@ -1088,7 +1088,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
     //         SUBSTRING(job_types.type, 1, 4), '_',
     //         SUBSTRING(jobs.job_id, 1, 15)
     //         ) AS job_code_id
-   
+
     //     FROM 
     //     jobs
     //     LEFT JOIN 
@@ -1127,7 +1127,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
 
 
-     const query = `
+    const query = `
         SELECT 
         jobs.id AS job_id,
         timesheet.job_id AS timesheet_job_id,
@@ -1197,23 +1197,23 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         ORDER BY 
         jobs.id DESC;
      `;
-      
-     const [result] = await pool.execute(query);
-   
-    //////-----START Assign Customer Service Data START----////////
-   let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
-   if(isExistAssignCustomer != undefined){
-    let matched = result?.filter(item =>
-      item?.assigned_source === 'assign_customer_service' &&
-      Number(item?.service_id_assign) === Number(item?.job_service_id)
-    )
-    let matched2 = result?.filter(item =>
-    item?.assigned_source !== 'assign_customer_service'
-    )
-    const resultAssignCustomer = [...matched, ...matched2]
 
-    
-    return { status: true, message: "Success.", data: resultAssignCustomer };
+    const [result] = await pool.execute(query);
+
+    //////-----START Assign Customer Service Data START----////////
+    let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+    if (isExistAssignCustomer != undefined) {
+      let matched = result?.filter(item =>
+        item?.assigned_source === 'assign_customer_service' &&
+        Number(item?.service_id_assign) === Number(item?.job_service_id)
+      )
+      let matched2 = result?.filter(item =>
+        item?.assigned_source !== 'assign_customer_service'
+      )
+      const resultAssignCustomer = [...matched, ...matched2]
+
+
+      return { status: true, message: "Success.", data: resultAssignCustomer };
     }
     //////-----END Assign Customer Service Data END----////////
 
@@ -1382,22 +1382,22 @@ const getJobByClient = async (job) => {
     const [result] = await pool.execute(query);
 
 
-      //////-----START Assign Customer Service Data START----////////
-   let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
-   if(isExistAssignCustomer != undefined){
-    let matched = result?.filter(item =>
-      item?.assigned_source === 'assign_customer_service' &&
-      Number(item?.service_id_assign) === Number(item?.job_service_id)
-    )
-    let matched2 = result?.filter(item =>
-    item?.assigned_source !== 'assign_customer_service'
-    )
-    const resultAssignCustomer = [...matched, ...matched2]
-    return { status: true, message: "Success.", data: resultAssignCustomer };
+    //////-----START Assign Customer Service Data START----////////
+    let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+    if (isExistAssignCustomer != undefined) {
+      let matched = result?.filter(item =>
+        item?.assigned_source === 'assign_customer_service' &&
+        Number(item?.service_id_assign) === Number(item?.job_service_id)
+      )
+      let matched2 = result?.filter(item =>
+        item?.assigned_source !== 'assign_customer_service'
+      )
+      const resultAssignCustomer = [...matched, ...matched2]
+      return { status: true, message: "Success.", data: resultAssignCustomer };
     }
     //////-----END Assign Customer Service Data END----////////
 
-    
+
 
     return { status: true, message: "Success.", data: result };
   } catch (error) {
@@ -1697,7 +1697,7 @@ const getJobById = async (job) => {
 
     //  checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
     //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
- 
+
     const [rows] = await pool.execute(query, [job_id]);
     const [selectedStaffData] = await pool.execute(
       `SELECT CONCAT(staffs.first_name, ' ', staffs.last_name) AS label , staffs.id AS value
@@ -1851,69 +1851,69 @@ const getJobById = async (job) => {
         Management_Accounts_Frequency_id_6: rows[0].Management_Accounts_Frequency_id_6,
 
 
-        Year_Ending_id_1 : rows[0].Year_Ending_id_1,
-        Day_Date_id_2 : rows[0].Day_Date_id_2,
-        Week_Year_id_2 : rows[0].Week_Year_id_2,
-        Week_Month_id_2 : rows[0].Week_Month_id_2,
-        Week_id_2 : rows[0].Week_id_2,
-        Fortnight_Year_id_2 : rows[0].Fortnight_Year_id_2,
-        Fortnight_Month_id_2 : rows[0].Fortnight_Month_id_2,
-        Fortnight_id_2 : rows[0].Fortnight_id_2,
-        Month_Year_id_2 : rows[0].Month_Year_id_2,
-        Month_id_2 : rows[0].Month_id_2,
-        Quarter_Year_id_2 : rows[0].Quarter_Year_id_2,
-        Quarter_id_2 : rows[0].Quarter_id_2,
-        Year_id_2 : rows[0].Year_id_2,
-        Other_FromDate_id_2 : rows[0].Other_FromDate_id_2,
-        Other_ToDate_id_2 : rows[0].Other_ToDate_id_2,
-        Payroll_Week_Year_id_3 : rows[0].Payroll_Week_Year_id_3,
-        Payroll_Week_Month_id_3 : rows[0].Payroll_Week_Month_id_3,
-        Payroll_Week_id_3 : rows[0].Payroll_Week_id_3,
-        Payroll_Fortnight_Year_id_3 : rows[0].Payroll_Fortnight_Year_id_3,
-        Payroll_Fortnight_Month_id_3 : rows[0].Payroll_Fortnight_Month_id_3,
-        Payroll_Fortnight_id_3 : rows[0].Payroll_Fortnight_id_3,
-        Payroll_Month_Year_id_3 : rows[0].Payroll_Month_Year_id_3,
-        Payroll_Month_id_3 : rows[0].Payroll_Month_id_3,
-        Payroll_Quarter_Year_id_3 : rows[0].Payroll_Quarter_Year_id_3,
-        Payroll_Quarter_id_3 : rows[0].Payroll_Quarter_id_3,
-        Payroll_Year_id_3 : rows[0].Payroll_Year_id_3,
-        Tax_Year_id_4 : rows[0].Tax_Year_id_4,
-        Management_Accounts_FromDate_id_6 : rows[0].Management_Accounts_FromDate_id_6,
-        Management_Accounts_ToDate_id_6 : rows[0].Management_Accounts_ToDate_id_6,
-        Year_id_33 : rows[0].Year_id_33,
-        Period_id_32 : rows[0].Period_id_32,
-        Day_Date_id_32 : rows[0].Day_Date_id_32,
-        Week_Year_id_32 : rows[0].Week_Year_id_32,
-        Week_Month_id_32 : rows[0].Week_Month_id_32,
-        Week_id_32 : rows[0].Week_id_32,
-        Fortnight_Year_id_32 : rows[0].Fortnight_Year_id_32,
-        Fortnight_Month_id_32 : rows[0].Fortnight_Month_id_32,
-        Fortnight_id_32 : rows[0].Fortnight_id_32,
-        Month_Year_id_32 : rows[0].Month_Year_id_32,
-        Month_id_32 : rows[0].Month_id_32,
-        Quarter_Year_id_32 : rows[0].Quarter_Year_id_32,
-        Quarter_id_32 : rows[0].Quarter_id_32,
-        Year_id_32 : rows[0].Year_id_32,
-        Other_FromDate_id_32 : rows[0].Other_FromDate_id_32,
-        Other_ToDate_id_32 : rows[0].Other_ToDate_id_32,
-        Payroll_Frequency_id_31 : rows[0].Payroll_Frequency_id_31,
-        Payroll_Week_Year_id_31 : rows[0].Payroll_Week_Year_id_31,
-        Payroll_Week_Month_id_31 : rows[0].Payroll_Week_Month_id_31,
-        Payroll_Week_id_31 : rows[0].Payroll_Week_id_31,
-        Payroll_Fortnight_Year_id_31 : rows[0].Payroll_Fortnight_Year_id_31,
-        Payroll_Fortnight_Month_id_31 : rows[0].Payroll_Fortnight_Month_id_31,
-        Payroll_Fortnight_id_31 : rows[0].Payroll_Fortnight_id_31,
-        Payroll_Month_Year_id_31 : rows[0].Payroll_Month_Year_id_31,
-        Payroll_Month_id_31 : rows[0].Payroll_Month_id_31,
-        Payroll_Quarter_Year_id_31 : rows[0].Payroll_Quarter_Year_id_31,
-        Payroll_Quarter_id_31 : rows[0].Payroll_Quarter_id_31,
-        Payroll_Year_id_31 : rows[0].Payroll_Year_id_31,
-        Audit_Year_Ending_id_27 : rows[0].Audit_Year_Ending_id_27,
-        Filing_Frequency_id_8 : rows[0].Filing_Frequency_id_8,
-        Period_Ending_Date_id_8 : rows[0].Period_Ending_Date_id_8,
-        Filing_Date_id_8 : rows[0].Filing_Date_id_8,
-        Year_id_28 : rows[0].Year_id_28,
-        
+        Year_Ending_id_1: rows[0].Year_Ending_id_1,
+        Day_Date_id_2: rows[0].Day_Date_id_2,
+        Week_Year_id_2: rows[0].Week_Year_id_2,
+        Week_Month_id_2: rows[0].Week_Month_id_2,
+        Week_id_2: rows[0].Week_id_2,
+        Fortnight_Year_id_2: rows[0].Fortnight_Year_id_2,
+        Fortnight_Month_id_2: rows[0].Fortnight_Month_id_2,
+        Fortnight_id_2: rows[0].Fortnight_id_2,
+        Month_Year_id_2: rows[0].Month_Year_id_2,
+        Month_id_2: rows[0].Month_id_2,
+        Quarter_Year_id_2: rows[0].Quarter_Year_id_2,
+        Quarter_id_2: rows[0].Quarter_id_2,
+        Year_id_2: rows[0].Year_id_2,
+        Other_FromDate_id_2: rows[0].Other_FromDate_id_2,
+        Other_ToDate_id_2: rows[0].Other_ToDate_id_2,
+        Payroll_Week_Year_id_3: rows[0].Payroll_Week_Year_id_3,
+        Payroll_Week_Month_id_3: rows[0].Payroll_Week_Month_id_3,
+        Payroll_Week_id_3: rows[0].Payroll_Week_id_3,
+        Payroll_Fortnight_Year_id_3: rows[0].Payroll_Fortnight_Year_id_3,
+        Payroll_Fortnight_Month_id_3: rows[0].Payroll_Fortnight_Month_id_3,
+        Payroll_Fortnight_id_3: rows[0].Payroll_Fortnight_id_3,
+        Payroll_Month_Year_id_3: rows[0].Payroll_Month_Year_id_3,
+        Payroll_Month_id_3: rows[0].Payroll_Month_id_3,
+        Payroll_Quarter_Year_id_3: rows[0].Payroll_Quarter_Year_id_3,
+        Payroll_Quarter_id_3: rows[0].Payroll_Quarter_id_3,
+        Payroll_Year_id_3: rows[0].Payroll_Year_id_3,
+        Tax_Year_id_4: rows[0].Tax_Year_id_4,
+        Management_Accounts_FromDate_id_6: rows[0].Management_Accounts_FromDate_id_6,
+        Management_Accounts_ToDate_id_6: rows[0].Management_Accounts_ToDate_id_6,
+        Year_id_33: rows[0].Year_id_33,
+        Period_id_32: rows[0].Period_id_32,
+        Day_Date_id_32: rows[0].Day_Date_id_32,
+        Week_Year_id_32: rows[0].Week_Year_id_32,
+        Week_Month_id_32: rows[0].Week_Month_id_32,
+        Week_id_32: rows[0].Week_id_32,
+        Fortnight_Year_id_32: rows[0].Fortnight_Year_id_32,
+        Fortnight_Month_id_32: rows[0].Fortnight_Month_id_32,
+        Fortnight_id_32: rows[0].Fortnight_id_32,
+        Month_Year_id_32: rows[0].Month_Year_id_32,
+        Month_id_32: rows[0].Month_id_32,
+        Quarter_Year_id_32: rows[0].Quarter_Year_id_32,
+        Quarter_id_32: rows[0].Quarter_id_32,
+        Year_id_32: rows[0].Year_id_32,
+        Other_FromDate_id_32: rows[0].Other_FromDate_id_32,
+        Other_ToDate_id_32: rows[0].Other_ToDate_id_32,
+        Payroll_Frequency_id_31: rows[0].Payroll_Frequency_id_31,
+        Payroll_Week_Year_id_31: rows[0].Payroll_Week_Year_id_31,
+        Payroll_Week_Month_id_31: rows[0].Payroll_Week_Month_id_31,
+        Payroll_Week_id_31: rows[0].Payroll_Week_id_31,
+        Payroll_Fortnight_Year_id_31: rows[0].Payroll_Fortnight_Year_id_31,
+        Payroll_Fortnight_Month_id_31: rows[0].Payroll_Fortnight_Month_id_31,
+        Payroll_Fortnight_id_31: rows[0].Payroll_Fortnight_id_31,
+        Payroll_Month_Year_id_31: rows[0].Payroll_Month_Year_id_31,
+        Payroll_Month_id_31: rows[0].Payroll_Month_id_31,
+        Payroll_Quarter_Year_id_31: rows[0].Payroll_Quarter_Year_id_31,
+        Payroll_Quarter_id_31: rows[0].Payroll_Quarter_id_31,
+        Payroll_Year_id_31: rows[0].Payroll_Year_id_31,
+        Audit_Year_Ending_id_27: rows[0].Audit_Year_Ending_id_27,
+        Filing_Frequency_id_8: rows[0].Filing_Frequency_id_8,
+        Period_Ending_Date_id_8: rows[0].Period_Ending_Date_id_8,
+        Filing_Date_id_8: rows[0].Filing_Date_id_8,
+        Year_id_28: rows[0].Year_id_28,
+
         tasks: {
           checklist_id: rows[0].checklist_id,
           task: tasks,
@@ -2400,6 +2400,9 @@ const jobUpdate = async (job) => {
           ]);
         }
         // Insert or update tasks
+
+        console.log("tasks --  ", tasks);
+
         for (const tsk of tasks.task) {
           let task_id = tsk.task_id;
           let task_name = tsk.task_name;
@@ -2438,17 +2441,35 @@ const jobUpdate = async (job) => {
             }
           } else {
             // Update existing task or add to the job
+            console.log("job_id ", job_id);
+            console.log("client_id ", client_id);
+            console.log("task_id ", task_id);
+            console.log("budgeted_hour ", budgeted_hour);
+
+            // const query = `
+            //     INSERT INTO client_job_task (job_id, client_id, task_id,time)
+            //     VALUES (?, ?, ?, ?)
+            //     ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), job_id = VALUES(job_id);
+            //   `;
+            // await pool.execute(query, [
+            //   job_id,
+            //   client_id,
+            //   task_id,
+            //   budgeted_hour,
+            // ]);
+
             const query = `
-                INSERT INTO client_job_task (job_id, client_id, task_id,time)
-                VALUES (?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), job_id = VALUES(job_id);
-              `;
-            await pool.execute(query, [
-              job_id,
-              client_id,
-              task_id,
-              budgeted_hour,
-            ]);
+              UPDATE client_job_task
+              SET 
+                time = ?
+              WHERE 
+                job_id = ? 
+                AND client_id = ? 
+                AND task_id = ?;
+            `;
+            await pool.execute(query, [ budgeted_hour,job_id,client_id, task_id]);
+
+
           }
         }
       }
