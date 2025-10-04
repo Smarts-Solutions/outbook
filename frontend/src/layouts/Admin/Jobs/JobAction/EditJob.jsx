@@ -656,7 +656,7 @@ const EditJob = () => {
     const { name, value } = e.target;
 
     if (name === "JobType") {
-      if (!["",undefined,null].includes(value) && Number(existJobTypeId) === (Number(value))) {
+      if (!["", undefined, null].includes(value) && Number(existJobTypeId) === (Number(value))) {
         setAddTaskArr(existAddTaskArr);
       } else {
         setAddTaskArr([]);
@@ -785,6 +785,19 @@ const EditJob = () => {
   }
 
   const handleSubmit = async () => {
+
+    if (AddTaskArr.length === 0) {
+      sweatalert.fire({
+        icon: "error",
+        title: "Please add at least one task.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
+
+
     const req = {
       job_id: location.state.job_id,
       ...jobData,
@@ -1071,7 +1084,8 @@ const EditJob = () => {
   };
 
   const handleAddCheckList = () => {
-    if(AddTaskArr.length===0){
+    
+    if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "warning",
         title: "Please add at least one task.",
