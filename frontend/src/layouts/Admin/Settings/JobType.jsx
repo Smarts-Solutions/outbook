@@ -167,7 +167,7 @@ const Setting = () => {
                   <i className="fa fa-plus pe-1"></i> Add Task
                 </button>
 
-                
+
               </div>
             </div>
           </div>
@@ -198,13 +198,13 @@ const Setting = () => {
               <i className="fa fa-plus pe-1"></i> Add Task
             </button> */}
 
-             <button
+            <button
               className="btn btn-sm btn-info text-white"
               onClick={(e) => {
-                navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab ,service_id : location.state.Id } });
+                navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab, service_id: location.state.Id } });
               }}
             >
-              <i className="fa fa-plus pe-1"></i> Add Task 
+              <i className="fa fa-plus pe-1"></i> Add Task
             </button>
           </div>
         </>
@@ -711,6 +711,7 @@ const Setting = () => {
                 <tr>
                   <th className="">Sr. No</th>
                   <th className="tabel_left">Task</th>
+                  <th className="tabel_left">Budgeted Time</th>
                 </tr>
               </thead>
               <tbody className="list form-check-all">
@@ -718,6 +719,12 @@ const Setting = () => {
                   <tr className="tabel_new" key={index}>
                     <td>{index + 1}</td>
                     <td>{task.name}</td>
+                   
+                    <td>
+                      {task?.budgeted_hour
+                        ? `${task?.budgeted_hour.split(":")[0]} Hours ${task?.budgeted_hour.split(":")[1]} Minutes`
+                        : ""}
+                    </td>
                   </tr>
                 ))}
               </tbody>

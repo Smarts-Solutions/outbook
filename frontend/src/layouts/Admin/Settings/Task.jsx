@@ -76,8 +76,10 @@ const Setting = () => {
       width: "20%",
     },
     {
-      name: "Budgeted Hour",
-      selector: (row) => row?.budgeted_hour,
+      name: "Budgeted Time",
+      selector: (row) => row?.budgeted_hour
+                        ? `${row?.budgeted_hour.split(":")[0]} Hours ${row?.budgeted_hour.split(":")[1]} Minutes`
+                        : "",
       sortable: true,
       width: "20%",
     },
