@@ -1687,8 +1687,7 @@ const getJobById = async (job) => {
      countries ON jobs.currency = countries.id
      LEFT JOIN 
      client_job_task ON client_job_task.job_id = jobs.id
-     LEFT JOIN
-     task ON client_job_task.task_id = task.id
+     LEFT JOIN task ON client_job_task.task_id = task.id
      LEFT JOIN
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE
@@ -1708,16 +1707,27 @@ const getJobById = async (job) => {
       [job_id]
     );
 
-   
-    console.log("rows", rows);
+
+    const [taskData] = await pool.execute(
+      `SELECT 
+      client_job_task.task_id AS task_id,
+      client_job_task.time AS budgeted_hour,
+      task.name AS task_name
+      FROM client_job_task
+      JOIN task ON client_job_task.task_id = task.id
+      WHERE client_job_task.job_id = ${job_id}`
+    );
+
+    // console.log("rows", rows);
+    // console.log("taskData", taskData);
     let result = {};
     if (rows.length > 0) {
       let tasks = [];
-      if (rows[0].task_id !== null) {
-        tasks = await rows.map((row) => ({
-          task_id: row.task_id,
-          task_name: row.task_name,
-          budgeted_hour: row.task_budgeted_hour,
+      if (taskData.length > 0) {
+        tasks = await taskData?.map((row) => ({
+          task_id: row?.task_id,
+          task_name: row?.task_name,
+          budgeted_hour: row?.budgeted_hour
         }));
       }
 

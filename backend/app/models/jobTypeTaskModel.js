@@ -818,7 +818,7 @@ const getByServiceWithJobType = async (checklist) => {
     ORDER BY task.id DESC;`
     try {
     const [result] = await pool.execute(query);
-    console.log("result",result)
+   // console.log("result",result)
     return {
       status: true,
       message: "get Task in Job Create successfully.",

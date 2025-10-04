@@ -229,7 +229,7 @@ const CreateJob = () => {
     getAllChecklist();
   }, [jobData.JobType, AllJobData?.data]);
 
-  console.log("AllChecklistData", AllChecklistData);
+  // console.log("AllChecklistData", AllChecklistData);
 
   const GetJobType = async () => {
     const req = { action: "get", service_id: jobData.Service };
@@ -293,6 +293,10 @@ const CreateJob = () => {
   const HandleChange = (e) => {
     let name = e.target.name;
     let value = e.target.value;
+
+    if(name === "JobType"){
+      setAddTaskArr([]);
+    }
 
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
@@ -497,6 +501,19 @@ const CreateJob = () => {
   }, [AddTaskArr]);
 
   const handleSubmit = async () => {
+   
+   if(AddTaskArr.length === 0){
+    sweatalert.fire({
+      icon: "error",
+      title: "Please add at least one task.",
+      timerProgressBar: true,
+      showConfirmButton: true,
+      timer: 1500,
+    });
+    return;
+    }
+
+   
     const req = {
       selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
@@ -773,8 +790,6 @@ const CreateJob = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
-
   const handleAddCheckList = () => {
     const isValid = validateBudgetedHours(AddTaskArr);
     if (!isValid) {
@@ -784,8 +799,6 @@ const CreateJob = () => {
 
     jobModalSetStatus(false);
   };
-
-
 
   // Years (last 5 + current)
   const getLastFiveYears = () => {
@@ -1257,13 +1270,6 @@ const CreateJob = () => {
           options: getLastFiveYears(),
           showIf: { Payroll_Frequency_id_3: "Yearly" },
         },
-
-
-
-
-
-
-
 
 
 
@@ -1876,7 +1882,6 @@ const CreateJob = () => {
       label: service.service_name
     }))
   ];
-
 
   let isAssignDetails = jobData?.CustomerDetails.find(
     (detail) => detail.assigned_source === "assign_customer_service"

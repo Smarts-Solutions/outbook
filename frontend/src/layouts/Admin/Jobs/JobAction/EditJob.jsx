@@ -47,6 +47,9 @@ const EditJob = () => {
     loading: false,
     data: [],
   });
+
+
+  console.log("AllChecklistData", AllChecklistData);
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [taskNameError, setTaskNameError] = useState("");
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
@@ -81,7 +84,7 @@ const EditJob = () => {
 
 
   // console.log("selectedStaffData", selectedStaffData);
-   console.log("CustomerDetails", CustomerDetails);
+  //  console.log("CustomerDetails", CustomerDetails);
 
 
   const [jobData, setJobData] = useState({
@@ -144,7 +147,7 @@ const EditJob = () => {
       Who_Did_The_Bookkeeping_id_1: "Outbooks",
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
-     // Bookkeeping_Frequency_id_2: "Daily",
+      // Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
       Number_of_Purchase_Invoices_id_2: 0,
@@ -161,7 +164,7 @@ const EditJob = () => {
       Sales_Reconciliation_Required_id_2: "No",
       Factoring_Account_id_2: "Provider Deducts Commission Only",
       Payment_Methods_id_2: "1",
-    //  Payroll_Frequency_id_3: "Weekly",
+      //  Payroll_Frequency_id_3: "Weekly",
       Type_of_Payslip_id_3: "Wages Only",
       Percentage_of_Variable_Payslips_id_3: "0%",
       Is_CIS_Required_id_3: "No",
@@ -173,8 +176,8 @@ const EditJob = () => {
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
       Management_Accounts_Frequency_id_6: "Quarterly",
 
-     
-       ////////////////////////// 
+
+      ////////////////////////// 
       Year_Ending_id_1: null,
 
       Day_Date_id_2: null,
@@ -267,7 +270,7 @@ const EditJob = () => {
       .then(async (response) => {
         if (response.status) {
           if (Object.keys(response.data).length > 0) {
-           
+
             setSelectedStaffData(response.data.selectedStaffData || []);
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
@@ -494,7 +497,7 @@ const EditJob = () => {
               Period_Ending_Date_id_8: response.data.Period_Ending_Date_id_8 ?? null,
               Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
               Year_id_28: response.data.Year_id_28 ?? null,
-              
+
 
 
             }));
@@ -562,6 +565,9 @@ const EditJob = () => {
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
       .then(async (response) => {
+
+        console.log("getChecklistData", response);
+
         if (response.status) {
           setAllChecklistData({
             loading: true,
@@ -580,7 +586,7 @@ const EditJob = () => {
   };
 
   useEffect(() => {
-    getChecklistData();
+    //  getChecklistData();
   }, [getChecklistId]);
 
   const GetJobData = async () => {
@@ -603,7 +609,7 @@ const EditJob = () => {
             loading: true,
             data: [],
           });
-           setAllStaffData([]);
+          setAllStaffData([]);
         }
       })
       .catch((error) => {
@@ -768,7 +774,7 @@ const EditJob = () => {
     const req = {
       job_id: location.state.job_id,
       ...jobData,
-      selectedStaffData:selectedStaffData,
+      selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
         getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
@@ -1050,7 +1056,7 @@ const EditJob = () => {
 
 
 
-    // Years (last 5 + current)
+  // Years (last 5 + current)
   const getLastFiveYears = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
@@ -1220,14 +1226,14 @@ const EditJob = () => {
           key: "Week_Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
         },
         {
           name: "Week",
           key: "Week_id_2",
           type: "dropdown",
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          showIf: { Bookkeeping_Frequency_id_2: "Weekly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
         },
         // Fortnight
         {
@@ -1235,21 +1241,21 @@ const EditJob = () => {
           key: "Fortnight_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
         },
         {
           name: "Month",
           key: "Fortnight_Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
         },
         {
           name: "Fortnight",
           key: "Fortnight_id_2",
           type: "dropdown",
           options: ["1st Half", "2nd Half"],
-          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
         },
         // Month
         {
@@ -1257,14 +1263,14 @@ const EditJob = () => {
           key: "Month_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
         },
         {
           name: "Month",
           key: "Month_id_2",
           type: "dropdown",
           options: getMonths(),
-          showIf: { Bookkeeping_Frequency_id_2: "Monthly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
         },
         // Quarter
         {
@@ -1272,14 +1278,14 @@ const EditJob = () => {
           key: "Quarter_Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
         },
         {
           name: "Quarter",
           key: "Quarter_id_2",
           type: "dropdown",
           options: getQuarters(),
-          showIf: { Bookkeeping_Frequency_id_2: "Quarterly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
         },
         // Year
         {
@@ -1287,20 +1293,20 @@ const EditJob = () => {
           key: "Year_id_2",
           type: "dropdown",
           options: getLastFiveYears(),
-          showIf: { Bookkeeping_Frequency_id_2: "Yearly"},
+          showIf: { Bookkeeping_Frequency_id_2: "Yearly" },
         },
         // Other
         {
           name: "From Date",
           key: "Other_FromDate_id_2",
           type: "date",
-          showIf: { Bookkeeping_Frequency_id_2: "Other"},
+          showIf: { Bookkeeping_Frequency_id_2: "Other" },
         },
         {
           name: "To Date",
           key: "Other_ToDate_id_2",
           type: "date",
-          showIf: { Bookkeeping_Frequency_id_2: "Other"},
+          showIf: { Bookkeeping_Frequency_id_2: "Other" },
         },
 
 
@@ -1639,7 +1645,7 @@ const EditJob = () => {
             "Other",
           ],
         },
-         {
+        {
           name: "Tax Year",
           key: "Tax_Year_id_4",
           type: "dropdown",
@@ -1687,7 +1693,7 @@ const EditJob = () => {
       id: 7, // Company Secretarial
       fields: [],
     },
-     {
+    {
       id: 33, // Aus - Compliance
       fields: [
         {
@@ -1964,7 +1970,7 @@ const EditJob = () => {
   useEffect(() => {
     setServiceFieldsData(
       // serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
-        serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
+      serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
     );
   }, [jobData?.Service]);
 
@@ -1979,7 +1985,7 @@ const EditJob = () => {
   ];
 
   // Select options for Service
-  let  serviceOptions = [
+  let serviceOptions = [
     { value: '', label: 'Select Service' },
     ...(AllJobData?.data?.services || []).map((service) => ({
       value: service.service_id,
@@ -1987,7 +1993,7 @@ const EditJob = () => {
     }))
   ];
 
-   let isAssignDetails = CustomerDetails.find(
+  let isAssignDetails = CustomerDetails.find(
     (detail) => detail.assigned_source === "assign_customer_service"
   );
   if (isAssignDetails != undefined) {
@@ -2323,11 +2329,11 @@ const EditJob = () => {
                                     <Select
                                       name="Service"
                                       id="Service"
-                                       menuPortalTarget={document.body}   
-  styles={{
-    menuPortal: base => ({ ...base, zIndex: 9999 }), 
-    menu: base => ({ ...base, zIndex: 9999 })
-  }}
+                                      menuPortalTarget={document.body}
+                                      styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                        menu: base => ({ ...base, zIndex: 9999 })
+                                      }}
                                       options={serviceOptions}
                                       value={serviceOptions.find(
                                         (opt) => String(opt.value) === String(jobData.Service)
@@ -3019,13 +3025,13 @@ const EditJob = () => {
                                     >
                                       Allocated to (Other)
                                     </label>
-                                  
+
                                     <Select
                                       options={allStaffData
-                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId) 
+                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId)
                                         ?.map((data) => {
-                                        return { label: data.full_name, value: data.id };
-                                      })}
+                                          return { label: data.full_name, value: data.id };
+                                        })}
                                       isMulti
                                       closeMenuOnSelect={false}
                                       className="basic-multi-select"
@@ -3398,45 +3404,45 @@ const EditJob = () => {
                                         )}
                                     </div> */}
                                     <div className="row">
-                                    {serviceFieldsData?.length > 0 &&
-                                      serviceFieldsData?.map((field, index) => {
-                                        // 👇 check if field should be visible
-                                        const isVisible = shouldShowField(field, jobData);
-                                        if (!isVisible) return null;
+                                      {serviceFieldsData?.length > 0 &&
+                                        serviceFieldsData?.map((field, index) => {
+                                          // 👇 check if field should be visible
+                                          const isVisible = shouldShowField(field, jobData);
+                                          if (!isVisible) return null;
 
-                                        return (
-                                          <div className="col-lg-4 mb-3" key={index}>
-                                            <label className="form-label">{field.name}</label>
-                                            {field.type === "dropdown" ? (
-                                              <select
-                                                className="form-control"
-                                                name={field.key}
-                                                onChange={(e) => HandleChange(e)}
-                                                value={jobData[field.key] || ""}
-                                              >
-                                                <option value="">-- Select --</option>
-                                                {field.options?.map((option, i) => (
-                                                  <option value={option} key={i}>
-                                                    {option}
-                                                  </option>
-                                                ))}
-                                              </select>
-                                            ) : (
-                                              <input
-                                                type={field.type || "text"}
-                                                className="form-control"
-                                                placeholder={field.name}
-                                                name={field.key}
-                                                min={field.min}
-                                                max={field.max}
-                                                onChange={(e) => HandleChange(e)}
-                                                value={jobData[field.key] || ""}
-                                              />
-                                            )}
-                                          </div>
-                                        );
-                                      })}
-                                  </div>
+                                          return (
+                                            <div className="col-lg-4 mb-3" key={index}>
+                                              <label className="form-label">{field.name}</label>
+                                              {field.type === "dropdown" ? (
+                                                <select
+                                                  className="form-control"
+                                                  name={field.key}
+                                                  onChange={(e) => HandleChange(e)}
+                                                  value={jobData[field.key] || ""}
+                                                >
+                                                  <option value="">-- Select --</option>
+                                                  {field.options?.map((option, i) => (
+                                                    <option value={option} key={i}>
+                                                      {option}
+                                                    </option>
+                                                  ))}
+                                                </select>
+                                              ) : (
+                                                <input
+                                                  type={field.type || "text"}
+                                                  className="form-control"
+                                                  placeholder={field.name}
+                                                  name={field.key}
+                                                  min={field.min}
+                                                  max={field.max}
+                                                  onChange={(e) => HandleChange(e)}
+                                                  value={jobData[field.key] || ""}
+                                                />
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -3749,7 +3755,7 @@ const EditJob = () => {
                                                                 }{" "}
                                                               </td>
 
-                                                              <td>
+                                                              {/* <td>
                                                                 {" "}
                                                                 {
                                                                   checklist.budgeted_hour.split(
@@ -3763,6 +3769,11 @@ const EditJob = () => {
                                                                   )[1]
                                                                 }
                                                                 m{" "}
+                                                              </td> */}
+                                                              <td>
+                                                                {checklist?.budgeted_hour
+                                                                  ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
+                                                                  : ""}
                                                               </td>
                                                               <td>
                                                                 <div className="add">
@@ -3826,7 +3837,7 @@ const EditJob = () => {
                                                                   checklist.task_name
                                                                 }{" "}
                                                               </td>
-                                                              <td>
+                                                              {/* <td>
                                                                 {checklist.budgeted_hour !=
                                                                   null
                                                                   ? checklist.budgeted_hour.split(
@@ -3841,9 +3852,15 @@ const EditJob = () => {
                                                                   )[1]
                                                                   : "0"}
                                                                 m
+                                                              </td> */}
+
+                                                              <td>
+                                                                {checklist?.budgeted_hour
+                                                                  ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
+                                                                  : ""}
                                                               </td>
 
-                                                              {/* <td>{checklist.budgeted_hour} hr</td> */}
+
                                                               <td>
                                                                 <div className="add">
                                                                   <button className="delete-icon">
