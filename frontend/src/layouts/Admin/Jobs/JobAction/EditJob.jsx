@@ -49,8 +49,10 @@ const EditJob = () => {
   });
 
 
-  console.log("AllChecklistData", AllChecklistData);
+  // console.log("AllChecklistData", AllChecklistData);
   const [AddTaskArr, setAddTaskArr] = useState([]);
+  const [existAddTaskArr, setExistAddTaskArr] = useState([]);
+  const [existJobTypeId, setExistJobTypeId] = useState([]);
   const [taskNameError, setTaskNameError] = useState("");
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [taskName, setTaskName] = useState("");
@@ -276,6 +278,8 @@ const EditJob = () => {
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempTaskArr(response.data.tasks?.task ?? []);
             setAddTaskArr(response.data.tasks?.task ?? []);
+            setExistAddTaskArr(response.data.tasks?.task ?? []);
+            setExistJobTypeId(response.data.job_type_id ?? []);
             setBudgetedHours({
               hours: response.data.budgeted_hours?.split(":")[0] ?? "",
               minutes: response.data.budgeted_hours?.split(":")[1] ?? "",
@@ -651,6 +655,14 @@ const EditJob = () => {
   const HandleChange = (e) => {
     const { name, value } = e.target;
 
+    if (name === "JobType") {
+      if (!["",undefined,null].includes(value) && Number(existJobTypeId) === (Number(value))) {
+        setAddTaskArr(existAddTaskArr);
+      } else {
+        setAddTaskArr([]);
+      }
+    }
+
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
@@ -719,6 +731,8 @@ const EditJob = () => {
     }));
     validate(name, value);
   };
+
+  console.log("setAddTaskArr", AddTaskArr);
 
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
@@ -853,7 +867,7 @@ const EditJob = () => {
       },
     };
 
-    
+
 
     const data = { req: req, authToken: token };
     if (validate()) {
