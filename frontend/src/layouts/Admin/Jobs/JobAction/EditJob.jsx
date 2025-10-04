@@ -1071,7 +1071,18 @@ const EditJob = () => {
   };
 
   const handleAddCheckList = () => {
+    if(AddTaskArr.length===0){
+      sweatalert.fire({
+        icon: "warning",
+        title: "Please add at least one task.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
 
+    // Validate all budgeted_hour fields
     const isValid = validateBudgetedHours(AddTaskArr);
     if (!isValid) {
       console.log("Invalid inputs found");

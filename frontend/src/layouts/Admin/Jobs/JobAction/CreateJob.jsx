@@ -294,7 +294,7 @@ const CreateJob = () => {
     let name = e.target.name;
     let value = e.target.value;
 
-    if(name === "JobType"){
+    if (name === "JobType") {
       setAddTaskArr([]);
     }
 
@@ -501,19 +501,19 @@ const CreateJob = () => {
   }, [AddTaskArr]);
 
   const handleSubmit = async () => {
-   
-   if(AddTaskArr.length === 0){
-    sweatalert.fire({
-      icon: "error",
-      title: "Please add at least one task.",
-      timerProgressBar: true,
-      showConfirmButton: true,
-      timer: 1500,
-    });
-    return;
+
+    if (AddTaskArr.length === 0) {
+      sweatalert.fire({
+        icon: "error",
+        title: "Please add at least one task.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
     }
 
-   
+
     const req = {
       selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
@@ -791,6 +791,18 @@ const CreateJob = () => {
   };
 
   const handleAddCheckList = () => {
+
+    if (AddTaskArr.length === 0) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Please add at least one task.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
+
     const isValid = validateBudgetedHours(AddTaskArr);
     if (!isValid) {
       console.log("Invalid inputs found");
