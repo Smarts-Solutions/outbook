@@ -743,7 +743,46 @@ const CreateJob = () => {
     setChecklistId("");
   };
 
+  const [errorsBudgetTimeTask, setErrorsBudgetTimeTask] = useState({});
+  const validateBudgetedHours = (tasks) => {
+    const newErrors = {};
+
+    tasks.forEach((task) => {
+      const value = task.budgeted_hour || "";
+      const [hours, minutes] = value.split(":");
+
+      // Convert safely to numbers (default to 0 if NaN or empty)
+      const h = Number(hours) || 0;
+      const m = Number(minutes) || 0;
+
+      // Condition: invalid if missing ":" or both hour and minute are 0 or blank
+      if (
+        !value.includes(":") ||          // missing colon
+        hours === undefined ||           // missing hours
+        minutes === undefined ||         // missing minutes
+        hours.trim() === "" ||           // empty hours
+        minutes.trim() === "" ||         // empty minutes
+        (h === 0 && m === 0)             // both zero
+      ) {
+        newErrors[task.task_id] = "Please enter valid hours or minutes.";
+      }
+    });
+
+    setErrorsBudgetTimeTask(newErrors);
+
+    // Return true if all valid
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+
   const handleAddCheckList = () => {
+    const isValid = validateBudgetedHours(AddTaskArr);
+    if (!isValid) {
+      console.log("Invalid inputs found");
+      return;
+    }
+
     jobModalSetStatus(false);
   };
 
@@ -1899,58 +1938,44 @@ const CreateJob = () => {
 
 
   const handleBudgetTime = (e, index, row, type) => {
-  const { value } = e.target;
-  setAddTaskArr((prev) => {
-    // Copy array
-    const updated = [...prev];
+    const { value } = e.target;
 
-    // Split current budgeted_hour into [hour, minute]
-    let [hour, minute] = updated[index].budgeted_hour.split(":");
-
-    if (type === "hour") {
-      hour = value.padStart(2, "0"); // 2 digit maintain
-    } else if (type === "minute") {
-      minute = value.padStart(2, "0");
+    const isValid = /^\d*$/.test(value);
+    if (!isValid) {
+      return;
     }
 
-    // Update budgeted_hour
-    updated[index] = {
-      ...updated[index],
-      budgeted_hour: `${hour}:${minute}`,
-    };
+    setAddTaskArr((prev) => {
+      // Copy array
+      const updated = [...prev];
 
-    return updated;
-  });
-};
+      // Split current budgeted_hour into [hour, minute]
+      let [hour, minute] = updated[index].budgeted_hour.split(":");
 
+      if (type === "hour") {
+        //hour = value.padStart(2, "0");
+        hour = value
+      } else if (type === "minute") {
+        // minute = value.padStart(2, "0");
 
-// const handleBudgetTime = (e, taskId, type) => {
-//   const { value } = e.target;
+        let numValue = Number(value);
+        if (isNaN(numValue) || numValue < 0) numValue = 0;
+        if (numValue > 59) numValue = 59;
+        minute = numValue.toString()
+      }
 
-//   setAddTaskArr((prev) =>
-//     prev.map((task) => {
-//       if (task.task_id === taskId) {
-     
-//         let [hour, minute] = task.budgeted_hour.split(":");
+      // Update budgeted_hour
+      updated[index] = {
+        ...updated[index],
+        budgeted_hour: `${hour}:${minute}`,
+      };
 
-//         if (type === "hour") {
-//           hour = value.padStart(2, "0");
-//         } else if (type === "minute") {
-//           minute = value.padStart(2, "0");
-//         }
-
-//         return {
-//           ...task,
-//           budgeted_hour: `${hour}:${minute}`,
-//         };
-//       }
-//       return task;
-//     })
-//   );
-// };
+      return updated;
+    });
+  };
 
 
-
+  console.log("setAddTaskArr - CreateJob", AddTaskArr);
 
   return (
     <div>
@@ -3763,6 +3788,7 @@ const CreateJob = () => {
                                                 AddTaskArr.map((checklist, index) => {
                                                   // split hours and minutes safely
                                                   const [hours, minutes] = (checklist?.budgeted_hour || "0:0").split(":");
+                                                  const error = errorsBudgetTimeTask[checklist.task_id];
 
                                                   return (
                                                     <tr key={checklist.task_id || index}>
@@ -3773,29 +3799,31 @@ const CreateJob = () => {
                                                         <div className="input-group">
                                                           {/* Hours */}
                                                           <input
-                                                            type="number"
+                                                            type="text"
                                                             className="form-control"
-                                                            defaultValue={hours}
-                                                            min={0}
-                                                            onChange={(e) => handleBudgetTime(e,index,checklist,"hour")}
+                                                            value={hours}
+                                                            onChange={(e) => handleBudgetTime(e, index, checklist, "hour")}
                                                             style={{ width: "80px", marginRight: "5px" }}
                                                           />
                                                           <span className="input-group-text">h</span>
 
                                                           {/* Minutes */}
                                                           <input
-                                                            type="number"
+                                                            type="text"
                                                             className="form-control"
-                                                            defaultValue={minutes}
-                                                            min={0}
-                                                            max={59}
-                                                            onChange={(e) => handleBudgetTime(e,index,checklist,"minute")}
+                                                            value={minutes}
+                                                            onChange={(e) => handleBudgetTime(e, index, checklist, "minute")}
                                                             style={{ width: "80px", marginRight: "5px" }}
 
-                                                            
+
                                                           />
                                                           <span className="input-group-text">m</span>
                                                         </div>
+                                                        {error && (
+                                                          <div className="error-text text-danger">
+                                                            {error}
+                                                          </div>
+                                                        )}
                                                       </td>
 
                                                       <td>
