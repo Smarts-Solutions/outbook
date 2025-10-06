@@ -97,8 +97,13 @@ function TimesheetReport() {
     }
   };
 
-  function formatStringToTitleCase(text) {
+  function formatStringToTitleCase(text,key) {
   if (!text) return "";
+
+  if(key == 'date'){
+    return dayjs(text).format('DD-MM-YYYY');
+  }
+  
   return text
     .replace(/_/g, " ")                 // underscores → spaces
     .toLowerCase()                      // make all lowercase first
@@ -130,8 +135,8 @@ function TimesheetReport() {
             ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}<br/>` : ""}
             ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
             ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
-            ${!['',null,'null',undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate)}<br/>` : ""}
-            ${!['',null,'null',undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate)}` : ""}
+            ${!['',null,'null',undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate,'date')}<br/>` : ""}
+            ${!['',null,'null',undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate,'date')}` : ""}
           `,
 
             filters: item.filter_record
