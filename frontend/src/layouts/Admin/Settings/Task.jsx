@@ -205,39 +205,6 @@ const Setting = () => {
   };
 
   const handleEdit = (data) => {
-    // setModalData({
-    //   ...modalData,
-    //   fields: [
-    //     {
-    //       type: "text",
-    //       name: "name",
-    //       label: "Task Name",
-    //       placeholder: "Enter Task Name",
-    //       value: data.name,
-    //     },
-    //     // {
-    //     //   type: "select",
-    //     //   name: "status",
-    //     //   label: "Status",
-    //     //   placeholder: "Select Status",
-    //     //   value: data.status === "1" ? "1" : "0",
-    //     //   options: [
-    //     //     { label: "Active", value: "1" },
-    //     //     { label: "Deactive", value: "0" },
-    //     //   ],
-    //     // },
-    //   ],
-    //   title: "Task",
-
-    //   id: data.id,
-    //   budgeted_hour: data.budgeted_hour,
-    //   service_id: data.service_id,
-    //   job_type_id: data.job_type_id,
-    // });
-
-    // setIsEdit(true);
-    // setIsModalOpen(true);
-
     setIsModalOpenEditTask(true)
     setTaskEditRow(data)
     setBudgetedHours({

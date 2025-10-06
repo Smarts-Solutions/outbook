@@ -206,7 +206,7 @@ const addTask = async (task) => {
 };
 
 const updateTask = async (task) => {
-  const { id, name, service_id, job_type_id } = task;
+  const { id, name,budgeted_hour, service_id, job_type_id } = task;
    // check task name already exist
   const checkQuery = `
     SELECT id , name FROM task WHERE name = ? AND service_id = ? AND job_type_id = ? AND id != ?
@@ -222,12 +222,13 @@ const updateTask = async (task) => {
   }
   const query = `
     UPDATE task
-    SET name = ?
+    SET name = ?,
+    budgeted_hour = ?
     WHERE id = ? 
     `;
   try {
     
-    const [result] = await pool.execute(query, [name,id]);
+    const [result] = await pool.execute(query, [name,budgeted_hour,id]);
     if (result.changedRows) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
