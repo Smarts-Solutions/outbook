@@ -439,13 +439,11 @@ const jobSummaryReports = async (Report) => {
         // console.log("query", query);
         const [result] = await pool.execute(query);
 
-
-        // Step 1: Conditional filter for assign_customer_service
         const filtered = result?.filter(item => {
             if (item.assigned_source === "assign_customer_service") {
                 return item.service_id_assign === item.job_service_id;
             }
-            return true; // all other sources
+            return true; 
         });
 
         // Step 2: Group only by job_status
@@ -465,7 +463,6 @@ const jobSummaryReports = async (Report) => {
             }, {})
         );
 
-        // Step 3: Convert job_ids array to comma-separated string
         grouped.forEach(obj => {
             obj.job_ids = obj.job_ids.join(",");
         });
@@ -517,30 +514,85 @@ const jobPendingReports = async (Report) => {
 
         // Other Role Data
 
-        const query = `
-       SELECT 
+    //     const query = `
+    //    SELECT 
+    //     master_status.name AS job_status,
+    //     job_types.type AS job_type_name,
+    //     COUNT(jobs.status_type) AS number_of_job,
+    //     GROUP_CONCAT(jobs.id) AS job_ids
+    //     FROM 
+    //         jobs
+    //     LEFT JOIN 
+    //       assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+    //     LEFT JOIN 
+    //     clients ON jobs.client_id = clients.id    
+    //     LEFT JOIN 
+    //         master_status ON master_status.id = jobs.status_type
+    //     JOIN 
+    //         job_types ON jobs.job_type_id = job_types.id
+    //     WHERE
+        // (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) 
+        // AND jobs.status_type != 6 
+    //     GROUP BY 
+    //         master_status.name, jobs.status_type
+    //      `;
+    //     const [result] = await pool.execute(query);
+    //     return { status: true, message: 'Success.', data: result };
+
+    const query = `
+        SELECT 
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
         master_status.name AS job_status,
-        job_types.type AS job_type_name,
-        COUNT(jobs.status_type) AS number_of_job,
-        GROUP_CONCAT(jobs.id) AS job_ids
-        FROM 
+        jobs.id AS job_id
+        FROM
             jobs
-        LEFT JOIN 
+         JOIN
           assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        LEFT JOIN 
-        clients ON jobs.client_id = clients.id    
-        LEFT JOIN 
+         JOIN
+        clients ON jobs.client_id = clients.id
+         JOIN
             master_status ON master_status.id = jobs.status_type
-        JOIN 
-            job_types ON jobs.job_type_id = job_types.id
-        WHERE
+        WHERE 
         (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) 
-        AND jobs.status_type != 6 
-        GROUP BY 
-            master_status.name, jobs.status_type
+        AND jobs.status_type != 6
+        GROUP BY jobs.id;
          `;
+
+        // console.log("query", query);
         const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
+
+        const filtered = result?.filter(item => {
+            if (item.assigned_source === "assign_customer_service") {
+                return item.service_id_assign === item.job_service_id;
+            }
+            return true; 
+        });
+
+        // Step 2: Group only by job_status
+        const grouped = Object.values(
+            filtered.reduce((acc, item) => {
+                const key = item.job_status; // only job_status as key
+                if (!acc[key]) {
+                    acc[key] = {
+                        job_status: key,
+                        number_of_job: 0,
+                        job_ids: []
+                    };
+                }
+                acc[key].number_of_job += 1;
+                acc[key].job_ids.push(item.job_id);
+                return acc;
+            }, {})
+        );
+
+        grouped.forEach(obj => {
+            obj.job_ids = obj.job_ids.join(",");
+        });
+
+        return { status: true, message: 'Success.', data: grouped };
 
 
 
