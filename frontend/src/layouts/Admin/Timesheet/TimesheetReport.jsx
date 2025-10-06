@@ -116,6 +116,7 @@ function TimesheetReport() {
             
           console.log("getAllFilters response ", response.data);
           const data = response?.data?.map((item) => ({
+            
             value: item.id,
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
             label: `
@@ -126,11 +127,11 @@ function TimesheetReport() {
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
             ${item.task_name ? `⮞ Task : ${item.task_name}<br/>` : ""}
             ${item.internal_job_name ? `⮞ Internal Job : ${item.internal_job_name}<br/>` : ""}
-            ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}` : ""}
-            ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}` : ""}
-            ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}` : ""}
-            ${item.fromDate ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate)}` : ""}
-            ${item.toDate ? `⮞ To Date : ${formatStringToTitleCase(item.toDate)}` : ""}
+            ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}<br/>` : ""}
+            ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
+            ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
+            ${!['',null,'null',undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate)}<br/>` : ""}
+            ${!['',null,'null',undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate)}` : ""}
           `,
 
             filters: item.filter_record
