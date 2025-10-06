@@ -375,9 +375,10 @@ const jobSummaryReports = async (Report) => {
         jobs.service_id AS job_service_id,
 
         master_status.name AS job_status,
-        master_status.name AS job_status,
-        COUNT(jobs.status_type) AS number_of_job,
-        GROUP_CONCAT(jobs.id) AS job_ids
+
+        -- COUNT(jobs.status_type) AS number_of_job 
+        COUNT(DISTINCT jobs.id) AS number_of_job,
+        GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
         FROM 
             jobs
         LEFT JOIN 
@@ -389,7 +390,7 @@ const jobSummaryReports = async (Report) => {
         WHERE 
             assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
         GROUP BY 
-             master_status.name, jobs.status_type
+            master_status.name, jobs.status_type
          `;
         const [result] = await pool.execute(query);
 
