@@ -653,7 +653,11 @@ const teamMonthlyReports = async (Report) => {
         GROUP BY 
             staffs.id
          `;
+       
         const [result] = await pool.execute(query);
+      
+        // console.log("result -- ", result);
+
         return { status: true, message: 'Success.', data: result };
 
     } catch (error) {
