@@ -326,8 +326,7 @@ const jobReceivedSentReports = async (Report) => {
             };
         });
 
-
-        // console.log("result", result);
+         console.log("result", result);
         return { status: true, message: 'Success.', data: result };
 
     } catch (error) {
@@ -723,6 +722,7 @@ const reportCountJob = async (Report) => {
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type    
         WHERE jobs.id IN (`+ cleaneJob_ids + `) 
+        GROUP BY jobs.id
         ORDER BY
         jobs.id DESC;
         `;
@@ -793,7 +793,8 @@ const reportCountJob = async (Report) => {
         master_status ON master_status.id = jobs.status_type    
         WHERE 
         (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
-        AND jobs.id IN (`+ cleaneJob_ids + `) 
+        AND jobs.id IN (`+ cleaneJob_ids + `)
+        GROUP BY jobs.id
         ORDER BY
         jobs.id DESC;
         `;
