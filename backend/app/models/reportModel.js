@@ -326,7 +326,7 @@ const jobReceivedSentReports = async (Report) => {
             };
         });
 
-         //console.log("result", result);
+        //console.log("result", result);
         return { status: true, message: 'Success.', data: result };
 
     } catch (error) {
@@ -367,52 +367,110 @@ const jobSummaryReports = async (Report) => {
         }
 
         // Other Role Data
+        // const query = `
+        // SELECT 
+
+        // assigned_jobs_staff_view.source AS assigned_source,
+        // assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        // jobs.service_id AS job_service_id,
+
+        // master_status.name AS job_status,
+
+        // -- COUNT(jobs.status_type) AS number_of_job 
+        // COUNT(DISTINCT jobs.id) AS number_of_job,
+        // GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
+        // FROM 
+        //     jobs
+        //  JOIN 
+        //   assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id 
+        //    AND COALESCE(assigned_jobs_staff_view.service_id_assign, 0) = COALESCE(jobs.service_id, 0)
+        //  JOIN 
+        // clients ON jobs.client_id = clients.id    
+        //  JOIN 
+        //     master_status ON master_status.id = jobs.status_type
+        // WHERE 
+        //     assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
+        // GROUP BY 
+        //     master_status.name, jobs.status_type
+        //  `;
+
+        //  const [result] = await pool.execute(query);
+
+       //////-----START Assign Customer Service Data START----////////
+        // let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
+        // if (isExistAssignCustomer != undefined) {
+        //     let matched = result?.filter(item =>
+        //         item?.assigned_source === 'assign_customer_service' &&
+        //         Number(item?.service_id_assign) === Number(item?.job_service_id)
+        //     )
+        //     let matched2 = result?.filter(item =>
+        //         item?.assigned_source !== 'assign_customer_service'
+        //     )
+        //     const resultAssignCustomer = [...matched, ...matched2]
+        //     return { status: true, message: "Success.", data: resultAssignCustomer };
+        // }
+        // //////-----END Assign Customer Service Data END----////////
+
+        // return { status: true, message: 'Success.', data: result };
+
+
+
         const query = `
         SELECT 
-
         assigned_jobs_staff_view.source AS assigned_source,
         assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
 
         master_status.name AS job_status,
-
-        -- COUNT(jobs.status_type) AS number_of_job 
-        COUNT(DISTINCT jobs.id) AS number_of_job,
-        GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
-        FROM 
+        jobs.id AS job_id
+        FROM
             jobs
-        LEFT JOIN 
+         JOIN
           assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        LEFT JOIN 
-        clients ON jobs.client_id = clients.id    
-        LEFT JOIN 
+         JOIN
+        clients ON jobs.client_id = clients.id
+         JOIN
             master_status ON master_status.id = jobs.status_type
         WHERE 
             assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
-        GROUP BY 
-            master_status.name, jobs.status_type
+        GROUP BY jobs.id;
          `;
+
+        // console.log("query", query);
         const [result] = await pool.execute(query);
 
 
-        console.log("result", result);
+        // Step 1: Conditional filter for assign_customer_service
+        const filtered = result?.filter(item => {
+            if (item.assigned_source === "assign_customer_service") {
+                return item.service_id_assign === item.job_service_id;
+            }
+            return true; // all other sources
+        });
 
-        //////-----START Assign Customer Service Data START----////////
-        let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
-        if (isExistAssignCustomer != undefined) {
-            let matched = result?.filter(item =>
-                item?.assigned_source === 'assign_customer_service' &&
-                Number(item?.service_id_assign) === Number(item?.job_service_id)
-            )
-            let matched2 = result?.filter(item =>
-                item?.assigned_source !== 'assign_customer_service'
-            )
-            const resultAssignCustomer = [...matched, ...matched2]
-            return { status: true, message: "Success.", data: resultAssignCustomer };
-        }
-        //////-----END Assign Customer Service Data END----////////
+        // Step 2: Group only by job_status
+        const grouped = Object.values(
+            filtered.reduce((acc, item) => {
+                const key = item.job_status; // only job_status as key
+                if (!acc[key]) {
+                    acc[key] = {
+                        job_status: key,
+                        number_of_job: 0,
+                        job_ids: []
+                    };
+                }
+                acc[key].number_of_job += 1;
+                acc[key].job_ids.push(item.job_id);
+                return acc;
+            }, {})
+        );
 
-        return { status: true, message: 'Success.', data: result };
+        // Step 3: Convert job_ids array to comma-separated string
+        grouped.forEach(obj => {
+            obj.job_ids = obj.job_ids.join(",");
+        });
+
+        return { status: true, message: 'Success.', data: grouped };
 
 
     } catch (error) {
@@ -1601,7 +1659,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 //                     WHEN raw.task_type = '2' THEN t.name
 //                 END AS task_name`;
 
-       
+
 //         const unpivotSQL = `
 //         SELECT
 //             timesheet_id,
@@ -1678,7 +1736,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 //         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
 //         conn.release();
 
-        
+
 //         const groups = {};
 //         const periodSet = new Set();
 
@@ -1780,7 +1838,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
     var {
-        groupBy = ['staff_id'], 
+        groupBy = ['staff_id'],
         internal_external,
         fieldsToDisplay,
         fieldsToDisplayId,
@@ -1826,7 +1884,7 @@ const getTimesheetReportData = async (Report) => {
         var { fromDate, toDate } = range;
 
         let where = [`work_date BETWEEN ? AND ?`];
-        
+
 
         // let lastIndexValue = groupBy[groupBy.length - 1];
         // if (!["", null, undefined].includes(fieldsToDisplayId)) {
@@ -1937,7 +1995,7 @@ const getTimesheetReportData = async (Report) => {
                             WHEN raw.task_type = '1' THEN 'Internal'
                             WHEN raw.task_type = '2' THEN 'External'
                             ELSE 'Unknown'
-                          END AS task_type_label`;        
+                          END AS task_type_label`;
 
         // Unpivot query
         const unpivotSQL = `
@@ -2027,8 +2085,8 @@ const getTimesheetReportData = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
-          //  const gid = r.group_value || 'NULL';
-            const gid = r.group_value+'_'+r.task_type || 'NULL';
+            //  const gid = r.group_value || 'NULL';
+            const gid = r.group_value + '_' + r.task_type || 'NULL';
             const label = r.group_label;
             const staffName = r.staff_name;
             const customerName = r.customer_name;
@@ -2111,7 +2169,7 @@ const getTimesheetReportData = async (Report) => {
         // console.log("displayBy, ", displayBy);
         const finalRows = normalizeRows(columnsWeeks, outRows);
 
-        const fixed = [...groupBy,'task_type','total_hours'];
+        const fixed = [...groupBy, 'task_type', 'total_hours'];
         const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
         const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
 
@@ -2158,7 +2216,7 @@ const getTimesheetReportData = async (Report) => {
 
 
 const missingTimesheetReport = async (Report) => {
-//    console.log("Missing Timesheet Report:", Report);
+    //    console.log("Missing Timesheet Report:", Report);
     const { data, StaffUserId } = Report;
     // Line Manager
     //const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
@@ -2166,29 +2224,29 @@ const missingTimesheetReport = async (Report) => {
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
     async function getAllLineManageStaffIds(staff_id) {
-    const allStaffIds = new Set(); // To avoid duplicates
-    const queue = [staff_id];
+        const allStaffIds = new Set(); // To avoid duplicates
+        const queue = [staff_id];
 
-    while (queue.length > 0) {
-        const currentId = queue.shift();
-        if (!allStaffIds.has(currentId)) {
-            allStaffIds.add(currentId);
+        while (queue.length > 0) {
+            const currentId = queue.shift();
+            if (!allStaffIds.has(currentId)) {
+                allStaffIds.add(currentId);
 
-            const [rows] = await pool.execute(
-                `SELECT staff_to FROM line_managers WHERE staff_by = ?`,
-                [currentId]
-            );
+                const [rows] = await pool.execute(
+                    `SELECT staff_to FROM line_managers WHERE staff_by = ?`,
+                    [currentId]
+                );
 
-            const subordinates = rows.map(row => row.staff_to);
-            queue.push(...subordinates);
+                const subordinates = rows.map(row => row.staff_to);
+                queue.push(...subordinates);
+            }
         }
+
+        return Array.from(allStaffIds);
     }
 
-    return Array.from(allStaffIds);
-}
-
- const LineManageStaffId = await getAllLineManageStaffIds(StaffUserId);
- console.log("LineManageStaffId", LineManageStaffId);
+    const LineManageStaffId = await getAllLineManageStaffIds(StaffUserId);
+    console.log("LineManageStaffId", LineManageStaffId);
 
     let where = [];
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
@@ -2288,7 +2346,7 @@ const discrepancyReport = async (Report) => {
     //         SUBSTRING(job_types.type, 1, 4), '_',
     //         SUBSTRING(jobs.job_id, 1, 15)
     //         ) AS job_code_id
-        
+
     // FROM timesheet
     // JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
     // JOIN staffs ON staffs.id = timesheet.staff_id
@@ -2299,7 +2357,7 @@ const discrepancyReport = async (Report) => {
     // `;
 
 
-       let query = `
+    let query = `
         SELECT 
             jobs.id AS job_id,
             CONCAT(
@@ -2329,7 +2387,7 @@ const discrepancyReport = async (Report) => {
 
         GROUP BY jobs.id, job_code_id, jobs.total_time
     `;
-    
+
 
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
         // Allow access to all data
@@ -2352,7 +2410,7 @@ const discrepancyReportProcessor = async (Report) => {
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
 
-     let query = `
+    let query = `
     SELECT 
         jobs.id AS job_id,
         CONCAT(
@@ -2391,7 +2449,7 @@ const discrepancyReportProcessor = async (Report) => {
     GROUP BY jobs.id, job_code_id, jobs.total_time
 `;
 
-    
+
 
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
         // Allow access to all data
@@ -2419,49 +2477,49 @@ const capacityReport = async (Report) => {
 const saveFilters = async (Report) => {
     console.log("Save Filters Report:", Report);
     const { data, StaffUserId } = Report;
-    const { id,type, filters } = data;
+    const { id, type, filters } = data;
     // console.log("Save Filters Report id:", id);
     // console.log("Save Filters Report type:", type);
-     console.log("Save Filters Report filters:", filters);
+    console.log("Save Filters Report filters:", filters);
 
 
-//   Save Filters Report filters: {
-//   groupBy: [ 'staff_id' ],
-//   internal_external: '0',
-//   fieldsToDisplay: null,
-//   fieldsToDisplayId: null,
-//   staff_id: null,
-//   customer_id: null,
-//   client_id: null,
-//   job_id: null,
-//   task_id: null,
-//   internal_job_id: null,
-//   internal_task_id: null,
-//   timePeriod: 'this_month',
-//   displayBy: 'Weekly',
-//   fromDate: null,
-//   toDate: null
-// }
+    //   Save Filters Report filters: {
+    //   groupBy: [ 'staff_id' ],
+    //   internal_external: '0',
+    //   fieldsToDisplay: null,
+    //   fieldsToDisplayId: null,
+    //   staff_id: null,
+    //   customer_id: null,
+    //   client_id: null,
+    //   job_id: null,
+    //   task_id: null,
+    //   internal_job_id: null,
+    //   internal_task_id: null,
+    //   timePeriod: 'this_month',
+    //   displayBy: 'Weekly',
+    //   fromDate: null,
+    //   toDate: null
+    // }
 
-    if(!['', null, undefined].includes(id)){
-    const query = `
+    if (!['', null, undefined].includes(id)) {
+        const query = `
         UPDATE timesheet_filter 
         SET type = ?, staff_id = ?, filter_record = ?
         WHERE id = ?
         `;
-    const [result] = await pool.execute(query, [type, StaffUserId, JSON.stringify(filters), id]);
-    return { status: true, message: 'Record updated successfully.', data: result };
+        const [result] = await pool.execute(query, [type, StaffUserId, JSON.stringify(filters), id]);
+        return { status: true, message: 'Record updated successfully.', data: result };
 
-    }else{   
-    const query = `
+    } else {
+        const query = `
         INSERT INTO timesheet_filter (type,staff_id,filter_record)
         VALUES (?, ?, ?)
         `;
-    const [result] = await pool.execute(query, [type, StaffUserId, JSON.stringify(filters)]);
-    return { status: true, message: 'Record added successfully', data: result };
+        const [result] = await pool.execute(query, [type, StaffUserId, JSON.stringify(filters)]);
+        return { status: true, message: 'Record added successfully', data: result };
     }
-    
-   
+
+
 
 
 }
@@ -2469,23 +2527,23 @@ const saveFilters = async (Report) => {
 
 const getAllFilters = async (Report) => {
     console.log("Get All Filters Report:", Report);
-     const { data, StaffUserId } = Report;
-     const { type } = data;
+    const { data, StaffUserId } = Report;
+    const { type } = data;
 
-        let where = [`timesheet_filter.staff_id = ?`];
-        if(!['', null, undefined].includes(type)){
-            where.push(`timesheet_filter.type = '${type}'`);
-        }
-        where = where.length ? `WHERE ${where.join(" AND ")}` : '';
-        // const query = `
-        // SELECT 
-        // * 
-        // FROM 
-        // timesheet_filter
-        // ${where}
-        // `;
+    let where = [`timesheet_filter.staff_id = ?`];
+    if (!['', null, undefined].includes(type)) {
+        where.push(`timesheet_filter.type = '${type}'`);
+    }
+    where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+    // const query = `
+    // SELECT 
+    // * 
+    // FROM 
+    // timesheet_filter
+    // ${where}
+    // `;
 
-        const query = `
+    const query = `
         SELECT 
         timesheet_filter.*,
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.groupBy')) AS groupBy,
@@ -2536,11 +2594,11 @@ const getAllFilters = async (Report) => {
 
 
 
-         
-        console.log("query -- ",query)
-        
-        const [result] = await pool.execute(query, [StaffUserId]);
-        return { status: true, message: 'Success.', data: result };
+
+    console.log("query -- ", query)
+
+    const [result] = await pool.execute(query, [StaffUserId]);
+    return { status: true, message: 'Success.', data: result };
 
 }
 
@@ -2750,7 +2808,7 @@ module.exports = {
 
 //     -- 6. Final dynamic SQL
 //     SET @sql = CONCAT("
-//         SELECT 
+//         SELECT
 //             CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
 //             st.email AS staff_email,
 //             st.id AS staff_id,
@@ -2765,7 +2823,7 @@ module.exports = {
 //                 DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
 //             ) AS week_date
 //         FROM staffs st
-//         LEFT JOIN timesheet ts 
+//         LEFT JOIN timesheet ts
 //             ON st.id = ts.staff_id
 //             AND YEARWEEK(
 //                 COALESCE(
@@ -2866,7 +2924,7 @@ module.exports = {
 
 //     -- 6. Final dynamic SQL
 //     SET @sql = CONCAT("
-//         SELECT 
+//         SELECT
 //             CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
 //             st.email AS staff_email,
 //             st.id AS staff_id,
@@ -2881,7 +2939,7 @@ module.exports = {
 //                 DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
 //             ) AS week_date
 //         FROM staffs st
-//         LEFT JOIN timesheet ts 
+//         LEFT JOIN timesheet ts
 //             ON st.id = ts.staff_id
 //             AND YEARWEEK(
 //                 COALESCE(
