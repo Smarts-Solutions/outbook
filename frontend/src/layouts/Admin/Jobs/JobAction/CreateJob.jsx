@@ -3444,7 +3444,7 @@ const CreateJob = () => {
                           setAddTaskArr([]);
                         }}
                         centered
-                        size="lg"
+                        size="xl"
                       >
                         <Modal.Header closeButton>
                           <Modal.Title>Tasks</Modal.Title>
@@ -3536,7 +3536,7 @@ const CreateJob = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="col-lg-6 " id="column2">
+                                <div className="col-lg-6 column" id="column2">
                                   <div className="card">
                                     <div className="card-body">
                                       <div id="customerList">

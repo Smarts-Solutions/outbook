@@ -3803,7 +3803,7 @@ const EditJob = () => {
                                   HandleReset1();
                                 }}
                                 centered
-                                size="lg"
+                                size="xl"
                               >
                                 <Modal.Header closeButton>
                                   <Modal.Title>Tasks</Modal.Title>
