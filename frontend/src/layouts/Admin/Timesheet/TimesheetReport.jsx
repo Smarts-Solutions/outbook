@@ -64,8 +64,6 @@ function TimesheetReport() {
 
   //  console.log("lastGroupValue ", lastGroupValue);
 
-
-
   const staffData = async () => {
     //  console.log("role ", role);
     if (role?.toUpperCase() === "SUPERADMIN") {
@@ -99,6 +97,15 @@ function TimesheetReport() {
     }
   };
 
+  function formatStringToTitleCase(text) {
+  if (!text) return "";
+  return text
+    .replace(/_/g, " ")                 // underscores → spaces
+    .toLowerCase()                      // make all lowercase first
+    .replace(/\b\w/g, char => char.toUpperCase()) // capitalize first letter of each word
+    .trim();
+}
+
   const getAllFilters = async () => {
     var req = { action: "getAllFilters", type: "timesheet_report" };
     var data = { req: req, authToken: token };
@@ -106,7 +113,8 @@ function TimesheetReport() {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          
+            
+          console.log("getAllFilters response ", response.data);
           const data = response?.data?.map((item) => ({
             value: item.id,
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
@@ -119,6 +127,10 @@ function TimesheetReport() {
             ${item.task_name ? `⮞ Task : ${item.task_name}<br/>` : ""}
             ${item.internal_job_name ? `⮞ Internal Job : ${item.internal_job_name}<br/>` : ""}
             ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}` : ""}
+            ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}` : ""}
+            ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}` : ""}
+            ${item.fromDate ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate)}` : ""}
+            ${item.toDate ? `⮞ To Date : ${formatStringToTitleCase(item.toDate)}` : ""}
           `,
 
             filters: item.filter_record

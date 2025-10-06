@@ -2599,9 +2599,7 @@ const saveFilters = async (Report) => {
     const { id, type, filters } = data;
     // console.log("Save Filters Report id:", id);
     // console.log("Save Filters Report type:", type);
-    console.log("Save Filters Report filters:", filters);
-
-
+    // console.log("Save Filters Report filters:", filters);
     //   Save Filters Report filters: {
     //   groupBy: [ 'staff_id' ],
     //   internal_external: '0',
@@ -2666,6 +2664,10 @@ const getAllFilters = async (Report) => {
         SELECT 
         timesheet_filter.*,
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.groupBy')) AS groupBy,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.timePeriod')) AS timePeriod,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.displayBy')) AS displayBy,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.fromDate')) AS fromDate,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.toDate')) AS toDate,
         staffs.id AS filter_staff_id,
         CONCAT(staffs.first_name,' ',staffs.last_name) AS staff_fullname,
         customers.id AS filter_customer_id,
