@@ -326,7 +326,7 @@ const jobReceivedSentReports = async (Report) => {
             };
         });
 
-         console.log("result", result);
+         //console.log("result", result);
         return { status: true, message: 'Success.', data: result };
 
     } catch (error) {
