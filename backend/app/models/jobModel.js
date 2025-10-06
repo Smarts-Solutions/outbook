@@ -2446,18 +2446,29 @@ const jobUpdate = async (job) => {
             console.log("task_id ", task_id);
             console.log("budgeted_hour ", budgeted_hour);
 
-            // const query = `
-            //     INSERT INTO client_job_task (job_id, client_id, task_id,time)
-            //     VALUES (?, ?, ?, ?)
-            //     ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), job_id = VALUES(job_id);
-            //   `;
-            // await pool.execute(query, [
-            //   job_id,
-            //   client_id,
-            //   task_id,
-            //   budgeted_hour,
-            // ]);
-
+           // is existing for the job
+            const checkQuery2 = `
+                SELECT id FROM client_job_task WHERE job_id = ? AND client_id = ? AND task_id = ?
+              `;
+            const [existing2] = await pool.execute(checkQuery2, [
+              job_id,
+              client_id,
+              task_id,
+            ]);
+            if (existing2.length === 0) {
+              const query2 = `
+                  INSERT INTO client_job_task (job_id, client_id, task_id,time)
+                  VALUES (?, ?, ?, ?)
+                `;
+              await pool.execute(query2, [
+                job_id,
+                client_id,
+                task_id,
+                budgeted_hour,
+              ]);
+              continue; // Skip the update if it was just inserted
+            }else{
+        
             const query = `
               UPDATE client_job_task
               SET 
@@ -2468,6 +2479,7 @@ const jobUpdate = async (job) => {
                 AND task_id = ?;
             `;
             await pool.execute(query, [ budgeted_hour,job_id,client_id, task_id]);
+            }
 
 
           }
