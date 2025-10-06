@@ -207,6 +207,7 @@ const Setting = () => {
   const handleEdit = (data) => {
     setIsModalOpenEditTask(true)
     setTaskEditRow(data)
+    setTaskInput(data?.name || "")
     setBudgetedHours({
       hours: data?.budgeted_hour ? data?.budgeted_hour.split(":")[0] : "",
       minutes: data?.budgeted_hour ? data?.budgeted_hour.split(":")[1] : "",
@@ -220,7 +221,7 @@ const Setting = () => {
   }
   const onSaveEditTask = () => {
     // Logic to save the edited task
-    if (taskEditRow?.name?.trim() == "" || taskEditRow?.name == undefined) {
+    if (taskInput?.trim() == "" || taskInput == undefined) {
       sweatalert.fire({
         title: "Please enter task name",
         icon: "warning",
@@ -233,7 +234,7 @@ const Setting = () => {
     req.budgeted_hour = `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`;
     req.service_id = taskEditRow.service_id;
     req.job_type_id = taskEditRow.job_type_id;
-    req.name = taskEditRow.name;
+    req.name = taskInput;
     dispatch(AddTask({ req, authToken: token }))  
       .unwrap()
       .then(async (response) => {
@@ -531,7 +532,7 @@ const Setting = () => {
                     placeholder="Enter Task Name"
                     id="firstNameinput"
                     autoFocus
-                    value={taskEditRow?.name || ""}
+                    value={taskInput || ""}
                     onChange={handleInputChange}
                   />
                 </div>
