@@ -32,6 +32,10 @@ const Setting = () => {
   });
   const [tasks, setTasks] = useState([]);
 
+  const [isModalOpenEditTask, setIsModalOpenEditTask] = useState(false);
+  const [taskEditRow, setTaskEditRow] = useState({});
+  
+
   const TaskData = async () => {
     const req = { service_id: location?.state?.service_id, job_type_id: location?.state?.Id };
     const data = { req: req, authToken: token };
@@ -201,39 +205,95 @@ const Setting = () => {
   };
 
   const handleEdit = (data) => {
-    setModalData({
-      ...modalData,
-      fields: [
-        {
-          type: "text",
-          name: "name",
-          label: "Task Name",
-          placeholder: "Enter Task Name",
-          value: data.name,
-        },
-        // {
-        //   type: "select",
-        //   name: "status",
-        //   label: "Status",
-        //   placeholder: "Select Status",
-        //   value: data.status === "1" ? "1" : "0",
-        //   options: [
-        //     { label: "Active", value: "1" },
-        //     { label: "Deactive", value: "0" },
-        //   ],
-        // },
-      ],
-      title: "Task",
+    // setModalData({
+    //   ...modalData,
+    //   fields: [
+    //     {
+    //       type: "text",
+    //       name: "name",
+    //       label: "Task Name",
+    //       placeholder: "Enter Task Name",
+    //       value: data.name,
+    //     },
+    //     // {
+    //     //   type: "select",
+    //     //   name: "status",
+    //     //   label: "Status",
+    //     //   placeholder: "Select Status",
+    //     //   value: data.status === "1" ? "1" : "0",
+    //     //   options: [
+    //     //     { label: "Active", value: "1" },
+    //     //     { label: "Deactive", value: "0" },
+    //     //   ],
+    //     // },
+    //   ],
+    //   title: "Task",
 
-      id: data.id,
-      budgeted_hour: data.budgeted_hour,
-      service_id: data.service_id,
-      job_type_id: data.job_type_id,
-    });
+    //   id: data.id,
+    //   budgeted_hour: data.budgeted_hour,
+    //   service_id: data.service_id,
+    //   job_type_id: data.job_type_id,
+    // });
 
-    setIsEdit(true);
-    setIsModalOpen(true);
+    // setIsEdit(true);
+    // setIsModalOpen(true);
+
+    setIsModalOpenEditTask(true)
+    setTaskEditRow(data)
+    setBudgetedHours({
+      hours: data?.budgeted_hour ? data?.budgeted_hour.split(":")[0] : "",
+      minutes: data?.budgeted_hour ? data?.budgeted_hour.split(":")[1] : "",
+    })
   };
+
+  const onCloseEditTask = () => {
+    setIsModalOpenEditTask(false)
+    setTaskEditRow({})
+    setBudgetedHours({ hours: "", minutes: "" })
+  }
+  const onSaveEditTask = () => {
+    // Logic to save the edited task
+    if (taskEditRow?.name?.trim() == "" || taskEditRow?.name == undefined) {
+      sweatalert.fire({
+        title: "Please enter task name",
+        icon: "warning",
+        timer: 2000,
+      });
+      return;
+    }
+    const req = { action: "update" };
+    req.id = taskEditRow.id;
+    req.budgeted_hour = `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`;
+    req.service_id = taskEditRow.service_id;
+    req.job_type_id = taskEditRow.job_type_id;
+    req.name = taskEditRow.name;
+    dispatch(AddTask({ req, authToken: token }))  
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: response.message,
+            icon: "success",
+            timer: 2000,
+          });
+          TaskData();
+          setTimeout(() => {
+            onCloseEditTask();
+            setTasks([]);
+            formik.resetForm();
+          }, 2000);
+        } else {
+          sweatalert.fire({
+            title: response.message,
+            icon: "error",
+            timer: 2000,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  }
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -476,6 +536,127 @@ const Setting = () => {
           }
         />
       )}
+
+
+       {isModalOpenEditTask && (
+         <div
+      className="modal fade show"
+      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+      tabIndex="-1"
+    >
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+
+          {/* Header */}
+          <div className="modal-header">
+            <h5 className="modal-title">Edit Task</h5>
+            <button type="button" className="btn-close" onClick={onCloseEditTask}></button>
+          </div>
+
+          <div className="modal-body">
+             <div className="row ">
+              <div className="col-lg-9">
+                <div className="mb-3">
+                  <label htmlFor="">Task Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter Task Name"
+                    id="firstNameinput"
+                    autoFocus
+                    value={taskEditRow?.name || ""}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">
+                    Budgeted Time
+                  </label>
+                  <div className="input-group">
+                    {/* Hours Input */}
+                    <div className="hours-div">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Hours"
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          // Only allow non-negative numbers for hours
+                          if (
+                            value === "" ||
+                            Number(value) >= 0
+                          ) {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              hours: value,
+                            });
+                          }
+                        }}
+                        value={budgetedHours?.hours || ""}
+                      />
+                      <span
+                        className="input-group-text"
+                        id="basic-addon2"
+                      >
+                        H
+                      </span>
+                    </div>
+
+                    {/* Minutes Input */}
+                    <div className="hours-div">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Minutes"
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          // Only allow minutes between 0 and 59
+                          if (
+                            value === "" ||
+                            (Number(value) >= 0 &&
+                              Number(value) <= 59)
+                          ) {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              minutes: value,
+                            });
+                          }
+                        }}
+                        value={budgetedHours?.minutes || ""}
+                      />
+                      <span
+                        className="input-group-text"
+                        id="basic-addon2"
+                      >
+                        M
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+            </div>
+            </div>
+
+          {/* Footer */}
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onCloseEditTask}>
+              Close
+            </button>
+            <button type="button" className="btn btn-primary" onClick={onSaveEditTask}>
+              Update
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+      )}
+
+
 
       <CommanModal
         isOpen={showAddTask}
