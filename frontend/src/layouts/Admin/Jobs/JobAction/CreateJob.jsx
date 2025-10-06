@@ -295,9 +295,9 @@ const CreateJob = () => {
     let value = e.target.value;
 
     if (name === "JobType") {
-      if(!['','undefined',undefined,null,'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0){
+      if (!['', 'undefined', undefined, null, 'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0) {
 
-      }else{
+      } else {
         setAddTaskArr([]);
       }
     }
@@ -1970,7 +1970,8 @@ const CreateJob = () => {
       const updated = [...prev];
 
       // Split current budgeted_hour into [hour, minute]
-      let [hour, minute] = updated[index].budgeted_hour.split(":");
+      const budgetedValue = updated[index]?.budgeted_hour || "0:0";
+      let [hour, minute] = budgetedValue?.split(":");
 
       if (type === "hour") {
         //hour = value.padStart(2, "0");
