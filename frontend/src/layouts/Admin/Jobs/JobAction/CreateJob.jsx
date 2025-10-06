@@ -295,7 +295,11 @@ const CreateJob = () => {
     let value = e.target.value;
 
     if (name === "JobType") {
-      setAddTaskArr([]);
+      if(!['','undefined',undefined,null,'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0){
+
+      }else{
+        setAddTaskArr([]);
+      }
     }
 
     const date = new Date();
