@@ -9,7 +9,7 @@ module.exports = (app) => {
   // Schedule tasks to be run on the server.
 
 // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
-  cron.schedule("0 9 * * 1", async () => {
+  cron.schedule("0 8 * * 1", async () => {
     //console.log("Running a task every Monday at 09:00 AM to send individual emails");
   //cron.schedule("38 12 * * *", async () => {
    const [staffResult] = await pool.execute(`
