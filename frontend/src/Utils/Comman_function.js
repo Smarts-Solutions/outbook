@@ -1,6 +1,7 @@
 import { ClientErrorMessages } from "./Common_Message";
 import { Email_regex } from "./Common_regex";
 import axios from "axios";
+import dayjs from "dayjs";
 
 export const getDateRange = (tabId) => {
   const today = new Date();
@@ -223,6 +224,14 @@ export const convertDate = (date) => {
   }
   return "";
 }
+
+export const convertDate1 = (date) => {
+  if (date) {
+    return dayjs(date).format('DD-MM-YYYY');
+  }else {
+    return "";
+  }
+ }
 
 export const allowedTypes = 
   [

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
-import { convertDate } from "../../../Utils/Comman_function";
+import { convertDate ,convertDate1 } from "../../../Utils/Comman_function";
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
+
 const JobStatus = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -34,6 +35,13 @@ const JobStatus = () => {
       name: "Job Id",
       cell: (row) => <div title={row.job_code_id}>{row.job_code_id}</div>,
       selector: (row) => row.job_code_id,
+      reorder: false,
+      sortable: true,
+    },
+    
+    {
+      name: "Job Received On",
+      selector: (row) => convertDate1(row.job_received_on),
       reorder: false,
       sortable: true,
     },
@@ -101,7 +109,7 @@ const JobStatus = () => {
       sortable: true,
     },
     {
-      name: "Received On",
+      name: "Reviewer Name",
       cell: (row) => (
         <div title={row.reviewer_name}>{row.reviewer_name}</div>
       ),
