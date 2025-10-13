@@ -303,6 +303,7 @@ const SubInternal = () => {
                                     type="button"
                                     className="btn btn-info text-white float-end"
                                     onClick={(e) => handleAdd(e, "1")}
+                                    style={{zIndex:"9"}}
                                 >
                                     <i className="fa fa-plus" /> Add Internal Task
                                 </button>

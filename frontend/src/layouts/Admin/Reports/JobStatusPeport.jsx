@@ -41,7 +41,7 @@ const JobStatus = () => {
     
     {
       name: "Job Received On",
-      selector: (row) => convertDate1(row.job_received_on),
+      selector: (row) => convertDate(row.job_received_on),
       reorder: false,
       sortable: true,
     },
