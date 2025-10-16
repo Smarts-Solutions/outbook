@@ -12,7 +12,7 @@ parentPort.on("message", async (rows) => {
     try {
             const [[getStaffNameMissingReport]] = await pool.execute(`CALL GetLastWeekMissingTimesheetReport(${row.id})`);
             //console.log("getStaffNameMissingReport , ",getStaffNameMissingReport); 
-            
+            if(getStaffNameMissingReport && getStaffNameMissingReport.length > 0){
             let csvContent = "Staff Name,Staff Email\n";
             getStaffNameMissingReport?.forEach(val => {
                 csvContent += `${val.staff_fullname},${val.staff_email}\n`;
@@ -35,6 +35,11 @@ parentPort.on("message", async (rows) => {
                // console.log("Failed to send Missing Timesheet Report email.");
                 parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
             }
+          } else {
+            parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
+          }
+
+
     } catch (err) {
       parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
     }
