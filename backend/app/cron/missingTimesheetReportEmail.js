@@ -11,7 +11,7 @@ parentPort.on("message", async (rows) => {
   for (const row of rows) {
     try {
             const [[getStaffNameMissingReport]] = await pool.execute(`CALL GetLastWeekMissingTimesheetReport(${row.id})`);
-            //console.log("getStaffNameMissingReport , ",getStaffNameMissingReport); 
+            console.log("getStaffNameMissingReport , ",getStaffNameMissingReport); 
             if(getStaffNameMissingReport && getStaffNameMissingReport.length > 0){
             let csvContent = "Staff Name,Staff Email\n";
             getStaffNameMissingReport?.forEach(val => {

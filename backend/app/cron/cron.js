@@ -11,7 +11,7 @@ module.exports = (app) => {
 // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
   cron.schedule("0 9 * * 1", async () => {
     //console.log("Running a task every Monday at 09:00 AM to send individual emails");
-  //cron.schedule("38 12 * * *", async () => {
+  //cron.schedule("* * * * *", async () => {
    const [staffResult] = await pool.execute(`
     SELECT 
     id,
@@ -24,6 +24,8 @@ module.exports = (app) => {
   // console.log("staffResult , ",staffResult); 
     sendEmailInWorkerMissingTimeSheet(staffResult || []);
 
+    
+ 
 
     ////////-----------Submit Timesheet Reminder Email --------------------//////
 
