@@ -293,6 +293,7 @@ const getTask = async (task) => {
     JOIN job_types ON job_types.id = task.job_type_id
     LEFT JOIN client_job_task ON client_job_task.task_id = task.id
     WHERE task.service_id = ? AND task.job_type_id = ?
+    GROUP BY task.id
     ORDER BY id DESC
     `;
   try {
