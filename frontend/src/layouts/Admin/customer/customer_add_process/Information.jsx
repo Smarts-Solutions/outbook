@@ -76,7 +76,7 @@ const Information = ({ id, pageStatus }) => {
     CompanyNumber: "",
     RegisteredOfficeAddress: "",
     IncorporationDate: "",
-    IncorporationIn: "",
+    IncorporationIn: "4",
     VATRegistered: "0",
     VATNumber: "",
     Website: "",
@@ -84,6 +84,8 @@ const Information = ({ id, pageStatus }) => {
     TradingAddress: "",
     notes: "",
   });
+
+ 
 
   // state for company contact
   const [contacts, setContacts] = useState([
@@ -278,9 +280,7 @@ const Information = ({ id, pageStatus }) => {
               ? customerDetails?.company_details &&
               customerDetails?.company_details?.incorporation_date
               : "",
-          IncorporationIn:
-            customerDetails?.company_details &&
-            customerDetails?.company_details?.incorporation_in,
+          IncorporationIn:"4",
 
           VATRegistered:
             customerDetails?.customer && customerDetails?.customer?.vat_registered,
@@ -1107,7 +1107,11 @@ const Information = ({ id, pageStatus }) => {
         if (response.status) {
           setIncorporationDataAll(response.data);
           if (response.data.length > 0) {
-            setCompanyDetails({ ...getCompanyDetails, IncorporationIn: (response.data[0].id).toString() });
+            //setCompanyDetails({ ...getCompanyDetails, IncorporationIn: (response.data[0].id).toString() });
+            setCompanyDetails({
+              ...getCompanyDetails,
+              IncorporationIn: "4",
+            });
           }
         } else {
           setIncorporationDataAll([]);
@@ -1144,14 +1148,14 @@ const Information = ({ id, pageStatus }) => {
 
 
   // SELECT ACCOUNT MANAGE 
- 
+
   const staffOptions = [
-  { value: '', label: 'Select Manager' }, // <-- default option
-  ...(staffDataAll?.map((data) => ({
-    value: data?.id,
-    label: `${capitalizeFirstLetter(data?.first_name)} ${capitalizeFirstLetter(data?.last_name)} (${data?.email})`
-  })) || [])
-];
+    { value: '', label: 'Select Manager' }, // <-- default option
+    ...(staffDataAll?.map((data) => ({
+      value: data?.id,
+      label: `${capitalizeFirstLetter(data?.first_name)} ${capitalizeFirstLetter(data?.last_name)} (${data?.email})`
+    })) || [])
+  ];
 
   return (
     <>
