@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { getWeeklyReport, weeklyReportFilter } from '../../../ReduxStore/Slice/Report/ReportSlice';
 
 const SlidingTable = () => {
+  const noDataImage ='/assets/images/No-data-amico.png';
   const StaffUserId = JSON.parse(localStorage.getItem('staffDetails'))?.id;
   const token = JSON.parse(localStorage.getItem('token'));
   const dispatch = useDispatch();
@@ -26,12 +27,12 @@ const SlidingTable = () => {
     var CurrentWeek = getCurrentWeekNumber();
     setCurrentIndex(CurrentWeek)
     setVisibleColumns(columns.slice(CurrentWeek - 1, CurrentWeek + 9));
-
     getAllWeeklyReports();
     getFilterData()
   }, [multipleFilter]);
 
   const getAllWeeklyReports = async () => {
+    console.log("multipleFilter-->", multipleFilter);
     const req = {
       StaffUserId: StaffUserId,
       customer_id: multipleFilter.customer_id,
@@ -109,6 +110,8 @@ const SlidingTable = () => {
     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
+  console.log("weeklyReportData", weeklyReportData);
+
   return (
     <div className='containr-fluid mt-5'>
       <div className='report-data'>
@@ -171,18 +174,18 @@ const SlidingTable = () => {
               </select>
             </div>
             <div className='col-md-1 pe-0'>
-            <button className="btn btn-info " onClick={() => setMultipleFilter({
-              customer_id: "",
-              job_status_type_id: "",
-              processor_id: "",
-              reviewer_id: ""
-            })} disabled={currentIndex === 0}>
-              Reset
-            </button>
+              <button className="btn btn-info " onClick={() => setMultipleFilter({
+                customer_id: "",
+                job_status_type_id: "",
+                processor_id: "",
+                reviewer_id: ""
+              })} disabled={currentIndex === 0}>
+                Reset
+              </button>
+            </div>
           </div>
-          </div>
-          </div>
-          <div className='row'>
+        </div>
+        <div className='row'>
           <div>
             <button className="btn btn-info " onClick={slidePrev} disabled={currentIndex === 0}>
               Prev
@@ -191,9 +194,9 @@ const SlidingTable = () => {
               Next
             </button>
           </div>
-          
-         
-        
+
+
+
 
         </div>
         <div className="table-wrapper">
@@ -207,16 +210,39 @@ const SlidingTable = () => {
               </tr>
             </thead>
             <tbody>
-              {weeklyReportData && weeklyReportData.map((data, index) => (
+              {
+              weeklyReportData.length === 0 ?
+                <tr>
+                  <td colSpan={visibleColumns.length + 1} className="text-center">
+                    <img src={noDataImage} alt="No Data" style={{ width: '150px', height: '150px' }} />
+                    <p>No data available</p>
+                  </td>
+                </tr>
+
+                // <div className='text-center'>
+                //         <img
+                //           src={noDataImage}
+                //           alt="No records available"
+                //           style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+                //         />
+                //         <p className='fs-16'>There are no records to display</p>
+                //       </div>
+
+
+              :
+              weeklyReportData && weeklyReportData.map((data, index) => (
                 <tr key={index}>
                   <td className="fixed-column">{data.customer_name}</td>
                   {Object.values(data.weeks[index]).map((col, index1) => (
                     (visibleColumns[0] <= index1 + 1 && index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
                       <td key={index1}>{col.count == 0 ? "-" : col.count}</td>
-                    ) : null
+                    ) :
+                      null
                   ))}
                 </tr>
-              ))}
+              ))
+              
+              }
 
             </tbody>
           </table>
