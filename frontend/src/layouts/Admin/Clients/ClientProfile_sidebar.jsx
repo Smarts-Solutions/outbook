@@ -322,7 +322,7 @@ const ClientList = () => {
           }
         </div>
       ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.job_code_id,
       sortable: true,
     },
     {
@@ -346,28 +346,31 @@ const ClientList = () => {
       selector: (row) => row.job_type_name,
       sortable: true,
     },
-    {
+  
+     {
       name: "Status",
+      selector: (row) => {
+        const status = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
+        return status ? status.name.toLowerCase() : "-";
+      },
+      sortable: true,
       cell: (row) => (
         <div>
-          <div>
-            <select
-              className="form-select form-control"
-              value={row.status_type}
-              onChange={(e) => handleStatusChange(e, row)}
-              disabled={getAccessDataJob.update === 1 || role === "SUPERADMIN" ? false : true}
-            >
-              {statusDataAll.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className="form-select form-control"
+            value={row.status_type}
+            onChange={(e) => handleStatusChange(e, row)}
+            disabled={!(getAccessDataJob.update === 1 || role === "SUPERADMIN")}
+          >
+            {statusDataAll.map((status) => (
+              <option key={status.id} value={status.id}>
+                {status.name}
+              </option>
+            ))}
+          </select>
         </div>
       ),
-      sortable: true,
-      width: "325px"
+      width: "325px",
     },
 
     {

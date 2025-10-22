@@ -65,7 +65,7 @@ const ClientList = () => {
       (item) => item.permission_name === "job"
     )?.items || [];
 
-    const accessDataJobAll =
+  const accessDataJobAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "all_jobs"
     )?.items || [];
@@ -73,15 +73,15 @@ const ClientList = () => {
 
   useEffect(() => {
     if (accessDataJob.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 , all_jobs: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, all_jobs: 0 };
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
       if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
-  
-    
+
+
 
     accessDataJobAll.forEach((item) => {
       if (item.type === "view")
@@ -99,7 +99,7 @@ const ClientList = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-         
+
           setClientDetails({
             loading: false,
             data: response.data,
@@ -110,7 +110,7 @@ const ClientList = () => {
           informationSetData(response?.data?.client);
           setClientInformationData(response?.data?.contact_details[0]);
           setCompanyDetails(response?.data?.company_details);
-          
+
         } else {
           setClientDetails({
             loading: false,
@@ -220,7 +220,7 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {
-            (getAccessDataJob.view == 1 || getAccessDataJob.all_jobs == 1) ||  role === "SUPERADMIN" ? (
+            (getAccessDataJob.view == 1 || getAccessDataJob.all_jobs == 1) || role === "SUPERADMIN" ? (
               <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
                 {row.job_code_id}
               </a>
@@ -228,7 +228,7 @@ const ClientList = () => {
           }
         </div>
       ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.job_code_id,
       sortable: true,
     },
     {
@@ -254,28 +254,29 @@ const ClientList = () => {
     },
     {
       name: "Status",
+      selector: (row) => {
+        const status = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
+        return status ? status.name.toLowerCase() : "-";
+      },
+      sortable: true,
       cell: (row) => (
         <div>
-          <div>
-            <select
-              className="form-select form-control"
-              value={row.status_type}
-              onChange={(e) => handleStatusChange(e, row)}
-              disabled={getAccessDataJob.update === 1 ||  role === "SUPERADMIN" ? false : true}
-            >
-              {statusDataAll.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className="form-select form-control"
+            value={row.status_type}
+            onChange={(e) => handleStatusChange(e, row)}
+            disabled={!(getAccessDataJob.update === 1 || role === "SUPERADMIN")}
+          >
+            {statusDataAll.map((status) => (
+              <option key={status.id} value={status.id}>
+                {status.name}
+              </option>
+            ))}
+          </select>
         </div>
       ),
-      sortable: true,
-      width: "325px"
+      width: "325px",
     },
-
     {
       name: "Client Contact Person",
       cell: (row) => (
@@ -337,14 +338,14 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(getAccessDataJob.update == 1 ||  role === "SUPERADMIN") && (
+          {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
           )}
           {
             row.timesheet_job_id == null ?
-              (getAccessDataJob.delete == 1 ||  role === "SUPERADMIN") && (
+              (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
                 <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
                   <i className="ti-trash text-danger" />
                 </button>
@@ -852,7 +853,7 @@ const ClientList = () => {
                       <i className="fa fa-arrow-left pe-1" /> Back
                     </button>
                     {
-                      (getAccessDataJob.insert == 1 ||  role === "SUPERADMIN") && (
+                      (getAccessDataJob.insert == 1 || role === "SUPERADMIN") && (
                         <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
                           <i className="fa fa-plus pe-1" /> Create Job
                         </div>
@@ -946,7 +947,7 @@ const ClientList = () => {
                     >
 
                       <div className="datatable-wrapper ">
-                        {customerData && customerData && (
+                        {customerData && statusDataAll.length > 0 && (
                           <Datatable
                             columns={columns}
                             data={customerData}
@@ -1053,7 +1054,7 @@ const ClientList = () => {
                           {informationData && informationData.client_type == 1
                             ? "Sole Trader"
                             : informationData.client_type == 2
-                              ? "Company" : informationData.client_type == 3 ? "Partnership" :  getClientDetails?.data?.client?.client_type==5 ? "Charity Incorporated Organisation Information" :  getClientDetails?.data?.client?.client_type==6 ? "Charity Unincorporated Association Information" : getClientDetails?.data?.client?.client_type==7 ?  "Trust" : ""
+                              ? "Company" : informationData.client_type == 3 ? "Partnership" : getClientDetails?.data?.client?.client_type == 5 ? "Charity Incorporated Organisation Information" : getClientDetails?.data?.client?.client_type == 6 ? "Charity Unincorporated Association Information" : getClientDetails?.data?.client?.client_type == 7 ? "Trust" : ""
 
                           }
                         </h4>
