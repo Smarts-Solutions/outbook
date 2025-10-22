@@ -108,9 +108,13 @@ const jobStatusReports = async (Report) => {
                  DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
                  DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
                  DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-                 DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on
+                 DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+                GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
                 FROM 
                 jobs
+                LEFT JOIN 
+                job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+                LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
                 LEFT JOIN 
                 customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
                 LEFT JOIN 
@@ -180,9 +184,13 @@ const jobStatusReports = async (Report) => {
          DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
          DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
          DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-         DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on
+         DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
          FROM 
          jobs
+         LEFT JOIN 
+         job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+         JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
          LEFT JOIN 
          assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
          JOIN 

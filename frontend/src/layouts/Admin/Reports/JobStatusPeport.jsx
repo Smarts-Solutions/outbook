@@ -20,6 +20,8 @@ const JobStatus = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
+
+          console.log("Job Status Data:", res.data);
           setJobStatusData(res.data);
         } else {
           setJobStatusData([]);
@@ -105,6 +107,16 @@ const JobStatus = () => {
         <div title={row.allocated_name}>{row.allocated_name}</div>
       ),
       selector: (row) => row.allocated_name,
+      reorder: false,
+      sortable: true,
+    },
+    
+    {
+      name: "Allocated to (Other)",
+      cell: (row) => (
+        <div title={row.multiple_staff_names}>{row.multiple_staff_names}</div>
+      ),
+      selector: (row) => row.multiple_staff_names,
       reorder: false,
       sortable: true,
     },
