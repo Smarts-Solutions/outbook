@@ -98,10 +98,8 @@ const ClientList = () => {
     await dispatch(ClientAction(data))
       .unwrap()
       .then((response) => {
-        console.log("response-client ", response.data);
-        console.log("response-client ", response.status);
         if (response.status) {
-          console.log("response.data.client_documents 1", response.data.client_documents);
+         
           setClientDetails({
             loading: false,
             data: response.data,

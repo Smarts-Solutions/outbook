@@ -656,7 +656,7 @@ ORDER BY
     ) AS client_code
       FROM 
           clients
-      JOIN 
+      LEFT JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})  
       JOIN 
           customers ON customers.id = clients.customer_id    
@@ -665,7 +665,7 @@ ORDER BY
       LEFT JOIN 
           jobs ON clients.id = jobs.client_id 
       WHERE 
-      (clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+       (clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND clients.customer_id = ${customer_id}
       GROUP BY
           clients.id
       ORDER BY 
