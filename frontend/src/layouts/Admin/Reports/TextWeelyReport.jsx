@@ -110,7 +110,7 @@ const SlidingTable = () => {
     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
-  console.log("weeklyReportData", weeklyReportData);
+  
 
   return (
     <div className='containr-fluid mt-5'>
