@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { getWeeklyReport, weeklyReportFilter } from '../../../ReduxStore/Slice/Report/ReportSlice';
 
 const SlidingTable = () => {
-  const noDataImage ='/assets/images/No-data-amico.png';
+  const noDataImage = '/assets/images/No-data-amico.png';
   const StaffUserId = JSON.parse(localStorage.getItem('staffDetails'))?.id;
   const token = JSON.parse(localStorage.getItem('token'));
   const dispatch = useDispatch();
@@ -211,37 +211,37 @@ const SlidingTable = () => {
             </thead>
             <tbody>
               {
-              weeklyReportData.length === 0 ?
-                <tr>
-                  <td colSpan={visibleColumns.length + 1} className="text-center">
-                    <img src={noDataImage} alt="No Data" style={{ width: '150px', height: '150px' }} />
-                    <p>No data available</p>
-                  </td>
-                </tr>
+                weeklyReportData.length === 0 ?
+                  <tr>
+                    <td colSpan={visibleColumns.length + 1} className="text-center">
+                      <img src={noDataImage} alt="No Data" style={{ width: '150px', height: '150px' }} />
+                      <p>No data available</p>
+                    </td>
+                  </tr>
 
-                // <div className='text-center'>
-                //         <img
-                //           src={noDataImage}
-                //           alt="No records available"
-                //           style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
-                //         />
-                //         <p className='fs-16'>There are no records to display</p>
-                //       </div>
+                  // <div className='text-center'>
+                  //         <img
+                  //           src={noDataImage}
+                  //           alt="No records available"
+                  //           style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+                  //         />
+                  //         <p className='fs-16'>There are no records to display</p>
+                  //       </div>
 
 
-              :
-              weeklyReportData && weeklyReportData.map((data, index) => (
-                <tr key={index}>
-                  <td className="fixed-column">{data.customer_name}</td>
-                  {Object.values(data.weeks[index]).map((col, index1) => (
-                    (visibleColumns[0] <= index1 + 1 && index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
-                      <td key={index1}>{col.count == 0 ? "-" : col.count}</td>
-                    ) :
-                      null
-                  ))}
-                </tr>
-              ))
-              
+                  :
+                  weeklyReportData && weeklyReportData.map((data, index) => (
+                    <tr key={index}>
+                      <td className="fixed-column">{data.customer_name}</td>
+                      {Object.values(data.weeks[index]).map((col, index1) => (
+                        (visibleColumns[0] <= index1 + 1 && index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
+                          <td key={index1}>{col.count == 0 ? "-" : col.count}</td>
+                        ) :
+                          null
+                      ))}
+                    </tr>
+                  ))
+
               }
 
             </tbody>
