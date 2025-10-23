@@ -21,7 +21,7 @@ require("./app/cron/cron")(app);
 // const client_id = "376ee1a2-3c24-48ac-b7cc-9a09f66b9e21";
 // const tenant_id = "332dcd89-cd37-40a0-bba2-a2b91abd434a";
 // const redirect_uri = encodeURIComponent("https://jobs.outbooks.com/backend/callback");
-// const scope = encodeURIComponent("offline_access Sites.ReadWrite.All");
+// // const scope = encodeURIComponent("offline_access Sites.ReadWrite.All");
 // const scope = encodeURIComponent("offline_access Files.ReadWrite.All Sites.ReadWrite.All");
 // app.get('/getToken', async (req, res) => {
 //    const auth_url = `https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/authorize` +
@@ -31,6 +31,8 @@ require("./app/cron/cron")(app);
 
 
 // app.get('/callback', async (req, res) => {
+
+//   console.log("✅ Callback received with query:", req.query); 
 //  const code = req.query.code;
 //  const client_secret = "peL8Q~lVqVTHX6oWbrS.Hh-XPI9dcgXQV6PJTbWc";
 //  const redirect_url = "https://jobs.outbooks.com/backend/callback";
@@ -92,8 +94,39 @@ function sendEmailInWorker(row) {
   worker.on("message", (msg) => console.log("MESSAGEEEE--- ",msg));
 }
 
-
 // app.use('/api/auth', authRoutes);
 // app.use('/api', userRoutes);
+
+
+app.post('/downloadSharepointFile', async (req, res) => {
+    const { fileUrl, sharepointToken } = req.body;
+    console.log("Received fileUrl:", fileUrl);
+    console.log("Received sharepointToken:", sharepointToken);
+    try {
+      const fetchUrl = encodeURI(fileUrl);
+        const sharePointResponse = await fetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${sharepointToken}`,
+         // 'Accept': 'application/json'
+        //  'Accept': '*/*'
+        }
+      });
+
+        console.log("SharePoint response status:", sharePointResponse);
+        if (!sharePointResponse.ok) {
+            return res.status(sharePointResponse.status).send('Failed to fetch file from SharePoint');
+        }
+        res.setHeader('Content-Type', sharePointResponse.headers.get('content-type'));
+        res.setHeader('Content-Disposition', 'attachment; filename="downloaded-file"');
+        sharePointResponse.body.pipe(res);
+
+    } catch (error) {
+        console.error('Server error fetching from SharePoint:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 
 module.exports = app;
