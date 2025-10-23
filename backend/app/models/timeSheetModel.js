@@ -322,7 +322,39 @@ ORDER BY
 
     //   return result;
     // });
-    const filterDataWeek = rows1
+
+
+    // const filterDataWeek = rows1
+    //   .map(item => {
+    //     if (
+    //       item.valid_weekOffsets != null &&
+    //       item.valid_weekOffsets != '' &&
+    //       item.valid_weekOffsets != undefined
+    //     ) {
+    //       const firstDate =
+    //         item.monday_date ||
+    //         item.tuesday_date ||
+    //         item.wednesday_date ||
+    //         item.thursday_date ||
+    //         item.friday_date ||
+    //         item.saturday_date ||
+    //         item.sunday_date;
+
+    //       const result = {
+    //         id: item.id,
+    //         staff_id: item.staff_id,
+    //         valid_weekOffsets: item.valid_weekOffsets,
+    //       };
+    //       if (firstDate) {
+    //         result.month_date = firstDate;
+    //       }
+    //       return result;
+    //     }
+    //   })
+    //   .filter(Boolean);
+
+
+     const filterDataWeek = rows1
       .map(item => {
         if (
           item.valid_weekOffsets != null &&
@@ -335,19 +367,18 @@ ORDER BY
             item.wednesday_date ||
             item.thursday_date ||
             item.friday_date ||
-            item.saturday_date ||
-            item.sunday_date;
+            item.saturday_date;
 
-          const result = {
+          if (!firstDate) return null;
+
+          return {
             id: item.id,
             staff_id: item.staff_id,
             valid_weekOffsets: item.valid_weekOffsets,
+            month_date: firstDate,
           };
-          if (firstDate) {
-            result.month_date = firstDate;
-          }
-          return result;
         }
+        return null;
       })
       .filter(Boolean);
 
