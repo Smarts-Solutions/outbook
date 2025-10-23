@@ -47,10 +47,6 @@ const Login1 = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          
-          console.log("Login Response", response);
-          return
-
           await accessDataFetch(response.data.staffDetails, response.data.token);
           localStorage.setItem(
             "staffDetails",
