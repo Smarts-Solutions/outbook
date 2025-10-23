@@ -18,7 +18,6 @@ module.exports = (app) => {
                 csvContent += `${row.staff_fullname},${row.staff_email}\n`;
             }
             );
-
             let toEmail = "vikaspnpinfotech@gmail.com"
             let subjectEmail = "Missing Timesheet Report"
             let htmlEmail = "<h3>Please find the attached Missing Timesheet Report.</h3>"
