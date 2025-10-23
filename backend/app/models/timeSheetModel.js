@@ -411,7 +411,37 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
         // Other Role Data
-        let query = `
+      //   let query = `
+      //  SELECT  
+      //   customers.id AS id,
+      //   customers.status AS status,
+      //   customers.form_process AS form_process,
+      //   customers.trading_name AS trading_name,
+      //   CONCAT(
+      //   'cust_', 
+      //   SUBSTRING(customers.trading_name, 1, 3), '_',
+      //   SUBSTRING(customers.customer_code, 1, 15)
+      //   ) AS customer_code
+      //   FROM 
+      //       customers  
+      //   JOIN 
+      //       staffs AS staff1 ON customers.staff_id = staff1.id
+      //   JOIN 
+      //       staffs AS staff2 ON customers.account_manager_id = staff2.id
+      //   LEFT JOIN clients ON clients.customer_id = customers.id
+      //   LEFT JOIN
+      //       assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+      //   LEFT JOIN
+      //       customer_company_information ON customers.id = customer_company_information.customer_id
+      //   WHERE
+      //       (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
+      //       OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      //       )
+      //      GROUP BY customers.id
+      //      ORDER BY customers.id DESC
+      //    `;
+      //   const [result] = await pool.execute(query, [staff_id, staff_id]);
+      let query = `
        SELECT  
         customers.id AS id,
         customers.status AS status,
@@ -423,24 +453,15 @@ const getTimesheetTaskType = async (Timesheet) => {
         SUBSTRING(customers.customer_code, 1, 15)
         ) AS customer_code
         FROM 
-            customers  
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
+            customers
         LEFT JOIN
             assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-        LEFT JOIN
-            customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-            (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
-            OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            )
+           customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
            ORDER BY customers.id DESC
          `;
-        const [result] = await pool.execute(query, [staff_id, staff_id]);
+        const [result] = await pool.execute(query);
         return { status: true, message: 'Success..', data: result };
 
       } catch (err) {
@@ -505,6 +526,41 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 
         // Other role Get data
+        // const query = `
+        //       SELECT  
+        //         clients.id AS id,
+        //         clients.trading_name AS trading_name,
+        //         CONCAT(
+        //             'cli_', 
+        //             SUBSTRING(customers.trading_name, 1, 3), '_',
+        //             SUBSTRING(clients.trading_name, 1, 3), '_',
+        //             SUBSTRING(clients.client_code, 1, 15)
+        //         ) AS client_code
+        //           FROM 
+        //               clients
+        //           JOIN 
+        //               assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
+        //           JOIN 
+        //               customers ON customers.id = clients.customer_id    
+        //           JOIN 
+        //               client_types ON client_types.id = clients.client_type
+        //           LEFT JOIN 
+        //               jobs ON clients.id = jobs.client_id
+        //           LEFT JOIN 
+        //               client_contact_details ON client_contact_details.id = (
+        //                   SELECT MIN(cd.id)
+        //                   FROM client_contact_details cd
+        //                   WHERE cd.client_id = clients.id
+        //               ) 
+        //           WHERE 
+        //           (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
+        //           OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+        //           GROUP BY
+        //               clients.id
+        //           ORDER BY 
+        //               clients.id DESC;
+        // `;
+        // const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
         const query = `
               SELECT  
                 clients.id AS id,
@@ -520,26 +576,15 @@ const getTimesheetTaskType = async (Timesheet) => {
                   JOIN 
                       assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
                   JOIN 
-                      customers ON customers.id = clients.customer_id    
-                  JOIN 
-                      client_types ON client_types.id = clients.client_type
-                  LEFT JOIN 
-                      jobs ON clients.id = jobs.client_id
-                  LEFT JOIN 
-                      client_contact_details ON client_contact_details.id = (
-                          SELECT MIN(cd.id)
-                          FROM client_contact_details cd
-                          WHERE cd.client_id = clients.id
-                      ) 
+                      customers ON customers.id = clients.customer_id 
                   WHERE 
-                  (clients.staff_created_id = ? OR assigned_jobs_staff_view.staff_id = ?
-                  OR clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+                  (clients.staff_created_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
                   GROUP BY
                       clients.id
                   ORDER BY 
                       clients.id DESC;
         `;
-        const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
+        const [result] = await pool.execute(query);
         return { status: true, message: "success.", data: result };
 
       } catch (err) {
