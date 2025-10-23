@@ -38,7 +38,7 @@ const ClientList = () => {
 
   // console.log("getJobDetails ", getJobDetails);
 
- 
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState("");
   const [statusDataAll, setStatusDataAll] = useState([]);
@@ -80,7 +80,7 @@ const ClientList = () => {
       (item) => item.permission_name === "customer"
     )?.items || [];
 
-    const accessDataCustomerAll =
+  const accessDataCustomerAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "all_customers"
     )?.items || [];
@@ -122,15 +122,15 @@ const ClientList = () => {
       setActiveTab(retrievedData);
     } else {
       setActiveTab(
-        (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1) ) ||
-          
+        (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1)) ||
+
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob && (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
-            
+
             role === "SUPERADMIN"
-          ? "job"
-          : "documents"
+            ? "job"
+            : "documents"
       );
     }
   }, [getAccessDataJob, getAccessDataClient]);
@@ -148,7 +148,7 @@ const ClientList = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
-    const accessDataClientAll =
+  const accessDataClientAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "all_clients"
     )?.items || [];
@@ -158,14 +158,14 @@ const ClientList = () => {
       (item) => item.permission_name === "job"
     )?.items || [];
 
-    const accessDataJobAll =
+  const accessDataJobAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "all_jobs"
     )?.items || [];
 
   useEffect(() => {
     if (accessDataClient.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 , all_clients: 0};
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0, all_clients: 0 };
     accessDataClient.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -182,7 +182,7 @@ const ClientList = () => {
 
   useEffect(() => {
     if (accessDataJob.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, job: 0 , all_jobs: 0};
+    const updatedAccess = { insert: 0, update: 0, delete: 0, job: 0, all_jobs: 0 };
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -232,7 +232,7 @@ const ClientList = () => {
     let tabsData = [];
     if (
       (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1)) ||
-      
+
       role === "SUPERADMIN"
     ) {
       tabsData.push({
@@ -243,7 +243,7 @@ const ClientList = () => {
     }
     if (
       (getAccessDataJob && (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
-      
+
       role === "SUPERADMIN"
     ) {
       tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
@@ -257,8 +257,8 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {(getAccessDataJob.job === 1 || getAccessDataJob.all_jobs == 1) ||
-          
-          role === "SUPERADMIN" ? (
+
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -296,9 +296,8 @@ const ClientList = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -313,8 +312,8 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataClient.update === 1 ||
-          
-          role === "SUPERADMIN" ? (
+
+            role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
               onClick={() =>
@@ -327,8 +326,8 @@ const ClientList = () => {
             </button>
           ) : null}
           {getAccessDataClient.delete === 1 ||
-          
-          role === "SUPERADMIN" ? (
+
+            role === "SUPERADMIN" ? (
             <>
               {row?.Delete_Status == null && (
                 <button
@@ -399,8 +398,8 @@ const ClientList = () => {
               onChange={(e) => handleStatusChange(e, row)}
               disabled={
                 getAccessDataJob.update === 1 ||
-                
-                role === "SUPERADMIN"
+
+                  role === "SUPERADMIN"
                   ? false
                   : true
               }
@@ -425,8 +424,8 @@ const ClientList = () => {
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -436,8 +435,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -458,8 +457,8 @@ const ClientList = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -469,8 +468,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -490,26 +489,26 @@ const ClientList = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -525,8 +524,8 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataJob.update === 1 ||
-          
-          role === "SUPERADMIN" ? (
+
+            role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
               onClick={() =>
@@ -545,8 +544,8 @@ const ClientList = () => {
           ) : null}
           {row.timesheet_job_id == null ? (
             getAccessDataJob.delete === 1 ||
-            
-            role === "SUPERADMIN" ? (
+
+              role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"
                 onClick={() => handleDelete(row, "job")}
@@ -643,9 +642,20 @@ const ClientList = () => {
             <i className="ti-trash text-danger" />
           </button>
 
-          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
+          {/* <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
             <i className="ti-download" />
-          </button>
+          </button> */}
+
+          <a
+            className="download-icon"
+            href={row.web_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            download={row.original_name}
+
+          >
+            <i className="ti-download" />
+          </a>
         </div>
       ),
       ignoreRowClick: true,
@@ -656,8 +666,8 @@ const ClientList = () => {
   ];
 
 
-  
-  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+
+  const downloadFileFromSharePoint1 = async (sharePointFileUrl, accessToken, fileName) => {
     console.log("sharePointFileUrl", sharePointFileUrl);
     console.log("accessToken", accessToken);
     try {
@@ -693,6 +703,47 @@ const ClientList = () => {
       console.error('Error downloading the file:', error);
     }
   };
+
+
+  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+    const backendDownloadUrl = 'https://jobs.outbooks.com/backend/downloadSharepointFile';
+
+    try {
+      const response = await fetch(backendDownloadUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${local_user_jwt_token}` 
+        },
+        body: JSON.stringify({
+          fileUrl: sharePointFileUrl,
+          sharepointToken: accessToken
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend Error: ${response.statusText}`);
+      }
+
+      // 1. फ़ाइल डेटा को Blob के रूप में लें
+      const fileBlob = await response.blob();
+
+      // 2. फ़ाइल डाउनलोड करने के लिए a टैग का उपयोग करें
+      const fileURL = window.URL.createObjectURL(fileBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName;
+      document.body.appendChild(downloadLink); // DOM में जोड़ना ज़रूरी है
+      downloadLink.click();
+      document.body.removeChild(downloadLink); // Clean up
+      window.URL.revokeObjectURL(fileURL);
+
+    } catch (error) {
+      console.error('Error downloading the file through backend:', error);
+    }
+  };
+
+
 
   const removeItem = async (file, type) => {
     if (type == 1) {
@@ -886,8 +937,8 @@ const ClientList = () => {
         <div>
           <a
             title={row.check_list_name}
-            // onClick={() => HandleClientView(row)}
-            // style={{ cursor: "pointer", color: "#26bdf0" }}
+          // onClick={() => HandleClientView(row)}
+          // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.check_list_name}
           </a>
@@ -930,8 +981,8 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataCustomer.update === 1 ||
-          
-          role === "SUPERADMIN" ? (
+
+            role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
               onClick={() =>
@@ -948,8 +999,8 @@ const ClientList = () => {
             </button>
           ) : null}
           {getAccessDataCustomer.delete === 1 ||
-          
-          role === "SUPERADMIN" ? (
+
+            role === "SUPERADMIN" ? (
             <button
               className="delete-icon"
               onClick={() => ChecklistDelete(row)}
@@ -1256,9 +1307,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1277,9 +1327,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
@@ -1290,9 +1340,9 @@ const ClientList = () => {
                       <i className="fa fa-arrow-left pe-1" /> Back
                     </div>
                     {(getAccessDataClient.insert === 1 ||
-                      
+
                       role === "SUPERADMIN") &&
-                    activeTab === "client" ? (
+                      activeTab === "client" ? (
                       <>
                         <div
                           className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
@@ -1310,7 +1360,7 @@ const ClientList = () => {
                       </>
                     ) : ClientData?.length > 0 &&
                       (getAccessDataJob.insert == 1 ||
-                        
+
                         role === "SUPERADMIN") &&
                       activeTab === "job" ? (
                       <>
@@ -1330,8 +1380,8 @@ const ClientList = () => {
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
-                        
-                        role === "SUPERADMIN") &&
+
+                      role === "SUPERADMIN") &&
                       activeTab === "checklist" ? (
                       <>
                         <div
@@ -1350,32 +1400,32 @@ const ClientList = () => {
                       </>
                     ) : null}
                   </>
-                ) : 
-                
-                activeTab === "documents" ? (
-                  <>
-                    <div
-                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                      onClick={() => {
-                        window.history.back();
-                      }}
-                    >
-                      <i className="fa fa-arrow-left pe-1" /> Back
-                    </div>
-                  </>
-                ) : 
-                activeTab === "status" ? (
-                  <>
-                    <div
-                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                      onClick={() => {
-                        window.history.back();
-                      }}
-                    >
-                      <i className="fa fa-arrow-left pe-1" /> Back
-                    </div>
-                  </>
-                ) : null
+                ) :
+
+                  activeTab === "documents" ? (
+                    <>
+                      <div
+                        className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                        onClick={() => {
+                          window.history.back();
+                        }}
+                      >
+                        <i className="fa fa-arrow-left pe-1" /> Back 111
+                      </div>
+                    </>
+                  ) :
+                    activeTab === "status" ? (
+                      <>
+                        <div
+                          className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                          onClick={() => {
+                            window.history.back();
+                          }}
+                        >
+                          <i className="fa fa-arrow-left pe-1" /> Back
+                        </div>
+                      </>
+                    ) : null
                 }
               </div>
             </div>
@@ -1391,8 +1441,8 @@ const ClientList = () => {
           activeTab == "client"
             ? ClientData?.length
             : activeTab == "job"
-            ? getJobDetails?.length
-            : ""
+              ? getJobDetails?.length
+              : ""
         }
       />
 
@@ -1400,9 +1450,8 @@ const ClientList = () => {
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${
-              activeTab == tab.key ? "show active" : ""
-            }`}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}

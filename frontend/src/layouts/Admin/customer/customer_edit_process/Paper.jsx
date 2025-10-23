@@ -163,9 +163,9 @@ const Paper = () => {
         setIsLoading(true);
         const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
-       // console.log("site_ID", site_ID);
-     //   console.log("drive_ID", drive_ID);
-       // console.log("folder_ID", folder_ID);
+        // console.log("site_ID", site_ID);
+        //   console.log("drive_ID", drive_ID);
+        // console.log("folder_ID", folder_ID);
 
         const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
 
@@ -176,7 +176,7 @@ const Paper = () => {
 
           console.log("uploadDataUrl", uploadDataUrl);
 
-          
+
 
           const uploadedFileInfo = {
             web_url: uploadDataUrl,
@@ -194,9 +194,9 @@ const Paper = () => {
     const data1 = {
       req: { fileData: newFiles, customer_id: address, authToken: token, uploadedFiles: uploadedFilesArray },
     };
-    
-    
-    
+
+
+
 
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()
@@ -669,9 +669,22 @@ const Paper = () => {
                                                   </button>
 
 
-                                                  <button className="download-icon" onClick={() => downloadFileFromSharePoint(file.web_url, sharepoint_token, file.original_name)}>
+                                                  {/* <button className="download-icon" onClick={() => downloadFileFromSharePoint(file.web_url, sharepoint_token, file.original_name)}>
                                                     <i className="ti-download" />
-                                                  </button>
+                                                  </button> */}
+
+                                                  <a
+                                                    className="download-icon"
+                                                    href={file.web_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    download={file.original_name}
+
+                                                  >
+                                                    <i className="ti-download" />
+                                                  </a>
+
+
 
 
                                                 </div>
