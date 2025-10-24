@@ -290,7 +290,7 @@ const ClientLists = () => {
           )}
         </div>
       ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.client_name,
       sortable: true,
     },
 
