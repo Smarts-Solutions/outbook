@@ -202,7 +202,6 @@ const JobStatus = () => {
       "Allocated To": item.allocated_name,
       "Allocated to (Other)": item.multiple_staff_names,
       "Reviewer Name": item.reviewer_name,
-      "Received On": item.reviewer_name,
       "Companies House Due Date": convertDate(item.filing_Companies_date),
       "Internal Deadline": convertDate(item.internal_deadline_date),
       "Customer Deadline": convertDate(item.customer_deadline_date),
