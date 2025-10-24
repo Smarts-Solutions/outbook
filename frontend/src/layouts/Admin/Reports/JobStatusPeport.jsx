@@ -192,6 +192,7 @@ const JobStatus = () => {
   const exportData = JobStatusData.map((item) => {
     return {
       "Job Id": item.job_code_id,
+      "Job Received On": convertDate(item.job_received_on),
       "Customer Name": item.customer_trading_name,
       "Account Manager": item.account_manager_name,
       "Clients": item.client_trading_name,
@@ -199,6 +200,8 @@ const JobStatus = () => {
       "Job Type": item.job_type_name,
       "Status": item.status,
       "Allocated To": item.allocated_name,
+      "Allocated to (Other)": item.multiple_staff_names,
+      "Reviewer Name": item.reviewer_name,
       "Received On": item.reviewer_name,
       "Companies House Due Date": convertDate(item.filing_Companies_date),
       "Internal Deadline": convertDate(item.internal_deadline_date),
