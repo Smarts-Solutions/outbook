@@ -109,8 +109,12 @@ const JobStatus = () => {
       selector: (row) => row.allocated_name,
       reorder: false,
       sortable: true,
+      sortFunction: (a, b) => {
+        const nameA = (a.allocated_name || "").toLowerCase();
+        const nameB = (b.allocated_name || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      },
     },
-    
     {
       name: "Allocated to (Other)",
       cell: (row) => (
@@ -119,6 +123,11 @@ const JobStatus = () => {
       selector: (row) => row.multiple_staff_names,
       reorder: false,
       sortable: true,
+      sortFunction: (a, b) => {
+        const nameA = (a.multiple_staff_names || "").toLowerCase();
+        const nameB = (b.multiple_staff_names || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      },
     },
     {
       name: "Reviewer Name",
@@ -128,6 +137,11 @@ const JobStatus = () => {
       selector: (row) => row.reviewer_name,
       reorder: false,
       sortable: true,
+      sortFunction: (a, b) => {
+        const nameA = (a.reviewer_name || "").toLowerCase();
+        const nameB = (b.reviewer_name || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      },
     },
     {
       name: "Companies House Due Date",

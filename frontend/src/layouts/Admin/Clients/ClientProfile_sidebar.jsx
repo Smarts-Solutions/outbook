@@ -428,6 +428,13 @@ const ClientList = () => {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
+      sortFunction: (a, b) => {
+        // Sort YES before NO
+        const aVal = a.invoiced == "1" ? "YES" : "NO";
+        const bVal = b.invoiced == "1" ? "YES" : "NO";
+        return aVal.localeCompare(bVal);
+      },
+      
     },
 
     {
