@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { getWeeklyReport, weeklyReportFilter } from '../../../ReduxStore/Slice/Report/ReportSlice';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 
 const SlidingTable = () => {
   const navigate = useNavigate();
@@ -129,58 +130,108 @@ const SlidingTable = () => {
           <div className="row">
 
             <div className='col-md-3 pe-0'>
-              <select className="form-select" id="tabSelect"
-                value={multipleFilter.customer_id}
-                onChange={(e) => setMultipleFilter({ ...multipleFilter, customer_id: e.target.value })}
-
-              >
-                <option value="">Select Customer</option>
-                {filterData && filterData?.customer?.map((data, index) => (
-                  <option key={index} value={data.customer_id}>{data.customer_name}</option>
-                ))}
-
-              </select>
-
+              {/* Searchable Customer Dropdown */}
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={
+                  filterData && filterData.customer
+                    ? filterData.customer.map((data) => ({ value: data.customer_id, label: data.customer_name }))
+                    : []
+                }
+                value={
+                  filterData && filterData.customer
+                    ? filterData.customer
+                        .map((data) => ({ value: data.customer_id, label: data.customer_name }))
+                        .find((opt) => opt.value === multipleFilter.customer_id)
+                    : null
+                }
+                onChange={(selected) => {
+                  setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" });
+                }}
+                placeholder="Select Customer"
+              />
             </div>
 
             <div className='col-md-3 pe-0'>
-              <select className="form-select" id="tabSelect"
-                value={multipleFilter.job_status_type_id}
-                onChange={(e) => setMultipleFilter({ ...multipleFilter, job_status_type_id: e.target.value })}
-              >
-                <option value="">Select Job Status</option>
-                {filterData && filterData?.job_status_type?.map((data, index) => (
-                  <option key={index} value={data.job_status_type_id}>{data.job_status_type_name}</option>
-                ))}
-              </select>
-
+              {/* Searchable Job Status Dropdown */}
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={
+                  filterData && filterData.job_status_type
+                    ? filterData.job_status_type.map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
+                    : []
+                }
+                value={
+                  filterData && filterData.job_status_type
+                    ? filterData.job_status_type
+                        .map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
+                        .find((opt) => opt.value === multipleFilter.job_status_type_id)
+                    : null
+                }
+                onChange={(selected) => {
+                  setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" });
+                }}
+                placeholder="Select Job Status"
+              />
             </div>
 
 
             <div className='col-md-3 pe-0'>
-              <select className="form-select" id="tabSelect"
-                value={multipleFilter.processor_id}
-                onChange={(e) => setMultipleFilter({ ...multipleFilter, processor_id: e.target.value })}
-              >
-                <option value="">Select Processor</option>
-                {filterData && filterData?.processor?.map((data, index) => (
-                  <option key={index} value={data.processor_id}>{data.processor_name}</option>
-                ))}
-
-              </select>
-
+              {/* Searchable Processor Dropdown */}
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={
+                  filterData && filterData.processor
+                    ? filterData.processor.map((data) => ({ value: data.processor_id, label: data.processor_name }))
+                    : []
+                }
+                value={
+                  filterData && filterData.processor
+                    ? filterData.processor
+                        .map((data) => ({ value: data.processor_id, label: data.processor_name }))
+                        .find((opt) => opt.value === multipleFilter.processor_id)
+                    : null
+                }
+                onChange={(selected) => {
+                  setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" });
+                }}
+                placeholder="Select Processor"
+              />
             </div>
 
             <div className='col-md-2 pe-0'>
-              <select className="form-select" id="tabSelect"
-                value={multipleFilter.reviewer_id}
-                onChange={(e) => setMultipleFilter({ ...multipleFilter, reviewer_id: e.target.value })}
-              >
-                <option value="">Select Reviewer</option>
-                {filterData && filterData?.reviewer?.map((data, index) => (
-                  <option key={index} value={data.reviewer_id}>{data.reviewer_name}</option>
-                ))}
-              </select>
+              {/* Searchable Reviewer Dropdown */}
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={
+                  filterData && filterData.reviewer
+                    ? filterData.reviewer.map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
+                    : []
+                }
+                value={
+                  filterData && filterData.reviewer
+                    ? filterData.reviewer
+                        .map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
+                        .find((opt) => opt.value === multipleFilter.reviewer_id)
+                    : null
+                }
+                onChange={(selected) => {
+                  setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" });
+                }}
+                placeholder="Select Reviewer"
+              />
             </div>
             <div className='col-md-1 pe-0'>
               <button className="btn btn-info " onClick={() => setMultipleFilter({
