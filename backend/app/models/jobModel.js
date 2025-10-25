@@ -1042,7 +1042,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         GROUP BY jobs.id
         ORDER BY 
-         jobs.id DESC;
+        job_code_id ASC;
         `;
       const [rows] = await pool.execute(query);
       return { status: true, message: "Success.", data: rows };
@@ -1118,7 +1118,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
          assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
         GROUP BY jobs.id 
         ORDER BY 
-        jobs.id DESC;
+        job_code_id ASC;
      `;
 
      console.log("query", query);
