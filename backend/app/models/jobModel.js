@@ -140,7 +140,7 @@ const getAddJobData = async (job) => {
     WHERE  
      (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1' 
     ORDER BY 
-     staffs.id DESC;
+     staffs.first_name ASC;
    `;
 
     const [rows4] = await pool.execute(queryReviewer, [customer_id]);
@@ -167,7 +167,7 @@ const getAddJobData = async (job) => {
     WHERE  
      (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1' 
     ORDER BY 
-     staffs.id DESC;
+     staffs.first_name ASC
    `;
 
     const [rows5] = await pool.execute(queryAllocated, [customer_id]);
@@ -275,7 +275,10 @@ const getAddJobData = async (job) => {
       FROM 
            staffs
       WHERE  
-       (staffs.role_id != 1  AND staffs.role_id != 2) AND staffs.status = '1'`;
+       (staffs.role_id != 1  AND staffs.role_id != 2) AND staffs.status = '1'
+       ORDER BY
+       staffs.first_name ASC;
+         `;
     const [rowsStaff] = await pool.execute(allStaff);
 
 
