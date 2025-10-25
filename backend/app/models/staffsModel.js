@@ -122,7 +122,7 @@ const getStaff = async () => {
      FROM staffs 
      JOIN roles ON staffs.role_id = roles.id 
      LEFT JOIN line_managers ON line_managers.staff_by = staffs.id 
-     ORDER BY staffs.id DESC
+     ORDER BY staffs.first_name ASC
      `
   );
   return rows;
