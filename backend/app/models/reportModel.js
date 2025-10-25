@@ -1198,47 +1198,13 @@ const taxWeeklyStatusReport = async (Report) => {
       ORDER BY customers.id, year_week
     `;
 
-     //   console.log("Optimized Query:", query);
+        //   console.log("Optimized Query:", query);
 
         const [rowsData] = await pool.execute(query, params);
 
         // 🧾 Format Result (same as old structure)
         const formattedResult = [];
         const grouped = {};
-
-        // group data by customer + status
-        // for (const row of rowsData) {
-        //   const weekNum = parseInt(row.year_week.toString().slice(-2));
-        //   const key = `${row.customer_name}_${row.job_status}`;
-
-        //   if (!grouped[key]) {
-        //     grouped[key] = {
-        //       job_status: row.job_status,
-        //       job_type_name: "", // not in query, but keeping for compatibility
-        //       customer_name: row.customer_name,
-        //       weeks: [{}], // same as old format
-        //       Grand_Total: { count: 0, job_ids: "" },
-        //     };
-
-        //     // initialize 53 weeks
-        //     const weeksData = {};
-        //     for (let i = 1; i <= 53; i++) {
-        //       weeksData[`WE_${i}_${currentYear}`] = { count: 0, job_ids: "" };
-        //     }
-        //     grouped[key].weeks[0] = weeksData;
-        //   }
-
-        //   // fill week data
-        //   grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`] = {
-        //     count: row.job_count,
-        //     job_ids: row.job_ids,
-        //   };
-
-        //   // update grand total
-        //   grouped[key].Grand_Total.count += row.job_count;
-        //   grouped[key].Grand_Total.job_ids +=
-        //     (grouped[key].Grand_Total.job_ids ? "," : "") + row.job_ids;
-        // }
 
         for (const row of rowsData) {
             const weekNum = parseInt(row.year_week.toString().slice(-2));
@@ -1292,7 +1258,6 @@ const taxWeeklyStatusReport = async (Report) => {
                 job_ids: totalUniqueIds.join(','),
             };
         }
-
 
         // push to final array
         for (const key in grouped) {

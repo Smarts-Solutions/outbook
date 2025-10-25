@@ -22,6 +22,10 @@ const SlidingTable = () => {
     reviewer_id: ""
   });
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
 
 
 
@@ -32,32 +36,35 @@ const SlidingTable = () => {
     setVisibleColumns(columns.slice(CurrentWeek - 1, CurrentWeek + 9));
     getAllWeeklyReports();
     getFilterData()
-  }, [multipleFilter]);
+  }, [multipleFilter, page, limit]);
 
   const getAllWeeklyReports = async () => {
-    console.log("multipleFilter-->", multipleFilter);
     const req = {
+      // Pagination state (must be before any usage)
+
       StaffUserId: StaffUserId,
       customer_id: multipleFilter.customer_id,
       job_status_type_id: multipleFilter.job_status_type_id,
       processor_id: multipleFilter.processor_id,
-      reviewer_id: multipleFilter.reviewer_id
+      reviewer_id: multipleFilter.reviewer_id,
+      page,
+      limit
     }
     const data = { req: req, authToken: token };
     await dispatch(getWeeklyReport(data)).unwrap()
       .then((res) => {
         if (res.status) {
-
-          console.log("res.data", res.data);
-
-          setWeeklyReportData(res.data)
+          setWeeklyReportData(res.data);
+          setTotalCount(res.totalCount || 0);
         }
         else {
-          setWeeklyReportData([])
+          setWeeklyReportData([]);
+          setTotalCount(0);
         }
       })
       .catch((err) => {
         console.log("err", err);
+        setTotalCount(0);
       })
   };
 
@@ -82,6 +89,7 @@ const SlidingTable = () => {
   };
 
 
+  // Pagination state is already declared at the top
   function generateColumns(num) {
     const cols = [];
     for (let i = 1; i <= num; i++) {
@@ -98,6 +106,7 @@ const SlidingTable = () => {
     }
   };
 
+  // ...existing code...
   const slidePrev = () => {
     if (currentIndex - 10 >= 0) {
       const newIndex = currentIndex - 10;
@@ -126,9 +135,7 @@ const SlidingTable = () => {
     <div className='containr-fluid mt-5'>
       <div className='report-data'>
         <div className='mb-2 d-flex justify-content-between'>
-
           <div className="row">
-
             <div className='col-md-3 pe-0'>
               {/* Searchable Customer Dropdown */}
               <Select
@@ -170,8 +177,8 @@ const SlidingTable = () => {
                 value={
                   filterData && filterData.job_status_type
                     ? filterData.job_status_type
-                        .map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
-                        .find((opt) => opt.value === multipleFilter.job_status_type_id)
+                      .map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
+                      .find((opt) => opt.value === multipleFilter.job_status_type_id)
                     : null
                 }
                 onChange={(selected) => {
@@ -197,8 +204,8 @@ const SlidingTable = () => {
                 value={
                   filterData && filterData.processor
                     ? filterData.processor
-                        .map((data) => ({ value: data.processor_id, label: data.processor_name }))
-                        .find((opt) => opt.value === multipleFilter.processor_id)
+                      .map((data) => ({ value: data.processor_id, label: data.processor_name }))
+                      .find((opt) => opt.value === multipleFilter.processor_id)
                     : null
                 }
                 onChange={(selected) => {
@@ -223,8 +230,8 @@ const SlidingTable = () => {
                 value={
                   filterData && filterData.reviewer
                     ? filterData.reviewer
-                        .map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
-                        .find((opt) => opt.value === multipleFilter.reviewer_id)
+                      .map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
+                      .find((opt) => opt.value === multipleFilter.reviewer_id)
                     : null
                 }
                 onChange={(selected) => {
@@ -278,38 +285,15 @@ const SlidingTable = () => {
                       <p>No data available</p>
                     </td>
                   </tr>
-
-                  // <div className='text-center'>
-                  //         <img
-                  //           src={noDataImage}
-                  //           alt="No records available"
-                  //           style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
-                  //         />
-                  //         <p className='fs-16'>There are no records to display</p>
-                  //       </div>
-
-
                   :
                   weeklyReportData && weeklyReportData?.map((data, index) => (
-                    // <tr key={index}>
-                    //   <td className="fixed-column">{data?.customer_name}</td>
-                    //   {Object.values(data?.weeks[index]).map((col, index1) => (
-                    //     (visibleColumns[0] <= index1 + 1 && index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
-                    //       <td key={index1}>{col?.count == 0 ? "-" : col.count}</td>
-                    //     ) :
-                    //       null
-                    //   ))}
-                    // </tr>
                     <tr key={index}>
                       <td className="fixed-column">{data?.customer_name}</td>
-
                       {Object.values(data?.weeks[0]).map((col, index1) => (
                         (visibleColumns[0] <= index1 + 1 &&
                           index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
                           <td key={index1}>
                             {col?.count === 0 ? "-" :
-
-
                               <div
                                 style={{
                                   color: 'rgb(38, 189, 240)',
@@ -323,20 +307,17 @@ const SlidingTable = () => {
                               >
                                 {col.count}
                               </div>
-
                             }
-
                           </td>
                         ) : null
                       ))}
                     </tr>
                   ))
-
               }
-
             </tbody>
           </table>
         </div>
+        {/* Pagination Controls removed as requested */}
       </div>
     </div>
   );
