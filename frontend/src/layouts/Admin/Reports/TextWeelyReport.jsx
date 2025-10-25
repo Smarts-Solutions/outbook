@@ -44,6 +44,9 @@ const SlidingTable = () => {
     await dispatch(getWeeklyReport(data)).unwrap()
       .then((res) => {
         if (res.status) {
+
+          console.log("res.data", res.data);
+
           setWeeklyReportData(res.data)
         }
         else {
@@ -110,7 +113,7 @@ const SlidingTable = () => {
     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
-  
+
 
   return (
     <div className='containr-fluid mt-5'>
@@ -230,14 +233,26 @@ const SlidingTable = () => {
 
 
                   :
-                  weeklyReportData && weeklyReportData.map((data, index) => (
+                  weeklyReportData && weeklyReportData?.map((data, index) => (
+                    // <tr key={index}>
+                    //   <td className="fixed-column">{data?.customer_name}</td>
+                    //   {Object.values(data?.weeks[index]).map((col, index1) => (
+                    //     (visibleColumns[0] <= index1 + 1 && index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
+                    //       <td key={index1}>{col?.count == 0 ? "-" : col.count}</td>
+                    //     ) :
+                    //       null
+                    //   ))}
+                    // </tr>
                     <tr key={index}>
-                      <td className="fixed-column">{data.customer_name}</td>
-                      {Object.values(data.weeks[index]).map((col, index1) => (
-                        (visibleColumns[0] <= index1 + 1 && index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
-                          <td key={index1}>{col.count == 0 ? "-" : col.count}</td>
-                        ) :
-                          null
+                      <td className="fixed-column">{data?.customer_name}</td>
+
+                      {Object.values(data?.weeks[0]).map((col, index1) => (
+                        (visibleColumns[0] <= index1 + 1 &&
+                          index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
+                          <td key={index1}>
+                            {col?.count === 0 ? "-" : col.count}
+                          </td>
+                        ) : null
                       ))}
                     </tr>
                   ))

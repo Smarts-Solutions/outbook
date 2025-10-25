@@ -1004,136 +1004,309 @@ function getWeekNumber(date) {
     return Math.ceil((dayOfYear + 1) / 7);
 }
 
+// const taxWeeklyStatusReport = async (Report) => {
+//     try {
+//         const { StaffUserId, customer_id, job_status_type_id, processor_id, reviewer_id } = Report;
+
+//         // Line Manager
+//         const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+
+//         // Get Role
+//         const rows = await QueryRoleHelperFunction(StaffUserId)
+
+
+//         const currentYear = new Date().getFullYear();
+//         const startDate = new Date(currentYear, 0, 1);
+//         const endDate = new Date(currentYear, 11, 31);
+//         let weeks = [];
+//         let currentDate = new Date(startDate);
+//         while (currentDate <= endDate) {
+//             const weekNum = getWeekNumber(currentDate);
+//             const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
+//             weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
+//             weeks.push(`GROUP_CONCAT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS job_ids_${weekNum}_${currentDate.getFullYear()}`);
+//             currentDate.setDate(currentDate.getDate() + 7);
+//         }
+//         const weeks_sql = weeks.join(",\n    ");
+
+
+
+//         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+
+//         let query = `
+//             SELECT
+//                 master_status.name AS job_status,
+//                 customers.trading_name AS customer_name,
+//                 ${weeks_sql},
+//                 GROUP_CONCAT(jobs.id) AS job_ids,
+//                 COUNT(jobs.id) AS Grand_Total
+//             FROM 
+//                 customers
+//             LEFT JOIN 
+//                 assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+//              `;
+
+
+//         if (job_status_type_id != undefined && job_status_type_id != "") {
+//             query += `
+//                 LEFT JOIN 
+//                 jobs ON jobs.customer_id = customers.id AND jobs.status_type = ${job_status_type_id}
+//                 LEFT JOIN 
+//                 master_status ON master_status.id = jobs.status_type`;
+//         } else {
+//             query += `
+//                 LEFT JOIN 
+//                 jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6
+//                 LEFT JOIN 
+//                 master_status ON master_status.id = jobs.status_type`;
+//         }
+
+//         let conditions = [];
+
+//         if (customer_id != undefined && customer_id != "") {
+//             conditions.push(`customers.id = ${customer_id}`);
+//         }
+
+//         if (processor_id != undefined && processor_id != "") {
+//             conditions.push(`jobs.allocated_to = ${processor_id}`);
+//         }
+
+//         if (reviewer_id != undefined && reviewer_id != "") {
+//             conditions.push(`jobs.reviewer = ${reviewer_id}`);
+//         }
+
+
+//         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+//             if (conditions.length > 0) {
+//                 query += ` WHERE ${conditions.join(" AND ")}`;
+//             }
+//         } else {
+//             if (conditions.length > 0) {
+//                 query += ` WHERE (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND
+//              ${conditions.join(" AND ")}`;
+//             } else {
+//                 query += ` WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})`;
+//             }
+
+//         }
+
+
+//         // if (conditions.length > 0) {
+//         //     query += ` WHERE ${conditions.join(" AND ")}`;
+//         // }
+
+//         query += `
+//             GROUP BY 
+//                 master_status.name, 
+//                 customers.trading_name
+//             ORDER BY 
+//                 customers.id ASC
+//             `;
+
+//             console.log("query", query);
+
+//         const [result] = await pool.execute(query);
+//         let weekArray = [];
+//         const formattedResult = result.map(row => {
+//             const weeksData = {};
+//             for (let i = 1; i <= 53; i++) {
+//                 weeksData[`WE_${i}_${currentYear}`] = {
+//                     count: row[`WE_${i}_${currentYear}`] || 0,
+//                     job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`] : ""
+//                 };
+//             }
+//             weekArray.push(weeksData);
+//             return {
+//                 job_status: row.job_status,
+//                 job_type_name: row.job_type_name,
+//                 customer_name: row.customer_name,
+//                 weeks: weekArray,
+//                 Grand_Total: {
+//                     count: row.Grand_Total,
+//                     job_ids: row.job_ids
+//                 }
+
+//             };
+//         });
+
+//         return { status: true, message: 'Success.', data: formattedResult };
+
+//     } catch (error) {
+//         console.log("error ", error);
+//         return { status: false, message: 'Error getting tax status weekly report.' };
+//     }
+// }
+
 const taxWeeklyStatusReport = async (Report) => {
     try {
         const { StaffUserId, customer_id, job_status_type_id, processor_id, reviewer_id } = Report;
 
-        // Line Manager
-        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
-
-        // Get Role
-        const rows = await QueryRoleHelperFunction(StaffUserId)
-
+        // Helpers
+        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+        const rows = await QueryRoleHelperFunction(StaffUserId);
 
         const currentYear = new Date().getFullYear();
-        const startDate = new Date(currentYear, 0, 1);
-        const endDate = new Date(currentYear, 11, 31);
-        let weeks = [];
-        let currentDate = new Date(startDate);
-        while (currentDate <= endDate) {
-            const weekNum = getWeekNumber(currentDate);
-            const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
-            weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
-            weeks.push(`GROUP_CONCAT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS job_ids_${weekNum}_${currentDate.getFullYear()}`);
-            currentDate.setDate(currentDate.getDate() + 7);
-        }
-        const weeks_sql = weeks.join(",\n    ");
 
+        const [RoleAccess] = await pool.execute(
+            'SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?',
+            [rows[0].role_id, 33]
+        );
 
-
-        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
-
+        // ✅ Lightweight optimized query
         let query = `
-            SELECT
-                master_status.name AS job_status,
-                customers.trading_name AS customer_name,
-                ${weeks_sql},
-                GROUP_CONCAT(jobs.id) AS job_ids,
-                COUNT(jobs.id) AS Grand_Total
-            FROM 
-                customers
-            LEFT JOIN 
-                assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-             `;
+      SELECT
+        master_status.name AS job_status,
+        customers.trading_name AS customer_name,
+        YEARWEEK(jobs.created_at, 1) AS year_week,
+        COUNT(jobs.id) AS job_count,
+        GROUP_CONCAT(jobs.id) AS job_ids
+      FROM jobs
+      INNER JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+      WHERE YEAR(jobs.created_at) = ?
+    `;
 
+        const params = [currentYear];
 
-        if (job_status_type_id != undefined && job_status_type_id != "") {
-            query += `
-                LEFT JOIN 
-                jobs ON jobs.customer_id = customers.id AND jobs.status_type = ${job_status_type_id}
-                LEFT JOIN 
-                master_status ON master_status.id = jobs.status_type`;
+        // 🔍 Dynamic filters
+        if (customer_id) {
+            query += ` AND customers.id = ?`;
+            params.push(customer_id);
+        }
+        if (job_status_type_id) {
+            query += ` AND jobs.status_type = ?`;
+            params.push(job_status_type_id);
         } else {
-            query += `
-                LEFT JOIN 
-                jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6
-                LEFT JOIN 
-                master_status ON master_status.id = jobs.status_type`;
+            query += ` AND jobs.status_type = 6`; // default
+        }
+        if (processor_id) {
+            query += ` AND jobs.allocated_to = ?`;
+            params.push(processor_id);
+        }
+        if (reviewer_id) {
+            query += ` AND jobs.reviewer = ?`;
+            params.push(reviewer_id);
         }
 
-        let conditions = [];
-
-        if (customer_id != undefined && customer_id != "") {
-            conditions.push(`customers.id = ${customer_id}`);
+        if (!(rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+            query += ` AND (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))`;
         }
-
-        if (processor_id != undefined && processor_id != "") {
-            conditions.push(`jobs.allocated_to = ${processor_id}`);
-        }
-
-        if (reviewer_id != undefined && reviewer_id != "") {
-            conditions.push(`jobs.reviewer = ${reviewer_id}`);
-        }
-
-
-        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-            if (conditions.length > 0) {
-                query += ` WHERE ${conditions.join(" AND ")}`;
-            }
-        } else {
-            if (conditions.length > 0) {
-                query += ` WHERE (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND
-             ${conditions.join(" AND ")}`;
-            } else {
-                query += ` WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})`;
-            }
-
-        }
-
-
-        // if (conditions.length > 0) {
-        //     query += ` WHERE ${conditions.join(" AND ")}`;
-        // }
 
         query += `
-            GROUP BY 
-                master_status.name, 
-                customers.trading_name
-            ORDER BY 
-                customers.id ASC
-            `;
+      GROUP BY customers.id, master_status.id, year_week
+      ORDER BY customers.id, year_week
+    `;
 
-        const [result] = await pool.execute(query);
-        let weekArray = [];
-        const formattedResult = result.map(row => {
-            const weeksData = {};
-            for (let i = 1; i <= 53; i++) {
-                weeksData[`WE_${i}_${currentYear}`] = {
-                    count: row[`WE_${i}_${currentYear}`] || 0,
-                    job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`] : ""
+     //   console.log("Optimized Query:", query);
+
+        const [rowsData] = await pool.execute(query, params);
+
+        // 🧾 Format Result (same as old structure)
+        const formattedResult = [];
+        const grouped = {};
+
+        // group data by customer + status
+        // for (const row of rowsData) {
+        //   const weekNum = parseInt(row.year_week.toString().slice(-2));
+        //   const key = `${row.customer_name}_${row.job_status}`;
+
+        //   if (!grouped[key]) {
+        //     grouped[key] = {
+        //       job_status: row.job_status,
+        //       job_type_name: "", // not in query, but keeping for compatibility
+        //       customer_name: row.customer_name,
+        //       weeks: [{}], // same as old format
+        //       Grand_Total: { count: 0, job_ids: "" },
+        //     };
+
+        //     // initialize 53 weeks
+        //     const weeksData = {};
+        //     for (let i = 1; i <= 53; i++) {
+        //       weeksData[`WE_${i}_${currentYear}`] = { count: 0, job_ids: "" };
+        //     }
+        //     grouped[key].weeks[0] = weeksData;
+        //   }
+
+        //   // fill week data
+        //   grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`] = {
+        //     count: row.job_count,
+        //     job_ids: row.job_ids,
+        //   };
+
+        //   // update grand total
+        //   grouped[key].Grand_Total.count += row.job_count;
+        //   grouped[key].Grand_Total.job_ids +=
+        //     (grouped[key].Grand_Total.job_ids ? "," : "") + row.job_ids;
+        // }
+
+        for (const row of rowsData) {
+            const weekNum = parseInt(row.year_week.toString().slice(-2));
+            const key = `${row.customer_name}_${row.job_status}`;
+
+            if (!grouped[key]) {
+                grouped[key] = {
+                    job_status: row.job_status,
+                    job_type_name: "", // compatibility
+                    customer_name: row.customer_name,
+                    weeks: [{}],
+                    Grand_Total: { count: 0, job_ids: "" },
                 };
-            }
-            weekArray.push(weeksData);
-            return {
-                job_status: row.job_status,
-                job_type_name: row.job_type_name,
-                customer_name: row.customer_name,
-                weeks: weekArray,
-                Grand_Total: {
-                    count: row.Grand_Total,
-                    job_ids: row.job_ids
+
+                // Initialize 53 weeks
+                const weeksData = {};
+                for (let i = 1; i <= 53; i++) {
+                    weeksData[`WE_${i}_${currentYear}`] = { count: 0, job_ids: "" };
                 }
+                grouped[key].weeks[0] = weeksData;
+            }
 
+            // --- Parse and merge unique job IDs ---
+            const existingWeek = grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`];
+            const existingIds = existingWeek.job_ids
+                ? existingWeek.job_ids.split(',').map(id => id.trim()).filter(id => id)
+                : [];
+
+            const newIds = row.job_ids
+                ? row.job_ids.split(',').map(id => id.trim()).filter(id => id)
+                : [];
+
+            // Combine and keep unique job IDs
+            const uniqueIds = [...new Set([...existingIds, ...newIds])];
+
+            // Update week data
+            grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`] = {
+                count: uniqueIds.length, // ✅ count based on unique IDs
+                job_ids: uniqueIds.join(','),
             };
-        });
 
-        return { status: true, message: 'Success.', data: formattedResult };
+            // --- Update Grand Total (unique across all weeks) ---
+            const existingTotalIds = grouped[key].Grand_Total.job_ids
+                ? grouped[key].Grand_Total.job_ids.split(',').map(id => id.trim()).filter(id => id)
+                : [];
 
+            const totalUniqueIds = [...new Set([...existingTotalIds, ...newIds])];
+
+            grouped[key].Grand_Total = {
+                count: totalUniqueIds.length,
+                job_ids: totalUniqueIds.join(','),
+            };
+        }
+
+
+        // push to final array
+        for (const key in grouped) {
+            formattedResult.push(grouped[key]);
+        }
+
+        return { status: true, message: "Success.", data: formattedResult };
     } catch (error) {
-        console.log("error ", error);
-        return { status: false, message: 'Error getting tax status weekly report.' };
+        console.error("error ", error);
+        return { status: false, message: "Error getting tax status weekly report." };
     }
-}
+};
+
+
 
 const taxWeeklyStatusReportFilterKey = async (Report) => {
     const { StaffUserId } = Report;
@@ -1201,7 +1374,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         JOIN 
              roles ON staffs.role_id = roles.id
         WHERE  
-         staffs.role_id = 6   
+          (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1'  
         ORDER BY 
          staffs.id DESC;
        `;
@@ -1227,7 +1400,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         JOIN 
              roles ON staffs.role_id = roles.id
         WHERE  
-         staffs.role_id = 3   
+         (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1'   
         ORDER BY 
          staffs.id DESC;
        `;
