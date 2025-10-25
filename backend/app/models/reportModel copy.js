@@ -1252,8 +1252,6 @@ const getInternalTasks = async (Report) => {
 
 
 
-
-
 /////////////------  START Timesheet Report START-------//////////////////////
 
 /** get date range for timePeriod */

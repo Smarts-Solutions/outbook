@@ -1488,6 +1488,7 @@ const getAllTaskByStaff = async (Report) => {
     JOIN task ON task.id = client_job_task.task_id
     WHERE job_id IN (${jobIds})
     GROUP BY task.id
+    ORDER BY task.name ASC;
     `;
     const [result] = await pool.execute(query);
     // console.log("Task data retrieved:", result);
@@ -1566,13 +1567,13 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 }
 
 const getInternalJobs = async (Report) => {
-    const query = `SELECT * FROM internal ORDER BY id DESC`;
+    const query = `SELECT * FROM internal ORDER BY name ASC`;
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
 
 const getInternalTasks = async (Report) => {
-    const query = `SELECT * FROM sub_internal ORDER BY id DESC`;
+    const query = `SELECT * FROM sub_internal ORDER BY name ASC`;
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
