@@ -627,7 +627,7 @@ WHERE
 GROUP BY
     clients.id    
 ORDER BY 
-    clients.id DESC;
+    clients.trading_name ASC;
     `;
       const [result] = await pool.execute(query);
       return { status: true, message: "success.", data: result };
@@ -669,7 +669,7 @@ ORDER BY
       GROUP BY
           clients.id
       ORDER BY 
-          clients.id DESC;
+          clients.trading_name ASC;
     `;
 
      const [result] = await pool.execute(query);
