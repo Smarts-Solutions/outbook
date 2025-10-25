@@ -26,7 +26,7 @@ const getAddJobData = async (job) => {
         clients ON customers.id = clients.customer_id
    WHERE customers.id = ?    
    ORDER BY 
-    customers.id DESC;
+    clients.trading_name ASC;
   `;
     const [rows] = await pool.execute(queryCustomerWithClient, [customer_id]);
 
