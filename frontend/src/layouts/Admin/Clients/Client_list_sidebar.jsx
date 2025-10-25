@@ -382,7 +382,7 @@ const ClientLists = () => {
           </a>
         </div>
       ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.job_code_id,
       sortable: true,
       reorder: false,
     },
