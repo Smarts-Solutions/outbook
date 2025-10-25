@@ -429,7 +429,6 @@ const CreateJob = () => {
     }
 
     ScrollToViewFirstError(newErrors);
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -506,6 +505,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
 
+  
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
@@ -516,6 +516,18 @@ const CreateJob = () => {
       });
       return;
     }
+
+    if(["",null,undefined].includes(jobData.DateReceivedOn)){
+      sweatalert.fire({
+        icon: "error",
+        title: "Please select Date Received On.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
+
 
 
     const req = {
@@ -2605,6 +2617,7 @@ const CreateJob = () => {
                                     <label className="form-label">
                                       Date Received On
                                     </label>
+                                    <span className="text-danger">*</span>
                                     <input
                                       type="date"
                                       className={

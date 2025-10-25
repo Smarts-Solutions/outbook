@@ -797,6 +797,17 @@ const EditJob = () => {
       return;
     }
 
+    if(["",null,undefined].includes(jobData.DateReceivedOn)){
+      sweatalert.fire({
+        icon: "error",
+        title: "Please select Date Received On.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
+
 
     const req = {
       job_id: location.state.job_id,
@@ -2803,6 +2814,7 @@ const EditJob = () => {
                                     <label className="form-label">
                                       Date Received On
                                     </label>
+                                    <span className="text-danger">*</span>
                                     <input
                                       type="date"
                                       className="form-control mb-3"
