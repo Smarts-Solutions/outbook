@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { getWeeklyReport, weeklyReportFilter } from '../../../ReduxStore/Slice/Report/ReportSlice';
+import { useNavigate } from 'react-router-dom';
 
 const SlidingTable = () => {
+  const navigate = useNavigate();
   const noDataImage = '/assets/images/No-data-amico.png';
   const StaffUserId = JSON.parse(localStorage.getItem('staffDetails'))?.id;
   const token = JSON.parse(localStorage.getItem('token'));
@@ -111,6 +113,10 @@ const SlidingTable = () => {
     const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
     const days = Math.floor((currentDate - startOfYear) / (24 * 60 * 60 * 1000));
     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+  }
+
+  const handleOnClick = (row) => {
+    navigate('/admin/report/jobs', { state: { job_ids: row?.job_ids } });
   }
 
 
@@ -250,7 +256,25 @@ const SlidingTable = () => {
                         (visibleColumns[0] <= index1 + 1 &&
                           index1 + 1 <= visibleColumns[visibleColumns.length - 1]) ? (
                           <td key={index1}>
-                            {col?.count === 0 ? "-" : col.count}
+                            {col?.count === 0 ? "-" :
+
+
+                              <div
+                                style={{
+                                  color: 'rgb(38, 189, 240)',
+                                  cursor: 'pointer',
+                                  display: 'flex',          
+                                  justifyContent: 'center', 
+                                  alignItems: 'center',    
+                                  height: '100%',
+                                }}
+                                onClick={() => handleOnClick(col)}
+                              >
+                                {col.count}
+                              </div>
+
+                            }
+
                           </td>
                         ) : null
                       ))}
