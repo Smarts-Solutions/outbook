@@ -134,9 +134,9 @@ const SlidingTable = () => {
   return (
     <div className='containr-fluid mt-5'>
       <div className='report-data'>
-        <div className='mb-2 d-flex justify-content-between'>
+        <div className='mb-2'>
           <div className="row">
-            <div className='col-md-3 pe-0'>
+            <div className='col-md-2 pe-0'>
               {/* Searchable Customer Dropdown */}
               <Select
                 id="tabSelect"
@@ -162,7 +162,7 @@ const SlidingTable = () => {
               />
             </div>
 
-            <div className='col-md-3 pe-0'>
+            <div className='col-md-2 pe-0'>
               {/* Searchable Job Status Dropdown */}
               <Select
                 id="tabSelect"
@@ -189,7 +189,7 @@ const SlidingTable = () => {
             </div>
 
 
-            <div className='col-md-3 pe-0'>
+            <div className='col-md-2 pe-0'>
               {/* Searchable Processor Dropdown */}
               <Select
                 id="tabSelect"
