@@ -749,7 +749,7 @@ const getCustomer_dropdown = async (customer) => {
 FROM 
     customers 
 ORDER BY 
-id DESC;`;
+trading_name ASC;`;
 
         const [result] = await pool.execute(query);
 
@@ -796,7 +796,7 @@ id DESC;`;
         WHERE
              customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
-           ORDER BY customers.id DESC
+           ORDER BY customers.trading_name ASC
 
          `;
          try {
