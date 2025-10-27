@@ -83,7 +83,7 @@ const CreateClient = () => {
     CompanyNumber: "",
     RegisteredOfficeAddress: "",
     IncorporationDate: "",
-    IncorporationIn: "",
+    IncorporationIn: "4",
     VATRegistered: "0",
     VATNumber: "",
     Website: "",
@@ -1119,7 +1119,8 @@ const CreateClient = () => {
             setPartnershipDetails({ ...getPartnershipDetails, ClientIndustry: (response.data[0].id).toString() });
 
             setSoleTraderDetails({ ...getSoleTraderDetails, IndustryType: (response.data[0].id).toString() });
-            setCompanyDetails({ ...getCompanyDetails, ClientIndustry: (response.data[0].id).toString(), IncorporationIn: incorporationDataAll[0].id });
+            setCompanyDetails({ ...getCompanyDetails, ClientIndustry: (response.data[0].id).toString(), IncorporationIn: "4" });
+            
           }
         } else {
           setClientIndustry(response.data);
@@ -1129,6 +1130,7 @@ const CreateClient = () => {
         return;
       });
   };
+
 
   const getClientIndustry1 = async (incorporation_id) => {
     const req = { action: "get" };
@@ -1841,6 +1843,8 @@ const CreateClient = () => {
           role: personRoleDataAll.data.length > 0 ? (personRoleDataAll.data[0]?.id).toString() : "",
         }))
       );
+
+      setCompanyDetails({ ...getCompanyDetails, IncorporationIn: "4" });
     } else if (e.target.value == 3) {
       setContacts1(prevContacts =>
         prevContacts.map(contact => ({
