@@ -81,7 +81,7 @@ const CreateJob = () => {
     Reviewer: "",
     AllocatedTo: "",
     AllocatedOn: "",
-    DateReceivedOn: "",
+    DateReceivedOn: new Date().toISOString().split("T")[0],
     YearEnd: "",
     TotalPreparationTime: "",
     ReviewTime: "",
@@ -2628,7 +2628,7 @@ const CreateJob = () => {
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
                                       onChange={HandleChange}
-                                      value={jobData.DateReceivedOn}
+                                      value={jobData.DateReceivedOn || new Date().toISOString().slice(0, 10)}
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
