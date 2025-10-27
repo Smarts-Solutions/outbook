@@ -253,12 +253,15 @@ const SlidingTable = () => {
               />
             </div>
             <div className='col-md-1 pe-0'>
-              <button className="btn btn-info " onClick={() => setMultipleFilter({
+              {/* <button className="btn btn-info " onClick={() => setMultipleFilter({
                 customer_id: "",
                 job_status_type_id: "",
                 processor_id: "",
                 reviewer_id: ""
               })} disabled={currentIndex === 0}>
+                Reset
+              </button> */}
+              <button className="btn btn-info " onClick={() => setMultipleFilter()} disabled={currentIndex === 0}>
                 Reset
               </button>
             </div>
