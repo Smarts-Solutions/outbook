@@ -274,7 +274,7 @@ const Sidebar = () => {
 
 
 
-            {/* {((updatedShowTab && updatedShowTab.report) ||
+            {((updatedShowTab && updatedShowTab.report) ||
               role === "SUPERADMIN") && (
                 <li
                   className={
@@ -293,11 +293,11 @@ const Sidebar = () => {
                     <span>Reports</span>
                   </Link>
                 </li>
-              )} */}
+              )}
 
 
 
-            {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
+            {/* {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
               <li className={activeLink.startsWith("/admin/reports") ? "active" : ""}>
                 <Link
                   to="/admin/reports"
@@ -320,7 +320,7 @@ const Sidebar = () => {
                   aria-expanded={menuState.dropdownOpen["/admin/reports"] ? "true" : "false"}
                 >
 
-                  {/* Standard Report */}
+                
                   <li
                     className={
                       activeLink === "/admin/reports" ? "active" : ""
@@ -333,7 +333,7 @@ const Sidebar = () => {
                     >
                       <span className="sidebar-icons">
                         <i className="fas fa-file-alt"></i>{" "}
-                        {/* Report icon */}
+                      
                       </span>
                       <span>Standard Report</span>
                     </Link>
@@ -341,7 +341,7 @@ const Sidebar = () => {
 
 
                   
-                  {/* Custom timesheet Report */}
+            
                   <li
                     className={
                       activeLink === "/admin/timesheetReports" ? "active" : ""
@@ -362,7 +362,7 @@ const Sidebar = () => {
 
                 </ul>
               </li>
-            )}
+            )} */}
 
 
 
@@ -389,7 +389,7 @@ const Sidebar = () => {
                   </li>
 
 
-                  {/* {
+                  {
                     ["SUPERADMIN", "ADMIN"].includes(role) ?
                       <li
                         className={
@@ -409,7 +409,7 @@ const Sidebar = () => {
                         </Link>
                       </li>
                       : ""
-                  } */}
+                  }
 
 
 
