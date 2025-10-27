@@ -33,7 +33,7 @@ function JobCustomReport() {
   const [jobTypeAllData, setJobTypeAllData] = useState([]);
   const [statusAllData, setStatusAllData] = useState([]);
 
-  
+
 
 
 
@@ -184,8 +184,8 @@ function JobCustomReport() {
       });
   };
 
-    
-   // Get All Clients
+
+  // Get All Clients
   const GetAllClient = async () => {
     const req = { action: "get", customer_id: "" };
     const data = { req: req, authToken: token };
@@ -210,231 +210,231 @@ function JobCustomReport() {
   // All Type Staff Get
   const staffData = async (role_id) => {
     //  console.log("role ", role);
-    if(['',null,undefined].includes(role_id)){
+    if (['', null, undefined].includes(role_id)) {
       return
     }
-    if(Number(role_id) == 4){
-    if (role?.toUpperCase() === "SUPERADMIN") {
-      var req = { action: "getStaffWithRole", role_id: role_id || "" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            // console.log("response.data ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: `${item.first_name} ${item.last_name} (${item.email})`
-            }));
-            setAccountManagerAllData(data);
-          } else {
-            setAccountManagerAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-
-    } else {
-      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
-
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email
-      }));
-      setAccountManagerAllData(data);
-    }
-    }
-
-    else if(Number(role_id) == 3){
+    if (Number(role_id) == 4) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-      var req = { action: "getStaffWithRole", role_id: role_id || "" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            // console.log("response.data ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: `${item.first_name} ${item.last_name} (${item.email})`
-            }));
-            setAllocatedToAllData(data);
-          } else {
-            setAllocatedToAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var data = { req: req, authToken: token };
+        await dispatch(getAllTaskByStaff(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              // console.log("response.data ", response.data);
+              const data = response?.data?.map((item) => ({
+                value: item.id,
+                label: `${item.first_name} ${item.last_name} (${item.email})`
+              }));
+              setAccountManagerAllData(data);
+            } else {
+              setAccountManagerAllData([]);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
 
-    } else {
-      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+      } else {
+        let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
 
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email
-      }));
-      setAllocatedToAllData(data);
+        data = data?.map((item) => ({
+          value: item.id,
+          label: item.email
+        }));
+        setAccountManagerAllData(data);
+      }
     }
-    }
 
-    else if(Number(role_id) == 6){
+    else if (Number(role_id) == 3) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-      var req = { action: "getStaffWithRole", role_id: role_id || "" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            // console.log("response.data ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: `${item.first_name} ${item.last_name} (${item.email})`
-            }));
-            setReviewerAllData(data);
-          } else {
-            setReviewerAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var data = { req: req, authToken: token };
+        await dispatch(getAllTaskByStaff(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              // console.log("response.data ", response.data);
+              const data = response?.data?.map((item) => ({
+                value: item.id,
+                label: `${item.first_name} ${item.last_name} (${item.email})`
+              }));
+              setAllocatedToAllData(data);
+            } else {
+              setAllocatedToAllData([]);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
 
-    } else {
-      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+      } else {
+        let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
 
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email
-      }));
-      setReviewerAllData(data);
+        data = data?.map((item) => ({
+          value: item.id,
+          label: item.email
+        }));
+        setAllocatedToAllData(data);
+      }
     }
-    }
-   
-    else if(role_id == 'other'){
+
+    else if (Number(role_id) == 6) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-      var req = { action: "getStaffWithRole", role_id: role_id || "" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            // console.log("response.data ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: `${item.first_name} ${item.last_name} (${item.email})`
-            }));
-            setOtherStaffAllData(data);
-          } else {
-            setOtherStaffAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var data = { req: req, authToken: token };
+        await dispatch(getAllTaskByStaff(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              // console.log("response.data ", response.data);
+              const data = response?.data?.map((item) => ({
+                value: item.id,
+                label: `${item.first_name} ${item.last_name} (${item.email})`
+              }));
+              setReviewerAllData(data);
+            } else {
+              setReviewerAllData([]);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
 
-    } else {
-      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+      } else {
+        let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
 
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email
-      }));
-      setOtherStaffAllData(data);
+        data = data?.map((item) => ({
+          value: item.id,
+          label: item.email
+        }));
+        setReviewerAllData(data);
+      }
     }
+
+    else if (role_id == 'other') {
+      if (role?.toUpperCase() === "SUPERADMIN") {
+        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var data = { req: req, authToken: token };
+        await dispatch(getAllTaskByStaff(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              // console.log("response.data ", response.data);
+              const data = response?.data?.map((item) => ({
+                value: item.id,
+                label: `${item.first_name} ${item.last_name} (${item.email})`
+              }));
+              setOtherStaffAllData(data);
+            } else {
+              setOtherStaffAllData([]);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
+
+      } else {
+        let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+
+        data = data?.map((item) => ({
+          value: item.id,
+          label: item.email
+        }));
+        setOtherStaffAllData(data);
+      }
     }
-    else{
+    else {
       return
     }
 
   };
 
-   // Get All Service
+  // Get All Service
   const GetAllService = async () => {
 
-      var req = { action: "getAllService" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setServiceAllData(data);
-          } else {
-            setServiceAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    
-   
+    var req = { action: "getAllService" };
+    var data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.name
+          }));
+          setServiceAllData(data);
+        } else {
+          setServiceAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    return
+
+
   };
 
-   // Get All Service
+  // Get All Service
   const GetAllJobType = async () => {
 
-      var req = { action: "getAllJobType" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.type
-            }));
-            setJobTypeAllData(data);
-          } else {
-            setJobTypeAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    
-   
+    var req = { action: "getAllJobType" };
+    var data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.type
+          }));
+          setJobTypeAllData(data);
+        } else {
+          setJobTypeAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    return
+
+
   };
 
-    // Get All Status
+  // Get All Status
   const GetAllStatus = async () => {
 
-      var req = { action: "getAllStatus" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setStatusAllData(data);
-          } else {
-            setStatusAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    
-   
+    var req = { action: "getAllStatus" };
+    var data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.name
+          }));
+          setStatusAllData(data);
+        } else {
+          setStatusAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    return
+
+
   };
 
-  
-
-  
 
 
 
-  
+
+
+
+
 
 
 
@@ -738,13 +738,13 @@ function JobCustomReport() {
       else if (value == 'account_manager_id') {
         staffData(4)  // role_id 4 for account manager
       }
-      else if(value == "allocated_to_id"){
+      else if (value == "allocated_to_id") {
         staffData(3)  // role_id 3 for staff
       }
-      else if(value == "reviewer_id"){
+      else if (value == "reviewer_id") {
         staffData(6)  // role_id 2 for reviewer
       }
-      else if(value == "allocated_to_other_id"){
+      else if (value == "allocated_to_other_id") {
         staffData('other')  // role_id 5 for allocated to other
       }
       else if (value == 'service_id') {
@@ -1252,7 +1252,6 @@ function JobCustomReport() {
           </div>
         )}
 
-
         {/* Field To Display Customer */}
         {filters?.groupBy?.includes('customer_id') && (
           <div className="col-lg-4 col-md-6">
@@ -1336,7 +1335,7 @@ function JobCustomReport() {
           </div>
         )}
 
-         {/* Field To Display Allocated To */}
+        {/* Field To Display Allocated To */}
         {filters?.groupBy?.includes('allocated_to_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
@@ -1365,7 +1364,7 @@ function JobCustomReport() {
           </div>
         )}
 
-          {/* Field To Display Reviewer  */}
+        {/* Field To Display Reviewer  */}
         {filters?.groupBy?.includes('reviewer_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
@@ -1394,7 +1393,7 @@ function JobCustomReport() {
           </div>
         )}
 
-          {/* Field To Display Allocated Other  */}
+        {/* Field To Display Allocated Other  */}
         {filters?.groupBy?.includes('allocated_to_other_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
@@ -1423,7 +1422,7 @@ function JobCustomReport() {
           </div>
         )}
 
-         {/* Field To Display Services  */}
+        {/* Field To Display Services  */}
         {filters?.groupBy?.includes('service_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
@@ -1453,7 +1452,7 @@ function JobCustomReport() {
         )}
 
 
-           {/* Field To Display Job Type  */}
+        {/* Field To Display Job Type  */}
         {filters?.groupBy?.includes('job_type_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
@@ -1482,7 +1481,7 @@ function JobCustomReport() {
           </div>
         )}
 
-          {/* Field To Display Status  */}
+        {/* Field To Display Status  */}
         {filters?.groupBy?.includes('status_type_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
