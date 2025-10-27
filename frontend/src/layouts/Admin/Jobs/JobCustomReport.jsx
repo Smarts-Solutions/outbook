@@ -1161,7 +1161,7 @@ function JobCustomReport() {
 
 
         {/* Field To Display Job */}
-        {(filters?.groupBy?.includes('job_id') && filters.internal_external != "1") && (
+        {(filters?.groupBy?.includes('job_id')) && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
               Select Job
@@ -1299,7 +1299,6 @@ function JobCustomReport() {
             />
           </div>
         )}
-
 
           {/* Field To Display Reviewer  */}
         {filters?.groupBy?.includes('reviewer_id') && (
