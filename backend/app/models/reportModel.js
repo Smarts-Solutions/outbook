@@ -1297,7 +1297,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         FROM 
             customers   
         ORDER BY 
-        customers.id DESC;
+        customers.trading_name ASC;
        `;
             const [data] = await pool.execute(queryCustomer);
             custumerData = data;
@@ -1313,7 +1313,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         WHERE 
           customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})           
         ORDER BY 
-        customers.id DESC;
+        customers.trading_name ASC;
        `;
             const [data] = await pool.execute(queryCustomer);
             custumerData = data;
@@ -1341,7 +1341,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         WHERE  
           (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1'  
         ORDER BY 
-         staffs.id DESC;
+         staffs.first_name ASC;
        `;
 
         const [rows1] = await pool.execute(queryReviewer);
@@ -1367,7 +1367,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
         WHERE  
          (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1'   
         ORDER BY 
-         staffs.id DESC;
+         staffs.first_name ASC;
        `;
         const [rows2] = await pool.execute(queryProcessor);
         let processor = []
@@ -1388,7 +1388,7 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
       FROM 
           master_status
       ORDER BY 
-       master_status.id DESC;
+       master_status.name ASC;
      `;
         const [rows3] = await pool.execute(queryJobStatusType);
         let job_status_type = []

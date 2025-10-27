@@ -129,6 +129,18 @@ const SlidingTable = () => {
     navigate('/admin/report/jobs', { state: { job_ids: row?.job_ids } });
   }
 
+  const clearFilter = () => {
+    setMultipleFilter({
+      customer_id: "",
+      job_status_type_id: "",
+      processor_id: "",
+      reviewer_id: ""
+    })
+
+    
+
+  };
+
 
 
   return (
@@ -152,11 +164,13 @@ const SlidingTable = () => {
                   ]
                 }
                 value={
-                  filterData && filterData.customer
-                    ? filterData.customer
-                        .map((data) => ({ value: data.customer_id, label: data.customer_name }))
-                        .find((opt) => opt.value === multipleFilter.customer_id)
-                    : null
+                  multipleFilter.customer_id === ""
+                    ? { value: "", label: "---select---" }
+                    : filterData && filterData.customer
+                      ? filterData.customer
+                          .map((data) => ({ value: data.customer_id, label: data.customer_name }))
+                          .find((opt) => opt.value === multipleFilter.customer_id)
+                      : null
                 }
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" });
@@ -181,11 +195,13 @@ const SlidingTable = () => {
                   ]
                 }
                 value={
-                  filterData && filterData.job_status_type
-                    ? filterData.job_status_type
-                      .map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
-                      .find((opt) => opt.value === multipleFilter.job_status_type_id)
-                    : null
+                  multipleFilter.job_status_type_id === ""
+                    ? { value: "", label: "--- select ----" }
+                    : filterData && filterData.job_status_type
+                      ? filterData.job_status_type
+                          .map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
+                          .find((opt) => opt.value === multipleFilter.job_status_type_id)
+                      : null
                 }
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" });
@@ -211,11 +227,13 @@ const SlidingTable = () => {
                   ]
                 }
                 value={
-                  filterData && filterData.processor
-                    ? filterData.processor
-                      .map((data) => ({ value: data.processor_id, label: data.processor_name }))
-                      .find((opt) => opt.value === multipleFilter.processor_id)
-                    : null
+                  multipleFilter.processor_id === ""
+                    ? { value: "", label: "--- select ---" }
+                    : filterData && filterData.processor
+                      ? filterData.processor
+                          .map((data) => ({ value: data.processor_id, label: data.processor_name }))
+                          .find((opt) => opt.value === multipleFilter.processor_id)
+                      : null
                 }
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" });
@@ -240,11 +258,13 @@ const SlidingTable = () => {
                   ]
                 }
                 value={
-                  filterData && filterData.reviewer
-                    ? filterData.reviewer
-                      .map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
-                      .find((opt) => opt.value === multipleFilter.reviewer_id)
-                    : null
+                  multipleFilter.reviewer_id === ""
+                    ? { value: "", label: "--- select ---" }
+                    : filterData && filterData.reviewer
+                      ? filterData.reviewer
+                          .map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
+                          .find((opt) => opt.value === multipleFilter.reviewer_id)
+                      : null
                 }
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" });
@@ -261,7 +281,7 @@ const SlidingTable = () => {
               })} disabled={currentIndex === 0}>
                 Reset
               </button> */}
-              <button className="btn btn-info " onClick={() => setMultipleFilter()} disabled={currentIndex === 0}>
+              <button className="btn btn-info " onClick={() => clearFilter()} disabled={currentIndex === 0}>
                 Reset
               </button>
             </div>
