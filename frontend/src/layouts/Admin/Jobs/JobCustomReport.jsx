@@ -31,6 +31,7 @@ function JobCustomReport() {
   const [jobAllData, setJobAllData] = useState([]);
   const [serviceAllData, setServiceAllData] = useState([]);
   const [jobTypeAllData, setJobTypeAllData] = useState([]);
+  const [statusAllData, setStatusAllData] = useState([]);
 
   
 
@@ -401,6 +402,34 @@ function JobCustomReport() {
    
   };
 
+    // Get All Status
+  const GetAllStatus = async () => {
+
+      var req = { action: "getAllStatus" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setStatusAllData(data);
+          } else {
+            setStatusAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+      return
+    
+   
+  };
+
+  
+
   
 
 
@@ -723,6 +752,9 @@ function JobCustomReport() {
       }
       else if (value == 'job_type_id') {
         GetAllJobType()
+      }
+      else if (value == 'status_type_id') {
+        GetAllStatus()
       }
 
     }
@@ -1442,6 +1474,35 @@ function JobCustomReport() {
               onChange={(selected) =>
                 handleFilterChange({
                   target: { key: "job_type_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+          {/* Field To Display Status  */}
+        {filters?.groupBy?.includes('status_type_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Status
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...statusAllData,
+              ]}
+              value={
+                statusAllData && statusAllData?.length > 0
+                  ? statusAllData?.find((opt) => Number(opt.value) === Number(filters.status_type_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "status_type_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable

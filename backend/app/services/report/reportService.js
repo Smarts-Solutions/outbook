@@ -98,6 +98,10 @@ else if(data.action == "getAllJobType"){
   return reportModel.getAllJobType(Report);
 }
 
+else if(data.action == "getAllStatus"){
+  return reportModel.getAllStatus(Report);
+}
+
 
 else{
   return;
