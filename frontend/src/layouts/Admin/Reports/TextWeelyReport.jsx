@@ -144,9 +144,12 @@ const SlidingTable = () => {
                 classNamePrefix="react-select"
                 isSearchable
                 options={
-                  filterData && filterData.customer
-                    ? filterData.customer.map((data) => ({ value: data.customer_id, label: data.customer_name }))
-                    : []
+                  [
+                    { value: "", label: "---select---" },
+                    ...(filterData && filterData.customer
+                      ? filterData.customer.map((data) => ({ value: data.customer_id, label: data.customer_name }))
+                      : [])
+                  ]
                 }
                 value={
                   filterData && filterData.customer
@@ -158,7 +161,7 @@ const SlidingTable = () => {
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" });
                 }}
-                placeholder="Select Customer"
+                placeholder="--- select ---"
               />
             </div>
 
@@ -170,9 +173,12 @@ const SlidingTable = () => {
                 classNamePrefix="react-select"
                 isSearchable
                 options={
-                  filterData && filterData.job_status_type
-                    ? filterData.job_status_type.map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
-                    : []
+                  [
+                    { value: "", label: "--- select ----" },
+                    ...(filterData && filterData.job_status_type
+                      ? filterData.job_status_type.map((data) => ({ value: data.job_status_type_id, label: data.job_status_type_name }))
+                      : [])
+                  ]
                 }
                 value={
                   filterData && filterData.job_status_type
@@ -184,7 +190,7 @@ const SlidingTable = () => {
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" });
                 }}
-                placeholder="Select Job Status"
+                placeholder="--- select ---"
               />
             </div>
 
@@ -197,9 +203,12 @@ const SlidingTable = () => {
                 classNamePrefix="react-select"
                 isSearchable
                 options={
-                  filterData && filterData.processor
-                    ? filterData.processor.map((data) => ({ value: data.processor_id, label: data.processor_name }))
-                    : []
+                  [
+                    { value: "", label: "--- select ---" },
+                    ...(filterData && filterData.processor
+                      ? filterData.processor.map((data) => ({ value: data.processor_id, label: data.processor_name }))
+                      : [])
+                  ]
                 }
                 value={
                   filterData && filterData.processor
@@ -211,7 +220,7 @@ const SlidingTable = () => {
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" });
                 }}
-                placeholder="Select Processor"
+                placeholder="--- select ---"
               />
             </div>
 
@@ -223,9 +232,12 @@ const SlidingTable = () => {
                 classNamePrefix="react-select"
                 isSearchable
                 options={
-                  filterData && filterData.reviewer
-                    ? filterData.reviewer.map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
-                    : []
+                  [
+                    { value: "", label: "--- select ---" },
+                    ...(filterData && filterData.reviewer
+                      ? filterData.reviewer.map((data) => ({ value: data.reviewer_id, label: data.reviewer_name }))
+                      : [])
+                  ]
                 }
                 value={
                   filterData && filterData.reviewer
@@ -237,7 +249,7 @@ const SlidingTable = () => {
                 onChange={(selected) => {
                   setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" });
                 }}
-                placeholder="Select Reviewer"
+                placeholder="--- select ---"
               />
             </div>
             <div className='col-md-1 pe-0'>
