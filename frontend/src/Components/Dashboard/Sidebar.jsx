@@ -77,7 +77,7 @@ const Sidebar = () => {
       },
     }));
   };
-  
+
 
   return (
     <div onClick={() => { sessionStorage.clear(); localStorage.removeItem('newCustomerId'); }}>
@@ -122,7 +122,7 @@ const Sidebar = () => {
               }
             >
 
-              {((updatedShowTab && updatedShowTab.customer) || 
+              {((updatedShowTab && updatedShowTab.customer) ||
                 (updatedShowTab && updatedShowTab.client) ||
                 (updatedShowTab && updatedShowTab.job) ||
                 (updatedShowTab && updatedShowTab.all_customers) ||
@@ -272,7 +272,9 @@ const Sidebar = () => {
               </li>
             )}
 
-            {((updatedShowTab && updatedShowTab.report) ||
+
+
+            {/* {((updatedShowTab && updatedShowTab.report) ||
               role === "SUPERADMIN") && (
                 <li
                   className={
@@ -286,58 +288,129 @@ const Sidebar = () => {
                   >
                     <span className="sidebar-icons">
                       <i className="fas fa-file-alt"></i>{" "}
-                      {/* Report icon */}
+                  
                     </span>
                     <span>Reports</span>
                   </Link>
                 </li>
-              )}
+              )} */}
+
+
+
+            {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
+              <li className={activeLink.startsWith("/admin/reports") ? "active" : ""}>
+                <Link
+                  to="/admin/reports"
+                  onClick={(e) => handleMenuClick(e, "/admin/reports")}
+                >
+                  <div>
+                    <span className="sidebar-icons">
+                      <i className="fas fa-file-alt"></i>
+                    </span>
+                    <span className="pe-4 pe-lg-4">Reports</span>
+                  </div>
+                  <span className="chevron-icon">
+                    <i
+                      className={`fas ${menuState.dropdownOpen["/admin/reports"] ? "fa-chevron-down" : "fa-chevron-right"}`}
+                    ></i>
+                  </span>
+                </Link>
+                <ul
+                  className={`nav-second-level ${menuState.dropdownOpen["/admin/reports"] ? "in" : "mm-collapse"}`}
+                  aria-expanded={menuState.dropdownOpen["/admin/reports"] ? "true" : "false"}
+                >
+
+                  {/* Standard Report */}
+                  <li
+                    className={
+                      activeLink === "/admin/reports" ? "active" : ""
+                    }
+                  >
+                    <Link
+                      to="/admin/reports"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/reports")}
+                    >
+                      <span className="sidebar-icons">
+                        <i className="fas fa-file-alt"></i>{" "}
+                        {/* Report icon */}
+                      </span>
+                      <span>Standard Report</span>
+                    </Link>
+                  </li>
+
+
+                  
+                  {/* Custom timesheet Report */}
+                  <li
+                    className={
+                      activeLink === "/admin/timesheetReports" ? "active" : ""
+                    }
+                  >
+                    <Link
+                      to="/admin/timesheetReports"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
+                    >
+                      <span className="sidebar-icons">
+                        <i className="fas fa-clock"></i>{" "}
+
+                      </span>
+                      <span>Time Sheet Reports</span>
+                    </Link>
+                  </li>
+
+                </ul>
+              </li>
+            )}
+
+
+
 
             {((updatedShowTab && updatedShowTab.timesheet) ||
               role === "SUPERADMIN") && (
                 <>
-                <li
-                  className={
-                    activeLink === "/admin/timesheet" ? "active" : ""
-                  }
-                >
-                  <Link
-                    to="/admin/timesheet"
-                    aria-expanded="false"
-                    onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
-                  >
-                    <span className="sidebar-icons">
-                      <i className="fas fa-clock"></i>{" "}
-                      {/* Time Sheet icon */}
-                    </span>
-                    <span>Time Sheet</span>
-                  </Link>
-                </li>
-
-
-                {
-                  ["SUPERADMIN","ADMIN"].includes(role) ?
                   <li
-                  className={
-                    activeLink === "/admin/timesheetReports" ? "active" : ""
-                  }
-                >
-                  <Link
-                    to="/admin/timesheetReports"
-                    aria-expanded="false"
-                    onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
+                    className={
+                      activeLink === "/admin/timesheet" ? "active" : ""
+                    }
                   >
-                    <span className="sidebar-icons">
-                      <i className="fas fa-clock"></i>{" "}
-                     
-                    </span>
-                    <span>Time Sheet Reports</span>
-                  </Link>
-                </li>
-                  :""
-                  
-                }
-                
+                    <Link
+                      to="/admin/timesheet"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
+                    >
+                      <span className="sidebar-icons">
+                        <i className="fas fa-clock"></i>{" "}
+                        {/* Time Sheet icon */}
+                      </span>
+                      <span>Time Sheet</span>
+                    </Link>
+                  </li>
+
+
+                  {/* {
+                    ["SUPERADMIN", "ADMIN"].includes(role) ?
+                      <li
+                        className={
+                          activeLink === "/admin/timesheetReports" ? "active" : ""
+                        }
+                      >
+                        <Link
+                          to="/admin/timesheetReports"
+                          aria-expanded="false"
+                          onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
+                        >
+                          <span className="sidebar-icons">
+                            <i className="fas fa-clock"></i>{" "}
+
+                          </span>
+                          <span>Time Sheet Reports</span>
+                        </Link>
+                      </li>
+                      : ""
+                  } */}
+
 
 
 
@@ -364,8 +437,8 @@ const Sidebar = () => {
               )}
           </ul>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
