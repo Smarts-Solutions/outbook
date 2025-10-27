@@ -1488,9 +1488,7 @@ function JobCustomReport() {
             <label className="form-label fw-medium">
               Select Status
             </label>
-
             <Select
-
               options={[
                 { value: "", label: "Select..." },
                 ...statusAllData,
