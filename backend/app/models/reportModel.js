@@ -3029,6 +3029,21 @@ const getAllService = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
+const getAllJobType = async () => {
+ 
+    const query = `
+    SELECT  
+    id,
+    type
+    FROM
+    job_types
+    WHERE status = '1'
+    ORDER BY type ASC;
+    `
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+}
+
 
 ///////////// ---- END JOB CUSTOM REPORTS ----//////////////////////
 
@@ -3060,7 +3075,8 @@ module.exports = {
     getAllFilters,
     deleteFilterId,
     getStaffWithRole,
-    getAllService
+    getAllService,
+    getAllJobType
 };
 
 

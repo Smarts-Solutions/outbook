@@ -30,6 +30,7 @@ function JobCustomReport() {
   const [clientAllData, setClientAllData] = useState([]);
   const [jobAllData, setJobAllData] = useState([]);
   const [serviceAllData, setServiceAllData] = useState([]);
+  const [jobTypeAllData, setJobTypeAllData] = useState([]);
 
   
 
@@ -374,6 +375,36 @@ function JobCustomReport() {
    
   };
 
+   // Get All Service
+  const GetAllJobType = async () => {
+
+      var req = { action: "getAllJobType" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.type
+            }));
+            setJobTypeAllData(data);
+          } else {
+            setJobTypeAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+      return
+    
+   
+  };
+
+  
+
+
+
   
 
 
@@ -690,6 +721,9 @@ function JobCustomReport() {
       else if (value == 'service_id') {
         GetAllService()
       }
+      else if (value == 'job_type_id') {
+        GetAllJobType()
+      }
 
     }
 
@@ -834,7 +868,6 @@ function JobCustomReport() {
     { value: "service_id", label: "Service Type" },
     { value: "job_type_id", label: "Job Type" },
     { value: "status_type_id", label: "Status" },
-    { value: "detailed_status_id", label: "Detailed Status" },
     { value: "line_manager_id", label: "Line Manager" },
   ];
 
@@ -1379,6 +1412,36 @@ function JobCustomReport() {
               onChange={(selected) =>
                 handleFilterChange({
                   target: { key: "service_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+
+           {/* Field To Display Job Type  */}
+        {filters?.groupBy?.includes('job_type_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Job Type
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...jobTypeAllData,
+              ]}
+              value={
+                jobTypeAllData && jobTypeAllData?.length > 0
+                  ? jobTypeAllData?.find((opt) => Number(opt.value) === Number(filters.job_type_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "job_type_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable

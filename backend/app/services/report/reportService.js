@@ -94,6 +94,10 @@ else if(data.action == "getAllService"){
   return reportModel.getAllService(Report);
 }
 
+else if(data.action == "getAllJobType"){
+  return reportModel.getAllJobType(Report);
+}
+
 
 else{
   return;
