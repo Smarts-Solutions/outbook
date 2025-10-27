@@ -2893,16 +2893,6 @@ const deleteFilterId = async (Report) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 // Staff Work
 const getChangedRoleStaff = async (Report) => {
     const { data } = Report;
@@ -2977,6 +2967,73 @@ const staffRoleChangeUpdate = async (Report) => {
 
 }
 
+
+
+/////////////---- START JOB CUSTOM REPORTS ----//////////////////////
+const getStaffWithRole = async (Report) => {
+    console.log("Get Staff With Role Report:", Report);
+    const { data } = Report;
+    const { role_id } = data;
+
+    if (role_id == "other") {
+        const query = `
+        SELECT 
+        staffs.id,
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email 
+        FROM
+        job_allowed_staffs 
+        JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
+        GROUP BY job_allowed_staffs.staff_id
+        ORDER BY staffs.first_name ASC;
+        `
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+
+    }
+    else {
+        let where = `role_id = ${role_id} AND staffs.status = '1'`;
+        if (![3, 6].includes(Number(role_id))) {
+            where = `(role_id = ${role_id} || role_id = 4) AND staffs.status = '1'`;
+        }
+        const query = `
+        SELECT
+        id,
+        first_name,
+        last_name,
+        email
+        FROM 
+        staffs 
+        WHERE ${where}
+        ORDER BY first_name ASC;
+    `
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+
+    }
+}
+
+const getAllService = async (Report) => {
+ 
+    const query = `
+    SELECT  
+    id,
+    name 
+    FROM
+    services
+    WHERE status = '1'
+    ORDER BY name ASC;
+    `
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+}
+
+
+///////////// ---- END JOB CUSTOM REPORTS ----//////////////////////
+
+
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -3001,7 +3058,9 @@ module.exports = {
     staffRoleChangeUpdate,
     saveFilters,
     getAllFilters,
-    deleteFilterId
+    deleteFilterId,
+    getStaffWithRole,
+    getAllService
 };
 
 

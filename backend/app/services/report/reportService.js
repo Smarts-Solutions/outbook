@@ -85,6 +85,16 @@ else if(data.action == "deleteFilterId"){
 }
 
 
+// Job Custom Report
+else if(data.action == "getStaffWithRole"){
+  return reportModel.getStaffWithRole(Report);
+}
+
+else if(data.action == "getAllService"){
+  return reportModel.getAllService(Report);
+}
+
+
 else{
   return;
 }

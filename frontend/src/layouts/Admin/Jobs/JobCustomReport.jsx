@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
 
 
-function TimesheetReport() {
+function JobCustomReport() {
   const noDataImage = '/assets/images/No-data-amico.png';
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -22,10 +22,20 @@ function TimesheetReport() {
 
   //console.log("showData ", showData);
 
-  const [staffAllData, setStaffAllData] = useState([]);
+  const [accountManagerAllData, setAccountManagerAllData] = useState([]);
+  const [allocatedToAllData, setAllocatedToAllData] = useState([]);
+  const [reviewerAllData, setReviewerAllData] = useState([]);
+  const [otherStaffAllData, setOtherStaffAllData] = useState([]);
   const [customerAllData, setCustomerAllData] = useState([]);
   const [clientAllData, setClientAllData] = useState([]);
   const [jobAllData, setJobAllData] = useState([]);
+  const [serviceAllData, setServiceAllData] = useState([]);
+
+  
+
+
+
+
   const [taskAllData, setTaskAllData] = useState([]);
 
   const [internalJobAllData, setInternalJobAllData] = useState([]);
@@ -41,8 +51,10 @@ function TimesheetReport() {
 
 
 
+
+
   const [filters, setFilters] = useState({
-    groupBy: ["staff_id"],
+    groupBy: ["job_id"],
     internal_external: "0",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
@@ -62,54 +74,47 @@ function TimesheetReport() {
   let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
 
 
+  function formatStringToTitleCase(text, key) {
+    if (!text) return "";
+
+    if (key == 'date') {
+      return dayjs(text).format('DD-MM-YYYY');
+    }
+
+    return text
+      .replace(/_/g, " ")                 // underscores → spaces
+      .toLowerCase()                      // make all lowercase first
+      .replace(/\b\w/g, char => char.toUpperCase()) // capitalize first letter of each word
+      .trim();
+  }
+
+
   //  console.log("lastGroupValue ", lastGroupValue);
 
-  const staffData = async () => {
-    //  console.log("role ", role);
-    if (role?.toUpperCase() === "SUPERADMIN") {
-      await dispatch(Staff({ req: { action: "get" }, authToken: token }))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            // console.log("response.data ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: `${item.first_name} ${item.last_name} (${item.email})`
-            }));
-            setStaffAllData(data);
-          } else {
-            setStaffAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+  // Get All Jobs
+  const GetAllJobs = async () => {
+    // External get All jobs
+    const req = { action: "getByCustomer", customer_id: "" };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.job_id,
+            label: item.job_code_id
+          }));
+          setJobAllData(data);
+        } else {
+          setJobAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    return
 
-    }
-    else {
-      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
-
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email
-      }));
-      setStaffAllData(data);
-    }
   };
-
-  function formatStringToTitleCase(text,key) {
-  if (!text) return "";
-
-  if(key == 'date'){
-    return dayjs(text).format('DD-MM-YYYY');
-  }
-  
-  return text
-    .replace(/_/g, " ")                 // underscores → spaces
-    .toLowerCase()                      // make all lowercase first
-    .replace(/\b\w/g, char => char.toUpperCase()) // capitalize first letter of each word
-    .trim();
-}
 
   const getAllFilters = async () => {
     var req = { action: "getAllFilters", type: "timesheet_report" };
@@ -118,10 +123,10 @@ function TimesheetReport() {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-            
+
           console.log("getAllFilters response ", response.data);
           const data = response?.data?.map((item) => ({
-            
+
             value: item.id,
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
             label: `
@@ -135,8 +140,8 @@ function TimesheetReport() {
             ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}<br/>` : ""}
             ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
             ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
-            ${!['',null,'null',undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate,'date')}<br/>` : ""}
-            ${!['',null,'null',undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate,'date')}` : ""}
+            ${!['', null, 'null', undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate, 'date')}<br/>` : ""}
+            ${!['', null, 'null', undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate, 'date')}` : ""}
           `,
 
             filters: item.filter_record
@@ -152,10 +157,9 @@ function TimesheetReport() {
   }
 
   useEffect(() => {
-    staffData();
+    GetAllJobs();
     getAllFilters();
   }, []);
-
 
   // Get All Customers
   const GetAllCustomer = async () => {
@@ -178,7 +182,8 @@ function TimesheetReport() {
       });
   };
 
-  // Get All Clients
+    
+   // Get All Clients
   const GetAllClient = async () => {
     const req = { action: "get", customer_id: "" };
     const data = { req: req, authToken: token };
@@ -200,103 +205,178 @@ function TimesheetReport() {
       });
   };
 
-  // Get All Jobs
-  const GetAllJobs = async (internal_external) => {
-    if (internal_external == "0") {
-      var req = { action: "getInternalJobs" };
+  // All Type Staff Get
+  const staffData = async (role_id) => {
+    //  console.log("role ", role);
+    if(['',null,undefined].includes(role_id)){
+      return
+    }
+    if(Number(role_id) == 4){
+    if (role?.toUpperCase() === "SUPERADMIN") {
+      var req = { action: "getStaffWithRole", role_id: role_id || "" };
       var data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-
-            // console.log("Internal jobs response: ", response.data);
+            // console.log("response.data ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
-              label: item.name
+              label: `${item.first_name} ${item.last_name} (${item.email})`
             }));
-            setInternalJobAllData(data);
+            setAccountManagerAllData(data);
           } else {
-            setInternalJobAllData([]);
+            setAccountManagerAllData([]);
           }
         })
         .catch((error) => {
           return;
         });
 
+    } else {
+      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
 
-      // External get All jobs
-      var req = { action: "getByCustomer", customer_id: "" };
-      var data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.job_id,
-              label: item.job_code_id
-            }));
-            setJobAllData(data);
-          } else {
-            setJobAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-
-
-      return
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email
+      }));
+      setAccountManagerAllData(data);
+    }
     }
 
-    else if (internal_external == "1") {
-      var req = { action: "getInternalJobs" };
+    else if(Number(role_id) == 3){
+      if (role?.toUpperCase() === "SUPERADMIN") {
+      var req = { action: "getStaffWithRole", role_id: role_id || "" };
       var data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-
-            // console.log("Internal jobs response: ", response.data);
+            // console.log("response.data ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
-              label: item.name
+              label: `${item.first_name} ${item.last_name} (${item.email})`
             }));
-            setInternalJobAllData(data);
+            setAllocatedToAllData(data);
           } else {
-            setInternalJobAllData([]);
+            setAllocatedToAllData([]);
           }
         })
         .catch((error) => {
           return;
         });
-      return
+
+    } else {
+      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email
+      }));
+      setAllocatedToAllData(data);
+    }
     }
 
-    else if (internal_external == "2") {
-      // External get All jobs
-      const req = { action: "getByCustomer", customer_id: "" };
-      const data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
+    else if(Number(role_id) == 6){
+      if (role?.toUpperCase() === "SUPERADMIN") {
+      var req = { action: "getStaffWithRole", role_id: role_id || "" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
+            // console.log("response.data ", response.data);
             const data = response?.data?.map((item) => ({
-              value: item.job_id,
-              label: item.job_code_id
+              value: item.id,
+              label: `${item.first_name} ${item.last_name} (${item.email})`
             }));
-            setJobAllData(data);
+            setReviewerAllData(data);
           } else {
-            setJobAllData([]);
+            setReviewerAllData([]);
           }
         })
         .catch((error) => {
           return;
         });
+
+    } else {
+      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email
+      }));
+      setReviewerAllData(data);
+    }
+    }
+   
+    else if(role_id == 'other'){
+      if (role?.toUpperCase() === "SUPERADMIN") {
+      var req = { action: "getStaffWithRole", role_id: role_id || "" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            // console.log("response.data ", response.data);
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: `${item.first_name} ${item.last_name} (${item.email})`
+            }));
+            setOtherStaffAllData(data);
+          } else {
+            setOtherStaffAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+    } else {
+      let data = [{ id: staffDetails?.id, email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})` }]
+
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email
+      }));
+      setOtherStaffAllData(data);
+    }
+    }
+    else{
       return
     }
 
   };
+
+   // Get All Service
+  const GetAllService = async () => {
+
+      var req = { action: "getAllService" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setServiceAllData(data);
+          } else {
+            setServiceAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+      return
+    
+   
+  };
+
+  
+
+
 
   // Get All task
   const GetAllTask = async (internal_external) => {
@@ -452,37 +532,6 @@ function TimesheetReport() {
 
       return; // multi-select
 
-      // let lastIndexValue = gropByArray[gropByArray.length - 1];
-      // //  console.log("lastIndexValue ", lastIndexValue);
-
-      // if (lastIndexValue == "staff_id") {
-      //   staffData()
-      // }
-
-      // else if (lastIndexValue == "customer_id") {
-      //   GetAllCustomer()
-      // }
-
-      // else if (lastIndexValue == "client_id") {
-      //   GetAllClient()
-      // }
-
-      // else if (lastIndexValue == "job_id") {
-      //   GetAllJobs(filters.internal_external)
-      // }
-
-      // else if (lastIndexValue == "task_id") {
-      //   GetAllTask(filters.internal_external)
-      // }
-
-      // setFilters((prev) => ({
-      //   ...prev,
-      //   fieldsToDisplay: null,
-      //   fieldsToDisplayId: null,
-      //   groupBy: sortByReference(gropByArray)
-      // }));
-
-      // return;
     }
 
 
@@ -566,8 +615,7 @@ function TimesheetReport() {
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == 'job_id') {
         setOptions([])
-        // console.log("Internal/External changed, calling GetAllJobs with: ", value);
-        GetAllJobs(value)
+        GetAllJobs()
       }
       else if (lastIndexValue == 'task_id') {
         setOptions([])
@@ -618,8 +666,8 @@ function TimesheetReport() {
 
   const addAndRemoveGroupBy = (value, type) => {
     if (type == 'add') {
-      if (value == 'staff_id') {
-        staffData()
+      if (value == 'job_id') {
+        GetAllJobs()
       }
       else if (value == 'customer_id') {
         GetAllCustomer()
@@ -627,11 +675,20 @@ function TimesheetReport() {
       else if (value == 'client_id') {
         GetAllClient()
       }
-      else if (value == 'job_id') {
-        GetAllJobs(filters.internal_external)
+      else if (value == 'account_manager_id') {
+        staffData(4)  // role_id 4 for account manager
       }
-      else if (value == 'task_id') {
-        GetAllTask(filters.internal_external)
+      else if(value == "allocated_to_id"){
+        staffData(3)  // role_id 3 for staff
+      }
+      else if(value == "reviewer_id"){
+        staffData(6)  // role_id 2 for reviewer
+      }
+      else if(value == "allocated_to_other_id"){
+        staffData('other')  // role_id 5 for allocated to other
+      }
+      else if (value == 'service_id') {
+        GetAllService()
       }
 
     }
@@ -639,53 +696,43 @@ function TimesheetReport() {
     else if (type == 'remove') {
 
       // console.log("Removed value: ---------------- ", value);
-      if (value == 'staff_id') {
-        setStaffAllData([]);
+
+      if (value == 'job_id') {
+        setJobAllData([]);
         setFilters((prev) => ({
           ...prev,
-          [value]: null
+          job_id: null
         }));
 
-      } else if (value == 'customer_id') {
+      }
+      else if (value == 'customer_id') {
         setCustomerAllData([]);
         setFilters((prev) => ({
           ...prev,
           [value]: null
         }));
 
-      } else if (value == 'client_id') {
+      }
+
+      else if (value == 'staff_id') {
+
+        setFilters((prev) => ({
+          ...prev,
+          [value]: null
+        }));
+
+      }
+      else if (value == 'client_id') {
         setClientAllData([]);
         setFilters((prev) => ({
           ...prev,
           [value]: null
         }));
 
-      } else if (value == 'job_id') {
-
-        if (filters.internal_external == "0") {
-          setJobAllData([]);
-          setInternalJobAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            job_id: null,
-            internal_job_id: null
-          }));
-        } else if (filters.internal_external == "1") {
-          setInternalJobAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            internal_job_id: null
-          }));
-        } else if (filters.internal_external == "2") {
-          setJobAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            job_id: null
-          }));
-        }
+      }
 
 
-      } else if (value == 'task_id') {
+      else if (value == 'task_id') {
         if (filters.internal_external == "0") {
           setTaskAllData([]);
           setInternalTaskAllData([]);
@@ -737,7 +784,7 @@ function TimesheetReport() {
 
   useEffect(() => {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
-      callFilterApi();
+      // callFilterApi();
     }
   }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id]);
 
@@ -765,7 +812,7 @@ function TimesheetReport() {
     setFilterId(null)
     setShowData([]);
 
-    setStaffAllData([]);
+
     setCustomerAllData([]);
     setClientAllData([]);
     setJobAllData([]);
@@ -776,21 +823,33 @@ function TimesheetReport() {
     //staffData();
   }
 
-
   const optionGroupBy = [
-    { value: "staff_id", label: "Staff" },
-    ...((filters?.internal_external == '2' || filters?.internal_external == '0') ? [{ value: "customer_id", label: "Customer" }] : []),
-    ...((filters?.internal_external == '2' || filters?.internal_external == '0') ? [{ value: "client_id", label: "Client" }] : []),
-    { value: "job_id", label: "Job" },
-    { value: "task_id", label: "Task" }
+    { value: "job_id", label: "Job Name" },
+    { value: "customer_id", label: "Customer Name" },
+    { value: "client_id", label: "Client Name" },
+    { value: "account_manager_id", label: "Account Manager Name" },
+    { value: "allocated_to_id", label: "Allocated To" },
+    { value: "reviewer_id", label: "Reviewer" },
+    { value: "allocated_to_other_id", label: "Allocated To (Other)" },
+    { value: "service_id", label: "Service Type" },
+    { value: "job_type_id", label: "Job Type" },
+    { value: "status_type_id", label: "Status" },
+    { value: "detailed_status_id", label: "Detailed Status" },
+    { value: "line_manager_id", label: "Line Manager" },
   ];
 
   const labels = {
-    staff_id: "Staff",
-    customer_id: "Customer",
-    client_id: "Client",
-    job_id: "Job",
-    task_id: "Task"
+    job_id: "Job Name",
+    customer_id: "Customer Name",
+    account_manager_id: "Account Manager Name",
+    service_id: "Service Type",
+    job_type_id: "Job Type",
+    status_type_id: "Status",
+    detailed_status_id: "Detailed Status",
+    allocated_to_id: "Allocated To",
+    allocated_to_other_id: "Allocated To (Other)",
+    reviewer_id: "Reviewer",
+    line_manager_id: "Line Manager",
   };
 
 
@@ -944,7 +1003,7 @@ function TimesheetReport() {
 
   }
 
-  console.log("setFilterId -----  ", filterId);
+
 
   return (
     <div className="container-fluid pb-3">
@@ -1005,7 +1064,7 @@ function TimesheetReport() {
                     //   { value: "", label: "Select..." },
                     //   ...getAllFilterData,
                     // ]}
-                     options={[
+                    options={[
                       { value: "", label: "Select..." },
                       ...getAllFilterData.map(opt => ({
                         value: opt.value,
@@ -1100,85 +1159,26 @@ function TimesheetReport() {
           />
         </div>
 
-        {/* Field To Internal External */}
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">Internal / External</label>
-          <select
-            className="form-select shadow-sm"
-            id="internal_external"
-            value={filters.internal_external}
-            onChange={(e) =>
-              handleFilterChange({
-                target: {
-                  key: "internal_external",
-                  value: e.target.value,
-                  label: e.target.options[e.target.selectedIndex].text
-                }
-              })
-            }
-          >
-            <option value="0">Both</option>
-            <option value="1">Internal</option>
-            <option value="2">External</option>
-          </select>
-        </div>
 
-
-        {/* Field To Display */}
-        {/* <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            {
-              `Select ${labels[lastGroupValue] || "..."}`
-            }
-            {
-              lastGroupValue == "job_id" || lastGroupValue == "task_id" ? filters.internal_external === "1" ? " ( Internal )" : " ( External )" : ""
-            }
-
-          </label>
-
-          <Select
-            options={[
-              { value: "", label: "Select..." },
-              ...options,
-            ]}
-            value={
-              options && options.length > 0
-                ? options.find((opt) => Number(opt.value) === Number(filters.fieldsToDisplayId)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "fieldsToDisplay", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div> */}
-
-
-
-        {/* Field To Display Staff */}
-        {filters?.groupBy?.includes('staff_id') && (
+        {/* Field To Display Job */}
+        {(filters?.groupBy?.includes('job_id') && filters.internal_external != "1") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Select Staff
+              Select Job
             </label>
-
             <Select
-
               options={[
                 { value: "", label: "Select..." },
-                ...staffAllData,
+                ...jobAllData,
               ]}
               value={
-                staffAllData && staffAllData.length > 0
-                  ? staffAllData.find((opt) => Number(opt.value) === Number(filters.staff_id)) || null
+                jobAllData && jobAllData.length > 0
+                  ? jobAllData.find((opt) => Number(opt.value) === Number(filters.job_id)) || null
                   : null
               }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "staff_id", value: selected.value, label: selected.label },
+                  target: { key: "job_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable
@@ -1215,7 +1215,6 @@ function TimesheetReport() {
           </div>
         )}
 
-
         {/* Field To Display Client */}
         {filters?.groupBy?.includes('client_id') && (
           <div className="col-lg-4 col-md-6">
@@ -1243,26 +1242,56 @@ function TimesheetReport() {
           </div>
         )}
 
-
-        {/* Field To Display Job */}
-        {(filters?.groupBy?.includes('job_id') && filters.internal_external != "1") && (
+        {/* Field To Display Account Manager  */}
+        {filters?.groupBy?.includes('account_manager_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Select Job
+              Select Account Manager
             </label>
+
             <Select
+
               options={[
                 { value: "", label: "Select..." },
-                ...jobAllData,
+                ...accountManagerAllData,
               ]}
               value={
-                jobAllData && jobAllData.length > 0
-                  ? jobAllData.find((opt) => Number(opt.value) === Number(filters.job_id)) || null
+                accountManagerAllData && accountManagerAllData.length > 0
+                  ? accountManagerAllData.find((opt) => Number(opt.value) === Number(filters.account_manager_id)) || null
                   : null
               }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "job_id", value: selected.value, label: selected.label },
+                  target: { key: "account_manager_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+         {/* Field To Display Allocated To */}
+        {filters?.groupBy?.includes('allocated_to_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Allocated To
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...allocatedToAllData,
+              ]}
+              value={
+                allocatedToAllData && allocatedToAllData?.length > 0
+                  ? allocatedToAllData?.find((opt) => Number(opt.value) === Number(filters.allocated_to_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "allocated_to_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable
@@ -1272,25 +1301,27 @@ function TimesheetReport() {
         )}
 
 
-        {/* Field To Display task */}
-        {(filters?.groupBy?.includes('task_id') && filters.internal_external != "1") && (
+          {/* Field To Display Reviewer  */}
+        {filters?.groupBy?.includes('reviewer_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Select Task
+              Select Reviewer
             </label>
+
             <Select
+
               options={[
                 { value: "", label: "Select..." },
-                ...taskAllData,
+                ...reviewerAllData,
               ]}
               value={
-                taskAllData && taskAllData.length > 0
-                  ? taskAllData.find((opt) => Number(opt.value) === Number(filters.task_id)) || null
+                reviewerAllData && reviewerAllData?.length > 0
+                  ? reviewerAllData?.find((opt) => Number(opt.value) === Number(filters.reviewer_id)) || null
                   : null
               }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "task_id", value: selected.value, label: selected.label },
+                  target: { key: "reviewer_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable
@@ -1299,26 +1330,27 @@ function TimesheetReport() {
           </div>
         )}
 
-
-        {/* Field To Display Internal Job */}
-        {(filters?.groupBy?.includes('job_id') && filters.internal_external != "2") && (
+          {/* Field To Display Allocated Other  */}
+        {filters?.groupBy?.includes('allocated_to_other_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Select Internal Job
+              Select Allocated To (Other)
             </label>
+
             <Select
+
               options={[
                 { value: "", label: "Select..." },
-                ...internalJobAllData,
+                ...otherStaffAllData,
               ]}
               value={
-                internalJobAllData && internalJobAllData.length > 0
-                  ? internalJobAllData.find((opt) => Number(opt.value) === Number(filters.internal_job_id)) || null
+                otherStaffAllData && otherStaffAllData?.length > 0
+                  ? otherStaffAllData?.find((opt) => Number(opt.value) === Number(filters.allocated_to_other_id)) || null
                   : null
               }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "internal_job_id", value: selected.value, label: selected.label },
+                  target: { key: "allocated_to_other_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable
@@ -1327,26 +1359,27 @@ function TimesheetReport() {
           </div>
         )}
 
-
-        {/* Field To Display Internal Task */}
-        {(filters?.groupBy?.includes('task_id') && filters.internal_external != "2") && (
+         {/* Field To Display Services  */}
+        {filters?.groupBy?.includes('service_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Select Internal Task
+              Select Service
             </label>
+
             <Select
+
               options={[
                 { value: "", label: "Select..." },
-                ...internalTaskAllData,
+                ...serviceAllData,
               ]}
               value={
-                internalTaskAllData && internalTaskAllData.length > 0
-                  ? internalTaskAllData.find((opt) => Number(opt.value) === Number(filters.internal_task_id)) || null
+                serviceAllData && serviceAllData?.length > 0
+                  ? serviceAllData?.find((opt) => Number(opt.value) === Number(filters.service_id)) || null
                   : null
               }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "internal_task_id", value: selected.value, label: selected.label },
+                  target: { key: "service_id", value: selected.value, label: selected.label },
                 })
               }
               isSearchable
@@ -1354,8 +1387,6 @@ function TimesheetReport() {
             />
           </div>
         )}
-
-
 
 
         {/* Time Period */}
@@ -1588,4 +1619,4 @@ function getColumnName(columnKey) {
   return dayMap[columnKey] || columnKey;
 }
 
-export default TimesheetReport;
+export default JobCustomReport;
