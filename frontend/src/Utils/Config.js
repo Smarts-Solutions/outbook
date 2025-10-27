@@ -11,5 +11,3 @@ export const base_url = isLocalhost
 : `${window.location.origin}/backend/`;
 
 
-
-

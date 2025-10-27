@@ -50,6 +50,7 @@ import MissingLogs from "../layouts/Admin/Jobs/MissingLogs";
 import Queries from "../layouts/Admin/Jobs/Queries";
 import Drafts from "../layouts/Admin/Jobs/Drafts";
 import Documents from "../layouts/Admin/Jobs/Documents";
+import JobCustomReport from "../layouts/Admin/Jobs/JobCustomReport";
 
 
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
@@ -288,6 +289,7 @@ const Admin_Route = () => {
               <Route path="/job/documents" element={<Documents />} />
               <Route path="/job/jobtimeline" element={<JobTimeline />} />
               <Route path="/job/jobinformation" element={<JobInformation />} />
+              <Route path="/job/customreport" element={<JobCustomReport />} />
               <Route path="/add/subSource" element={<Subsource />} />
               <Route path="/setting/checklist" element={<SettingCheckList />} />
               <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />

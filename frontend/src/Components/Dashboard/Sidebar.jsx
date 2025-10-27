@@ -274,7 +274,7 @@ const Sidebar = () => {
 
 
 
-            {((updatedShowTab && updatedShowTab.report) ||
+            {/* {((updatedShowTab && updatedShowTab.report) ||
               role === "SUPERADMIN") && (
                 <li
                   className={
@@ -288,16 +288,38 @@ const Sidebar = () => {
                   >
                     <span className="sidebar-icons">
                       <i className="fas fa-file-alt"></i>{" "}
-                  
+
                     </span>
                     <span>Reports</span>
                   </Link>
                 </li>
               )}
 
+            {
+              ["SUPERADMIN", "ADMIN"].includes(role) ?
+                <li
+                  className={
+                    activeLink === "/admin/timesheetReports" ? "active" : ""
+                  }
+                >
+                  <Link
+                    to="/admin/timesheetReports"
+                    aria-expanded="false"
+                    onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
+                  >
+                    <span className="sidebar-icons">
+                      <i className="fas fa-clock"></i>{" "}
+
+                    </span>
+                    <span>Time Sheet Reports</span>
+                  </Link>
+                </li>
+                : ""
+            } */}
 
 
-            {/* {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
+
+            {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
               <li className={activeLink.startsWith("/admin/reports") ? "active" : ""}>
                 <Link
                   to="/admin/reports"
@@ -360,9 +382,28 @@ const Sidebar = () => {
                     </Link>
                   </li>
 
+
+                  <li
+                    className={
+                      activeLink === "/admin/job/customreport" ? "active" : ""
+                    }
+                  >
+                    <Link
+                      to="/admin/job/customreport"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/job/customreport")}
+                    >
+                      <span className="sidebar-icons">
+                        <i className="fas fa-clock"></i>{" "}
+
+                      </span>
+                      <span>Job Reports</span>
+                    </Link>
+                  </li>
+
                 </ul>
               </li>
-            )} */}
+            )}
 
 
 
@@ -389,27 +430,7 @@ const Sidebar = () => {
                   </li>
 
 
-                  {
-                    ["SUPERADMIN", "ADMIN"].includes(role) ?
-                      <li
-                        className={
-                          activeLink === "/admin/timesheetReports" ? "active" : ""
-                        }
-                      >
-                        <Link
-                          to="/admin/timesheetReports"
-                          aria-expanded="false"
-                          onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
-                        >
-                          <span className="sidebar-icons">
-                            <i className="fas fa-clock"></i>{" "}
 
-                          </span>
-                          <span>Time Sheet Reports</span>
-                        </Link>
-                      </li>
-                      : ""
-                  }
 
 
 
