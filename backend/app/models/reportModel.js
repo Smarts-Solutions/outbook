@@ -2902,9 +2902,29 @@ const getAllFilters = async (Report) => {
           SUBSTRING(clients.client_code, 1, 15)
           ) AS client_name,
 
-          
+
         account_manager.id AS filter_account_manager_id,
-        CONCAT(account_manager.first_name,' ',account_manager.last_name) AS account_manager_name
+        CONCAT(account_manager.first_name,' ',account_manager.last_name) AS account_manager_name,
+
+        allocated_to.id AS filter_allocated_to_id,
+        CONCAT(allocated_to.first_name,' ',allocated_to.last_name) AS allocated_to_name,
+         
+        reviewer.id AS filter_reviewer_id,
+        CONCAT(reviewer.first_name,' ',reviewer.last_name) AS reviewer_name,
+
+        allocated_to_other.id AS filter_allocated_to_other_id,
+        CONCAT(allocated_to_other.first_name,' ',allocated_to_other.last_name) AS allocated_to_other_name,
+
+        services.id AS filter_service_id,
+        services.name AS service_name,
+
+        job_types.id AS filter_job_type_id,
+        job_types.type AS job_type_name,
+
+        master_status.id AS filter_status_type_id,
+        master_status.name AS status_type_name
+
+
 
         FROM
         timesheet_filter
@@ -2924,6 +2944,29 @@ const getAllFilters = async (Report) => {
 
         LEFT JOIN 
         staffs AS account_manager ON account_manager.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.account_manager_id'))
+
+        LEFT JOIN 
+        staffs AS allocated_to ON allocated_to.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.allocated_to_id'))
+
+        LEFT JOIN 
+        staffs AS reviewer ON reviewer.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.reviewer_id'))
+
+        LEFT JOIN 
+        staffs AS allocated_to_other ON allocated_to_other.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.allocated_to_other_id'))
+
+         LEFT JOIN 
+         services ON services.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.service_id'))
+
+         LEFT JOIN 
+         job_types ON job_types.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.job_type_id'))
+
+         LEFT JOIN 
+         master_status ON master_status.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.status_type_id'))
+
+
+        
+
+        
 
         ${where}
         ORDER BY timesheet_filter.id DESC
