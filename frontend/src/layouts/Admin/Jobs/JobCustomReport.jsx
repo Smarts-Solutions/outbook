@@ -135,14 +135,14 @@ function JobCustomReport() {
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
             ${item.customer_name ? `⮞ Customer : ${item.customer_name}<br/>` : ""}
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
+            ${item.account_manager_name ? `⮞ Account Manager Name : ${item.account_manager_name}<br/>` : ""}
+            ${item.allocated_to_name ? `⮞ Allocated To : ${item.allocated_to_name}<br/>` : ""}
+            ${item.reviewer_name ? `⮞ Reviewer : ${item.reviewer_name}<br/>` : ""}
+            ${item.allocated_to_other_name ? `⮞ Allocated To (Other) : ${item.allocated_to_other_name}<br/>` : ""}
+            ${item.service_name ? `⮞ Service Type : ${item.service_name}<br/>` : ""}
+            ${item.job_type_name ? `⮞ Job Type : ${item.job_type_name}<br/>` : ""}
+            ${item.status_type_name ? `⮞ Status : ${item.status_type_name}<br/>` : ""}
+            
             ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
             ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
             ${!['', null, 'null', undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate, 'date')}<br/>` : ""}
