@@ -159,6 +159,7 @@ const StaffPage = () => {
               (item) => item.type === "insert"
             );
             setShowStaffInsertTab(staffInsert && staffInsert.is_assigned == 1);
+
             const staffUpdate = item.items.find(
               (item) => item.type === "update"
             );
@@ -377,7 +378,10 @@ const StaffPage = () => {
         return (
           <>
             <div className="px-2">
-              {row?.is_disable == 0 && (
+              {
+              
+              showStaffDeleteTab == true ?
+              row?.is_disable == 0 && (
                 row.is_customer_exist == 1 ?
                   <button
                     className="delete-icon dropdown-item  w-auto mb-2"
@@ -392,10 +396,17 @@ const StaffPage = () => {
                     onClick={() => handleDeleteIsNotExistCustomer(row)}
                   > {" "}<i className="ti-trash text-danger" />
                   </button>
+               )
 
-              )}
+               : ""
+              
+              }
             </div>
-            <div className="dropdown">
+            
+            {
+              showStaffUpdateTab == true ?
+
+              <div className="dropdown">
               <button
                 className="btn "
                 type="button"
@@ -452,6 +463,14 @@ const StaffPage = () => {
                 </a>
               </div>
             </div>
+
+              :
+              ""
+                
+            
+            }
+
+            
           </>
         );
       },
@@ -461,6 +480,12 @@ const StaffPage = () => {
       reorder: false,
     },
   ];
+
+
+
+
+
+
 
   const GetAllStaffPortfolio = async (row) => {
     try {
