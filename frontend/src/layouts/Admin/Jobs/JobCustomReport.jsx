@@ -575,52 +575,73 @@ function JobCustomReport() {
         setCustomerAllData([]);
         setFilters((prev) => ({
           ...prev,
-          [value]: null
+          customer_id: null
         }));
-
-      }
-
-      else if (value == 'staff_id') {
-
-        setFilters((prev) => ({
-          ...prev,
-          [value]: null
-        }));
-
       }
       else if (value == 'client_id') {
         setClientAllData([]);
         setFilters((prev) => ({
           ...prev,
-          [value]: null
+          client_id: null
         }));
-
       }
-
-
-      else if (value == 'task_id') {
-        if (filters.internal_external == "0") {
-          setTaskAllData([]);
-          setInternalTaskAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            task_id: null,
-            internal_task_id: null
-          }));
-        } else if (filters.internal_external == "1") {
-          setInternalTaskAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            internal_task_id: null
-          }));
-        } else if (filters.internal_external == "2") {
-          setTaskAllData([]);
-          setFilters((prev) => ({
-            ...prev,
-            task_id: null
-          }));
-        }
+      else if (value == 'account_manager_id') {
+        setAccountManagerAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          account_manager_id: null
+        }));
       }
+      else if (value == 'allocated_to_id') {
+        setAllocatedToAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          allocated_to_id: null
+        }));
+      }
+      else if (value == 'reviewer_id') {
+        setReviewerAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          reviewer_id: null
+        }));
+      }
+      else if (value == 'allocated_to_other_id') {
+        setOtherStaffAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          allocated_to_other_id: null
+        }));
+      }
+      else if (value == 'service_id') {
+        setServiceAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          service_id: null
+        }));
+      }
+      else if (value == 'job_type_id') {
+        setJobTypeAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          job_type_id: null
+        }));
+      }
+      else if (value == 'status_type_id') {
+        setStatusAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          status_type_id: null
+        }));
+      }
+      else if (value == 'allocated_to_other_id') {
+        setOtherStaffAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          allocated_to_other_id: null
+        }));
+      }
+      
 
 
 
