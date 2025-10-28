@@ -2795,20 +2795,19 @@ const getAllFilters = async (Report) => {
     console.log("Get All Filters Report:", Report);
     const { data, StaffUserId } = Report;
     const { type } = data;
+     
+    
+    if(['', null, undefined].includes(type)){
+        return { status: false, message: 'Filter type is required.', data: [] };
+    } 
+    
+    if(type === 'timesheet_report'){
 
     let where = [`timesheet_filter.staff_id = ?`];
     if (!['', null, undefined].includes(type)) {
         where.push(`timesheet_filter.type = '${type}'`);
     }
     where = where.length ? `WHERE ${where.join(" AND ")}` : '';
-    // const query = `
-    // SELECT 
-    // * 
-    // FROM 
-    // timesheet_filter
-    // ${where}
-    // `;
-
     const query = `
         SELECT 
         timesheet_filter.*,
@@ -2846,8 +2845,6 @@ const getAllFilters = async (Report) => {
         sub_internal.id AS filter_internal_task_id,
         sub_internal.name AS internal_task_name
 
-        
-
         FROM 
         timesheet_filter
         LEFT JOIN staffs ON staffs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.staff_id'))
@@ -2861,14 +2858,73 @@ const getAllFilters = async (Report) => {
         ${where}
         ORDER BY timesheet_filter.id DESC
         `;
-
-
-
-
-    console.log("query -- ", query)
-
     const [result] = await pool.execute(query, [StaffUserId]);
     return { status: true, message: 'Success.', data: result };
+
+   }
+
+   else if(type === 'job_custom_report'){
+    let where = [`timesheet_filter.staff_id = ?`];
+    if (!['', null, undefined].includes(type)) {
+        where.push(`timesheet_filter.type = '${type}'`);
+    }
+    where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+
+
+//    {"groupBy":["job_id","customer_id","client_id","account_manager_id","allocated_to_id","reviewer_id","allocated_to_other_id","service_id","job_type_id","status_type_id","line_manager_id"],"internal_external":"0","fieldsToDisplay":null,"fieldsToDisplayId":null,"staff_id":null,"customer_id":null,"client_id":null,"job_id":null,"task_id":null,"internal_job_id":null,"internal_task_id":null,"timePeriod":"this_month","displayBy":"Weekly","fromDate":null,"toDate":null}
+
+
+    const query = `
+        SELECT 
+        timesheet_filter.*,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.groupBy')) AS groupBy,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.timePeriod')) AS timePeriod,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.displayBy')) AS displayBy,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.fromDate')) AS fromDate,
+        JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.toDate')) AS toDate,
+        jobs.id AS filter_job_id,
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+          ) AS job_name,
+        customers.id AS filter_customer_id,
+        customers.trading_name AS customer_name,
+        clients.id AS filter_client_id,
+        CONCAT(
+          'cli_', 
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(clients.client_code, 1, 15)
+          ) AS client_name,
+        account_manager.id AS filter_account_manager_id,
+        CONCAT(account_manager.first_name,' ',account_manager.last_name) AS account_manager_name
+
+        FROM
+        timesheet_filter
+        LEFT JOIN jobs ON jobs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.job_id'))
+        LEFT JOIN customers ON customers.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.customer_id'))
+        LEFT JOIN clients ON clients.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.client_id'))
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+
+        LEFT JOIN 
+        staffs AS account_manager ON account_manager.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.account_manager_id'))
+
+        ${where}
+        ORDER BY timesheet_filter.id DESC
+        `;
+
+        console.log("query", query);
+    const [result] = await pool.execute(query, [StaffUserId]);
+    return { status: true, message: 'Success.', data: result };
+   }
+    else{
+        return { status: false, message: 'Invalid filter type.', data: [] };
+    }
+
+
+
 
 }
 

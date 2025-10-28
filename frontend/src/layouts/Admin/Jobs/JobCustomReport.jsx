@@ -48,25 +48,23 @@ function JobCustomReport() {
   // set filter id
   const [filterId, setFilterId] = useState(null);
 
-  console.log("filterId -------  ", filterId);
-  console.log("getAllFilterData ", getAllFilterData);
-
 
 
 
 
   const [filters, setFilters] = useState({
     groupBy: ["job_id"],
-    internal_external: "0",
-    fieldsToDisplay: null,
-    fieldsToDisplayId: null,
-    staff_id: null,
+    job_id: null,
     customer_id: null,
     client_id: null,
-    job_id: null,
-    task_id: null,
-    internal_job_id: null,
-    internal_task_id: null,
+    account_manager_id: null,
+    allocated_to_id: null,
+    reviewer_id: null,
+    allocated_to_other_id: null,
+    service_id: null,
+    job_type_id: null,
+    status_type_id: null,
+    line_manager_id: null,
     timePeriod: "this_month",
     displayBy: "Weekly",
     fromDate: null,
@@ -119,7 +117,7 @@ function JobCustomReport() {
   };
 
   const getAllFilters = async () => {
-    var req = { action: "getAllFilters", type: "timesheet_report" };
+    var req = { action: "getAllFilters", type: "job_custom_report" };
     var data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -429,107 +427,6 @@ function JobCustomReport() {
   };
 
 
-
-
-
-
-
-
-
-
-
-  // Get All task
-  const GetAllTask = async (internal_external) => {
-    if (internal_external == "0") {
-      var req = { action: "getInternalTasks" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            // console.log("Internal tasks response: ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setInternalTaskAllData(data);
-          } else {
-            setInternalTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-
-      // External Task
-      var req = { action: "get" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.task_id,
-              label: item.task_name
-            }));
-            setTaskAllData(data);
-          } else {
-            setTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    }
-    else if (internal_external == "1") {
-      var req = { action: "getInternalTasks" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            // console.log("Internal tasks response: ", response.data);
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setInternalTaskAllData(data);
-          } else {
-            setInternalTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    }
-    else if (internal_external == "2") {
-      // External Task
-      const req = { action: "get" };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.task_id,
-              label: item.task_name
-            }));
-            setTaskAllData(data);
-          } else {
-            setTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
-    }
-  };
-
   const exportToCSV = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
       alert("No data to export!");
@@ -579,116 +476,21 @@ function JobCustomReport() {
     if (Array.isArray(e)) {
       // this case is for multi-select (Group By)
       const values = e.map((opt) => opt.value);
-      const labels = e.map((opt) => opt.label);
-      //console.log("Filter changed (multi): ", "groupBy", values, labels);
       setOptions([]);
       let gropByArray = sortByReference(values)
       setFilters((prev) => ({
         ...prev,
-        fieldsToDisplay: null,
-        fieldsToDisplayId: null,
         groupBy: sortByReference(gropByArray)
       }));
 
-      return; // multi-select
+      return;
 
     }
-
-
 
 
     const { key, value, label } = e.target;
-    // console.log("Filter changed: ", key, value, label);
-    // if (key === "fieldsToDisplay") {
 
-    //   //console.log("Fields to Display changed field: ", value);
-
-    //   if ([null, undefined, ""].includes(value)) {
-    //     setFilters((prev) => ({
-    //       ...prev,
-    //       [key]: null,
-    //       [key + "Id"]: null
-    //     }));
-    //   } else {
-    //     setFilters((prev) => ({
-    //       ...prev,
-    //       [key]: label,
-    //       [key + "Id"]: value
-    //     }));
-    //   }
-
-    // }
-
-
-    if (key === "staff_id" || key === "customer_id" || key === "client_id" || key === "job_id" || key === "task_id" || key === "internal_job_id" || key === "internal_task_id") {
-      if ([null, undefined, ""].includes(value)) {
-        setFilters((prev) => ({
-          ...prev,
-          [key]: null
-        }));
-      } else {
-        setFilters((prev) => ({
-          ...prev,
-          [key]: value
-        }));
-      }
-    }
-
-    else if (key === "internal_external") {
-
-      let remainingPart = filters?.groupBy
-
-      if (value == "1") {
-        setOptions([])
-        let remainingPart = filters?.groupBy?.filter(item => item !== 'customer_id' && item !== 'client_id');
-
-        let lastIndexValue = remainingPart[remainingPart.length - 1];
-
-        let fieldsToDisplayId = null;
-        if (lastIndexValue == 'staff_id') {
-          if (filters?.groupBy.some(item => ['customer_id', 'client_id'].includes(item))) {
-            fieldsToDisplayId = null
-          } else {
-            fieldsToDisplayId = filters.fieldsToDisplayId
-          }
-          staffData()
-        } else {
-          fieldsToDisplayId = null
-        }
-
-
-        setFilters((prev) => ({
-          ...prev,
-          [key]: value,
-          groupBy: remainingPart,
-          fieldsToDisplay: null,
-          fieldsToDisplayId: fieldsToDisplayId
-        }));
-      } else {
-        setFilters((prev) => ({
-          ...prev,
-          [key]: value
-        }));
-      }
-
-
-      let lastIndexValue = remainingPart[remainingPart.length - 1];
-      if (lastIndexValue == 'job_id') {
-        setOptions([])
-        GetAllJobs()
-      }
-      else if (lastIndexValue == 'task_id') {
-        setOptions([])
-        GetAllTask(value)
-      }
-      else if (lastIndexValue == 'staff_id') {
-        setOptions([])
-        staffData()
-      }
-
-    }
-
-    else if (key == "timePeriod") {
+    if (key == "timePeriod") {
 
       setFilters((prev) => ({
         ...prev,
@@ -718,8 +520,6 @@ function JobCustomReport() {
         [key]: value
       }));
     }
-
-
 
 
   };
@@ -761,7 +561,7 @@ function JobCustomReport() {
 
     else if (type == 'remove') {
 
-      // console.log("Removed value: ---------------- ", value);
+
 
       if (value == 'job_id') {
         setJobAllData([]);
@@ -860,16 +660,17 @@ function JobCustomReport() {
   const resetFunction = () => {
     setFilters({
       groupBy: [],
-      internal_external: "2",
-      fieldsToDisplay: null,
-      fieldsToDisplayId: null,
-      staff_id: null,
+      job_id: null,
       customer_id: null,
       client_id: null,
-      job_id: null,
-      task_id: null,
-      internal_job_id: null,
-      internal_task_id: null,
+      account_manager_id: null,
+      allocated_to_id: null,
+      reviewer_id: null,
+      allocated_to_other_id: null,
+      service_id: null,
+      job_type_id: null,
+      status_type_id: null,
+      line_manager_id: null,
       timePeriod: "",
       displayBy: "",
       fromDate: null,
@@ -903,21 +704,6 @@ function JobCustomReport() {
     { value: "line_manager_id", label: "Line Manager" },
   ];
 
-  const labels = {
-    job_id: "Job Name",
-    customer_id: "Customer Name",
-    account_manager_id: "Account Manager Name",
-    service_id: "Service Type",
-    job_type_id: "Job Type",
-    status_type_id: "Status",
-    detailed_status_id: "Detailed Status",
-    allocated_to_id: "Allocated To",
-    allocated_to_other_id: "Allocated To (Other)",
-    reviewer_id: "Reviewer",
-    line_manager_id: "Line Manager",
-  };
-
-
 
   const orderMap = {};
   for (let i = 0; i < optionGroupBy.length; i++) {
@@ -946,7 +732,7 @@ function JobCustomReport() {
       return
     }
 
-    var req = { action: "saveFilters", filters: filters, id: filterId, type: "timesheet_report" };
+    var req = { action: "saveFilters", filters: filters, id: filterId, type: "job_custom_report" };
     var data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -979,7 +765,7 @@ function JobCustomReport() {
 
   }
 
-  const handleFilterSelect = (selected) => {
+  const handleFilterSelect = async (selected) => {
     setFilterId(selected.value);
     // set filters from selected
     // console.log("selected  1 --", selected);
@@ -991,7 +777,39 @@ function JobCustomReport() {
       try {
 
         parsedFilters = JSON.parse(selectedFilter.filters);
-        //console.log("Parsed Filters: 4  ", parsedFilters);
+
+        if (parsedFilters?.groupBy?.includes('job_id')) {
+          await GetAllJobs();
+        }
+        if (parsedFilters?.groupBy?.includes('customer_id')) {
+          await GetAllCustomer();
+        }
+        if (parsedFilters?.groupBy?.includes('client_id')) {
+          await GetAllClient();
+        }
+        if (parsedFilters?.groupBy?.includes('account_manager_id')) {
+          await staffData(4);
+        }
+        if (parsedFilters?.groupBy?.includes('allocated_to_id')) {
+          await staffData(3);
+        }
+        if (parsedFilters?.groupBy?.includes('reviewer_id')) {
+          await staffData(6);
+        }
+        if (parsedFilters?.groupBy?.includes('allocated_to_other_id')) {
+          await staffData('other');
+        }
+        if (parsedFilters?.groupBy?.includes('service_id')) {
+          await GetAllService();
+        }
+        if (parsedFilters?.groupBy?.includes('job_type_id')) {
+          await GetAllJobType();
+        }
+        if (parsedFilters?.groupBy?.includes('status_type_id')) {
+          await GetAllStatus();
+        }
+
+
         setFilters(parsedFilters);
         callFilterApi();
       } catch (e) {
@@ -1032,7 +850,7 @@ function JobCustomReport() {
       confirmButtonText: 'Yes, delete it!'
     });
     if (result.isConfirmed) {
-      var req = { action: "deleteFilterId", filterId: filterId, type: "timesheet_report" };
+      var req = { action: "deleteFilterId", filterId: filterId, type: "job_custom_report" };
       var data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()

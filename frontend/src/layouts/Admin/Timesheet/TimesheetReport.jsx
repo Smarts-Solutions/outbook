@@ -855,7 +855,7 @@ function TimesheetReport() {
 
   }
 
-  const handleFilterSelect = (selected) => {
+  const handleFilterSelect = async (selected) => {
     setFilterId(selected.value);
     // set filters from selected
     // console.log("selected  1 --", selected);
@@ -866,7 +866,24 @@ function TimesheetReport() {
       let parsedFilters = {};
       try {
 
-        parsedFilters = JSON.parse(selectedFilter.filters);
+        parsedFilters = JSON.parse(selectedFilter?.filters);
+
+        if (parsedFilters?.groupBy?.includes('staff_id')) {
+          await staffData();
+        }
+        if (parsedFilters?.groupBy?.includes('customer_id')) {
+          await GetAllCustomer();
+        }
+        if (parsedFilters?.groupBy?.includes('client_id')) {
+          await GetAllClient();
+        }
+        if (parsedFilters?.groupBy?.includes('job_id')) {
+          await GetAllJobs(parsedFilters?.internal_external);
+        }
+        if (parsedFilters?.groupBy?.includes('task_id')) {
+          await GetAllTask(parsedFilters?.internal_external);
+        }
+        
         //console.log("Parsed Filters: 4  ", parsedFilters);
         setFilters(parsedFilters);
         callFilterApi();
