@@ -2887,7 +2887,7 @@ const getAllFilters = async (Report) => {
         CONCAT(
           SUBSTRING(job_customer.trading_name, 1, 3), '_',
           SUBSTRING(job_client.trading_name, 1, 3), '_',
-          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(job_type_job.type, 1, 4), '_',
           SUBSTRING(jobs.job_id, 1, 15)
           ) AS job_name,
 
@@ -2931,7 +2931,7 @@ const getAllFilters = async (Report) => {
         LEFT JOIN jobs ON jobs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.job_id'))
         JOIN customers AS job_customer ON job_customer.id = jobs.customer_id
         JOIN clients AS job_client ON job_client.id = jobs.client_id
-        JOIN job_types ON jobs.job_type_id = job_types.id
+        JOIN job_types AS job_type_job ON  job_type_job.id = jobs.job_type_id
 
 
 
