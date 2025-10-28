@@ -2882,31 +2882,45 @@ const getAllFilters = async (Report) => {
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.displayBy')) AS displayBy,
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.fromDate')) AS fromDate,
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.toDate')) AS toDate,
+
         jobs.id AS filter_job_id,
         CONCAT(
-          SUBSTRING(customers.trading_name, 1, 3), '_',
-          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_customer.trading_name, 1, 3), '_',
+          SUBSTRING(job_client.trading_name, 1, 3), '_',
           SUBSTRING(job_types.type, 1, 4), '_',
           SUBSTRING(jobs.job_id, 1, 15)
           ) AS job_name,
+
         customers.id AS filter_customer_id,
         customers.trading_name AS customer_name,
+
         clients.id AS filter_client_id,
         CONCAT(
           'cli_', 
-          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(client_customer.trading_name, 1, 3), '_',
           SUBSTRING(clients.trading_name, 1, 3), '_',
           SUBSTRING(clients.client_code, 1, 15)
           ) AS client_name,
+
+          
         account_manager.id AS filter_account_manager_id,
         CONCAT(account_manager.first_name,' ',account_manager.last_name) AS account_manager_name
 
         FROM
         timesheet_filter
         LEFT JOIN jobs ON jobs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.job_id'))
+        JOIN customers AS job_customer ON job_customer.id = jobs.customer_id
+        JOIN clients AS job_client ON job_client.id = jobs.client_id
+        JOIN job_types ON jobs.job_type_id = job_types.id
+
+
+
+
         LEFT JOIN customers ON customers.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.customer_id'))
+
+
         LEFT JOIN clients ON clients.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.client_id'))
-        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        JOIN customers AS client_customer ON client_customer.id = clients.customer_id
 
         LEFT JOIN 
         staffs AS account_manager ON account_manager.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.account_manager_id'))

@@ -131,13 +131,10 @@ function JobCustomReport() {
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
             label: `
             Group By : [${(JSON.parse(item?.groupBy))?.map(item => item.replace(/_id$/i, ""))}]<br/>
-            ${item.staff_fullname ? `⮞ Staff : ${item.staff_fullname}<br/>` : ""}
+        
             ${item.customer_name ? `⮞ Customer : ${item.customer_name}<br/>` : ""}
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
-            ${item.task_name ? `⮞ Task : ${item.task_name}<br/>` : ""}
-            ${item.internal_job_name ? `⮞ Internal Job : ${item.internal_job_name}<br/>` : ""}
-            ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}<br/>` : ""}
             ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
             ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
             ${!['', null, 'null', undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate, 'date')}<br/>` : ""}
@@ -641,7 +638,7 @@ function JobCustomReport() {
           allocated_to_other_id: null
         }));
       }
-      
+
 
 
 
