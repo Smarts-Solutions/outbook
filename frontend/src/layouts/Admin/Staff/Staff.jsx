@@ -378,8 +378,7 @@ const StaffPage = () => {
         return (
           <>
             <div className="px-2">
-              {
-              
+              {   
               showStaffDeleteTab == true ?
               row?.is_disable == 0 && (
                 row.is_customer_exist == 1 ?
@@ -397,7 +396,6 @@ const StaffPage = () => {
                   > {" "}<i className="ti-trash text-danger" />
                   </button>
                )
-
                : ""
               
               }
@@ -405,7 +403,6 @@ const StaffPage = () => {
             
             {
               showStaffUpdateTab == true ?
-
               <div className="dropdown">
               <button
                 className="btn "
