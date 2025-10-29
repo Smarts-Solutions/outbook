@@ -2516,10 +2516,6 @@ const getJobCustomReport = async (Report) => {
 
 
 
-
-
-
-
     //console.log("groupBy", groupBy);
     // console.log("fieldsToDisplayId", fieldsToDisplayId);
     if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
@@ -3469,7 +3465,7 @@ const getStaffWithRole = async (Report) => {
     }
     else {
         let where = `role_id = ${role_id} AND staffs.status = '1'`;
-        if (![3, 6].includes(Number(role_id))) {
+        if ([3, 6].includes(Number(role_id))) {
             where = `(role_id = ${role_id} || role_id = 4) AND staffs.status = '1'`;
         }
         const query = `
