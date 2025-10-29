@@ -923,7 +923,7 @@ function JobCustomReport() {
           <div className="row align-items-start">
             <div className="col-12 col-sm-7 ">
               <div>
-                <h3 className="mt-0">Job Custom Reports</h3>
+                <h3 className="mt-0">Custom Job Report</h3>
 
               </div>
 
