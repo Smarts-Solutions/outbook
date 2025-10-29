@@ -3284,9 +3284,9 @@ const getAllFilters = async (Report) => {
         FROM
         timesheet_filter
         LEFT JOIN jobs ON jobs.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.job_id'))
-        JOIN customers AS job_customer ON job_customer.id = jobs.customer_id
-        JOIN clients AS job_client ON job_client.id = jobs.client_id
-        JOIN job_types AS job_type_job ON  job_type_job.id = jobs.job_type_id
+        LEFT JOIN customers AS job_customer ON job_customer.id = jobs.customer_id
+        LEFT JOIN clients AS job_client ON job_client.id = jobs.client_id
+        LEFT JOIN job_types AS job_type_job ON  job_type_job.id = jobs.job_type_id
 
 
 
@@ -3295,7 +3295,7 @@ const getAllFilters = async (Report) => {
 
 
         LEFT JOIN clients ON clients.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.client_id'))
-        JOIN customers AS client_customer ON client_customer.id = clients.customer_id
+        LEFT JOIN customers AS client_customer ON client_customer.id = clients.customer_id
 
         LEFT JOIN 
         staffs AS account_manager ON account_manager.id = JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.account_manager_id'))
@@ -3326,6 +3326,8 @@ const getAllFilters = async (Report) => {
         ${where}
         ORDER BY timesheet_filter.id DESC
         `;
+
+        console.log("Get All Filters Query:", query);   
 
 
 
