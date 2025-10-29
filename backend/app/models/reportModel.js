@@ -2565,7 +2565,7 @@ const getJobCustomReport = async (Report) => {
 
 
         if (!["", null, undefined].includes(job_id)) {
-            where.push(`raw.id = ${job_id}`);
+            where.push(`raw.job_id = ${job_id}`);
         }
         if (!["", null, undefined].includes(customer_id)) {
             where.push(`raw.customer_id = ${customer_id}`);
@@ -2596,6 +2596,8 @@ const getJobCustomReport = async (Report) => {
         }
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+        console.log("where", where);
 
         // ===== Build dynamic group & label SQL =====
         const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
@@ -2682,7 +2684,6 @@ const getJobCustomReport = async (Report) => {
                     j.status_type AS status_type_id,
                     j.created_at AS work_date
                 FROM jobs AS j
-                WHERE j.created_at BETWEEN ? AND ?
             ) AS raw
             LEFT JOIN customers AS c ON raw.customer_id = c.id
             LEFT JOIN clients AS cl ON raw.client_id = cl.id
@@ -2694,7 +2695,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN master_status AS st ON raw.status_type_id = st.id
             LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
             LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
-            WHERE raw.work_date BETWEEN ? AND ?
+            ${where}
             ORDER BY raw.job_id
         `;
 
@@ -2702,7 +2703,7 @@ const getJobCustomReport = async (Report) => {
         console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();
-        const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate , fromDate, toDate]);
+        const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
         conn.release();
 
         console.log("rows.length", rows.length);
