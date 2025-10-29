@@ -1806,7 +1806,7 @@ const Timesheet = () => {
                                     <input
                                       className="form-control cursor-pointer"
                                       style={{ width: "100px" }}
-                                      defaultValue={
+                                      value={
                                         item.task_type === "1"
                                           ? "No Customer"
                                           : item.customer_name
@@ -1841,7 +1841,7 @@ const Timesheet = () => {
                                     <input
                                       className="form-control cursor-pointer"
                                       style={{ width: "90px" }}
-                                      defaultValue={
+                                      value={
                                         item.task_type === "1"
                                           ? "No Client"
                                           : item.client_name
@@ -1872,7 +1872,7 @@ const Timesheet = () => {
                                     <input
                                       style={{ width: "100px" }}
                                       className="form-control cursor-pointer"
-                                      defaultValue={
+                                      value={
                                         item.task_type === "1"
                                           ? item.internal_name
                                           : item.job_name
@@ -1923,7 +1923,7 @@ const Timesheet = () => {
                                     <input
                                       className="form-control cursor-pointer"
                                       style={{ width: "100px" }}
-                                      defaultValue={
+                                      value={
                                         item.task_type === "1"
                                           ? item.sub_internal_name
                                           : item.task_name
