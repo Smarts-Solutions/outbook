@@ -376,7 +376,6 @@ const Sidebar = () => {
                     >
                       <span className="sidebar-icons">
                         <i className="fas fa-clock"></i>{" "}
-
                       </span>
                       <span>Custom TimeSheet Report</span>
                     </Link>
