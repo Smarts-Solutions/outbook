@@ -2105,6 +2105,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
+    console.log("Call Timesheet Report");
     var {
         groupBy = ['staff_id'],
         internal_external,
@@ -2205,7 +2206,7 @@ const getTimesheetReportData = async (Report) => {
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : '';
 
-        console.log("where", where);
+
 
         // Build group_value for SQL
         const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
@@ -2483,6 +2484,362 @@ const getTimesheetReportData = async (Report) => {
 
 
 
+
+
+
+
+
+
+////////////////////-----START getJobCustomReports -----//////////////////////
+const getJobCustomReport = async (Report) => {
+    const { StaffUserId, data } = Report;
+    console.log("Call Custome Job Report");
+    var {
+        groupBy = ['job_id'],
+        job_id,
+        customer_id,
+        client_id,
+        account_manager_id,
+        allocated_to_id,
+        reviewer_id,
+        allocated_to_other_id,
+        service_id,
+        job_type_id,
+        status_type_id,
+        line_manager_id,
+        timePeriod,
+        displayBy,
+        fromDate,
+        toDate
+
+    } = data.filters;
+
+
+
+
+
+
+
+    //console.log("groupBy", groupBy);
+    // console.log("fieldsToDisplayId", fieldsToDisplayId);
+    if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
+        return { status: false, message: `empty groupBy field`, data: [] };
+    }
+    //    groupBy = ['staff_id','customer_id','client_id'];
+    // allowed fields
+    const ALLOWED_GROUP_FIELDS = [
+        'job_id',
+        'customer_id',
+        'client_id',
+        'account_manager_id',
+        'allocated_to_id',
+        'reviewer_id',
+        'allocated_to_other_id',
+        'service_id',
+        'job_type_id',
+        'status_type_id',
+        //'line_manager_id'
+    ]
+
+    // validate groupBy
+    if (!Array.isArray(groupBy)) groupBy = [groupBy];
+    for (const g of groupBy) {
+        if (!ALLOWED_GROUP_FIELDS.includes(g)) {
+            return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
+        }
+    }
+
+    try {
+        // compute date range
+        let range;
+        try {
+            range = await getDateRange(timePeriod, fromDate, toDate);
+        } catch (err) {
+            return { status: false, message: err.message || 'Invalid date range', data: [] };
+        }
+
+        var { fromDate, toDate } = range;
+
+        let where = [`work_date BETWEEN ? AND ?`];
+
+
+
+        if (!["", null, undefined].includes(job_id)) {
+            where.push(`raw.id = ${job_id}`);
+        }
+        if (!["", null, undefined].includes(customer_id)) {
+            where.push(`raw.customer_id = ${customer_id}`);
+        }
+        if (!["", null, undefined].includes(client_id)) {
+            where.push(`raw.client_id = ${client_id}`);
+        }
+        if (!["", null, undefined].includes(account_manager_id)) {
+            where.push(`raw.account_manager_id = ${account_manager_id}`);
+        }
+        if (!["", null, undefined].includes(allocated_to_id)) {
+            where.push(`raw.allocated_to_id = ${allocated_to_id}`);
+        }
+        if (!["", null, undefined].includes(reviewer_id)) {
+            where.push(`raw.reviewer_id = ${reviewer_id}`);
+        }
+        if (!["", null, undefined].includes(allocated_to_other_id)) {
+            where.push(`ato.id = ${allocated_to_other_id}`);
+        }
+        if (!["", null, undefined].includes(service_id)) {
+            where.push(`raw.service_id = ${service_id}`);
+        }
+        if (!["", null, undefined].includes(job_type_id)) {
+            where.push(`raw.job_type_id = ${job_type_id}`);
+        }
+        if (!["", null, undefined].includes(status_type_id)) {
+            where.push(`raw.status_type_id = ${status_type_id}`);
+        }
+
+        where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+        // ===== Build dynamic group & label SQL =====
+        const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
+
+        const groupLabelSQL = groupBy
+            .map((f) => {
+                if (f === "job_id") return "raw.id";
+                if (f === "customer_id") return "c.trading_name";
+                if (f === "client_id") return "cl.trading_name";
+                if (f === "account_manager_id") return "CONCAT(am.first_name,' ',am.last_name)";
+                if (f === "allocated_to_id") return "CONCAT(at.first_name,' ',at.last_name)";
+                if (f === "reviewer_id") return "CONCAT(rv.first_name,' ',rv.last_name)";
+                if (f === "allocated_to_other_id") return "CONCAT(ato.first_name,' ',ato.last_name)";
+                if (f === "service_id") return "sv.service_name";
+                if (f === "job_type_id") return "jt.type";
+                if (f === "status_type_id") return "st.status";
+                return f;
+            })
+            .join(", ' - ', ");
+
+        const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
+
+        // ===== Readable column names =====
+        const jobName = `CONCAT(
+            SUBSTRING(c.trading_name, 1, 3), '_',
+            SUBSTRING(cl.trading_name, 1, 3), '_',
+            SUBSTRING(jt.type, 1, 4), '_',
+            SUBSTRING(raw.id, 1, 15)
+            ) AS job_name`;
+
+        const customerName = `c.trading_name AS customer_name`;
+        const clientName = `CONCAT(
+            'cli_', 
+            SUBSTRING(c.trading_name, 1, 3), '_',
+            SUBSTRING(cl.trading_name, 1, 3), '_',
+            SUBSTRING(cl.client_code, 1, 15)
+            ) AS client_name`;
+        const accountManagerName = `CONCAT(am.first_name,' ',am.last_name) AS account_manager_name`;
+        const allocatedToName = `CONCAT(at.first_name,' ',at.last_name) AS allocated_to_name`;
+        const reviewerName = `CONCAT(rv.first_name,' ',rv.last_name) AS reviewer_name`;
+        const allocatedToOtherName = `CONCAT(ato.first_name,' ',ato.last_name) AS allocated_to_other_name`;
+        const serviceName = `sv.name AS service_name`;
+        const jobTypeName = `jt.type AS job_type_name`;
+        const statusTypeName = `st.name AS status_type_name`;
+
+        // ===== Final Query =====
+        const unpivotSQL = `
+            SELECT
+                raw.job_id,
+                CONCAT_WS('::', raw.job_id) AS group_value,
+                raw.work_date,
+                CONCAT(
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(jt.type, 1, 4), '_',
+                    SUBSTRING(raw.job_code_id, 1, 15)
+                ) AS job_name,
+                CONCAT(raw.job_id) AS group_label,
+                c.trading_name AS customer_name,
+                CONCAT(
+                    'cli_', 
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.client_code, 1, 15)
+                ) AS client_name,
+                CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+                CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+                CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+                CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
+                sv.name AS service_name,
+                jt.type AS job_type_name,
+                st.name AS status_type_name
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+                WHERE j.created_at BETWEEN ? AND ?
+            ) AS raw
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+            LEFT JOIN services AS sv ON raw.service_id = sv.id
+            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
+            LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
+            WHERE raw.work_date BETWEEN ? AND ?
+            ORDER BY raw.job_id
+        `;
+
+        console.log("fromDate ,", fromDate, "toDate ", toDate);
+        console.log("unpivotSQL", unpivotSQL);
+
+        const conn = await pool.getConnection();
+        const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate , fromDate, toDate]);
+        conn.release();
+
+        console.log("rows.length", rows.length);
+        console.log("rows", rows);
+
+
+
+
+
+        // Aggregate JS
+        const groups = {};
+        const periodSet = new Set();
+
+        for (const r of rows) {
+            let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
+            if (!workDateStr) continue;
+           
+            //  const gid = r.group_value || 'NULL';
+            const gid = r.group_value || 'NULL';
+            const jobName = r.job_name;
+            const customerName = r.customer_name;
+            const clientName = r.client_name;
+            const accountManagerName = r.account_manager_name;
+            const allocatedToName = r.allocated_to_name;
+            const reviewerName = r.reviewer_name;
+            const allocatedToOtherName = r.allocated_to_other_name;
+            const serviceName = r.service_name;
+            const jobTypeName = r.job_type_name;
+            const statusTypeName = r.status_type_name;
+            const date = workDateStr;
+
+            const secs = r.work_hours;
+            // console.log("displayBy", displayBy, "workDateStr", workDateStr);
+            const periodKey = getPeriodKey(displayBy, workDateStr);
+            if (!periodKey) continue;
+
+            periodSet.add(periodKey);
+
+            if (!groups[gid]) {
+                groups[gid] = {
+                    group_value: gid,
+                    job_name: jobName,
+                    customer_name: customerName,
+                    client_name: clientName,
+                    account_manager_name: accountManagerName,
+                    allocated_to_name: allocatedToName,
+                    reviewer_name: reviewerName,
+                    allocated_to_other_name: allocatedToOtherName,
+                    service_name: serviceName,
+                    job_type_name: jobTypeName,
+                    status_type_name: statusTypeName,
+                    date: date,
+                    totalSeconds: 0,
+                    timesheetIds: new Set(),
+                    periodSeconds: {}
+                };
+            }
+
+            const g = groups[gid];
+            g.totalSeconds += parseFloat(secs?.replace(':', '.'));
+            g.timesheetIds.add(r.timesheet_id);
+            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
+        }
+
+        const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+        const outRows = [];
+        const groupKeys = Object.keys(groups).sort((a, b) => {
+            const na = Number(a), nb = Number(b);
+            if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+            return a.localeCompare(b);
+        });
+
+        for (const gid of groupKeys) {
+            const g = groups[gid];
+            const row = {};
+            // console.log("g", g);
+
+            row['job_id'] = g.job_name;
+            row['customer_id'] = g.customer_name;
+            row['client_id'] = g.client_name;
+            row['account_manager_id'] = g.account_manager_name;
+            row['allocated_to_id'] = g.allocated_to_name;
+            row['reviewer_id'] = g.reviewer_name;
+            row['allocated_to_other_id'] = g.allocated_to_other_name;
+            row['service_id'] = g.service_name;
+            row['job_type_id'] = g.job_type_name;
+            row['status_type_id'] = g.status_type_name;
+
+
+            for (const p of periods) {
+                row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
+            }
+
+            row.date = g.date;
+            // row.total_records = g.timesheetIds.size;
+            outRows.push(row);
+        }
+
+
+        // const columns = ['group', ...periods, 'total_hours', 'total_records'];
+
+        const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+
+        //const columnsWeeks = [...groupBy, ...weeks];
+        const columnsWeeks = [...groupBy,'date'];
+       
+        // console.log("columnsWeeks", columnsWeeks);
+        // console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
+        // console.log("displayBy, ", displayBy);
+        const finalRows = normalizeRows(columnsWeeks, outRows);
+
+        const fixed = [...groupBy];
+        const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
+        const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
+
+        return {
+            status: true,
+            message: 'Success.',
+            data: {
+                meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
+                //columns: columnsWeeks,
+                columns: columnsWeeksDecOrder,
+                rows: finalRows
+            }
+        };
+
+    } catch (err) {
+        console.error(err);
+        return { status: false, message: err.message || 'server error', data: [] };
+    }
+};
+
+/////////////------- END getJobCustomReports END-------//////////////////////
+
+
+
+
 const missingTimesheetReport = async (Report) => {
     //    console.log("Missing Timesheet Report:", Report);
     const { data, StaffUserId } = Report;
@@ -2514,7 +2871,7 @@ const missingTimesheetReport = async (Report) => {
     }
 
     const LineManageStaffId = await getAllLineManageStaffIds(StaffUserId);
-    console.log("LineManageStaffId", LineManageStaffId);
+
 
     let where = [];
     if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
@@ -2560,7 +2917,7 @@ const missingTimesheetReport = async (Report) => {
         
     `
 
-    console.log("query_last_week_filter", query_last_week_filter);
+
 
     const [result] = await pool.execute(query_last_week_filter);
     // console.log("result", result);
@@ -2734,7 +3091,7 @@ const discrepancyReportProcessor = async (Report) => {
 
 
 const capacityReport = async (Report) => {
-    console.log("Capacity Report:", Report);
+
 
 
     return { status: true, message: 'no make Api', data: [] };
@@ -2743,7 +3100,7 @@ const capacityReport = async (Report) => {
 
 //////// ---------- Save Filters Start --------- ////////////
 const saveFilters = async (Report) => {
-    console.log("Save Filters Report:", Report);
+
     const { data, StaffUserId } = Report;
     const { id, type, filters } = data;
     // console.log("Save Filters Report id:", id);
@@ -2792,23 +3149,24 @@ const saveFilters = async (Report) => {
 
 
 const getAllFilters = async (Report) => {
-    console.log("Get All Filters Report:", Report);
+
+
     const { data, StaffUserId } = Report;
     const { type } = data;
-     
-    
-    if(['', null, undefined].includes(type)){
-        return { status: false, message: 'Filter type is required.', data: [] };
-    } 
-    
-    if(type === 'timesheet_report'){
 
-    let where = [`timesheet_filter.staff_id = ?`];
-    if (!['', null, undefined].includes(type)) {
-        where.push(`timesheet_filter.type = '${type}'`);
+
+    if (['', null, undefined].includes(type)) {
+        return { status: false, message: 'Filter type is required.', data: [] };
     }
-    where = where.length ? `WHERE ${where.join(" AND ")}` : '';
-    const query = `
+
+    if (type === 'timesheet_report') {
+
+        let where = [`timesheet_filter.staff_id = ?`];
+        if (!['', null, undefined].includes(type)) {
+            where.push(`timesheet_filter.type = '${type}'`);
+        }
+        where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+        const query = `
         SELECT 
         timesheet_filter.*,
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.groupBy')) AS groupBy,
@@ -2858,23 +3216,23 @@ const getAllFilters = async (Report) => {
         ${where}
         ORDER BY timesheet_filter.id DESC
         `;
-    const [result] = await pool.execute(query, [StaffUserId]);
-    return { status: true, message: 'Success.', data: result };
+        const [result] = await pool.execute(query, [StaffUserId]);
+        return { status: true, message: 'Success.', data: result };
 
-   }
-
-   else if(type === 'job_custom_report'){
-    let where = [`timesheet_filter.staff_id = ?`];
-    if (!['', null, undefined].includes(type)) {
-        where.push(`timesheet_filter.type = '${type}'`);
     }
-    where = where.length ? `WHERE ${where.join(" AND ")}` : '';
+
+    else if (type === 'job_custom_report') {
+        let where = [`timesheet_filter.staff_id = ?`];
+        if (!['', null, undefined].includes(type)) {
+            where.push(`timesheet_filter.type = '${type}'`);
+        }
+        where = where.length ? `WHERE ${where.join(" AND ")}` : '';
 
 
-//    {"groupBy":["job_id","customer_id","client_id","account_manager_id","allocated_to_id","reviewer_id","allocated_to_other_id","service_id","job_type_id","status_type_id","line_manager_id"],"internal_external":"0","fieldsToDisplay":null,"fieldsToDisplayId":null,"staff_id":null,"customer_id":null,"client_id":null,"job_id":null,"task_id":null,"internal_job_id":null,"internal_task_id":null,"timePeriod":"this_month","displayBy":"Weekly","fromDate":null,"toDate":null}
+        //    {"groupBy":["job_id","customer_id","client_id","account_manager_id","allocated_to_id","reviewer_id","allocated_to_other_id","service_id","job_type_id","status_type_id","line_manager_id"],"internal_external":"0","fieldsToDisplay":null,"fieldsToDisplayId":null,"staff_id":null,"customer_id":null,"client_id":null,"job_id":null,"task_id":null,"internal_job_id":null,"internal_task_id":null,"timePeriod":"this_month","displayBy":"Weekly","fromDate":null,"toDate":null}
 
 
-    const query = `
+        const query = `
         SELECT 
         timesheet_filter.*,
         JSON_UNQUOTE(JSON_EXTRACT(timesheet_filter.filter_record, '$.groupBy')) AS groupBy,
@@ -2972,11 +3330,12 @@ const getAllFilters = async (Report) => {
         ORDER BY timesheet_filter.id DESC
         `;
 
-        console.log("query", query);
-    const [result] = await pool.execute(query, [StaffUserId]);
-    return { status: true, message: 'Success.', data: result };
-   }
-    else{
+
+
+        const [result] = await pool.execute(query, [StaffUserId]);
+        return { status: true, message: 'Success.', data: result };
+    }
+    else {
         return { status: false, message: 'Invalid filter type.', data: [] };
     }
 
@@ -2986,7 +3345,8 @@ const getAllFilters = async (Report) => {
 }
 
 const deleteFilterId = async (Report) => {
-    console.log("Save Filters Report:", Report);
+
+
     const { data, StaffUserId } = Report;
     const { type, filterId } = data;
 
@@ -3084,7 +3444,8 @@ const staffRoleChangeUpdate = async (Report) => {
 
 /////////////---- START JOB CUSTOM REPORTS ----//////////////////////
 const getStaffWithRole = async (Report) => {
-    console.log("Get Staff With Role Report:", Report);
+
+
     const { data } = Report;
     const { role_id } = data;
 
@@ -3128,7 +3489,7 @@ const getStaffWithRole = async (Report) => {
 }
 
 const getAllService = async (Report) => {
- 
+
     const query = `
     SELECT  
     id,
@@ -3143,7 +3504,7 @@ const getAllService = async (Report) => {
 }
 
 const getAllJobType = async () => {
- 
+
     const query = `
     SELECT  
     id,
@@ -3158,7 +3519,7 @@ const getAllJobType = async () => {
 }
 
 const getAllStatus = async () => {
- 
+
     const query = `
     SELECT  
     id,
@@ -3205,7 +3566,8 @@ module.exports = {
     getStaffWithRole,
     getAllService,
     getAllJobType,
-    getAllStatus
+    getAllStatus,
+    getJobCustomReport
 };
 
 

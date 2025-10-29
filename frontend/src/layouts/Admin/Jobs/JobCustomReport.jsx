@@ -124,7 +124,7 @@ function JobCustomReport() {
       .then(async (response) => {
         if (response.status) {
 
-          console.log("getAllFilters response ", response.data);
+         
           const data = response?.data?.map((item) => ({
 
             value: item.id,
@@ -142,7 +142,7 @@ function JobCustomReport() {
             ${item.service_name ? `⮞ Service Type : ${item.service_name}<br/>` : ""}
             ${item.job_type_name ? `⮞ Job Type : ${item.job_type_name}<br/>` : ""}
             ${item.status_type_name ? `⮞ Status : ${item.status_type_name}<br/>` : ""}
-            
+
             ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
             ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
             ${!['', null, 'null', undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate, 'date')}<br/>` : ""}
@@ -487,6 +487,7 @@ function JobCustomReport() {
         ...prev,
         groupBy: sortByReference(gropByArray)
       }));
+      
 
       return;
 
@@ -653,10 +654,11 @@ function JobCustomReport() {
     }
   }
 
+  console.log("filters ", filters);
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { action: "get", filters: filters };
+    const req = { action: "getJobCustomReport", filters: filters };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
@@ -675,10 +677,10 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-    if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
-      // callFilterApi();
+    if (role?.toUpperCase() === "SUPERADMIN") {
+       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id]);
+  }, [filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id, filters.groupBy]);
 
 
   //console.log("filters ", filters);
@@ -727,7 +729,7 @@ function JobCustomReport() {
     { value: "service_id", label: "Service Type" },
     { value: "job_type_id", label: "Job Type" },
     { value: "status_type_id", label: "Status" },
-    { value: "line_manager_id", label: "Line Manager" },
+    // { value: "line_manager_id", label: "Line Manager" },
   ];
 
 
@@ -834,8 +836,6 @@ function JobCustomReport() {
         if (parsedFilters?.groupBy?.includes('status_type_id')) {
           await GetAllStatus();
         }
-
-
         setFilters(parsedFilters);
         callFilterApi();
       } catch (e) {
@@ -844,17 +844,18 @@ function JobCustomReport() {
     } else {
 
       setFilters({
-        groupBy: ["staff_id"],
-        internal_external: "0",
-        fieldsToDisplay: null,
-        fieldsToDisplayId: null,
-        staff_id: null,
+        groupBy: ["job_id"],
+        job_id: null,
         customer_id: null,
         client_id: null,
-        job_id: null,
-        task_id: null,
-        internal_job_id: null,
-        internal_task_id: null,
+        account_manager_id: null,
+        allocated_to_id: null,
+        reviewer_id: null,
+        allocated_to_other_id: null,
+        service_id: null,
+        job_type_id: null,
+        status_type_id: null,
+        line_manager_id: null,
         timePeriod: "this_month",
         displayBy: "Weekly",
         fromDate: null,
@@ -926,42 +927,6 @@ function JobCustomReport() {
 
               </div>
 
-              {/* <div className='w-50 mt-2'>
-                <label className="form-label fw-medium form-label fw-medium mt-2 mb-1">
-                  Select Saved Filters
-                </label>
-                <Select
-                  options={[
-                    { value: "", label: "Select..." },
-                    ...getAllFilterData,
-                  ]}
-                  value={
-                    getAllFilterData && getAllFilterData.length > 0
-                      ? getAllFilterData.find(
-                        (opt) => Number(opt.value) === Number(filterId)
-                      ) || null
-                      : null
-                  }
-                  onChange={handleFilterSelect}
-                  isSearchable
-                  className="shadow-sm select-staff rounded-pill"
-                />
-
-
-                {
-                  !['', null, undefined].includes(filterId) ?
-
-                    <i className="fa fa-trash"
-                      title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
-
-                    : ""
-                }
-
-
-              </div> */}
               <div className='w-50 mt-2'>
                 <label className="form-label fw-medium mt-2 mb-1">
                   Select Saved Filters
@@ -969,10 +934,7 @@ function JobCustomReport() {
 
                 <div className="d-flex align-items-center gap-2">
                   <Select
-                    // options={[
-                    //   { value: "", label: "Select..." },
-                    //   ...getAllFilterData,
-                    // ]}
+                   
                     options={[
                       { value: "", label: "Select..." },
                       ...getAllFilterData.map(opt => ({
@@ -1044,7 +1006,7 @@ function JobCustomReport() {
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
-          {console.log("optionGroupBy --- ", optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value)))}
+         
           <Select
             isMulti
             options={optionGroupBy}
@@ -1384,35 +1346,7 @@ function JobCustomReport() {
         {/* From Date  And To Date */}
         {filters.timePeriod == "custom" && (
           <>
-            {/* <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">From Date</label>
-          <input
-            type="date"
-            className="form-control shadow-sm"
-            id="fromDate"
-            value={filters.fromDate}
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "fromDate", value: selected.target.value },
-              })
-            }
-          />
-        </div>
-
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">To Date</label>
-          <input
-            type="date"
-            className="form-control shadow-sm"
-            id="toDate"
-            value={filters.toDate}
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "toDate", value: selected.target.value },
-              })
-            }
-          />
-        </div> */}
+           
             {/* From Date */}
             <div className="col-lg-4 col-md-6">
               <label className="form-label fw-medium">From Date</label>
@@ -1562,14 +1496,19 @@ function JobCustomReport() {
 
 function getColumnName(columnKey) {
   const dayMap = {
-    staff_id: "Staff",
+    job_id: "Job",
     customer_id: "Customer",
     client_id: "Client",
-    job_id: "Job",
-    task_id: "Task",
-    total_hours: "Total Hours",
-    total_records: "Total Records",
-    task_type: "Task Type"
+    account_manager_id: "Account Manager",
+    allocated_to_id: "Allocated To",
+    reviewer_id: "Reviewer",
+    allocated_to_other_id: "Allocated To (Other)",
+    service_id: "Service",
+    job_type_id: "Job Type",
+    status_type_id: "Status",
+    line_manager_id: "Line Manager",
+    Daily: "Date (hrs)",
+
   };
 
   // ✅ check if columnKey is a date string (yyyy-mm-dd format)

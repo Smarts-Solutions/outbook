@@ -109,7 +109,16 @@ else{
 }
 
 const getTimesheetReportData = async (Report) => {
-  return reportModel.getTimesheetReportData(Report);
+  const { data } = Report;
+  if(data.action == "get"){
+    return reportModel.getTimesheetReportData(Report);
+  }
+  else if(data.action == "getJobCustomReport"){
+    return reportModel.getJobCustomReport(Report);
+  }
+  else{
+    return;
+  }
 }
 
 
@@ -125,5 +134,6 @@ module.exports = {
   taxWeeklyStatusReportFilterKey,
   averageTatReport,
   getAllTaskByStaff,
-  getTimesheetReportData
+  getTimesheetReportData,
+  
 };
