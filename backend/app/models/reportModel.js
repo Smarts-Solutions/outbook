@@ -3579,7 +3579,7 @@ const getJobCustomReport = async (Report) => {
                     service_name: r.service_name,
                     job_type_name: r.job_type_name,
                     status_type_name: r.status_type_name,
-                    date: workDateStr,
+                    //date: workDateStr,
                     jobIds: new Set(),
                     periodSeconds: {}
                 };
@@ -3621,7 +3621,7 @@ const getJobCustomReport = async (Report) => {
             // total_count = total number of jobs in all periods
             row['total_count'] = totalCount;
 
-            row.date = g.date;
+            //row.date = g.date;
             outRows.push(row);
         }
 
@@ -3630,7 +3630,7 @@ const getJobCustomReport = async (Report) => {
         const columnsWeeks = [
             ...groupBy,
             ...weeks,
-            'date',
+            //'date',
             'total_count'
         ];
         const finalRows = normalizeRows(columnsWeeks, outRows);
