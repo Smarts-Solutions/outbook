@@ -3534,8 +3534,7 @@ const getJobCustomReport = async (Report) => {
                 r.allocated_to_other_name || 'NULL',
                 r.service_name || 'NULL',
                 r.job_type_name || 'NULL',
-                r.status_type_name || 'NULL',
-                r.job_name || 'NULL'
+                r.status_type_name || 'NULL'
             ];
 
             const gid = groupKeyParts.join('|'); // unique key for this combination
@@ -3556,7 +3555,6 @@ const getJobCustomReport = async (Report) => {
                     service_name: r.service_name,
                     job_type_name: r.job_type_name,
                     status_type_name: r.status_type_name,
-                    job_id: r.job_name,
                     date: workDateStr,
                     jobIds: new Set(),
                     periodSeconds: {}
@@ -3590,7 +3588,6 @@ const getJobCustomReport = async (Report) => {
             row['service_id'] = g.service_name;
             row['job_type_id'] = g.job_type_name;
             row['status_type_id'] = g.status_type_name;
-            row['job_id'] = g.job_name;
 
             // fill counts for each period
             let totalCount = 0;
@@ -3619,7 +3616,6 @@ const getJobCustomReport = async (Report) => {
             'service_id',
             'job_type_id',
             'status_type_id',
-            'job_id',
             ...weeks,
             'date',
             'total_count'
