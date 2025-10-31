@@ -1538,7 +1538,8 @@ function getColumnName(columnKey) {
     job_type_id: "Job Type",
     status_type_id: "Status",
     line_manager_id: "Line Manager",
-    Daily: "Date (hrs)",
+    date: "Created Date",
+    total_count: "Total Count",
 
   };
 

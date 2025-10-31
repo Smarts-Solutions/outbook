@@ -3548,9 +3548,7 @@ const getJobCustomReport = async (Report) => {
                 return r[nameKey] || 'NULL';        
             });
 
-            console.log("gggggggggg",groupKeyParts);
-
-
+    
             // const groupKeyParts = [
             //     r.group_value || 'NULL',
             //     r.job_name || 'NULL',
@@ -3605,11 +3603,6 @@ const getJobCustomReport = async (Report) => {
         for (const gid of Object.keys(groups)) {
             const g = groups[gid];
             const row = {};
-            console.log("gid", gid);
-            console.log("groups", groups);
-            console.log("g", g);
-            console.log("------------------------------------------");
-
             // fill group fields
             row['job_id'] = g.job_name;
             row['customer_id'] = g.customer_name;
