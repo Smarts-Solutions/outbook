@@ -3286,7 +3286,7 @@ const getJobCustomReport = async (Report) => {
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-        console.log("where", where);
+        //console.log("where", where);
 
         // ===== Build dynamic group & label SQL =====
         const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
@@ -3388,15 +3388,15 @@ const getJobCustomReport = async (Report) => {
             ORDER BY raw.job_id
         `;
 
-        console.log("fromDate ,", fromDate, "toDate ", toDate);
-        console.log("unpivotSQL", unpivotSQL);
+        // console.log("fromDate ,", fromDate, "toDate ", toDate);
+        //  console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
         conn.release();
 
-        console.log("rows.length", rows.length);
-        console.log("rows", rows);
+        //   console.log("rows.length", rows.length);
+        //    console.log("rows", rows);
 
 
 
@@ -3515,6 +3515,115 @@ const getJobCustomReport = async (Report) => {
 
 
         // Aggregate JS
+
+        // console.log("----groupBy ",groupBy);
+        // const groups = {};
+        // const periodSet = new Set();
+
+        // for (const r of rows) {
+        //     let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
+        //     if (!workDateStr) continue;
+
+        //     // Generate dynamic group key based on multiple groupBy fields
+        //     // Example: customer_name|client_name|account_manager_name|...
+        //     const groupKeyParts = [
+        //         //r.group_value || 'NULL',
+        //         r.job_name || 'NULL',
+        //         r.customer_name || 'NULL',
+        //         r.client_name || 'NULL',
+        //         r.account_manager_name || 'NULL',
+        //         r.allocated_to_name || 'NULL',
+        //         r.reviewer_name || 'NULL',
+        //         r.allocated_to_other_name || 'NULL',
+        //         r.service_name || 'NULL',
+        //         r.job_type_name || 'NULL',
+        //         r.status_type_name || 'NULL'
+        //     ];
+
+        //     const gid = groupKeyParts.join('|'); // unique key for this combination
+
+        //     const periodKey = getPeriodKey(displayBy, workDateStr);
+        //     if (!periodKey) continue;
+        //     periodSet.add(periodKey);
+
+        //     if (!groups[gid]) {
+        //         groups[gid] = {
+        //           //  group_value: gid,
+        //             job_name: r.job_name,   
+        //             customer_name: r.customer_name,
+        //             client_name: r.client_name,
+        //             account_manager_name: r.account_manager_name,
+        //             allocated_to_name: r.allocated_to_name,
+        //             reviewer_name: r.reviewer_name,
+        //             allocated_to_other_name: r.allocated_to_other_name,
+        //             service_name: r.service_name,
+        //             job_type_name: r.job_type_name,
+        //             status_type_name: r.status_type_name,
+        //             date: workDateStr,
+        //             jobIds: new Set(),
+        //             periodSeconds: {}
+        //         };
+        //     }
+
+        //     const g = groups[gid];
+
+        //     // Add job to set to prevent duplicate IDs
+        //     g.jobIds.add(r.job_id);
+
+        //     // Increment count for that period
+        //     g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + 1;
+        // }
+
+        // const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+        // const outRows = [];
+
+        // for (const gid of Object.keys(groups)) {
+        //     const g = groups[gid];
+        //     const row = {};
+        //     console.log("gid", gid);    
+        //     console.log("groups", groups);    
+        //     console.log("g", g);
+        //     console.log("------------------------------------------");
+
+        //     // fill group fields
+        //     row['job_id'] = g.job_name;
+        //     row['customer_id'] = g.customer_name;
+        //     row['client_id'] = g.client_name;
+        //     row['account_manager_id'] = g.account_manager_name;
+        //     row['allocated_to_id'] = g.allocated_to_name;
+        //     row['reviewer_id'] = g.reviewer_name;
+        //     row['allocated_to_other_id'] = g.allocated_to_other_name;
+        //     row['service_id'] = g.service_name;
+        //     row['job_type_id'] = g.job_type_name;
+        //     row['status_type_id'] = g.status_type_name;
+
+        //     // fill counts for each period
+        //     let totalCount = 0;
+        //     for (const p of periods) {
+        //         const count = g.periodSeconds[p] || 0;
+        //         row[p] = count;
+        //         totalCount += count;
+        //     }
+
+        //     // total_count = total number of jobs in all periods
+        //     row['total_count'] = totalCount;
+
+        //     row.date = g.date;
+        //     outRows.push(row);
+        // }
+
+
+        // const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+        // const columnsWeeks = [
+        //     ...groupBy,
+        //     ...weeks,
+        //     'date',
+        //     'total_count'
+        // ];
+
+
+        // const finalRows = normalizeRows(columnsWeeks, outRows);
+
         const groups = {};
         const periodSet = new Set();
 
@@ -3522,39 +3631,19 @@ const getJobCustomReport = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
-            // Generate dynamic group key based on multiple groupBy fields
-            // Example: customer_name|client_name|account_manager_name|...
-            const groupKeyParts = [
-              
-                r.customer_name || 'NULL',
-                r.client_name || 'NULL',
-                r.account_manager_name || 'NULL',
-                r.allocated_to_name || 'NULL',
-                r.reviewer_name || 'NULL',
-                r.allocated_to_other_name || 'NULL',
-                r.service_name || 'NULL',
-                r.job_type_name || 'NULL',
-                r.status_type_name || 'NULL'
-            ];
-
-            const gid = groupKeyParts.join('|'); // unique key for this combination
+            // ✅ Dynamically generate group key based on groupBy array
+            const groupKeyParts = groupBy.map(key => r[key] || 'NULL');
+            const gid = groupKeyParts.join('|');
 
             const periodKey = getPeriodKey(displayBy, workDateStr);
             if (!periodKey) continue;
+
             periodSet.add(periodKey);
 
             if (!groups[gid]) {
                 groups[gid] = {
-                   
-                    customer_name: r.customer_name,
-                    client_name: r.client_name,
-                    account_manager_name: r.account_manager_name,
-                    allocated_to_name: r.allocated_to_name,
-                    reviewer_name: r.reviewer_name,
-                    allocated_to_other_name: r.allocated_to_other_name,
-                    service_name: r.service_name,
-                    job_type_name: r.job_type_name,
-                    status_type_name: r.status_type_name,
+                    // store all groupBy field values dynamically
+                    ...Object.fromEntries(groupBy.map(key => [key, r[key]])),
                     date: workDateStr,
                     jobIds: new Set(),
                     periodSeconds: {}
@@ -3562,8 +3651,6 @@ const getJobCustomReport = async (Report) => {
             }
 
             const g = groups[gid];
-
-            // Add job to set to prevent duplicate IDs
             g.jobIds.add(r.job_id);
 
             // Increment count for that period
@@ -3577,17 +3664,10 @@ const getJobCustomReport = async (Report) => {
             const g = groups[gid];
             const row = {};
 
-            // fill group fields
-            
-            row['customer_id'] = g.customer_name;
-            row['client_id'] = g.client_name;
-            row['account_manager_id'] = g.account_manager_name;
-            row['allocated_to_id'] = g.allocated_to_name;
-            row['reviewer_id'] = g.reviewer_name;
-            row['allocated_to_other_id'] = g.allocated_to_other_name;
-            row['service_id'] = g.service_name;
-            row['job_type_id'] = g.job_type_name;
-            row['status_type_id'] = g.status_type_name;
+            // ✅ dynamically assign all groupBy fields
+            for (const key of groupBy) {
+                row[key] = g[key];
+            }
 
             // fill counts for each period
             let totalCount = 0;
@@ -3597,31 +3677,21 @@ const getJobCustomReport = async (Report) => {
                 totalCount += count;
             }
 
-            // total_count = total number of jobs in all periods
             row['total_count'] = totalCount;
-
             row.date = g.date;
             outRows.push(row);
         }
 
-        // Prepare columns dynamically
+        // ✅ Prepare columns dynamically
         const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
         const columnsWeeks = [
-            'customer_id',
-            'client_id',
-            'account_manager_id',
-            'allocated_to_id',
-            'reviewer_id',
-            'allocated_to_other_id',
-            'service_id',
-            'job_type_id',
-            'status_type_id',
+            ...groupBy,
             ...weeks,
             'date',
             'total_count'
         ];
 
-        // Normalize output (assuming normalizeRows matches your table format)
+        // ✅ Normalize output (if your normalizeRows uses same column order)
         const finalRows = normalizeRows(columnsWeeks, outRows);
 
 
