@@ -3396,10 +3396,7 @@ const getJobCustomReport = async (Report) => {
         conn.release();
 
         //   console.log("rows.length", rows.length);
-        //    console.log("rows", rows);
-
-
-
+        //   console.log("rows", rows);
 
 
         // Aggregate JS
@@ -3516,7 +3513,7 @@ const getJobCustomReport = async (Report) => {
 
         // Aggregate JS
 
-        console.log("----groupBy ", groupBy);
+        // console.log("----groupBy ", groupBy);
         const groups = {};
         const periodSet = new Set();
 
@@ -3589,10 +3586,8 @@ const getJobCustomReport = async (Report) => {
             }
 
             const g = groups[gid];
-
             // Add job to set to prevent duplicate IDs
             g.jobIds.add(r.job_id);
-
             // Increment count for that period
             g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + 1;
         }
@@ -3638,11 +3633,7 @@ const getJobCustomReport = async (Report) => {
             'date',
             'total_count'
         ];
-
-
         const finalRows = normalizeRows(columnsWeeks, outRows);
-
-
 
 
         const fixed = [...groupBy];
