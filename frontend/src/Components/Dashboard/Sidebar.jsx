@@ -357,7 +357,7 @@ const Sidebar = () => {
                         <i className="fas fa-file-alt"></i>{" "}
                       
                       </span>
-                      <span>Standard Reports</span>
+                      <span>Standard</span>
                     </Link>
                   </li>
 
@@ -377,7 +377,7 @@ const Sidebar = () => {
                       <span className="sidebar-icons">
                         <i className="fas fa-clock"></i>{" "}
                       </span>
-                      <span>Custom TimeSheet Report</span>
+                      <span>Custom TimeSheet</span>
                     </Link>
                   </li>
 
@@ -396,7 +396,7 @@ const Sidebar = () => {
                         <i className="fas fa-clock"></i>{" "}
 
                       </span>
-                      <span>Custom Job Report</span>
+                      <span>Custom Job</span>
                     </Link>
                   </li>
 
