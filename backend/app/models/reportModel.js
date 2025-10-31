@@ -3516,7 +3516,7 @@ const getJobCustomReport = async (Report) => {
 
         // Aggregate JS
 
-        console.log("----groupBy ",groupBy);
+        console.log("----groupBy ", groupBy);
         const groups = {};
         const periodSet = new Set();
 
@@ -3526,19 +3526,44 @@ const getJobCustomReport = async (Report) => {
 
             // Generate dynamic group key based on multiple groupBy fields
             // Example: customer_name|client_name|account_manager_name|...
-            const groupKeyParts = [
-                //r.group_value || 'NULL',
-                r.job_name || 'NULL',
-                r.customer_name || 'NULL',
-                r.client_name || 'NULL',
-                r.account_manager_name || 'NULL',
-                r.allocated_to_name || 'NULL',
-                r.reviewer_name || 'NULL',
-                r.allocated_to_other_name || 'NULL',
-                r.service_name || 'NULL',
-                r.job_type_name || 'NULL',
-                r.status_type_name || 'NULL'
-            ];
+
+
+            // Map of id → name field relation
+            const idToNameMap = {
+                job_id: "job_name",
+                customer_id: "customer_name",
+                client_id: "client_name",
+                account_manager_id: "account_manager_name",
+                allocated_to_id: "allocated_to_name",
+                reviewer_id: "reviewer_name",
+                allocated_to_other_id: "allocated_to_other_name",
+                service_id: "service_name",
+                job_type_id: "job_type_name",
+                status_type_id: "status_type_name",
+            };
+
+            // Now dynamically build groupKeyParts
+            const groupKeyParts = groupBy.map(idKey => {
+                const nameKey = idToNameMap[idKey];
+                return r[nameKey] || 'NULL';        
+            });
+
+            console.log("gggggggggg",groupKeyParts);
+
+
+            // const groupKeyParts = [
+            //     r.group_value || 'NULL',
+            //     r.job_name || 'NULL',
+            //     r.customer_name || 'NULL',
+            //     r.client_name || 'NULL',
+            //     r.account_manager_name || 'NULL',
+            //     r.allocated_to_name || 'NULL',
+            //     r.reviewer_name || 'NULL',
+            //     r.allocated_to_other_name || 'NULL',
+            //     r.service_name || 'NULL',
+            //     r.job_type_name || 'NULL',
+            //     r.status_type_name || 'NULL'
+            // ];
 
             const gid = groupKeyParts.join('|'); // unique key for this combination
 
@@ -3548,8 +3573,8 @@ const getJobCustomReport = async (Report) => {
 
             if (!groups[gid]) {
                 groups[gid] = {
-                  //  group_value: gid,
-                    job_name: r.job_name,   
+                    //  group_value: gid,
+                    job_name: r.job_name,
                     customer_name: r.customer_name,
                     client_name: r.client_name,
                     account_manager_name: r.account_manager_name,
@@ -3580,8 +3605,8 @@ const getJobCustomReport = async (Report) => {
         for (const gid of Object.keys(groups)) {
             const g = groups[gid];
             const row = {};
-            console.log("gid", gid);    
-            console.log("groups", groups);    
+            console.log("gid", gid);
+            console.log("groups", groups);
             console.log("g", g);
             console.log("------------------------------------------");
 
@@ -3624,7 +3649,7 @@ const getJobCustomReport = async (Report) => {
 
         const finalRows = normalizeRows(columnsWeeks, outRows);
 
-     
+
 
 
         const fixed = [...groupBy];
