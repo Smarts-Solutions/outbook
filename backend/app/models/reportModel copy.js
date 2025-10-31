@@ -2974,7 +2974,7 @@ const getAllFilters = async (Report) => {
         ORDER BY timesheet_filter.id DESC
         `;
 
-        console.log("Get All Filters Query:", query);   
+        console.log("Get All Filters Query:", query);
 
 
 
@@ -3286,7 +3286,7 @@ const getJobCustomReport = async (Report) => {
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-        console.log("where", where);
+        //console.log("where", where);
 
         // ===== Build dynamic group & label SQL =====
         const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
@@ -3388,88 +3388,217 @@ const getJobCustomReport = async (Report) => {
             ORDER BY raw.job_id
         `;
 
-        console.log("fromDate ,", fromDate, "toDate ", toDate);
-        console.log("unpivotSQL", unpivotSQL);
+        // console.log("fromDate ,", fromDate, "toDate ", toDate);
+        //  console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
         conn.release();
 
-        console.log("rows.length", rows.length);
-        console.log("rows", rows);
-
-
-
+        //   console.log("rows.length", rows.length);
+        //   console.log("rows", rows);
 
 
         // Aggregate JS
+        // const groups = {};
+        // const periodSet = new Set();
+
+        // for (const r of rows) {
+        //     let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
+        //     if (!workDateStr) continue;
+
+
+        //     const gid = r.group_value || 'NULL';
+        //     const jobName = r.job_name;
+        //     const customerName = r.customer_name;
+        //     const clientName = r.client_name;
+        //     const accountManagerName = r.account_manager_name;
+        //     const allocatedToName = r.allocated_to_name;
+        //     const reviewerName = r.reviewer_name;
+        //     const allocatedToOtherName = r.allocated_to_other_name;
+        //     const serviceName = r.service_name;
+        //     const jobTypeName = r.job_type_name;
+        //     const statusTypeName = r.status_type_name;
+        //     const date = workDateStr;
+
+        //     const secs = r.work_hours;
+
+        //     const periodKey = getPeriodKey(displayBy, workDateStr);
+        //     if (!periodKey) continue;
+        //     periodSet.add(periodKey);
+
+
+
+        //     if (!groups[gid]) {
+        //         groups[gid] = {
+        //             group_value: gid,
+        //             job_name: jobName,
+        //             customer_name: customerName,
+        //             client_name: clientName,
+        //             account_manager_name: accountManagerName,
+        //             allocated_to_name: allocatedToName,
+        //             reviewer_name: reviewerName,
+        //             allocated_to_other_name: allocatedToOtherName,
+        //             service_name: serviceName,
+        //             job_type_name: jobTypeName,
+        //             status_type_name: statusTypeName,
+        //             date: date,
+        //             totalSeconds: 0,
+        //             jobIds: new Set(),
+        //             periodSeconds: {}
+        //         };
+        //     }
+
+        //     const g = groups[gid];
+        //     g.totalSeconds += parseFloat(secs?.replace(':', '.'));
+        //     g.jobIds.add(r.job_id);
+
+        //     g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + 1; // 1 job 
+
+        // }
+
+        // const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+        // const outRows = [];
+        // const groupKeys = Object.keys(groups).sort((a, b) => {
+        //     const na = Number(a), nb = Number(b);
+        //     if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+        //     return a.localeCompare(b);
+        // });
+
+
+
+        // for (const gid of groupKeys) {
+        //     const g = groups[gid];
+        //     const row = {};
+        // // console.log("g", g);
+
+        // row['job_id'] = g.job_name;
+        // row['customer_id'] = g.customer_name;
+        // row['client_id'] = g.client_name;
+        // row['account_manager_id'] = g.account_manager_name;
+        // row['allocated_to_id'] = g.allocated_to_name;
+        // row['reviewer_id'] = g.reviewer_name;
+        // row['allocated_to_other_id'] = g.allocated_to_other_name;
+        // row['service_id'] = g.service_name;
+        // row['job_type_id'] = g.job_type_name;
+        // row['status_type_id'] = g.status_type_name;
+
+
+        // //     for (const p of periods) {
+        // //         row[p] = g.periodSeconds[p] || 0;
+        // //     }
+        // //    row['total_count'] = g.jobIds.size;
+
+        // let totalCount = 0;
+
+        //     // fill period columns and sum for total_count
+        //     for (const p of periods) {
+        //         const count = g.periodSeconds[p] || 0;
+        //         row[p] = count;
+        //         totalCount += count;
+        //     }
+
+        //     // ✅ total_count now includes sum of all weekly job counts
+        //     row['total_count'] = totalCount;
+
+
+        //     row.date = g.date;
+        //     outRows.push(row);
+        // }
+
+        // const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+        // const columnsWeeks = [...groupBy, ...weeks, 'date', 'total_count'];
+        // const finalRows = normalizeRows(columnsWeeks, outRows);
+
+
+        // Aggregate JS
+
+        // console.log("----groupBy ", groupBy);
         const groups = {};
         const periodSet = new Set();
 
         for (const r of rows) {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
-           
-            //  const gid = r.group_value || 'NULL';
-            const gid = r.group_value || 'NULL';
-            const jobName = r.job_name;
-            const customerName = r.customer_name;
-            const clientName = r.client_name;
-            const accountManagerName = r.account_manager_name;
-            const allocatedToName = r.allocated_to_name;
-            const reviewerName = r.reviewer_name;
-            const allocatedToOtherName = r.allocated_to_other_name;
-            const serviceName = r.service_name;
-            const jobTypeName = r.job_type_name;
-            const statusTypeName = r.status_type_name;
-            const date = workDateStr;
 
-            const secs = r.work_hours;
-            // console.log("displayBy", displayBy, "workDateStr", workDateStr);
+            // Generate dynamic group key based on multiple groupBy fields
+            // Example: customer_name|client_name|account_manager_name|...
+
+
+            // Map of id → name field relation
+            const idToNameMap = {
+                job_id: "job_name",
+                customer_id: "customer_name",
+                client_id: "client_name",
+                account_manager_id: "account_manager_name",
+                allocated_to_id: "allocated_to_name",
+                reviewer_id: "reviewer_name",
+                allocated_to_other_id: "allocated_to_other_name",
+                service_id: "service_name",
+                job_type_id: "job_type_name",
+                status_type_id: "status_type_name",
+            };
+
+            // Now dynamically build groupKeyParts
+            const groupKeyParts = groupBy.map(idKey => {
+                const nameKey = idToNameMap[idKey];
+                return r[nameKey] || 'NULL';        
+            });
+
+    
+            // const groupKeyParts = [
+            //     r.group_value || 'NULL',
+            //     r.job_name || 'NULL',
+            //     r.customer_name || 'NULL',
+            //     r.client_name || 'NULL',
+            //     r.account_manager_name || 'NULL',
+            //     r.allocated_to_name || 'NULL',
+            //     r.reviewer_name || 'NULL',
+            //     r.allocated_to_other_name || 'NULL',
+            //     r.service_name || 'NULL',
+            //     r.job_type_name || 'NULL',
+            //     r.status_type_name || 'NULL'
+            // ];
+
+            const gid = groupKeyParts.join('|'); // unique key for this combination
+
             const periodKey = getPeriodKey(displayBy, workDateStr);
             if (!periodKey) continue;
-
             periodSet.add(periodKey);
 
             if (!groups[gid]) {
                 groups[gid] = {
-                    group_value: gid,
-                    job_name: jobName,
-                    customer_name: customerName,
-                    client_name: clientName,
-                    account_manager_name: accountManagerName,
-                    allocated_to_name: allocatedToName,
-                    reviewer_name: reviewerName,
-                    allocated_to_other_name: allocatedToOtherName,
-                    service_name: serviceName,
-                    job_type_name: jobTypeName,
-                    status_type_name: statusTypeName,
-                    date: date,
-                    totalSeconds: 0,
+                    //  group_value: gid,
+                    job_name: r.job_name,
+                    customer_name: r.customer_name,
+                    client_name: r.client_name,
+                    account_manager_name: r.account_manager_name,
+                    allocated_to_name: r.allocated_to_name,
+                    reviewer_name: r.reviewer_name,
+                    allocated_to_other_name: r.allocated_to_other_name,
+                    service_name: r.service_name,
+                    job_type_name: r.job_type_name,
+                    status_type_name: r.status_type_name,
+                    //date: workDateStr,
                     jobIds: new Set(),
                     periodSeconds: {}
                 };
             }
 
             const g = groups[gid];
-            g.totalSeconds += parseFloat(secs?.replace(':', '.'));
+            // Add job to set to prevent duplicate IDs
             g.jobIds.add(r.job_id);
-            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(':', '.'));
+            // Increment count for that period
+            g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + 1;
         }
 
         const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
         const outRows = [];
-        const groupKeys = Object.keys(groups).sort((a, b) => {
-            const na = Number(a), nb = Number(b);
-            if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
-            return a.localeCompare(b);
-        });
 
-        for (const gid of groupKeys) {
+        for (const gid of Object.keys(groups)) {
             const g = groups[gid];
             const row = {};
-            // console.log("g", g);
-
+            // fill group fields
             row['job_id'] = g.job_name;
             row['customer_id'] = g.customer_name;
             row['client_id'] = g.client_name;
@@ -3481,30 +3610,31 @@ const getJobCustomReport = async (Report) => {
             row['job_type_id'] = g.job_type_name;
             row['status_type_id'] = g.status_type_name;
 
-
+            // fill counts for each period
+            let totalCount = 0;
             for (const p of periods) {
-                row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
+                const count = g.periodSeconds[p] || 0;
+                row[p] = count;
+                totalCount += count;
             }
 
-            row['total_count'] = g.jobIds.size;
+            // total_count = total number of jobs in all periods
+            row['total_count'] = totalCount;
 
-            row.date = g.date;
+            //row.date = g.date;
             outRows.push(row);
         }
 
 
-        // const columns = ['group', ...periods, 'total_hours', 'total_records'];
-
-       
-        
         const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
-        const columnsWeeks = [...groupBy, ...weeks,'date','total_count'];
-        
-        // const columnsWeeks = [...groupBy,'date'];
-        // console.log("columnsWeeks", columnsWeeks);
-        // console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
-        // console.log("displayBy, ", displayBy);
+        const columnsWeeks = [
+            ...groupBy,
+            ...weeks,
+            //'date',
+            'total_count'
+        ];
         const finalRows = normalizeRows(columnsWeeks, outRows);
+
 
         const fixed = [...groupBy];
         const dynamic = columnsWeeks.filter(col => !fixed.includes(col));

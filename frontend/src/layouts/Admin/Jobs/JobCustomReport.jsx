@@ -65,6 +65,7 @@ function JobCustomReport() {
         "job_type_id",
         "status_type_id"
       ],
+      additionalField: [],
     job_id: null,
     customer_id: null,
     client_id: null,
@@ -496,7 +497,17 @@ function JobCustomReport() {
     link.click();
   };
 
-  const handleFilterChange = (e) => {
+  const handleFilterChange = (e , type) => {
+
+    if(type == 'additionalField'){
+      const values = e.map((opt) => opt.value);
+      let additionalFieldArray = sortByReference(values)
+      setFilters((prev) => ({
+        ...prev,
+        additionalField: sortByReference(additionalFieldArray)
+      }));
+      return;
+    }
 
     if (Array.isArray(e)) {
       // this case is for multi-select (Group By)
@@ -507,10 +518,7 @@ function JobCustomReport() {
         ...prev,
         groupBy: sortByReference(gropByArray)
       }));
-
-
       return;
-
     }
 
 
@@ -700,7 +708,7 @@ function JobCustomReport() {
     if (role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id, filters.groupBy]);
+  }, [filters.groupBy , filters.additionalField ,filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id]);
 
 
   //console.log("filters ", filters);
@@ -708,6 +716,7 @@ function JobCustomReport() {
   const resetFunction = () => {
     setFilters({
       groupBy: [],
+      additionalField: [],
       job_id: null,
       customer_id: null,
       client_id: null,
@@ -750,6 +759,11 @@ function JobCustomReport() {
     { value: "job_type_id", label: "Job Type" },
     { value: "status_type_id", label: "Status" },
     // { value: "line_manager_id", label: "Line Manager" },
+  ];
+
+
+   const optionAdditionalBy = [
+    { value: "date_received_on", label: "Received On" }
   ];
 
 
@@ -876,6 +890,7 @@ function JobCustomReport() {
             "job_type_id",
             "status_type_id"
           ],
+          additionalField: [],
         job_id: null,
         customer_id: null,
         client_id: null,
@@ -1035,7 +1050,7 @@ return (
     {/* Filters Section */}
     <div className="row g-3 mb-3 bg-light p-3  mt-4 rounded shadow-sm align-items-end">
       {/* Group By */}
-      <div className="col-lg-4 col-md-6">
+       <div className="col-lg-4 col-md-6">
         <label className="form-label fw-medium">Group By</label>
 
         <Select
@@ -1055,6 +1070,24 @@ return (
               addAndRemoveGroupBy(actionMeta.option.value, 'add');
             }
             handleFilterChange(selectedOptions);
+          }}
+          className="basic-multi-select"
+          classNamePrefix="select"
+        />
+      </div>
+
+       {/* Additional Field */}
+       <div className="col-lg-4 col-md-6">
+        <label className="form-label fw-medium">Additional Fields</label>
+
+        <Select
+          isMulti
+          options={optionAdditionalBy}
+          value={optionAdditionalBy?.filter((opt) => filters?.additionalField.includes(opt.value))}
+          onChange={(selectedOptions, actionMeta) => {
+            // console.log("Selected Options:", selectedOptions);
+            //console.log("Action Meta:", actionMeta);
+            handleFilterChange(selectedOptions , 'additionalField');
           }}
           className="basic-multi-select"
           classNamePrefix="select"
@@ -1540,7 +1573,7 @@ function getColumnName(columnKey) {
     line_manager_id: "Line Manager",
     date: "Created Date",
     total_count: "Total Count",
-
+    date_received_on: "Received On",
   };
 
   // ✅ check if columnKey is a date string (yyyy-mm-dd format)
