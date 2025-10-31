@@ -3534,7 +3534,7 @@ const getJobCustomReport = async (Report) => {
                 r.allocated_to_other_name || 'NULL',
                 r.service_name || 'NULL',
                 r.job_type_name || 'NULL',
-                r.status_type_name || 'NULL'
+                r.status_type_name || 'NULL',
                 r.job_name || 'NULL'
             ];
 
