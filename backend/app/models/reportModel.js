@@ -3294,7 +3294,7 @@ const getJobCustomReport = async (Report) => {
         const unpivotSQL = `
             SELECT
                 raw.job_id,
-                DATE_FORMAT(raw.date_received_on, '%d-%m-%Y') AS date_received_on,
+                DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 
 
                 CONCAT_WS('::', raw.job_id) AS group_value,
