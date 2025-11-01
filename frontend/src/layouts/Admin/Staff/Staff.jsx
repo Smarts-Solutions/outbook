@@ -318,7 +318,7 @@ const StaffPage = () => {
       ),
       selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
-      width: "300px",
+      width: "200px",
       reorder: false,
     },
     {
@@ -353,6 +353,13 @@ const StaffPage = () => {
     {
       name: "Role",
       selector: (row) => row.role_name,
+      sortable: true,
+      width: "150px",
+      reorder: false,
+    },
+    {
+      name: "Line Manager",
+      selector: (row) => row.line_manager_name || "-",
       sortable: true,
       width: "200px",
       reorder: false,

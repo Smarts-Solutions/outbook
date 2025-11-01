@@ -100,7 +100,9 @@ const getStaff = async () => {
      
      roles.role_name ,
      roles.role ,
-     line_managers.staff_to,
+
+     lm.staff_to,
+     CONCAT(manager.first_name, ' ', manager.last_name) AS line_manager_name,
      
      CASE 
         WHEN EXISTS (
@@ -121,7 +123,8 @@ const getStaff = async () => {
 
      FROM staffs 
      JOIN roles ON staffs.role_id = roles.id 
-     LEFT JOIN line_managers ON line_managers.staff_by = staffs.id 
+     LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
+     LEFT JOIN staffs manager ON manager.id = lm.staff_to
      ORDER BY staffs.first_name ASC
      `
   );
@@ -177,7 +180,7 @@ const updateStaff = async (staff) => {
       ]);
     }
   }
-  else{
+  else {
     await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
@@ -544,10 +547,10 @@ const getSharePointToken = async (staff) => {
         result.access_token != "" &&
         result.access_token != undefined
       ) {
-        const TokenExpiry = await CheckExpirySharePointToken(result.access_token );
+        const TokenExpiry = await CheckExpirySharePointToken(result.access_token);
 
         if (TokenExpiry) {
-          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token,result.client_id,result.client_secret);
+          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token, result.client_id, result.client_secret);
 
           if (genrateAccessToken == "error") {
             return "sharepoint_token_not_found";
@@ -619,13 +622,13 @@ const UpdateStaffPortfolio = async (staff) => {
 };
 
 const deleteStaffUpdateStaff = async (staff) => {
-  const { delete_id, update_staff ,role} = staff;
+  const { delete_id, update_staff, role } = staff;
 
-    if(role.toUpperCase() === "MANAGER"){
-      await pool.execute(`UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`, [update_staff, delete_id]);
+  if (role.toUpperCase() === "MANAGER") {
+    await pool.execute(`UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`, [update_staff, delete_id]);
 
-      await pool.execute(`UPDATE customer_service_account_managers SET account_manager_id  = ? WHERE account_manager_id  = ?`, [update_staff, delete_id]);
-    }
+    await pool.execute(`UPDATE customer_service_account_managers SET account_manager_id  = ? WHERE account_manager_id  = ?`, [update_staff, delete_id]);
+  }
 
   if (delete_id == update_staff) {
     return {
