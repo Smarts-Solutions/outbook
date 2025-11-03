@@ -1498,7 +1498,7 @@ const CreateClient = () => {
         client_type: "1",
         customer_id: location.state.id,
         client_industry_id: getSoleTraderDetails.IndustryType,
-        trading_name: getSoleTraderDetails.tradingName,
+        trading_name: (getSoleTraderDetails.tradingName).trim(),
         trading_address: getSoleTraderDetails.tradingAddress,
         vat_registered: getSoleTraderDetails.vatRegistered,
         vat_number: getSoleTraderDetails.vatNumber,
@@ -1563,7 +1563,7 @@ const CreateClient = () => {
           website: getCompanyDetails.Website,
           notes: getCompanyDetails.notes,
           client_industry_id: Number(getCompanyDetails.ClientIndustry),
-          trading_name: getCompanyDetails.TradingName,
+          trading_name: (getCompanyDetails.TradingName).trim(),
           trading_address: getCompanyDetails.TradingAddress,
           contactDetails: contacts,
         };
@@ -1622,7 +1622,7 @@ const CreateClient = () => {
           client_type: "3",
           customer_id: location.state.id,
           client_industry_id: getPartnershipDetails.ClientIndustry,
-          trading_name: getPartnershipDetails.TradingName,
+          trading_name: (getPartnershipDetails.TradingName).trim(),
           trading_address: getPartnershipDetails.TradingAddress,
           vat_registered: getPartnershipDetails.VATRegistered,
           vat_number: getPartnershipDetails.VATNumber,
@@ -1642,7 +1642,7 @@ const CreateClient = () => {
       const req = {
         client_type: "4",
         customer_id: location.state.id,
-        trading_name: getIndivisualDetails.tradingName,
+        trading_name: (getIndivisualDetails.tradingName).trim(),
         first_name: getIndivisualDetails?.first_name,
         last_name: getIndivisualDetails?.last_name,
         phone: getIndivisualDetails.phone,
@@ -1718,7 +1718,7 @@ const CreateClient = () => {
         const req = {
           client_type: "5",
           customer_id: location.state.id,
-          trading_name: getCharityIncorporatedOrganisation.charity_name,
+          trading_name: (getCharityIncorporatedOrganisation.charity_name).trim(),
           charity_commission_number: getCharityIncorporatedOrganisation.charity_commission_number,
           trading_address: getCharityIncorporatedOrganisation.principal_office_address,
           service_address: getCharityIncorporatedOrganisation.service_address,
@@ -1760,7 +1760,7 @@ const CreateClient = () => {
         const req = {
           client_type: "6",
           customer_id: location.state.id,
-          trading_name: getAssociationDetails.AssociationName,
+          trading_name: (getAssociationDetails.AssociationName).trim(),
           trading_address: getAssociationDetails.AssociationAddress,
           vat_registered: getAssociationDetails.VATRegistered,
           vat_number: getAssociationDetails.VATNumber,
@@ -1814,7 +1814,7 @@ const CreateClient = () => {
         const req = {
           client_type: "7",
           customer_id: location.state.id,
-          trading_name: getTrust.TrustName,
+          trading_name: (getTrust.TrustName).trim(),
           trading_address: getTrust.TrustAddress,
           vat_registered: getTrust.VATRegistered,
           vat_number: getTrust.VATNumber,
