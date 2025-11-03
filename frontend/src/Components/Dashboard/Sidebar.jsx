@@ -274,7 +274,7 @@ const Sidebar = () => {
 
 
 
-            {/* {((updatedShowTab && updatedShowTab.report) ||
+            {((updatedShowTab && updatedShowTab.report) ||
               role === "SUPERADMIN") && (
                 <li
                   className={
@@ -315,10 +315,10 @@ const Sidebar = () => {
                   </Link>
                 </li>
                 : ""
-            } */}
+            }
 
 
-
+{/* 
             {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
               <li className={activeLink.startsWith("/admin/reports") ? "active" : ""}>
                 <Link
@@ -402,7 +402,7 @@ const Sidebar = () => {
 
                 </ul>
               </li>
-            )}
+            )} */}
 
 
 
