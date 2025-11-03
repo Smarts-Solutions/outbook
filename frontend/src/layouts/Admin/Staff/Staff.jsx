@@ -486,11 +486,6 @@ const StaffPage = () => {
   ];
 
 
-
-
-
-
-
   const GetAllStaffPortfolio = async (row) => {
     try {
       const response = await staffPortfolio({
@@ -550,7 +545,7 @@ const StaffPage = () => {
 
     onSubmit: async (values) => {
       let req = {
-        first_name: values.first_name,
+        first_name: (values.first_name).trim(),
         last_name: values.last_name,
         email: values.email,
         phone: values.phone,
@@ -700,7 +695,6 @@ const StaffPage = () => {
         })),
     },
   ];
-
 
 
   const handleCheckboxChange = (event, id) => {
