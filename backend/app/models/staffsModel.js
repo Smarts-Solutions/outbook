@@ -181,7 +181,7 @@ const updateStaff = async (staff) => {
     }
   }
   else {
-    await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
+  //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
 
