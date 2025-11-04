@@ -229,7 +229,7 @@ const CreateJob = () => {
     getAllChecklist();
   }, [jobData.JobType, AllJobData?.data]);
 
-  // console.log("AllChecklistData", AllChecklistData);
+  //console.log("AllChecklistData", AllChecklistData);
 
   const GetJobType = async () => {
     const req = { action: "get", service_id: jobData.Service };
@@ -505,7 +505,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
 
-  
+
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
@@ -517,7 +517,7 @@ const CreateJob = () => {
       return;
     }
 
-    if(["",null,undefined].includes(jobData.DateReceivedOn)){
+    if (["", null, undefined].includes(jobData.DateReceivedOn)) {
       sweatalert.fire({
         icon: "error",
         title: "Please select Date Received On.",
@@ -1911,13 +1911,28 @@ const CreateJob = () => {
     }))
   ];
 
-  let isAssignDetails = jobData?.CustomerDetails.find(
+
+  // let isAssignDetails = jobData?.CustomerDetails.find(
+  //   (detail) => detail.assigned_source === "assign_customer_service"
+  // );
+
+  // if (isAssignDetails != undefined) {
+  //   serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+  // }
+
+  let assignDetails = jobData?.CustomerDetails?.filter(
     (detail) => detail.assigned_source === "assign_customer_service"
   );
-  if (isAssignDetails != undefined) {
-    //console.log("isAssignDetails", isAssignDetails);
-    serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+
+  let assignedServiceIds = assignDetails.map((d) => Number(d.service_id_assign));
+
+  if (assignedServiceIds.length > 0) {
+    serviceOptions = serviceOptions.filter((option) =>
+      assignedServiceIds.includes(Number(option.value))
+    );
   }
+
+
 
   // 2. Build job type options based on selected service
   const jobTypeOptions = [
@@ -2317,6 +2332,9 @@ const CreateJob = () => {
                                         )
                                       )}
                                     </select> */}
+
+
+
                                     <Select
                                       name="Service"
                                       id="Service"
@@ -3407,7 +3425,7 @@ const CreateJob = () => {
                             </div>
                           </div>
 
-                    
+
 
                           <div className="col-lg-12">
                             <div className="card card_shadow">
@@ -3471,7 +3489,7 @@ const CreateJob = () => {
                                   style={{ display: "flex" }}
                                 >
                                   <div className="col-lg-6">
-                                
+
                                   </div>
                                   <div className="col-lg-6">
                                     <div className="col-sm-auto">
@@ -3565,7 +3583,7 @@ const CreateJob = () => {
                                                 <th>Action</th>
                                               </tr>
                                             </thead>
-                                          
+
                                             <tbody className="list form-check-all">
                                               {AddTaskArr &&
                                                 AddTaskArr.map((checklist, index) => {

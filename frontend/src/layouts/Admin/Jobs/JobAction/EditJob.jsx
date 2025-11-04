@@ -2106,12 +2106,25 @@ const EditJob = () => {
     }))
   ];
 
-  let isAssignDetails = CustomerDetails.find(
+
+  // let isAssignDetails = CustomerDetails.find(
+  //   (detail) => detail.assigned_source === "assign_customer_service"
+  // );
+  // if (isAssignDetails != undefined) {
+  //   serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+  // }
+
+
+   let assignDetails = jobData?.CustomerDetails?.filter(
     (detail) => detail.assigned_source === "assign_customer_service"
   );
-  if (isAssignDetails != undefined) {
-    //console.log("isAssignDetails", isAssignDetails);
-    serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+
+  let assignedServiceIds = assignDetails.map((d) => Number(d.service_id_assign));
+
+  if (assignedServiceIds.length > 0) {
+    serviceOptions = serviceOptions.filter((option) =>
+      assignedServiceIds.includes(Number(option.value))
+    );
   }
 
 

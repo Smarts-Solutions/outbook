@@ -60,7 +60,7 @@ const getAddJobData = async (job) => {
    LEFT JOIN 
         assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
    WHERE customers.id = ? AND assigned_jobs_staff_view.staff_id = ?
-   GROUP BY customers.id
+   GROUP BY assigned_jobs_staff_view.service_id_assign , customers.id
    ORDER BY 
     customers.id DESC;
   `;
