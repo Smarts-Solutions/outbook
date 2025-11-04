@@ -557,13 +557,15 @@ ORDER BY
 
     // console.log("LineManageStaffId", LineManageStaffId);
 
-  console.log("Call Customer:", "time", new Date().toISOString());
+    const staffIdString = LineManageStaffId.join(',');
+
+//   console.log("Call Customer:", "time", new Date().toISOString());
     try {
         const [rows] = await pool.query(
             `CALL GetCustomersData(?, ?, ?, ?)`,
-            [LineManageStaffId, search || null, limit, offset]);
+            [staffIdString, search || null, limit, offset]);
 
-        console.log("Main Query Result:", rows, "time", new Date().toISOString());
+        // console.log("Main Query Result:", rows, "time", new Date().toISOString());
 
         const result = rows[0];
         const countResult = rows[1];
