@@ -772,6 +772,7 @@ const StaffPage = () => {
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
   };
+  
 
   const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
@@ -779,6 +780,7 @@ const StaffPage = () => {
     Email: item.email,
     Phone: item.phone,
     Role: item.role_name,
+    "Line Manager" : item.line_manager_name || "-",
     Status: item.status === "1" ? "Active" : "Inactive",
   }));
 
