@@ -797,7 +797,7 @@ const EditJob = () => {
       return;
     }
 
-    if(["",null,undefined].includes(jobData.DateReceivedOn)){
+    if (["", null, undefined].includes(jobData.DateReceivedOn)) {
       sweatalert.fire({
         icon: "error",
         title: "Please select Date Received On.",
@@ -1044,7 +1044,7 @@ const EditJob = () => {
   };
 
   const HandleReset1 = () => {
-   // setAddTaskArr(tempTaskArr);
+    // setAddTaskArr(tempTaskArr);
     setChecklistId(tempChecklistId);
   };
 
@@ -2115,13 +2115,17 @@ const EditJob = () => {
   // }
 
 
-   let assignDetails = jobData?.CustomerDetails?.filter(
+  let assignDetails = jobData?.CustomerDetails?.filter(
     (detail) => detail.assigned_source === "assign_customer_service"
   );
 
-  let assignedServiceIds = assignDetails.length > 0 ? assignDetails?.map((d) => Number(d.service_id_assign)) : [];
+  // console.log("assignDetails", assignDetails);
 
-  if (assignedServiceIds.length > 0) {
+  let assignedServiceIds = assignDetails?.map((d) => Number(d.service_id_assign));
+
+
+
+  if (assignedServiceIds != undefined && Array.isArray(assignedServiceIds) && assignedServiceIds.length > 0) {
     serviceOptions = serviceOptions.filter((option) =>
       assignedServiceIds.includes(Number(option.value))
     );

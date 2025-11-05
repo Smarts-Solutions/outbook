@@ -1924,9 +1924,9 @@ const CreateJob = () => {
     (detail) => detail.assigned_source === "assign_customer_service"
   );
 
-  let assignedServiceIds = assignDetails.length > 0 ? assignDetails?.map((d) => Number(d.service_id_assign)) : [];
+  let assignedServiceIds = assignDetails?.map((d) => Number(d.service_id_assign));
 
-  if (assignedServiceIds.length > 0) {
+ if (assignedServiceIds != undefined && Array.isArray(assignedServiceIds) && assignedServiceIds.length > 0) {
     serviceOptions = serviceOptions.filter((option) =>
       assignedServiceIds.includes(Number(option.value))
     );
