@@ -2119,7 +2119,7 @@ const EditJob = () => {
     (detail) => detail.assigned_source === "assign_customer_service"
   );
 
-  let assignedServiceIds = assignDetails.map((d) => Number(d.service_id_assign));
+  let assignedServiceIds = assignDetails.length > 0 ? assignDetails?.map((d) => Number(d.service_id_assign)) : [];
 
   if (assignedServiceIds.length > 0) {
     serviceOptions = serviceOptions.filter((option) =>
