@@ -842,6 +842,9 @@ const getJobByCustomer = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
         master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -850,6 +853,7 @@ const getJobByCustomer = async (job) => {
             ) AS job_code_id
         FROM 
         jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN 
         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         LEFT JOIN 
@@ -911,6 +915,9 @@ const getJobByCustomer = async (job) => {
         jobs.service_id AS job_service_id,
 
         master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -920,6 +927,7 @@ const getJobByCustomer = async (job) => {
    
         FROM 
         jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN 
         assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
         LEFT JOIN 
@@ -1012,6 +1020,9 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
         master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1020,6 +1031,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
             ) AS job_code_id
         FROM 
         jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN 
         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         LEFT JOIN 
@@ -1085,6 +1097,10 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         jobs.service_id AS job_service_id,
 
         master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1094,6 +1110,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
    
         FROM 
         jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN 
         assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id 
         LEFT JOIN 
@@ -1196,6 +1213,10 @@ const getJobByClient = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
         master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1204,6 +1225,7 @@ const getJobByClient = async (job) => {
             ) AS job_code_id
         FROM 
         jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN 
         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         LEFT JOIN 
@@ -1268,6 +1290,11 @@ const getJobByClient = async (job) => {
         jobs.service_id AS job_service_id,
 
         master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1277,6 +1304,7 @@ const getJobByClient = async (job) => {
    
         FROM 
         jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN 
         assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
         LEFT JOIN 

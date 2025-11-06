@@ -528,6 +528,27 @@ const ClientList = () => {
       sortable: true,
       reorder: false,
     },
+     {
+      name: "Created By",
+      cell: (row) => (
+        <div title={row.job_created_by || "-"}>
+          {row.job_created_by || "-"}
+        </div>
+      ),
+      selector: (row) => row.job_created_by || "-",
+      sortable: true,
+    },
+
+     {
+      name: "Created At",
+      cell: (row) => (
+        <div title={row.created_at || "-"}>
+          {row.created_at || "-"}
+        </div>
+      ),
+      selector: (row) => row.created_at || "-",
+      sortable: true,
+    },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
