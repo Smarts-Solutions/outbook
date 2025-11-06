@@ -25,7 +25,13 @@ const customerAction = async (customer) => {
 };
 
 const getSingleCustomer = async (customer) => {
-    return customerModel.getSingleCustomer(customer);
+    
+  console.log("customerService getSingleCustomer customer:", customer);
+    if(customer.action === "allAccountManager"){
+      return customerModel.getAllAccountManager(customer);
+    }else{
+      return customerModel.getSingleCustomer(customer);
+    }
 };
 
 const updateProcessCustomer = async (customerProcessData) => {

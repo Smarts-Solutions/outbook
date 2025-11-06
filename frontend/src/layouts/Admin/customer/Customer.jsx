@@ -3,9 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import ExportToExcel  from '../../../Components/ExtraComponents/ExportToExcel';
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status , deleteCustomer ,GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status , deleteCustomer ,GET_ALL_CUSTOMERS ,GET_CUSTOMER_DATA } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
+
 
 
 const Customer = () => {
@@ -213,10 +214,18 @@ const Customer = () => {
         return (
           <div className="w-100">
             {(role === "SUPERADMIN") && row.status == 1 ? (
+
+              <>
               <div className="d-flex justify-content-start">
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
                 </button>
+                
+                {/*view Icon Button*/}
+                <button className="view-icon" onClick={() => handleViewAllAccountManager(row)}>
+                  <i className="ti-eye text-success" />
+                </button>
+
                {(row.form_process != "4" || row.is_client == 0) &&  <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
@@ -225,6 +234,7 @@ const Customer = () => {
                 </button>}
                 
               </div>
+              </>
             ) : (
               <div className="d-flex justify-content-end">
                  {hasUpdateAccess && row.status == 1 && (
@@ -354,6 +364,32 @@ const Customer = () => {
       }
     });
   };
+
+  const handleViewAllAccountManager = async (customerId) => {
+      try {
+          const response = await dispatch(
+            GET_CUSTOMER_DATA({
+              req: { customer_id: customerId.id, action: 'allAccountManager' },
+              authToken: token,
+            })
+          ).unwrap();
+          
+        } catch (error) {
+          return;
+        }
+    
+
+    // const customer = filteredData.find(cust => cust.id === customerId);
+    // if (customer && customer.all_account_managers) {
+    //   return
+    //     customer.all_account_managers.map((manager, index) => (
+    //       <div key={index}>
+    //         {manager.first_name} {manager.last_name}
+    //       </div>
+    //     ));
+    // }
+    return null;
+  }
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);

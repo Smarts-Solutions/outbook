@@ -3404,6 +3404,13 @@ WHERE service_id = ${service_id} AND customer_id = 0;
     return { status: true, message: 'customers updated successfully.', data: customer_id };
 }
 
+const getAllAccountManagers = async () => {
+    const query = `
+    SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM staff WHERE role = 'Account Manager' AND status = 1`;
+    const [result] = await pool.execute(query);
+    return result;
+}
+
 const customerStatusUpdate = async (customer) => {
     const { customer_id, status } = customer;
     const query = `UPDATE customers SET status = ? WHERE id = ?`;
@@ -3566,7 +3573,8 @@ module.exports = {
     customerUpdate,
     customerStatusUpdate,
     getcustomerschecklist,
-    getCustomer_dropdown_delete
+    getCustomer_dropdown_delete,
+    getAllAccountManagers
 
 
 };
