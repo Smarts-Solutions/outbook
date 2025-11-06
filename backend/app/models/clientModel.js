@@ -609,8 +609,8 @@ const getClient = async (client) => {
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
     CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
-    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
-    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -654,8 +654,8 @@ ORDER BY
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
     CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
-    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
-    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -704,8 +704,8 @@ async function getAllClientsSidebar(StaffUserId, LineManageStaffId, rows) {
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
     CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
-    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
-    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -746,8 +746,8 @@ ORDER BY
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
     CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
-    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
-    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',

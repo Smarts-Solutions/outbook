@@ -843,8 +843,8 @@ const getJobByCustomer = async (job) => {
         staffs3.last_name AS outbooks_acount_manager_last_name,
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -916,8 +916,8 @@ const getJobByCustomer = async (job) => {
 
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1021,8 +1021,8 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         staffs3.last_name AS outbooks_acount_manager_last_name,
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1099,8 +1099,8 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         master_status.name AS status,
 
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1215,8 +1215,8 @@ const getJobByClient = async (job) => {
         master_status.name AS status,
 
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1292,8 +1292,8 @@ const getJobByClient = async (job) => {
         master_status.name AS status,
 
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%Y/%m/%d') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%Y/%m/%d') AS updated_at,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
 
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
