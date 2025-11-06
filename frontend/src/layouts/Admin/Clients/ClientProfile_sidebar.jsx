@@ -629,6 +629,8 @@ const ClientList = () => {
     "Outbooks Account Manager": item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name,
     "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
     "Invoiced": item.invoiced == "1" ? "YES" : "NO",
+    "Created By": item.job_created_by,
+    "Created At": item.created_at,
     "Status": item.status,
   }));
 

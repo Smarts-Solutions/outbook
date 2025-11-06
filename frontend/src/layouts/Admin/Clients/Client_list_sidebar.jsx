@@ -1298,6 +1298,8 @@ const ClientLists = () => {
                             "Client Name": item?.client_name,
                             "Client Code": item?.client_code,
                             "Client Type Name": item.client_type_name,
+                            "Created By": item.client_created_by,
+                            "Created At": item.created_at,
                             Status: item.status == 1 ? "Active" : "Deactive",
                           }))
                           : tab.title == "Jobs"
@@ -1331,6 +1333,8 @@ const ClientLists = () => {
                                   "m"
                                   : "-",
                               Invoicing: item.invoiced == 1 ? "YES" : "NO",
+                              "Created By": item.job_created_by,
+                              "Created At": item.created_at,
                             }))
                             : tab.data
                       }
