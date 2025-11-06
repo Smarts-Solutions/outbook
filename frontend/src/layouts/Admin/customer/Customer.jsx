@@ -226,8 +226,8 @@ const Customer = () => {
                   </button>
 
                   {/*view Icon Button*/}
-                  <button className="view-icon" onClick={() => handleViewAllAccountManager(row)}>
-                    <i className="ti-eye text-success" />
+                  <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
+                    <i className="ti-eye text-primary" />
                   </button>
 
                   {(row.form_process != "4" || row.is_client == 0) && <button
