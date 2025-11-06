@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import qs from 'qs';
 import jwtDecode from "jwt-decode";
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 const Dashboard = () => {
   const [visibleLogs, setVisibleLogs] = useState(4); // Initially show 5 logs
@@ -112,7 +113,7 @@ const Dashboard = () => {
 
   const [newAccessToken, setNewAccessToken] = useState("");
   const [error, setError] = useState("");
-// Refresh Token
+  // Refresh Token
   const refreshToken = async () => {
     // const refreshToken = "1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8j5F-GZwVFOh_by_NPXfxUEByMvJcplAKWNhsPQtT40epQO-lc2g1x_FflTMS94BxphBD7OSKaLes4Iyx5IjdwcpAxXB1ZZos6FvTEMe8zQ8rEVnwawlow-mIjikU01Dw7bfxMH2PdnoU-mgSszjmGfSCZfRhQpqEd0SqPznBomn7CEuHDGWqfzh-h3eqAy9mK-YtzjWSQoPceC3-ohC6gNctmAf-WxI0QyERB8xCi1oRd0U3u5by1UQtqWqo80L5T8t8iqOAhV8n6brsSmt-ZlB28bY-HQYeQ6R8G8K0US_3rWtKIBTF5ZDljnzsu_SYjb_zO9NNj8B9-L-aIRz4truIfgvhVVXParWf6MjICTJ2Tq8wKa5nZcgo6UFnS0J-u8ixeRZkjSo8Uz__Oh3pXfkeZvoRrlWITUuMkJDJt-wHvq_Y5Eq0GxMWEWBoQZDTRm5T2ZgXCSImwnePGmerSpLfODswuph2akuhs9ub7Va_feoDRZDahnmh6FCqOX98mjEBUC4k3yiZYI_ZbhZnURL_A7z_kPBcX02Hmr5-n5jVHhZHFJbFzW53DMZ3Fcxd6k8WCOKjWatwXwpeAFmpqnGBUedZL8W0D95Dny7z_qk94eemwpu_aZQl5sETFYpAJ1XU9c-HzEAzK02ppsoLBTHNV76PQ0H-Yhetvt2vF6mHcj6NpYaGM5BM3RTvq-SmXp7vdkb5Rps4Sj4jv9YdhI1Mg0odiz8pPuLbBAHyMppB4mznvsus";
     // const url = "https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token";
@@ -139,33 +140,33 @@ const Dashboard = () => {
     //   setError("Error: " + err.message);
     // }
 
-   
+
     let data = qs.stringify({
       'grant_type': 'refresh_token',
       'client_id': '9185857f-7365-4d35-b00a-5a31dcdd58d2',
       'client_secret': 'aCE8Q~nIMereO8MzR6cDsf4QUjJIGLhuBMlcPc-t',
-      'refresh_token': '1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8j5F-GZwVFOh_by_NPXfxUEByMvJcplAKWNhsPQtT40epQO-lc2g1x_FflTMS94BxphBD7OSKaLes4Iyx5IjdwcpAxXB1ZZos6FvTEMe8zQ8rEVnwawlow-mIjikU01Dw7bfxMH2PdnoU-mgSszjmGfSCZfRhQpqEd0SqPznBomn7CEuHDGWqfzh-h3eqAy9mK-YtzjWSQoPceC3-ohC6gNctmAf-WxI0QyERB8xCi1oRd0U3u5by1UQtqWqo80L5T8t8iqOAhV8n6brsSmt-ZlB28bY-HQYeQ6R8G8K0US_3rWtKIBTF5ZDljnzsu_SYjb_zO9NNj8B9-L-aIRz4truIfgvhVVXParWf6MjICTJ2Tq8wKa5nZcgo6UFnS0J-u8ixeRZkjSo8Uz__Oh3pXfkeZvoRrlWITUuMkJDJt-wHvq_Y5Eq0GxMWEWBoQZDTRm5T2ZgXCSImwnePGmerSpLfODswuph2akuhs9ub7Va_feoDRZDahnmh6FCqOX98mjEBUC4k3yiZYI_ZbhZnURL_A7z_kPBcX02Hmr5-n5jVHhZHFJbFzW53DMZ3Fcxd6k8WCOKjWatwXwpeAFmpqnGBUedZL8W0D95Dny7z_qk94eemwpu_aZQl5sETFYpAJ1XU9c-HzEAzK02ppsoLBTHNV76PQ0H-Yhetvt2vF6mHcj6NpYaGM5BM3RTvq-SmXp7vdkb5Rps4Sj4jv9YdhI1Mg0odiz8pPuLbBAHyMppB4mznvsus' 
+      'refresh_token': '1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8j5F-GZwVFOh_by_NPXfxUEByMvJcplAKWNhsPQtT40epQO-lc2g1x_FflTMS94BxphBD7OSKaLes4Iyx5IjdwcpAxXB1ZZos6FvTEMe8zQ8rEVnwawlow-mIjikU01Dw7bfxMH2PdnoU-mgSszjmGfSCZfRhQpqEd0SqPznBomn7CEuHDGWqfzh-h3eqAy9mK-YtzjWSQoPceC3-ohC6gNctmAf-WxI0QyERB8xCi1oRd0U3u5by1UQtqWqo80L5T8t8iqOAhV8n6brsSmt-ZlB28bY-HQYeQ6R8G8K0US_3rWtKIBTF5ZDljnzsu_SYjb_zO9NNj8B9-L-aIRz4truIfgvhVVXParWf6MjICTJ2Tq8wKa5nZcgo6UFnS0J-u8ixeRZkjSo8Uz__Oh3pXfkeZvoRrlWITUuMkJDJt-wHvq_Y5Eq0GxMWEWBoQZDTRm5T2ZgXCSImwnePGmerSpLfODswuph2akuhs9ub7Va_feoDRZDahnmh6FCqOX98mjEBUC4k3yiZYI_ZbhZnURL_A7z_kPBcX02Hmr5-n5jVHhZHFJbFzW53DMZ3Fcxd6k8WCOKjWatwXwpeAFmpqnGBUedZL8W0D95Dny7z_qk94eemwpu_aZQl5sETFYpAJ1XU9c-HzEAzK02ppsoLBTHNV76PQ0H-Yhetvt2vF6mHcj6NpYaGM5BM3RTvq-SmXp7vdkb5Rps4Sj4jv9YdhI1Mg0odiz8pPuLbBAHyMppB4mznvsus'
     });
-    
+
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: 'https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token',
-      headers: { 
-        'Content-Type': 'application/x-www-form-urlencoded', 
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': 'fpc=AshJ25n1ISVAouDe8Gv6k9fASJ25AQAAAByKBd8OAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
       },
-      data : data
+      data: data
     };
-    
+
     axios.request(config)
-    .then((response) => {
-      console.log("response - ",response);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-    
+      .then((response) => {
+        console.log("response - ", response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
 
 
 
@@ -173,10 +174,10 @@ const Dashboard = () => {
 
 
 
- let site_ID = "";
- let folder_path = "/Shared Documents/Job Management"; // Replace with your folder path
- let drive_ID = "";
- let folder_ID = "";
+  let site_ID = "";
+  let folder_path = "/Shared Documents/Job Management"; // Replace with your folder path
+  let drive_ID = "";
+  let folder_ID = "";
 
   // get data
   const [data, setData] = useState(null);
@@ -195,29 +196,29 @@ const Dashboard = () => {
           "Content-Type": "application/json",
         },
       });
-   
-      if(response.data.id != undefined && response.data.id != null && response.data.id != ""){
+
+      if (response.data.id != undefined && response.data.id != null && response.data.id != "") {
         const parts = response.data.id.split(",");
         site_ID = parts[1];
-       
+
 
         // Get Drive ID
         const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives`;
         //const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drive/root:${folder_path}:/children`;
-        
+
         const driveResponse = await axios.get(driveUrl, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         });
-        
-        if(driveResponse.data.value != undefined && driveResponse.data.value != null && driveResponse.data.value != ""){
+
+        if (driveResponse.data.value != undefined && driveResponse.data.value != null && driveResponse.data.value != "") {
 
           drive_ID = driveResponse.data.value[0].id;
 
 
-          
+
 
           // Get Folder ID
           const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
@@ -228,38 +229,38 @@ const Dashboard = () => {
             },
           });
 
-          
-          if(folderResponse.data.value != undefined && folderResponse.data.value != null && folderResponse.data.value != ""){
+
+          if (folderResponse.data.value != undefined && folderResponse.data.value != null && folderResponse.data.value != "") {
 
 
             const jobManagementObject = folderResponse.data.value.find((item) => item.name === "JobManagement");
 
-            if(jobManagementObject != undefined && jobManagementObject != null && jobManagementObject != ""){
+            if (jobManagementObject != undefined && jobManagementObject != null && jobManagementObject != "") {
               folder_ID = jobManagementObject.id;
             }
 
 
-            return {site_ID: site_ID,drive_ID :drive_ID,folder_ID:folder_ID};
+            return { site_ID: site_ID, drive_ID: drive_ID, folder_ID: folder_ID };
 
-              //uploadFileToFolder
-              const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/shk.txt:/content`;
-              const file = new Blob(["Hello, SHK"], { type: "text/plain" });
-              const formData = new FormData();
-              formData.append("file", file);
+            //uploadFileToFolder
+            const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/shk.txt:/content`;
+            const file = new Blob(["Hello, SHK"], { type: "text/plain" });
+            const formData = new FormData();
+            formData.append("file", file);
 
-              const uploadResponse = await axios.put(uploadUrl, formData, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Content-Type": "application/json",
-                },
-              });
+            const uploadResponse = await axios.put(uploadUrl, formData, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            });
 
-             console.log("uploadResponse - ",uploadResponse);
+            console.log("uploadResponse - ", uploadResponse);
 
 
           }
 
-        } 
+        }
 
       }
 
@@ -272,165 +273,165 @@ const Dashboard = () => {
 
   const uploadImage = async (file) => {
     const val = await fetchData();
-    
-    let  userName = "JohnDoe"; // Replace with the actual user's name
-    
+
+    let userName = "JohnDoe"; // Replace with the actual user's name
+
     let site_ID = val.site_ID;
     let drive_ID = val.drive_ID;
     let folder_ID = val.folder_ID;
-    
-    console.log("site_ID - ",site_ID);
-    console.log("drive_ID - ",drive_ID);
-    console.log("folder_ID - ",folder_ID);
-    console.log("folder_path - ",folder_path);
-    console.log("accessToken - ",accessToken);
+
+    console.log("site_ID - ", site_ID);
+    console.log("drive_ID - ", drive_ID);
+    console.log("folder_ID - ", folder_ID);
+    console.log("folder_path - ", folder_path);
+    console.log("accessToken - ", accessToken);
 
     // Create a folder based on the user's name
     // const folderId = await createFolderIfNotExists(userName);
     // folder_ID = folderId;
     try {
-      
+
       const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
-  
+
       const response = await axios.put(uploadUrl, file, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": file.type, // Ensure correct MIME type
         },
       });
-  
+
       console.log("Image uploaded successfully:", response.data);
     } catch (error) {
       console.error("Error uploading image:", error);
     }
   };
 
-//   const uploadImage = async (file) => {
-//     const val = await fetchData();
-//     let  userName = "JohnDoe";
-//     let site_ID = val.site_ID;
-//     let drive_ID = val.drive_ID;
-//     let folder_ID = val.folder_ID; // Assuming this is the ID of the parent folder
+  //   const uploadImage = async (file) => {
+  //     const val = await fetchData();
+  //     let  userName = "JohnDoe";
+  //     let site_ID = val.site_ID;
+  //     let drive_ID = val.drive_ID;
+  //     let folder_ID = val.folder_ID; // Assuming this is the ID of the parent folder
 
-//     // Create a folder based on the user's name
-//     // const folderId = await createFolderIfNotExists(userName);
+  //     // Create a folder based on the user's name
+  //     // const folderId = await createFolderIfNotExists(userName);
 
-//     // Construct the upload URL
-//     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${file.name}:/content`;
+  //     // Construct the upload URL
+  //     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${file.name}:/content`;
 
-//     try {
-//         const response = await axios.put(uploadUrl, file, {
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`,
-//                 "Content-Type": file.type, // Ensure correct MIME type
-//             },
-//         });
+  //     try {
+  //         const response = await axios.put(uploadUrl, file, {
+  //             headers: {
+  //                 Authorization: `Bearer ${accessToken}`,
+  //                 "Content-Type": file.type, // Ensure correct MIME type
+  //             },
+  //         });
 
-//         console.log("Image uploaded successfully:", response.data);
-//     } catch (error) {
-//         console.error("Error uploading image:", error);
-//     }
-// };
+  //         console.log("Image uploaded successfully:", response.data);
+  //     } catch (error) {
+  //         console.error("Error uploading image:", error);
+  //     }
+  // };
 
-const createFolderIfNotExists = async (folderName) => {
-  const val = await fetchData();
-  
-  let site_ID = val.site_ID;
-  let drive_ID = val.drive_ID;
-  let parentFolderId = val.folder_ID; // Assuming this is the ID of the parent folder
+  const createFolderIfNotExists = async (folderName) => {
+    const val = await fetchData();
 
-  // Construct the URL to check for the folder
-  const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
+    let site_ID = val.site_ID;
+    let drive_ID = val.drive_ID;
+    let parentFolderId = val.folder_ID; // Assuming this is the ID of the parent folder
 
-  try {
+    // Construct the URL to check for the folder
+    const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
+
+    try {
       // List the children of the parent folder
       const response = await axios.get(folderUrl, {
-          headers: {
-              Authorization: `Bearer ${accessToken}`,
-          },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       // Check if the folder already exists
       const folderExists = response.data.value.some(item => item.name === folderName && item.folder);
 
       if (!folderExists) {
-          // Create the folder if it doesn't exist
-          const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
-          const folderData = {
-              name: folderName,
-              folder: {},
-              "@microsoft.graph.conflictBehavior": "rename" // Handle conflicts by renaming
-          };
+        // Create the folder if it doesn't exist
+        const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
+        const folderData = {
+          name: folderName,
+          folder: {},
+          "@microsoft.graph.conflictBehavior": "rename" // Handle conflicts by renaming
+        };
 
-          await axios.post(createFolderUrl, folderData, {
-              headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Content-Type": "application/json",
-              },
-          });
+        await axios.post(createFolderUrl, folderData, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-          console.log(`Folder '${folderName}' created successfully.`);
+        console.log(`Folder '${folderName}' created successfully.`);
       } else {
-          console.log(`Folder '${folderName}' already exists.`);
+        console.log(`Folder '${folderName}' already exists.`);
       }
 
       // Return the folder ID for further use
       const folderResponse = await axios.get(folderUrl, {
-          headers: {
-              Authorization: `Bearer ${accessToken}`,
-          },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       const createdFolder = folderResponse.data.value.find(item => item.name === folderName);
       return createdFolder.id; // Return the ID of the created or existing folder
 
-  } catch (error) {
+    } catch (error) {
       console.error("Error checking or creating folder:", error);
       throw error; // Rethrow the error for handling in the upload function
-  }
-};
+    }
+  };
 
   // File selection handler
-const handleFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    uploadImage(file);
-  } else {
-    console.error("No file selected.");
-  }
-};
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      uploadImage(file);
+    } else {
+      console.error("No file selected.");
+    }
+  };
 
 
 
-const deleteImage = async () => {
-  const val = await fetchData();
-  let fileName = "Clipboard - August 20, 2024 3_26 PM.png";
-  let site_ID = val.site_ID; 
-  let drive_ID = val.drive_ID; 
-  let folder_ID = val.folder_ID; 
+  const deleteImage = async () => {
+    const val = await fetchData();
+    let fileName = "Clipboard - August 20, 2024 3_26 PM.png";
+    let site_ID = val.site_ID;
+    let drive_ID = val.drive_ID;
+    let folder_ID = val.folder_ID;
 
-  console.log("site_ID - ", site_ID);
-  console.log("drive_ID - ", drive_ID);
-  console.log("folder_ID - ", folder_ID);
+    console.log("site_ID - ", site_ID);
+    console.log("drive_ID - ", drive_ID);
+    console.log("folder_ID - ", folder_ID);
 
 
-  const filePath = `${folder_path}/${fileName}`; 
+    const filePath = `${folder_path}/${fileName}`;
 
-  const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
+    const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
 
-  try {
-      
+    try {
+
       const response = await axios.delete(deleteUrl, {
-          headers: {
-              Authorization: `Bearer ${accessToken}`,
-          },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
-      
+
       console.log("Image deleted successfully:", response.data);
-  } catch (error) {
+    } catch (error) {
       console.error("Error deleting image:", error);
-  }
-};
+    }
+  };
 
 
 
@@ -458,32 +459,32 @@ const deleteImage = async () => {
   //     return { isExpired: true, remainingTime: 0 };
   //   }
   // };
-  
-  
+
+
   // const { isExpired, remainingTime } = checkTokenExpiration(accessToken);
-  
+
   // console.log("Token Expired:", isExpired);
   // console.log("Time Left (seconds):", remainingTime);
 
 
   const SharePointToken = async (token) => {
-      if(token != null && token != undefined && token != ""){
+    if (token != null && token != undefined && token != "") {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (decodedToken.exp && decodedToken.exp < currentTime) {
-       //console.log("Token Expired");
-      }else{
-       //console.log("Token Not Expired");
+        //console.log("Token Expired");
+      } else {
+        //console.log("Token Not Expired");
       }
 
-    }else{
+    } else {
 
     }
-  
+
   };
 
-   SharePointToken(accessToken);
+  SharePointToken(accessToken);
 
 
 
@@ -498,9 +499,11 @@ const deleteImage = async () => {
 
 
 
+  const exportData = getActiviyLog.map(({ id, ...item }) => ({
+    ...item,
+  }));
 
 
- 
 
   return (
     <div>
@@ -564,6 +567,13 @@ const deleteImage = async () => {
                   </div>
                 </div> */}
 
+              </div>
+              <div className="col-md-2">
+                <ExportToExcel
+                  className="btn btn-outline-info fw-bold float-end border-3 "
+                  apiData={exportData}
+                  fileName={"Logs Details"}
+                />
               </div>
               <div className="tab-content mt-5">
 

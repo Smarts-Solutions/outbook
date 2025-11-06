@@ -500,6 +500,8 @@ const Customer = () => {
     "Customer Code": item.customer_code,
     "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
     "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+    "Created by": item.customer_created_by,
+    "Created At": item.created_at,
     "Status": item.status == 1 ? "Active" : "Deactive",
   }));
 
