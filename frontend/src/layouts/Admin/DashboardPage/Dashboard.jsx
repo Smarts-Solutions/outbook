@@ -516,6 +516,13 @@ const Dashboard = () => {
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
+                  <div className="col-md-2">
+                <ExportToExcel
+                  className="btn btn-outline-info fw-bold float-end border-3 "
+                  apiData={exportData}
+                  fileName={"Logs Details"}
+                />
+              </div>
               </div>
             </div>
           </div>
@@ -568,13 +575,7 @@ const Dashboard = () => {
                 </div> */}
 
               </div>
-              <div className="col-md-2">
-                <ExportToExcel
-                  className="btn btn-outline-info fw-bold float-end border-3 "
-                  apiData={exportData}
-                  fileName={"Logs Details"}
-                />
-              </div>
+            
               <div className="tab-content mt-5">
 
                 <div className="tab-pane show active">
