@@ -151,7 +151,7 @@ const Customer = () => {
     },
 
      {
-      name: "Customer created by",
+      name: "Created by",
       selector: (row) => row.customer_created_by,
       cell: (row) => (
         <div
