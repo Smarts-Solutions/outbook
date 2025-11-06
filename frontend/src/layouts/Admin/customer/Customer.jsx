@@ -512,7 +512,7 @@ const Customer = () => {
         isOpen={showManagerModal}
         handleClose={() => {setShowManagerModal(false); setManagerList([]);}}
         hideBtn={true}
-        title="Assign Service Account Managers"
+        title="Individual Service Account Managers"
        
       >
         <div>
