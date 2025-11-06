@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import ExportToExcel  from '../../../Components/ExtraComponents/ExportToExcel';
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status , deleteCustomer ,GET_ALL_CUSTOMERS ,GET_CUSTOMER_DATA } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
 
+
+import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ const Customer = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [customerData, setCustomerData] = useState([]);
+  const [showManagerModal, setShowManagerModal] = useState(false);
+  const [managerList, setManagerList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [activeTab, setActiveTab] = useState("this-year");
   const role = JSON.parse(localStorage.getItem("role"));
@@ -40,7 +44,7 @@ const Customer = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
-    const accessDataAllClients=
+  const accessDataAllClients =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "all_clients"
     )?.items || [];
@@ -54,7 +58,7 @@ const Customer = () => {
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 ,all_clients: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0, all_clients: 0 };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -66,7 +70,7 @@ const Customer = () => {
 
     accessDataAllClients.forEach((item) => {
       if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
-    } );
+    });
 
     setAccessData(updatedAccess);
   }, []);
@@ -121,7 +125,7 @@ const Customer = () => {
       sortable: true,
 
     },
-    
+
     {
       name: "Type",
       selector: (row) =>
@@ -151,7 +155,7 @@ const Customer = () => {
       ),
     },
 
-     {
+    {
       name: "Created by",
       selector: (row) => row.customer_created_by,
       cell: (row) => (
@@ -165,7 +169,7 @@ const Customer = () => {
 
     },
 
-     {
+    {
       name: "Created At",
       selector: (row) => row.created_at,
       cell: (row) => (
@@ -205,7 +209,7 @@ const Customer = () => {
       sortable: true,
     },
 
-  
+
     {
       name: "Actions      ",
       cell: (row) => {
@@ -216,41 +220,41 @@ const Customer = () => {
             {(role === "SUPERADMIN") && row.status == 1 ? (
 
               <>
-              <div className="d-flex justify-content-start">
-                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil text-primary" />
-                </button>
-                
-                {/*view Icon Button*/}
-                <button className="view-icon" onClick={() => handleViewAllAccountManager(row)}>
-                  <i className="ti-eye text-success" />
-                </button>
+                <div className="d-flex justify-content-start">
+                  <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                    <i className="ti-pencil text-primary" />
+                  </button>
 
-               {(row.form_process != "4" || row.is_client == 0) &&  <button
-                  className="delete-icon "
-                  onClick={() => handleDelete(row)}
-                >
-                  <i className="ti-trash text-danger " />
-                </button>}
-                
-              </div>
+                  {/*view Icon Button*/}
+                  <button className="view-icon" onClick={() => handleViewAllAccountManager(row)}>
+                    <i className="ti-eye text-success" />
+                  </button>
+
+                  {(row.form_process != "4" || row.is_client == 0) && <button
+                    className="delete-icon "
+                    onClick={() => handleDelete(row)}
+                  >
+                    <i className="ti-trash text-danger " />
+                  </button>}
+
+                </div>
               </>
             ) : (
               <div className="d-flex justify-content-end">
-                 {hasUpdateAccess && row.status == 1 && (
+                {hasUpdateAccess && row.status == 1 && (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) &&  (
+                {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) && (
                   <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row)}
+                    className="delete-icon"
+                    onClick={() => handleDelete(row)}
                   >
                     <i className="ti-trash text-danger" />
                   </button>
                 )}
-               
+
               </div>
             )}
           </div>
@@ -311,7 +315,7 @@ const Customer = () => {
         });
       }
     });
-    
+
   };
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
@@ -366,30 +370,35 @@ const Customer = () => {
   };
 
   const handleViewAllAccountManager = async (customerId) => {
-      try {
-          const response = await dispatch(
-            GET_CUSTOMER_DATA({
-              req: { customer_id: customerId.id, action: 'allAccountManager' },
-              authToken: token,
-            })
-          ).unwrap();
-          
-        } catch (error) {
-          return;
+    try {
+      const response = await dispatch(
+        GET_CUSTOMER_DATA({
+          req: { customer_id: customerId.id, action: 'allAccountManager' },
+          authToken: token,
+        })
+      ).unwrap();
+      if (response.status) {
+        if(response.status == true){
+        setManagerList(response?.data?.data);
+        setShowManagerModal(true);
+        }else{
+          Swal.fire({
+            title: 'Info',
+            text: 'No account managers found for this customer.',
+            icon: 'info',
+          });
         }
-    
-
-    // const customer = filteredData.find(cust => cust.id === customerId);
-    // if (customer && customer.all_account_managers) {
-    //   return
-    //     customer.all_account_managers.map((manager, index) => (
-    //       <div key={index}>
-    //         {manager.first_name} {manager.last_name}
-    //       </div>
-    //     ));
-    // }
-    return null;
-  }
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to fetch account managers.',
+          icon: 'error',
+        });
+      }
+    } catch (error) {
+      return;
+    }
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -489,110 +498,147 @@ const Customer = () => {
   const exportData = filteredData.map((item) => ({
     "Trading Name": item.trading_name,
     "Customer Code": item.customer_code,
-    "Type": item.customer_type === '1'  ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
+    "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
     "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
     "Status": item.status == 1 ? "Active" : "Deactive",
   }));
 
 
   return (
-    <div className="container-fluid">
-      <div className="content-title">
-        <div className="row">
-          <div className="col-md-6 col-sm-5">
-            <div className="tab-title">
-              <h3 className="mt-0">Customers</h3>
-            </div>
-          </div>
-          {role === "SUPERADMIN" ? (
-            <div className="col-md-6 col-sm-7">
-              <Link
-                to="/admin/addcustomer"
-                className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
-              >
-                <i className="fa fa-plus" /> Add Customer
-              </Link>
+    <div>
+      <CommanModal
+        isOpen={showManagerModal}
+        handleClose={() => {setShowManagerModal(false); setManagerList([]);}}
+        title="Service Assign Account Managers"
+      >
+        <div>
+          {console.log("managerList", managerList)}
+          {managerList && managerList?.length > 0 ? (
+            <div className="table-responsive">
+              <table className="table table-bordered table-striped align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Service Name</th>
+                    <th>Account Managers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managerList?.map((value, idx) => (
+                    <tr key={idx}>
+                      <td>{idx + 1}</td>
+                      <td>{value.service_name}</td>
+                      <td>{value?.account_managers?.map(item => item?.account_manager_name)?.join(" , ")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
-            getAccessData.insert === 1 && (
+            <div className="text-center p-3 text-muted">
+              No account managers found.
+            </div>
+          )}
+        </div>
+      </CommanModal>
+      <div className="container-fluid">
+        <div className="content-title">
+          <div className="row">
+            <div className="col-md-6 col-sm-5">
+              <div className="tab-title">
+                <h3 className="mt-0">Customers</h3>
+              </div>
+            </div>
+            {role === "SUPERADMIN" ? (
               <div className="col-md-6 col-sm-7">
                 <Link
                   to="/admin/addcustomer"
-                  className="btn btn-outline-info fw-bold float-end border-3"
+                  className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
                   <i className="fa fa-plus" /> Add Customer
                 </Link>
               </div>
-            )
-          )}
-        </div>
-      </div>
-
-      <div className="report-data mt-4">
-        <div className="col-sm-12">
-          <div className="page-title-box pt-0 pb-0">
-            <div className="row align-items-start justify-content-end">
-              <div className="col-4">
-                <div className="form-group mb-2 mt-1 pe-3 pt-5">
-
+            ) : (
+              getAccessData.insert === 1 && (
+                <div className="col-md-6 col-sm-7">
+                  <Link
+                    to="/admin/addcustomer"
+                    className="btn btn-outline-info fw-bold float-end border-3"
+                  >
+                    <i className="fa fa-plus" /> Add Customer
+                  </Link>
                 </div>
-              </div>
+              )
+            )}
+          </div>
+        </div>
 
-              <div className="col-12">
-                {/* Tab content */}
-                <div className="tab-content mt-minus-60" id="pills-tabContent">
-                  <div className="card-datatable">
+        <div className="report-data mt-4">
+          <div className="col-sm-12">
+            <div className="page-title-box pt-0 pb-0">
+              <div className="row align-items-start justify-content-end">
+                <div className="col-4">
+                  <div className="form-group mb-2 mt-1 pe-3 pt-5">
+
+                  </div>
+                </div>
+
+                <div className="col-12">
+                  {/* Tab content */}
+                  <div className="tab-content mt-minus-60" id="pills-tabContent">
                     <div className="card-datatable">
+                      <div className="card-datatable">
 
-                      <div className="row mb-3">
-                        <div className="col-md-4">
-                          <input
-                            type="text"
-                            placeholder="Search Customers"
-                            className="form-control"
-                            value={searchTerm}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                          />
+                        <div className="row mb-3">
+                          <div className="col-md-4">
+                            <input
+                              type="text"
+                              placeholder="Search Customers"
+                              className="form-control"
+                              value={searchTerm}
+                              onChange={(e) => handleSearchChange(e.target.value)}
+                            />
+                          </div>
+                          <div className="col-md-2">
+                            <select className="form-select form-control" onChange={(e) => setStatusFilter(e.target.value)} >
+                              <option value="">All</option>
+                              <option value="1">Active</option>
+                              <option value="0">Inactive</option>
+                            </select>
+                          </div>
+                          <div className="col-md-2">
+                            <ExportToExcel
+                              className="btn btn-outline-info fw-bold float-end border-3 "
+                              apiData={exportData}
+                              fileName={"Customer Details"}
+                            />
+                          </div>
                         </div>
-                        <div className="col-md-2">
-                          <select className="form-select form-control" onChange={(e) => setStatusFilter(e.target.value)} >
-                            <option value="">All</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                          </select>
-                        </div>
-                        <div className="col-md-2">
-                        <ExportToExcel
-                        className="btn btn-outline-info fw-bold float-end border-3 "
-                        apiData={exportData}
-                        fileName={"Customer Details"}
-                      />
-                        </div>
+
+
+                        <Datatable columns={columns} data={filteredData1} />
+
+                        {/* Pagination Controls */}
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          pageCount={Math.ceil(totalRecords / pageSize)}
+                          marginPagesDisplayed={2}
+                          pageRangeDisplayed={5}
+                          onPageChange={handlePageChange}
+                          containerClassName={"pagination"}
+                          activeClassName={"active"}
+                        />
                       </div>
-                      
+                      <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
 
-                      <Datatable columns={columns} data={filteredData1} />
-
-                      {/* Pagination Controls */}
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        pageCount={Math.ceil(totalRecords / pageSize)}
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={5}
-                        onPageChange={handlePageChange}
-                        containerClassName={"pagination"}
-                        activeClassName={"active"}
-                      />
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                      </select>
                     </div>
-                    <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
-                      
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
                   </div>
                 </div>
               </div>

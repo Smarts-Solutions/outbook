@@ -3404,11 +3404,64 @@ WHERE service_id = ${service_id} AND customer_id = 0;
     return { status: true, message: 'customers updated successfully.', data: customer_id };
 }
 
-const getAllAccountManagers = async () => {
-    const query = `
-    SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM staff WHERE role = 'Account Manager' AND status = 1`;
-    const [result] = await pool.execute(query);
-    return result;
+const getAllAccountManager = async (customer) => {
+   let  {customer_id} = customer;
+  
+     const query = `
+    SELECT  
+    customers.id AS id,
+    staffs.id AS staff_id,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS account_manager_name,
+    services.id AS service_id,
+    services.name AS service_name
+FROM 
+    customers
+JOIN 
+    customer_services ON customer_services.customer_id = customers.id
+JOIN
+    services ON services.id = customer_services.service_id    
+JOIN 
+    customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+JOIN 
+    staffs ON staffs.id = customer_service_account_managers.account_manager_id    
+ WHERE 
+    customers.id = ${customer_id}
+ GROUP BY services.id , staffs.id
+    `;
+
+   const [result] = await pool.execute(query);
+
+
+
+
+     const FinalResult = Object.values(
+  result?.reduce((acc, curr) => {
+    if (!acc[curr.service_id]) {
+      acc[curr.service_id] = {
+        service_id: curr.service_id,
+        service_name: curr.service_name,
+        account_managers: []
+      };
+    }
+
+    // Add account manager if not already added for same service
+    const alreadyExists = acc[curr.service_id].account_managers.some(
+      (m) => m.staff_id === curr.staff_id
+    );
+
+    if (!alreadyExists) {
+      acc[curr.service_id].account_managers.push({
+        staff_id: curr.staff_id,
+        account_manager_name: curr.account_manager_name
+      });
+    }
+
+    return acc;
+  }, {})
+);
+
+console.log(FinalResult);
+   return { status: true, data: FinalResult };
 }
 
 const customerStatusUpdate = async (customer) => {
@@ -3574,7 +3627,7 @@ module.exports = {
     customerStatusUpdate,
     getcustomerschecklist,
     getCustomer_dropdown_delete,
-    getAllAccountManagers
+    getAllAccountManager
 
 
 };
