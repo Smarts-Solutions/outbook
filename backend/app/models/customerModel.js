@@ -16,6 +16,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelper
 //         "SELECT DISTINCT customers.id AS id,
 //                 customers.customer_type,
 //                 customers.staff_id,
+//                 CONCAT(staffs.first_name, ' ', staffs.last_name) AS customer_created_by,
 //                 customers.account_manager_id,
 //                 customers.trading_name,
 //                 customers.trading_address,
@@ -23,8 +24,8 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelper
 //                 customers.vat_number,
 //                 customers.website,
 //                 customers.form_process,
-//                 customers.created_at,
-//                 customers.updated_at,
+//                 DATE_FORMAT(customers.created_at, '%Y/%m/%d') AS created_at,
+//                 DATE_FORMAT(customers.updated_at, '%Y/%m/%d') AS updated_at,
 //                 customers.status,
 //                 staff2.first_name AS account_manager_firstname, 
 //                 staff2.last_name AS account_manager_lastname,
@@ -36,6 +37,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelper
     // END AS is_client
     
 //          FROM customers
+//          JOIN staffs ON customers.staff_id = staffs.id
 //          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
 //          LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
 //          WHERE (customers.staff_id IN (", LineManageStaffId, ")
@@ -499,6 +501,7 @@ const getCustomer = async (customer) => {
     customers.id AS id,
     customers.customer_type AS customer_type,
     customers.staff_id AS staff_id,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS customer_created_by,
     customers.account_manager_id AS account_manager_id,
     customers.trading_name AS trading_name,
     customers.trading_address AS trading_address,
@@ -506,8 +509,8 @@ const getCustomer = async (customer) => {
     customers.vat_number AS vat_number,
     customers.website AS website,
     customers.form_process AS form_process,
-    customers.created_at AS created_at,
-    customers.updated_at AS updated_at,
+    DATE_FORMAT(customers.created_at, '%Y/%m/%d') AS created_at,
+    DATE_FORMAT(customers.updated_at, '%Y/%m/%d') AS updated_at,
     customers.status AS status,
     staff2.first_name AS account_manager_firstname, 
     staff2.last_name AS account_manager_lastname,
@@ -522,6 +525,8 @@ const getCustomer = async (customer) => {
     END AS is_client
 FROM 
     customers
+LEFT JOIN 
+    staffs ON customers.staff_id = staffs.id
 LEFT JOIN 
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN clients ON clients.customer_id = customers.id    

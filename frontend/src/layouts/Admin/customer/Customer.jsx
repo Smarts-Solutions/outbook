@@ -149,6 +149,35 @@ const Customer = () => {
         </div>
       ),
     },
+
+     {
+      name: "Customer created by",
+      selector: (row) => row.customer_created_by,
+      cell: (row) => (
+        <div
+          title={row.customer_created_by}
+        >
+          {row.customer_created_by}
+        </div>
+      ),
+      sortable: true,
+
+    },
+
+     {
+      name: "Created At",
+      selector: (row) => row.created_at,
+      cell: (row) => (
+        <div
+          title={row.created_at}
+        >
+          {row.created_at}
+        </div>
+      ),
+      sortable: true,
+
+    },
+
     {
       name: "Status",
       selector: (row) => row.form_process,
@@ -173,23 +202,9 @@ const Customer = () => {
         </div>
       ),
       sortable: true,
-
     },
 
-    // {
-    //   name: "Progress",
-    //   cell: (row) => (
-    //     <div>
-    //       {row.form_process === "4" ? (
-    //         <span className="text-success">Complete</span>
-    //       ) : (
-    //         <span className="text-danger">Pending</span>
-    //       )}
-    //     </div>
-    //   ),
-    //   sortable: true,
-    //   width: "120px",
-    // },
+  
     {
       name: "Actions      ",
       cell: (row) => {
