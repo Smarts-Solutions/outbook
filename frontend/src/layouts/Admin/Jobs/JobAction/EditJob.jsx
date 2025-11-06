@@ -2150,11 +2150,18 @@ const EditJob = () => {
     }))
   ];
 
+
+  console.log("getJobDetails.data", getJobDetails);
+
   const isReviewerDisabled = !(
     ["ADMIN", "SUPERADMIN"].includes(role) ||
     (getJobDetails.data?.staff_created_id !== undefined &&
       (getJobDetails.data.staff_created_id === staffCreatedId ||
-        getJobDetails.data.customer_staff_id === staffCreatedId))
+        getJobDetails.data.customer_staff_id === staffCreatedId ||
+        getJobDetails.data.customer_account_manager_id === staffCreatedId ||
+        getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)
+
+      ))
   );
 
 
@@ -2171,7 +2178,11 @@ const EditJob = () => {
     ["ADMIN", "SUPERADMIN"].includes(role) ||
     (getJobDetails.data?.staff_created_id !== undefined &&
       (getJobDetails.data.staff_created_id === staffCreatedId ||
-        getJobDetails.data.customer_staff_id === staffCreatedId))
+        getJobDetails.data.customer_staff_id === staffCreatedId ||
+        getJobDetails.data.customer_account_manager_id === staffCreatedId ||
+        getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)
+      
+      ))
   );
 
 
@@ -2402,39 +2413,7 @@ const EditJob = () => {
                                       Customer Account Manager(Officer)
                                       <span className="text-danger">*</span>
                                     </label>
-                                    {/* <select
-                                      className={
-                                        errors["CustomerAccountManager"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
-                                      name="CustomerAccountManager"
-                                      id="CustomerAccountManager"
-                                      onChange={HandleChange}
-                                      value={jobData.CustomerAccountManager}
-                                    >
-                                      <option value="">
-                                        Select Customer Account Manager
-                                      </option>
-
-                                      {(
-                                        AllJobData?.data
-                                          ?.customer_account_manager || []
-                                      ).map((customer_account_manager) => (
-                                        <option
-                                          value={
-                                            customer_account_manager.customer_account_manager_officer_id
-                                          }
-                                          key={
-                                            customer_account_manager.customer_account_manager_officer_id
-                                          }
-                                        >
-                                          {
-                                            customer_account_manager.customer_account_manager_officer_name
-                                          }
-                                        </option>
-                                      ))}
-                                    </select> */}
+                                   
                                     <Select
                                       name="CustomerAccountManager"
                                       id="CustomerAccountManager"

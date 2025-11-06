@@ -1451,6 +1451,7 @@ const getJobById = async (job) => {
      customers.id AS customer_id,
      customers.trading_name AS customer_trading_name,
      customers.staff_id AS customer_staff_id,
+     customers.account_manager_id AS customer_account_manager_id,
      clients.id AS client_id,
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
@@ -1684,6 +1685,18 @@ const getJobById = async (job) => {
         }));
       }
 
+
+    // Linemanager Staff id
+    const [lineManaegerStaff] = await pool.execute(
+      `SELECT 
+       staff_to
+      FROM line_managers
+      WHERE staff_by = ${rows[0].staff_created_id} || staff_by = ${rows[0].customer_account_manager_id}`
+    );
+
+
+
+
       result = {
         job_id: rows[0].job_id,
         staff_created_id: rows[0].staff_created_id,
@@ -1691,6 +1704,8 @@ const getJobById = async (job) => {
         customer_id: rows[0].customer_id,
         customer_trading_name: rows[0].customer_trading_name,
         customer_staff_id: rows[0].customer_staff_id,
+        customer_account_manager_id: rows[0].customer_account_manager_id,
+        line_manaeger_staff: lineManaegerStaff?.map(item => item.staff_to),
         client_id: rows[0].client_id,
         client_trading_name: rows[0].client_trading_name,
         client_job_code: rows[0].client_job_code,
