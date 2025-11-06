@@ -608,6 +608,9 @@ const getClient = async (client) => {
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -616,6 +619,8 @@ const getClient = async (client) => {
     ) AS client_code
 FROM 
     clients
+JOIN 
+    staffs ON clients.staff_created_id = staffs.id    
 JOIN 
     customers ON customers.id = clients.customer_id    
 JOIN 
@@ -648,6 +653,9 @@ ORDER BY
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -656,6 +664,8 @@ ORDER BY
     ) AS client_code
       FROM 
           clients
+      JOIN 
+          staffs ON clients.staff_created_id = staffs.id
       LEFT JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})  
       JOIN 
@@ -693,14 +703,19 @@ async function getAllClientsSidebar(StaffUserId, LineManageStaffId, rows) {
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
         SUBSTRING(clients.trading_name, 1, 3), '_',
         SUBSTRING(clients.client_code, 1, 15)
     ) AS client_code
-FROM 
+FROM   
     clients
+JOIN 
+    staffs ON clients.staff_created_id = staffs.id
 JOIN 
     customers ON customers.id = clients.customer_id    
 JOIN 
@@ -730,6 +745,9 @@ ORDER BY
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%Y/%m/%d') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%Y/%m/%d') AS updated_at,
     CONCAT(
         'cli_', 
         SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -738,6 +756,8 @@ ORDER BY
     ) AS client_code
       FROM 
           clients
+      JOIN 
+          staffs ON clients.staff_created_id = staffs.id    
       LEFT JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       JOIN 

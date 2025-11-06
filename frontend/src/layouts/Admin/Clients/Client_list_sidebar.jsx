@@ -311,6 +311,26 @@ const ClientLists = () => {
       width: "150px",
       reorder: false,
     },
+
+     {
+      name: "Created By",
+      cell: (row) => (
+        <div title={row.client_created_by || "-"}>{row.client_created_by || "-"}</div>
+      ),
+      selector: (row) => row.client_created_by || "-",
+      sortable: true,
+      reorder: false,
+    },
+
+    {
+      name: "Created At",
+      cell: (row) => (
+        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
+      ),
+      selector: (row) => row.created_at || "-",
+      sortable: true,
+      reorder: false,
+    },
     {
       name: "Status",
       selector: (row) => (
