@@ -509,14 +509,17 @@ const Customer = () => {
       <CommanModal
         isOpen={showManagerModal}
         handleClose={() => {setShowManagerModal(false); setManagerList([]);}}
-        title="Service Assign Account Managers"
+        hideBtn={true}
+        title="Assign Service Account Managers"
+       
       >
         <div>
-          {console.log("managerList", managerList)}
+      
           {managerList && managerList?.length > 0 ? (
             <div className="table-responsive">
               <table className="table table-bordered table-striped align-middle">
-                <thead className="table-light">
+                <thead className="table-light"
+                 >
                   <tr>
                     <th>#</th>
                     <th>Service Name</th>
