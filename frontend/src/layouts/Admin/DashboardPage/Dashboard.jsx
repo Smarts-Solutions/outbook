@@ -497,10 +497,10 @@ const Dashboard = () => {
 
   // End Process SharePoint Refresh Process End //
 
-
-
-  const exportData = getActiviyLog.map(({ id, ...item }) => ({
-    ...item,
+  const exportData = getActiviyLog?.map((item) => ({
+    staff_name: item.staff_name,
+    log_message: item.log_message,
+    created_at: formatDate(item.created_at),
   }));
 
 

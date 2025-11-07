@@ -438,10 +438,13 @@ const getDashboardActivityLog = async (dashboard) => {
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    staff_logs.log_message_all AS log_message
+    staff_logs.log_message_all AS log_message,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
   FROM
     staff_logs
    ${MatchCondition}
+  LEFT JOIN
+    staffs ON staffs.id = staff_logs.staff_id 
   ORDER BY
     staff_logs.id DESC
 `;
