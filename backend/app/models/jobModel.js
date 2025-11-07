@@ -1687,11 +1687,12 @@ const getJobById = async (job) => {
 
 
     // Linemanager Staff id
+    // Linemanager Staff id
     const [lineManaegerStaff] = await pool.execute(
       `SELECT 
-       staff_to
+       staff_by
       FROM line_managers
-      WHERE staff_by = ${rows[0].staff_created_id} || staff_by = ${rows[0].customer_account_manager_id}`
+      WHERE staff_to = ${rows[0].staff_created_id} || staff_to = ${rows[0].customer_account_manager_id}`
     );
 
 
@@ -1705,7 +1706,7 @@ const getJobById = async (job) => {
         customer_trading_name: rows[0].customer_trading_name,
         customer_staff_id: rows[0].customer_staff_id,
         customer_account_manager_id: rows[0].customer_account_manager_id,
-        line_manaeger_staff: lineManaegerStaff?.map(item => item.staff_to),
+        line_manaeger_staff: lineManaegerStaff?.map(item => item.staff_by),
         client_id: rows[0].client_id,
         client_trading_name: rows[0].client_trading_name,
         client_job_code: rows[0].client_job_code,
