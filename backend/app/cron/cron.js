@@ -49,7 +49,7 @@ module.exports = (app) => {
 
   cron.schedule("0 9 * * *", async () => {
     ////////-----------Trigger Report Email --------------------//////
-   const [wipAndToBeStartedMoreThan] = await pool.execute(`
+   const [superAdminAdminManagementRole] = await pool.execute(`
     SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -62,7 +62,7 @@ module.exports = (app) => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
-   wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan  || []);
+   wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole  || []);
   
 }
 , {
