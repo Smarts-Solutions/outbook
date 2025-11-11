@@ -1062,8 +1062,8 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
       return { status: true, message: "Success.", data: rows };
     }
 
-   // Other Role Data
-  
+    // Other Role Data
+
     const query = `
         SELECT 
         jobs.id AS job_id,
@@ -1140,7 +1140,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         job_code_id ASC;
      `;
 
-     console.log("query", query);
+    console.log("query", query);
 
     const [result] = await pool.execute(query);
 
@@ -1688,14 +1688,14 @@ const getJobById = async (job) => {
       }
 
 
-    // Linemanager Staff id
-    // Linemanager Staff id
-    const [lineManaegerStaff] = await pool.execute(
-      `SELECT 
+      // Linemanager Staff id
+      // Linemanager Staff id
+      const [lineManaegerStaff] = await pool.execute(
+        `SELECT 
        staff_by
       FROM line_managers
       WHERE staff_to = ${rows[0].staff_created_id} || staff_to = ${rows[0].customer_account_manager_id}`
-    );
+      );
 
 
 
@@ -2012,12 +2012,12 @@ const jobUpdate = async (job) => {
     console.log("ExistJob", ExistJob);
     console.log("expected_delivery_date", expected_delivery_date);
     let expected_delivery_date_old = ExistJob.expected_delivery_date_old;
-    if(expected_delivery_date == null){
+    if (expected_delivery_date == null) {
       expected_delivery_date_old = null;
-    }else if(expected_delivery_date != null && ExistJob.expected_delivery_date_old == null){
+    } else if (expected_delivery_date != null && ExistJob.expected_delivery_date_old == null) {
       expected_delivery_date_old = expected_delivery_date;
-    }else if(expected_delivery_date != null && ExistJob.expected_delivery_date_old != null ){
-    expected_delivery_date_old = ExistJob.expected_delivery_date;
+    } else if (expected_delivery_date != null && ExistJob.expected_delivery_date_old != null) {
+      expected_delivery_date_old = ExistJob.expected_delivery_date;
     }
 
     let status_type_update = status_type;
@@ -2430,7 +2430,7 @@ const jobUpdate = async (job) => {
             // console.log("task_id ", task_id);
             // console.log("budgeted_hour ", budgeted_hour);
 
-           // is existing for the job
+            // is existing for the job
             const checkQuery2 = `
                 SELECT id FROM client_job_task WHERE job_id = ? AND client_id = ? AND task_id = ?
               `;
@@ -2451,9 +2451,9 @@ const jobUpdate = async (job) => {
                 budgeted_hour,
               ]);
               continue; // Skip the update if it was just inserted
-            }else{
-        
-            const query = `
+            } else {
+
+              const query = `
               UPDATE client_job_task
               SET 
                 time = ?
@@ -2462,7 +2462,7 @@ const jobUpdate = async (job) => {
                 AND client_id = ? 
                 AND task_id = ?;
             `;
-            await pool.execute(query, [ budgeted_hour,job_id,client_id, task_id]);
+              await pool.execute(query, [budgeted_hour, job_id, client_id, task_id]);
             }
 
 
@@ -2744,10 +2744,30 @@ const updateJobStatus = async (job) => {
     [job_id]
   );
 
+  console.log("job_id", job_id);
+  console.log("status_type", status_type);
+  console.log("ExistJobData", ExistJobData);
 
+
+  
 
   try {
-    if (parseInt(status_type) == 6) {
+    if (parseInt(status_type) == 20) {
+      const [[ExistReviewer]] = await pool.execute(
+        `SELECT reviewer FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+      
+      if (['',null,undefined,0,'0'].includes(ExistReviewer?.reviewer)) {
+        return {
+          status: false,
+          message: "Please sent to be reviewed.",
+          data: "W",
+        };
+      }
+    }
+
+    if (parseInt(status_type) == 6 || parseInt(status_type) == 20) {
       const [ExistDraft] = await pool.execute(
         `SELECT job_id FROM drafts WHERE job_id = ?`,
         [job_id]
@@ -2782,7 +2802,8 @@ const updateJobStatus = async (job) => {
           data: "W",
         };
       }
-    } else {
+    }
+    else {
       //  Missing Log
       const [ExistMissingLog] = await pool.execute(
         `SELECT job_id FROM missing_logs WHERE missing_log_reviewed_date IS NULL AND job_id = ? LIMIT 1`,
@@ -2816,11 +2837,28 @@ const updateJobStatus = async (job) => {
 
 
 
-    const query = `
+    console.log("status_type UPDATEEEEE", status_type);
+
+  
+
+      let query = `
          UPDATE jobs 
          SET status_type = ?
          WHERE id = ?
        `;
+     
+       if(parseInt(status_type) == 20){
+        query = `
+        UPDATE jobs 
+        SET status_type = ?, filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
+        WHERE id = ?
+      `;
+
+       }
+
+
+
+     
     const [result] = await pool.execute(query, [status_type, job_id]);
 
     if (result.changedRows > 0) {
