@@ -122,7 +122,7 @@ parentPort.on("message", async (rows) => {
          csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
         });
 
-        console.log("CSV Content -->>>:\n", csvContent);
+        // console.log("CSV Content -->>>:\n", csvContent);
 
 
 
@@ -145,7 +145,7 @@ parentPort.on("message", async (rows) => {
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-       // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+       const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
           //console.log("Missing Timesheet Report email sent successfully.");
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);

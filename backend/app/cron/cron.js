@@ -94,8 +94,6 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
   
-   missingPaperworkInMax2Days(superAdminAdminManagementRole  || []);
-  
    
  }, {
    timezone: "Europe/London"

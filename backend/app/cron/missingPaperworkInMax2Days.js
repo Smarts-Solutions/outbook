@@ -144,7 +144,7 @@ parentPort.on("message", async (rows) => {
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-       // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+       const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
           //console.log("Missing Timesheet Report email sent successfully.");
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
