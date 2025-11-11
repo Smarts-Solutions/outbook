@@ -115,7 +115,6 @@ parentPort.on("message", async (rows) => {
         const dynamic_attachment = csvContent;
         const filename = `Jobs_Not_Updated_7Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
 
-
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
         const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
