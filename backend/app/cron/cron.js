@@ -78,7 +78,7 @@ module.exports = (app) => {
    
 };
 
- cron.schedule("* * * * *", async () => {
+ cron.schedule("* * * * 1", async () => {
   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
  const [superAdminAdminManagementRole] = await pool.execute(`
     SELECT 
@@ -94,7 +94,7 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
   
-   
+  
  }, {
    timezone: "Europe/London"
  });
