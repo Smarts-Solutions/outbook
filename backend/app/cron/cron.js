@@ -64,6 +64,8 @@ module.exports = (app) => {
     `);
    wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole  || []);
   
+   expectedDeliveryDateChanged(superAdminAdminManagementRole  || []);
+  
 }
 , {
   timezone: "Europe/London"
@@ -72,13 +74,28 @@ module.exports = (app) => {
    
 };
 
-//  cron.schedule("* * * * *", async () => {
-//   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
-
+ cron.schedule("* * * * 1", async () => {
+  console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
+ const [superAdminAdminManagementRole] = await pool.execute(`
+    SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email
+    FROM staffs
+    JOIN roles ON roles.id = staffs.role_id
+    LEFT JOIN timesheet 
+        ON staffs.id = timesheet.staff_id 
+      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
+    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
+    GROUP BY staffs.id
+    `);
+  
+  
+  
    
-//  }, {
-//    timezone: "Europe/London"
-//  });
+ }, {
+   timezone: "Europe/London"
+ });
 
 
 
@@ -127,9 +144,22 @@ function wipAndToBeStartedMoreThan_7(rows) {
   );
 }
 
+// Trigger Expected Delivery Date Changed Report Email
+function expectedDeliveryDateChanged(rows) {
+  const worker = new Worker(join(__dirname, "expectedDeliveryDateChanged.js"), { type: "module" });
+  worker.postMessage(rows);
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--",msg)
+  }
+  );
+  worker.on("error", (err) => console.log("Worker error --:", err));
+  worker.on("exit", (code) => {
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
+  }
+  );
+}
 
 
 
-// SELECT *
-// FROM jobs
-// WHERE expected_delivery_date <> expected_delivery_date_old;
+
+
