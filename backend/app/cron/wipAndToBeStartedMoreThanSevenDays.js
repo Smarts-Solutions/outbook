@@ -79,10 +79,34 @@ parentPort.on("message", async (rows) => {
       // const [result] = await pool.execute(`SELECT * FROM jobs WHERE status_type = 1 AND created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`);
        const [result] = await pool.execute(query);
 
+
+        //  {
+        //      "Job Id": item.job_code_id,
+        //      "Job Received On": convertDate(item.job_received_on),
+        //      "Customer Name": item.customer_trading_name,
+        //      "Account Manager": item.account_manager_name,
+        //      "Clients": item.client_trading_name,
+        //      "Service Type": item.service_name,
+        //      "Job Type": item.job_type_name,
+        //      "Status": item.status,
+        //      "Allocated To": item.allocated_name,
+        //      "Allocated to (Other)": item.multiple_staff_names,
+        //      "Reviewer Name": item.reviewer_name,
+        //      "Companies House Due Date": convertDate(item.filing_Companies_date),
+        //      "Internal Deadline": convertDate(item.internal_deadline_date),
+        //      "Customer Deadline": convertDate(item.customer_deadline_date),
+        //      "Initial Query Sent Date": convertDate(item.query_sent_date),
+        //      "Final Query Response Received Date": convertDate(
+        //        item.final_query_response_received_date
+        //      ),
+        //      "First Draft Sent": convertDate(item.draft_sent_on),
+        //      "Final Draft Sent": convertDate(item.final_draft_sent_on),
+        //    };
+
       if (result && result.length > 0) {
-        let csvContent = "Staff Name,Staff Email\n";
+        let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
         result?.forEach(val => {
-          //csvContent += `${val.staff_fullname},${val.staff_email}\n`;
+         csvContent += `${val.job_code_id},${val.job_received_on},${val.customer_trading_name},${val.account_manager_name},${val.client_trading_name},${val.service_name},${val.job_type_name},${val.status},${val.allocated_name},"${val.multiple_staff_names}",${val.reviewer_name},${val.filing_Companies_date},${val.internal_deadline_date},${val.customer_deadline_date},${val.query_sent_date},${val.final_query_response_received_date},${val.draft_sent_on},${val.final_draft_sent_on}\n`;
         });
 
 
