@@ -264,7 +264,7 @@ const ClientList = () => {
             });
 
             setStatusId(Id);
-            GetAllJobList(clientDetailSingle.id);
+            GetAllJobListByCustomer("");
           } else if (res.data === "W") {
             sweatalert.fire({
               title: "Warning",

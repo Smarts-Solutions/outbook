@@ -1172,7 +1172,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
 
 const getJobByClient = async (job) => {
   const { client_id, StaffUserId } = job;
-  // console.log("getJobByClient", job);
+  //console.log("getJobByClient ----->", job);
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
