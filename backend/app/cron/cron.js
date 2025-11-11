@@ -41,10 +41,14 @@ module.exports = (app) => {
     `);
    sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet  || []);
 
+   }, 
 
+   {
+   timezone: "Europe/London"
+   });
 
+  cron.schedule("0 9 * * *", async () => {
     ////////-----------Trigger Report Email --------------------//////
-
    const [wipAndToBeStartedMoreThan] = await pool.execute(`
     SELECT 
         staffs.id AS id,
@@ -59,16 +63,13 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
    wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan  || []);
-  }, 
-
-   {
-   timezone: "Europe/London"
-   });
-
-
+  
+}
+, {
+  timezone: "Europe/London"
+}
+ );
    
-
-
 };
 
 //  cron.schedule("* * * * *", async () => {
@@ -78,6 +79,8 @@ module.exports = (app) => {
 //  }, {
 //    timezone: "Europe/London"
 //  });
+
+
 
  // function to send email in worker thread for Missing Timesheet Report
 function sendEmailInWorkerMissingTimeSheet(rows) {
@@ -107,6 +110,8 @@ function sendEmailInWorkerSubmitTimesheet(rows) {
   });
 }
 
+
+///////////////////----DAILY REORT EMAIL FUNCTIONS ----/////////////////////
 // Trigger Report Email
 function wipAndToBeStartedMoreThan_7(rows) {
   const worker = new Worker(join(__dirname, "wipAndToBeStartedMoreThanSevenDays.js"), { type: "module" });
