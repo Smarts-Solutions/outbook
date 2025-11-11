@@ -65,6 +65,8 @@ module.exports = (app) => {
    wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole  || []);
   
    expectedDeliveryDateChanged(superAdminAdminManagementRole  || []);
+   
+   missingPaperworkInMax2Days(superAdminAdminManagementRole  || []);
   
 }
 , {
@@ -159,7 +161,24 @@ function expectedDeliveryDateChanged(rows) {
   );
 }
 
+// Trigger Missing Paperwork in Max 2 Days Report Email
+function missingPaperworkInMax2Days(rows) {
+  const worker = new Worker(join(__dirname, "missingPaperworkInMax2Days.js"), { type: "module" });
+  worker.postMessage(rows);
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--",msg)
+  }
+  );
+  worker.on("error", (err) => console.log("Worker error --:", err));
+  worker.on("exit", (code) => {
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
+  }
+  );
+}
 
 
 
 
+// SELECT id,job_id,created_at
+// FROM jobs
+// WHERE created_at <= NOW() - INTERVAL 2 DAY;
