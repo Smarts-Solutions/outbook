@@ -65,7 +65,7 @@ function JobCustomReport() {
         "job_type_id",
         "status_type_id"
       ],
-      additionalField: [],
+    additionalField: [],
     job_id: null,
     customer_id: null,
     client_id: null,
@@ -497,9 +497,9 @@ function JobCustomReport() {
     link.click();
   };
 
-  const handleFilterChange = (e , type) => {
+  const handleFilterChange = (e, type) => {
 
-    if(type == 'additionalField'){
+    if (type == 'additionalField') {
       const values = e.map((opt) => opt.value);
       let additionalFieldArray = sortByReference(values)
       setFilters((prev) => ({
@@ -514,11 +514,28 @@ function JobCustomReport() {
       const values = e.map((opt) => opt.value);
       setOptions([]);
       let gropByArray = sortByReference(values)
-      setFilters((prev) => ({
-        ...prev,
-        groupBy: sortByReference(gropByArray)
-      }));
-      return;
+
+      // console.log("gropByArray ", gropByArray);
+
+      if (!gropByArray.includes('job_id')) {
+        setFilters((prev) => ({
+          ...prev,
+          groupBy: sortByReference(gropByArray),
+          additionalField: []
+        }));
+        return;
+      } else {
+
+        setFilters((prev) => ({
+          ...prev,
+          groupBy: sortByReference(gropByArray)
+        }));
+        return;
+
+
+      }
+
+
     }
 
 
@@ -708,7 +725,7 @@ function JobCustomReport() {
     if (role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.groupBy , filters.additionalField ,filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id]);
+  }, [filters.groupBy, filters.additionalField, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id]);
 
 
   //console.log("filters ", filters);
@@ -762,8 +779,14 @@ function JobCustomReport() {
   ];
 
 
-   const optionAdditionalBy = [
-    { value: "date_received_on", label: "Received On" }
+  const optionAdditionalBy = [
+    { value: "date_received_on", label: "Date Received On" },
+    { value: "staff_full_name", label: "Staff Full Name" },
+    { value: "role", label: "Role" },
+    { value: "staff_email", label: "Email Address" },
+    { value: "line_manager", label: "Line Manager" },
+    { value: "staff_status", label: "Status" },
+
   ];
 
 
@@ -890,7 +913,7 @@ function JobCustomReport() {
             "job_type_id",
             "status_type_id"
           ],
-          additionalField: [],
+        additionalField: [],
         job_id: null,
         customer_id: null,
         client_id: null,
@@ -908,652 +931,652 @@ function JobCustomReport() {
         toDate: null,
       })
 
+    }
+  };
+
+  const deleteFilterIdFunction = async () => {
+    // confirm before delete
+    const result = await sweatalert.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+      var req = { action: "deleteFilterId", filterId: filterId, type: "job_custom_report" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+
+            sweatalert.fire({
+              title: 'Success',
+              text: response.message,
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+            getAllFilters();
+            resetFunction();
+
+          } else {
+            sweatalert.fire({
+              title: 'Error',
+              text: 'Failed to save filters. Please try again.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    } else {
+      return
+    }
+
+
   }
-};
-
-const deleteFilterIdFunction = async () => {
-  // confirm before delete
-  const result = await sweatalert.fire({
-    title: 'Are you sure?',
-    text: "You won't be able to revert this!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it!'
-  });
-  if (result.isConfirmed) {
-    var req = { action: "deleteFilterId", filterId: filterId, type: "job_custom_report" };
-    var data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-
-          sweatalert.fire({
-            title: 'Success',
-            text: response.message,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          getAllFilters();
-          resetFunction();
-
-        } else {
-          sweatalert.fire({
-            title: 'Error',
-            text: 'Failed to save filters. Please try again.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  } else {
-    return
-  }
-
-
-}
 
 
 
-return (
-  <div className="container-fluid pb-3">
-    {/* Page Title */}
-    <div className="content-title">
-      <div className="tab-title mb-3">
-        <div className="row align-items-start">
-          <div className="col-12 col-sm-7 ">
-            <div>
-              <h3 className="mt-0">Custom Job Report</h3>
-
-            </div>
-
-            <div className='w-50 mt-2'>
-              <label className="form-label fw-medium mt-2 mb-1">
-                Select Saved Filters
-              </label>
-
-              <div className="d-flex align-items-center gap-2">
-                <Select
-
-                  options={[
-                    { value: "", label: "Select..." },
-                    ...getAllFilterData.map(opt => ({
-                      value: opt.value,
-                      label: <span dangerouslySetInnerHTML={{ __html: opt.label }} />
-                    }))
-                  ]}
-                  value={
-                    getAllFilterData && getAllFilterData.length > 0
-                      ? getAllFilterData.find(
-                        (opt) => Number(opt.value) === Number(filterId)
-                      ) || null
-                      : null
-                  }
-                  onChange={handleFilterSelect}
-                  isSearchable
-                  className="shadow-sm select-staff rounded-pill flex-grow-1"
-                />
-
-                {
-
-                  !['', null, undefined].includes(filterId) && (
-                    <i
-                      className="fa fa-trash"
-                      title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
-                  )
-                }
+  return (
+    <div className="container-fluid pb-3">
+      {/* Page Title */}
+      <div className="content-title">
+        <div className="tab-title mb-3">
+          <div className="row align-items-start">
+            <div className="col-12 col-sm-7 ">
+              <div>
+                <h3 className="mt-0">Custom Job Report</h3>
 
               </div>
+
+              <div className='w-50 mt-2'>
+                <label className="form-label fw-medium mt-2 mb-1">
+                  Select Saved Filters
+                </label>
+
+                <div className="d-flex align-items-center gap-2">
+                  <Select
+
+                    options={[
+                      { value: "", label: "Select..." },
+                      ...getAllFilterData.map(opt => ({
+                        value: opt.value,
+                        label: <span dangerouslySetInnerHTML={{ __html: opt.label }} />
+                      }))
+                    ]}
+                    value={
+                      getAllFilterData && getAllFilterData.length > 0
+                        ? getAllFilterData.find(
+                          (opt) => Number(opt.value) === Number(filterId)
+                        ) || null
+                        : null
+                    }
+                    onChange={handleFilterSelect}
+                    isSearchable
+                    className="shadow-sm select-staff rounded-pill flex-grow-1"
+                  />
+
+                  {
+
+                    !['', null, undefined].includes(filterId) && (
+                      <i
+                        className="fa fa-trash"
+                        title="Delete Filter"
+                        onClick={() => deleteFilterIdFunction()}
+                        style={{ cursor: "pointer", color: "red" }}
+                      ></i>
+                    )
+                  }
+
+                </div>
+              </div>
+
+
             </div>
 
-
-          </div>
-
-          {/* get filters Dropdown */}
+            {/* get filters Dropdown */}
 
 
 
-          {/* end get filters Dropdown */}
+            {/* end get filters Dropdown */}
 
 
 
 
 
 
-          <div className="col-12 col-sm-5">
-            <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
-              <button className="btn btn-info" id="btn-export"
-                onClick={() => exportToCSV(showData)}>
-                Export Data
-              </button>
+            <div className="col-12 col-sm-5">
+              <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
+                <button className="btn btn-info" id="btn-export"
+                  onClick={() => exportToCSV(showData)}>
+                  Export Data
+                </button>
 
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    {/* <div className="row mb-3">
+      {/* <div className="row mb-3">
         <div className="col-12">
           <h5 className="fw-semibold mb-0">Timesheet Reports</h5>
         </div>
       </div> */}
 
-    {/* Filters Section */}
-    <div className="row g-3 mb-3 bg-light p-3  mt-4 rounded shadow-sm align-items-end">
-      {/* Group By */}
-       <div className="col-lg-4 col-md-6">
-        <label className="form-label fw-medium">Group By</label>
-
-        <Select
-          isMulti
-          options={optionGroupBy}
-          value={optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value))}
-          onChange={(selectedOptions, actionMeta) => {
-            // console.log("Selected Options:", selectedOptions);
-            //console.log("Action Meta:", actionMeta);
-
-            if (actionMeta.action === "remove-value") {
-              console.log("Removed value:", actionMeta.removedValue.value);
-              addAndRemoveGroupBy(actionMeta.removedValue.value, 'remove');
-            }
-            if (actionMeta.action === "select-option") {
-              console.log("Added value:", actionMeta.option.value);
-              addAndRemoveGroupBy(actionMeta.option.value, 'add');
-            }
-            handleFilterChange(selectedOptions);
-          }}
-          className="basic-multi-select"
-          classNamePrefix="select"
-        />
-      </div>
-
-       {/* Additional Field */}
-       <div className="col-lg-4 col-md-6">
-        <label className="form-label fw-medium">Additional Fields</label>
-
-        <Select
-          isMulti
-          options={optionAdditionalBy}
-          value={optionAdditionalBy?.filter((opt) => filters?.additionalField.includes(opt.value))}
-          onChange={(selectedOptions, actionMeta) => {
-            // console.log("Selected Options:", selectedOptions);
-            //console.log("Action Meta:", actionMeta);
-            handleFilterChange(selectedOptions , 'additionalField');
-          }}
-          className="basic-multi-select"
-          classNamePrefix="select"
-        />
-      </div>
-
-
-      {/* Field To Display Job */}
-      {(filters?.groupBy?.includes('job_id')) && (
+      {/* Filters Section */}
+      <div className="row g-3 mb-3 bg-light p-3  mt-4 rounded shadow-sm align-items-end">
+        {/* Group By */}
         <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Job
-          </label>
-          <Select
-            options={[
-              { value: "", label: "Select..." },
-              ...jobAllData,
-            ]}
-            value={
-              jobAllData && jobAllData.length > 0
-                ? jobAllData.find((opt) => Number(opt.value) === Number(filters.job_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "job_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-      {/* Field To Display Customer */}
-      {filters?.groupBy?.includes('customer_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Customer
-          </label>
-          <Select
-            options={[
-              { value: "", label: "Select..." },
-              ...customerAllData,
-            ]}
-            value={
-              customerAllData && customerAllData.length > 0
-                ? customerAllData.find((opt) => Number(opt.value) === Number(filters.customer_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "customer_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-      {/* Field To Display Client */}
-      {filters?.groupBy?.includes('client_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Client
-          </label>
-          <Select
-            options={[
-              { value: "", label: "Select..." },
-              ...clientAllData,
-            ]}
-            value={
-              clientAllData && clientAllData.length > 0
-                ? clientAllData.find((opt) => Number(opt.value) === Number(filters.client_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "client_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-      {/* Field To Display Account Manager  */}
-      {filters?.groupBy?.includes('account_manager_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Account Manager
-          </label>
+          <label className="form-label fw-medium">Group By</label>
 
           <Select
+            isMulti
+            options={optionGroupBy}
+            value={optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value))}
+            onChange={(selectedOptions, actionMeta) => {
+              // console.log("Selected Options:", selectedOptions);
+              //console.log("Action Meta:", actionMeta);
 
-            options={[
-              { value: "", label: "Select..." },
-              ...accountManagerAllData,
-            ]}
-            value={
-              accountManagerAllData && accountManagerAllData.length > 0
-                ? accountManagerAllData.find((opt) => Number(opt.value) === Number(filters.account_manager_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "account_manager_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
+              if (actionMeta.action === "remove-value") {
+                console.log("Removed value:", actionMeta.removedValue.value);
+                addAndRemoveGroupBy(actionMeta.removedValue.value, 'remove');
+              }
+              if (actionMeta.action === "select-option") {
+                console.log("Added value:", actionMeta.option.value);
+                addAndRemoveGroupBy(actionMeta.option.value, 'add');
+              }
+              handleFilterChange(selectedOptions);
+            }}
+            className="basic-multi-select"
+            classNamePrefix="select"
           />
         </div>
-      )}
 
-      {/* Field To Display Allocated To */}
-      {filters?.groupBy?.includes('allocated_to_id') && (
+        {/* Additional Field */}
         <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Allocated To
-          </label>
+          <label className="form-label fw-medium">Additional Fields</label>
 
           <Select
-
-            options={[
-              { value: "", label: "Select..." },
-              ...allocatedToAllData,
-            ]}
-            value={
-              allocatedToAllData && allocatedToAllData?.length > 0
-                ? allocatedToAllData?.find((opt) => Number(opt.value) === Number(filters.allocated_to_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "allocated_to_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
+            isMulti
+            options={optionAdditionalBy}
+            value={optionAdditionalBy?.filter((opt) => filters?.additionalField.includes(opt.value))}
+            onChange={(selectedOptions, actionMeta) => {
+              // console.log("Selected Options:", selectedOptions);
+              //console.log("Action Meta:", actionMeta);
+              handleFilterChange(selectedOptions, 'additionalField');
+            }}
+            className="basic-multi-select"
+            classNamePrefix="select"
           />
         </div>
-      )}
-
-      {/* Field To Display Reviewer  */}
-      {filters?.groupBy?.includes('reviewer_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Reviewer
-          </label>
-
-          <Select
-
-            options={[
-              { value: "", label: "Select..." },
-              ...reviewerAllData,
-            ]}
-            value={
-              reviewerAllData && reviewerAllData?.length > 0
-                ? reviewerAllData?.find((opt) => Number(opt.value) === Number(filters.reviewer_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "reviewer_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-      {/* Field To Display Allocated Other  */}
-      {filters?.groupBy?.includes('allocated_to_other_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Allocated To (Other)
-          </label>
-
-          <Select
-
-            options={[
-              { value: "", label: "Select..." },
-              ...otherStaffAllData,
-            ]}
-            value={
-              otherStaffAllData && otherStaffAllData?.length > 0
-                ? otherStaffAllData?.find((opt) => Number(opt.value) === Number(filters.allocated_to_other_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "allocated_to_other_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-      {/* Field To Display Services  */}
-      {filters?.groupBy?.includes('service_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Service
-          </label>
-
-          <Select
-
-            options={[
-              { value: "", label: "Select..." },
-              ...serviceAllData,
-            ]}
-            value={
-              serviceAllData && serviceAllData?.length > 0
-                ? serviceAllData?.find((opt) => Number(opt.value) === Number(filters.service_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "service_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
 
 
-      {/* Field To Display Job Type  */}
-      {filters?.groupBy?.includes('job_type_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Job Type
-          </label>
-
-          <Select
-
-            options={[
-              { value: "", label: "Select..." },
-              ...jobTypeAllData,
-            ]}
-            value={
-              jobTypeAllData && jobTypeAllData?.length > 0
-                ? jobTypeAllData?.find((opt) => Number(opt.value) === Number(filters.job_type_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "job_type_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-      {/* Field To Display Status  */}
-      {filters?.groupBy?.includes('status_type_id') && (
-        <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">
-            Select Status
-          </label>
-          <Select
-            options={[
-              { value: "", label: "Select..." },
-              ...statusAllData,
-            ]}
-            value={
-              statusAllData && statusAllData?.length > 0
-                ? statusAllData?.find((opt) => Number(opt.value) === Number(filters.status_type_id)) || null
-                : null
-            }
-            onChange={(selected) =>
-              handleFilterChange({
-                target: { key: "status_type_id", value: selected.value, label: selected.label },
-              })
-            }
-            isSearchable
-            className="shadow-sm select-staff rounded-pill"
-          />
-        </div>
-      )}
-
-
-      {/* Time Period */}
-      <div className="col-lg-4 col-md-6">
-        <label className="form-label fw-medium">Time Period</label>
-        <select
-          className="form-select shadow-sm"
-          id="timePeriod"
-          value={filters.timePeriod}
-          onChange={(selected) =>
-            handleFilterChange({
-              target: { key: "timePeriod", value: selected.target.value },
-            })
-          }
-        >
-          <option value={""}>--Select--</option>
-          <option value={"this_week"}>This week</option>
-          <option value={"last_week"}>Last Week</option>
-          <option value={"this_month"}>This month</option>
-          <option value={"last_month"}>Last Month</option>
-          <option value={"this_quarter"}>This quarter</option>
-          <option value={"last_quarter"}>Last quarter</option>
-          <option value={"this_year"}>This year</option>
-          <option value={"last_year"}>Last year</option>
-          <option value={"custom"}>Custom</option>
-        </select>
-      </div>
-
-
-
-      {/* From Date  And To Date */}
-      {filters.timePeriod == "custom" && (
-        <>
-
-          {/* From Date */}
+        {/* Field To Display Job */}
+        {(filters?.groupBy?.includes('job_id')) && (
           <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">From Date</label>
-            <input
-              type="date"
-              className="form-control shadow-sm"
-              id="fromDate"
-              value={filters.fromDate}
-              //  min={today} 
+            <label className="form-label fw-medium">
+              Select Job
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...jobAllData,
+              ]}
+              value={
+                jobAllData && jobAllData.length > 0
+                  ? jobAllData.find((opt) => Number(opt.value) === Number(filters.job_id)) || null
+                  : null
+              }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "fromDate", value: selected.target.value },
+                  target: { key: "job_id", value: selected.value, label: selected.label },
                 })
               }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
+        )}
 
-          {/* To Date */}
+        {/* Field To Display Customer */}
+        {filters?.groupBy?.includes('customer_id') && (
           <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">To Date</label>
-            <input
-              type="date"
-              className="form-control shadow-sm"
-              id="toDate"
-              value={filters.toDate}
-              min={filters.fromDate || today}
+            <label className="form-label fw-medium">
+              Select Customer
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...customerAllData,
+              ]}
+              value={
+                customerAllData && customerAllData.length > 0
+                  ? customerAllData.find((opt) => Number(opt.value) === Number(filters.customer_id)) || null
+                  : null
+              }
               onChange={(selected) =>
                 handleFilterChange({
-                  target: { key: "toDate", value: selected.target.value },
+                  target: { key: "customer_id", value: selected.value, label: selected.label },
                 })
               }
-              disabled={!filters.fromDate}
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
-        </>
-      )}
+        )}
+
+        {/* Field To Display Client */}
+        {filters?.groupBy?.includes('client_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Client
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...clientAllData,
+              ]}
+              value={
+                clientAllData && clientAllData.length > 0
+                  ? clientAllData.find((opt) => Number(opt.value) === Number(filters.client_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "client_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Account Manager  */}
+        {filters?.groupBy?.includes('account_manager_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Account Manager
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...accountManagerAllData,
+              ]}
+              value={
+                accountManagerAllData && accountManagerAllData.length > 0
+                  ? accountManagerAllData.find((opt) => Number(opt.value) === Number(filters.account_manager_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "account_manager_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Allocated To */}
+        {filters?.groupBy?.includes('allocated_to_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Allocated To
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...allocatedToAllData,
+              ]}
+              value={
+                allocatedToAllData && allocatedToAllData?.length > 0
+                  ? allocatedToAllData?.find((opt) => Number(opt.value) === Number(filters.allocated_to_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "allocated_to_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Reviewer  */}
+        {filters?.groupBy?.includes('reviewer_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Reviewer
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...reviewerAllData,
+              ]}
+              value={
+                reviewerAllData && reviewerAllData?.length > 0
+                  ? reviewerAllData?.find((opt) => Number(opt.value) === Number(filters.reviewer_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "reviewer_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Allocated Other  */}
+        {filters?.groupBy?.includes('allocated_to_other_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Allocated To (Other)
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...otherStaffAllData,
+              ]}
+              value={
+                otherStaffAllData && otherStaffAllData?.length > 0
+                  ? otherStaffAllData?.find((opt) => Number(opt.value) === Number(filters.allocated_to_other_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "allocated_to_other_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Services  */}
+        {filters?.groupBy?.includes('service_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Service
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...serviceAllData,
+              ]}
+              value={
+                serviceAllData && serviceAllData?.length > 0
+                  ? serviceAllData?.find((opt) => Number(opt.value) === Number(filters.service_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "service_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
 
 
-      {/* Display By */}
-      <div className="col-lg-4 col-md-6">
-        <label className="form-label fw-medium">Display By</label>
-        <select
-          className="form-select shadow-sm"
-          id="displayBy"
-          value={filters.displayBy}
-          onChange={(selected) =>
-            handleFilterChange({
-              target: { key: "displayBy", value: selected.target.value },
-            })
-          }
-        >
-          <option value={""}>--Select--</option>
-          <option value={"Daily"}>Daily</option>
-          <option value={"Weekly"}>Weekly</option>
-          <option value={"Monthly"}>Monthly</option>
-          <option value={"Fortnightly"}>Fortnightly</option>
-          <option value={"Quarterly"}>Quarterly</option>
-          <option value={"Yearly"}>Yearly</option>
-        </select>
-      </div>
-      {/* Reset Button */}
-      <div className="col-lg-4 col-md-6">
-        <button
-          className="btn btn-outline-secondary shadow-sm rounded-pill border-3 fw-bold"
-          id="btn-reset"
-          onClick={() => resetFunction()}
-        >
-          Clear Filter
-        </button>
-        <button
-          className="btn btn-info shadow-sm rounded-pill ms-3"
-          id="btn-reset"
-          onClick={() => saveFilterFunction()}
-        >
-          Save Filters
-        </button>
-      </div>
+        {/* Field To Display Job Type  */}
+        {filters?.groupBy?.includes('job_type_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Job Type
+            </label>
+
+            <Select
+
+              options={[
+                { value: "", label: "Select..." },
+                ...jobTypeAllData,
+              ]}
+              value={
+                jobTypeAllData && jobTypeAllData?.length > 0
+                  ? jobTypeAllData?.find((opt) => Number(opt.value) === Number(filters.job_type_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "job_type_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Status  */}
+        {filters?.groupBy?.includes('status_type_id') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Select Status
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...statusAllData,
+              ]}
+              value={
+                statusAllData && statusAllData?.length > 0
+                  ? statusAllData?.find((opt) => Number(opt.value) === Number(filters.status_type_id)) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "status_type_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
 
 
-
-    </div>
-
-
-    {/* Filtered Data Display */}
-    <div className='datatable-container'>
-      {/* <h6>Filtered Data:</h6> */}
-      {
-        //console.log("showData?.rows ", showData?.rows)
-      }
-      {showData?.rows == undefined || showData?.rows?.length === 0 ? (
-        <div className='text-center'>
-          <img
-            src={noDataImage}
-            alt="No records available"
-            style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
-          />
-          <p className='fs-16'>There are no records to display</p>
-        </div>
-      ) : (
-        <div className='table-responsive fixed-table-header'>
-          <table
-            className="table rdt_Table"
-          // className="table table-bordered"
-          // style={{
-          //   fontSize: "14px",
-          //   width: "100%",
-          //   overflowX: "auto",
-          //   display: "block",
-          // }}
+        {/* Time Period */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Time Period</label>
+          <select
+            className="form-select shadow-sm"
+            id="timePeriod"
+            value={filters.timePeriod}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "timePeriod", value: selected.target.value },
+              })
+            }
           >
-            <thead
-            // className="rdt_TableHead"
+            <option value={""}>--Select--</option>
+            <option value={"this_week"}>This week</option>
+            <option value={"last_week"}>Last Week</option>
+            <option value={"this_month"}>This month</option>
+            <option value={"last_month"}>Last Month</option>
+            <option value={"this_quarter"}>This quarter</option>
+            <option value={"last_quarter"}>Last quarter</option>
+            <option value={"this_year"}>This year</option>
+            <option value={"last_year"}>Last year</option>
+            <option value={"custom"}>Custom</option>
+          </select>
+        </div>
+
+
+
+        {/* From Date  And To Date */}
+        {filters.timePeriod == "custom" && (
+          <>
+
+            {/* From Date */}
+            <div className="col-lg-4 col-md-6">
+              <label className="form-label fw-medium">From Date</label>
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="fromDate"
+                value={filters.fromDate}
+                //  min={today} 
+                onChange={(selected) =>
+                  handleFilterChange({
+                    target: { key: "fromDate", value: selected.target.value },
+                  })
+                }
+              />
+            </div>
+
+            {/* To Date */}
+            <div className="col-lg-4 col-md-6">
+              <label className="form-label fw-medium">To Date</label>
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="toDate"
+                value={filters.toDate}
+                min={filters.fromDate || today}
+                onChange={(selected) =>
+                  handleFilterChange({
+                    target: { key: "toDate", value: selected.target.value },
+                  })
+                }
+                disabled={!filters.fromDate}
+              />
+            </div>
+          </>
+        )}
+
+
+        {/* Display By */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Display By</label>
+          <select
+            className="form-select shadow-sm"
+            id="displayBy"
+            value={filters.displayBy}
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { key: "displayBy", value: selected.target.value },
+              })
+            }
+          >
+            <option value={""}>--Select--</option>
+            <option value={"Daily"}>Daily</option>
+            <option value={"Weekly"}>Weekly</option>
+            <option value={"Monthly"}>Monthly</option>
+            <option value={"Fortnightly"}>Fortnightly</option>
+            <option value={"Quarterly"}>Quarterly</option>
+            <option value={"Yearly"}>Yearly</option>
+          </select>
+        </div>
+        {/* Reset Button */}
+        <div className="col-lg-4 col-md-6">
+          <button
+            className="btn btn-outline-secondary shadow-sm rounded-pill border-3 fw-bold"
+            id="btn-reset"
+            onClick={() => resetFunction()}
+          >
+            Clear Filter
+          </button>
+          <button
+            className="btn btn-info shadow-sm rounded-pill ms-3"
+            id="btn-reset"
+            onClick={() => saveFilterFunction()}
+          >
+            Save Filters
+          </button>
+        </div>
+
+
+
+      </div>
+
+
+      {/* Filtered Data Display */}
+      <div className='datatable-container'>
+        {/* <h6>Filtered Data:</h6> */}
+        {
+          //console.log("showData?.rows ", showData?.rows)
+        }
+        {showData?.rows == undefined || showData?.rows?.length === 0 ? (
+          <div className='text-center'>
+            <img
+              src={noDataImage}
+              alt="No records available"
+              style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+            />
+            <p className='fs-16'>There are no records to display</p>
+          </div>
+        ) : (
+          <div className='table-responsive fixed-table-header'>
+            <table
+              className="table rdt_Table"
+            // className="table table-bordered"
+            // style={{
+            //   fontSize: "14px",
+            //   width: "100%",
+            //   overflowX: "auto",
+            //   display: "block",
+            // }}
             >
-              <tr
-                className="rdt_TableHeadRow"
+              <thead
+              // className="rdt_TableHead"
               >
-                {showData?.columns?.map((col, idx) => (
-                  <th className='border-bottom-0' key={idx}
-                    style={{ fontSize: "15px", fontWeight: "bold", minWidth: "130px" }}
-                  >
-                    {getColumnName(col)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {showData?.rows?.map((row, rowIdx) => (
-                <tr key={rowIdx}>
-                  {showData?.columns?.map((col, colIdx) => (
-                    <td key={colIdx} style={{ padding: "10px", }}>
-                      {row[col] !== undefined ? row[col] : ""}
-                    </td>
+                <tr
+                  className="rdt_TableHeadRow"
+                >
+                  {showData?.columns?.map((col, idx) => (
+                    <th className='border-bottom-0' key={idx}
+                      style={{ fontSize: "15px", fontWeight: "bold", minWidth: "130px" }}
+                    >
+                      {getColumnName(col)}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {showData?.rows?.map((row, rowIdx) => (
+                  <tr key={rowIdx}>
+                    {showData?.columns?.map((col, colIdx) => (
+                      <td key={colIdx} style={{ padding: "10px", }}>
+                        {row[col] !== undefined ? row[col] : ""}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      )}
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 
 }
 
@@ -1570,10 +1593,15 @@ function getColumnName(columnKey) {
     service_id: "Service",
     job_type_id: "Job Type",
     status_type_id: "Status",
-    line_manager_id: "Line Manager",
+    // line_manager_id: "Line Manager",
     date: "Created Date",
     total_count: "Total Count",
-    date_received_on: "Received On",
+    date_received_on: "Date Received On",
+    staff_full_name: "Staff Full Name",
+    role: "Role",
+    staff_email: "Email Address",
+    line_manager: "Line Manager",
+    staff_status: "Status",
   };
 
   // ✅ check if columnKey is a date string (yyyy-mm-dd format)

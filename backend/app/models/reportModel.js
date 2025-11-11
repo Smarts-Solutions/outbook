@@ -3289,12 +3289,18 @@ const getJobCustomReport = async (Report) => {
 
         //console.log("where", where);
 
-      
+
         // ===== Final Query =====
         const unpivotSQL = `
             SELECT
                 raw.job_id,
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+                jobcreatestaff.email AS staff_email,
+                staffrole.role AS role,
+                jobcreatestaff.status AS staff_status,
+                CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+
                 
 
                 CONCAT_WS('::', raw.job_id) AS group_value,
@@ -3333,6 +3339,7 @@ const getJobCustomReport = async (Report) => {
                     j.reviewer AS reviewer_id,
                     j.service_id,
                     j.status_type AS status_type_id,
+                    j.staff_created_id,
                     j.created_at AS work_date
                 FROM jobs AS j
             ) AS raw
@@ -3346,6 +3353,12 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN master_status AS st ON raw.status_type_id = st.id
             LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
             LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
+            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+            LEFT JOIN line_managers AS lm 
+            ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff 
+            ON lm.staff_to = managerstaff.id
             ${where}
             ORDER BY raw.job_id
         `;
@@ -3358,7 +3371,7 @@ const getJobCustomReport = async (Report) => {
         conn.release();
 
         //   console.log("rows.length", rows.length);
-       // console.log("rows", rows);
+        // console.log("rows", rows);
 
 
         // Aggregate JS
@@ -3391,10 +3404,10 @@ const getJobCustomReport = async (Report) => {
             // Now dynamically build groupKeyParts
             const groupKeyParts = groupBy.map(idKey => {
                 const nameKey = idToNameMap[idKey];
-                return r[nameKey] || 'NULL';        
+                return r[nameKey] || 'NULL';
             });
 
-    
+
             // const groupKeyParts = [
             //     r.group_value || 'NULL',
             //     r.job_name || 'NULL',
@@ -3428,7 +3441,15 @@ const getJobCustomReport = async (Report) => {
                     service_name: r.service_name,
                     job_type_name: r.job_type_name,
                     status_type_name: r.status_type_name,
+
+
+                    // Additional Fields
                     date_received_on: r.date_received_on,
+                    staff_full_name: r.staff_full_name,
+                    staff_email: r.staff_email,
+                    role: r.role,
+                    staff_status: r.staff_status,
+                    line_manager: r.line_manager,
                     //date: workDateStr,
                     jobIds: new Set(),
                     periodSeconds: {}
@@ -3459,7 +3480,15 @@ const getJobCustomReport = async (Report) => {
             row['service_id'] = g.service_name;
             row['job_type_id'] = g.job_type_name;
             row['status_type_id'] = g.status_type_name;
+
+
+            // Additional fields
             row['date_received_on'] = g.date_received_on;
+            row['staff_full_name'] = g.staff_full_name;
+            row['staff_email'] = g.staff_email;
+            row['role'] = g.role;
+            row['staff_status'] = g.staff_status == '1' ? 'Active' : 'Inactive';
+            row['line_manager'] = g.line_manager;
 
             // fill counts for each period
             let totalCount = 0;
