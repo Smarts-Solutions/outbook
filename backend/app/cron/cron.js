@@ -24,8 +24,6 @@ module.exports = (app) => {
     sendEmailInWorkerMissingTimeSheet(staffResult || []);
 
     
-
-
     ////////-----------Submit Timesheet Reminder Email --------------------//////
 
    const [staffResultSubmitTimeSheet] = await pool.execute(`
@@ -61,17 +59,25 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
    wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan  || []);
-
-
   }, 
-  {
-  timezone: "Europe/London"
- }
-)
+
+   {
+   timezone: "Europe/London"
+   });
+
+
+   
+
 
 };
 
+//  cron.schedule("* * * * *", async () => {
+//   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
 
+   
+//  }, {
+//    timezone: "Europe/London"
+//  });
 
  // function to send email in worker thread for Missing Timesheet Report
 function sendEmailInWorkerMissingTimeSheet(rows) {

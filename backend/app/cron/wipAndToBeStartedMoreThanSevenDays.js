@@ -2,6 +2,19 @@
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
+const convertDate = (date) => {
+  if([null, undefined, ''].includes(date)) {
+    return "-";
+  }
+  if (date) {
+    let newDate = new Date(date);
+    let day = newDate.getDate();
+    let month = newDate.getMonth() + 1;
+    let year = newDate.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+  return "-";
+}
 
 // Missing Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
@@ -105,10 +118,36 @@ parentPort.on("message", async (rows) => {
       if (result && result.length > 0) {
         let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
         result?.forEach(val => {
-         csvContent += `${val.job_code_id},${val.job_received_on},${val.customer_trading_name},${val.account_manager_name},${val.client_trading_name},${val.service_name},${val.job_type_name},${val.status},${val.allocated_name},"${val.multiple_staff_names}",${val.reviewer_name},${val.filing_Companies_date},${val.internal_deadline_date},${val.customer_deadline_date},${val.query_sent_date},${val.final_query_response_received_date},${val.draft_sent_on},${val.final_draft_sent_on}\n`;
+
+        let job_received_on = convertDate(val.job_received_on);
+        customer_trading_name = val.customer_trading_name || ' - ';
+        let account_manager_name = val.account_manager_name || ' - ';
+        let client_trading_name = val.client_trading_name || ' - ';
+        let service_name = val.service_name || ' - ';
+        let job_type_name = val.job_type_name || ' - ';
+        let status = val.status || ' - ';
+        let allocated_name = val.allocated_name || ' - ';
+        let multiple_staff_names = val.multiple_staff_names || ' - ';
+        let reviewer_name = val.reviewer_name || ' - ';
+        let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
+        let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
+        let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
+        let query_sent_date = convertDate(val.query_sent_date) || ' - ';
+        let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
+        let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
+        let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
+ 
+
+
+
+
+
+
+         csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
         });
 
-
+        console.log("CSV Content Generated:\n", csvContent);
+       
         let toEmail = row.staff_email;
         let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
         let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
