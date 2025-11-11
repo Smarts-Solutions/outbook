@@ -10,8 +10,7 @@ module.exports = (app) => {
 
 // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
   cron.schedule("0 9 * * 1", async () => {
-    //console.log("Running a task every Monday at 09:00 AM to send individual emails");
-  //cron.schedule("* * * * *", async () => {
+    ////////-----------Missing Timesheet Report Email --------------------//////
    const [staffResult] = await pool.execute(`
     SELECT 
     id,
@@ -25,7 +24,7 @@ module.exports = (app) => {
     sendEmailInWorkerMissingTimeSheet(staffResult || []);
 
     
- 
+
 
     ////////-----------Submit Timesheet Reminder Email --------------------//////
 
@@ -42,8 +41,26 @@ module.exports = (app) => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
+   sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet  || []);
 
-  sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet  || []);
+
+
+    ////////-----------Trigger Report Email --------------------//////
+
+   const [wipAndToBeStartedMoreThan] = await pool.execute(`
+    SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email
+    FROM staffs
+    JOIN roles ON roles.id = staffs.role_id
+    LEFT JOIN timesheet 
+        ON staffs.id = timesheet.staff_id 
+      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
+    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
+    GROUP BY staffs.id
+    `);
+   wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan  || []);
 
 
   }, 
@@ -82,4 +99,19 @@ function sendEmailInWorkerSubmitTimesheet(rows) {
   worker.on("exit", (code) => {
     if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
   });
+}
+
+// Trigger Report Email
+function wipAndToBeStartedMoreThan_7(rows) {
+  const worker = new Worker(join(__dirname, "wipAndToBeStartedMoreThanSevenDays.js"), { type: "module" });
+  worker.postMessage(rows);
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--",msg)
+  }
+  );
+  worker.on("error", (err) => console.log("Worker error --:", err));
+  worker.on("exit", (code) => {
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
+  }
+  );
 }

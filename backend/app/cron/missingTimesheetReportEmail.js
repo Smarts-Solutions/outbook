@@ -4,8 +4,6 @@ const { parentPort } = require("worker_threads");
 const { missingTimesheetReport } = require("../models/reportModel");
 const { commonEmail } = require("../utils/commonEmail");
 
-
-
 // Missing Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
   for (const row of rows) {

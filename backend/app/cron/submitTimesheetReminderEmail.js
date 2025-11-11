@@ -18,8 +18,8 @@ parentPort.on("message", async (rows) => {
             });
 
            
-            let toEmail = "shakirpnp@gmail.com";
-           // let toEmail = row.staff_email;
+            
+            let toEmail = row.staff_email;
             let subjectEmail = "Submit Timesheet Reminder Report"
             let htmlEmail = "<h3>Please find the attached Submit Timesheet Report.</h3>"
             const dynamic_attachment = csvContent;
