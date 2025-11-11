@@ -65,8 +65,10 @@ module.exports = (app) => {
    wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole  || []);
   
    expectedDeliveryDateChanged(superAdminAdminManagementRole  || []);
-   
+
    missingPaperworkInMax2Days(superAdminAdminManagementRole  || []);
+   
+   jobsSittingWithForOverMonth(superAdminAdminManagementRole  || []);
   
 }
 , {
@@ -76,7 +78,7 @@ module.exports = (app) => {
    
 };
 
- cron.schedule("* * * * 1", async () => {
+ cron.schedule("* * * * *", async () => {
   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
  const [superAdminAdminManagementRole] = await pool.execute(`
     SELECT 
@@ -86,13 +88,13 @@ module.exports = (app) => {
     FROM staffs
     JOIN roles ON roles.id = staffs.role_id
     LEFT JOIN timesheet 
-        ON staffs.id = timesheet.staff_id 
-      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
+        ON staffs.id = timesheet.staff_id
+      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8))
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
   
-  
+   missingPaperworkInMax2Days(superAdminAdminManagementRole  || []);
   
    
  }, {
@@ -176,20 +178,19 @@ function missingPaperworkInMax2Days(rows) {
   );
 }
 
+// Trigger Jobs Sitting With Staff For Over Month Report Email
+function jobsSittingWithForOverMonth(rows) {
+  const worker = new Worker(join(__dirname, "jobsSittingWithForOverMonth.js"), { type: "module" });
+  worker.postMessage(rows);
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--",msg)
+  }
+  );
+  worker.on("error", (err) => console.log("Worker error --:", err));
+  worker.on("exit", (code) => {
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
+  }
+  );
+}
 
 
-
-
-
-// SELECT 
-//     jobs.id,
-//     jobs.job_id,
-//     jobs.created_at
-// FROM 
-//     jobs
-// LEFT JOIN 
-//     missing_logs 
-//     ON jobs.id = missing_logs.job_id
-// WHERE 
-//     jobs.created_at <= NOW() - INTERVAL 2 DAY
-//     AND missing_logs.job_id IS NULL;

@@ -3,7 +3,7 @@ const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const convertDate = (date) => {
-  if([null, undefined, ''].includes(date)) {
+  if ([null, undefined, ''].includes(date)) {
     return "-";
   }
   if (date) {
@@ -16,7 +16,7 @@ const convertDate = (date) => {
   return "-";
 }
 
-
+// Missing Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
   for (const row of rows) {
     try {
@@ -54,7 +54,7 @@ parentPort.on("message", async (rows) => {
           DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
           DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
           DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
-        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
+        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
         FROM 
         jobs
         LEFT JOIN 
@@ -82,38 +82,18 @@ parentPort.on("message", async (rows) => {
         queries ON queries.job_id = jobs.id
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
-        WHERE jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        WHERE 
+        jobs.created_at <= NOW() - INTERVAL 30 DAY
+        AND jobs.status_type != 6
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
         `;
 
       // const [result] = await pool.execute(`SELECT * FROM jobs WHERE status_type = 1 AND created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`);
-       const [result] = await pool.execute(query);
+      const [result] = await pool.execute(query);
 
 
-        //  {
-        //      "Job Id": item.job_code_id,
-        //      "Job Received On": convertDate(item.job_received_on),
-        //      "Customer Name": item.customer_trading_name,
-        //      "Account Manager": item.account_manager_name,
-        //      "Clients": item.client_trading_name,
-        //      "Service Type": item.service_name,
-        //      "Job Type": item.job_type_name,
-        //      "Status": item.status,
-        //      "Allocated To": item.allocated_name,
-        //      "Allocated to (Other)": item.multiple_staff_names,
-        //      "Reviewer Name": item.reviewer_name,
-        //      "Companies House Due Date": convertDate(item.filing_Companies_date),
-        //      "Internal Deadline": convertDate(item.internal_deadline_date),
-        //      "Customer Deadline": convertDate(item.customer_deadline_date),
-        //      "Initial Query Sent Date": convertDate(item.query_sent_date),
-        //      "Final Query Response Received Date": convertDate(
-        //        item.final_query_response_received_date
-        //      ),
-        //      "First Draft Sent": convertDate(item.draft_sent_on),
-        //      "Final Draft Sent": convertDate(item.final_draft_sent_on),
-        //    };
 
       if (result && result.length > 0) {
         let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
@@ -142,17 +122,30 @@ parentPort.on("message", async (rows) => {
          csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
         });
 
-        console.log("CSV Content Generated:\n", csvContent);
-       
+        console.log("CSV Content -->>>:\n", csvContent);
+
+
+
         let toEmail = row.staff_email;
-        let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
-        let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
+
+        let subjectEmail = "Alert: Jobs That Have Been Sitting With Us for Over a Month";
+
+        let htmlEmail = `
+          <h3>Alert: Jobs That Have Been Sitting With Us for Over a Month</h3>
+          <p>Hello,</p>
+          <p>This is to inform you that some jobs have been sitting with us for over a month without any progress or updates.</p>
+          <p>Please review the attached report and take the necessary actions to move these jobs forward.</p>
+          <br>
+          <p>Regards,<br>Your Automation System</p>
+        `;
         const dynamic_attachment = csvContent;
-        const filename = `Jobs_Not_Updated_7Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+        const filename = `Jobs_Sitting_With_Us_OverMonth_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+
+
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+       // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
           //console.log("Missing Timesheet Report email sent successfully.");
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
