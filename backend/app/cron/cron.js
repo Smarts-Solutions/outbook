@@ -179,6 +179,17 @@ function missingPaperworkInMax2Days(rows) {
 
 
 
-// SELECT id,job_id,created_at
-// FROM jobs
-// WHERE created_at <= NOW() - INTERVAL 2 DAY;
+
+
+// SELECT 
+//     jobs.id,
+//     jobs.job_id,
+//     jobs.created_at
+// FROM 
+//     jobs
+// LEFT JOIN 
+//     missing_logs 
+//     ON jobs.id = missing_logs.job_id
+// WHERE 
+//     jobs.created_at <= NOW() - INTERVAL 2 DAY
+//     AND missing_logs.job_id IS NULL;

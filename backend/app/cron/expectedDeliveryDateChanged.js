@@ -3,7 +3,7 @@ const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const convertDate = (date) => {
-  if([null, undefined, ''].includes(date)) {
+  if ([null, undefined, ''].includes(date)) {
     return "-";
   }
   if (date) {
@@ -51,7 +51,7 @@ parentPort.on("message", async (rows) => {
         `;
 
       // const [result] = await pool.execute(`SELECT * FROM jobs WHERE status_type = 1 AND created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`);
-       const [result] = await pool.execute(query);
+      const [result] = await pool.execute(query);
 
 
 
@@ -59,24 +59,32 @@ parentPort.on("message", async (rows) => {
         let csvContent = "Job Id,Customer Name,Client Name,Expected Delivery Date ,Expected Delivery Date Old \n";
         result?.forEach(val => {
 
-  
-        let customer_trading_name = val.customer_trading_name || ' - ';
-        let client_trading_name = val.client_trading_name || ' - ';
-        let expected_delivery_date = val.expected_delivery_date || ' - ';
-        let expected_delivery_date_old = val.expected_delivery_date_old || ' - '; 
 
-        
+          let customer_trading_name = val.customer_trading_name || ' - ';
+          let client_trading_name = val.client_trading_name || ' - ';
+          let expected_delivery_date = val.expected_delivery_date || ' - ';
+          let expected_delivery_date_old = val.expected_delivery_date_old || ' - ';
 
-         csvContent += `${val.job_code_id},${customer_trading_name},${client_trading_name},${expected_delivery_date},${expected_delivery_date_old}\n`;
+
+
+          csvContent += `${val.job_code_id},${customer_trading_name},${client_trading_name},${expected_delivery_date},${expected_delivery_date_old}\n`;
         });
 
-       // console.log("CSV Content Generated Expected Delevery:\n", csvContent);
-       
+        // console.log("CSV Content Generated Expected Delevery:\n", csvContent);
+
         let toEmail = row.staff_email;
-        let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
-        let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
+        let subjectEmail = "Alert: Jobs with Changed Expected Delivery Dates";
+        let htmlEmail = `
+                <h3>Alert: Jobs with Changed Expected Delivery Dates</h3>
+                <p>Hello,</p>
+                <p>This is to inform you that some job records have had their expected delivery dates changed.</p>
+                <p>Please review the attached report for more details.</p>
+                <br>
+                <p>Regards,<br>Your Automation System</p>
+              `;
         const dynamic_attachment = csvContent;
-        const filename = `Jobs_Not_Updated_7Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+        const filename = `Jobs_Changed_Expected_Delivery_Dates_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
