@@ -525,7 +525,6 @@ function JobCustomReport() {
         }));
         return;
       } else {
-
         setFilters((prev) => ({
           ...prev,
           groupBy: sortByReference(gropByArray)
