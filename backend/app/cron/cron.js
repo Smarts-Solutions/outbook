@@ -126,3 +126,10 @@ function wipAndToBeStartedMoreThan_7(rows) {
   }
   );
 }
+
+
+
+
+// SELECT *
+// FROM jobs
+// WHERE expected_delivery_date <> expected_delivery_date_old;
