@@ -8,10 +8,10 @@ const { commonEmail } = require("../utils/commonEmail");
 module.exports = (app) => {
   // Schedule tasks to be run on the server.
 
-// Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
+  // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
   cron.schedule("0 9 * * 1", async () => {
     ////////-----------Missing Timesheet Report Email --------------------//////
-   const [staffResult] = await pool.execute(`
+    const [staffResult] = await pool.execute(`
     SELECT 
     id,
     CONCAT(first_name, ' ', last_name) AS staff_fullname,
@@ -20,13 +20,13 @@ module.exports = (app) => {
     staffs 
     WHERE status = '1'
     `);
-  // console.log("staffResult , ",staffResult); 
+    // console.log("staffResult , ",staffResult); 
     sendEmailInWorkerMissingTimeSheet(staffResult || []);
 
-    
+
     ////////-----------Submit Timesheet Reminder Email --------------------//////
 
-   const [staffResultSubmitTimeSheet] = await pool.execute(`
+    const [staffResultSubmitTimeSheet] = await pool.execute(`
     SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -39,17 +39,17 @@ module.exports = (app) => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
-   sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet  || []);
+    sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet || []);
 
-   }, 
+  },
 
-   {
-   timezone: "Europe/London"
-   });
+    {
+      timezone: "Europe/London"
+    });
 
   cron.schedule("0 9 * * *", async () => {
     ////////-----------Trigger Report Email --------------------//////
-   const [superAdminAdminManagementRole] = await pool.execute(`
+    const [superAdminAdminManagementRole] = await pool.execute(`
     SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -62,25 +62,25 @@ module.exports = (app) => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
-   wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole  || []);
-  
-   expectedDeliveryDateChanged(superAdminAdminManagementRole  || []);
+    wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole || []);
 
-   missingPaperworkInMax2Days(superAdminAdminManagementRole  || []);
-   
-   jobsSittingWithForOverMonth(superAdminAdminManagementRole  || []);
-  
-}
-, {
-  timezone: "Europe/London"
-}
- );
-   
+    expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
+
+    missingPaperworkInMax2Days(superAdminAdminManagementRole || []);
+
+    jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
+
+  }
+    , {
+      timezone: "Europe/London"
+    }
+  );
+
 };
 
- cron.schedule("* * * * 1", async () => {
+cron.schedule("* * * * 1", async () => {
   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
- const [superAdminAdminManagementRole] = await pool.execute(`
+  const [superAdminAdminManagementRole] = await pool.execute(`
     SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -93,20 +93,20 @@ module.exports = (app) => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
-  
-  
- }, {
-   timezone: "Europe/London"
- });
+
+
+}, {
+  timezone: "Europe/London"
+});
 
 
 
- // function to send email in worker thread for Missing Timesheet Report
+// function to send email in worker thread for Missing Timesheet Report
 function sendEmailInWorkerMissingTimeSheet(rows) {
   const worker = new Worker(join(__dirname, "missingTimesheetReportEmail.js"), { type: "module" });
-  worker.postMessage(rows); 
+  worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--",msg)
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
@@ -121,7 +121,7 @@ function sendEmailInWorkerSubmitTimesheet(rows) {
   const worker = new Worker(join(__dirname, "submitTimesheetReminderEmail.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--",msg)
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
@@ -136,7 +136,7 @@ function wipAndToBeStartedMoreThan_7(rows) {
   const worker = new Worker(join(__dirname, "wipAndToBeStartedMoreThanSevenDays.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--",msg)
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
   }
   );
   worker.on("error", (err) => console.log("Worker error --:", err));
@@ -151,7 +151,7 @@ function expectedDeliveryDateChanged(rows) {
   const worker = new Worker(join(__dirname, "expectedDeliveryDateChanged.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--",msg)
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
   }
   );
   worker.on("error", (err) => console.log("Worker error --:", err));
@@ -166,7 +166,7 @@ function missingPaperworkInMax2Days(rows) {
   const worker = new Worker(join(__dirname, "missingPaperworkInMax2Days.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--",msg)
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
   }
   );
   worker.on("error", (err) => console.log("Worker error --:", err));
@@ -181,7 +181,7 @@ function jobsSittingWithForOverMonth(rows) {
   const worker = new Worker(join(__dirname, "jobsSittingWithForOverMonth.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--",msg)
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
   }
   );
   worker.on("error", (err) => console.log("Worker error --:", err));
