@@ -2745,23 +2745,20 @@ const updateJobStatus = async (job) => {
     [job_id]
   );
 
-  console.log("job_id", job_id);
-  console.log("status_type", status_type);
-  console.log("ExistJobData", ExistJobData);
-
-
-  
+  // console.log("job_id", job_id);
+  // console.log("status_type", status_type);
+  // console.log("ExistJobData", ExistJobData);  
 
   try {
 
-  // only Processing sent one record
-    if ([7,4,5].includes(parseInt(status_type))) {
+    // only Processing sent one record
+    if ([7, 4, 5].includes(parseInt(status_type))) {
       const [[ExistAllocatedTo]] = await pool.execute(
         `SELECT allocated_to FROM jobs WHERE id = ?`,
         [job_id]
       );
-      
-      if (['',null,undefined,0,'0'].includes(ExistAllocatedTo?.allocated_to)) {
+
+      if (['', null, undefined, 0, '0'].includes(ExistAllocatedTo?.allocated_to)) {
         return {
           status: false,
           message: "Please sent to be Processing.",
@@ -2771,14 +2768,14 @@ const updateJobStatus = async (job) => {
     }
 
 
-   // only Reviewer sent one record
-    if ([20,19,18,7,17].includes(parseInt(status_type))) {
+    // only Reviewer sent one record
+    if ([20, 19, 18, 7, 17].includes(parseInt(status_type))) {
       const [[ExistReviewer]] = await pool.execute(
         `SELECT reviewer FROM jobs WHERE id = ?`,
         [job_id]
       );
-      
-      if (['',null,undefined,0,'0'].includes(ExistReviewer?.reviewer)) {
+
+      if (['', null, undefined, 0, '0'].includes(ExistReviewer?.reviewer)) {
         return {
           status: false,
           message: "Please sent to be reviewed.",
@@ -2787,10 +2784,10 @@ const updateJobStatus = async (job) => {
       }
     }
 
-    
- 
+
+
     // only Draft sent one record
-    if ([7,20,19,18,17].includes(parseInt(status_type))) {
+    if ([7, 20, 19, 18].includes(parseInt(status_type))) {
       const [ExistDraft] = await pool.execute(
         `SELECT job_id FROM drafts WHERE job_id = ?`,
         [job_id]
@@ -2799,6 +2796,32 @@ const updateJobStatus = async (job) => {
         return {
           status: false,
           message: "Please sent first draft.",
+          data: "W",
+        };
+      }
+    }
+
+
+    if ([17].includes(parseInt(status_type))) {
+      const [ExistDraftFeedbackYes] = await pool.execute(
+        `SELECT 
+          CASE 
+            WHEN COUNT(*) > 0 THEN TRUE 
+            ELSE FALSE 
+          END AS is_condition_true
+      FROM drafts
+      WHERE job_id = ?
+        AND feedback_received = '1'
+        AND was_it_complete = '0'`,
+        [job_id]
+      );
+
+      console.log("ExistDraftFeedbackYes", ExistDraftFeedbackYes);
+      const isCondition = ExistDraftFeedbackYes[0]?.is_condition_true;
+      if (isCondition == 0) {
+        return {
+          status: false,
+          message: "Please sent the draft feedback first.",
           data: "W",
         };
       }
@@ -2910,40 +2933,40 @@ const updateJobStatus = async (job) => {
 
     console.log("status_type UPDATEEEEE", status_type);
 
-  
-   
-      let query = `
+
+
+    let query = `
          UPDATE jobs 
          SET status_type = ?
          WHERE id = ?
        `;
-     
-       if(parseInt(status_type) == 20){
-        query = `
+
+    if (parseInt(status_type) == 20) {
+      query = `
         UPDATE jobs 
         SET status_type = ?, filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
         WHERE id = ?
       `;
-       }
+    }
 
-      else if(parseInt(status_type) == 19){
-        query = `
+    else if (parseInt(status_type) == 19) {
+      query = `
         UPDATE jobs 
         SET status_type = ?, filing_Companies_required = '1' , filing_Companies_date = CURDATE()
         WHERE id = ?
       `;
-       }
-       else if(parseInt(status_type) == 18){
-        query = `
+    }
+    else if (parseInt(status_type) == 18) {
+      query = `
         UPDATE jobs 
         SET status_type = ?, filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
         WHERE id = ?
       `;
-       }
+    }
 
 
 
-     
+
     const [result] = await pool.execute(query, [status_type, job_id]);
 
     if (result.changedRows > 0) {
