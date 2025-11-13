@@ -72,7 +72,7 @@ ___________________
 ______________________________________________
 - WIP – To Be Reviewed – This status can only be selected if the below is true at least once:
 
-- Job has been in WIP – Processing status once  - Discuss
+- Job has been in WIP – Processing status once  - Done
 ______________________________________________
 - On Hold – In Queries – This status can only be selected if the below is true at least once:
 

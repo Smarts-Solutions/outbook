@@ -2753,7 +2753,26 @@ const updateJobStatus = async (job) => {
   
 
   try {
-    if ([20,19,18,7].includes(parseInt(status_type))) {
+
+  // only Processing sent one record
+    if ([7,4,5].includes(parseInt(status_type))) {
+      const [[ExistAllocatedTo]] = await pool.execute(
+        `SELECT allocated_to FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+      
+      if (['',null,undefined,0,'0'].includes(ExistAllocatedTo?.allocated_to)) {
+        return {
+          status: false,
+          message: "Please sent to be Processing.",
+          data: "W",
+        };
+      }
+    }
+
+
+   // only Reviewer sent one record
+    if ([20,19,18,7,17].includes(parseInt(status_type))) {
       const [[ExistReviewer]] = await pool.execute(
         `SELECT reviewer FROM jobs WHERE id = ?`,
         [job_id]
@@ -2768,23 +2787,10 @@ const updateJobStatus = async (job) => {
       }
     }
 
-    if ([7,4].includes(parseInt(status_type))) {
-      const [[ExistAllocatedTo]] = await pool.execute(
-        `SELECT allocated_to FROM jobs WHERE id = ?`,
-        [job_id]
-      );
-      
-      if (['',null,undefined,0,'0'].includes(ExistAllocatedTo?.allocated_to)) {
-        return {
-          status: false,
-          message: "Please sent to be Processing.",
-          data: "W",
-        };
-      }
-    }
+    
  
     // only Draft sent one record
-    if ([7,20,19,18].includes(parseInt(status_type))) {
+    if ([7,20,19,18,17].includes(parseInt(status_type))) {
       const [ExistDraft] = await pool.execute(
         `SELECT job_id FROM drafts WHERE job_id = ?`,
         [job_id]
@@ -2812,6 +2818,8 @@ const updateJobStatus = async (job) => {
         };
       }
     }
+
+
 
     // only missing log sent one record check
     if ([2].includes(parseInt(status_type))) {
