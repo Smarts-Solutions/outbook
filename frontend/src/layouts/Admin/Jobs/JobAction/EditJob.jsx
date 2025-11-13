@@ -312,7 +312,7 @@ const EditJob = () => {
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
 
-
+            
             setJobData((prevState) => ({
               ...prevState,
               AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
@@ -501,6 +501,7 @@ const EditJob = () => {
               Period_Ending_Date_id_8: response.data.Period_Ending_Date_id_8 ?? null,
               Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
               Year_id_28: response.data.Year_id_28 ?? null,
+              job_priority: response.data.job_priority ?? null,
 
 
 
@@ -885,6 +886,7 @@ const EditJob = () => {
           : jobData.InvoiceRemark,
       status_type: jobData.status_type,
       notes: jobData.notes,
+      job_priority: jobData.job_priority,
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr,
@@ -2181,7 +2183,7 @@ const EditJob = () => {
         getJobDetails.data.customer_staff_id === staffCreatedId ||
         getJobDetails.data.customer_account_manager_id === staffCreatedId ||
         getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)
-      
+
       ))
   );
 
@@ -2413,7 +2415,7 @@ const EditJob = () => {
                                       Customer Account Manager(Officer)
                                       <span className="text-danger">*</span>
                                     </label>
-                                   
+
                                     <Select
                                       name="CustomerAccountManager"
                                       id="CustomerAccountManager"
@@ -3193,6 +3195,36 @@ const EditJob = () => {
                                       placeholder="Select options"
                                     />
 
+                                  </div>
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Job Priority
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="job_priority"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.job_priority
+                                        }
+                                      >
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                      </select>
+                                      {errors[
+                                        "job_priority"
+                                      ] && (
+                                          <div className="error-text">
+                                            {
+                                              errors[
+                                              "job_priority"
+                                              ]
+                                            }
+                                          </div>
+                                        )}
+                                    </div>
                                   </div>
 
                                 </div>

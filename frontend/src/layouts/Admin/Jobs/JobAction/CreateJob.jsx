@@ -114,6 +114,7 @@ const CreateJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
     notes: "",
+    job_priority: "normal",
     //Bookkeeping_Frequency_id_2: "Daily",
 
   });
@@ -505,7 +506,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
 
-
+  
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
@@ -3023,6 +3024,37 @@ const CreateJob = () => {
                                     />
 
                                   </div>
+
+
+                                  <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Job Priority
+                                        </label>
+                                        <select
+                                          className="form-select"
+                                          name="job_priority"
+                                          onChange={HandleChange}
+                                          value={
+                                            jobData.job_priority
+                                          }
+                                        >
+                                          <option value="normal">Normal</option>
+                                          <option value="urgent">Urgent</option>
+                                        </select>
+                                        {errors[
+                                          "job_priority"
+                                        ] && (
+                                            <div className="error-text">
+                                              {
+                                                errors[
+                                                "job_priority"
+                                                ]
+                                              }
+                                            </div>
+                                          )}
+                                      </div>
+                                    </div>
 
 
                                 </div>
