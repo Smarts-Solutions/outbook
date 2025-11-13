@@ -16,9 +16,9 @@
 
 - Job has been in Complete – Draft Sent status once 
 
-- Job has been in WIP – To Be Reviewed status once 
+- Job has been in WIP – To Be Reviewed status once - Done
 
-- Completed – Filed with HMRC – This status can only be selected if the below is true at least once:
+- Completed – Filed with HMRC – This status can only be selected if the below is true at least once: 
 
 - Job has been in Complete – Draft Sent status once
 
@@ -60,7 +60,7 @@ ______________________________________________
 
 - Job has been in WIP - Customer Reviewed & To Be Updated
 
-- Jobs Drafts has at least one record and one record should have field Feedback Received as Yes
+- Jobs Drafts has at least one record and one record should have field Feedback Received as Yes - Done
 ___________________
 - Complete - Draft Sent – This status can only be selected if the below is true at least once:
 
