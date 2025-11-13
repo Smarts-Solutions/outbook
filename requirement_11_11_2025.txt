@@ -50,7 +50,7 @@ ______________________________________________
 
 - HMRC Filing Date should be automatically populated to the data the status is changing on. However user can edit it
 
-- Companies House Filing Date should be automatically populated to the data the status is changing on. However user can edit it -  1 day
+- Companies House Filing Date should be automatically populated to the data the status is changing on. However user can edit it -  1 day - Done
 ______________________________________________
 - Completed – Update Sent – This status can only be selected if the below is true at least once:
 
