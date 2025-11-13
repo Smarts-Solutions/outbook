@@ -2783,7 +2783,7 @@ const updateJobStatus = async (job) => {
     }
  
     // only Draft sent one record
-    if ([7].includes(parseInt(status_type))) {
+    if ([7,20,19,18].includes(parseInt(status_type))) {
       const [ExistDraft] = await pool.execute(
         `SELECT job_id FROM drafts WHERE job_id = ?`,
         [job_id]
@@ -2829,7 +2829,7 @@ const updateJobStatus = async (job) => {
 
 
 
-    if ([6,20,19,18].includes(parseInt(status_type))) {
+    if ([6].includes(parseInt(status_type))) {
       const [ExistDraft] = await pool.execute(
         `SELECT job_id FROM drafts WHERE job_id = ?`,
         [job_id]
