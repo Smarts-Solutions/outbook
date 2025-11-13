@@ -1647,8 +1647,8 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
             end = startOfDay(today);
             start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
     }
-    console.log("start", start);
-    console.log("end", end);
+    // console.log("start", start);
+    // console.log("end", end);
     return { fromDate: toYMD(start), toDate: toYMD(end) };
 }
 /** Helper: format Date -> YYYY-MM-DD */
@@ -2105,7 +2105,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
-    console.log("Call Timesheet Report");
+    // console.log("Call Timesheet Report");
     var {
         groupBy = ['staff_id'],
         internal_external,
@@ -2974,7 +2974,7 @@ const getAllFilters = async (Report) => {
         ORDER BY timesheet_filter.id DESC
         `;
 
-        console.log("Get All Filters Query:", query);
+        // console.log("Get All Filters Query:", query);
 
 
 
@@ -3182,7 +3182,7 @@ const getAllStatus = async () => {
 ////////////////////-----START getJobCustomReports -----//////////////////////
 const getJobCustomReport = async (Report) => {
     const { StaffUserId, data } = Report;
-    console.log("Call Custome Job Report");
+    // console.log("Call Custome Job Report");
     var {
         groupBy = ['job_id'],
         job_id,

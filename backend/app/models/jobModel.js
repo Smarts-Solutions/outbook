@@ -1140,7 +1140,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         job_code_id ASC;
      `;
 
-    console.log("query", query);
+    // console.log("query", query);
 
     const [result] = await pool.execute(query);
 
@@ -2009,8 +2009,8 @@ const jobUpdate = async (job) => {
   try {
     const [[ExistJob]] = await pool.execute(ExistJobQuery, [job_id]);
 
-    console.log("ExistJob", ExistJob);
-    console.log("expected_delivery_date", expected_delivery_date);
+    // console.log("ExistJob", ExistJob);
+    // console.log("expected_delivery_date", expected_delivery_date);
     let expected_delivery_date_old = ExistJob.expected_delivery_date_old;
     if (expected_delivery_date == null) {
       expected_delivery_date_old = null;
@@ -2385,7 +2385,7 @@ const jobUpdate = async (job) => {
         }
         // Insert or update tasks
 
-        console.log("tasks --  ", tasks);
+        // console.log("tasks --  ", tasks);
 
         for (const tsk of tasks.task) {
           let task_id = tsk.task_id;

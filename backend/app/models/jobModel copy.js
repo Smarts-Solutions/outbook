@@ -1638,7 +1638,7 @@ const getJobById = async (job) => {
     );
 
    
-    console.log("rows", rows);
+    // console.log("rows", rows);
     let result = {};
     if (rows.length > 0) {
       let tasks = [];

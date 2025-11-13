@@ -2103,7 +2103,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 
 const getTimesheetReportData = async (Report) => {
     const { StaffUserId, data } = Report;
-    console.log("Call Timesheet Report");
+    // console.log("Call Timesheet Report");
     var {
         groupBy = ['staff_id'],
         internal_external,
@@ -2972,7 +2972,7 @@ const getAllFilters = async (Report) => {
         ORDER BY timesheet_filter.id DESC
         `;
 
-        console.log("Get All Filters Query:", query);
+        // console.log("Get All Filters Query:", query);
 
 
 
@@ -3180,7 +3180,7 @@ const getAllStatus = async () => {
 ////////////////////-----START getJobCustomReports -----//////////////////////
 const getJobCustomReport = async (Report) => {
     const { StaffUserId, data } = Report;
-    console.log("Call Custome Job Report");
+    // console.log("Call Custome Job Report");
     var {
         groupBy = ['job_id'],
         additionalField = [],
@@ -3204,7 +3204,7 @@ const getJobCustomReport = async (Report) => {
 
 
 
-    console.log("additionalField --- ", additionalField);
+    // console.log("additionalField --- ", additionalField);
 
     // if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
     //     return { status: false, message: `empty groupBy field`, data: [] };

@@ -407,7 +407,7 @@ const addChecklist = async (checklist) => {
 const getChecklist = async (checklist) => {
   const { customer_id } = checklist;
 
-  console.log("customer_id", customer_id)
+  // console.log("customer_id", customer_id)
   let query = `
     SELECT
     checklists.id AS checklists_id,

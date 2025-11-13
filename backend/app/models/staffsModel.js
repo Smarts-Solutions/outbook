@@ -162,9 +162,9 @@ const updateStaff = async (staff) => {
     let [staff_by_result] = await pool.execute(staff_by_query, [id]);
     if (staff_by_result.length > 0) {
 
-      console.log("staff_by_result", staff_by_result);
-      console.log("staff_to", staff_to);
-      console.log("staff_by", id);
+      // console.log("staff_by_result", staff_by_result);
+      // console.log("staff_to", staff_to);
+      // console.log("staff_by", id);
 
 
       const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
@@ -717,7 +717,7 @@ const GetStaffByRoleId = async (data) => {
 
 const GetStaffAndDelete = async (data) => {
   try {
-    console.log("data--", data);
+    // console.log("data--", data);
 
     const { id, replace_id } = data;
 
