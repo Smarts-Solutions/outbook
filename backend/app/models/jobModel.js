@@ -370,9 +370,9 @@ const jobAdd = async (job) => {
     status_type = 3;
   }
 
-  if (reviewer > 0) {
-    status_type = 5;
-  }
+  // if (reviewer > 0) {
+  //   status_type = 5;
+  // }
 
   if (reviewer == 0 && allocated_to == 0) {
     status_type = 1;
@@ -2026,26 +2026,27 @@ const jobUpdate = async (job) => {
       if (allocated_to > 0) {
         status_type_update = 3;
       }
-      if (reviewer > 0) {
-        status_type_update = 5;
-      }
+      // if (reviewer > 0) {
+      //   status_type_update = 5;
+      // }
     } else {
       if (allocated_to > 0 && ExistJob.allocated_to == 0) {
         status_type_update = 3;
       }
-      if (reviewer > 0 && ExistJob.reviewer == 0) {
-        status_type_update = 5;
-      }
+      // if (reviewer > 0 && ExistJob.reviewer == 0) {
+      //   status_type_update = 5;
+      // }
 
-      if (status_type == 3) {
-        if (reviewer > 0 && ExistJob.reviewer != reviewer) {
-          status_type_update = 5;
-        }
-      } else if (status_type == 5) {
-        if (allocated_to > 0 && ExistJob.allocated_to != allocated_to) {
-          status_type_update = 3;
-        }
-      }
+      // if (status_type == 3) {
+      //   if (reviewer > 0 && ExistJob.reviewer != reviewer) {
+      //     status_type_update = 5;
+      //   }
+      // }
+      //  else if (status_type == 5) {
+      //   if (allocated_to > 0 && ExistJob.allocated_to != allocated_to) {
+      //     status_type_update = 3;
+      //   }
+      // }
     }
 
     const query = `
