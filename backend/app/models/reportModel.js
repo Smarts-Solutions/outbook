@@ -1271,8 +1271,6 @@ const taxWeeklyStatusReport = async (Report) => {
     }
 };
 
-
-
 const taxWeeklyStatusReportFilterKey = async (Report) => {
     const { StaffUserId } = Report;
     try {
