@@ -1948,6 +1948,7 @@ const jobUpdate = async (job) => {
     bookkeeping,
     processing_type,
     status_type,
+    job_priority,
   } = job;
 
   let invoiced = job.invoiced == "" || job.invoiced == "0" ? "0" : "1";
@@ -2162,7 +2163,8 @@ const jobUpdate = async (job) => {
              Filing_Frequency_id_8 = ?,
              Period_Ending_Date_id_8 = ?,
              Filing_Date_id_8 = ?,
-             Year_id_28 = ?
+             Year_id_28 = ?,
+            job_priority = ?
 
 
          WHERE id = ?
@@ -2318,6 +2320,7 @@ const jobUpdate = async (job) => {
       job.Period_Ending_Date_id_8,
       job.Filing_Date_id_8,
       job.Year_id_28,
+      job.job_priority,
 
 
       job_id
