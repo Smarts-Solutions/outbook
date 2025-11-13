@@ -2801,7 +2801,7 @@ const updateJobStatus = async (job) => {
       }
     }
 
-
+  // check draft feedback received yes or no
     if ([17].includes(parseInt(status_type))) {
       const [ExistDraftFeedbackYes] = await pool.execute(
         `SELECT 
