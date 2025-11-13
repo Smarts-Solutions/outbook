@@ -2767,7 +2767,7 @@ const updateJobStatus = async (job) => {
       }
     }
 
-    if ([7].includes(parseInt(status_type))) {
+    if ([7,4].includes(parseInt(status_type))) {
       const [[ExistAllocatedTo]] = await pool.execute(
         `SELECT allocated_to FROM jobs WHERE id = ?`,
         [job_id]
@@ -2792,6 +2792,36 @@ const updateJobStatus = async (job) => {
         return {
           status: false,
           message: "Please sent first draft.",
+          data: "W",
+        };
+      }
+    }
+
+    // only queries sent one record check
+    if ([4].includes(parseInt(status_type))) {
+      const [ExistQueries] = await pool.execute(
+        `SELECT job_id FROM queries WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistQueries.length === 0) {
+        return {
+          status: false,
+          message: "Please sent first queries.",
+          data: "W",
+        };
+      }
+    }
+
+    // only missing log sent one record check
+    if ([2].includes(parseInt(status_type))) {
+      const [ExistMissingLogs] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistMissingLogs.length === 0) {
+        return {
+          status: false,
+          message: "Please sent first missing logs.",
           data: "W",
         };
       }
@@ -2872,7 +2902,7 @@ const updateJobStatus = async (job) => {
     console.log("status_type UPDATEEEEE", status_type);
 
   
-   return
+   
       let query = `
          UPDATE jobs 
          SET status_type = ?

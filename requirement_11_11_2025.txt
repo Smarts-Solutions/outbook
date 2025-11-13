@@ -68,7 +68,7 @@ ___________________
 
 - Job has been in WIP – Processing status once
 
-- Job’s Drafts has at least one record - 1 day
+- Job’s Drafts has at least one record - 1 day - Done
 ______________________________________________
 - WIP – To Be Reviewed – This status can only be selected if the below is true at least once:
 
@@ -78,11 +78,11 @@ ______________________________________________
 
 - Job has been in WIP – Processing status once
 
-- Job’s Queries has at least one record - 1 day
+- Job’s Queries has at least one record - 1 day - Done
 ______________________________________________
 - On Hold – Missing Paperwork – This status can only be selected if the below is true at least once:
 
--Job’s Missing Log has at least one record - 1 day
+-Job’s Missing Log has at least one record - 1 day - Done
 ______________________________________________
 
 5. Requirements :-
