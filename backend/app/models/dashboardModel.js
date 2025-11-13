@@ -441,10 +441,10 @@ const getDashboardActivityLog = async (dashboard) => {
     staff_logs.log_message_all AS log_message,
     CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
   FROM
-    staff_logs
-   ${MatchCondition}
+  staff_logs
   LEFT JOIN
-    staffs ON staffs.id = staff_logs.staff_id 
+    staffs ON staffs.id = staff_logs.staff_id
+   ${MatchCondition}
   ORDER BY
     staff_logs.id DESC
 `;
@@ -485,7 +485,7 @@ const getDashboardActivityLog = async (dashboard) => {
 
 
   } catch (error) {
-    console.log("error - ", error)
+    console.log("error - 488 ", error)
     return { status: false, message: "Err Dashboard Activity Log Get", error: error.message };
   }
 
