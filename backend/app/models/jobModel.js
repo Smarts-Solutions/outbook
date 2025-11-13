@@ -2752,7 +2752,7 @@ const updateJobStatus = async (job) => {
   
 
   try {
-    if (parseInt(status_type) == 20 || parseInt(status_type) == 19) {
+    if ([20,19,18].includes(parseInt(status_type))) {
       const [[ExistReviewer]] = await pool.execute(
         `SELECT reviewer FROM jobs WHERE id = ?`,
         [job_id]
@@ -2767,7 +2767,7 @@ const updateJobStatus = async (job) => {
       }
     }
 
-    if (parseInt(status_type) == 6 || parseInt(status_type) == 20 || parseInt(status_type) == 19) {
+    if ([6,20,19,18].includes(parseInt(status_type))) {
       const [ExistDraft] = await pool.execute(
         `SELECT job_id FROM drafts WHERE job_id = ?`,
         [job_id]
@@ -2855,16 +2855,17 @@ const updateJobStatus = async (job) => {
       `;
        }
 
-       if(parseInt(status_type) == 20){
-        query = `
-        UPDATE jobs 
-        SET status_type = ?, filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
-        WHERE id = ?
-      `;
-       }if(parseInt(status_type) == 19){
+      else if(parseInt(status_type) == 19){
         query = `
         UPDATE jobs 
         SET status_type = ?, filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        WHERE id = ?
+      `;
+       }
+       else if(parseInt(status_type) == 18){
+        query = `
+        UPDATE jobs 
+        SET status_type = ?, filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
         WHERE id = ?
       `;
        }

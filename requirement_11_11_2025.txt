@@ -36,7 +36,7 @@ ______________________________________________
 
 - Filed with Companies House Required field is set to Yes
 
-- Companies House Filing Date should be automatically populated to the data the status is changing on. However user can edit it  - 1 day
+- Companies House Filing Date should be automatically populated to the data the status is changing on. However user can edit it  - 1 day - Done
 ______________________________________________
 - Completed – Filed with Companies House & HMRC – This status can only be selected if the below is true at least once:
 
