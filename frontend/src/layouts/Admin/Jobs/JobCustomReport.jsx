@@ -1147,7 +1147,7 @@ function JobCustomReport() {
         </div>
 
         {/* Additional Field */}
-        <div className="col-lg-4 col-md-6">
+        {/* <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Additional Fields</label>
 
           <Select
@@ -1162,7 +1162,7 @@ function JobCustomReport() {
             className="basic-multi-select"
             classNamePrefix="select"
           />
-        </div>
+        </div> */}
 
 
         {/* Field To Display Job */}

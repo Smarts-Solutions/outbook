@@ -3843,11 +3843,7 @@ const getJobCustomReport = async (Report) => {
                     Management_Accounts_ToDate_id_6: r.Management_Accounts_ToDate_id_6,
 
 
-
-
-
-
-
+                    // Staff Fields
                     staff_full_name: r.staff_full_name,
                     staff_email: r.staff_email,
                     role: r.role,
@@ -3936,28 +3932,43 @@ const getJobCustomReport = async (Report) => {
             row['line_manager'] = g.line_manager;
 
             // fill counts for each period
+
+            if(!['',null,undefined].includes(displayBy)){
             let totalCount = 0;
             for (const p of periods) {
                 const count = g.periodSeconds[p] || 0;
                 row[p] = count;
                 totalCount += count;
             }
-
             // total_count = total number of jobs in all periods
             row['total_count'] = totalCount;
+           }
+            
 
             //row.date = g.date;
             outRows.push(row);
         }
 
+       // console.log("displayBy --->>>", displayBy);
+         let total_count = [];
+         let weeks = [];
+         if(!['',null,undefined].includes(displayBy)){
+            total_count.push('total_count');
+            weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+         }
 
-        const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+
+        // const columnsWeeks = [
+        //     ...groupBy,
+        //     ...weeks,
+        //     //'date',
+        //     ...additionalField,
+        //    'total_count'
+        // ];
         const columnsWeeks = [
             ...groupBy,
             ...weeks,
-            //'date',
-            ...additionalField,
-            'total_count'
+            ...total_count
         ];
         const finalRows = normalizeRows(columnsWeeks, outRows);
 
