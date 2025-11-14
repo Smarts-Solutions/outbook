@@ -776,9 +776,6 @@ function JobCustomReport() {
     { value: "status_type_id", label: "Status" },
     { value: "date_received_on", label: "Received On" },
     { value: "allocated_on", label: "Allocated On" },
-    { value: "job_priority", label: "Job Priority" },
-    { value: "engagement_model", label: "Engagement Model" },
-    { value: "customer_account_manager_officer", label: "Customer Account Manager (Officer)" },
     // { value: "line_manager_id", label: "Line Manager" },
   ];
 
@@ -1589,7 +1586,6 @@ function getColumnName(columnKey) {
   const dayMap = {
     job_id: "Job",
     customer_id: "Customer",
-    customer_code: "Customer Code",
     client_id: "Client",
     account_manager_id: "Account Manager",
     allocated_to_id: "Allocated To",
@@ -1603,13 +1599,6 @@ function getColumnName(columnKey) {
     total_count: "Total Count",
     date_received_on: "Received On",
     allocated_on: "Allocated On",
-    job_priority: "Job Priority",
-    engagement_model: "Engagement Model",
-    customer_account_manager_officer: "Customer Account Manager (Officer)",
-
-
-
-
     staff_full_name: "Staff Full Name",
     role: "Role",
     staff_email: "Email Address",

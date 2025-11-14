@@ -2730,8 +2730,6 @@ const discrepancyReportProcessor = async (Report) => {
     return { status: true, message: 'Success.', data: result };
 }
 
-
-
 const capacityReport = async (Report) => {
 
 
@@ -2788,7 +2786,6 @@ const saveFilters = async (Report) => {
 
 
 }
-
 
 const getAllFilters = async (Report) => {
 
@@ -3008,8 +3005,6 @@ const deleteFilterId = async (Report) => {
 
 //////// ---------- Save Filters End --------- ////////////
 
-
-
 // Staff Work
 const getChangedRoleStaff = async (Report) => {
     const { data } = Report;
@@ -3083,8 +3078,6 @@ const staffRoleChangeUpdate = async (Report) => {
 
 
 }
-
-
 
 /////////////---- START JOB CUSTOM REPORTS ----//////////////////////
 const getStaffWithRole = async (Report) => {
@@ -3194,6 +3187,21 @@ const getJobCustomReport = async (Report) => {
         service_id,
         job_type_id,
         status_type_id,
+
+
+        date_received_on,
+        allocated_on,
+        job_priority,
+        engagement_model,
+        customer_account_manager_officer,
+
+
+
+
+
+
+
+
         line_manager_id,
         timePeriod,
         displayBy,
@@ -3226,6 +3234,14 @@ const getJobCustomReport = async (Report) => {
         'service_id',
         'job_type_id',
         'status_type_id',
+
+
+        'date_received_on',
+        'allocated_on',
+        'job_priority',
+        'engagement_model',
+        'customer_account_manager_officer',
+        
         //'line_manager_id'
     ]
 
@@ -3282,6 +3298,22 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(status_type_id)) {
             where.push(`raw.status_type_id = ${status_type_id}`);
         }
+        if (!["", null, undefined].includes(date_received_on)) {
+            where.push(`raw.date_received_on = '${date_received_on}'`);
+        }
+        if (!["", null, undefined].includes(allocated_on)) {
+            where.push(`raw.allocated_on = '${allocated_on}'`);
+        }
+        if (!["", null, undefined].includes(job_priority)) {    
+            where.push(`raw.job_priority = '${job_priority}'`);
+        }
+        if (!["", null, undefined].includes(engagement_model)) {
+            where.push(`raw.engagement_model = '${engagement_model}'`);
+        }
+        if (!["", null, undefined].includes(customer_account_manager_officer)) {
+            where.push(`ccd.id = ${customer_account_manager_officer}`);
+        }
+
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
@@ -3292,7 +3324,15 @@ const getJobCustomReport = async (Report) => {
         const unpivotSQL = `
             SELECT
                 raw.job_id,
+
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                raw.job_priority,
+                raw.engagement_model,
+
+
+
+
                 CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
                 jobcreatestaff.email AS staff_email,
                 staffrole.role AS role,
@@ -3303,6 +3343,7 @@ const getJobCustomReport = async (Report) => {
 
                 CONCAT_WS('::', raw.job_id) AS group_value,
                 raw.work_date,
+                
                 CONCAT(
                     SUBSTRING(c.trading_name, 1, 3), '_',
                     SUBSTRING(cl.trading_name, 1, 3), '_',
@@ -3321,6 +3362,7 @@ const getJobCustomReport = async (Report) => {
                 CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
                 CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
                 CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
+                CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
                 sv.name AS service_name,
                 jt.type AS job_type_name,
                 st.name AS status_type_name
@@ -3328,7 +3370,14 @@ const getJobCustomReport = async (Report) => {
                 SELECT 
                     j.id AS job_id,
                     j.job_id AS job_code_id,
+
                     j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+
+
                     j.customer_id,
                     j.client_id,
                     j.job_type_id,
@@ -3341,6 +3390,7 @@ const getJobCustomReport = async (Report) => {
                     j.created_at AS work_date
                 FROM jobs AS j
             ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
             LEFT JOIN customers AS c ON raw.customer_id = c.id
             LEFT JOIN clients AS cl ON raw.client_id = cl.id
             LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
@@ -3397,6 +3447,13 @@ const getJobCustomReport = async (Report) => {
                 service_id: "service_name",
                 job_type_id: "job_type_name",
                 status_type_id: "status_type_name",
+
+
+                date_received_on: "date_received_on",
+                allocated_on: "allocated_on",
+                job_priority: "job_priority",
+                engagement_model: "engagement_model",
+                customer_account_manager_officer: "customer_account_manager_officer",
             };
 
             // Now dynamically build groupKeyParts
@@ -3443,6 +3500,16 @@ const getJobCustomReport = async (Report) => {
 
                     // Additional Fields
                     date_received_on: r.date_received_on,
+                    allocated_on: r.allocated_on,
+                    job_priority: r.job_priority,
+                    engagement_model: r.engagement_model,
+                    customer_account_manager_officer: r.customer_account_manager_officer,
+
+
+
+
+
+
                     staff_full_name: r.staff_full_name,
                     staff_email: r.staff_email,
                     role: r.role,
@@ -3482,6 +3549,15 @@ const getJobCustomReport = async (Report) => {
 
             // Additional fields
             row['date_received_on'] = g.date_received_on;
+            row['allocated_on'] = g.allocated_on;
+            row['job_priority'] = g.job_priority;
+            row['engagement_model'] = g?.engagement_model?.replace(/_/g, " ")?.replace(/\b\w/g, (c) => c?.toUpperCase());
+            row['customer_account_manager_officer'] = g.customer_account_manager_officer;
+
+
+
+
+
             row['staff_full_name'] = g.staff_full_name;
             row['staff_email'] = g.staff_email;
             row['role'] = g.role;
