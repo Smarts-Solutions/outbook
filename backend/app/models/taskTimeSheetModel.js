@@ -178,7 +178,7 @@ const addMissingLog = async (missingLog) => {
       );
 
       let update_status = 2;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id]);
     }
 
 
@@ -391,7 +391,7 @@ const editMissingLog = async (missingLog) => {
       }
 
       let update_status = 2;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id[0].job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id[0].job_id]);
     }
 
     if (missing_log_document.length > 0) {
@@ -547,7 +547,7 @@ const addQuerie = async (querie) => {
         }
       );
       let update_status = 4;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [update_status, job_id]);
     }
 
 
@@ -743,7 +743,7 @@ const editQuerie = async (query) => {
 
       const [job_id] = await pool.execute('SELECT job_id FROM  `queries` WHERE id = ?', [id]);
       let update_status = 4;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id[0].job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id[0].job_id]);
     }
 
 
@@ -849,12 +849,12 @@ const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
   
   if([1, 2, 3].includes(Number(updated_amendment))){
-    const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, job_id]);
+    const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [21, job_id]);
   }
   else if([4].includes(Number(updated_amendment))){
-    const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, job_id]);
+    const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, job_id]);
   }else{
-    const [DraftSentStatus] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [7, job_id]);
+    const [DraftSentStatus] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [7, job_id]);
   }
 
 
@@ -946,7 +946,7 @@ const addDraft = async (draft) => {
 
         if (rowsDraftProcess.status_check === 1) {
           let update_status = 6;
-          const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+          const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id]);
         }
       }
 
@@ -969,10 +969,10 @@ const editDraft = async (draft) => {
 
 
     if([1, 2, 3].includes(Number(updated_amendment))){
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [21, rowJob.job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [21, rowJob.job_id]);
     }
     else if([4].includes(Number(updated_amendment))){
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [6, rowJob.job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, rowJob.job_id]);
     }
 
 
@@ -1051,7 +1051,7 @@ const editDraft = async (draft) => {
         draft_log_msg.push('completed the draft')
         if (rowsDraftProcess.status_check === 1) {
           let update_status = 6;
-          const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, rowJob.job_id]);
+          const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [update_status, rowJob.job_id]);
 
         }
 

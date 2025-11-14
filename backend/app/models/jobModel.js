@@ -1978,6 +1978,7 @@ const jobUpdate = async (job) => {
  review_time,
  feedback_incorporation_time,
  total_time, engagement_model,
+ status_type,
  
  DATE_FORMAT(expected_delivery_date, '%Y-%m-%d') AS expected_delivery_date,
  DATE_FORMAT(expected_delivery_date_old, '%Y-%m-%d') AS expected_delivery_date_old,
@@ -2054,6 +2055,12 @@ const jobUpdate = async (job) => {
       //   }
       // }
     }
+
+    console.log("status_type_update", status_type_update);
+    console.log("ExistJob.status_type", ExistJob.status_type);
+
+
+   
 
     const query = `
          UPDATE jobs 
@@ -2164,7 +2171,7 @@ const jobUpdate = async (job) => {
              Period_Ending_Date_id_8 = ?,
              Filing_Date_id_8 = ?,
              Year_id_28 = ?,
-            job_priority = ?
+             job_priority = ?
 
 
          WHERE id = ?
@@ -2325,6 +2332,12 @@ const jobUpdate = async (job) => {
 
       job_id
     ];
+
+     if(Number(ExistJob.status_type) != Number(status_type_update)){
+      let status_update_query = ` UPDATE jobs 
+         SET status_updation_date = NOW() WHERE id = ? `;
+      await pool.execute(status_update_query, [job_id]);
+    }
 
     // Sanitize the parameters
     const sanitizedParams = sanitizeParams(params);
