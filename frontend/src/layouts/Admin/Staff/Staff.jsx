@@ -385,96 +385,96 @@ const StaffPage = () => {
         return (
           <>
             <div className="px-2">
-              {   
-              showStaffDeleteTab == true ?
-              row?.is_disable == 0 && (
-                row.is_customer_exist == 1 ?
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => setDeleteStaff(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                  :
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => handleDeleteIsNotExistCustomer(row)}
-                  > {" "}<i className="ti-trash text-danger" />
-                  </button>
-               )
-               : ""
-              
+              {
+                showStaffDeleteTab == true ?
+                  row?.is_disable == 0 && (
+                    row.is_customer_exist == 1 ?
+                      <button
+                        className="delete-icon dropdown-item  w-auto mb-2"
+                        onClick={() => setDeleteStaff(row)}
+                      >
+                        {" "}
+                        <i className="ti-trash text-danger" />
+                      </button>
+                      :
+                      <button
+                        className="delete-icon dropdown-item  w-auto mb-2"
+                        onClick={() => handleDeleteIsNotExistCustomer(row)}
+                      > {" "}<i className="ti-trash text-danger" />
+                      </button>
+                  )
+                  : ""
+
               }
             </div>
-            
+
             {
               showStaffUpdateTab == true ?
-              <div className="dropdown">
-              <button
-                className="btn "
-                type="button"
-                id="dropdownMenuButton"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
-              </button>
-              <div
-                className="dropdown-menu custom-dropdown"
-                aria-labelledby="dropdownMenuButton"
-              >
-                <a
-                  className="dropdown-item"
-                  onClick={() => {
-                    GetAllStaffPortfolio(row);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <FaPencilAlt /> Portfolio
-                </a>
-                <a
-                  className="dropdown-item"
-                  onClick={() => {
-                    setEditShowModel(true);
-                    setEditStaff(true);
-                    setEditStaffData(row);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <FaBriefcase /> Edit
-                </a>
-                <a
-                  className="dropdown-item"
-                  onClick={() => {
-                    ServiceData(row);
-                    SetCompetancy(true);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <FaPlus /> Competency
-                </a>
-                {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
-                <a
-                  className="dropdown-item"
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    navigate(`/admin/staff/viewlogs`, { state: { row: row } })
-                  }
-                >
-                  <FaEye /> Logs
-                </a>
-              </div>
-            </div>
+                <div className="dropdown">
+                  <button
+                    className="btn "
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  </button>
+                  <div
+                    className="dropdown-menu custom-dropdown"
+                    aria-labelledby="dropdownMenuButton"
+                  >
+                    <a
+                      className="dropdown-item"
+                      onClick={() => {
+                        GetAllStaffPortfolio(row);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaPencilAlt /> Portfolio
+                    </a>
+                    <a
+                      className="dropdown-item"
+                      onClick={() => {
+                        setEditShowModel(true);
+                        setEditStaff(true);
+                        setEditStaffData(row);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaBriefcase /> Edit
+                    </a>
+                    <a
+                      className="dropdown-item"
+                      onClick={() => {
+                        ServiceData(row);
+                        SetCompetancy(true);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaPlus /> Competency
+                    </a>
+                    {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
+                    <a
+                      className="dropdown-item"
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+                      }
+                    >
+                      <FaEye /> Logs
+                    </a>
+                  </div>
+                </div>
 
-              :
-              ""
-                
-            
+                :
+                ""
+
+
             }
 
-            
+
           </>
         );
       },
@@ -542,7 +542,7 @@ const StaffPage = () => {
       status: Yup.string()
         .trim(Validation_Message.StatusValidation)
         .required(Validation_Message.StatusValidation),
-        employee_number: Yup.string()
+      employee_number: Yup.string()
         .trim(Validation_Message.EmployeeNumberValidation)
         .required(Validation_Message.EmployeeNumberValidation)
     }),
@@ -565,8 +565,8 @@ const StaffPage = () => {
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
-     
-      
+
+
       await dispatch(
         Staff({
           req: { action: editStaff ? "update" : "add", ...req },
@@ -700,7 +700,7 @@ const StaffPage = () => {
           value: data.id,
         })),
     },
-     {
+    {
       type: "text6",
       name: "employee_number",
       label: "Employee Number",
@@ -788,7 +788,7 @@ const StaffPage = () => {
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
   };
-  
+
 
   const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
@@ -796,7 +796,7 @@ const StaffPage = () => {
     Email: item.email,
     Phone: item.phone,
     Role: item.role_name,
-    "Line Manager" : item.line_manager_name || "-",
+    "Line Manager": item.line_manager_name || "-",
     Status: item.status === "1" ? "Active" : "Inactive",
   }));
 
@@ -882,7 +882,7 @@ const StaffPage = () => {
   const [changeRole, setChangeRole] = useState(false);
   const getChangedRoleStaff = async (staffData) => {
     //  console.log("Get Changed Role Staff:", staffData);
-     getCustomersNameChangeRole(staffData.id);
+    getCustomersNameChangeRole(staffData.id);
     try {
       const req = { action: "getChangedRoleStaff", staffData: staffData };
       const data = { req: req, authToken: token };
@@ -1392,10 +1392,10 @@ const StaffPage = () => {
         </div>
       </CommanModal>
 
-     <CommanModal
+      <CommanModal
         isOpen={changeRole}
         backdrop="static"
-        
+
         title="Change Role - Staff"
         hideBtn={true}
         handleClose={() => {
@@ -1406,76 +1406,76 @@ const StaffPage = () => {
           setChangedRoleStaffData([]);
         }}
       >
-  <div className="modal-body">
+        <div className="modal-body">
 
-    {/* Select Staff to Replace */}
-    <div className="mb-4">
-      <label htmlFor="staff-select" className="form-label fw-semibold">
-        <i className="bi bi-person-fill me-2"></i> Select Staff to Replace
-      </label>
+          {/* Select Staff to Replace */}
+          <div className="mb-4">
+            <label htmlFor="staff-select" className="form-label fw-semibold">
+              <i className="bi bi-person-fill me-2"></i> Select Staff to Replace
+            </label>
 
-      <div className="dropdown w-100">
-        <button
-          className="btn btn-outline-info rounded-pill dropdown-toggle w-100 text-start"
-          type="button"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-        >
-          {selectedStaff ? selectedStaff.staff_fullname : "Choose Staff"}
-        </button>
+            <div className="dropdown w-100">
+              <button
+                className="btn btn-outline-info rounded-pill dropdown-toggle w-100 text-start"
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                {selectedStaff ? selectedStaff.staff_fullname : "Choose Staff"}
+              </button>
 
-        {dropdownOpen && (
-          <ul
-            className="dropdown-menu show w-100 shadow-sm"
-            style={{ maxHeight: "220px", overflowY: "auto" }}
-          >
-            {changedRoleStaffData?.length > 0 ? (
-              changedRoleStaffData.map((staff) => (
-                <li key={staff.id}>
-                  <button
-                    className="dropdown-item"
-                    onClick={() => {
-                      setSelectedStaff(staff);
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    {staff.staff_fullname}
-                  </button>
-                </li>
-              ))
-            ) : (
-              <li>
-                <span className="dropdown-item text-muted">
-                  No staff available
-                </span>
-              </li>
+              {dropdownOpen && (
+                <ul
+                  className="dropdown-menu show w-100 shadow-sm"
+                  style={{ maxHeight: "220px", overflowY: "auto" }}
+                >
+                  {changedRoleStaffData?.length > 0 ? (
+                    changedRoleStaffData.map((staff) => (
+                      <li key={staff.id}>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => {
+                            setSelectedStaff(staff);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          {staff.staff_fullname}
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li>
+                      <span className="dropdown-item text-muted">
+                        No staff available
+                      </span>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="d-flex justify-content-end gap-2">
+            {selectedStaff && (
+              <button onClick={handleChangeRole} className="btn btn-info">
+                <i className="bi bi-arrow-repeat me-1"></i> Change Role
+              </button>
             )}
-          </ul>
-        )}
-      </div>
-    </div>
+            <button
+              onClick={() => {
+                setChangeRole(false);
+                setSelectedStaff(null);
+                formik.resetForm();
+                setEditStaffData({});
+                setChangedRoleStaffData([]);
+              }}
+              className="btn btn-secondary"
+            >
+              <i className="bi bi-x-circle me-1"></i> Cancel
+            </button>
+          </div>
 
-    {/* Action Buttons */}
-    <div className="d-flex justify-content-end gap-2">
-      {selectedStaff && (
-        <button onClick={handleChangeRole} className="btn btn-info">
-          <i className="bi bi-arrow-repeat me-1"></i> Change Role
-        </button>
-      )}
-      <button
-        onClick={() => {
-          setChangeRole(false);
-          setSelectedStaff(null);
-          formik.resetForm();
-          setEditStaffData({});
-          setChangedRoleStaffData([]);
-        }}
-        className="btn btn-secondary"
-      >
-        <i className="bi bi-x-circle me-1"></i> Cancel
-      </button>
-    </div>
-
-    {/* Customers List */}
+          {/* Customers List */}
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
@@ -1493,8 +1493,8 @@ const StaffPage = () => {
               </ul>
             </div>
           )}
-  </div>
-</CommanModal>
+        </div>
+      </CommanModal>
 
 
     </div>
