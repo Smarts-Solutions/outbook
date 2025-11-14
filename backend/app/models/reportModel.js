@@ -3203,6 +3203,29 @@ const getJobCustomReport = async (Report) => {
         Number_of_Purchase_Invoices_id_2,
         Number_of_Sales_Invoices_id_2,
         Number_of_Total_Transactions_id_2,
+        submission_deadline,
+        Tax_Year_id_4,
+        If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+        Whose_Tax_Return_is_it_id_4,
+        Type_of_Payslip_id_3,
+        Year_Ending_id_1,
+        Bookkeeping_Frequency_id_2,
+        CIS_Frequency_id_3,
+        Filing_Frequency_id_8,
+        Management_Accounts_Frequency_id_6,
+        Payroll_Frequency_id_3,
+        budgeted_hours,
+        feedback_incorporation_time,
+        review_time,
+        total_preparation_time,
+        total_time,
+        due_on,
+        customer_deadline_date,
+        expected_delivery_date,
+        internal_deadline_date,
+        sla_deadline_date,
+        Management_Accounts_FromDate_id_6,
+        Management_Accounts_ToDate_id_6,
 
 
 
@@ -3259,6 +3282,29 @@ const getJobCustomReport = async (Report) => {
         'Number_of_Purchase_Invoices_id_2',
         'Number_of_Sales_Invoices_id_2',
         'Number_of_Total_Transactions_id_2',
+        'submission_deadline',
+        'Tax_Year_id_4',
+        'If_Sole_Trader_Who_is_doing_Bookkeeping_id_4',
+        'Whose_Tax_Return_is_it_id_4',
+        'Type_of_Payslip_id_3',
+        'Year_Ending_id_1',
+        'Bookkeeping_Frequency_id_2',
+        'CIS_Frequency_id_3',
+        'Filing_Frequency_id_8',
+        'Management_Accounts_Frequency_id_6',
+        'Payroll_Frequency_id_3',
+        'budgeted_hours',
+        'feedback_incorporation_time',
+        'review_time',
+        'total_preparation_time',
+        'total_time',
+        'due_on',
+        'customer_deadline_date',
+        'expected_delivery_date',
+        'internal_deadline_date',
+        'sla_deadline_date',
+        'Management_Accounts_FromDate_id_6',
+        'Management_Accounts_ToDate_id_6',
 
 
         
@@ -3360,6 +3406,79 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(Number_of_Total_Transactions_id_2)) {
             where.push(`raw.Number_of_Total_Transactions_id_2 = ${Number_of_Total_Transactions_id_2}`);
         }
+        if (!["", null, undefined].includes(submission_deadline)) {
+            where.push(`raw.submission_deadline = '${submission_deadline}'`);
+        }
+        if (!["", null, undefined].includes(Tax_Year_id_4)) {
+            where.push(`raw.Tax_Year_id_4 = ${Tax_Year_id_4}`);
+        }
+        if (!["", null, undefined].includes(If_Sole_Trader_Who_is_doing_Bookkeeping_id_4)) {
+            where.push(`raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 = ${If_Sole_Trader_Who_is_doing_Bookkeeping_id_4}`);
+        }   
+        if (!["", null, undefined].includes(Whose_Tax_Return_is_it_id_4)) {
+            where.push(`raw.Whose_Tax_Return_is_it_id_4 = ${Whose_Tax_Return_is_it_id_4}`);
+        }   
+        if (!["", null, undefined].includes(Type_of_Payslip_id_3)) {
+            where.push(`raw.Type_of_Payslip_id_3 = ${Type_of_Payslip_id_3}`);
+        }
+        if (!["", null, undefined].includes(Year_Ending_id_1)) {
+            where.push(`raw.Year_Ending_id_1 = ${Year_Ending_id_1}`);
+        }
+        if (!["", null, undefined].includes(Bookkeeping_Frequency_id_2)) {
+            where.push(`raw.Bookkeeping_Frequency_id_2 = ${Bookkeeping_Frequency_id_2}`);
+        }
+        if (!["", null, undefined].includes(CIS_Frequency_id_3)) {
+            where.push(`raw.CIS_Frequency_id_3 = ${CIS_Frequency_id_3}`);
+        }
+        if (!["", null, undefined].includes(Filing_Frequency_id_8)) {
+            where.push(`raw.Filing_Frequency_id_8 = ${Filing_Frequency_id_8}`);
+        }
+        if (!["", null, undefined].includes(Management_Accounts_Frequency_id_6)) {
+            where.push(`raw.Management_Accounts_Frequency_id_6 = ${Management_Accounts_Frequency_id_6}`);
+        }
+        if (!["", null, undefined].includes(Payroll_Frequency_id_3)) {
+            where.push(`raw.Payroll_Frequency_id_3 = ${Payroll_Frequency_id_3}`);
+        }
+        if (!["", null, undefined].includes(budgeted_hours)) {
+            where.push(`raw.budgeted_hours = ${budgeted_hours}`);
+        }
+        if (!["", null, undefined].includes(feedback_incorporation_time)) {
+            where.push(`raw.feedback_incorporation_time = '${feedback_incorporation_time}'`);
+        }
+        if (!["", null, undefined].includes(review_time)) {
+            where.push(`raw.review_time = '${review_time}'`);
+        }
+        if (!["", null, undefined].includes(total_preparation_time)) {
+            where.push(`raw.total_preparation_time = '${total_preparation_time}'`);
+        }
+        if (!["", null, undefined].includes(total_time)) {
+            where.push(`raw.total_time = '${total_time}'`);
+        }
+        if (!["", null, undefined].includes(due_on)) {
+            where.push(`raw.due_on = '${due_on}'`);
+        }
+        if (!["", null, undefined].includes(customer_deadline_date)) {
+            where.push(`raw.customer_deadline_date = '${customer_deadline_date}'`);
+        }
+        if (!["", null, undefined].includes(expected_delivery_date)) {
+            where.push(`raw.expected_delivery_date = '${expected_delivery_date}'`);
+        }
+        if (!["", null, undefined].includes(internal_deadline_date)) {
+            where.push(`raw.internal_deadline_date = '${internal_deadline_date}'`);
+        }
+        if (!["", null, undefined].includes(sla_deadline_date)) {
+            where.push(`raw.sla_deadline_date = '${sla_deadline_date}'`);
+        }
+        if (!["", null, undefined].includes(Management_Accounts_FromDate_id_6)) {
+            where.push(`raw.Management_Accounts_FromDate_id_6 = '${Management_Accounts_FromDate_id_6}'`);
+        }
+        if (!["", null, undefined].includes(Management_Accounts_ToDate_id_6)) {
+            where.push(`raw.Management_Accounts_ToDate_id_6 = '${Management_Accounts_ToDate_id_6}'`);
+        }
+        
+
+
+
 
 
 
@@ -3386,6 +3505,31 @@ const getJobCustomReport = async (Report) => {
                 raw.Number_of_Purchase_Invoices_id_2,
                 raw.Number_of_Sales_Invoices_id_2,
                 raw.Number_of_Total_Transactions_id_2,
+                raw.submission_deadline,
+                raw.Tax_Year_id_4,
+                raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                raw.Whose_Tax_Return_is_it_id_4,
+                raw.Type_of_Payslip_id_3,
+                raw.Year_Ending_id_1,
+                raw.Bookkeeping_Frequency_id_2,
+                raw.CIS_Frequency_id_3,
+                raw.Filing_Frequency_id_8,
+                raw.Management_Accounts_Frequency_id_6,
+                raw.Payroll_Frequency_id_3,
+                raw.budgeted_hours,
+                raw.feedback_incorporation_time,
+                raw.review_time,
+                raw.total_preparation_time,
+                raw.total_time,
+                DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+                DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+                DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+                DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+                DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+                DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+                DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+
+
 
 
 
@@ -3441,7 +3585,31 @@ const getJobCustomReport = async (Report) => {
                     j.Number_of_Petty_Cash_Transactions_id_2,
                     j.Number_of_Purchase_Invoices_id_2,
                     j.Number_of_Sales_Invoices_id_2,
-                    j.Number_of_Total_Transactions_id_2,    
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
 
 
                     j.customer_id,
@@ -3529,6 +3697,30 @@ const getJobCustomReport = async (Report) => {
                 Number_of_Purchase_Invoices_id_2 : "Number_of_Purchase_Invoices_id_2",
                 Number_of_Sales_Invoices_id_2 : "Number_of_Sales_Invoices_id_2",
                 Number_of_Total_Transactions_id_2 : "Number_of_Total_Transactions_id_2",
+                submission_deadline : "submission_deadline",
+                Tax_Year_id_4 : "Tax_Year_id_4",
+                If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 : "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+                Whose_Tax_Return_is_it_id_4 : "Whose_Tax_Return_is_it_id_4",
+                Type_of_Payslip_id_3 : "Type_of_Payslip_id_3",
+                Year_Ending_id_1 : "Year_Ending_id_1",
+                Bookkeeping_Frequency_id_2 : "Bookkeeping_Frequency_id_2",
+                CIS_Frequency_id_3 : "CIS_Frequency_id_3",
+                Filing_Frequency_id_8 : "Filing_Frequency_id_8",
+                Management_Accounts_Frequency_id_6 : "Management_Accounts_Frequency_id_6",
+                Payroll_Frequency_id_3 : "Payroll_Frequency_id_3",
+                budgeted_hours : "budgeted_hours",
+                feedback_incorporation_time : "feedback_incorporation_time",
+                review_time : "review_time",
+                total_preparation_time : "total_preparation_time",
+                total_time : "total_time",
+                due_on : "due_on",
+                customer_deadline_date : "customer_deadline_date",
+                expected_delivery_date : "expected_delivery_date",
+                internal_deadline_date : "internal_deadline_date",
+                sla_deadline_date : "sla_deadline_date",
+                Management_Accounts_FromDate_id_6 : "Management_Accounts_FromDate_id_6",
+                Management_Accounts_ToDate_id_6 : "Management_Accounts_ToDate_id_6",
+
                 
             };
 
@@ -3589,6 +3781,30 @@ const getJobCustomReport = async (Report) => {
                     Number_of_Purchase_Invoices_id_2 : r.Number_of_Purchase_Invoices_id_2,
                     Number_of_Sales_Invoices_id_2 : r.Number_of_Sales_Invoices_id_2,
                     Number_of_Total_Transactions_id_2 : r.Number_of_Total_Transactions_id_2,
+                    submission_deadline : r.submission_deadline,
+                    Tax_Year_id_4 : r.Tax_Year_id_4,
+                    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 : r.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    Whose_Tax_Return_is_it_id_4 : r.Whose_Tax_Return_is_it_id_4,
+                    Type_of_Payslip_id_3 : r.Type_of_Payslip_id_3,
+                    Year_Ending_id_1 : r.Year_Ending_id_1,
+                    Bookkeeping_Frequency_id_2 : r.Bookkeeping_Frequency_id_2,
+                    CIS_Frequency_id_3 : r.CIS_Frequency_id_3,
+                    Filing_Frequency_id_8 : r.Filing_Frequency_id_8,
+                    Management_Accounts_Frequency_id_6 : r.Management_Accounts_Frequency_id_6,
+                    Payroll_Frequency_id_3 : r.Payroll_Frequency_id_3,
+                    budgeted_hours: r.budgeted_hours,
+                    feedback_incorporation_time: r.feedback_incorporation_time,
+                    review_time: r.review_time,
+                    total_preparation_time: r.total_preparation_time,
+                    total_time: r.total_time,
+                    due_on: r.due_on,
+                    customer_deadline_date: r.customer_deadline_date,
+                    expected_delivery_date: r.expected_delivery_date,
+                    internal_deadline_date: r.internal_deadline_date,
+                    sla_deadline_date: r.sla_deadline_date,
+                    Management_Accounts_FromDate_id_6: r.Management_Accounts_FromDate_id_6,
+                    Management_Accounts_ToDate_id_6: r.Management_Accounts_ToDate_id_6,
+
 
 
 
@@ -3647,6 +3863,30 @@ const getJobCustomReport = async (Report) => {
             row['Number_of_Purchase_Invoices_id_2'] = g.Number_of_Purchase_Invoices_id_2;
             row['Number_of_Sales_Invoices_id_2'] = g.Number_of_Sales_Invoices_id_2;
             row['Number_of_Total_Transactions_id_2'] = g.Number_of_Total_Transactions_id_2;
+            row['submission_deadline'] = g.submission_deadline;
+            row['Tax_Year_id_4'] = g.Tax_Year_id_4;
+            row['If_Sole_Trader_Who_is_doing_Bookkeeping_id_4'] = g.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4;
+            row['Whose_Tax_Return_is_it_id_4'] = g.Whose_Tax_Return_is_it_id_4;
+            row['Type_of_Payslip_id_3'] = g.Type_of_Payslip_id_3;
+            row['Year_Ending_id_1'] = g.Year_Ending_id_1;   
+            row['Bookkeeping_Frequency_id_2'] = g.Bookkeeping_Frequency_id_2;
+            row['CIS_Frequency_id_3'] = g.CIS_Frequency_id_3;
+            row['Filing_Frequency_id_8'] = g.Filing_Frequency_id_8;
+            row['Management_Accounts_Frequency_id_6'] = g.Management_Accounts_Frequency_id_6;
+            row['Payroll_Frequency_id_3'] = g.Payroll_Frequency_id_3;
+            row['budgeted_hours'] = g.budgeted_hours;
+            row['feedback_incorporation_time'] = g.feedback_incorporation_time;
+            row['review_time'] = g.review_time;
+            row['total_preparation_time'] = g.total_preparation_time;
+            row['total_time'] = g.total_time;
+            row['due_on'] = g.due_on;
+            row['customer_deadline_date'] = g.customer_deadline_date;
+            row['expected_delivery_date'] = g.expected_delivery_date;
+            row['internal_deadline_date'] = g.internal_deadline_date;
+            row['sla_deadline_date'] = g.sla_deadline_date;
+            row['Management_Accounts_FromDate_id_6'] = g.Management_Accounts_FromDate_id_6;
+            row['Management_Accounts_ToDate_id_6'] = g.Management_Accounts_ToDate_id_6;
+
 
 
 
