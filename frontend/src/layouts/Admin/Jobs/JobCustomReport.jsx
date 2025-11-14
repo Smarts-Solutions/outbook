@@ -8,6 +8,7 @@ import * as XLSX from "xlsx";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
+import { TextSelect } from 'lucide-react';
 
 
 function JobCustomReport() {
@@ -774,7 +775,7 @@ function JobCustomReport() {
     { value: "service_id", label: "Service Type" },
     { value: "job_type_id", label: "Job Type" },
     { value: "status_type_id", label: "Job Status" },
-   
+
     { value: "allocated_on", label: "Allocated On" },
     { value: "job_priority", label: "Job Priority" },
     { value: "engagement_model", label: "Engagement Model" },
@@ -806,7 +807,7 @@ function JobCustomReport() {
     { value: "total_time", label: "Total Time" },
     { value: "due_on", label: "Due On" },
     { value: "customer_deadline_date", label: "Customer Deadline Date" },
-     { value: "date_received_on", label: "Date Received On" },
+    { value: "date_received_on", label: "Date Received On" },
     { value: "expected_delivery_date", label: "Expected Delivery Date" },
     { value: "internal_deadline_date", label: "Internal Deadline Date" },
     { value: "sla_deadline_date", label: "SLA Deadline Date" },
@@ -820,10 +821,10 @@ function JobCustomReport() {
     // { value: "line_manager_id", label: "Line Manager" },
   ];
 
- 
 
 
- 
+
+
 
 
   const optionAdditionalBy = [
@@ -1121,10 +1122,32 @@ function JobCustomReport() {
       <div className="row g-3 mb-3 bg-light p-3  mt-4 rounded shadow-sm align-items-end">
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
+
+          <button
+            onClick={() => {
+              const allValues = optionGroupBy.map(opt => opt.value);
+              addAndRemoveGroupBy(allValues, "addAll");
+              handleFilterChange(optionGroupBy);
+            }}
+            style={{
+              marginBottom: "5px",
+              padding: "6px 10px",
+              background: "#eee",
+              borderRadius: "5px",
+              cursor: "pointer"
+            }}
+          >
+          <TextSelect />
+          </button>
+
+           
+        
+  
           <label className="form-label fw-medium">Group By</label>
 
           <Select
             isMulti
+            closeMenuOnSelect={false}
             options={optionGroupBy}
             value={optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value))}
             onChange={(selectedOptions, actionMeta) => {
@@ -1425,7 +1448,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes('status_type_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-             Job Status
+              Job Status
             </label>
             <Select
               options={[
@@ -1655,7 +1678,7 @@ function getColumnName(columnKey) {
     Number_of_Journal_Entries_id_2: "Number of Journal Entries",
     Number_of_Other_Transactions_id_2: "Number of Other Transactions",
     Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
-    Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices", 
+    Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices",
     Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
     Number_of_Total_Transactions_id_2: "Number of Total Transactions",
     submission_deadline: "Submission Deadline",
