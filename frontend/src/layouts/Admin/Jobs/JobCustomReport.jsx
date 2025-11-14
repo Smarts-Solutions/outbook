@@ -773,12 +773,21 @@ function JobCustomReport() {
     { value: "allocated_to_other_id", label: "Allocated To (Other)" },
     { value: "service_id", label: "Service Type" },
     { value: "job_type_id", label: "Job Type" },
-    { value: "status_type_id", label: "Status" },
+    { value: "status_type_id", label: "Job Status" },
     { value: "date_received_on", label: "Received On" },
     { value: "allocated_on", label: "Allocated On" },
     { value: "job_priority", label: "Job Priority" },
     { value: "engagement_model", label: "Engagement Model" },
     { value: "customer_account_manager_officer", label: "Customer Account Manager (Officer)" },
+    { value: "status_updation_date", label: "Status Updation Date" },
+    { value: "Transactions_Posting_id_2", label: "Transactions Posting" },
+    { value: "Number_of_Bank_Transactions_id_2", label: "Number of Bank Transactions" },
+    { value: "Number_of_Journal_Entries_id_2", label: "Number of Journal Entries" },
+    { value: "Number_of_Other_Transactions_id_2", label: "Number of Other Transactions" },
+    { value: "Number_of_Petty_Cash_Transactions_id_2", label: "Number of Petty Cash Transactions" },
+    { value: "Number_of_Purchase_Invoices_id_2", label: "Number of Purchase Invoices" },
+    { value: "Number_of_Sales_Invoices_id_2", label: "Number of Sales Invoices" },
+    { value: "Number_of_Total_Transactions_id_2", label: "Number of Total Transactions" },
     // { value: "line_manager_id", label: "Line Manager" },
   ];
 
@@ -1382,7 +1391,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes('status_type_id') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Status
+             Job Status
             </label>
             <Select
               options={[
@@ -1597,7 +1606,7 @@ function getColumnName(columnKey) {
     allocated_to_other_id: "Allocated To (Other)",
     service_id: "Service",
     job_type_id: "Job Type",
-    status_type_id: "Status",
+    status_type_id: "Job Status",
     // line_manager_id: "Line Manager",
     date: "Created Date",
     total_count: "Total Count",
@@ -1606,6 +1615,16 @@ function getColumnName(columnKey) {
     job_priority: "Job Priority",
     engagement_model: "Engagement Model",
     customer_account_manager_officer: "Customer Account Manager (Officer)",
+    status_updation_date: "Status Updation Date",
+    Transactions_Posting_id_2: "Transactions Posting",
+    Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
+    Number_of_Journal_Entries_id_2: "Number of Journal Entries",
+    Number_of_Other_Transactions_id_2: "Number of Other Transactions",
+    Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
+    Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices", 
+    Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
+    Number_of_Total_Transactions_id_2: "Number of Total Transactions",
+
 
 
 

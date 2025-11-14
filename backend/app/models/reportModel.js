@@ -3194,6 +3194,15 @@ const getJobCustomReport = async (Report) => {
         job_priority,
         engagement_model,
         customer_account_manager_officer,
+        status_updation_date,
+        Transactions_Posting_id_2,
+        Number_of_Bank_Transactions_id_2,
+        Number_of_Journal_Entries_id_2,
+        Number_of_Other_Transactions_id_2,
+        Number_of_Petty_Cash_Transactions_id_2,
+        Number_of_Purchase_Invoices_id_2,
+        Number_of_Sales_Invoices_id_2,
+        Number_of_Total_Transactions_id_2,
 
 
 
@@ -3241,6 +3250,17 @@ const getJobCustomReport = async (Report) => {
         'job_priority',
         'engagement_model',
         'customer_account_manager_officer',
+        'status_updation_date',
+        'Transactions_Posting_id_2',
+        'Number_of_Bank_Transactions_id_2',
+        'Number_of_Journal_Entries_id_2',
+        'Number_of_Other_Transactions_id_2',
+        'Number_of_Petty_Cash_Transactions_id_2',
+        'Number_of_Purchase_Invoices_id_2',
+        'Number_of_Sales_Invoices_id_2',
+        'Number_of_Total_Transactions_id_2',
+
+
         
         //'line_manager_id'
     ]
@@ -3313,6 +3333,34 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(customer_account_manager_officer)) {
             where.push(`ccd.id = ${customer_account_manager_officer}`);
         }
+        if (!["", null, undefined].includes(status_updation_date)) {
+            where.push(`raw.status_updation_date = '${status_updation_date}'`);
+        }
+        if (!["", null, undefined].includes(Transactions_Posting_id_2)) {
+            where.push(`raw.Transactions_Posting_id_2 = ${Transactions_Posting_id_2}`);
+        }
+        if (!["", null, undefined].includes(Number_of_Bank_Transactions_id_2)) {
+            where.push(`raw.Number_of_Bank_Transactions_id_2 = ${Number_of_Bank_Transactions_id_2}`);
+        }
+        if (!["", null, undefined].includes(Number_of_Journal_Entries_id_2)) {
+            where.push(`raw.Number_of_Journal_Entries_id_2 = ${Number_of_Journal_Entries_id_2}`);
+        }   
+        if (!["", null, undefined].includes(Number_of_Other_Transactions_id_2)) {
+            where.push(`raw.Number_of_Other_Transactions_id_2 = ${Number_of_Other_Transactions_id_2}`);
+        }
+        if (!["", null, undefined].includes(Number_of_Petty_Cash_Transactions_id_2)) {
+            where.push(`raw.Number_of_Petty_Cash_Transactions_id_2 = ${Number_of_Petty_Cash_Transactions_id_2}`);
+        }
+        if (!["", null, undefined].includes(Number_of_Purchase_Invoices_id_2)) {
+            where.push(`raw.Number_of_Purchase_Invoices_id_2 = ${Number_of_Purchase_Invoices_id_2}`);
+        }
+        if (!["", null, undefined].includes(Number_of_Sales_Invoices_id_2)) {
+            where.push(`raw.Number_of_Sales_Invoices_id_2 = ${Number_of_Sales_Invoices_id_2}`);
+        }
+        if (!["", null, undefined].includes(Number_of_Total_Transactions_id_2)) {
+            where.push(`raw.Number_of_Total_Transactions_id_2 = ${Number_of_Total_Transactions_id_2}`);
+        }
+
 
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -3327,8 +3375,17 @@ const getJobCustomReport = async (Report) => {
 
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
                 raw.job_priority,
                 raw.engagement_model,
+                raw.Transactions_Posting_id_2,
+                raw.Number_of_Bank_Transactions_id_2,
+                raw.Number_of_Journal_Entries_id_2,
+                raw.Number_of_Other_Transactions_id_2,
+                raw.Number_of_Petty_Cash_Transactions_id_2,
+                raw.Number_of_Purchase_Invoices_id_2,
+                raw.Number_of_Sales_Invoices_id_2,
+                raw.Number_of_Total_Transactions_id_2,
 
 
 
@@ -3376,6 +3433,15 @@ const getJobCustomReport = async (Report) => {
                     j.job_priority AS job_priority,
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,    
 
 
                     j.customer_id,
@@ -3454,6 +3520,16 @@ const getJobCustomReport = async (Report) => {
                 job_priority: "job_priority",
                 engagement_model: "engagement_model",
                 customer_account_manager_officer: "customer_account_manager_officer",
+                status_updation_date: "status_updation_date",
+                Transactions_Posting_id_2 : "Transactions_Posting_id_2",
+                Number_of_Bank_Transactions_id_2 : "Number_of_Bank_Transactions_id_2",
+                Number_of_Journal_Entries_id_2 : "Number_of_Journal_Entries_id_2",
+                Number_of_Other_Transactions_id_2 : "Number_of_Other_Transactions_id_2",
+                Number_of_Petty_Cash_Transactions_id_2 : "Number_of_Petty_Cash_Transactions_id_2",
+                Number_of_Purchase_Invoices_id_2 : "Number_of_Purchase_Invoices_id_2",
+                Number_of_Sales_Invoices_id_2 : "Number_of_Sales_Invoices_id_2",
+                Number_of_Total_Transactions_id_2 : "Number_of_Total_Transactions_id_2",
+                
             };
 
             // Now dynamically build groupKeyParts
@@ -3504,6 +3580,15 @@ const getJobCustomReport = async (Report) => {
                     job_priority: r.job_priority,
                     engagement_model: r.engagement_model,
                     customer_account_manager_officer: r.customer_account_manager_officer,
+                    status_updation_date: r.status_updation_date,
+                    Transactions_Posting_id_2: r.Transactions_Posting_id_2,
+                    Number_of_Bank_Transactions_id_2 : r.Number_of_Bank_Transactions_id_2,
+                    Number_of_Journal_Entries_id_2 : r.Number_of_Journal_Entries_id_2,
+                    Number_of_Other_Transactions_id_2 : r.Number_of_Other_Transactions_id_2,
+                    Number_of_Petty_Cash_Transactions_id_2 : r.Number_of_Petty_Cash_Transactions_id_2,
+                    Number_of_Purchase_Invoices_id_2 : r.Number_of_Purchase_Invoices_id_2,
+                    Number_of_Sales_Invoices_id_2 : r.Number_of_Sales_Invoices_id_2,
+                    Number_of_Total_Transactions_id_2 : r.Number_of_Total_Transactions_id_2,
 
 
 
@@ -3553,6 +3638,15 @@ const getJobCustomReport = async (Report) => {
             row['job_priority'] = g.job_priority;
             row['engagement_model'] = g?.engagement_model?.replace(/_/g, " ")?.replace(/\b\w/g, (c) => c?.toUpperCase());
             row['customer_account_manager_officer'] = g.customer_account_manager_officer;
+            row['status_updation_date'] = g.status_updation_date;
+            row['Transactions_Posting_id_2'] = g.Transactions_Posting_id_2;
+            row['Number_of_Bank_Transactions_id_2'] = g.Number_of_Bank_Transactions_id_2;
+            row['Number_of_Journal_Entries_id_2'] = g.Number_of_Journal_Entries_id_2;
+            row['Number_of_Other_Transactions_id_2'] = g.Number_of_Other_Transactions_id_2;
+            row['Number_of_Petty_Cash_Transactions_id_2'] = g.Number_of_Petty_Cash_Transactions_id_2;
+            row['Number_of_Purchase_Invoices_id_2'] = g.Number_of_Purchase_Invoices_id_2;
+            row['Number_of_Sales_Invoices_id_2'] = g.Number_of_Sales_Invoices_id_2;
+            row['Number_of_Total_Transactions_id_2'] = g.Number_of_Total_Transactions_id_2;
 
 
 
