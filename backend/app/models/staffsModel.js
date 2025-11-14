@@ -4,7 +4,7 @@ const axios = require("axios");
 const qs = require("qs");
 
 const createStaff = async (staff) => {
-  console.log(staff);
+  // console.log(staff);
   const {
     role_id,
     first_name,
