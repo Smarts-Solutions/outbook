@@ -3226,6 +3226,13 @@ const getJobCustomReport = async (Report) => {
         sla_deadline_date,
         Management_Accounts_FromDate_id_6,
         Management_Accounts_ToDate_id_6,
+        
+        // Staff Fields
+        staff_full_name,
+        role,
+        staff_email,
+        line_manager,
+        staff_status,
 
 
 
@@ -3305,6 +3312,12 @@ const getJobCustomReport = async (Report) => {
         'sla_deadline_date',
         'Management_Accounts_FromDate_id_6',
         'Management_Accounts_ToDate_id_6',
+        // Staff Fields
+        'staff_full_name',
+        'role',
+        'staff_email',
+        'line_manager',
+        'staff_status',
 
 
         
@@ -3475,7 +3488,24 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(Management_Accounts_ToDate_id_6)) {
             where.push(`raw.Management_Accounts_ToDate_id_6 = '${Management_Accounts_ToDate_id_6}'`);
         }
-        
+
+        // // Staff Fields
+        if (!["", null, undefined].includes(staff_full_name)) {
+            where.push(`CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) LIKE '%${staff_full_name}%'`);
+        }
+        if (!["", null, undefined].includes(role)) {
+            where.push(`staffrole.role = '${role}'`);
+        }
+        if (!["", null, undefined].includes(staff_email)) {
+            where.push(`jobcreatestaff.email = '${staff_email}'`);
+        }
+        if (!["", null, undefined].includes(line_manager)) {
+            where.push(`CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) LIKE '%${line_manager}%'`);
+        }
+        if (!["", null, undefined].includes(staff_status)) {
+            where.push(`jobcreatestaff.status = '${staff_status}'`);
+        }
+
 
 
 
@@ -3720,6 +3750,13 @@ const getJobCustomReport = async (Report) => {
                 sla_deadline_date : "sla_deadline_date",
                 Management_Accounts_FromDate_id_6 : "Management_Accounts_FromDate_id_6",
                 Management_Accounts_ToDate_id_6 : "Management_Accounts_ToDate_id_6",
+
+                // staff fields
+                staff_full_name : "staff_full_name",
+                role : "role",
+                staff_email : "staff_email",
+                line_manager : "line_manager",
+                staff_status : "staff_status",
 
                 
             };

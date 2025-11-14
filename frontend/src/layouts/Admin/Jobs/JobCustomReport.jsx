@@ -812,8 +812,18 @@ function JobCustomReport() {
     { value: "sla_deadline_date", label: "SLA Deadline Date" },
     { value: "Management_Accounts_FromDate_id_6", label: "From Date (Management Accounts)" },
     { value: "Management_Accounts_ToDate_id_6", label: "To Date (Management Accounts)" },
+    { value: "staff_full_name", label: "Staff Full Name" },
+    { value: "role", label: "Role" },
+    { value: "staff_email", label: "Email Address" },
+    { value: "line_manager", label: "Line Manager" },
+    { value: "staff_status", label: "Staff Status" },
     // { value: "line_manager_id", label: "Line Manager" },
   ];
+
+ 
+
+
+ 
 
 
   const optionAdditionalBy = [
@@ -1681,7 +1691,7 @@ function getColumnName(columnKey) {
     role: "Role",
     staff_email: "Email Address",
     line_manager: "Line Manager",
-    staff_status: "Status",
+    staff_status: "Staff Status",
   };
 
   // ✅ check if columnKey is a date string (yyyy-mm-dd format)
