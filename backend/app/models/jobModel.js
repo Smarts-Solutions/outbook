@@ -2945,14 +2945,14 @@ const updateJobStatus = async (job) => {
 
     let query = `
          UPDATE jobs 
-         SET status_type = ?
+         SET status_type = ? , status_updation_date = NOW()
          WHERE id = ?
        `;
 
     if (parseInt(status_type) == 20) {
       query = `
         UPDATE jobs 
-        SET status_type = ?, filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
+        SET status_type = ?,status_updation_date = NOW(), filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
         WHERE id = ?
       `;
     }
@@ -2960,14 +2960,14 @@ const updateJobStatus = async (job) => {
     else if (parseInt(status_type) == 19) {
       query = `
         UPDATE jobs 
-        SET status_type = ?, filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        SET status_type = ?, status_updation_date = NOW(),filing_Companies_required = '1' , filing_Companies_date = CURDATE()
         WHERE id = ?
       `;
     }
     else if (parseInt(status_type) == 18) {
       query = `
         UPDATE jobs 
-        SET status_type = ?, filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        SET status_type = ?,status_updation_date = NOW(), filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
         WHERE id = ?
       `;
     }
