@@ -7,6 +7,7 @@ const RoleValidation = "Role is required";
 const StatusValidation = "Status is required";
 const PasswordIsRequire = "Password is required";
 const EmailIsRequire = "Email is required";
+const EmployeeNumberValidation = "Employee Number is required";
 
 
-export default {FirstNameValidation,LastNameValidation, EmailValidation, PhoneValidation, PasswordValidation, RoleValidation, StatusValidation ,PasswordIsRequire,EmailIsRequire};
+export default {FirstNameValidation,LastNameValidation, EmailValidation, PhoneValidation, PasswordValidation, RoleValidation, StatusValidation ,PasswordIsRequire,EmailIsRequire ,EmployeeNumberValidation};

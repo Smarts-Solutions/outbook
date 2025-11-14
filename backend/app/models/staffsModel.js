@@ -4,7 +4,7 @@ const axios = require("axios");
 const qs = require("qs");
 
 const createStaff = async (staff) => {
-  // console.log(staff);
+  console.log(staff);
   const {
     role_id,
     first_name,
@@ -14,6 +14,7 @@ const createStaff = async (staff) => {
     phone_code,
     password,
     status,
+    employee_number,
     created_by,
     StaffUserId,
     ip,
@@ -36,8 +37,8 @@ const createStaff = async (staff) => {
   }
 
   const query = `
-    INSERT INTO staffs (role_id, first_name, last_name, email, phone_code,phone, password,hourminute, status ,created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO staffs (role_id, first_name, last_name, email, phone_code,phone, password,hourminute, status ,created_by, employee_number)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
   try {
@@ -52,6 +53,7 @@ const createStaff = async (staff) => {
       hourminute,
       status,
       created_by,
+      employee_number
     ]);
 
     if (staff_to != "" && staff_to != undefined) {
@@ -95,6 +97,7 @@ const getStaff = async () => {
      staffs.phone ,
      staffs.is_disable ,
      staffs.status ,
+     staffs.employee_number ,
      staffs.created_at ,
      staffs.hourminute ,
      

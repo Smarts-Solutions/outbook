@@ -14,6 +14,7 @@ const addStaff = async (staff) => {
     phone_code,
     status,
     created_by,
+    employee_number,
     StaffUserId,
     ip,
     staff_to
@@ -28,8 +29,10 @@ const addStaff = async (staff) => {
     phone,
     phone_code,
     status,
+
     password: hashedPassword,
     created_by,
+    employee_number,
     StaffUserId,
     ip,
     staff_to

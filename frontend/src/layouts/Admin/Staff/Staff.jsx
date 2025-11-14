@@ -523,6 +523,7 @@ const StaffPage = () => {
       role: "3",
       status: "1",
       staff_to: "",
+      employee_number: "",
     },
     validationSchema: Yup.object({
       first_name: Yup.string()
@@ -541,6 +542,9 @@ const StaffPage = () => {
       status: Yup.string()
         .trim(Validation_Message.StatusValidation)
         .required(Validation_Message.StatusValidation),
+        employee_number: Yup.string()
+        .trim(Validation_Message.EmployeeNumberValidation)
+        .required(Validation_Message.EmployeeNumberValidation)
     }),
 
     onSubmit: async (values) => {
@@ -552,6 +556,7 @@ const StaffPage = () => {
         phone_code: values.phone_code,
         role_id: values.role,
         status: values.status,
+        employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
         hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
@@ -560,7 +565,8 @@ const StaffPage = () => {
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
-
+     
+      
       await dispatch(
         Staff({
           req: { action: editStaff ? "update" : "add", ...req },
@@ -694,6 +700,15 @@ const StaffPage = () => {
           value: data.id,
         })),
     },
+     {
+      type: "text6",
+      name: "employee_number",
+      label: "Employee Number",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Employee Number",
+    },
   ];
 
 
@@ -752,6 +767,7 @@ const StaffPage = () => {
       formik.setFieldValue("phone", editStaffData.phone || null);
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
+      formik.setFieldValue("employee_number", editStaffData.employee_number || null);
       formik.setFieldValue("phone_code", editStaffData.phone_code || null);
       formik.setFieldValue("staff_to", editStaffData.staff_to || "");
       formik.setFieldValue("id", editStaffData?.id || "");
