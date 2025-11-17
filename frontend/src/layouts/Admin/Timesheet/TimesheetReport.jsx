@@ -1617,7 +1617,8 @@ function getColumnName(columnKey) {
     task_id: "Task",
     total_hours: "Total Hours",
     total_records: "Total Records",
-    task_type: "Task Type"
+    task_type: "Task Type",
+    employee_number: "Employee ID"
   };
 
   // ✅ check if columnKey is a date string (yyyy-mm-dd format)
