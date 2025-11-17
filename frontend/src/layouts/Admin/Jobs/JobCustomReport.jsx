@@ -829,7 +829,7 @@ function JobCustomReport() {
     { value: "service_id", label: "Service Type" },
     { value: "job_type_id", label: "Job Type" },
     { value: "status_type_id", label: "Job Status" },
-    { value: "employee_number", label: "Employee Id" },
+    { value: "employee_number", label: "Employee ID" },
 
     { value: "allocated_on", label: "Allocated On" },
     { value: "job_priority", label: "Job Priority" },
@@ -1324,11 +1324,11 @@ function JobCustomReport() {
           </div>
         )}
 
-         {/* Field To Display Employee Id Number  */}
+         {/* Field To Display Employee ID Number  */}
         {filters?.groupBy?.includes('employee_number') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
-              Employee Id
+              Employee ID
             </label>
             <Select
               options={[
@@ -1746,7 +1746,7 @@ function getColumnName(columnKey) {
     service_id: "Service",
     job_type_id: "Job Type",
     status_type_id: "Job Status",
-    employee_number: "Employee Id",
+    employee_number: "Employee ID",
     // line_manager_id: "Line Manager",
     date: "Created Date",
     total_count: "Total Count",
