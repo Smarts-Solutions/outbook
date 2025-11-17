@@ -737,7 +737,7 @@ function TimesheetReport() {
     if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id]);
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id,filters.employee_number]);
 
 
   //console.log("filters ", filters);
@@ -780,7 +780,9 @@ function TimesheetReport() {
     ...((filters?.internal_external == '2' || filters?.internal_external == '0') ? [{ value: "customer_id", label: "Customer" }] : []),
     ...((filters?.internal_external == '2' || filters?.internal_external == '0') ? [{ value: "client_id", label: "Client" }] : []),
     { value: "job_id", label: "Job" },
-    { value: "task_id", label: "Task" }
+    { value: "task_id", label: "Task" },
+    { value: "employee_number", label: "Employee ID" },
+
   ];
 
   const labels = {

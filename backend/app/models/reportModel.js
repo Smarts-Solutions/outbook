@@ -2110,6 +2110,7 @@ const getTimesheetReportData = async (Report) => {
         fieldsToDisplay,
         fieldsToDisplayId,
         staff_id,
+        employee_number,
         customer_id,
         client_id,
         job_id,
@@ -2129,7 +2130,7 @@ const getTimesheetReportData = async (Report) => {
     }
     //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
-    const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
+    const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id','employee_number'];
 
     // validate groupBy
     if (!Array.isArray(groupBy)) groupBy = [groupBy];
@@ -2196,6 +2197,9 @@ const getTimesheetReportData = async (Report) => {
         if (!["", null, undefined].includes(internal_task_id)) {
             where.push(`(raw.task_type = '1' AND raw.task_id = ${internal_task_id})`);
         }
+        if (!["", null, undefined].includes(employee_number)) {
+            where.push(`s.employee_number = '${employee_number}'`);
+        }
 
 
 
@@ -2227,6 +2231,7 @@ const getTimesheetReportData = async (Report) => {
                     WHEN raw.task_type = '2' THEN t.name
                 END`;
             }
+            if (f === 'employee_number') return "s.employee_number";
             return f;
         }).join(", ' - ', ");
 
@@ -2263,6 +2268,7 @@ const getTimesheetReportData = async (Report) => {
                             WHEN raw.task_type = '2' THEN 'External'
                             ELSE 'Unknown'
                           END AS task_type_label`;
+        const employeeNumber = `s.employee_number AS employee_number`;                  
 
         // Unpivot query
         const unpivotSQL = `
@@ -2279,7 +2285,8 @@ const getTimesheetReportData = async (Report) => {
             ${clientName},
             ${jobName},
             ${taskName},
-            ${taskType}
+            ${taskType},
+            ${employeeNumber}
         FROM (
             SELECT id AS timesheet_id,
                    staff_id,
@@ -2361,6 +2368,7 @@ const getTimesheetReportData = async (Report) => {
             const jobName = r.job_name;
             const taskName = r.task_name;
             const taskType = r.task_type_label;
+            const employeeNumber = r.employee_number;
 
             const secs = r.work_hours;
             // console.log("displayBy", displayBy, "workDateStr", workDateStr);
@@ -2379,6 +2387,7 @@ const getTimesheetReportData = async (Report) => {
                     job_name: jobName,
                     task_name: taskName,
                     task_type: taskType,
+                    employee_number: employeeNumber,
                     totalSeconds: 0,
                     timesheetIds: new Set(),
                     periodSeconds: {}
@@ -2409,6 +2418,7 @@ const getTimesheetReportData = async (Report) => {
             row['client_id'] = g.client_name;
             row['job_id'] = g.job_name;
             row['task_id'] = g.task_name;
+            row['employee_number'] = g.employee_number;
 
             for (const p of periods) {
                 row[p] = ((g.periodSeconds[p])?.toFixed(2) || 0);
