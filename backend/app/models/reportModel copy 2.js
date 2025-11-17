@@ -2130,7 +2130,7 @@ const getTimesheetReportData = async (Report) => {
     }
     //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
-    const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id', 'employee_number'];
+    const ALLOWED_GROUP_FIELDS = ['staff_id', 'customer_id', 'client_id', 'job_id', 'task_id','employee_number'];
 
     // validate groupBy
     if (!Array.isArray(groupBy)) groupBy = [groupBy];
@@ -2211,10 +2211,7 @@ const getTimesheetReportData = async (Report) => {
 
 
         // Build group_value for SQL
-       // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
-        const groupValueSQL = `CONCAT_WS('::', ${groupBy
-            .map(f => (f === 'employee_number' ? 's.employee_number' : `${f}`))
-            .join(', ')}) AS group_value`;
+        const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
 
         // Build readable group_label
         const groupLabelSQL = groupBy.map(f => {
@@ -2271,7 +2268,7 @@ const getTimesheetReportData = async (Report) => {
                             WHEN raw.task_type = '2' THEN 'External'
                             ELSE 'Unknown'
                           END AS task_type_label`;
-        const employeeNumber = `s.employee_number AS employee_number`;
+        const employeeNumber = `s.employee_number AS employee_number`;                  
 
         // Unpivot query
         const unpivotSQL = `
@@ -2291,105 +2288,47 @@ const getTimesheetReportData = async (Report) => {
             ${taskType},
             ${employeeNumber}
         FROM (
-           SELECT 
-            timesheet.id AS timesheet_id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.monday_date AS work_date,
-            timesheet.monday_hours AS work_hours,
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE timesheet.monday_date IS NOT NULL
-
+            SELECT id AS timesheet_id,
+                   staff_id,
+                   customer_id,
+                   client_id,
+                   job_id,
+                   task_id,
+                   ${groupValueSQL},
+                   monday_date AS work_date,
+                   monday_hours AS work_hours,
+                   task_type
+            FROM timesheet WHERE monday_date IS NOT NULL
             UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.tuesday_date, timesheet.tuesday_hours, timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE timesheet.tuesday_date IS NOT NULL
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+                   ${groupValueSQL},
+                   tuesday_date, tuesday_hours, task_type
+            FROM timesheet WHERE tuesday_date IS NOT NULL
             UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.wednesday_date, timesheet.wednesday_hours, timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.wednesday_date IS NOT NULL
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+                   ${groupValueSQL},
+                   wednesday_date, wednesday_hours, task_type
+            FROM timesheet WHERE wednesday_date IS NOT NULL
             UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.thursday_date, timesheet.thursday_hours, timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE   
-                timesheet.thursday_date IS NOT NULL
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+                   ${groupValueSQL},
+                   thursday_date, thursday_hours, task_type
+            FROM timesheet WHERE thursday_date IS NOT NULL
             UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.friday_date, timesheet.friday_hours, timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.friday_date IS NOT NULL
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+                   ${groupValueSQL},
+                   friday_date, friday_hours, task_type
+            FROM timesheet WHERE friday_date IS NOT NULL
             UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,   
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.saturday_date, timesheet.saturday_hours, timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.saturday_date IS NOT NULL
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+                   ${groupValueSQL},
+                   saturday_date, saturday_hours, task_type
+            FROM timesheet WHERE saturday_date IS NOT NULL
             UNION ALL
-            SELECT
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.sunday_date, timesheet.sunday_hours, timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.sunday_date IS NOT NULL
-                
+            SELECT id, staff_id, customer_id, client_id,job_id,task_id,
+                   ${groupValueSQL},
+                   sunday_date, sunday_hours, task_type
+            FROM timesheet WHERE sunday_date IS NOT NULL
         ) AS raw
         LEFT JOIN staffs s ON raw.staff_id = s.id
         LEFT JOIN customers c ON raw.customer_id = c.id
@@ -3315,7 +3254,7 @@ const getJobCustomReport = async (Report) => {
         sla_deadline_date,
         Management_Accounts_FromDate_id_6,
         Management_Accounts_ToDate_id_6,
-
+        
         // Staff Fields
         staff_full_name,
         role,
@@ -3410,7 +3349,7 @@ const getJobCustomReport = async (Report) => {
         'staff_status',
 
 
-
+        
         //'line_manager_id'
     ]
 
@@ -3480,7 +3419,7 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(allocated_on)) {
             where.push(`raw.allocated_on = '${allocated_on}'`);
         }
-        if (!["", null, undefined].includes(job_priority)) {
+        if (!["", null, undefined].includes(job_priority)) {    
             where.push(`raw.job_priority = '${job_priority}'`);
         }
         if (!["", null, undefined].includes(engagement_model)) {
@@ -3500,7 +3439,7 @@ const getJobCustomReport = async (Report) => {
         }
         if (!["", null, undefined].includes(Number_of_Journal_Entries_id_2)) {
             where.push(`raw.Number_of_Journal_Entries_id_2 = ${Number_of_Journal_Entries_id_2}`);
-        }
+        }   
         if (!["", null, undefined].includes(Number_of_Other_Transactions_id_2)) {
             where.push(`raw.Number_of_Other_Transactions_id_2 = ${Number_of_Other_Transactions_id_2}`);
         }
@@ -3524,10 +3463,10 @@ const getJobCustomReport = async (Report) => {
         }
         if (!["", null, undefined].includes(If_Sole_Trader_Who_is_doing_Bookkeeping_id_4)) {
             where.push(`raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 = ${If_Sole_Trader_Who_is_doing_Bookkeeping_id_4}`);
-        }
+        }   
         if (!["", null, undefined].includes(Whose_Tax_Return_is_it_id_4)) {
             where.push(`raw.Whose_Tax_Return_is_it_id_4 = ${Whose_Tax_Return_is_it_id_4}`);
-        }
+        }   
         if (!["", null, undefined].includes(Type_of_Payslip_id_3)) {
             where.push(`raw.Type_of_Payslip_id_3 = ${Type_of_Payslip_id_3}`);
         }
@@ -3611,7 +3550,7 @@ const getJobCustomReport = async (Report) => {
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-        // console.log("where", where);
+       // console.log("where", where);
 
 
         // ===== Final Query =====
@@ -3819,46 +3758,46 @@ const getJobCustomReport = async (Report) => {
                 engagement_model: "engagement_model",
                 customer_account_manager_officer: "customer_account_manager_officer",
                 status_updation_date: "status_updation_date",
-                Transactions_Posting_id_2: "Transactions_Posting_id_2",
-                Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
-                Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
-                Number_of_Other_Transactions_id_2: "Number_of_Other_Transactions_id_2",
-                Number_of_Petty_Cash_Transactions_id_2: "Number_of_Petty_Cash_Transactions_id_2",
-                Number_of_Purchase_Invoices_id_2: "Number_of_Purchase_Invoices_id_2",
-                Number_of_Sales_Invoices_id_2: "Number_of_Sales_Invoices_id_2",
-                Number_of_Total_Transactions_id_2: "Number_of_Total_Transactions_id_2",
-                submission_deadline: "submission_deadline",
-                Tax_Year_id_4: "Tax_Year_id_4",
-                If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
-                Whose_Tax_Return_is_it_id_4: "Whose_Tax_Return_is_it_id_4",
-                Type_of_Payslip_id_3: "Type_of_Payslip_id_3",
-                Year_Ending_id_1: "Year_Ending_id_1",
-                Bookkeeping_Frequency_id_2: "Bookkeeping_Frequency_id_2",
-                CIS_Frequency_id_3: "CIS_Frequency_id_3",
-                Filing_Frequency_id_8: "Filing_Frequency_id_8",
-                Management_Accounts_Frequency_id_6: "Management_Accounts_Frequency_id_6",
-                Payroll_Frequency_id_3: "Payroll_Frequency_id_3",
-                budgeted_hours: "budgeted_hours",
-                feedback_incorporation_time: "feedback_incorporation_time",
-                review_time: "review_time",
-                total_preparation_time: "total_preparation_time",
-                total_time: "total_time",
-                due_on: "due_on",
-                customer_deadline_date: "customer_deadline_date",
-                expected_delivery_date: "expected_delivery_date",
-                internal_deadline_date: "internal_deadline_date",
-                sla_deadline_date: "sla_deadline_date",
-                Management_Accounts_FromDate_id_6: "Management_Accounts_FromDate_id_6",
-                Management_Accounts_ToDate_id_6: "Management_Accounts_ToDate_id_6",
+                Transactions_Posting_id_2 : "Transactions_Posting_id_2",
+                Number_of_Bank_Transactions_id_2 : "Number_of_Bank_Transactions_id_2",
+                Number_of_Journal_Entries_id_2 : "Number_of_Journal_Entries_id_2",
+                Number_of_Other_Transactions_id_2 : "Number_of_Other_Transactions_id_2",
+                Number_of_Petty_Cash_Transactions_id_2 : "Number_of_Petty_Cash_Transactions_id_2",
+                Number_of_Purchase_Invoices_id_2 : "Number_of_Purchase_Invoices_id_2",
+                Number_of_Sales_Invoices_id_2 : "Number_of_Sales_Invoices_id_2",
+                Number_of_Total_Transactions_id_2 : "Number_of_Total_Transactions_id_2",
+                submission_deadline : "submission_deadline",
+                Tax_Year_id_4 : "Tax_Year_id_4",
+                If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 : "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+                Whose_Tax_Return_is_it_id_4 : "Whose_Tax_Return_is_it_id_4",
+                Type_of_Payslip_id_3 : "Type_of_Payslip_id_3",
+                Year_Ending_id_1 : "Year_Ending_id_1",
+                Bookkeeping_Frequency_id_2 : "Bookkeeping_Frequency_id_2",
+                CIS_Frequency_id_3 : "CIS_Frequency_id_3",
+                Filing_Frequency_id_8 : "Filing_Frequency_id_8",
+                Management_Accounts_Frequency_id_6 : "Management_Accounts_Frequency_id_6",
+                Payroll_Frequency_id_3 : "Payroll_Frequency_id_3",
+                budgeted_hours : "budgeted_hours",
+                feedback_incorporation_time : "feedback_incorporation_time",
+                review_time : "review_time",
+                total_preparation_time : "total_preparation_time",
+                total_time : "total_time",
+                due_on : "due_on",
+                customer_deadline_date : "customer_deadline_date",
+                expected_delivery_date : "expected_delivery_date",
+                internal_deadline_date : "internal_deadline_date",
+                sla_deadline_date : "sla_deadline_date",
+                Management_Accounts_FromDate_id_6 : "Management_Accounts_FromDate_id_6",
+                Management_Accounts_ToDate_id_6 : "Management_Accounts_ToDate_id_6",
 
                 // staff fields
-                staff_full_name: "staff_full_name",
-                role: "role",
-                staff_email: "staff_email",
-                line_manager: "line_manager",
-                staff_status: "staff_status",
+                staff_full_name : "staff_full_name",
+                role : "role",
+                staff_email : "staff_email",
+                line_manager : "line_manager",
+                staff_status : "staff_status",
 
-
+                
             };
 
             // Now dynamically build groupKeyParts
@@ -3913,24 +3852,24 @@ const getJobCustomReport = async (Report) => {
                     customer_account_manager_officer: r.customer_account_manager_officer,
                     status_updation_date: r.status_updation_date,
                     Transactions_Posting_id_2: r.Transactions_Posting_id_2,
-                    Number_of_Bank_Transactions_id_2: r.Number_of_Bank_Transactions_id_2,
-                    Number_of_Journal_Entries_id_2: r.Number_of_Journal_Entries_id_2,
-                    Number_of_Other_Transactions_id_2: r.Number_of_Other_Transactions_id_2,
-                    Number_of_Petty_Cash_Transactions_id_2: r.Number_of_Petty_Cash_Transactions_id_2,
-                    Number_of_Purchase_Invoices_id_2: r.Number_of_Purchase_Invoices_id_2,
-                    Number_of_Sales_Invoices_id_2: r.Number_of_Sales_Invoices_id_2,
-                    Number_of_Total_Transactions_id_2: r.Number_of_Total_Transactions_id_2,
-                    submission_deadline: r.submission_deadline,
-                    Tax_Year_id_4: r.Tax_Year_id_4,
-                    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: r.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
-                    Whose_Tax_Return_is_it_id_4: r.Whose_Tax_Return_is_it_id_4,
-                    Type_of_Payslip_id_3: r.Type_of_Payslip_id_3,
-                    Year_Ending_id_1: r.Year_Ending_id_1,
-                    Bookkeeping_Frequency_id_2: r.Bookkeeping_Frequency_id_2,
-                    CIS_Frequency_id_3: r.CIS_Frequency_id_3,
-                    Filing_Frequency_id_8: r.Filing_Frequency_id_8,
-                    Management_Accounts_Frequency_id_6: r.Management_Accounts_Frequency_id_6,
-                    Payroll_Frequency_id_3: r.Payroll_Frequency_id_3,
+                    Number_of_Bank_Transactions_id_2 : r.Number_of_Bank_Transactions_id_2,
+                    Number_of_Journal_Entries_id_2 : r.Number_of_Journal_Entries_id_2,
+                    Number_of_Other_Transactions_id_2 : r.Number_of_Other_Transactions_id_2,
+                    Number_of_Petty_Cash_Transactions_id_2 : r.Number_of_Petty_Cash_Transactions_id_2,
+                    Number_of_Purchase_Invoices_id_2 : r.Number_of_Purchase_Invoices_id_2,
+                    Number_of_Sales_Invoices_id_2 : r.Number_of_Sales_Invoices_id_2,
+                    Number_of_Total_Transactions_id_2 : r.Number_of_Total_Transactions_id_2,
+                    submission_deadline : r.submission_deadline,
+                    Tax_Year_id_4 : r.Tax_Year_id_4,
+                    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 : r.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    Whose_Tax_Return_is_it_id_4 : r.Whose_Tax_Return_is_it_id_4,
+                    Type_of_Payslip_id_3 : r.Type_of_Payslip_id_3,
+                    Year_Ending_id_1 : r.Year_Ending_id_1,
+                    Bookkeeping_Frequency_id_2 : r.Bookkeeping_Frequency_id_2,
+                    CIS_Frequency_id_3 : r.CIS_Frequency_id_3,
+                    Filing_Frequency_id_8 : r.Filing_Frequency_id_8,
+                    Management_Accounts_Frequency_id_6 : r.Management_Accounts_Frequency_id_6,
+                    Payroll_Frequency_id_3 : r.Payroll_Frequency_id_3,
                     budgeted_hours: r.budgeted_hours,
                     feedback_incorporation_time: r.feedback_incorporation_time,
                     review_time: r.review_time,
@@ -4004,7 +3943,7 @@ const getJobCustomReport = async (Report) => {
             row['If_Sole_Trader_Who_is_doing_Bookkeeping_id_4'] = g.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4;
             row['Whose_Tax_Return_is_it_id_4'] = g.Whose_Tax_Return_is_it_id_4;
             row['Type_of_Payslip_id_3'] = g.Type_of_Payslip_id_3;
-            row['Year_Ending_id_1'] = g.Year_Ending_id_1;
+            row['Year_Ending_id_1'] = g.Year_Ending_id_1;   
             row['Bookkeeping_Frequency_id_2'] = g.Bookkeeping_Frequency_id_2;
             row['CIS_Frequency_id_3'] = g.CIS_Frequency_id_3;
             row['Filing_Frequency_id_8'] = g.Filing_Frequency_id_8;
@@ -4036,29 +3975,29 @@ const getJobCustomReport = async (Report) => {
 
             // fill counts for each period
 
-            if (!['', null, undefined].includes(displayBy)) {
-                let totalCount = 0;
-                for (const p of periods) {
-                    const count = g.periodSeconds[p] || 0;
-                    row[p] = count;
-                    totalCount += count;
-                }
-                // total_count = total number of jobs in all periods
-                row['total_count'] = totalCount;
+            if(!['',null,undefined].includes(displayBy)){
+            let totalCount = 0;
+            for (const p of periods) {
+                const count = g.periodSeconds[p] || 0;
+                row[p] = count;
+                totalCount += count;
             }
-
+            // total_count = total number of jobs in all periods
+            row['total_count'] = totalCount;
+           }
+            
 
             //row.date = g.date;
             outRows.push(row);
         }
 
-        // console.log("displayBy --->>>", displayBy);
-        let total_count = [];
-        let weeks = [];
-        if (!['', null, undefined].includes(displayBy)) {
+       // console.log("displayBy --->>>", displayBy);
+         let total_count = [];
+         let weeks = [];
+         if(!['',null,undefined].includes(displayBy)){
             total_count.push('total_count');
             weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
-        }
+         }
 
 
         // const columnsWeeks = [
