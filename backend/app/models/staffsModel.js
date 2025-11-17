@@ -20,12 +20,20 @@ const createStaff = async (staff) => {
     ip,
     staff_to,
   } = staff;
-
+  
+  // Exist Email Check
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
   const [check] = await pool.execute(checkQuery, [email]);
 
   if (check.length > 0) {
     return { status: false, message: "Email Already Exists." };
+  }
+
+  // Exist Employee Number Check
+  const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ?`;
+  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [employee_number]);
+  if (checkEmployeeNumber.length > 0) {
+    return { status: false, message: "Employee Number Already Exists." };
   }
 
   const Role_query = `SELECT role ,hourminute FROM roles WHERE id = ?`;
@@ -157,6 +165,8 @@ const updateStaff = async (staff) => {
   const { id, ...fields } = staff;
   let email = fields.email;
 
+  console.log("fields", fields);
+
 
   // Line Manage Code
   let staff_to = fields.staff_to;
@@ -187,11 +197,19 @@ const updateStaff = async (staff) => {
   //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
-
+  
+  // Exist Email Check
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
   if (check.length > 0) {
     return { status: false, message: "Email Already Exists." };
+  }
+
+  // Exist Employee Number Check
+  const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ? AND id != ?`;
+  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [fields.employee_number, id]);
+  if (checkEmployeeNumber.length > 0) {
+    return { status: false, message: "Employee Number Already Exists." };
   }
   // Create an array to hold the set clauses
   const setClauses = [];
