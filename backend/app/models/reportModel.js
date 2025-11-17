@@ -3540,7 +3540,7 @@ const getJobCustomReport = async (Report) => {
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-        console.log("where", where);
+       // console.log("where", where);
 
 
         // ===== Final Query =====
