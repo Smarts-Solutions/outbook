@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 14, 2025 at 01:13 PM
+-- Generation Time: Nov 17, 2025 at 12:57 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -2284,15 +2284,16 @@ CREATE TABLE IF NOT EXISTS `staffs` (
   `login_auth_token` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `employee_number` (`employee_number`),
   KEY `role_id` (`role_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staffs`
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-11-14 04:53:14', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzA5NTk5NCwiZXhwIjoxNzYzMTMxOTk0fQ.EB8jye6Gp9rZWpNZmgik-mc9zsz4hF8coiheJPMtfgc'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-11-17 05:20:05', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzM1NjgwNSwiZXhwIjoxNzYzMzkyODA1fQ.P52NUJ_nBxOlDEBj045gzWQ_e272rlly7evAkINyw7k'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2300,16 +2301,17 @@ INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phon
 (11, 4, 'STAFF', 'SIX', 'sss@gmail.com', '+44', '2777777777', '$2a$10$a7sfTgDavJUrU.8kFfbKIe0525d3EF4yABvGUlcZAxV/Amy1qgCVa', '2:5', '1', '0', 1, NULL, '2025-02-08 11:43:22', '2025-11-06 09:53:12', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJpYXQiOjE3NjI0MjI3OTIsImV4cCI6MTc2MjQ1ODc5Mn0.1LVeQaL6u1nnoM6tr9VY_bgXZsV4hsa9ZCMYCDnTbF4'),
 (7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 1, NULL, '2025-02-07 12:50:36', '2025-08-11 10:03:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc1NDkwNjYwMSwiZXhwIjoxNzU0OTQyNjAxfQ.HdhwmS5nBwiYQI8t--vxdl3Ki42iJYnUU2z30bEU9k4'),
 (10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, NULL, '2025-02-08 11:36:28', '2025-10-06 07:12:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTk3MzQ3MzcsImV4cCI6MTc1OTc3MDczN30.luIo8TYrG2_9Eu3yel9cakru6lg_GzFmJJ0s964l6_c'),
-(12, 6, 'BBBBBB 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, NULL, '2025-04-17 05:56:18', '2025-10-25 11:47:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NTk3MzQ1NjIsImV4cCI6MTc1OTc3MDU2Mn0.TUGCAS5_R7m-lQWmK_8wpDvYpNTrc3wDjQim-aGc6DU'),
-(13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, NULL, '2025-06-11 09:18:34', '2025-11-13 09:22:28', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NjMwMjU3NDgsImV4cCI6MTc2MzA2MTc0OH0.I-FNELieNjnnmKC-ryrfX7pqHfz-50vMl96aBdLSyEM'),
-(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, NULL, '2025-07-11 10:42:49', '2025-11-06 10:19:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjI0MjQzOTQsImV4cCI6MTc2MjQ2MDM5NH0.TmzrdBT9RRmkd1ufjyWJLKi14xZwyWkU5I7jC-4Waf8'),
-(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, NULL, '2025-07-11 10:48:30', '2025-10-06 09:24:43', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTk3NDI2ODMsImV4cCI6MTc1OTc3ODY4M30.sWz3MOL6384SlB1Tr8KG16Rf-C6eva1vUJg51moirB4'),
+(12, 6, 'BBBBBB 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, 'fff', '2025-04-17 05:56:18', '2025-11-17 05:27:51', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NTk3MzQ1NjIsImV4cCI6MTc1OTc3MDU2Mn0.TUGCAS5_R7m-lQWmK_8wpDvYpNTrc3wDjQim-aGc6DU'),
+(13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, 'SHK13', '2025-06-11 09:18:34', '2025-11-17 06:57:53', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NjMwMjU3NDgsImV4cCI6MTc2MzA2MTc0OH0.I-FNELieNjnnmKC-ryrfX7pqHfz-50vMl96aBdLSyEM'),
+(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-17 10:15:41', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjI0MjQzOTQsImV4cCI6MTc2MjQ2MDM5NH0.TmzrdBT9RRmkd1ufjyWJLKi14xZwyWkU5I7jC-4Waf8'),
+(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, 'SS9', '2025-07-11 10:48:30', '2025-11-17 10:15:55', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTk3NDI2ODMsImV4cCI6MTc1OTc3ODY4M30.sWz3MOL6384SlB1Tr8KG16Rf-C6eva1vUJg51moirB4'),
 (16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, NULL, '2025-08-13 11:32:32', '2025-10-06 07:13:13', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTk3MzQ3OTMsImV4cCI6MTc1OTc3MDc5M30.BjQxmDKYe_TeMMez3qVfCxkg6xx6k7sR7Rmgxse1YCE'),
 (17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, NULL, '2025-08-18 08:20:15', '2025-10-06 07:09:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTk3MzQ1OTQsImV4cCI6MTc1OTc3MDU5NH0.bdxXzq8DGTDBzz1cRmrCF4CZR87D2itNEbHTrUBdpd0'),
-(20, 8, 'AAAAAAA', 'ddddd', 'sasdasfwsf@gmail.com', '+44', '44020890320', '$2a$10$snor8L/CMAboV6UHDlzibufXa6WDscXEA65yIzOLql2qEPC5JeHFO', '00:00', '1', '0', 1, NULL, '2025-09-23 06:27:54', '2025-10-25 11:47:15', NULL),
+(20, 8, 'AAAAAAA', 'ddddd', 'sasdasfwsf@gmail.com', '+44', '44020890320', '$2a$10$snor8L/CMAboV6UHDlzibufXa6WDscXEA65yIzOLql2qEPC5JeHFO', '00:00', '1', '0', 1, 'ff', '2025-09-23 06:27:54', '2025-11-17 05:22:46', NULL),
 (21, 3, 'fvedgv', 'gvddvd', 'f@gmail.com', '+44', '', '$2a$10$rnnx7UQnvlGmXKjGUthJbu0a9/qYz.0BKz4y6n8OaN9R8NPo4FMRa', '232:59', '1', '0', 1, NULL, '2025-11-03 10:12:49', '2025-11-03 10:12:49', NULL),
 (22, 3, 'GGGG', 'wff', 's111@gmail.com', '+44', NULL, '$2a$10$cBR2xNM//0aITVICasUBfO.FF2U2HtoeuwiDtKBOUjIWaIZPEHMM6', '232:59', '1', '0', 1, NULL, '2025-11-03 10:13:49', '2025-11-13 07:23:46', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIyLCJpYXQiOjE3NjMwMTg2MjYsImV4cCI6MTc2MzA1NDYyNn0.AAPKZyAK5fE4niwpOOV-4vFSX2o4O-NrEeezJyMr40o'),
-(23, 3, 'DDDDDD', 'DD', 'DDss@gmail.com', '+44', NULL, '$2a$10$tcnXTmD9q4DyCNlf3K7hH.XQnSLenLSxqXP3HIaLaf4vhbB85fCXO', '232:59', '1', '0', 1, 'DREOO', '2025-11-14 13:10:31', '2025-11-14 13:10:54', NULL);
+(23, 3, 'DDDDDD', 'DD', 'DDss@gmail.com', '+44', NULL, '$2a$10$tcnXTmD9q4DyCNlf3K7hH.XQnSLenLSxqXP3HIaLaf4vhbB85fCXO', '232:59', '1', '0', 1, 'DREOO', '2025-11-14 13:10:31', '2025-11-14 13:10:54', NULL),
+(24, 3, 'FFFFFFFF', 'hhhhh', 'hhhhhhh@gmail.com', '+44', '', '$2a$10$MWRcrqM45a7lktHrdwW3LO1.acU/klFC8Hb/y/LHJuw18PNLrJueG', '232:59', '1', '0', 1, 'ffff', '2025-11-17 05:29:30', '2025-11-17 05:29:30', NULL);
 
 -- --------------------------------------------------------
 
@@ -2348,7 +2350,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1118 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1122 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3476,7 +3478,11 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1114, 1, '2025-11-14', 'job', 36, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:16:24', '2025-11-14 07:16:24'),
 (1115, 1, '2025-11-14', 'job', 36, 'edited the job information and has assigned the job to the processor, STAFF EIGHT job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF EIGHT job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:16:57', '2025-11-14 07:16:57'),
 (1116, 1, '2025-11-14', 'staff', 23, 'created staff DDDDDD DD', 'Super Admin System Super Super Admin created staff DDDDDD DD ', 'created', '122.168.114.106', '2025-11-14 13:10:31', '2025-11-14 13:10:31'),
-(1117, 1, '2025-11-14', 'staff', 23, 'edited staff DDDDDD DD', 'Super Admin System Super Super Admin edited staff DDDDDD DD ', 'updated', '122.168.114.106', '2025-11-14 13:10:54', '2025-11-14 13:10:54');
+(1117, 1, '2025-11-14', 'staff', 23, 'edited staff DDDDDD DD', 'Super Admin System Super Super Admin edited staff DDDDDD DD ', 'updated', '122.168.114.106', '2025-11-14 13:10:54', '2025-11-14 13:10:54'),
+(1118, 1, '2025-11-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-17 05:20:05', '2025-11-17 05:20:05'),
+(1119, 1, '2025-11-17', 'staff', 20, 'edited staff AAAAAAA ddddd', 'Super Admin System Super Super Admin edited staff AAAAAAA ddddd ', 'updated', '122.168.114.106', '2025-11-17 05:22:46', '2025-11-17 05:22:46'),
+(1120, 1, '2025-11-17', 'staff', 12, 'edited staff BBBBBB 7 hv', 'Super Admin System Super Super Admin edited staff BBBBBB 7 hv ', 'updated', '122.168.114.106', '2025-11-17 05:27:51', '2025-11-17 05:27:51'),
+(1121, 1, '2025-11-17', 'staff', 24, 'created staff FFFFFFFF hhhhh', 'Super Admin System Super Super Admin created staff FFFFFFFF hhhhh ', 'created', '122.168.114.106', '2025-11-17 05:29:30', '2025-11-17 05:29:30');
 
 -- --------------------------------------------------------
 
