@@ -707,7 +707,6 @@ function TimesheetReport() {
           ...prev,
           [value]: null
         }));
-
       }
 
     }
