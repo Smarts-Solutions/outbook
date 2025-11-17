@@ -365,6 +365,13 @@ const StaffPage = () => {
       reorder: false,
     },
     {
+      name: "Employee ID",
+      selector: (row) => row.employee_number || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
       name: "Status",
       cell: (row) => (
         <div>
@@ -796,6 +803,7 @@ const StaffPage = () => {
     Email: item.email,
     Phone: item.phone,
     Role: item.role_name,
+    "Employee ID": item.employee_number || "-",
     "Line Manager": item.line_manager_name || "-",
     Status: item.status === "1" ? "Active" : "Inactive",
   }));
@@ -853,7 +861,6 @@ const StaffPage = () => {
       console.error("Error fetching customer names:", error);
     }
   };
-
 
   const getCustomersNameChangeRole = async (id) => {
     if (!id) return;

@@ -446,6 +446,7 @@ function TimesheetReport() {
       client_id: "Client Name",
       job_id: "Job Name",
       task_id: "Task Name",
+      employee_number: "Employee ID",
       total_hours: "Total Hours",
       task_type: "Task Type"
 
@@ -1056,7 +1057,6 @@ function TimesheetReport() {
                 </div>
               </div>
 
-
             </div>
 
             {/* get filters Dropdown */}
@@ -1257,7 +1257,6 @@ function TimesheetReport() {
             />
           </div>
         )}
-
 
         {/* Field To Display Client */}
         {filters?.groupBy?.includes('client_id') && (

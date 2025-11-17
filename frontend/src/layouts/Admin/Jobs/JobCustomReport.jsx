@@ -9,6 +9,7 @@ import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
 import { TextSelect } from 'lucide-react';
+import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 
 
 function JobCustomReport() {
@@ -384,7 +385,7 @@ function JobCustomReport() {
                 ?.filter(item => ![null, '', 'null', undefined].includes(item.employee_number))
                 ?.map(item => ({
                   value: item.employee_number,
-                 // value: item.id,
+                  // value: item.id,
                   label: `${item.employee_number}`,
                 }));
               setEmployeeNumberAllData(data);
@@ -401,7 +402,7 @@ function JobCustomReport() {
 
         data = data?.map((item) => ({
           value: item.employee_number,
-         // value: item.id,
+          // value: item.id,
           label: item.employee_number
         }));
         setEmployeeNumberAllData(data);
@@ -492,36 +493,121 @@ function JobCustomReport() {
   };
 
 
-  const exportToCSV = (data) => {
+  const exportToCSV1 = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
       alert("No data to export!");
       return;
     }
 
+
+
     //  Headers dynamically from data.columns
     //  const headers = data.columns;
     const colMap = {
-      staff_id: "Staff Name",
+      job_id: "Job Name",
       customer_id: "Customer Name",
       client_id: "Client Name",
-      job_id: "Job Name",
-      task_id: "Task Name",
-      total_hours: "Total Hours",
-      task_type: "Task Type"
+      account_manager_id: "Account Manager Name",
+      allocated_to_id: "Allocated To",
+      reviewer_id: "Reviewer",
+      allocated_to_other_id: "Allocated To (Other)",
+      service_id: "Service Type",
+      job_type_id: "Job Type",
+      status_type_id: "Job Status",
+      employee_number: "Employee ID",
+
+
+      allocated_on: "Allocated On",
+      job_priority: "Job Priority",
+      engagement_model: "Engagement Model",
+      customer_account_manager_officer: "Customer Account Manager (Officer)",
+      status_updation_date: "Status Updation Date",
+      Transactions_Posting_id_2: "Transactions Posting",
+      Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
+      Number_of_Journal_Entries_id_2: "Number of Journal Entries",
+      Number_of_Other_Transactions_id_2: "Number of Other Transactions",
+      Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
+      Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices",
+      Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
+      Number_of_Total_Transactions_id_2: "Number of Total Transactions",
+      submission_deadline: "Submission Deadline",
+      Tax_Year_id_4: "Tax Year",
+      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Who is doing Bookkeeping",
+      Whose_Tax_Return_is_it_id_4: "Whose Tax Return is it",
+      Type_of_Payslip_id_3: "Type of Payslip",
+      Year_Ending_id_1: "Year Ending",
+      Bookkeeping_Frequency_id_2: "Bookkeeping Frequency",
+      CIS_Frequency_id_3: "CIS Frequency",
+      Filing_Frequency_id_8: "Filing Frequency",
+      Management_Accounts_Frequency_id_6: "Management Accounts Frequency",
+      Payroll_Frequency_id_3: "Payroll Frequency",
+      budgeted_hours: "Budgeted Hours",
+      feedback_incorporation_time: "Feedback Incorporation Time",
+      review_time: "Review Time",
+      total_preparation_time: "Total Preparation Time",
+      total_time: "Total Time",
+      due_on: "Due On",
+      customer_deadline_date: "Customer Deadline Date",
+      date_received_on: "Date Received On",
+      expected_delivery_date: "Expected Delivery Date",
+      internal_deadline_date: "Internal Deadline Date",
+      sla_deadline_date: "SLA Deadline Date",
+      Management_Accounts_FromDate_id_6: "Management Accounts From Date",
+      Management_Accounts_ToDate_id_6: "Management Accounts To Date",
+      staff_full_name: "Staff Full Name",
+      role: "Role",
+      staff_email: "Staff Email",
+      line_manager: "Line Manager",
+      staff_status: "Staff Status"
+
+
+
+
+
 
     };
     const headers = data.columns.map(col => colMap[col] || col);
 
+
+    // const rows = data.rows.map((row) => {
+    //   return data.columns.map((col) => {
+    //     let val = row[col];
+    //     if (val === undefined || val === null) val = "-";
+
+    //     if (typeof val === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+    //        console.log("val ---  ", val);
+    //        console.log("val typeof ---  ",typeof val);
+
+    //     }
+
+    //     if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
+    //     return val;
+    //   });
+    // });
 
     const rows = data.rows.map((row) => {
       return data.columns.map((col) => {
         let val = row[col];
         if (val === undefined || val === null) val = "-";
 
-        if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
+        // Date format detection
+        if (typeof val === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+          val = `"${val}"`;
+        }
+
+        // Comma value detection
+        if (typeof val === "string" && val.includes(",")) {
+          val = `"${val}"`;
+        }
+
         return val;
       });
     });
+
+
+
+
+    console.log("headers ", headers);
 
     //  CSV content
     const csvContent = [headers, ...rows]
@@ -532,9 +618,111 @@ function JobCustomReport() {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "TimeSheetReportData.csv";
+    link.download = "JobCustomReportData.csv";
     link.click();
   };
+  
+
+  const exportToCSV = (data) => {
+  if (!data || !data.rows || data.rows.length === 0) {
+    alert("No data to export!");
+    return;
+  }
+
+  const colMap = {
+    job_id: "Job Name",
+    customer_id: "Customer Name",
+    client_id: "Client Name",
+    account_manager_id: "Account Manager Name",
+    allocated_to_id: "Allocated To",
+    reviewer_id: "Reviewer",
+    allocated_to_other_id: "Allocated To (Other)",
+    service_id: "Service Type",
+    job_type_id: "Job Type",
+    status_type_id: "Job Status",
+    employee_number: "Employee ID",
+    allocated_on: "Allocated On",
+    job_priority: "Job Priority",
+    engagement_model: "Engagement Model",
+    customer_account_manager_officer: "Customer Account Manager (Officer)",
+    status_updation_date: "Status Updation Date",
+    Transactions_Posting_id_2: "Transactions Posting",
+    Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
+    Number_of_Journal_Entries_id_2: "Number of Journal Entries",
+    Number_of_Other_Transactions_id_2: "Number of Other Transactions",
+    Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
+    Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices",
+    Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
+    Number_of_Total_Transactions_id_2: "Number of Total Transactions",
+    submission_deadline: "Submission Deadline",
+    Tax_Year_id_4: "Tax Year",
+    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Who is doing Bookkeeping",
+    Whose_Tax_Return_is_it_id_4: "Whose Tax Return is it",
+    Type_of_Payslip_id_3: "Type of Payslip",
+    Year_Ending_id_1: "Year Ending",
+    Bookkeeping_Frequency_id_2: "Bookkeeping Frequency",
+    CIS_Frequency_id_3: "CIS Frequency",
+    Filing_Frequency_id_8: "Filing Frequency",
+    Management_Accounts_Frequency_id_6: "Management Accounts Frequency",
+    Payroll_Frequency_id_3: "Payroll Frequency",
+    budgeted_hours: "Budgeted Hours",
+    feedback_incorporation_time: "Feedback Incorporation Time",
+    review_time: "Review Time",
+    total_preparation_time: "Total Preparation Time",
+    total_time: "Total Time",
+    due_on: "Due On",
+    customer_deadline_date: "Customer Deadline Date",
+    date_received_on: "Date Received On",
+    expected_delivery_date: "Expected Delivery Date",
+    internal_deadline_date: "Internal Deadline Date",
+    sla_deadline_date: "SLA Deadline Date",
+    Management_Accounts_FromDate_id_6: "Management Accounts From Date",
+    Management_Accounts_ToDate_id_6: "Management Accounts To Date",
+    staff_full_name: "Staff Full Name",
+    role: "Role",
+    staff_email: "Staff Email",
+    line_manager: "Line Manager",
+    staff_status: "Staff Status"
+  };
+
+  const headers = data.columns.map(col => colMap[col] || col);
+
+  const rows = data.rows.map((row) => {
+    return data.columns.map((col) => {
+      let val = row[col];
+
+      if (val === undefined || val === null) val = "-";
+
+      val = String(val); // force string
+
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+        val = `"${val}"`; // safe date
+      }
+
+      if (val.includes(",")) {
+        val = `"${val}"`;
+      }
+
+      if (val.includes('"')) {
+        val = `"${val.replace(/"/g, '""')}"`;
+      }
+
+      return val;
+    });
+  });
+
+  const csvContent = [headers, ...rows]
+    .map((r) => r.join(","))
+    .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "JobCustomReportData.csv";
+  link.click();
+};
+
+
 
   const handleFilterChange = (e, type) => {
 
@@ -1321,7 +1509,7 @@ function JobCustomReport() {
           </div>
         )}
 
-         {/* Field To Display Employee ID Number  */}
+        {/* Field To Display Employee ID Number  */}
         {filters?.groupBy?.includes('employee_number') && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">
