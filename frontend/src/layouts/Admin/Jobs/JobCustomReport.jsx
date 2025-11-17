@@ -38,10 +38,7 @@ function JobCustomReport() {
   console.log("employeeNumberAllData ", employeeNumberAllData);
 
 
-
-
   const [taskAllData, setTaskAllData] = useState([]);
-
   const [internalJobAllData, setInternalJobAllData] = useState([]);
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
 

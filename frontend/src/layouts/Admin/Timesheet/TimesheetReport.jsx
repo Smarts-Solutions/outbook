@@ -30,6 +30,7 @@ function TimesheetReport() {
 
   const [internalJobAllData, setInternalJobAllData] = useState([]);
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
+  const [employeeNumberAllData, setEmployeeNumberAllData] = useState([]);
 
 
   const [getAllFilterData, setGetAllFilterData] = useState([]);
@@ -37,7 +38,7 @@ function TimesheetReport() {
   const [filterId, setFilterId] = useState(null);
 
   console.log("filterId -------  ", filterId);
-  console.log("getAllFilterData ", getAllFilterData);
+  // console.log("getAllFilterData ", getAllFilterData);
 
 
 
@@ -47,6 +48,7 @@ function TimesheetReport() {
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
     staff_id: null,
+    employee_number: null,
     customer_id: null,
     client_id: null,
     job_id: null,
@@ -95,6 +97,46 @@ function TimesheetReport() {
       }));
       setStaffAllData(data);
     }
+  };
+
+  // All Employee Number Data
+  const employeeData = async () => {
+      if (role?.toUpperCase() === "SUPERADMIN") {
+        var req = { action: "getStaffWithRole", role_id: "employee_number" || "" };
+        var data = { req: req, authToken: token };
+        await dispatch(getAllTaskByStaff(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              // console.log("response.data ", response.data);
+              const data = response?.data
+                ?.filter(item => ![null, '', 'null', undefined].includes(item.employee_number))
+                ?.map(item => ({
+                  value: item.employee_number,
+                  // value: item.id,
+                  label: `${item.employee_number}`,
+                }));
+              setEmployeeNumberAllData(data);
+            } else {
+              setEmployeeNumberAllData([]);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
+
+      } else {
+        let data = [{ id: staffDetails?.employee_number, employee_number: `${staffDetails.employee_number}` }]
+
+        data = data?.map((item) => ({
+          value: item.employee_number,
+          // value: item.id,
+          label: item.employee_number
+        }));
+        setEmployeeNumberAllData(data);
+      }
+    
+
   };
 
   function formatStringToTitleCase(text,key) {
@@ -451,67 +493,11 @@ function TimesheetReport() {
       }));
 
       return; // multi-select
-
-      // let lastIndexValue = gropByArray[gropByArray.length - 1];
-      // //  console.log("lastIndexValue ", lastIndexValue);
-
-      // if (lastIndexValue == "staff_id") {
-      //   staffData()
-      // }
-
-      // else if (lastIndexValue == "customer_id") {
-      //   GetAllCustomer()
-      // }
-
-      // else if (lastIndexValue == "client_id") {
-      //   GetAllClient()
-      // }
-
-      // else if (lastIndexValue == "job_id") {
-      //   GetAllJobs(filters.internal_external)
-      // }
-
-      // else if (lastIndexValue == "task_id") {
-      //   GetAllTask(filters.internal_external)
-      // }
-
-      // setFilters((prev) => ({
-      //   ...prev,
-      //   fieldsToDisplay: null,
-      //   fieldsToDisplayId: null,
-      //   groupBy: sortByReference(gropByArray)
-      // }));
-
-      // return;
     }
 
-
-
-
     const { key, value, label } = e.target;
-    // console.log("Filter changed: ", key, value, label);
-    // if (key === "fieldsToDisplay") {
 
-    //   //console.log("Fields to Display changed field: ", value);
-
-    //   if ([null, undefined, ""].includes(value)) {
-    //     setFilters((prev) => ({
-    //       ...prev,
-    //       [key]: null,
-    //       [key + "Id"]: null
-    //     }));
-    //   } else {
-    //     setFilters((prev) => ({
-    //       ...prev,
-    //       [key]: label,
-    //       [key + "Id"]: value
-    //     }));
-    //   }
-
-    // }
-
-
-    if (key === "staff_id" || key === "customer_id" || key === "client_id" || key === "job_id" || key === "task_id" || key === "internal_job_id" || key === "internal_task_id") {
+    if (key === "staff_id" || key === "customer_id" || key === "client_id" || key === "job_id" || key === "task_id" || key === "internal_job_id" || key === "internal_task_id" || key === "employee_number") {
       if ([null, undefined, ""].includes(value)) {
         setFilters((prev) => ({
           ...prev,
@@ -562,7 +548,6 @@ function TimesheetReport() {
         }));
       }
 
-
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == 'job_id') {
         setOptions([])
@@ -576,6 +561,10 @@ function TimesheetReport() {
       else if (lastIndexValue == 'staff_id') {
         setOptions([])
         staffData()
+      }
+      else if (lastIndexValue == 'employee_number') {
+        setOptions([])
+        employeeData()
       }
 
     }
@@ -633,6 +622,9 @@ function TimesheetReport() {
       else if (value == 'task_id') {
         GetAllTask(filters.internal_external)
       }
+      else if (value == 'employee_number') {
+        employeeData()
+      }
 
     }
 
@@ -660,7 +652,8 @@ function TimesheetReport() {
           [value]: null
         }));
 
-      } else if (value == 'job_id') {
+      }
+       else if (value == 'job_id') {
 
         if (filters.internal_external == "0") {
           setJobAllData([]);
@@ -708,8 +701,14 @@ function TimesheetReport() {
           }));
         }
       }
+      else if (value == 'employee_number') {
+        setEmployeeNumberAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          [value]: null
+        }));
 
-
+      }
 
     }
   }
@@ -1203,8 +1202,34 @@ function TimesheetReport() {
             />
           </div>
         )}
-
-
+        
+        {/* Field To Display Employee Number */}
+        {filters?.groupBy?.includes('employee_number') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Employee ID
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...employeeNumberAllData,
+              ]}
+              value={
+                employeeNumberAllData && employeeNumberAllData?.length > 0
+                  ? employeeNumberAllData?.find((opt) => opt.value === filters.employee_number) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "employee_number", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+       
         {/* Field To Display Customer */}
         {filters?.groupBy?.includes('customer_id') && (
           <div className="col-lg-4 col-md-6">
