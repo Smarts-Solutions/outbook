@@ -27,6 +27,7 @@ function JobCustomReport() {
   const [allocatedToAllData, setAllocatedToAllData] = useState([]);
   const [reviewerAllData, setReviewerAllData] = useState([]);
   const [otherStaffAllData, setOtherStaffAllData] = useState([]);
+  const [employeeNumberAllData, setEmployeeNumberAllData] = useState([]);
   const [customerAllData, setCustomerAllData] = useState([]);
   const [clientAllData, setClientAllData] = useState([]);
   const [jobAllData, setJobAllData] = useState([]);
@@ -34,7 +35,7 @@ function JobCustomReport() {
   const [jobTypeAllData, setJobTypeAllData] = useState([]);
   const [statusAllData, setStatusAllData] = useState([]);
 
-
+  console.log("employeeNumberAllData ", employeeNumberAllData);
 
 
 
@@ -64,7 +65,8 @@ function JobCustomReport() {
         "allocated_to_other_id",
         "service_id",
         "job_type_id",
-        "status_type_id"
+        "status_type_id",
+        "employee_number"
       ],
     additionalField: [],
     job_id: null,
@@ -77,6 +79,7 @@ function JobCustomReport() {
     service_id: null,
     job_type_id: null,
     status_type_id: null,
+    employee_number: null,
     line_manager_id: null,
     timePeriod: "this_week",
     displayBy: "",
@@ -185,6 +188,7 @@ function JobCustomReport() {
     staffData(3);
     staffData(6);
     staffData('other');
+    staffData('employee_number');
     getAllFilters();
   }, []);
 
@@ -367,6 +371,43 @@ function JobCustomReport() {
           label: item.email
         }));
         setOtherStaffAllData(data);
+      }
+    }
+
+    else if (role_id == 'employee_number') {
+      if (role?.toUpperCase() === "SUPERADMIN") {
+        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var data = { req: req, authToken: token };
+        await dispatch(getAllTaskByStaff(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              // console.log("response.data ", response.data);
+              const data = response?.data
+                ?.filter(item => ![null, '', 'null', undefined].includes(item.employee_number))
+                ?.map(item => ({
+                  value: item.employee_number,
+                 // value: item.id,
+                  label: `${item.employee_number}`,
+                }));
+              setEmployeeNumberAllData(data);
+            } else {
+              setEmployeeNumberAllData([]);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
+
+      } else {
+        let data = [{ id: staffDetails?.employee_number, employee_number: `${staffDetails.employee_number}` }]
+
+        data = data?.map((item) => ({
+          value: item.employee_number,
+         // value: item.id,
+          label: item.employee_number
+        }));
+        setEmployeeNumberAllData(data);
       }
     }
     else {
@@ -598,6 +639,7 @@ function JobCustomReport() {
       else if (value == "allocated_to_other_id") {
         staffData('other')  // role_id 5 for allocated to other
       }
+
       else if (value == 'service_id') {
         GetAllService()
       }
@@ -606,6 +648,10 @@ function JobCustomReport() {
       }
       else if (value == 'status_type_id') {
         GetAllStatus()
+      }
+
+      else if (value == 'employee_number') {
+        staffData('employee_number')
       }
 
     }
@@ -692,6 +738,13 @@ function JobCustomReport() {
           allocated_to_other_id: null
         }));
       }
+      else if (value == 'employee_number') {
+        setEmployeeNumberAllData([]);
+        setFilters((prev) => ({
+          ...prev,
+          employee_number: null
+        }));
+      }
 
 
 
@@ -725,7 +778,7 @@ function JobCustomReport() {
     if (role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
     }
-  }, [filters.groupBy, filters.additionalField, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id]);
+  }, [filters.groupBy, filters.additionalField, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id, filters.employee_number]);
 
 
   //console.log("filters ", filters);
@@ -744,6 +797,7 @@ function JobCustomReport() {
       service_id: null,
       job_type_id: null,
       status_type_id: null,
+      employee_number: null,
       line_manager_id: null,
       timePeriod: "",
       displayBy: "",
@@ -775,6 +829,7 @@ function JobCustomReport() {
     { value: "service_id", label: "Service Type" },
     { value: "job_type_id", label: "Job Type" },
     { value: "status_type_id", label: "Job Status" },
+    { value: "employee_number", label: "Employee Id" },
 
     { value: "allocated_on", label: "Allocated On" },
     { value: "job_priority", label: "Job Priority" },
@@ -1137,12 +1192,12 @@ function JobCustomReport() {
               cursor: "pointer"
             }}
           >
-          <TextSelect />
+            <TextSelect />
           </button>
 
-           
-        
-  
+
+
+
           <label className="form-label fw-medium">Group By</label>
 
           <Select
@@ -1261,6 +1316,33 @@ function JobCustomReport() {
               onChange={(selected) =>
                 handleFilterChange({
                   target: { key: "client_id", value: selected.value, label: selected.label },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+         {/* Field To Display Employee Id Number  */}
+        {filters?.groupBy?.includes('employee_number') && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">
+              Employee Id
+            </label>
+            <Select
+              options={[
+                { value: "", label: "Select..." },
+                ...employeeNumberAllData,
+              ]}
+              value={
+                employeeNumberAllData && employeeNumberAllData.length > 0
+                  ? employeeNumberAllData.find((opt) => opt.value === filters.employee_number) || null
+                  : null
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: { key: "employee_number", value: selected.value, label: selected.label },
                 })
               }
               isSearchable
@@ -1664,6 +1746,7 @@ function getColumnName(columnKey) {
     service_id: "Service",
     job_type_id: "Job Type",
     status_type_id: "Job Status",
+    employee_number: "Employee Id",
     // line_manager_id: "Line Manager",
     date: "Created Date",
     total_count: "Total Count",

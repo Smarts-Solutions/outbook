@@ -3103,6 +3103,23 @@ const getStaffWithRole = async (Report) => {
         return { status: true, message: 'Success.', data: result };
 
     }
+    if (role_id == "employee_number") {
+        const query = `
+        SELECT 
+        staffs.id,
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email,
+        staffs.employee_number
+        FROM
+        staffs
+        GROUP BY staffs.employee_number
+        ORDER BY staffs.employee_number ASC;
+        `
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+
+    }
     else {
         let where = `role_id = ${role_id} AND staffs.status = '1'`;
         if ([3, 6].includes(Number(role_id))) {
@@ -3187,6 +3204,7 @@ const getJobCustomReport = async (Report) => {
         service_id,
         job_type_id,
         status_type_id,
+        employee_number,
 
 
         date_received_on,
@@ -3273,6 +3291,7 @@ const getJobCustomReport = async (Report) => {
         'service_id',
         'job_type_id',
         'status_type_id',
+        'employee_number',
 
 
         'date_received_on',
@@ -3377,6 +3396,13 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(status_type_id)) {
             where.push(`raw.status_type_id = ${status_type_id}`);
         }
+        if (!["", null, undefined].includes(employee_number)) {
+            where.push(`sf.employee_number = '${employee_number}'`);
+        }
+
+
+
+
         if (!["", null, undefined].includes(date_received_on)) {
             where.push(`raw.date_received_on = '${date_received_on}'`);
         }
@@ -3514,7 +3540,7 @@ const getJobCustomReport = async (Report) => {
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-        //console.log("where", where);
+        console.log("where", where);
 
 
         // ===== Final Query =====
@@ -3596,7 +3622,8 @@ const getJobCustomReport = async (Report) => {
                 CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
                 sv.name AS service_name,
                 jt.type AS job_type_name,
-                st.name AS status_type_name
+                st.name AS status_type_name,
+                sf.employee_number AS employee_number
             FROM (
                 SELECT 
                     j.id AS job_id,
@@ -3663,6 +3690,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
             LEFT JOIN services AS sv ON raw.service_id = sv.id
             LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
             LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
             LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
             LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
@@ -3711,6 +3739,7 @@ const getJobCustomReport = async (Report) => {
                 service_id: "service_name",
                 job_type_id: "job_type_name",
                 status_type_id: "status_type_name",
+                employee_number: "employee_number",
 
 
                 date_received_on: "date_received_on",
@@ -3801,6 +3830,8 @@ const getJobCustomReport = async (Report) => {
                     service_name: r.service_name,
                     job_type_name: r.job_type_name,
                     status_type_name: r.status_type_name,
+                    employee_number: r.employee_number,
+
 
 
                     // Additional Fields
@@ -3879,6 +3910,7 @@ const getJobCustomReport = async (Report) => {
             row['service_id'] = g.service_name;
             row['job_type_id'] = g.job_type_name;
             row['status_type_id'] = g.status_type_name;
+            row['employee_number'] = g.employee_number;
 
 
             // Additional fields
