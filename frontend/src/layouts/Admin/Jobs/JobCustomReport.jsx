@@ -760,8 +760,13 @@ function JobCustomReport() {
 
       else if (key == 'client_id') {
         if ([null, '', 'null', undefined].includes(value)) {
-          GetAllJobs();
+          if (![null, '', 'null', undefined].includes(filters.customer_id)) {
+            GetAllJobs();
+          } else {
+            GetAllJobs('customer', newFilters);
+          }
         } else {
+          console.log("newFilters --->>>> ", newFilters);
           GetAllJobs('client', newFilters);
         }
       }
