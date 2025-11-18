@@ -187,35 +187,35 @@ function JobCustomReport() {
 
   // Get All Customers
   const GetAllCustomer = async (type) => {
-    if(type == 'all'){
-    const req = { action: "get_dropdown" };
-    const data = { req: req, authToken: token };
-    await dispatch(getAllCustomerDropDown(data)).unwrap()
-      .then(async (response) => {
-    
-        console.log("customer response ", response);
+    if (type == 'all') {
+      const req = { action: "get_dropdown" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllCustomerDropDown(data)).unwrap()
+        .then(async (response) => {
 
-        if (response.status) {
-          const data = response?.data?.map((item) => ({
-            value: item.id,
-            label: item.trading_name
-          }));
-          setCustomerAllData(data);
-        } else {
-          setCustomerAllData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-    }else{
-      const req = { action: "get_customers_filter" ,filters : type };
+          console.log("customer response ", response);
+
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.trading_name
+            }));
+            setCustomerAllData(data);
+          } else {
+            setCustomerAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    } else {
+      const req = { action: "get_customers_filter", filters: type };
       const data = { req: req, authToken: token };
       await dispatch(getAllCustomerDropDown(data)).unwrap()
         .then(async (response) => {
 
           console.log("customer filter ---  ", response);
-          
+
           if (response.status) {
             const data = response?.data?.map((item) => ({
               value: item.id,
@@ -233,30 +233,30 @@ function JobCustomReport() {
   // Get All Clients
   const GetAllClient = async (type) => {
 
-    if(type == 'all'){
-    const req = { action: "get", customer_id: "" };
-    const data = { req: req, authToken: token };
-    await dispatch(ClientAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const data = response?.data?.map((item) => ({
-            value: item.id,
-            label: item.client_name + " (" + item.client_code + ")"
-          }));
-          setClientAllData(data);
-        } else {
-          setClientAllData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-
-    }else{
-      const req = { action: "get_clients_filter" ,filters : type };
+    if (type == 'all') {
+      const req = { action: "get", customer_id: "" };
       const data = { req: req, authToken: token };
-      await dispatch(ClientAction(data))  
+      await dispatch(ClientAction(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.client_name + " (" + item.client_code + ")"
+            }));
+            setClientAllData(data);
+          } else {
+            setClientAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+
+    } else {
+      const req = { action: "get_clients_filter", filters: type };
+      const data = { req: req, authToken: token };
+      await dispatch(ClientAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -275,14 +275,14 @@ function JobCustomReport() {
   };
 
   // All Type Staff Get
-  const staffData = async (role_id) => {
+  const staffData = async (role_id , type) => {
     //  console.log("role ", role);
     if (['', null, undefined].includes(role_id)) {
       return
     }
     if (Number(role_id) == 4) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var req = { action: "getStaffWithRole", role_id: role_id || "" , filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -315,7 +315,7 @@ function JobCustomReport() {
 
     else if (Number(role_id) == 3) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var req = { action: "getStaffWithRole", role_id: role_id || "" ,filters: type};
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -348,7 +348,7 @@ function JobCustomReport() {
 
     else if (Number(role_id) == 6) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var req = { action: "getStaffWithRole", role_id: role_id || "" ,filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -381,7 +381,7 @@ function JobCustomReport() {
 
     else if (role_id == 'other') {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" };
+        var req = { action: "getStaffWithRole", role_id: role_id || "" , filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -455,35 +455,35 @@ function JobCustomReport() {
   };
 
   // Get All Service
-  const GetAllService = async () => {
-
-    var req = { action: "getAllService" };
-    var data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const data = response?.data?.map((item) => ({
-            value: item.id,
-            label: item.name
-          }));
-          setServiceAllData(data);
-        } else {
-          setServiceAllData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-    return
+  const GetAllService = async (type) => {
+    
+      var req = { action: "getAllService", filters: type };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name
+            }));
+            setServiceAllData(data);
+          } else {
+            setServiceAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+      return
 
 
   };
 
   // Get All Service
-  const GetAllJobType = async () => {
+  const GetAllJobType = async (type) => {
 
-    var req = { action: "getAllJobType" };
+    var req = { action: "getAllJobType" , filters: type };
     var data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -507,9 +507,9 @@ function JobCustomReport() {
   };
 
   // Get All Status
-  const GetAllStatus = async () => {
+  const GetAllStatus = async (type) => {
 
-    var req = { action: "getAllStatus" };
+    var req = { action: "getAllStatus" , filters: type };
     var data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -533,136 +533,7 @@ function JobCustomReport() {
   };
 
 
-  const exportToCSV1 = (data) => {
-    if (!data || !data.rows || data.rows.length === 0) {
-      alert("No data to export!");
-      return;
-    }
-
-
-
-    //  Headers dynamically from data.columns
-    //  const headers = data.columns;
-    const colMap = {
-      job_id: "Job Name",
-      customer_id: "Customer Name",
-      client_id: "Client Name",
-      account_manager_id: "Account Manager Name",
-      allocated_to_id: "Allocated To",
-      reviewer_id: "Reviewer",
-      allocated_to_other_id: "Allocated To (Other)",
-      service_id: "Service Type",
-      job_type_id: "Job Type",
-      status_type_id: "Job Status",
-      employee_number: "Employee ID",
-
-
-      allocated_on: "Allocated On",
-      job_priority: "Job Priority",
-      engagement_model: "Engagement Model",
-      customer_account_manager_officer: "Customer Account Manager (Officer)",
-      status_updation_date: "Status Updation Date",
-      Transactions_Posting_id_2: "Transactions Posting",
-      Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
-      Number_of_Journal_Entries_id_2: "Number of Journal Entries",
-      Number_of_Other_Transactions_id_2: "Number of Other Transactions",
-      Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
-      Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices",
-      Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
-      Number_of_Total_Transactions_id_2: "Number of Total Transactions",
-      submission_deadline: "Submission Deadline",
-      Tax_Year_id_4: "Tax Year",
-      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Who is doing Bookkeeping",
-      Whose_Tax_Return_is_it_id_4: "Whose Tax Return is it",
-      Type_of_Payslip_id_3: "Type of Payslip",
-      Year_Ending_id_1: "Year Ending",
-      Bookkeeping_Frequency_id_2: "Bookkeeping Frequency",
-      CIS_Frequency_id_3: "CIS Frequency",
-      Filing_Frequency_id_8: "Filing Frequency",
-      Management_Accounts_Frequency_id_6: "Management Accounts Frequency",
-      Payroll_Frequency_id_3: "Payroll Frequency",
-      budgeted_hours: "Budgeted Hours",
-      feedback_incorporation_time: "Feedback Incorporation Time",
-      review_time: "Review Time",
-      total_preparation_time: "Total Preparation Time",
-      total_time: "Total Time",
-      due_on: "Due On",
-      customer_deadline_date: "Customer Deadline Date",
-      date_received_on: "Date Received On",
-      expected_delivery_date: "Expected Delivery Date",
-      internal_deadline_date: "Internal Deadline Date",
-      sla_deadline_date: "SLA Deadline Date",
-      Management_Accounts_FromDate_id_6: "Management Accounts From Date",
-      Management_Accounts_ToDate_id_6: "Management Accounts To Date",
-      staff_full_name: "Staff Full Name",
-      role: "Role",
-      staff_email: "Staff Email",
-      line_manager: "Line Manager",
-      staff_status: "Staff Status"
-
-
-
-
-
-
-    };
-    const headers = data.columns.map(col => colMap[col] || col);
-
-
-    // const rows = data.rows.map((row) => {
-    //   return data.columns.map((col) => {
-    //     let val = row[col];
-    //     if (val === undefined || val === null) val = "-";
-
-    //     if (typeof val === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-    //        console.log("val ---  ", val);
-    //        console.log("val typeof ---  ",typeof val);
-
-    //     }
-
-    //     if (typeof val === "string" && val.includes(",")) val = `"${val}"`;
-    //     return val;
-    //   });
-    // });
-
-    const rows = data.rows.map((row) => {
-      return data.columns.map((col) => {
-        let val = row[col];
-        if (val === undefined || val === null) val = "-";
-
-        // Date format detection
-        if (typeof val === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-          val = `"${val}"`;
-        }
-
-        // Comma value detection
-        if (typeof val === "string" && val.includes(",")) {
-          val = `"${val}"`;
-        }
-
-        return val;
-      });
-    });
-
-
-
-
-    console.log("headers ", headers);
-
-    //  CSV content
-    const csvContent = [headers, ...rows]
-      .map((r) => r.join(",")) // join by comma
-      .join("\n"); // join rows by newline
-
-    //  Download CSV
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "JobCustomReportData.csv";
-    link.click();
-  };
-
-
+ 
   const exportToCSV = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
       alert("No data to export!");
@@ -748,7 +619,7 @@ function JobCustomReport() {
           // convert to Date
         }
 
-        
+
         return val;
       });
     });
@@ -842,9 +713,28 @@ function JobCustomReport() {
         ...filters,
         [key]: value
       };
-      if(key == 'job_id'){
-         GetAllCustomer(newFilters);
-         GetAllClient(newFilters);
+      if (key == 'job_id') {
+        if ([null, '', 'null', undefined].includes(value)) {
+          GetAllCustomer('all');
+          GetAllClient('all');
+          GetAllService('all');
+          GetAllJobType('all');
+          GetAllStatus('all');
+          staffData(4);
+          staffData(3);
+          staffData(6);
+          staffData('other');
+        } else {
+          GetAllCustomer(newFilters);
+          GetAllClient(newFilters);
+          GetAllService(newFilters);
+          GetAllJobType(newFilters);
+          GetAllStatus(newFilters);
+          staffData(4, newFilters);
+          staffData(3, newFilters);
+          staffData(6, newFilters);
+          staffData('other', newFilters);
+        }
       }
     }
 

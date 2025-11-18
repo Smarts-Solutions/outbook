@@ -2211,7 +2211,7 @@ const getTimesheetReportData = async (Report) => {
 
 
         // Build group_value for SQL
-       // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
+        // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
         const groupValueSQL = `CONCAT_WS('::', ${groupBy
             .map(f => (f === 'employee_number' ? 's.employee_number' : `${f}`))
             .join(', ')}) AS group_value`;
@@ -3156,9 +3156,13 @@ const getStaffWithRole = async (Report) => {
 
     const { data } = Report;
     const { role_id } = data;
+    let job_id = data?.filters?.job_id;
 
-    if (role_id == "other") {
-        const query = `
+    console.log("Get Staff With Role ID: ===>", role_id);
+    console.log("Get Staff With Role ID: ===>", job_id);
+    if (['', null, undefined].includes(job_id)) {
+        if (role_id == "other") {
+            const query = `
         SELECT 
         staffs.id,
         staffs.first_name,
@@ -3170,12 +3174,12 @@ const getStaffWithRole = async (Report) => {
         GROUP BY job_allowed_staffs.staff_id
         ORDER BY staffs.first_name ASC;
         `
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
 
-    }
-    if (role_id == "employee_number") {
-        const query = `
+        }
+        if (role_id == "employee_number") {
+            const query = `
         SELECT 
         staffs.id,
         staffs.first_name,
@@ -3187,16 +3191,16 @@ const getStaffWithRole = async (Report) => {
         GROUP BY staffs.employee_number
         ORDER BY staffs.employee_number ASC;
         `
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
 
-    }
-    else {
-        let where = `role_id = ${role_id} AND staffs.status = '1'`;
-        if ([3, 6].includes(Number(role_id))) {
-            where = `(role_id = ${role_id} || role_id = 4) AND staffs.status = '1'`;
         }
-        const query = `
+        else {
+            let where = `role_id = ${role_id} AND staffs.status = '1'`;
+            if ([3, 6].includes(Number(role_id))) {
+                where = `(role_id = ${role_id} || role_id = 4) AND staffs.status = '1'`;
+            }
+            const query = `
         SELECT
         id,
         first_name,
@@ -3207,15 +3211,37 @@ const getStaffWithRole = async (Report) => {
         WHERE ${where}
         ORDER BY first_name ASC;
     `
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+
+        }
+    } else {
+        if (role_id == "other") {
+            const query = `
+        SELECT 
+        staffs.id,
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email 
+        FROM
+        job_allowed_staffs
+        JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
+        WHERE job_allowed_staffs.job_id = ${job_id}
+        GROUP BY job_allowed_staffs.staff_id
+        ORDER BY staffs.first_name ASC;
+        `
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
-
+        }
     }
 }
 
 const getAllService = async (Report) => {
+    let { data } = Report;
+    let job_id = data?.filters?.job_id;
 
-    const query = `
+    if (['', null, undefined].includes(job_id)) {
+        const query = `
     SELECT  
     id,
     name 
@@ -3224,13 +3250,36 @@ const getAllService = async (Report) => {
     WHERE status = '1'
     ORDER BY name ASC;
     `
-    const [result] = await pool.execute(query);
-    return { status: true, message: 'Success.', data: result };
-}
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    }
 
-const getAllJobType = async () => {
 
     const query = `
+    SELECT  
+    services.id,
+    services.name 
+    FROM
+    services
+    JOIN
+    jobs ON jobs.service_id = services.id
+    WHERE services.status = '1' AND jobs.id = ${job_id}
+    ORDER BY services.name ASC;
+    `
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success.', data: result };
+
+
+
+
+}
+
+const getAllJobType = async (Report) => {
+
+    let { data } = Report;
+    let job_id = data?.filters?.job_id;
+    if (['', null, undefined].includes(job_id)) {
+        const query = `
     SELECT  
     id,
     type
@@ -3239,13 +3288,30 @@ const getAllJobType = async () => {
     WHERE status = '1'
     ORDER BY type ASC;
     `
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    }
+
+    const query = `
+    SELECT
+    job_types.id,
+    job_types.type
+    FROM
+    job_types
+    JOIN
+    jobs ON jobs.job_type_id = job_types.id
+    WHERE job_types.status = '1' AND jobs.id = ${job_id}
+    ORDER BY job_types.type ASC;
+    `
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
 
-const getAllStatus = async () => {
-
-    const query = `
+const getAllStatus = async (Report) => {
+    let { data } = Report;
+    let job_id = data?.filters?.job_id;
+    if (['', null, undefined].includes(job_id)) {
+        const query = `
     SELECT  
     id,
     name
@@ -3253,6 +3319,21 @@ const getAllStatus = async () => {
     master_status
     WHERE status = '1'
     ORDER BY name ASC;
+    `
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    }
+
+    const query = `
+    SELECT
+    master_status.id,
+    master_status.name
+    FROM
+    master_status
+    JOIN
+    jobs ON jobs.status_type = master_status.id
+    WHERE master_status.status = '1' AND jobs.id = ${job_id}
+    ORDER BY master_status.name ASC;
     `
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
