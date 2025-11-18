@@ -710,11 +710,11 @@ const StaffPage = () => {
     {
       type: "text6",
       name: "employee_number",
-      label: "Employee Number",
+      label: "Employee ID",
       label_size: 12,
       col_size: 6,
       disable: false,
-      placeholder: "Enter Employee Number",
+      placeholder: "Enter Employee ID",
     },
   ];
 
