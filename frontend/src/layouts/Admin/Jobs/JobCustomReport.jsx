@@ -739,6 +739,16 @@ function JobCustomReport() {
           staffData('other', newFilters);
         }
       }
+
+       if (key == 'customer_id') {
+        if ([null, '', 'null', undefined].includes(value)) {
+          GetAllClient('all');
+        } else {
+          GetAllClient(newFilters);
+        }
+      }
+
+
     }
 
 
