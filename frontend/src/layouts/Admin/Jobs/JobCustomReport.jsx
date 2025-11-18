@@ -750,10 +750,10 @@ function JobCustomReport() {
         GetAllJobs()
       }
       else if (value == 'customer_id') {
-        GetAllCustomer()
+        GetAllCustomer() // fetch all customers
       }
       else if (value == 'client_id') {
-        GetAllClient()
+        GetAllClient() // fetch all clients
       }
       else if (value == 'account_manager_id') {
         staffData(4)  // role_id 4 for account manager
@@ -767,19 +767,18 @@ function JobCustomReport() {
       else if (value == "allocated_to_other_id") {
         staffData('other')  // role_id 5 for allocated to other
       }
-
       else if (value == 'service_id') {
-        GetAllService()
+        GetAllService() // fetch all service
       }
       else if (value == 'job_type_id') {
-        GetAllJobType()
+        GetAllJobType() // fetch all job type
       }
       else if (value == 'status_type_id') {
-        GetAllStatus()
+        GetAllStatus() // fetch all status
       }
 
       else if (value == 'employee_number') {
-        staffData('employee_number')
+        staffData('employee_number') //fetch all employee number
       }
 
     }
