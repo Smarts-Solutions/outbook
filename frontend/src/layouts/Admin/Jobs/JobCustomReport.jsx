@@ -50,10 +50,6 @@ function JobCustomReport() {
   // set filter id
   const [filterId, setFilterId] = useState(null);
 
-
-
-
-
   const [filters, setFilters] = useState({
     groupBy:
       ["job_id",
@@ -102,8 +98,6 @@ function JobCustomReport() {
       .replace(/\b\w/g, char => char.toUpperCase()) // capitalize first letter of each word
       .trim();
   }
-
-
   //  console.log("lastGroupValue ", lastGroupValue);
 
   // Get All Jobs
@@ -178,11 +172,11 @@ function JobCustomReport() {
 
   useEffect(() => {
     GetAllJobs();
-    GetAllCustomer();
-    GetAllClient();
-    GetAllService();
-    GetAllJobType();
-    GetAllStatus();
+    GetAllCustomer('all');
+    GetAllClient('all');
+    GetAllService('all');
+    GetAllJobType('all');
+    GetAllStatus('all');
     staffData(4);
     staffData(3);
     staffData(6);
@@ -192,11 +186,15 @@ function JobCustomReport() {
   }, []);
 
   // Get All Customers
-  const GetAllCustomer = async () => {
+  const GetAllCustomer = async (type) => {
+    if(type == 'all'){
     const req = { action: "get_dropdown" };
     const data = { req: req, authToken: token };
     await dispatch(getAllCustomerDropDown(data)).unwrap()
       .then(async (response) => {
+    
+        console.log("customer response ", response);
+
         if (response.status) {
           const data = response?.data?.map((item) => ({
             value: item.id,
@@ -210,8 +208,27 @@ function JobCustomReport() {
       .catch((error) => {
         return;
       });
-  };
+    }else{
+      const req = { action: "get_customers_filter" ,filters : type };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllCustomerDropDown(data)).unwrap()
+        .then(async (response) => {
 
+          console.log("customer filter ---  ", response);
+          
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.trading_name
+            }));
+            setCustomerAllData(data);
+          } else {
+            setCustomerAllData([]);
+          }
+        })
+    }
+
+  };
 
   // Get All Clients
   const GetAllClient = async () => {
@@ -793,12 +810,20 @@ function JobCustomReport() {
         fromDate: value,
       }));
     }
-
     else {
+
       setFilters((prev) => ({
         ...prev,
         [key]: value
       }));
+      const newFilters = {
+        ...filters,
+        [key]: value
+      };
+      console.log("setFilters ====>>>>> ");
+      if(key == 'job_id'){
+         GetAllCustomer(newFilters);
+      }
     }
 
 
