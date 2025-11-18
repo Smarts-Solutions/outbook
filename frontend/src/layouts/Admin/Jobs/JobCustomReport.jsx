@@ -101,9 +101,17 @@ function JobCustomReport() {
   //  console.log("lastGroupValue ", lastGroupValue);
 
   // Get All Jobs
-  const GetAllJobs = async () => {
+  const GetAllJobs = async (type , filter) => {
     // External get All jobs
-    const req = { action: "getByCustomer", customer_id: "" };
+    let req = { action: "getByCustomer", customer_id: "" };
+    if (type == 'customer') {
+      req = { action: 'getByCustomer', customer_id: filter?.customer_id };
+    }else if(type == 'client'){
+      req = { action: "getByClient", client_id: filter?.client_id };
+    }else{
+      req = { action: "getByCustomer", customer_id: "" };
+    }
+
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -740,11 +748,21 @@ function JobCustomReport() {
         }
       }
 
-       if (key == 'customer_id') {
+      else if (key == 'customer_id') {
         if ([null, '', 'null', undefined].includes(value)) {
           GetAllClient('all');
+          GetAllJobs();
         } else {
           GetAllClient(newFilters);
+          GetAllJobs('customer', newFilters);
+        }
+      }
+
+      else if (key == 'client_id') {
+        if ([null, '', 'null', undefined].includes(value)) {
+          GetAllJobs();
+        } else {
+          GetAllJobs('client', newFilters);
         }
       }
 

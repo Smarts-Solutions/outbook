@@ -785,8 +785,9 @@ const getClientFilter = async (client) => {
 //  console.log("getClient client", client);
   let { customer_id, StaffUserId , filters } = client;
   let { job_id } = filters;
-
   
+    //console.log("getClientFilter filters", filters?.customer_id);
+    customer_id = filters?.customer_id;
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
