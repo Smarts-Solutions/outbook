@@ -231,7 +231,9 @@ function JobCustomReport() {
   };
 
   // Get All Clients
-  const GetAllClient = async () => {
+  const GetAllClient = async (type) => {
+
+    if(type == 'all'){
     const req = { action: "get", customer_id: "" };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
@@ -250,6 +252,26 @@ function JobCustomReport() {
       .catch((error) => {
         return;
       });
+
+    }else{
+      const req = { action: "get_clients_filter" ,filters : type };
+      const data = { req: req, authToken: token };
+      await dispatch(ClientAction(data))  
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.client_name + " (" + item.client_code + ")"
+            }));
+            setClientAllData(data);
+          } else {
+            setClientAllData([]);
+          }
+        })
+    }
+
+
   };
 
   // All Type Staff Get
