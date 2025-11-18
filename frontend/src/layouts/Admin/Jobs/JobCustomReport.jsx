@@ -655,7 +655,10 @@ function JobCustomReport() {
       setOptions([]);
       let gropByArray = sortByReference(values)
 
-      // console.log("gropByArray ", gropByArray);
+      console.log("gropByArray ", gropByArray);
+      if(gropByArray.length == 0){
+        setIsAllSelected(false);
+      }
 
       if (!gropByArray.includes('job_id')) {
         setFilters((prev) => ({

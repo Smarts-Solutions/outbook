@@ -3233,6 +3233,58 @@ const getStaffWithRole = async (Report) => {
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success.', data: result };
         }
+
+        if (role_id == "employee_number") {
+            const query = `
+        SELECT 
+        staffs.id,
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email,
+        staffs.employee_number
+        FROM
+        staffs
+        JOIN jobs ON jobs.allocated_to = staffs.id OR jobs.reviewer = staffs.id
+        WHERE jobs.id = ${job_id}
+        GROUP BY staffs.employee_number
+        ORDER BY staffs.employee_number ASC;
+        `
+        const [result] = await pool.execute(query); 
+        return { status: true, message: 'Success.', data: result };
+        }
+        else {
+            let where = `staffs.role_id = ${role_id} AND staffs.status = '1'`;
+            if ([3, 6].includes(Number(role_id))) {
+                where = `(staffs.role_id = ${role_id} || staffs.role_id = 4) AND staffs.status = '1'`;
+            }
+        let condition = `JOIN jobs ON jobs.account_manager_id = staffs.id
+        WHERE ${where} AND jobs.id = ${job_id}`;    
+         if(role_id == 3){
+              condition = `JOIN jobs ON jobs.allocated_to = staffs.id
+        WHERE ${where} AND jobs.id = ${job_id}`; 
+        }
+        else if(role_id == 6){
+             condition = `JOIN jobs ON jobs.reviewer = staffs.id
+        WHERE ${where} AND jobs.id = ${job_id}`; 
+        }
+
+        const query = `
+        SELECT
+        DISTINCT staffs.id,
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email
+        FROM 
+        staffs
+        ${condition}
+        ORDER BY staffs.first_name ASC;
+       `
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+        }
+
+
+
     }
 }
 
