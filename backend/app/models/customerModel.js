@@ -820,6 +820,37 @@ const getAllCustomersFilter = async (customer) => {
     const { StaffUserId, filters } = customer;
     let { job_id } = filters;
 
+    console.log("client id --", filters?.client_id);
+
+   if (!['',null,undefined].includes(filters?.client_id)) {
+     const query = `
+            SELECT  
+            customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM
+            customers
+        JOIN
+            clients ON clients.customer_id = customers.id
+        WHERE
+            clients.id = ${filters?.client_id}
+        ORDER BY 
+        trading_name ASC;`;
+
+        const [result] = await pool.execute(query);
+
+        return { status: true, message: 'Success..', data: result };
+
+   }
+
+
+
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
