@@ -779,6 +779,212 @@ ORDER BY
       return { status: true, message: "success.", data: result };
 }
 
+
+
+const getClientFilter = async (client) => {
+//  console.log("getClient client", client);
+  let { customer_id, StaffUserId , filters } = client;
+  let { job_id } = filters;
+
+  
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
+
+
+  if(customer_id == undefined || customer_id == null || customer_id == ''){
+    return await getAllClientsSidebarFilter(StaffUserId , rows ,job_id);
+  }
+
+  // console.log("getClient customer_id", customer_id);
+
+   try {
+   
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 34]);
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+      const query = `
+   SELECT  
+    clients.id AS id,
+    clients.trading_name AS client_name,
+    clients.status AS status,
+    client_types.type AS client_type_name,
+    jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code
+FROM 
+    clients
+JOIN 
+    staffs ON clients.staff_created_id = staffs.id    
+JOIN 
+    customers ON customers.id = clients.customer_id    
+JOIN 
+    client_types ON client_types.id = clients.client_type
+LEFT JOIN 
+    jobs ON clients.id = jobs.client_id  -- Corrected LEFT JOIN condition
+WHERE 
+    clients.customer_id = ${customer_id}
+GROUP BY
+    clients.id    
+ORDER BY 
+    clients.trading_name ASC;
+    `;
+      const [result] = await pool.execute(query);
+      return { status: true, message: "success.", data: result };
+    }
+    } catch (err) {
+     return { status: false, message: "Err Client Get" };
+   }
+
+
+ 
+   //console.log("Client LineManageStaffId:",LineManageStaffId);
+
+   // Other role Get data
+    const query = `
+   SELECT  
+    clients.id AS id,
+    clients.trading_name AS client_name,
+    clients.status AS status,
+    client_types.type AS client_type_name,
+    jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code
+      FROM 
+          clients
+      JOIN 
+          staffs ON clients.staff_created_id = staffs.id
+      LEFT JOIN 
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})  
+      JOIN 
+          customers ON customers.id = clients.customer_id    
+      JOIN 
+          client_types ON client_types.id = clients.client_type
+      LEFT JOIN 
+          jobs ON clients.id = jobs.client_id 
+      WHERE 
+       (clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND clients.customer_id = ${customer_id}
+      GROUP BY
+          clients.id
+      ORDER BY 
+          clients.trading_name ASC;
+    `;
+
+     const [result] = await pool.execute(query);
+     return { status: true, message: "success.", data: result };
+
+};
+
+async function getAllClientsSidebarFilter(StaffUserId, rows, job_id) {
+
+
+  try {
+  
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id , 34]);
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+      const query = `
+   SELECT  
+    clients.id AS id,
+    clients.trading_name AS client_name,
+    clients.status AS status,
+    client_types.type AS client_type_name,
+    jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code
+FROM   
+    clients     
+JOIN 
+    staffs ON clients.staff_created_id = staffs.id
+JOIN 
+    customers ON customers.id = clients.customer_id    
+JOIN 
+    client_types ON client_types.id = clients.client_type
+JOIN 
+    jobs ON clients.id = jobs.client_id
+WHERE
+    jobs.id = ${job_id}
+GROUP BY
+    clients.id    
+ORDER BY 
+    clients.trading_name ASC;
+    `;
+      const [result] = await pool.execute(query);
+     
+      return { status: true, message: "success.", data: result };
+     }
+     } catch (err) {
+     return { status: false, message: "Err Client Get" };
+   }
+
+  
+    // Other Role Get data
+
+    const query = `
+   SELECT  
+    clients.id AS id,
+    clients.trading_name AS client_name,
+    clients.status AS status,
+    client_types.type AS client_type_name,
+    jobs.id AS Delete_Status,
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+    CONCAT(
+        'cli_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+    ) AS client_code
+      FROM 
+          clients
+      JOIN 
+          staffs ON clients.staff_created_id = staffs.id    
+      LEFT JOIN 
+          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      JOIN 
+          customers ON customers.id = clients.customer_id    
+      JOIN 
+          client_types ON client_types.id = clients.client_type
+      JOIN 
+          jobs ON clients.id = jobs.client_id
+      WHERE 
+        jobs.id = ${job_id}
+      GROUP BY
+          clients.id    
+      ORDER BY 
+          clients.trading_name ASC;
+    `;
+     //console.log("Client Query:", query);
+  
+      const [result] = await pool.execute(query);
+      return { status: true, message: "success.", data: result };
+}
+
+
+
+
 const getByidClient = async (client) => {
   const { client_id } = client;
 
@@ -3218,4 +3424,5 @@ module.exports = {
   clientUpdate,
   addClientDocument,
   deleteClientFile,
+  getClientFilter
 };

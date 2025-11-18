@@ -842,9 +842,9 @@ function JobCustomReport() {
         ...filters,
         [key]: value
       };
-      console.log("setFilters ====>>>>> ");
       if(key == 'job_id'){
          GetAllCustomer(newFilters);
+         GetAllClient(newFilters);
       }
     }
 

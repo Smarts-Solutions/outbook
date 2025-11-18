@@ -3,7 +3,7 @@ const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../../app/utils/helper');
 
 
- // DELIMITER $$
+// DELIMITER $$
 
 // CREATE PROCEDURE GetCustomersData (
 //     IN LineManageStaffId VARCHAR(255),   -- Example: '1,2,3,4'
@@ -31,11 +31,11 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelper
 //                 staff2.last_name AS account_manager_lastname,
 //                 CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_',
 //                        SUBSTRING(customers.customer_code, 1, 15)) AS customer_code,
-    //             CASE
-    //     WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
-    //     THEN 1 ELSE 0
-    // END AS is_client
-    
+//             CASE
+//     WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+//     THEN 1 ELSE 0
+// END AS is_client
+
 //          FROM customers
 //          JOIN staffs ON customers.staff_id = staffs.id
 //          JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
@@ -476,13 +476,13 @@ const getCustomer = async (customer) => {
     const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
     const offset = (page - 1) * limit;
     const search = customer.search || "";
-      
+
     // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
 
     // Get Role
     const rows = await QueryRoleHelperFunction(staff_id)
-    
+
 
     const RoleAccessQuery = `
     SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?
@@ -564,7 +564,7 @@ ORDER BY
 
     const staffIdString = LineManageStaffId.join(',');
 
-//   console.log("Call Customer:", "time", new Date().toISOString());
+    //   console.log("Call Customer:", "time", new Date().toISOString());
     try {
         const [rows] = await pool.query(
             `CALL GetCustomersData(?, ?, ?, ?)`,
@@ -682,7 +682,7 @@ ORDER BY
             customers.id DESC`;
             countParams.push(`%${search}%`);
             queryParams.push(`%${search}%`);
-        }else{
+        } else {
             countQuery += ` GROUP BY
             customers.id`;
             query += ` GROUP BY
@@ -698,16 +698,16 @@ ORDER BY
         queryParams.push(limit, offset);
         // Execute the count query
         const [countResult] = await pool.execute(countQuery, countParams);
-      
+
         // console.log('Count Result:', countResult.length);
-        
+
         //const total = countResult[0].total;
         const total = countResult.length;
         // Execute the main query
         const [result] = await pool.execute(query, queryParams);
 
-       
-       // console.log('Result:', result);
+
+        // console.log('Result:', result);
         // console.log('Result:', result.length);
 
         return {
@@ -732,7 +732,7 @@ ORDER BY
 
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
@@ -762,9 +762,9 @@ trading_name ASC;`;
 
         return { status: true, message: 'Success..', data: result };
     }
-  
-        // other Role Data
-        let query = `
+
+    // other Role Data
+    let query = `
     SELECT  
         customers.id AS id,
         customers.customer_type AS customer_type,
@@ -806,20 +806,19 @@ trading_name ASC;`;
            ORDER BY customers.trading_name ASC
 
          `;
-         try {
-             const [result] = await pool.execute(query);
-             return { status: true, message: 'Success..', data: result };
-         } catch (err) {
-            console.error('Error executing query getCustomer_dropdown:', err);
-            return { status: false, message: 'Error executing query', data: err };
-         }
+    try {
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success..', data: result };
+    } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+    }
 
 }
 
 const getAllCustomersFilter = async (customer) => {
-    const { StaffUserId ,filters } = customer;
-    let {job_id} = filters;
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    const { StaffUserId, filters } = customer;
+    let { job_id } = filters;
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -852,9 +851,9 @@ const getAllCustomersFilter = async (customer) => {
 
         return { status: true, message: 'Success..', data: result };
     }
-  
-        // other Role Data
-        let query = `
+
+    // other Role Data
+    let query = `
     SELECT  
         customers.id AS id,
         customers.customer_type AS customer_type,
@@ -893,25 +892,25 @@ const getAllCustomersFilter = async (customer) => {
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-             (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND jobs.id = ${job_id}
+           jobs.id = ${job_id}
            GROUP BY customers.id
            ORDER BY customers.trading_name ASC
 
          `;
-         try {
-             const [result] = await pool.execute(query);
-             return { status: true, message: 'Success..', data: result };
-         } catch (err) {
-            console.error('Error executing query getCustomer_dropdown:', err);
-            return { status: false, message: 'Error executing query', data: err };
-         }
+    try {
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success..', data: result };
+    } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+    }
 
 }
 
 const getCustomer_dropdown_delete = async (customer) => {
     // const { StaffUserId ,staff_id } = customer;
     let StaffUserId = customer.staff_id;
-     // Line Manager
+    // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
@@ -941,9 +940,9 @@ id DESC;`;
 
         return { status: true, message: 'Success..', data: result };
     }
-  
-        // other Role Data
-        let query = `
+
+    // other Role Data
+    let query = `
     SELECT  
         customers.id AS id,
         customers.customer_type AS customer_type,
@@ -985,13 +984,13 @@ id DESC;`;
            ORDER BY customers.id DESC
 
          `;
-         try {
-             const [result] = await pool.execute(query);
-             return { status: true, message: 'Success..', data: result };
-         } catch (err) {
-            console.error('Error executing query getCustomer_dropdown:', err);
-            return { status: false, message: 'Error executing query', data: err };
-         }
+    try {
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success..', data: result };
+    } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+    }
 
 }
 
@@ -3497,9 +3496,9 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 }
 
 const getAllAccountManager = async (customer) => {
-   let  {customer_id} = customer;
-  
-     const query = `
+    let { customer_id } = customer;
+
+    const query = `
     SELECT  
     customers.id AS id,
     staffs.id AS staff_id,
@@ -3521,39 +3520,39 @@ JOIN
  GROUP BY services.id , staffs.id
     `;
 
-   const [result] = await pool.execute(query);
+    const [result] = await pool.execute(query);
 
 
 
 
-     const FinalResult = Object.values(
-  result?.reduce((acc, curr) => {
-    if (!acc[curr.service_id]) {
-      acc[curr.service_id] = {
-        service_id: curr.service_id,
-        service_name: curr.service_name,
-        account_managers: []
-      };
-    }
+    const FinalResult = Object.values(
+        result?.reduce((acc, curr) => {
+            if (!acc[curr.service_id]) {
+                acc[curr.service_id] = {
+                    service_id: curr.service_id,
+                    service_name: curr.service_name,
+                    account_managers: []
+                };
+            }
 
-    // Add account manager if not already added for same service
-    const alreadyExists = acc[curr.service_id].account_managers.some(
-      (m) => m.staff_id === curr.staff_id
+            // Add account manager if not already added for same service
+            const alreadyExists = acc[curr.service_id].account_managers.some(
+                (m) => m.staff_id === curr.staff_id
+            );
+
+            if (!alreadyExists) {
+                acc[curr.service_id].account_managers.push({
+                    staff_id: curr.staff_id,
+                    account_manager_name: curr.account_manager_name
+                });
+            }
+
+            return acc;
+        }, {})
     );
 
-    if (!alreadyExists) {
-      acc[curr.service_id].account_managers.push({
-        staff_id: curr.staff_id,
-        account_manager_name: curr.account_manager_name
-      });
-    }
-
-    return acc;
-  }, {})
-);
-
-console.log(FinalResult);
-   return { status: true, data: FinalResult };
+    console.log(FinalResult);
+    return { status: true, data: FinalResult };
 }
 
 const customerStatusUpdate = async (customer) => {
