@@ -35,6 +35,8 @@ function JobCustomReport() {
   const [serviceAllData, setServiceAllData] = useState([]);
   const [jobTypeAllData, setJobTypeAllData] = useState([]);
   const [statusAllData, setStatusAllData] = useState([]);
+  const [isAllSelected, setIsAllSelected] = useState(false);
+
 
   console.log("employeeNumberAllData ", employeeNumberAllData);
 
@@ -63,8 +65,7 @@ function JobCustomReport() {
         "allocated_to_other_id",
         "service_id",
         "job_type_id",
-        "status_type_id",
-        "employee_number"
+        "status_type_id"
       ],
     additionalField: [],
     job_id: null,
@@ -621,106 +622,108 @@ function JobCustomReport() {
     link.download = "JobCustomReportData.csv";
     link.click();
   };
-  
+
 
   const exportToCSV = (data) => {
-  if (!data || !data.rows || data.rows.length === 0) {
-    alert("No data to export!");
-    return;
-  }
+    if (!data || !data.rows || data.rows.length === 0) {
+      alert("No data to export!");
+      return;
+    }
 
-  const colMap = {
-    job_id: "Job Name",
-    customer_id: "Customer Name",
-    client_id: "Client Name",
-    account_manager_id: "Account Manager Name",
-    allocated_to_id: "Allocated To",
-    reviewer_id: "Reviewer",
-    allocated_to_other_id: "Allocated To (Other)",
-    service_id: "Service Type",
-    job_type_id: "Job Type",
-    status_type_id: "Job Status",
-    employee_number: "Employee ID",
-    allocated_on: "Allocated On",
-    job_priority: "Job Priority",
-    engagement_model: "Engagement Model",
-    customer_account_manager_officer: "Customer Account Manager (Officer)",
-    status_updation_date: "Status Updation Date",
-    Transactions_Posting_id_2: "Transactions Posting",
-    Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
-    Number_of_Journal_Entries_id_2: "Number of Journal Entries",
-    Number_of_Other_Transactions_id_2: "Number of Other Transactions",
-    Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
-    Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices",
-    Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
-    Number_of_Total_Transactions_id_2: "Number of Total Transactions",
-    submission_deadline: "Submission Deadline",
-    Tax_Year_id_4: "Tax Year",
-    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Who is doing Bookkeeping",
-    Whose_Tax_Return_is_it_id_4: "Whose Tax Return is it",
-    Type_of_Payslip_id_3: "Type of Payslip",
-    Year_Ending_id_1: "Year Ending",
-    Bookkeeping_Frequency_id_2: "Bookkeeping Frequency",
-    CIS_Frequency_id_3: "CIS Frequency",
-    Filing_Frequency_id_8: "Filing Frequency",
-    Management_Accounts_Frequency_id_6: "Management Accounts Frequency",
-    Payroll_Frequency_id_3: "Payroll Frequency",
-    budgeted_hours: "Budgeted Hours",
-    feedback_incorporation_time: "Feedback Incorporation Time",
-    review_time: "Review Time",
-    total_preparation_time: "Total Preparation Time",
-    total_time: "Total Time",
-    due_on: "Due On",
-    customer_deadline_date: "Customer Deadline Date",
-    date_received_on: "Date Received On",
-    expected_delivery_date: "Expected Delivery Date",
-    internal_deadline_date: "Internal Deadline Date",
-    sla_deadline_date: "SLA Deadline Date",
-    Management_Accounts_FromDate_id_6: "Management Accounts From Date",
-    Management_Accounts_ToDate_id_6: "Management Accounts To Date",
-    staff_full_name: "Staff Full Name",
-    role: "Role",
-    staff_email: "Staff Email",
-    line_manager: "Line Manager",
-    staff_status: "Staff Status"
-  };
+    const colMap = {
+      job_id: "Job Name",
+      customer_id: "Customer Name",
+      client_id: "Client Name",
+      account_manager_id: "Account Manager Name",
+      allocated_to_id: "Allocated To",
+      reviewer_id: "Reviewer",
+      allocated_to_other_id: "Allocated To (Other)",
+      service_id: "Service Type",
+      job_type_id: "Job Type",
+      status_type_id: "Job Status",
+      employee_number: "Employee ID",
+      allocated_on: "Allocated On",
+      job_priority: "Job Priority",
+      engagement_model: "Engagement Model",
+      customer_account_manager_officer: "Customer Account Manager (Officer)",
+      status_updation_date: "Status Updation Date",
+      Transactions_Posting_id_2: "Transactions Posting",
+      Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
+      Number_of_Journal_Entries_id_2: "Number of Journal Entries",
+      Number_of_Other_Transactions_id_2: "Number of Other Transactions",
+      Number_of_Petty_Cash_Transactions_id_2: "Number of Petty Cash Transactions",
+      Number_of_Purchase_Invoices_id_2: "Number of Purchase Invoices",
+      Number_of_Sales_Invoices_id_2: "Number of Sales Invoices",
+      Number_of_Total_Transactions_id_2: "Number of Total Transactions",
+      submission_deadline: "Submission Deadline",
+      Tax_Year_id_4: "Tax Year",
+      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Who is doing Bookkeeping",
+      Whose_Tax_Return_is_it_id_4: "Whose Tax Return is it",
+      Type_of_Payslip_id_3: "Type of Payslip",
+      Year_Ending_id_1: "Year Ending",
+      Bookkeeping_Frequency_id_2: "Bookkeeping Frequency",
+      CIS_Frequency_id_3: "CIS Frequency",
+      Filing_Frequency_id_8: "Filing Frequency",
+      Management_Accounts_Frequency_id_6: "Management Accounts Frequency",
+      Payroll_Frequency_id_3: "Payroll Frequency",
+      budgeted_hours: "Budgeted Hours",
+      feedback_incorporation_time: "Feedback Incorporation Time",
+      review_time: "Review Time",
+      total_preparation_time: "Total Preparation Time",
+      total_time: "Total Time",
+      due_on: "Due On",
+      customer_deadline_date: "Customer Deadline Date",
+      date_received_on: "Date Received On",
+      expected_delivery_date: "Expected Delivery Date",
+      internal_deadline_date: "Internal Deadline Date",
+      sla_deadline_date: "SLA Deadline Date",
+      Management_Accounts_FromDate_id_6: "Management Accounts From Date",
+      Management_Accounts_ToDate_id_6: "Management Accounts To Date",
+      staff_full_name: "Staff Full Name",
+      role: "Role",
+      staff_email: "Staff Email",
+      line_manager: "Line Manager",
+      staff_status: "Staff Status"
+    };
 
-  const headers = data.columns.map(col => colMap[col] || col);
+    const headers = data.columns.map(col => colMap[col] || col);
 
-  const rows = data.rows.map((row) => {
-    return data.columns.map((col) => {
-      let val = row[col];
+    const rows = data.rows.map((row) => {
+      return data.columns.map((col) => {
+        let val = row[col];
 
-      if (val === undefined || val === null) val = "-";
+        if (val === undefined || val === null) val = "-";
 
-      val = String(val); // force string
+        val = String(val); // force string
 
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-        val = `"${val}"`; // safe date
-      }
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+          val = `"${(val)}"`; // safe date
+        }
 
-      if (val.includes(",")) {
-        val = `"${val}"`;
-      }
+        if (val?.includes(",")) {
+          val = `${val}`;
+        }
 
-      if (val.includes('"')) {
-        val = `"${val.replace(/"/g, '""')}"`;
-      }
+        if (val.includes('"')) {
+          val = `"${val.replace(/"/g, '""')}"`;
+          // convert to Date
+        }
 
-      return val;
+        
+        return val;
+      });
     });
-  });
 
-  const csvContent = [headers, ...rows]
-    .map((r) => r.join(","))
-    .join("\n");
+    const csvContent = [headers, ...rows]
+      .map((r) => r.join(","))
+      .join("\n");
 
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "JobCustomReportData.csv";
-  link.click();
-};
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "JobCustomReportData.csv";
+    link.click();
+  };
 
 
 
@@ -1064,9 +1067,6 @@ function JobCustomReport() {
 
 
 
-
-
-
   const optionAdditionalBy = [
     { value: "date_received_on", label: "Date Received On" },
     { value: "staff_full_name", label: "Staff Full Name" },
@@ -1088,7 +1088,6 @@ function JobCustomReport() {
     if (!Array.isArray(selected) || selected.length <= 1) return selected;
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
-
 
   //  console.log("Filters: ", filters);
 
@@ -1363,27 +1362,35 @@ function JobCustomReport() {
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
 
-          <button
-            onClick={() => {
-              const allValues = optionGroupBy.map(opt => opt.value);
-              addAndRemoveGroupBy(allValues, "addAll");
-              handleFilterChange(optionGroupBy);
-            }}
-            style={{
-              marginBottom: "5px",
-              padding: "6px 10px",
-              background: "#eee",
-              borderRadius: "5px",
-              cursor: "pointer"
-            }}
-          >
-            <TextSelect />
-          </button>
-
-
-
 
           <label className="form-label fw-medium">Group By</label>
+
+          <span className="ms-2">
+
+            <button
+              type="button"
+              className="btn btn-sm btn-link p-0 ms-2"
+              onClick={() => {
+                const allValues = optionGroupBy.map((opt) => opt.value);
+
+                if (!isAllSelected) {
+                  // --- SELECT ALL ---
+                  addAndRemoveGroupBy(allValues, "addAll");
+                  handleFilterChange(optionGroupBy);
+                  setIsAllSelected(true);
+                } else {
+                  // --- CLEAR ALL ---
+                  addAndRemoveGroupBy([], "clearAll");
+                  handleFilterChange([]);
+                  setIsAllSelected(false);
+                }
+              }}
+            >
+              {isAllSelected ? "Clear" : "Select All"}
+            </button>
+
+          </span>
+
 
           <Select
             isMulti
@@ -1407,6 +1414,8 @@ function JobCustomReport() {
             className="basic-multi-select"
             classNamePrefix="select"
           />
+
+
         </div>
 
         {/* Additional Field */}
