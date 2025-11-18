@@ -275,14 +275,14 @@ function JobCustomReport() {
   };
 
   // All Type Staff Get
-  const staffData = async (role_id , type) => {
+  const staffData = async (role_id, type) => {
     //  console.log("role ", role);
     if (['', null, undefined].includes(role_id)) {
       return
     }
     if (Number(role_id) == 4) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" , filters: type };
+        var req = { action: "getStaffWithRole", role_id: role_id || "", filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -315,7 +315,7 @@ function JobCustomReport() {
 
     else if (Number(role_id) == 3) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" ,filters: type};
+        var req = { action: "getStaffWithRole", role_id: role_id || "", filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -348,7 +348,7 @@ function JobCustomReport() {
 
     else if (Number(role_id) == 6) {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" ,filters: type };
+        var req = { action: "getStaffWithRole", role_id: role_id || "", filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -381,7 +381,7 @@ function JobCustomReport() {
 
     else if (role_id == 'other') {
       if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: role_id || "" , filters: type };
+        var req = { action: "getStaffWithRole", role_id: role_id || "", filters: type };
         var data = { req: req, authToken: token };
         await dispatch(getAllTaskByStaff(data))
           .unwrap()
@@ -456,26 +456,26 @@ function JobCustomReport() {
 
   // Get All Service
   const GetAllService = async (type) => {
-    
-      var req = { action: "getAllService", filters: type };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name
-            }));
-            setServiceAllData(data);
-          } else {
-            setServiceAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return
+
+    var req = { action: "getAllService", filters: type };
+    var data = { req: req, authToken: token };
+    await dispatch(getAllTaskByStaff(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.id,
+            label: item.name
+          }));
+          setServiceAllData(data);
+        } else {
+          setServiceAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    return
 
 
   };
@@ -483,7 +483,7 @@ function JobCustomReport() {
   // Get All Service
   const GetAllJobType = async (type) => {
 
-    var req = { action: "getAllJobType" , filters: type };
+    var req = { action: "getAllJobType", filters: type };
     var data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -509,7 +509,7 @@ function JobCustomReport() {
   // Get All Status
   const GetAllStatus = async (type) => {
 
-    var req = { action: "getAllStatus" , filters: type };
+    var req = { action: "getAllStatus", filters: type };
     var data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -533,7 +533,7 @@ function JobCustomReport() {
   };
 
 
- 
+
   const exportToCSV = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
       alert("No data to export!");
@@ -656,7 +656,7 @@ function JobCustomReport() {
       let gropByArray = sortByReference(values)
 
       console.log("gropByArray ", gropByArray);
-      if(gropByArray.length == 0){
+      if (gropByArray.length == 0) {
         setIsAllSelected(false);
       }
 
@@ -750,31 +750,67 @@ function JobCustomReport() {
         GetAllJobs()
       }
       else if (value == 'customer_id') {
-        GetAllCustomer() // fetch all customers
+        if (['', null, undefined].includes(filters.job_id)) {
+          GetAllCustomer('all') // fetch all customers
+        } else {
+          GetAllCustomer(filters) // fetch filtered customers
+        }
       }
       else if (value == 'client_id') {
-        GetAllClient() // fetch all clients
+        if (['', null, undefined].includes(filters.job_id)) {
+          GetAllClient('all') // fetch all clients
+        } else {
+          GetAllClient(filters) // fetch filtered clients
+        }
       }
       else if (value == 'account_manager_id') {
-        staffData(4)  // role_id 4 for account manager
+        if (['', null, undefined].includes(filters.job_id)) {
+          staffData(4)  // role_id 4 for account manager
+        } else {
+          staffData(4, filters)  // role_id 4 for account manager
+        }
       }
       else if (value == "allocated_to_id") {
-        staffData(3)  // role_id 3 for staff
+        if (['', null, undefined].includes(filters.job_id)) {
+          staffData(3)  // role_id 3 for staff
+        } else {
+          staffData(3, filters)  // role_id 3 for staff
+        }
       }
       else if (value == "reviewer_id") {
-        staffData(6)  // role_id 2 for reviewer
+        if (['', null, undefined].includes(filters.job_id)) {
+          staffData(6)  // role_id 2 for reviewer
+        } else {
+          staffData(6, filters)  // role_id 2 for reviewer
+        }
       }
       else if (value == "allocated_to_other_id") {
-        staffData('other')  // role_id 5 for allocated to other
+        if (['', null, undefined].includes(filters.job_id)) {
+          staffData('other')  // role_id 5 for allocated to other
+        } else {
+          staffData('other', filters)  // role_id 5 for allocated to other
+        }
       }
       else if (value == 'service_id') {
-        GetAllService() // fetch all service
+        if (['', null, undefined].includes(filters.job_id)) {
+          GetAllService('all') // fetch all service
+        } else {
+          GetAllService(filters) // fetch filtered service
+        }
       }
       else if (value == 'job_type_id') {
-        GetAllJobType() // fetch all job type
+        if (['', null, undefined].includes(filters.job_id)) {
+          GetAllJobType('all') // fetch all job type
+        } else {
+          GetAllJobType(filters) // fetch filtered job type
+        }
       }
       else if (value == 'status_type_id') {
-        GetAllStatus() // fetch all status
+        if (['', null, undefined].includes(filters.job_id)) {
+          GetAllStatus('all') // fetch all status
+        } else {
+          GetAllStatus(filters) // fetch filtered status
+        }
       }
 
       else if (value == 'employee_number') {
@@ -1089,35 +1125,73 @@ function JobCustomReport() {
 
         parsedFilters = JSON.parse(selectedFilter.filters);
 
+        console.log("parsedFilters ", parsedFilters?.job_id);
+
         if (parsedFilters?.groupBy?.includes('job_id')) {
           await GetAllJobs();
         }
         if (parsedFilters?.groupBy?.includes('customer_id')) {
-          await GetAllCustomer();
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await GetAllCustomer('all');
+          } else {
+            await GetAllCustomer(parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('client_id')) {
-          await GetAllClient();
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await GetAllClient('all');
+          } else {
+            await GetAllClient(parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('account_manager_id')) {
-          await staffData(4);
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await staffData(4);
+          } else {
+            await staffData(4, parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('allocated_to_id')) {
-          await staffData(3);
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await staffData(3);
+          } else {
+            await staffData(3, parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('reviewer_id')) {
-          await staffData(6);
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await staffData(6);
+          } else {
+            await staffData(6, parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('allocated_to_other_id')) {
-          await staffData('other');
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await staffData('other');
+          } else {
+            await staffData('other', parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('service_id')) {
-          await GetAllService();
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await GetAllService('all');
+          } else {
+            await GetAllService(parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('job_type_id')) {
-          await GetAllJobType();
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await GetAllJobType('all');
+          } else {
+            await GetAllJobType(parsedFilters);
+          }
         }
         if (parsedFilters?.groupBy?.includes('status_type_id')) {
-          await GetAllStatus();
+          if (['', null, undefined].includes(parsedFilters?.job_id)) {
+            await GetAllStatus('all');
+          } else {
+            await GetAllStatus(parsedFilters);
+          }
         }
         setFilters(parsedFilters);
         callFilterApi();
