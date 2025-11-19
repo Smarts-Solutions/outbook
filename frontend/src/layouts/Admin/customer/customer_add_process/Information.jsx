@@ -477,7 +477,12 @@ const Information = ({ id, pageStatus }) => {
   // handle change solo trader
   const handleChange1 = (e) => {
     const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
+    // if (name === "vatNumber" || name === "phone") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
+    if (name === "phone") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
       }
@@ -489,11 +494,11 @@ const Information = ({ id, pageStatus }) => {
   // handle change company
   const handleChange2 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate2(name, value, 1);
     setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
@@ -502,11 +507,11 @@ const Information = ({ id, pageStatus }) => {
   const handleChange3 = (e) => {
     const { name, value } = e.target;
 
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate3(name, value);
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
@@ -1350,7 +1355,7 @@ const Information = ({ id, pageStatus }) => {
                                 id="vatNumber"
                                 value={getSoleTraderDetails?.vatNumber}
                                 onChange={(e) => handleChange1(e)}
-                                maxLength={9}
+                                //maxLength={9}
                               />
                             </div>
                           </div>
@@ -1855,7 +1860,7 @@ const Information = ({ id, pageStatus }) => {
                                     id="VATNumber"
                                     onChange={(e) => handleChange2(e)}
                                     value={getCompanyDetails?.VATNumber}
-                                    maxLength={9}
+                                    //maxLength={9}
                                   />
                                   {errors2["VATNumber"] && (
                                     <div className="error-text">
@@ -2346,7 +2351,7 @@ const Information = ({ id, pageStatus }) => {
                                   id="VATNumber"
                                   value={getPartnershipDetails?.VATNumber}
                                   onChange={(e) => handleChange3(e)}
-                                  maxLength={9}
+                                 // maxLength={9}
                                 />
                                 {errors3["VATNumber"] && (
                                   <div className="error-text">
