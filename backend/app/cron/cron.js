@@ -97,6 +97,21 @@ cron.schedule("* * * * 1", async () => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
+
+   const [staffResult] = await pool.execute(`
+    SELECT 
+    id,
+    CONCAT(first_name, ' ', last_name) AS staff_fullname,
+    email AS staff_email
+    FROM 
+    staffs 
+    WHERE status = '1'
+    `);
+    // console.log("staffResult , ",staffResult); 
+    sendEmailInWorkerMissingTimeSheet(staffResult || []);
+
+
+
     
 
 }, {
