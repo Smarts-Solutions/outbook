@@ -18,10 +18,8 @@ const convertDate = (date) => {
 
 
 parentPort.on("message", async (rows) => {
-  for (const row of rows) {
-    try {
 
-      const query = `
+  const query = `
         SELECT 
         jobs.id AS id,
           CONCAT(
@@ -89,40 +87,72 @@ parentPort.on("message", async (rows) => {
         ORDER BY 
           jobs.id DESC;
         `;
-
-      // const [result] = await pool.execute(`SELECT * FROM jobs WHERE status_type = 1 AND created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`);
-      const [result] = await pool.execute(query);
-
-
-
-      if (result && result.length > 0) {
-         let csvContent = "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  const [result] = await pool.execute(query);
+  let csvContent = "";
+  if (result && result.length > 0) {
+         csvContent = "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
         result?.forEach(val => {
 
-        let expected_delivery_date = val.expected_delivery_date || ' - ';
-        let expected_delivery_date_old = val.expected_delivery_date_old || ' - ';
+          let expected_delivery_date = val.expected_delivery_date || ' - ';
+          let expected_delivery_date_old = val.expected_delivery_date_old || ' - ';
 
-        let job_received_on = convertDate(val.job_received_on);
-        customer_trading_name = val.customer_trading_name || ' - ';
-        let account_manager_name = val.account_manager_name || ' - ';
-        let client_trading_name = val.client_trading_name || ' - ';
-        let service_name = val.service_name || ' - ';
-        let job_type_name = val.job_type_name || ' - ';
-        let status = val.status || ' - ';
-        let allocated_name = val.allocated_name || ' - ';
-        let multiple_staff_names = val.multiple_staff_names || ' - ';
-        let reviewer_name = val.reviewer_name || ' - ';
-        let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
-        let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
-        let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
-        let query_sent_date = convertDate(val.query_sent_date) || ' - ';
-        let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
-        let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
-        let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
- 
+          let job_received_on = convertDate(val.job_received_on);
+          customer_trading_name = val.customer_trading_name || ' - ';
+          let account_manager_name = val.account_manager_name || ' - ';
+          let client_trading_name = val.client_trading_name || ' - ';
+          let service_name = val.service_name || ' - ';
+          let job_type_name = val.job_type_name || ' - ';
+          let status = val.status || ' - ';
+          let allocated_name = val.allocated_name || ' - ';
+          let multiple_staff_names = val.multiple_staff_names || ' - ';
+          let reviewer_name = val.reviewer_name || ' - ';
+          let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
+          let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
+          let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
+          let query_sent_date = convertDate(val.query_sent_date) || ' - ';
+          let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
+          let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
+          let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
 
 
-         csvContent += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+
+          csvContent += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+        });
+
+   }
+
+
+  for (const row of rows) {
+    try {
+
+      if (result && result.length > 0) {
+        let csvContent = "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+        result?.forEach(val => {
+
+          let expected_delivery_date = val.expected_delivery_date || ' - ';
+          let expected_delivery_date_old = val.expected_delivery_date_old || ' - ';
+
+          let job_received_on = convertDate(val.job_received_on);
+          customer_trading_name = val.customer_trading_name || ' - ';
+          let account_manager_name = val.account_manager_name || ' - ';
+          let client_trading_name = val.client_trading_name || ' - ';
+          let service_name = val.service_name || ' - ';
+          let job_type_name = val.job_type_name || ' - ';
+          let status = val.status || ' - ';
+          let allocated_name = val.allocated_name || ' - ';
+          let multiple_staff_names = val.multiple_staff_names || ' - ';
+          let reviewer_name = val.reviewer_name || ' - ';
+          let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
+          let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
+          let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
+          let query_sent_date = convertDate(val.query_sent_date) || ' - ';
+          let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
+          let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
+          let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
+
+
+
+          csvContent += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
         });
 
         // console.log("CSV Content Generated Expected Delevery:\n", csvContent);
