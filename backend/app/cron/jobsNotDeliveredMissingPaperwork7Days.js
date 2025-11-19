@@ -86,6 +86,7 @@ parentPort.on("message", async (rows) => {
   const [result] = await pool.execute(query);
 
   let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  if(result && result.length > 0){
   result?.forEach(val => {
 
     let job_received_on = convertDate(val.job_received_on);
@@ -110,6 +111,7 @@ parentPort.on("message", async (rows) => {
 
     csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
   });
+ }
 
   for (const row of rows) {
     try {
