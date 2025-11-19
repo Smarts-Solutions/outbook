@@ -820,10 +820,8 @@ const getAllCustomersFilter = async (customer) => {
     const { StaffUserId, filters } = customer;
     let { job_id } = filters;
 
-   
-
-   if (!['',null,undefined].includes(filters?.client_id)) {
-     const query = `
+    if (!['', null, undefined].includes(filters?.client_id)) {
+        const query = `
             SELECT  
             customers.id AS id,
             customers.status AS status,
@@ -847,9 +845,7 @@ const getAllCustomersFilter = async (customer) => {
 
         return { status: true, message: 'Success..', data: result };
 
-   }
-
-
+    }
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
