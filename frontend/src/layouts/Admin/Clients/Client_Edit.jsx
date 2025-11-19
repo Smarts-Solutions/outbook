@@ -1087,7 +1087,12 @@ const ClientEdit = () => {
 
   const handleInputsChange = (e, type) => {
     const { name, value } = e.target;
-    if (name === "VATNumber" || name === "phone") {
+    // if (name === "VATNumber" || name === "phone") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
+    if (name === "phone") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
       }
@@ -1111,22 +1116,22 @@ const ClientEdit = () => {
 
   const handleChange5 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate5(name, value);
     setCharityIncorporatedOrganisation({ ...getCharityIncorporatedOrganisation, [name]: value });
   };
 
   const handleChange6 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate6(name, value);
     setAssociationDetails({ ...getAssociationDetails, [name]: value });
 
@@ -1134,11 +1139,11 @@ const ClientEdit = () => {
 
   const handleChange7 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate7(name, value);
     setTrust({ ...getTrust, [name]: value });
 
@@ -2067,7 +2072,7 @@ const ClientEdit = () => {
                                               getSoleTraderDetails.VATNumber
                                             }
                                             onChange={(e) => handleInputsChange(e, 1)}
-                                            maxLength={9}
+                                           // maxLength={9}
                                           />
                                         </div>
                                       </div>
@@ -2610,7 +2615,7 @@ const ClientEdit = () => {
                                                 value={
                                                   getCompanyDetails.VATNumber
                                                 }
-                                                maxLength={9}
+                                                //maxLength={9}
                                               />
                                               {errors2["VATNumber"] && (
                                                 <div style={{ color: "red" }}>
@@ -3259,7 +3264,7 @@ const ClientEdit = () => {
                                                 getPartnershipDetails.VATNumber
                                               }
                                               onChange={(e) => handleInputsChange(e, 3)}
-                                              maxLength={9}
+                                              //maxLength={9}
                                             />
                                             {errors3["VATNumber"] && (
                                               <div style={{ color: "red" }}>
@@ -4185,7 +4190,7 @@ const ClientEdit = () => {
                                                 getCharityIncorporatedOrganisation.VATNumber
                                               }
                                               onChange={(e) => handleChange5(e)}
-                                              maxLength={9}
+                                             // maxLength={9}
                                             />
                                             {errors5["VATNumber"] && (
                                               <div className="error-text">
@@ -5175,7 +5180,7 @@ const ClientEdit = () => {
                                                 getAssociationDetails.VATNumber
                                               }
                                               onChange={(e) => handleChange6(e)}
-                                              maxLength={9}
+                                              //maxLength={9}
                                             />
                                             {errors6["VATNumber"] && (
                                               <div className="error-text">
@@ -5758,7 +5763,7 @@ const ClientEdit = () => {
                                                 getTrust.VATNumber
                                               }
                                               onChange={(e) => handleChange7(e)}
-                                              maxLength={9}
+                                             // maxLength={9}
                                             />
                                             {errors7["VATNumber"] && (
                                               <div className="error-text">

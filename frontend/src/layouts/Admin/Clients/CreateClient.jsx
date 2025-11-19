@@ -685,18 +685,23 @@ const CreateClient = () => {
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "vatNumber" || name === "phone") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate1(name, value);
     setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
   };
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
-    if (name === "CompanyNumber" || name === "VATNumber") {
+    // if (name === "CompanyNumber" || name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
+    if (name === "CompanyNumber") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
       }
@@ -707,33 +712,33 @@ const CreateClient = () => {
 
   const handleChange3 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate3(name, value);
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
 
   const handleChange5 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate5(name, value);
     setCharityIncorporatedOrganisation({ ...getCharityIncorporatedOrganisation, [name]: value });
   };
 
   const handleChange6 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate6(name, value);
     setAssociationDetails({ ...getAssociationDetails, [name]: value });
 
@@ -741,11 +746,11 @@ const CreateClient = () => {
 
   const handleChange7 = (e) => {
     const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
+    // if (name === "VATNumber") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
     validate7(name, value);
     setTrust({ ...getTrust, [name]: value });
 
@@ -753,7 +758,12 @@ const CreateClient = () => {
 
   const handleChangeIndivisul = (e) => {
     const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
+    // if (name === "vatNumber" || name === "phone") {
+    //   if (!/^[0-9+]*$/.test(value)) {
+    //     return;
+    //   }
+    // }
+    if (name === "phone") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
       }
@@ -867,17 +877,14 @@ const CreateClient = () => {
       }
     }
     else {
-      if (name === "VATNumber" && !/^[0-9+]*$/.test(value)) {
-        newErrors[name] = "Please enter valid VAT Number";
-      }
-      else {
+      
         delete newErrors[name];
         setErrors2((prevErrors) => {
           const updatedErrors = { ...prevErrors };
           delete updatedErrors[name];
           return updatedErrors;
         });
-      }
+      
     }
 
     ScrollToViewFirstError(newErrors);
@@ -3254,7 +3261,7 @@ const CreateClient = () => {
                                                     getPartnershipDetails.VATNumber
                                                   }
                                                   onChange={(e) => handleChange3(e)}
-                                                  maxLength={9}
+                                                 // maxLength={9}
                                                 />
                                                 {errors3["VATNumber"] && (
                                                   <div className="error-text">
@@ -4138,7 +4145,7 @@ const CreateClient = () => {
                                                         getCharityIncorporatedOrganisation.VATNumber
                                                       }
                                                       onChange={(e) => handleChange5(e)}
-                                                      maxLength={9}
+                                                     // maxLength={9}
                                                     />
                                                     {errors5["VATNumber"] && (
                                                       <div className="error-text">
@@ -5130,7 +5137,7 @@ const CreateClient = () => {
                                                           getAssociationDetails.VATNumber
                                                         }
                                                         onChange={(e) => handleChange6(e)}
-                                                        maxLength={9}
+                                                        //maxLength={9}
                                                       />
                                                       {errors6["VATNumber"] && (
                                                         <div className="error-text">
@@ -5716,7 +5723,7 @@ const CreateClient = () => {
                                                             getTrust.VATNumber
                                                           }
                                                           onChange={(e) => handleChange7(e)}
-                                                          maxLength={9}
+                                                          //maxLength={9}
                                                         />
                                                         {errors7["VATNumber"] && (
                                                           <div className="error-text">
