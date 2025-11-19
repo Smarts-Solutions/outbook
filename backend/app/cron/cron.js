@@ -99,7 +99,6 @@ cron.schedule("* * * * 1", async () => {
     `);
     
 
-
 }, {
   timezone: "Europe/London"
 });
