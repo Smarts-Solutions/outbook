@@ -179,14 +179,14 @@ export const validate = (name, value, errors, setErrors) => {
       //   }
       //   break;
 
-      case "VATNumber":
-        if (!/^[0-9+]*$/.test(value)) {
-          newErrors[name] = "Please enter a valid VAT Number";
-        } else {
-          delete newErrors[name];   
-          RemoveErrorFromErrors(name, setErrors);
-        }
-        break;
+      // case "VATNumber":
+      //   if (!/^[0-9+]*$/.test(value)) {
+      //     newErrors[name] = "Please enter a valid VAT Number";
+      //   } else {
+      //     delete newErrors[name];   
+      //     RemoveErrorFromErrors(name, setErrors);
+      //   }
+      //   break;
 
       default:
         delete newErrors[name];  

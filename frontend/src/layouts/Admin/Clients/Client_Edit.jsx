@@ -1527,6 +1527,7 @@ const ClientEdit = () => {
   const handleUpdate = async () => {
     
 
+    console.log("getSoleTraderDetails.VATNumber", getSoleTraderDetails.VATNumber)
     console.log("selectClientType", selectClientType)
     console.log("validateAllFields(1)", validateAllFields(1))
 
@@ -2072,7 +2073,7 @@ const ClientEdit = () => {
                                               getSoleTraderDetails.VATNumber
                                             }
                                             onChange={(e) => handleInputsChange(e, 1)}
-                                           // maxLength={9}
+                                            //maxLength={9}
                                           />
                                         </div>
                                       </div>
@@ -3264,7 +3265,7 @@ const ClientEdit = () => {
                                                 getPartnershipDetails.VATNumber
                                               }
                                               onChange={(e) => handleInputsChange(e, 3)}
-                                              //maxLength={9}
+                                             // maxLength={9}
                                             />
                                             {errors3["VATNumber"] && (
                                               <div style={{ color: "red" }}>
