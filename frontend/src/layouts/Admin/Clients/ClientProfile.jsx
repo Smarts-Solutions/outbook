@@ -231,6 +231,22 @@ const ClientList = () => {
       selector: (row) => row.job_code_id,
       sortable: true,
     },
+     {
+      name: "Job Priority",
+      cell: (row) => {
+        const v = row.job_priority || "-";
+        const cap = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        return <div title={cap}>{cap}</div>;
+      },
+      selector: (row) => {
+        if (!row.job_priority) return "-";
+        return (
+          row.job_priority.charAt(0).toUpperCase() +
+          row.job_priority.slice(1).toLowerCase()
+        );
+      },
+      sortable: true,
+    },
     {
       name: "Client Name",
       cell: (row) => (

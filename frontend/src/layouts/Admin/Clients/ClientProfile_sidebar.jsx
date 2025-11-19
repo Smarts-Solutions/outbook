@@ -150,7 +150,7 @@ const ClientList = () => {
 
 
 
- console.log("customerData side baar",customerData)
+  console.log("customerData side baar", customerData)
 
 
   const accessDataJob =
@@ -326,6 +326,22 @@ const ClientList = () => {
       sortable: true,
     },
     {
+      name: "Job Priority",
+      cell: (row) => {
+        const v = row.job_priority || "-";
+        const cap = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        return <div title={cap}>{cap}</div>;
+      },
+      selector: (row) => {
+        if (!row.job_priority) return "-";
+        return (
+          row.job_priority.charAt(0).toUpperCase() +
+          row.job_priority.slice(1).toLowerCase()
+        );
+      },
+      sortable: true,
+    },
+    {
       name: "Client Name",
       cell: (row) => (
         <div title={row.client_trading_name || "-"}>
@@ -346,8 +362,8 @@ const ClientList = () => {
       selector: (row) => row.job_type_name,
       sortable: true,
     },
-  
-     {
+
+    {
       name: "Status",
       selector: (row) => {
         const status = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
@@ -434,10 +450,10 @@ const ClientList = () => {
         const bVal = b.invoiced == "1" ? "YES" : "NO";
         return aVal.localeCompare(bVal);
       },
-      
+
     },
 
-     {
+    {
       name: "Created By",
       cell: (row) => (
         <div title={row.job_created_by || "-"}>
@@ -448,7 +464,7 @@ const ClientList = () => {
       sortable: true,
     },
 
-     {
+    {
       name: "Created At",
       cell: (row) => (
         <div title={row.created_at || "-"}>
@@ -699,7 +715,7 @@ const ClientList = () => {
             <Select
               id="tabSelect"
               name="staff_id"
-className="basic-multi-select"
+              className="basic-multi-select"
               options={customerOptions}
               value={selectedOption}
               onChange={(selected) => {
