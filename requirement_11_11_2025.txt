@@ -98,4 +98,4 @@ ______________________________________________
    7)Please allow Users to be allocated to Customer, Clients and Jobs from their Staff section as well. Multiple Allocations should be possible. This is effectively like allocation for Process or Reviewers at the Job Screen and should work in the same way as well. This will allow users to give standard access when there is a need to allocate more than 2 processors or Reviewers to the same job - Required Discussion from client 
 
    8)Please add country “Isle of Man” - Done
-   9)Please allow the alphabet in the country number as it is required for Isle of Man. - 2 hours
+   9)Please allow the alphabet in the country number as it is required for Isle of Man. - 2 hours -Done- VAT NUMBER
