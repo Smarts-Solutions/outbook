@@ -379,10 +379,10 @@ const Customer = () => {
         })
       ).unwrap();
       if (response.status) {
-        if(response.status == true){
-        setManagerList(response?.data?.data);
-        setShowManagerModal(true);
-        }else{
+        if (response.status == true) {
+          setManagerList(response?.data?.data);
+          setShowManagerModal(true);
+        } else {
           Swal.fire({
             title: 'Info',
             text: 'No account managers found for this customer.',
@@ -496,33 +496,94 @@ const Customer = () => {
   };
 
 
-  const exportData = filteredData.map((item) => ({
-    "Trading Name": item.trading_name,
-    "Customer Code": item.customer_code,
-    "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
-    "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
-    "Created by": item.customer_created_by,
-    "Created At": item.created_at,
-    "Status": item.status == 1 ? "Active" : "Deactive",
-  }));
+  // const exportData = filteredData.map((item) => ({
+  //   "Trading Name": item.trading_name,
+  //   "Customer Code": item.customer_code,
+  //   "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
+  //   "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+  //   "Created by": item.customer_created_by,
+  //   "Created At": item.created_at,
+  //   "Status": item.status == 1 ? "Active" : "Deactive",
+  // }));
 
+  const handleExport = async () => {
+    ///const apiData = await GetAllCustomerData(1, 10000, searchTerm);
+    const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
+    const data = { req, authToken: token };
+    const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+    if (!response.status) {
+      alert("No data to export!");
+      return;
+    }
+    const apiData = response?.data?.data;
+
+    if (!apiData || apiData.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
+    // export format
+    const exportData = apiData?.map((item) => ({
+      "Trading Name": item.trading_name,
+      "Customer Code": item.customer_code,
+      "Type":
+        item.customer_type === "1"
+          ? "Sole Trader"
+          : item.customer_type === "2"
+            ? "Company"
+            : item.customer_type === "3"
+              ? "Partnership"
+              : "-",
+      "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+      "Created by": item.customer_created_by,
+      "Created At": item.created_at,
+      "Status": item.status == 1 ? "Active" : "Deactive",
+    }));
+
+    downloadCSV(exportData, "Customer Details.csv");
+  };
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+
+    // headers
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    // rows
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
+
+ 
 
   return (
     <div>
       <CommanModal
         isOpen={showManagerModal}
-        handleClose={() => {setShowManagerModal(false); setManagerList([]);}}
+        handleClose={() => { setShowManagerModal(false); setManagerList([]); }}
         hideBtn={true}
         title="Individual Service Account Managers"
-       
+
       >
         <div>
-      
+
           {managerList && managerList?.length > 0 ? (
             <div className="table-responsive">
               <table className="table table-bordered table-striped align-middle">
                 <thead className="table-light"
-                 >
+                >
                   <tr>
                     <th>#</th>
                     <th>Service Name</th>
@@ -613,11 +674,16 @@ const Customer = () => {
                             </select>
                           </div>
                           <div className="col-md-2">
-                            <ExportToExcel
+                            {/* <ExportToExcel
                               className="btn btn-outline-info fw-bold float-end border-3 "
                               apiData={exportData}
                               fileName={"Customer Details"}
-                            />
+                            /> */}
+                           
+
+                            <button className="btn btn-outline-info fw-bold float-end border-3 "   onClick={handleExport}>
+                              Export Excel
+                            </button>
                           </div>
                         </div>
 
