@@ -1420,7 +1420,7 @@ function JobCustomReport() {
 
             <button
               type="button"
-              className="btn btn-sm btn-link p-0 ms-2"
+              className="btn btn-sm btn-info dropdown-toggle p-0 ms-2 mb-2"
               onClick={() => {
                 const allValues = optionGroupBy.map((opt) => opt.value);
 
