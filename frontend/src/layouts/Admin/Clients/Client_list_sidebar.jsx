@@ -303,6 +303,16 @@ const ClientLists = () => {
       sortable: true,
       reorder: false,
     },
+
+    {
+      name: "Customer Name",
+      cell: (row) => (
+        <div title={row.customer_name || "-"}>{row.customer_name || "-"}</div>
+      ),
+      selector: (row) => row.customer_name || "-",
+      sortable: true,
+      reorder: false,
+    },
     {
       name: "Client Type",
       selector: (row) =>
