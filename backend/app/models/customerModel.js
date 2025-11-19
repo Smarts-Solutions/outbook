@@ -820,7 +820,7 @@ const getAllCustomersFilter = async (customer) => {
     const { StaffUserId, filters } = customer;
     let { job_id } = filters;
 
-    console.log("client id --", filters?.client_id);
+   
 
    if (!['',null,undefined].includes(filters?.client_id)) {
      const query = `
