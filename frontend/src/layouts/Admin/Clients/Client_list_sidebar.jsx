@@ -1322,6 +1322,7 @@ const ClientLists = () => {
                           ? tab?.data?.map((item) => ({
                             "Client Name": item?.client_name,
                             "Client Code": item?.client_code,
+                            "Customer Name": item?.customer_name,
                             "Client Type Name": item.client_type_name,
                             "Created By": item.client_created_by,
                             "Created At": item.created_at,
