@@ -605,6 +605,7 @@ const getClient = async (client) => {
    SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
+    customers.trading_name AS customer_name,
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
@@ -650,6 +651,7 @@ ORDER BY
    SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
+    customers.trading_name AS customer_name,
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
@@ -700,6 +702,7 @@ async function getAllClientsSidebar(StaffUserId, LineManageStaffId, rows) {
    SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
+    customers.trading_name AS customer_name,
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
@@ -742,6 +745,7 @@ ORDER BY
    SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
+    customers.trading_name AS customer_name,
     clients.status AS status,
     client_types.type AS client_type_name,
     jobs.id AS Delete_Status,
