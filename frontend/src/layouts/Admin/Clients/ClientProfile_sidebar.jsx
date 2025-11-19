@@ -150,7 +150,7 @@ const ClientList = () => {
 
 
 
-  console.log("customerData side baar", customerData)
+
 
 
   const accessDataJob =
@@ -639,6 +639,7 @@ const ClientList = () => {
 
   const exportData = customerData.map((item) => ({
     "Job Code Id": item.job_code_id,
+    "Job Priority": item.job_priority,
     "Client Trading Name": item.client_trading_name,
     "Job Type Name": item.job_type_name,
     "Account Manager": item.account_manager_officer_first_name + " " + item.account_manager_officer_last_name,
