@@ -70,6 +70,8 @@ module.exports = (app) => {
 
     jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
 
+    JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
+
   }
     , {
       timezone: "Europe/London"
@@ -179,6 +181,21 @@ function missingPaperworkInMax2Days(rows) {
 // Trigger Jobs Sitting With Staff For Over Month Report Email
 function jobsSittingWithForOverMonth(rows) {
   const worker = new Worker(join(__dirname, "jobsSittingWithForOverMonth.js"), { type: "module" });
+  worker.postMessage(rows);
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
+  }
+  );
+  worker.on("error", (err) => console.log("Worker error --:", err));
+  worker.on("exit", (code) => {
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
+  }
+  );
+}
+
+// Trigger Jobs Not Delivered Within 14 Days Report Email
+function JobsNotDeliveredWithin14Days(rows) {
+  const worker = new Worker(join(__dirname, "jobsNotDeliveredWithin14Days.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
     console.log("RECEIVED MSG EMAIL SENT--", msg)
