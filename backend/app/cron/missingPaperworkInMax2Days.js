@@ -1,4 +1,4 @@
-// missingTimesheetReportEmail.js
+// Jobs Missing Paperwork and Due in the Next 2 Days Report Email Worker
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");

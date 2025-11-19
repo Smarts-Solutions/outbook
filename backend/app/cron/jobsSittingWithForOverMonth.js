@@ -1,4 +1,4 @@
-// missingTimesheetReportEmail.js
+// Jobs Sitting With Staff For Over Month Report Email Worker
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");

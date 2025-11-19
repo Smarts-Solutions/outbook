@@ -71,6 +71,8 @@ module.exports = (app) => {
     jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
 
     JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
+    
+    JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
 
   }
     , {
@@ -95,6 +97,7 @@ cron.schedule("* * * * 1", async () => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
+    
 
 
 }, {
@@ -196,6 +199,22 @@ function jobsSittingWithForOverMonth(rows) {
 // Trigger Jobs Not Delivered Within 14 Days Report Email
 function JobsNotDeliveredWithin14Days(rows) {
   const worker = new Worker(join(__dirname, "jobsNotDeliveredWithin14Days.js"), { type: "module" });
+  worker.postMessage(rows);
+  worker.on("message", (msg) => {
+    console.log("RECEIVED MSG EMAIL SENT--", msg)
+  }
+  );
+  worker.on("error", (err) => console.log("Worker error --:", err));
+  worker.on("exit", (code) => {
+    if (code !== 0) console.log(`Worker stopped with exit code ${code}`);
+  }
+  );
+}
+
+// Trigger Jobs Not Delivered After Missing Paperwork 7 Days Report Email
+
+function JobsNotDeliveredMissingPaperwork7Days(rows) {
+  const worker = new Worker(join(__dirname, "jobsNotDeliveredMissingPaperwork7Days.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
     console.log("RECEIVED MSG EMAIL SENT--", msg)

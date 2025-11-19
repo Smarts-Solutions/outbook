@@ -1,4 +1,4 @@
-// Jobs Not Delivered Within 14 Days of Received On Date Report Email Worker
+// Jobs Not Delivered After Missing Paperwork 7 Days Report Email Worker
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
@@ -123,7 +123,8 @@ parentPort.on("message", async (rows) => {
       if (result && result.length > 0) {
 
         // console.log("CSV Content -->>>:\n", csvContent);
-        let toEmail = row.staff_email;
+       // let toEmail = row.staff_email;
+        let toEmail = 'shakirpnp@gmail.com';
 
         let subjectEmail = "Alert: Jobs Not Delivered Within 14 Days of Rreceived On Date";
 
@@ -159,9 +160,9 @@ parentPort.on("message", async (rows) => {
 
 
 
-        //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
+        parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-         const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+         //const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
           //console.log("Missing Timesheet Report email sent successfully.");
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
