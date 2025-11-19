@@ -271,7 +271,7 @@ const ClientList = () => {
               text: res.message,
               icon: "warning",
               confirmButtonText: "Ok",
-              timer: 1000,
+              timer: 3000,
               timerProgressBar: true,
             });
           } else {
