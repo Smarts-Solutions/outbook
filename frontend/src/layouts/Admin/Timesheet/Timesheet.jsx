@@ -1524,7 +1524,6 @@ const Timesheet = () => {
     let key = activeField + "_note";
     updatedRows[selectedRowIndex][key] = modalText;
     setTimeSheetRows(updatedRows);
-
     setUpdateTimeSheetRows((prev) => {
       const existingIndex = prev.findIndex(
         (row) => row.id === updatedRows[selectedRowIndex].id
