@@ -885,8 +885,8 @@ const saveTimesheet = async (Timesheet) => {
           ];
 
           days.forEach(day => {
-            if (day.date !== null) {
-              DateTimeString += ` Date: ${day.date}, Hours : ${day.hours.replace('.', ':')}`;
+            if (day?.date !== null) {
+              DateTimeString += ` Date: ${day?.date}, Hours : ${day?.hours?.replace('.', ':')}`;
             }
           });
 
@@ -958,10 +958,10 @@ const saveTimesheet = async (Timesheet) => {
           // Loop through each day and compare hours
           for (let i = 0; i < days.length; i++) {
             const { day, date, hours } = days[i];
-            let hoursSumit = hours == null ? "" : hours.replace(':', '.');
+            let hoursSumit = hours == null ? "" : hours?.replace(':', '.');
             DateTimeStringSubmit += ` Date: ${date}, hours : ${hoursSumit}`;
             if (hours !== existData[`${day}_hours`]) {
-              DateTimeString += ` Date: ${date}, Updated hours : ${hours.replace('.', ':')}`;
+              DateTimeString += ` Date: ${date}, Updated hours : ${hours?.replace('.', ':')}`;
             }
           }
 
