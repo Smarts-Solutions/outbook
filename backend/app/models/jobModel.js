@@ -2770,10 +2770,11 @@ const updateJobStatus = async (job) => {
   // console.log("status_type", status_type);
   // console.log("ExistJobData", ExistJobData);  
 
+  
   try {
 
     // only Processing sent one record
-    if ([4,5,7].includes(parseInt(status_type))) {
+    if ([4,5,7,3].includes(parseInt(status_type))) {
       const [[ExistAllocatedTo]] = await pool.execute(
         `SELECT allocated_to FROM jobs WHERE id = ?`,
         [job_id]
