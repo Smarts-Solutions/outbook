@@ -1544,7 +1544,6 @@ const Timesheet = () => {
     setActiveIndex(null);
     setActiveField(null);
 
-
   };
 
   // console.log("timeSheetRows -->>", timeSheetRows);
