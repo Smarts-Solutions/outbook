@@ -1377,7 +1377,26 @@ const Timesheet = () => {
       return;
     }
 
-    const headers = [
+    // const headers = [
+    //   "Index",
+    //   "Task Type",
+    //   "Customer Name",
+    //   "Client Name",
+    //   "Job Name",
+    //   "Job Type",
+    //   "Task Name",
+    //   weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
+    //   //"Monday Hours",
+    //   "Monday Note",
+    //   "Tuesday Hours",
+    //   "Wednesday Hours",
+    //   "Thursday Hours",
+    //   "Friday Hours",
+    //   "Saturday Hours",
+    //   "Remark"
+    // ];
+
+     const headers = [
       "Index",
       "Task Type",
       "Customer Name",
@@ -1385,12 +1404,18 @@ const Timesheet = () => {
       "Job Name",
       "Job Type",
       "Task Name",
-      "Monday Hours",
-      "Tuesday Hours",
-      "Wednesday Hours",
-      "Thursday Hours",
-      "Friday Hours",
-      "Saturday Hours",
+      weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
+      "Monday Note",
+      weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : "",
+      "Tuesday Note",
+      weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : "",
+      "Wednesday Note",
+      weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : "",
+      "Thursday Note",
+      weekDays.friday ? dayMonthFormatDate(weekDays.friday) : "",
+      "Friday Note",
+      weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
+      "Saturday Note",
       "Remark"
     ];
 
@@ -1409,13 +1434,19 @@ const Timesheet = () => {
           item.task_type === "1" ? " - " : item.job_type_name || " - ",
           item.task_type === "1"
             ? item.sub_internal_name || "No Task"
-            : item.task_name || "No Task",
+            : item.task_name || "No Task", 
           item.monday_hours || 0,
+          item.monday_note || "",
           item.tuesday_hours || 0,
+          item.tuesday_note || "",
           item.wednesday_hours || 0,
+          item.wednesday_note || "",
           item.thursday_hours || 0,
+          item.thursday_note || "",
           item.friday_hours || 0,
+          item.friday_note || "",
           item.saturday_hours || 0,
+          item.saturday_note || "",
           item.remark || ""
         ];
       });
