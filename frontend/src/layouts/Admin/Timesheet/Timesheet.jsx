@@ -27,7 +27,7 @@ const Timesheet = () => {
   // copy timesheet modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
-  console.log(`copyTimeSheetRows ------> `, copyTimeSheetRows);
+ 
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -1588,12 +1588,36 @@ const Timesheet = () => {
 
   // copy timeSheet functionality
   const weekOptionsWithPlaceholder = [
-  { label: "-- select --", value: "" },
-  ...weekOptions
- ];
+    { label: "-- select --", value: "" },
+    ...weekOptions
+  ];
 
   const handleCopyTimeSheetAutoFill = async () => {
-    alert("Auto-fill functionality is under development.");
+
+   if(copyTimeSheetRows && copyTimeSheetRows.length > 0){
+    setTimeSheetRows(
+      copyTimeSheetRows?.map((row) => {
+        const sum =
+          (parseFloat(row.monday_hours) || 0) +
+          (parseFloat(row.tuesday_hours) || 0) +
+          (parseFloat(row.wednesday_hours) || 0) +
+          (parseFloat(row.thursday_hours) || 0) +
+          (parseFloat(row.friday_hours) || 0) +
+          (parseFloat(row.saturday_hours) || 0) +
+          (parseFloat(row.sunday_hours) || 0);
+
+        return {
+          ...row,
+          id: null,
+          submit_status: "0",                             
+          total_hours: parseFloat(sum).toFixed(2)
+        };
+      })
+    );
+   }
+   setCopyTimeSheetRows([]);
+   setIsCopyModalOpen(false);
+
   }
 
 
