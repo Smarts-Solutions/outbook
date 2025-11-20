@@ -19,6 +19,10 @@ const Timesheet = () => {
   const [activeIndex, setActiveIndex] = useState(null);   // row
   const [activeField, setActiveField] = useState(null);   // field name
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalText, setModalText] = useState("");
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null)
+
   const getFormattedDate = (type, date) => {
     let now = new Date();
     if (type === "convert") {
@@ -274,18 +278,25 @@ const Timesheet = () => {
       job_total_time: null,
       monday_date: null,
       monday_hours: null,
+      monday_note: null,
       tuesday_date: null,
       tuesday_hours: null,
+      tuesday_note: null,
       wednesday_date: null,
       wednesday_hours: null,
+      wednesday_note: null,
       thursday_date: null,
       thursday_hours: null,
+      thursday_note: null,
       friday_date: null,
       friday_hours: null,
+      friday_note: null,
       saturday_date: null,
       saturday_hours: null,
+      saturday_note: null,
       sunday_date: null,
       sunday_hours: null,
+      sunday_note: null,
       remark: null,
       newRow: 1,
       editRow: 0,
@@ -947,6 +958,8 @@ const Timesheet = () => {
 
   const saveData = async (e) => {
 
+
+
     if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
@@ -968,6 +981,8 @@ const Timesheet = () => {
 
 
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
+
+
 
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
@@ -1057,6 +1072,12 @@ const Timesheet = () => {
         setSubmitStatusAllKey(0);
         GetTimeSheet(weekOffSetValue.current);
         setUpdateTimeSheetRows([]);
+
+        // note States reset
+        setIsModalOpen(false);
+        setModalText("");
+        setActiveIndex(null);
+        setActiveField(null);
       }
     }
   };
@@ -1326,6 +1347,12 @@ const Timesheet = () => {
       setSubmitStatus(0);
       setSubmitStatusAllKey(0);
       GetTimeSheet(weekOffSetValue.current);
+
+      // note States reset
+      setIsModalOpen(false);
+      setModalText("");
+      setActiveIndex(null);
+      setActiveField(null);
     }
   };
 
@@ -1457,6 +1484,42 @@ const Timesheet = () => {
   );
 
   // SELECT OPTIONS FOR WEEK END //
+
+
+  const handleSaveNote = (e) => {
+
+    // console.log("modalText ",modalText);
+    // console.log("activeField ",activeField);
+
+    const updatedRows = [...timeSheetRows];
+    let key = activeField + "_note";
+    updatedRows[selectedRowIndex][key] = modalText;
+    setTimeSheetRows(updatedRows);
+
+    setUpdateTimeSheetRows((prev) => {
+      const existingIndex = prev.findIndex(
+        (row) => row.id === updatedRows[selectedRowIndex].id
+      );
+      if (existingIndex !== -1) {
+        const updatedPrev = [...prev];
+        updatedPrev[existingIndex][key] = modalText;
+        return updatedPrev;
+      } else {
+        return [
+          ...prev,
+          { id: updatedRows[selectedRowIndex].id, [key]: modalText },
+        ];
+      }
+    });
+    setIsModalOpen(false);
+    setModalText("");
+    setActiveIndex(null);
+    setActiveField(null);
+
+
+  };
+
+  console.log("timeSheetRows -->>", timeSheetRows);
 
   // Example usage
   return (
@@ -1947,50 +2010,64 @@ const Timesheet = () => {
                                         className="d-flex  ms-3"
 
                                       >
-                                        <input
-                                          className="form-control cursor-pointer border-radius-end"
-                                          type="text"
-                                          style={{ width: "80px" }}
-                                          name="monday_hours"
-                                          onChange={(e) =>
-                                            handleHoursInput(
-                                              e,
-                                              index,
-                                              "monday_date",
-                                              weekDays.monday,
-                                              item
-                                            )
-                                          }
-                                          value={
-                                            item.monday_hours == null
-                                              ? "0"
-                                              : item.monday_hours
-                                          }
-                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
-                                          disabled={
-                                            staffDetails.id !=
-                                              multipleFilter.staff_id
-                                              ? true
-                                              : item.submit_status === "1"
-                                                ? true
-                                                : false
-                                          }
 
-                                          onFocus={() => {
-                                            setActiveIndex(index);
-                                            setActiveField("monday");
-                                          }}
-                                          onBlur={() => {
-                                            setActiveIndex(null);
-                                            setActiveField(null);
-                                          }}
-                                        />
+                                        <span>
+                                          <input
+                                            className="form-control cursor-pointer border-radius-end"
+                                            type="text"
+                                            style={{ width: "80px" }}
+                                            name="monday_hours"
+                                            onChange={(e) =>
+                                              handleHoursInput(
+                                                e,
+                                                index,
+                                                "monday_date",
+                                                weekDays.monday,
+                                                item
+                                              )
+                                            }
+                                            value={
+                                              item.monday_hours == null
+                                                ? "0"
+                                                : item.monday_hours
+                                            }
+                                            // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
+                                            disabled={
+                                              staffDetails.id !=
+                                                multipleFilter.staff_id
+                                                ? true
+                                                : item.submit_status === "1"
+                                                  ? true
+                                                  : false
+                                            }
+
+                                            onFocus={() => {
+                                              setActiveIndex(index);
+                                              setActiveField("monday");
+                                            }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
+                                          />
+                                        </span>
+
                                         {activeIndex === index && activeField === "monday" && (
-                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);     // store row index
+                                              setModalText(item.monday_note || ""); // existing value if any
+                                              setIsModalOpen(true);           // show modal
+                                            }}
+                                          />
+
                                         )}
 
-                                       
-                                      {/* Tuesday Input*/}
+
+                                        {/* Tuesday Input*/}
                                         <input
                                           style={{ width: "80px" }}
                                           className="form-control cursor-pointer ms-2"
@@ -2019,18 +2096,28 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
-                                           onFocus={() => {
+                                          onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("tuesday");
                                           }}
-                                          onBlur={() => {
-                                            setActiveIndex(null);
-                                            setActiveField(null);
-                                          }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
 
                                         />
                                         {activeIndex === index && activeField === "tuesday" && (
-                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);
+                                              setModalText(item.tuesday_note || ""); // existing value if any
+                                              setIsModalOpen(true);
+                                            }}
+
+
+                                          />
                                         )}
 
 
@@ -2072,13 +2159,21 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("wednesday");
                                           }}
-                                          onBlur={() => {
-                                            setActiveIndex(null);
-                                            setActiveField(null);
-                                          }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index && activeField === "wednesday" && (
-                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);
+                                              setModalText(item.wednesday_note || ""); // existing value if any
+                                              setIsModalOpen(true);
+                                            }}
+                                          />
                                         )}
 
 
@@ -2117,14 +2212,23 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
                                           }}
-                                          onBlur={() => {
-                                            setActiveIndex(null);
-                                            setActiveField(null);
-                                          }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index && activeField === "thursday" && (
-                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);
+                                              setModalText(item.thursday_note || ""); // existing value if any
+                                              setIsModalOpen(true);
+                                            }}
+                                          />
                                         )}
+
 
                                         {/* Friday Input*/}
                                         <input
@@ -2159,15 +2263,22 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("friday");
                                           }}
-                                          onBlur={() => {
-                                            setActiveIndex(null);
-                                            setActiveField(null);
-                                          }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index && activeField === "friday" && (
-                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);
+                                              setModalText(item.friday_note || ""); // existing value if any
+                                              setIsModalOpen(true);
+                                            }}
+                                          />
                                         )}
-
 
                                         {/* Saturday Input*/}
                                         <input
@@ -2202,13 +2313,21 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("saturday");
                                           }}
-                                          onBlur={() => {
-                                            setActiveIndex(null);
-                                            setActiveField(null);
-                                          }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index && activeField === "saturday" && (
-                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);
+                                              setModalText(item.saturday_note || ""); // existing value if any
+                                              setIsModalOpen(true);
+                                            }}
+                                          />
                                         )}
                                       </div>
                                     ) : (
@@ -2242,7 +2361,24 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+                                          onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("monday");
+                                          }}
                                         />
+
+                                        {activeIndex === index && activeField === "monday" && (
+                                          <Pencil
+                                            className="ms-1 mt-2 cursor-pointer"
+                                            size={14}
+                                            onClick={() => {
+                                              setSelectedRowIndex(index);     // store row index
+                                              setModalText(item.monday_note || ""); // existing value if any
+                                              setIsModalOpen(true);           // show modal
+                                            }}
+                                          />
+                                        )}
+
                                       </div>
                                     )}
                                   </div>
@@ -2651,6 +2787,70 @@ const Timesheet = () => {
               </div>
             </div>
           </CommonModal>
+
+
+
+
+          <CommonModal
+            isOpen={isModalOpen}
+            backdrop="static"
+            size="lg"
+            cancel_btn={false}
+            btn_2="true"
+            btn_name={"Save"}
+            title={activeField + " Note"}
+            hideBtn={false}
+            handleClose={() => {
+              setIsModalOpen(false);
+              setModalText("");
+            }}
+            Submit_Function={(e) => handleSaveNote(e)}
+          >
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-lg-12">
+                  <h5>Add Note</h5>
+
+                  <textarea
+                    className="form-control"
+                    rows={4}
+                    value={modalText}
+                    onChange={(e) => setModalText(e.target.value)}
+                  />
+
+                </div>
+              </div>
+            </div>
+          </CommonModal>
+
+          {/* {isModalOpen && (
+            <div className="custom-modal">
+              <div className="modal-content p-3">
+                <h5>Add Notes</h5>
+
+                <textarea
+                  className="form-control"
+                  rows={4}
+                  value={modalText}
+                  onChange={(e) => setModalText(e.target.value)}
+                />
+
+                <div className="d-flex justify-content-end mt-3">
+                  <button className="btn btn-secondary me-2" onClick={() => setIsModalOpen(false)}>
+                    Cancel
+                  </button>
+
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleSaveNote()}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )} */}
+
         </div>
       </div>
     </div>
