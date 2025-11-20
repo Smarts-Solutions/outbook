@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 19, 2025 at 12:16 PM
+-- Generation Time: Nov 20, 2025 at 01:18 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -581,7 +581,7 @@ CREATE TABLE IF NOT EXISTS `client_job_task` (
   UNIQUE KEY `job_id` (`job_id`,`client_id`,`task_id`),
   KEY `client_id` (`client_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_job_task`
@@ -618,7 +618,9 @@ INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_sta
 (33, 8, 7, 28, NULL, '1:0', '2025-11-13 05:53:55', '2025-11-13 05:53:55'),
 (34, 34, 7, 28, NULL, '5:0', '2025-11-13 12:43:32', '2025-11-13 12:43:32'),
 (35, 35, 7, 28, NULL, '6:0', '2025-11-14 06:53:06', '2025-11-14 06:53:06'),
-(36, 36, 7, 28, NULL, '6:0', '2025-11-14 06:54:36', '2025-11-14 06:54:36');
+(36, 36, 7, 28, NULL, '6:0', '2025-11-14 06:54:36', '2025-11-14 06:54:36'),
+(37, 37, 15, 24, NULL, '00:55', '2025-11-20 05:07:09', '2025-11-20 05:07:09'),
+(38, 38, 15, 25, NULL, '11:00', '2025-11-20 05:09:43', '2025-11-20 05:09:43');
 
 -- --------------------------------------------------------
 
@@ -1605,7 +1607,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`),
   KEY `currency` (`currency`)
-) ENGINE=MyISAM AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `jobs`
@@ -1647,7 +1649,9 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (33, 1, '000033', 15, 9, 7, '', 43, 3, 3, '09:59', 13, '0', '2025-11-11', '2025-11-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', '2025-11-16', '2025-11-16', NULL, NULL, NULL, '2025-11-12', NULL, '0', NULL, '1', '2025-11-12', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 20, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, '2025-11-11 15:07:13', '2025-11-11 21:32:08'),
 (34, 1, '000034', 15, 9, 7, '', 43, 3, 3, '05:00', 6, '22', '2025-11-13', '2025-11-13', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-14', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 7, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'urgent', '2025-11-14 12:12:47', '2025-11-13 12:43:31', '2025-11-14 06:42:47'),
 (35, 1, '000035', 15, 9, 7, '', 43, 3, 3, '06:00', 0, '0', '2025-11-14', '2025-11-14', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 26, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, '2025-11-14 06:53:06', '2025-11-14 09:40:59'),
-(36, 1, '000036', 15, 9, 7, '777', 43, 3, 3, '06:00', 0, '14', '2025-11-14', '2025-11-14', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 27, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, '2025-11-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-14 12:46:57', '2025-11-14 06:54:36', '2025-11-14 10:53:03');
+(36, 1, '000036', 15, 9, 7, '777', 43, 3, 3, '06:00', 0, '14', '2025-11-14', '2025-11-14', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 27, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, '2025-11-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-20 10:39:10', '2025-11-14 06:54:36', '2025-11-20 05:09:10'),
+(37, 1, '000037', 13, 10, 15, '', 44, 33, 10, '00:55', 0, '0', '2025-11-20', '2025-11-20', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-21', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 3, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-20 10:37:51', '2025-11-20 05:07:09', '2025-11-20 05:07:51'),
+(38, 1, '000038', 13, 10, 15, '', 44, 33, 9, '11:00', 0, '10', '2025-11-20', '2025-11-20', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-21', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-20 10:53:36', '2025-11-20 05:09:43', '2025-11-20 05:23:36');
 
 -- --------------------------------------------------------
 
@@ -2297,19 +2301,19 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-11-19 11:42:40', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzU1MjU2MCwiZXhwIjoxNzYzNTg4NTYwfQ.8g1bphyPFXMFoK7ES5l-K7DyxdIGL6ZTj7lQGEj4EUw'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-11-20 04:57:59', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzYxNDY3OSwiZXhwIjoxNzYzNjUwNjc5fQ.1vkBiwc3A2o8SegyzCzZ8BtxwY4TzIWaKi1zSxoA4d8'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
-(6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 1, NULL, '2025-02-06 07:28:28', '2025-08-13 09:32:51', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc1NTA3NzU3MSwiZXhwIjoxNzU1MTEzNTcxfQ.j6OgC4_HWDQnCVp5LL0GqVC5spS-SxJg3aiKqpPIQU4'),
+(6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 1, NULL, '2025-02-06 07:28:28', '2025-11-20 05:53:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc2MzYxNzk5NywiZXhwIjoxNzYzNjUzOTk3fQ.uceEiaEi6TPVLms5bTE57gwPzqpC29X5IfzJfLFocbs'),
 (11, 4, 'STAFF', 'SIX', 'sss@gmail.com', '+44', '2777777777', '$2a$10$a7sfTgDavJUrU.8kFfbKIe0525d3EF4yABvGUlcZAxV/Amy1qgCVa', '2:5', '1', '0', 1, NULL, '2025-02-08 11:43:22', '2025-11-06 09:53:12', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJpYXQiOjE3NjI0MjI3OTIsImV4cCI6MTc2MjQ1ODc5Mn0.1LVeQaL6u1nnoM6tr9VY_bgXZsV4hsa9ZCMYCDnTbF4'),
 (7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 1, NULL, '2025-02-07 12:50:36', '2025-08-11 10:03:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc1NDkwNjYwMSwiZXhwIjoxNzU0OTQyNjAxfQ.HdhwmS5nBwiYQI8t--vxdl3Ki42iJYnUU2z30bEU9k4'),
 (10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, NULL, '2025-02-08 11:36:28', '2025-10-06 07:12:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTk3MzQ3MzcsImV4cCI6MTc1OTc3MDczN30.luIo8TYrG2_9Eu3yel9cakru6lg_GzFmJJ0s964l6_c'),
 (12, 6, 'BBBBBB 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, 'fff', '2025-04-17 05:56:18', '2025-11-17 05:27:51', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NTk3MzQ1NjIsImV4cCI6MTc1OTc3MDU2Mn0.TUGCAS5_R7m-lQWmK_8wpDvYpNTrc3wDjQim-aGc6DU'),
 (13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, 'SHK13', '2025-06-11 09:18:34', '2025-11-17 06:57:53', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NjMwMjU3NDgsImV4cCI6MTc2MzA2MTc0OH0.I-FNELieNjnnmKC-ryrfX7pqHfz-50vMl96aBdLSyEM'),
-(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-17 10:15:41', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjI0MjQzOTQsImV4cCI6MTc2MjQ2MDM5NH0.TmzrdBT9RRmkd1ufjyWJLKi14xZwyWkU5I7jC-4Waf8'),
+(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-20 12:03:31', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjM2NDAyMTEsImV4cCI6MTc2MzY3NjIxMX0.rjKVzs87iJWVPewCK_GS8HALeoDgTXFVUWIxF5sc1ak'),
 (15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, 'SS9', '2025-07-11 10:48:30', '2025-11-17 10:15:55', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NTk3NDI2ODMsImV4cCI6MTc1OTc3ODY4M30.sWz3MOL6384SlB1Tr8KG16Rf-C6eva1vUJg51moirB4'),
-(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, NULL, '2025-08-13 11:32:32', '2025-10-06 07:13:13', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NTk3MzQ3OTMsImV4cCI6MTc1OTc3MDc5M30.BjQxmDKYe_TeMMez3qVfCxkg6xx6k7sR7Rmgxse1YCE'),
+(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, NULL, '2025-08-13 11:32:32', '2025-11-20 05:55:42', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NjM2MTgxNDIsImV4cCI6MTc2MzY1NDE0Mn0.q0FTxFt-5s1D-m9EX8SRcbRuFVBCHfjS-icn8ogVkcU'),
 (17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, NULL, '2025-08-18 08:20:15', '2025-10-06 07:09:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTk3MzQ1OTQsImV4cCI6MTc1OTc3MDU5NH0.bdxXzq8DGTDBzz1cRmrCF4CZR87D2itNEbHTrUBdpd0'),
 (20, 8, 'AAAAAAA', 'ddddd', 'sasdasfwsf@gmail.com', '+44', '44020890320', '$2a$10$snor8L/CMAboV6UHDlzibufXa6WDscXEA65yIzOLql2qEPC5JeHFO', '00:00', '1', '0', 1, 'ff', '2025-09-23 06:27:54', '2025-11-17 05:22:46', NULL),
 (21, 3, 'fvedgv', 'gvddvd', 'f@gmail.com', '+44', '', '$2a$10$rnnx7UQnvlGmXKjGUthJbu0a9/qYz.0BKz4y6n8OaN9R8NPo4FMRa', '232:59', '1', '0', 1, NULL, '2025-11-03 10:12:49', '2025-11-03 10:12:49', NULL),
@@ -2354,7 +2358,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1145 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1164 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3509,7 +3513,26 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1141, 1, '2025-11-19', 'client', 6, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_F &_CLI_00006(CLI---1)', 'updated', '122.168.114.106', '2025-11-19 10:59:48', '2025-11-19 10:59:48'),
 (1142, 1, '2025-11-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-19 11:42:40', '2025-11-19 11:42:40'),
 (1143, 1, '2025-11-19', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-11-19 12:08:28', '2025-11-19 12:08:28'),
-(1144, 1, '2025-11-19', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-11-19 12:08:40', '2025-11-19 12:08:40');
+(1144, 1, '2025-11-19', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-11-19 12:08:40', '2025-11-19 12:08:40'),
+(1145, 1, '2025-11-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-20 04:57:59', '2025-11-20 04:57:59'),
+(1146, 1, '2025-11-20', 'job', 37, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_bfb_comp_000037', 'created', '122.168.114.106', '2025-11-20 05:07:09', '2025-11-20 05:07:09'),
+(1147, 1, '2025-11-20', 'job', 37, 'updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code: NEW_bfb_comp_000037', 'updated', '122.168.114.106', '2025-11-20 05:07:51', '2025-11-20 05:07:51'),
+(1148, 1, '2025-11-20', 'job', 36, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-20 05:08:26', '2025-11-20 05:08:26'),
+(1149, 1, '2025-11-20', 'job', 36, 'updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-20 05:08:49', '2025-11-20 05:08:49'),
+(1150, 1, '2025-11-20', 'job', 36, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-20 05:09:10', '2025-11-20 05:09:10'),
+(1151, 1, '2025-11-20', 'job', 38, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_bfb_comp_000038', 'created', '122.168.114.106', '2025-11-20 05:09:43', '2025-11-20 05:09:43'),
+(1152, 1, '2025-11-20', 'job', 38, 'updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code: NEW_bfb_comp_000038', 'updated', '122.168.114.106', '2025-11-20 05:09:54', '2025-11-20 05:09:54'),
+(1153, 1, '2025-11-20', 'job', 38, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: NEW_bfb_comp_000038', 'updated', '122.168.114.106', '2025-11-20 05:21:34', '2025-11-20 05:21:34'),
+(1154, 1, '2025-11-20', 'job', 38, 'edited the job information and has assigned the job to the processor, STAFF FIVE job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF FIVE job code: NEW_bfb_comp_000038', 'updated', '122.168.114.106', '2025-11-20 05:23:37', '2025-11-20 05:23:37'),
+(1155, 6, '2025-11-20', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-11-20 05:53:17', '2025-11-20 05:53:17'),
+(1156, 6, '2025-11-20', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-11-20 05:55:32', '2025-11-20 05:55:32'),
+(1157, 16, '2025-11-20', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-11-20 05:55:42', '2025-11-20 05:55:42'),
+(1158, 1, '2025-11-20', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 3:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-17, Hours : 6:00 Date: 2025-11-18, Hours : 6:00 Date: 2025-11-19, Hours : 6:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 3:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-17, Hours : 6:00 Date: 2025-11-18, Hours : 6:00 Date: 2025-11-19, Hours : 6:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 09:37:40', '2025-11-20 09:37:40'),
+(1159, 16, '2025-11-20', '-', 0, ' Logged Out', 'Processor STAFF TEN  Logged Out ', '-', '122.168.114.106', '2025-11-20 12:03:19', '2025-11-20 12:03:19'),
+(1160, 14, '2025-11-20', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-20 12:03:31', '2025-11-20 12:03:31'),
+(1161, 1, '2025-11-20', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 12:46:44', '2025-11-20 12:46:44'),
+(1162, 1, '2025-11-20', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-11-17, Updated hours : 3:01 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,  Date: 2025-11-17, Updated hours : 3:01 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 12:58:09', '2025-11-20 12:58:09'),
+(1163, 1, '2025-11-20', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 Date: undefined, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 Date: undefined, Hours : undefined ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 Date: undefined, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 Date: undefined, Hours : undefined ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 13:02:36', '2025-11-20 13:02:36');
 
 -- --------------------------------------------------------
 
@@ -3524,15 +3547,14 @@ CREATE TABLE IF NOT EXISTS `staff_portfolio` (
   `customer_id` int(11) NOT NULL,
   `createdAt` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `staff_portfolio`
 --
 
 INSERT INTO `staff_portfolio` (`id`, `staff_id`, `customer_id`, `createdAt`) VALUES
-(9, 6, 1, '2025-02-11 14:28:29'),
-(10, 16, 2, '2025-08-18 05:48:47');
+(11, 16, 2, '2025-11-20 11:26:56');
 
 -- --------------------------------------------------------
 
@@ -3731,19 +3753,26 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
   `job_id` int(11) NOT NULL,
   `task_id` int(11) NOT NULL,
   `monday_date` date DEFAULT NULL,
+  `monday_note` text,
   `monday_hours` varchar(100) DEFAULT NULL,
   `tuesday_date` date DEFAULT NULL,
   `tuesday_hours` varchar(100) DEFAULT NULL,
+  `tuesday_note` text,
   `wednesday_date` date DEFAULT NULL,
   `wednesday_hours` varchar(100) DEFAULT NULL,
+  `wednesday_note` text,
   `thursday_date` date DEFAULT NULL,
   `thursday_hours` varchar(100) DEFAULT NULL,
+  `thursday_note` text,
   `friday_date` date DEFAULT NULL,
   `friday_hours` varchar(100) DEFAULT NULL,
+  `friday_note` text,
   `saturday_date` date DEFAULT NULL,
   `saturday_hours` varchar(100) DEFAULT NULL,
+  `saturday_note` text,
   `sunday_date` date DEFAULT NULL,
   `sunday_hours` varchar(100) DEFAULT NULL,
+  `sunday_note` text,
   `remark` longtext,
   `final_remark` longtext,
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
@@ -3756,30 +3785,34 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
   KEY `client_id` (`client_id`),
   KEY `job_id` (`job_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `timesheet`
 --
 
-INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_id`, `job_id`, `task_id`, `monday_date`, `monday_hours`, `tuesday_date`, `tuesday_hours`, `wednesday_date`, `wednesday_hours`, `thursday_date`, `thursday_hours`, `friday_date`, `friday_hours`, `saturday_date`, `saturday_hours`, `sunday_date`, `sunday_hours`, `remark`, `final_remark`, `status`, `submit_status`, `created_at`, `updated_at`) VALUES
-(1, 1, '1', 0, 0, 1, 3, '2025-07-07', '2:20', NULL, NULL, '2025-07-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:32:02'),
-(2, 1, '2', 1, 1, 2, 2, '2025-07-07', '5:50', '2025-07-08', '5:50', '2025-07-09', '5:60', '2025-07-10', '5:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:31:59'),
-(3, 1, '1', 0, 0, 1, 3, NULL, NULL, '2025-07-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:31:56'),
-(4, 1, '1', 0, 0, 1, 3, '2025-07-14', '9:60', '2025-07-15', '9:60', '2025-07-16', '9:60', '2025-07-17', '9:60', '2025-07-18', '9:60', NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-07-14 10:55:57', '2025-09-23 06:31:53'),
-(5, 14, '2', 10, 8, 10, 10, '2025-08-25', '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-08-21 12:17:35', '2025-09-16 06:32:45'),
-(6, 1, '1', 0, 0, 1, 3, '2025-09-01', '2:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:19:22', '2025-09-02 10:34:19'),
-(7, 1, '2', 1, 1, 5, 1, '2025-09-01', '5:60', '2025-09-02', '6:30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:20:10', '2025-09-02 10:20:10'),
-(8, 1, '1', 0, 0, 1, 3, '2025-09-08', '6:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-09 13:03:37', '2025-09-11 09:57:37'),
-(9, 17, '1', 0, 0, 1, 2, '2025-09-08', '3:00', '2025-09-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:08:01', '2025-09-10 13:25:21'),
-(10, 17, '1', 0, 0, 7, 10, '2025-09-08', '3:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:08:22', '2025-09-11 09:55:33'),
-(11, 16, '2', 10, 8, 10, 10, '2025-09-08', '9:85', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 05:19:50'),
-(12, 16, '2', 10, 8, 10, 10, '2025-09-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
-(13, 16, '1', 0, 0, 1, 1, '2025-09-08', '3:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 09:55:45'),
-(14, 1, '2', 5, 3, 13, 5, '2025-09-08', '9:30', '2025-09-09', '4:20', '2025-09-10', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-11 09:57:37', '2025-09-11 10:01:03'),
-(15, 14, '2', 10, 8, 10, 10, '2025-09-15', '2:00', '2025-09-09', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-08-21 12:17:35', '2025-09-23 06:03:39'),
-(16, 15, '2', 5, 3, 13, 5, '2025-09-15', '9:30', '2025-09-16', '4:20', '2025-09-17', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-19 09:57:37', '2025-09-22 07:21:25'),
-(17, 14, '2', 10, 8, 10, 10, '2025-09-15', '2:00', '2025-09-16', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-18 12:17:35', '2025-09-22 09:03:47');
+INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_id`, `job_id`, `task_id`, `monday_date`, `monday_note`, `monday_hours`, `tuesday_date`, `tuesday_hours`, `tuesday_note`, `wednesday_date`, `wednesday_hours`, `wednesday_note`, `thursday_date`, `thursday_hours`, `thursday_note`, `friday_date`, `friday_hours`, `friday_note`, `saturday_date`, `saturday_hours`, `saturday_note`, `sunday_date`, `sunday_hours`, `sunday_note`, `remark`, `final_remark`, `status`, `submit_status`, `created_at`, `updated_at`) VALUES
+(1, 1, '1', 0, 0, 1, 3, '2025-07-07', NULL, '2:20', NULL, NULL, NULL, '2025-07-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:32:02'),
+(2, 1, '2', 1, 1, 2, 2, '2025-07-07', NULL, '5:50', '2025-07-08', '5:50', NULL, '2025-07-09', '5:60', NULL, '2025-07-10', '5:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:31:59'),
+(3, 1, '1', 0, 0, 1, 3, NULL, NULL, NULL, '2025-07-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', '2025-07-09 12:11:46', '2025-09-23 06:31:56'),
+(4, 1, '1', 0, 0, 1, 3, '2025-07-14', NULL, '9:60', '2025-07-15', '9:60', NULL, '2025-07-16', '9:60', NULL, '2025-07-17', '9:60', NULL, '2025-07-18', '9:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-07-14 10:55:57', '2025-09-23 06:31:53'),
+(5, 14, '2', 10, 8, 10, 10, '2025-08-25', NULL, '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-08-21 12:17:35', '2025-09-16 06:32:45'),
+(6, 1, '1', 0, 0, 1, 3, '2025-09-01', NULL, '2:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:19:22', '2025-09-02 10:34:19'),
+(7, 1, '2', 1, 1, 5, 1, '2025-09-01', NULL, '5:60', '2025-09-02', '6:30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-02 10:20:10', '2025-09-02 10:20:10'),
+(8, 1, '1', 0, 0, 1, 3, '2025-09-08', NULL, '6:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-09 13:03:37', '2025-09-11 09:57:37'),
+(9, 17, '1', 0, 0, 1, 2, '2025-09-08', NULL, '3:00', '2025-09-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:08:01', '2025-09-10 13:25:21'),
+(10, 17, '1', 0, 0, 7, 10, '2025-09-08', NULL, '3:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:08:22', '2025-09-11 09:55:33'),
+(11, 16, '2', 10, 8, 10, 10, '2025-09-08', NULL, '9:85', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 05:19:50'),
+(12, 16, '2', 10, 8, 10, 10, '2025-09-08', NULL, '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
+(13, 16, '1', 0, 0, 1, 1, '2025-09-08', NULL, '3:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-10 07:09:48', '2025-09-11 09:55:45'),
+(14, 1, '2', 5, 3, 13, 5, '2025-09-08', NULL, '9:30', '2025-09-09', '4:20', NULL, '2025-09-10', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-11 09:57:37', '2025-09-11 10:01:03'),
+(15, 14, '2', 10, 8, 10, 10, '2025-09-15', NULL, '2:00', '2025-09-09', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', '2025-08-21 12:17:35', '2025-09-23 06:03:39'),
+(16, 15, '2', 5, 3, 13, 5, '2025-09-15', NULL, '9:30', '2025-09-16', '4:20', NULL, '2025-09-17', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-19 09:57:37', '2025-09-22 07:21:25'),
+(17, 14, '2', 10, 8, 10, 10, '2025-09-15', NULL, '2:00', '2025-09-16', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-09-18 12:17:35', '2025-09-22 09:03:47'),
+(18, 1, '1', 0, 0, 1, 3, '2025-11-17', 'monday first hhhhh', '3:01', NULL, NULL, NULL, NULL, NULL, 'budhhhhhhhhhhh firstttttt', NULL, NULL, 'sfvsfvsvsvsvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-11-20 09:37:40', '2025-11-20 12:58:09'),
+(19, 1, '1', 0, 0, 1, 3, '2025-11-17', NULL, '6:00', '2025-11-18', '6:00', NULL, '2025-11-19', '6:00', NULL, NULL, NULL, 'thursday second', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2025-11-20 09:37:40', '2025-11-20 09:37:40'),
+(20, 1, '2', 10, 15, 38, 25, '2025-10-27', 'FFFFFFFFFFF', '9:00', '2025-10-28', '8:00', NULL, '2025-10-29', '6:00', 'WEEEDDDDDFIRSTTTT', '2025-10-30', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'dcsc', '1', '1', '2025-11-20 12:46:44', '2025-11-20 12:46:44'),
+(21, 1, '1', 0, 0, 1, 3, '2025-10-27', NULL, '6:00', '2025-10-28', '4:00', NULL, '2025-10-29', '8:00', 'WEDDDDDDD', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'dcsc', '1', '1', '2025-11-20 12:46:44', '2025-11-20 12:46:44');
 
 -- --------------------------------------------------------
 
