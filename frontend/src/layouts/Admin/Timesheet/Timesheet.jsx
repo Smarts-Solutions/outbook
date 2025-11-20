@@ -763,6 +763,8 @@ const Timesheet = () => {
 
     console.log(`name`, name);
     console.log(`value`, value);
+    console.log(`date_value`, date_value);
+    console.log(`day_name`, day_name);
 
 
     let final_value = value;
@@ -1592,6 +1594,15 @@ const Timesheet = () => {
     ...weekOptions
   ];
 
+
+  const convertDateFormatForCopy = (dateString) => {
+   const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
+    const [day, month, year] = datePart.split("/");
+    const formattedDate = new Date(`${year}-${month}-${day}`);
+    const date_final_value = formattedDate.toISOString().split("T")[0];
+    return date_final_value;
+  }
+
   const handleCopyTimeSheetAutoFill = async () => {
 
     if (copyTimeSheetRows && copyTimeSheetRows.length > 0) {
@@ -1611,6 +1622,13 @@ const Timesheet = () => {
             ...row,
             id: null,
             submit_status: "0",
+            monday_date: convertDateFormatForCopy(weekDays.monday),
+            tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
+            wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
+            thursday_date: convertDateFormatForCopy(weekDays.thursday),
+            friday_date: convertDateFormatForCopy(weekDays.friday),
+            saturday_date: convertDateFormatForCopy(weekDays.saturday),
+            sunday_date: convertDateFormatForCopy(weekDays.sunday),
             total_hours: parseFloat(sum).toFixed(2),
           };
         })
@@ -1632,6 +1650,14 @@ const Timesheet = () => {
             ...row,
             id: null,
             submit_status: "0",
+            monday_date: convertDateFormatForCopy(weekDays.monday),
+            tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
+            wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
+            thursday_date: convertDateFormatForCopy(weekDays.thursday),
+            friday_date: convertDateFormatForCopy(weekDays.friday),
+            saturday_date: convertDateFormatForCopy(weekDays.saturday),
+            sunday_date: convertDateFormatForCopy(weekDays.sunday),
+
             total_hours: parseFloat(sum).toFixed(2),
           };
         })
@@ -1644,7 +1670,7 @@ const Timesheet = () => {
   }
 
   
-   console.log("weekDays.monday ", weekDays.monday);
+   console.log("timeSheetRows -- > ", timeSheetRows);
 
   // Example usage
   return (
