@@ -2799,7 +2799,7 @@ const updateJobStatus = async (job) => {
       if (['', null, undefined, 0, '0'].includes(ExistReviewer?.reviewer)) {
         return {
           status: false,
-          message: "Please sent to be reviewed.",
+          message: "Please assign the job to the reviewer.",
           data: "W",
         };
       }
@@ -2816,7 +2816,7 @@ const updateJobStatus = async (job) => {
       if (ExistDraft.length === 0) {
         return {
           status: false,
-          message: "Please sent first draft.",
+          message: "Please send the first draft.",
           data: "W",
         };
       }
@@ -2857,7 +2857,7 @@ const updateJobStatus = async (job) => {
       if (ExistQueries.length === 0) {
         return {
           status: false,
-          message: "Please sent first queries.",
+          message: "Please send the Queries.",
           data: "W",
         };
       }
@@ -2874,7 +2874,7 @@ const updateJobStatus = async (job) => {
       if (ExistMissingLogs.length === 0) {
         return {
           status: false,
-          message: "Please sent first missing logs.",
+          message: "Please send Missing Paper Logs.",
           data: "W",
         };
       }
