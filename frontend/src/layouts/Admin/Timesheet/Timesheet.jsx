@@ -18,7 +18,7 @@ const Timesheet = () => {
 
   const [activeIndex, setActiveIndex] = useState(null);   // row
   const [activeField, setActiveField] = useState(null);   // field name
-  
+
   // add node state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
@@ -26,6 +26,8 @@ const Timesheet = () => {
 
   // copy timesheet modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
+  console.log(`copyTimeSheetRows ------> `, copyTimeSheetRows);
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -119,6 +121,8 @@ const Timesheet = () => {
     setSubmitStatusAllKey(0);
     setDeleteRows([]);
     if (res.status) {
+
+
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
 
       const hasValidWeekOffsetZeroValue =
@@ -172,7 +176,38 @@ const Timesheet = () => {
       setWeekOffset(value);
       await GetTimeSheet(value);
     }
+    else if (name === "copy_week") {
+      await getTimeSheetCopyRecord(value);
+    }
+
   };
+
+  const getTimeSheetCopyRecord = async (weekOffset) => {
+    const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
+    const res = await dispatch(
+      getTimesheetData({ req, authToken: token })
+    ).unwrap();
+
+    if (res.status) {
+      setCopyTimeSheetRows(res.data);
+      setCopyTimeSheetRows((prevRows) =>
+        prevRows.map((row) => {
+          const sum =
+            (parseFloat(row.monday_hours) || 0) +
+            (parseFloat(row.tuesday_hours) || 0) +
+            (parseFloat(row.wednesday_hours) || 0) +
+            (parseFloat(row.thursday_hours) || 0) +
+            (parseFloat(row.friday_hours) || 0) +
+            (parseFloat(row.saturday_hours) || 0) +
+            (parseFloat(row.sunday_hours) || 0);
+          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+        })
+      );
+    }
+
+  }
+
+
 
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
@@ -1400,7 +1435,7 @@ const Timesheet = () => {
     //   "Remark"
     // ];
 
-     const headers = [
+    const headers = [
       "Index",
       "Task Type",
       "Customer Name",
@@ -1438,7 +1473,7 @@ const Timesheet = () => {
           item.task_type === "1" ? " - " : item.job_type_name || " - ",
           item.task_type === "1"
             ? item.sub_internal_name || "No Task"
-            : item.task_name || "No Task", 
+            : item.task_name || "No Task",
           item.monday_hours || 0,
           item.monday_note || "",
           item.tuesday_hours || 0,
@@ -1514,6 +1549,7 @@ const Timesheet = () => {
       });
     });
   }
+
   const currentValue = weekOptions.find(
     (opt) => opt.value == weekOffSetValue.current
   );
@@ -1551,9 +1587,14 @@ const Timesheet = () => {
   };
 
   // copy timeSheet functionality
- const handleCopyTimeSheetAutoFill = async () => {
-  alert("Auto-fill functionality is under development.");
- }
+  const weekOptionsWithPlaceholder = [
+  { label: "-- select --", value: "" },
+  ...weekOptions
+ ];
+
+  const handleCopyTimeSheetAutoFill = async () => {
+    alert("Auto-fill functionality is under development.");
+  }
 
 
   // console.log("timeSheetRows -->>", timeSheetRows);
@@ -2448,7 +2489,7 @@ const Timesheet = () => {
                                   {submitStatusAllKey === 0 ? (
                                     <div className="d-flex align-items-center">
 
-                              
+
                                       <button
                                         className="view-icon"
                                         onClick={(e) => {
@@ -2459,7 +2500,7 @@ const Timesheet = () => {
                                       </button>
 
 
-                                 
+
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2611,37 +2652,37 @@ const Timesheet = () => {
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
                                   <>
-                                  {/* Add new row */}
-                                  <button
-                                    style={{ zIndex: 'unset' }}
-                                    className="d-flex btn btn-info fw-normal px-2"
-                                    onClick={handleAddNewSheet}
-                                  >
-                                    <i
-                                      style={{
-                                        display: "block",
-                                        fontSize: 18,
-                                        cursor: "pointer",
-                                      }}
-                                      className="ri-add-circle-fill"
-                                    />
-                                  </button>
+                                    {/* Add new row */}
+                                    <button
+                                      style={{ zIndex: 'unset' }}
+                                      className="d-flex btn btn-info fw-normal px-2"
+                                      onClick={handleAddNewSheet}
+                                    >
+                                      <i
+                                        style={{
+                                          display: "block",
+                                          fontSize: 18,
+                                          cursor: "pointer",
+                                        }}
+                                        className="ri-add-circle-fill"
+                                      />
+                                    </button>
 
 
 
-                                 {/* copy Timesheet */}
-                                 <span style={{marginTop: "2rem"}} className="ms-3">
-                                  <button
-                                    style={{ zIndex: 'unset' }}
-                                    className="d-flex btn btn-info fw-normal px-2"
-                                    onClick={() => setIsCopyModalOpen(true)}
-                                  >
-                                    <span className="ms-2">Copy Timesheet</span>
-                                  </button>
-                                 </span>
+                                    {/* copy Timesheet */}
+                                    <span style={{ marginTop: "2rem" }} className="ms-3">
+                                      <button
+                                        style={{ zIndex: 'unset' }}
+                                        className="d-flex btn btn-info fw-normal px-2"
+                                        onClick={() => setIsCopyModalOpen(true)}
+                                      >
+                                        <span className="ms-2">Copy Timesheet</span>
+                                      </button>
+                                    </span>
 
 
-                                </>
+                                  </>
 
 
                                 ) : (
@@ -2851,7 +2892,7 @@ const Timesheet = () => {
           </CommonModal>
 
 
-  
+
 
           <CommonModal
             isOpen={isModalOpen}
@@ -2888,7 +2929,8 @@ const Timesheet = () => {
             </div>
           </CommonModal>
 
-            <CommonModal
+          { /* Copy Timesheet Modal */}
+          <CommonModal
             isOpen={isCopyModalOpen}
             backdrop="static"
             size="lg"
@@ -2906,12 +2948,22 @@ const Timesheet = () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                 
-                  <textarea
-                    className="form-control"
-                    rows={4}
-                    value={modalText}
-                    onChange={(e) => setModalText(e.target.value)}
+                  <h5>Select Week to Copy Timesheet From</h5>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    options={weekOptionsWithPlaceholder}
+                    defaultValue={null}
+                    //defaultValue={currentValue}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'copy_week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
                   />
 
                 </div>
@@ -2919,7 +2971,7 @@ const Timesheet = () => {
             </div>
           </CommonModal>
 
-          
+
 
         </div>
       </div>
