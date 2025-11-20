@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Select from 'react-select';
@@ -13,7 +13,12 @@ import {
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
+
 const Timesheet = () => {
+
+  const [activeIndex, setActiveIndex] = useState(null);   // row
+  const [activeField, setActiveField] = useState(null);   // field name
+
   const getFormattedDate = (type, date) => {
     let now = new Date();
     if (type === "convert") {
@@ -721,7 +726,7 @@ const Timesheet = () => {
       final_value = `${intPart}.${multipliedStr}`;
       // final_value = `${intPart}.${multiplied}`;
     }
-   
+
 
     // console.log(`final_value`, final_value);
 
@@ -1139,14 +1144,14 @@ const Timesheet = () => {
       //let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
       let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
 
-    //  console.log(`staff_hourminute 111 `, staff_hourminute);
+      //  console.log(`staff_hourminute 111 `, staff_hourminute);
 
       if (staff_hourminute != null && staff_hourminute?.includes(":")) {
         const [hours, minutes] = staff_hourminute.split(":").map(Number);
-        const decimal = hours+'.'+minutes;
-        staff_hourminute = parseFloat(decimal); 
+        const decimal = hours + '.' + minutes;
+        staff_hourminute = parseFloat(decimal);
       } else if (staff_hourminute != null) {
-        console.log(staff_hourminute); 
+        console.log(staff_hourminute);
         staff_hourminute = parseFloat(staff_hourminute)
       }
 
@@ -1247,12 +1252,12 @@ const Timesheet = () => {
     let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
 
     if (staff_hourminute != null && staff_hourminute?.includes(":")) {
-        const [hours, minutes] = staff_hourminute.split(":").map(Number);
-        const decimal = hours+'.'+minutes;
-        staff_hourminute = parseFloat(decimal); 
-      } else if (staff_hourminute != null) {
-        staff_hourminute = parseFloat(staff_hourminute)
-      }
+      const [hours, minutes] = staff_hourminute.split(":").map(Number);
+      const decimal = hours + '.' + minutes;
+      staff_hourminute = parseFloat(decimal);
+    } else if (staff_hourminute != null) {
+      staff_hourminute = parseFloat(staff_hourminute)
+    }
 
     if (staff_hourminute != null) {
 
@@ -1970,7 +1975,22 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+
+                                          onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("monday");
+                                          }}
+                                          onBlur={() => {
+                                            setActiveIndex(null);
+                                            setActiveField(null);
+                                          }}
                                         />
+                                        {activeIndex === index && activeField === "monday" && (
+                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                        )}
+
+                                       
+                                      {/* Tuesday Input*/}
                                         <input
                                           style={{ width: "80px" }}
                                           className="form-control cursor-pointer ms-2"
@@ -1999,7 +2019,27 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+                                           onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("tuesday");
+                                          }}
+                                          onBlur={() => {
+                                            setActiveIndex(null);
+                                            setActiveField(null);
+                                          }}
+
                                         />
+                                        {activeIndex === index && activeField === "tuesday" && (
+                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                        )}
+
+
+
+
+
+
+
+                                        {/* Wednesday Input*/}
                                         <input
                                           style={{ width: "80px" }}
                                           className="form-control cursor-pointer ms-2"
@@ -2028,7 +2068,23 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+                                          onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("wednesday");
+                                          }}
+                                          onBlur={() => {
+                                            setActiveIndex(null);
+                                            setActiveField(null);
+                                          }}
                                         />
+                                        {activeIndex === index && activeField === "wednesday" && (
+                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                        )}
+
+
+
+
+                                        {/* Thursday Input*/}
                                         <input
                                           style={{ width: "80px" }}
                                           className="form-control cursor-pointer ms-2"
@@ -2057,7 +2113,20 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+                                          onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("thursday");
+                                          }}
+                                          onBlur={() => {
+                                            setActiveIndex(null);
+                                            setActiveField(null);
+                                          }}
                                         />
+                                        {activeIndex === index && activeField === "thursday" && (
+                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                        )}
+
+                                        {/* Friday Input*/}
                                         <input
                                           style={{ width: "80px" }}
                                           className="form-control cursor-pointer ms-2"
@@ -2086,7 +2155,21 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+                                          onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("friday");
+                                          }}
+                                          onBlur={() => {
+                                            setActiveIndex(null);
+                                            setActiveField(null);
+                                          }}
                                         />
+                                        {activeIndex === index && activeField === "friday" && (
+                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                        )}
+
+
+                                        {/* Saturday Input*/}
                                         <input
                                           style={{ width: "80px" }}
                                           className="form-control cursor-pointer ms-2"
@@ -2115,7 +2198,18 @@ const Timesheet = () => {
                                                 ? true
                                                 : false
                                           }
+                                          onFocus={() => {
+                                            setActiveIndex(index);
+                                            setActiveField("saturday");
+                                          }}
+                                          onBlur={() => {
+                                            setActiveIndex(null);
+                                            setActiveField(null);
+                                          }}
                                         />
+                                        {activeIndex === index && activeField === "saturday" && (
+                                          <Pencil className="ms-1 mt-2 cursor-pointer" size={14} />
+                                        )}
                                       </div>
                                     ) : (
                                       <div className="ms-3">
