@@ -1518,8 +1518,10 @@ const Timesheet = () => {
 
 
   const handleSaveNote = (e) => {
+
     // console.log("modalText ",modalText);
     // console.log("activeField ",activeField);
+
     const updatedRows = [...timeSheetRows];
     let key = activeField + "_note";
     updatedRows[selectedRowIndex][key] = modalText;
