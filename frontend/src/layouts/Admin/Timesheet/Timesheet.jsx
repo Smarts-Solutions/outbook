@@ -18,10 +18,14 @@ const Timesheet = () => {
 
   const [activeIndex, setActiveIndex] = useState(null);   // row
   const [activeField, setActiveField] = useState(null);   // field name
-
+  
+  // add node state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
   const [selectedRowIndex, setSelectedRowIndex] = useState(null)
+
+  // copy timesheet modal state
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -1546,6 +1550,12 @@ const Timesheet = () => {
 
   };
 
+  // copy timeSheet functionality
+ const handleCopyTimeSheetAutoFill = async () => {
+  alert("Auto-fill functionality is under development.");
+ }
+
+
   // console.log("timeSheetRows -->>", timeSheetRows);
 
   // Example usage
@@ -2437,6 +2447,8 @@ const Timesheet = () => {
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
                                     <div className="d-flex align-items-center">
+
+                              
                                       <button
                                         className="view-icon"
                                         onClick={(e) => {
@@ -2445,6 +2457,9 @@ const Timesheet = () => {
                                       >
                                         <i className="ti-comment text-warning"></i>
                                       </button>
+
+
+                                 
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2595,6 +2610,8 @@ const Timesheet = () => {
                             <td className="border-none" style={{ border: 'none' }}>
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
+                                  <>
+                                  {/* Add new row */}
                                   <button
                                     style={{ zIndex: 'unset' }}
                                     className="d-flex btn btn-info fw-normal px-2"
@@ -2609,6 +2626,24 @@ const Timesheet = () => {
                                       className="ri-add-circle-fill"
                                     />
                                   </button>
+
+
+
+                                 {/* copy Timesheet */}
+                                 <span style={{marginTop: "2rem"}} className="ms-3">
+                                  <button
+                                    style={{ zIndex: 'unset' }}
+                                    className="d-flex btn btn-info fw-normal px-2"
+                                    onClick={() => setIsCopyModalOpen(true)}
+                                  >
+                                    <span className="ms-2">Copy Timesheet</span>
+                                  </button>
+                                 </span>
+
+
+                                </>
+
+
                                 ) : (
                                   ""
                                 )
@@ -2816,7 +2851,7 @@ const Timesheet = () => {
           </CommonModal>
 
 
-
+  
 
           <CommonModal
             isOpen={isModalOpen}
@@ -2830,6 +2865,9 @@ const Timesheet = () => {
             handleClose={() => {
               setIsModalOpen(false);
               setModalText("");
+              setActiveIndex(null);
+              setActiveField(null);
+
             }}
             Submit_Function={(e) => handleSaveNote(e)}
           >
@@ -2850,33 +2888,38 @@ const Timesheet = () => {
             </div>
           </CommonModal>
 
-          {/* {isModalOpen && (
-            <div className="custom-modal">
-              <div className="modal-content p-3">
-                <h5>Add Notes</h5>
+            <CommonModal
+            isOpen={isCopyModalOpen}
+            backdrop="static"
+            size="lg"
+            cancel_btn={false}
+            btn_2="true"
+            btn_name={"Save"}
+            title={"Timesheet"}
+            hideBtn={false}
+            handleClose={() => {
+              setIsCopyModalOpen(false);
 
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={modalText}
-                  onChange={(e) => setModalText(e.target.value)}
-                />
+            }}
+            Submit_Function={(e) => handleCopyTimeSheetAutoFill(e)}
+          >
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-lg-12">
+                 
+                  <textarea
+                    className="form-control"
+                    rows={4}
+                    value={modalText}
+                    onChange={(e) => setModalText(e.target.value)}
+                  />
 
-                <div className="d-flex justify-content-end mt-3">
-                  <button className="btn btn-secondary me-2" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
-
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleSaveNote()}
-                  >
-                    Save
-                  </button>
                 </div>
               </div>
             </div>
-          )} */}
+          </CommonModal>
+
+          
 
         </div>
       </div>
