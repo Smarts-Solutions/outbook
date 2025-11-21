@@ -5,9 +5,10 @@ import {
   GetAllJabData,
   UpdateJob,
   GET_ALL_CHECKLIST,
+  JobAction,
+  GetOfficerDetails
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { JobAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button } from "react-bootstrap";
@@ -84,8 +85,13 @@ const EditJob = () => {
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
 
+  const [allClientDetails, setAllClientDetails] = useState([]);
+  const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
 
-  // console.log("selectedStaffData", selectedStaffData);
+
+
+
+   console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
   //  console.log("CustomerDetails", CustomerDetails);
 
 
@@ -313,6 +319,10 @@ const EditJob = () => {
             });
 
             
+            if( response.data.client_type == "2" && response.data.client_company_number != undefined){
+              get_information_company_umber(response.data.client_company_number);
+            }
+
             setJobData((prevState) => ({
               ...prevState,
               AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
@@ -528,6 +538,24 @@ const EditJob = () => {
     JobDetails();
   }, []);
 
+  const get_information_company_umber = async (company_number) => {
+    const data = { company_number: company_number, type: 'company_info' };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setClientInfoCompanyDetails(res.data);
+        } else {
+          setClientInfoCompanyDetails({});
+
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+      );
+  };
+
   const getAllChecklist = async () => {
     const req = {
       action: "getByServiceWithJobType",
@@ -609,6 +637,7 @@ const EditJob = () => {
           setCustomerDetails(response.data.customerDetails || []);
 
           setAllStaffData(response?.data?.allStaff || []);
+          setAllClientDetails(response?.data?.client || []);
         } else {
           setAllJobData({
             loading: true,
@@ -733,8 +762,6 @@ const EditJob = () => {
     validate(name, value);
   };
 
-  console.log("setAddTaskArr", AddTaskArr);
-
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
     if (isSubmitting) {
@@ -787,7 +814,7 @@ const EditJob = () => {
 
   const handleSubmit = async () => {
 
-   
+
 
     if (AddTaskArr.length === 0) {
       sweatalert.fire({

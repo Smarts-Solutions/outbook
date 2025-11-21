@@ -1470,6 +1470,8 @@ const getJobById = async (job) => {
      customers.account_manager_id AS customer_account_manager_id,
      clients.id AS client_id,
      clients.trading_name AS client_trading_name,
+     clients.client_type AS client_type,
+     client_company_information.company_number AS client_company_number,
      jobs.client_job_code AS client_job_code,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -1642,6 +1644,8 @@ const getJobById = async (job) => {
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      JOIN 
      clients ON jobs.client_id = clients.id
+     LEFT JOIN 
+     client_company_information ON clients.id = client_company_information.client_id
      JOIN 
      customers ON jobs.customer_id = customers.id
      JOIN 
@@ -1726,6 +1730,8 @@ const getJobById = async (job) => {
         line_manaeger_staff: lineManaegerStaff?.map(item => item.staff_by),
         client_id: rows[0].client_id,
         client_trading_name: rows[0].client_trading_name,
+        client_type: rows[0].client_type,
+        client_company_number: rows[0].client_company_number,
         client_job_code: rows[0].client_job_code,
         outbooks_acount_manager_id: rows[0].outbooks_acount_manager_id,
         outbooks_acount_manager_first_name:
