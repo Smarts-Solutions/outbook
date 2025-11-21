@@ -58,12 +58,12 @@ const getCompanyOfficerDetails = async (req, res) => {
 
     console.log("type", type);
 
-    if(type != undefined && type == "company_info") {
-     if (!["", null, undefined].includes(req.body.company_number)) {
+    if (type != undefined && type == "company_info") {
+      if (!["", null, undefined].includes(req.body.company_number)) {
         let config = {
           method: 'get',
           maxBodyLength: Infinity,
-          url: 'https://api.companieshouse.gov.uk/company/' + req.body.company_number + '/officers',
+          url: 'https://api.companieshouse.gov.uk/company/' + req.body.company_number,
           headers: {
             'Authorization': 'Basic bm9uT2Y4Snk5X2thX2ZnRzJndEZ5TkxwYThsSm1zVkd2ekZadlRiRjo='
           }
@@ -71,7 +71,7 @@ const getCompanyOfficerDetails = async (req, res) => {
 
         await axios.request(config)
           .then((response) => {
-            return res.status(200).json({ status: true, data: response.data.items, message: "success.." });
+            return res.status(200).json({ status: true, data: response.data, message: "success.." });
           })
           .catch((error) => {
             return res.send({ status: false, message: error.message });
@@ -85,7 +85,7 @@ const getCompanyOfficerDetails = async (req, res) => {
     }
     else {
 
-       if (!["", null, undefined].includes(req.body.company_number)) {
+      if (!["", null, undefined].includes(req.body.company_number)) {
         let config = {
           method: 'get',
           maxBodyLength: Infinity,

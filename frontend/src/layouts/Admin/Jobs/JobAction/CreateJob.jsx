@@ -67,8 +67,11 @@ const CreateJob = () => {
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
   const [allClientDetails, setAllClientDetails] = useState([]);
+  const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
+  
 
-  console.log("allClientDetails", allClientDetails);
+
+  console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
 
 
   const [jobData, setJobData] = useState({
@@ -193,14 +196,10 @@ const CreateJob = () => {
         .unwrap()
         .then((res) => {
           if (res.status) {
-            if (res.data.length > 0) {
-              
-            } else {
-              
-            }
-  
+              setClientInfoCompanyDetails(res.data);
           } else {
-  
+             setClientInfoCompanyDetails({});
+
           }
         })
         .catch((err) => {
@@ -208,7 +207,6 @@ const CreateJob = () => {
         }
         );
     };
-
 
 
   const getAllChecklist = async () => {
@@ -331,6 +329,16 @@ const CreateJob = () => {
   const HandleChange = (e) => {
     let name = e.target.name;
     let value = e.target.value;
+
+    
+    if(name == 'Client'){
+      const clientInfo =   allClientDetails?.find((client) => Number(client?.client_id) == Number(value) && client?.client_client_type == "2") || "";
+      if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
+        get_information_company_umber(clientInfo?.client_company_number);
+      } else {  
+        setClientInfoCompanyDetails({});
+      }
+    }
 
     if (name === "JobType") {
       if (!['', 'undefined', undefined, null, 'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0) {
@@ -670,14 +678,7 @@ const CreateJob = () => {
     }
   };
 
-  useEffect(() => {
-
-    if (location?.state?.goto == "Customer") {
-      console.log("client id IF --->>", jobData.Client);
-    } else {
-      console.log("client id ELSE --->>", location?.state?.clientName?.id);
-    }
-  }, [jobData.Client]);
+ 
 
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
