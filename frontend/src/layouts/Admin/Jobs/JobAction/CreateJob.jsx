@@ -330,7 +330,6 @@ const CreateJob = () => {
     let name = e.target.name;
     let value = e.target.value;
 
-    
     if(name == 'Client'){
       const clientInfo =   allClientDetails?.find((client) => Number(client?.client_id) == Number(value) && client?.client_client_type == "2") || "";
       if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
