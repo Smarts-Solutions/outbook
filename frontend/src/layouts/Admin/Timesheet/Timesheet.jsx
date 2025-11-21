@@ -1596,7 +1596,7 @@ const Timesheet = () => {
 
 
   const convertDateFormatForCopy = (dateString) => {
-   const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
+    const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
     const [day, month, year] = datePart.split("/");
     const formattedDate = new Date(`${year}-${month}-${day}`);
     const date_final_value = formattedDate.toISOString().split("T")[0];
@@ -1636,7 +1636,7 @@ const Timesheet = () => {
 
       setUpdateTimeSheetRows((prev) => [
         ...prev,
-         ...copyTimeSheetRows.map((row) => {
+        ...copyTimeSheetRows.map((row) => {
           const sum =
             (parseFloat(row.monday_hours) || 0) +
             (parseFloat(row.tuesday_hours) || 0) +
@@ -1669,7 +1669,7 @@ const Timesheet = () => {
 
   }
 
-  
+
   //  console.log("timeSheetRows -- > ", timeSheetRows);
 
   // Example usage
@@ -1775,8 +1775,11 @@ const Timesheet = () => {
                     id="tabSelect"
                     name="week"
                     className="basic-multi-select"
-                    options={weekOptions}
-                    defaultValue={currentValue}
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    defaultValue={null}
+                    placeholder="-- Select --"
                     onChange={(selectedOption) => {
                       // simulate e.target.value
                       const e = { target: { name: 'week', value: selectedOption.value } };
