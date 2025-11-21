@@ -5,6 +5,7 @@ import {
   GetAllJabData,
   AddAllJobType,
   GET_ALL_CHECKLIST,
+  GetOfficerDetails
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
@@ -65,7 +66,9 @@ const CreateJob = () => {
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
+  const [allClientDetails, setAllClientDetails] = useState([]);
 
+  console.log("allClientDetails", allClientDetails);
 
 
   const [jobData, setJobData] = useState({
@@ -157,6 +160,16 @@ const CreateJob = () => {
           }));
 
           setAllStaffData(response?.data?.allStaff || []);
+          setAllClientDetails(response?.data?.client || []);
+
+          if (location?.state?.goto != "Customer") {
+           const clientInfo =   response?.data?.client?.find((client) => client?.client_id == location.state?.clientName?.id && client?.client_client_type == "2") || "";
+           console.log("clientInfo", clientInfo);
+            if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
+            await  get_information_company_umber(clientInfo?.client_company_number);
+            }
+
+          }
         } else {
           setAllJobData({
             loading: true,
@@ -173,6 +186,30 @@ const CreateJob = () => {
   useEffect(() => {
     GetJobData();
   }, []);
+
+  const get_information_company_umber = async (company_number) => {
+      const data = { company_number: company_number , type:'company_info' };
+      await dispatch(GetOfficerDetails(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            if (res.data.length > 0) {
+              
+            } else {
+              
+            }
+  
+          } else {
+  
+          }
+        })
+        .catch((err) => {
+          return;
+        }
+        );
+    };
+
+
 
   const getAllChecklist = async () => {
     if (
@@ -506,7 +543,7 @@ const CreateJob = () => {
 
   const handleSubmit = async () => {
 
-  
+
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
@@ -632,6 +669,15 @@ const CreateJob = () => {
     } else {
     }
   };
+
+  useEffect(() => {
+
+    if (location?.state?.goto == "Customer") {
+      console.log("client id IF --->>", jobData.Client);
+    } else {
+      console.log("client id ELSE --->>", location?.state?.clientName?.id);
+    }
+  }, [jobData.Client]);
 
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
@@ -1927,7 +1973,7 @@ const CreateJob = () => {
 
   let assignedServiceIds = assignDetails?.map((d) => Number(d.service_id_assign));
 
- if (assignedServiceIds != undefined && Array.isArray(assignedServiceIds) && assignedServiceIds.length > 0) {
+  if (assignedServiceIds != undefined && Array.isArray(assignedServiceIds) && assignedServiceIds.length > 0) {
     serviceOptions = serviceOptions.filter((option) =>
       assignedServiceIds.includes(Number(option.value))
     );
@@ -2024,7 +2070,7 @@ const CreateJob = () => {
   };
 
 
-  console.log("setAddTaskArr - CreateJob", AddTaskArr);
+
 
   return (
     <div>
@@ -3027,34 +3073,34 @@ const CreateJob = () => {
 
 
                                   <div className="col-lg-4">
-                                      <div className="mb-3">
-                                        <label className="form-label">
-                                          Job Priority
-                                        </label>
-                                        <select
-                                          className="form-select"
-                                          name="job_priority"
-                                          onChange={HandleChange}
-                                          value={
-                                            jobData.job_priority
-                                          }
-                                        >
-                                          <option value="normal">Normal</option>
-                                          <option value="urgent">Urgent</option>
-                                        </select>
-                                        {errors[
-                                          "job_priority"
-                                        ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
-                                                "job_priority"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
-                                      </div>
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Job Priority
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="job_priority"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.job_priority
+                                        }
+                                      >
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                      </select>
+                                      {errors[
+                                        "job_priority"
+                                      ] && (
+                                          <div className="error-text">
+                                            {
+                                              errors[
+                                              "job_priority"
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                     </div>
+                                  </div>
 
 
                                 </div>

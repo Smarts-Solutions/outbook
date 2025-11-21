@@ -19,11 +19,16 @@ const getAddJobData = async (job) => {
 
         clients.id AS client_id,
         clients.trading_name AS client_trading_name,
-        clients.client_type AS client_client_type
+        clients.client_type AS client_client_type,
+
+        client_company_information.company_number AS client_company_number
+
     FROM 
         customers
    JOIN 
         clients ON customers.id = clients.customer_id
+   LEFT JOIN
+       client_company_information ON clients.id = client_company_information.client_id     
    WHERE customers.id = ?    
    ORDER BY 
     clients.trading_name ASC;
@@ -44,6 +49,7 @@ const getAddJobData = async (job) => {
         client_id: row.client_id,
         client_trading_name: row.client_trading_name,
         client_client_type: row.client_client_type,
+        client_company_number: row.client_company_number
       }));
     }
 

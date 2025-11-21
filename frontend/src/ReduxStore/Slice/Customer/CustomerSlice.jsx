@@ -92,6 +92,7 @@ export const GetOfficerDetails = createAsyncThunk("seachCompany", async (data) =
     const updatedReq = {
       company_number: data.company_number,
       StaffUserId: StaffUserId.id,
+      type: data.type
     };
     const res = await GETOFFICERDETAILS(updatedReq);
     return await res;
