@@ -47,6 +47,24 @@ const JobStatus = () => {
       reorder: false,
       sortable: true,
     },
+
+     {
+      name: "Job Priority",
+      cell: (row) => {
+        const v = row.job_priority || "-";
+        const cap = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        return <div title={cap}>{cap}</div>;
+      },
+      selector: (row) => {
+        if (!row.job_priority) return "-";
+        return (
+          row.job_priority.charAt(0).toUpperCase() +
+          row.job_priority.slice(1).toLowerCase()
+        );
+      },
+      sortable: true,
+    },
+
     {
       name: "Customer Name",
       cell: (row) => (
@@ -193,6 +211,7 @@ const JobStatus = () => {
     return {
       "Job Id": item.job_code_id,
       "Job Received On": convertDate(item.job_received_on),
+      "Job Priority": item.job_priority ? (item.job_priority.charAt(0).toUpperCase() + item.job_priority.slice(1).toLowerCase()) : "-",
       "Customer Name": item.customer_trading_name,
       "Account Manager": item.account_manager_name,
       "Clients": item.client_trading_name,

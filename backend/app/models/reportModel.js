@@ -79,6 +79,8 @@ const jobStatusReports = async (Report) => {
             const query = `
                 SELECT 
                 jobs.id AS id,
+                jobs.service_id AS job_service_id,
+                jobs.job_priority AS job_priority,
                  CONCAT(
                         SUBSTRING(customers.trading_name, 1, 3), '_',
                         SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -148,8 +150,8 @@ const jobStatusReports = async (Report) => {
         // Other Role Data
         const query = `
         SELECT 
-         jobs.id AS id,
-
+        jobs.id AS id,
+        jobs.job_priority AS job_priority,
         assigned_jobs_staff_view.source AS assigned_source,
         assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,

@@ -260,6 +260,7 @@ const getTimesheet = async (Timesheet) => {
     const query_week_filter = `SELECT  
     id,
     staff_id,
+    submit_status,
     DATE_FORMAT(monday_date, '%Y-%m-%d') AS monday_date,
     DATE_FORMAT(tuesday_date, '%Y-%m-%d') AS tuesday_date,
     DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
@@ -359,6 +360,9 @@ ORDER BY
     //   })
     //   .filter(Boolean);
 
+      
+    console.log("rows1 ", rows1);
+
 
      const filterDataWeek = rows1
       .map(item => {
@@ -388,7 +392,36 @@ ORDER BY
       })
       .filter(Boolean);
 
-    return { status: true, message: "success.", data: rows, filterDataWeek: filterDataWeek };
+      const filterDataWeekSubmitTimeSheet = rows1
+      .map(item => {
+        if (
+          item.valid_weekOffsets != null &&
+          item.valid_weekOffsets != '' &&
+          item.valid_weekOffsets != undefined && 
+          item.submit_status === '1'
+        ) {
+          const firstDate =
+            item.monday_date ||
+            item.tuesday_date ||
+            item.wednesday_date ||
+            item.thursday_date ||
+            item.friday_date ||
+            item.saturday_date;
+
+          if (!firstDate) return null;
+
+          return {
+            id: item.id,
+            staff_id: item.staff_id,
+            valid_weekOffsets: item.valid_weekOffsets,
+            month_date: firstDate,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    return { status: true, message: "success.", data: rows, filterDataWeek: filterDataWeek , filterDataWeekSubmitTimeSheet: filterDataWeekSubmitTimeSheet };
   } catch (err) {
     console.log(err);
     return { status: false, message: "Err getTimesheet Data View Get", error: err.message };

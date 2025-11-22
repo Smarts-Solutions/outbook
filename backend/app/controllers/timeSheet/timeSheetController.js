@@ -8,7 +8,7 @@ const getTimesheet = async (req, res) => {
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
         }else{
-        return  res.status(200).json({ status: true, message: result.message , data : result.data , filterDataWeek : result.filterDataWeek});
+        return  res.status(200).json({ status: true, message: result.message , data : result.data , filterDataWeek : result.filterDataWeek , filterDataWeekSubmitTimeSheet : result.filterDataWeekSubmitTimeSheet });
         }
     
     } catch (error) {

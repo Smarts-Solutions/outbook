@@ -113,6 +113,11 @@ const Timesheet = () => {
     data: [],
   });
 
+  const [staffDataWeekDataAllSubmitTImeSheet, setStaffDataWeekDataAllSubmitTImeSheet] = useState({
+    loading: true,
+    data: [],
+  });
+
   const GetTimeSheet = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
@@ -122,8 +127,8 @@ const Timesheet = () => {
     setDeleteRows([]);
     if (res.status) {
 
-
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+      setStaffDataWeekDataAllSubmitTImeSheet({ loading: false, data: res.filterDataWeekSubmitTimeSheet });
 
       const hasValidWeekOffsetZeroValue =
         res.filterDataWeek.length > 0 &&
@@ -162,9 +167,7 @@ const Timesheet = () => {
 
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
-    console.log(`name`, name);
-    console.log(`value`, value);
-
+    
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -761,12 +764,7 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
-    console.log(`name`, name);
-    console.log(`value`, value);
-    console.log(`date_value`, date_value);
-    console.log(`day_name`, day_name);
-
-
+  
     let final_value = value;
 
     let [intPart, decimalPart] = value.toString().split(".");
@@ -1213,7 +1211,7 @@ const Timesheet = () => {
         const decimal = hours + '.' + minutes;
         staff_hourminute = parseFloat(decimal);
       } else if (staff_hourminute != null) {
-        console.log(staff_hourminute);
+        
         staff_hourminute = parseFloat(staff_hourminute)
       }
 
@@ -1552,6 +1550,19 @@ const Timesheet = () => {
     });
   }
 
+
+  const weekOptionsSubmitTimeSheet = [];
+  
+  if (staffDataWeekDataAllSubmitTImeSheet.data) {
+    staffDataWeekDataAllSubmitTImeSheet.data.forEach((val) => {
+      weekOptionsSubmitTimeSheet.push({
+        value: val.valid_weekOffsets,
+        label: getFormattedDate("convert", val.month_date),
+      });
+    });
+  }
+
+
   const currentValue = weekOptions.find(
     (opt) => opt.value == weekOffSetValue.current
   );
@@ -1588,11 +1599,19 @@ const Timesheet = () => {
 
   };
 
-  // copy timeSheet functionality
+  //  timeSheet functionality
   const weekOptionsWithPlaceholder = [
     { label: "-- select --", value: "" },
     ...weekOptions
   ];
+   
+   
+  // COPY TIMESHEET FUNCTIONALITY START //
+  const weekOptionsWithPlaceholderSubmitTimeSheet = [
+    { label: "-- select --", value: "" },
+    ...weekOptionsSubmitTimeSheet
+  ];
+
 
 
   const convertDateFormatForCopy = (dateString) => {
@@ -3029,7 +3048,7 @@ const Timesheet = () => {
                     id="tabSelect"
                     name="week"
                     className="basic-multi-select"
-                    options={weekOptionsWithPlaceholder}
+                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
                     defaultValue={null}
                     //defaultValue={currentValue}
                     placeholder="-- Select --"
