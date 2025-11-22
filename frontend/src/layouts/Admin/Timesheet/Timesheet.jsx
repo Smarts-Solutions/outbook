@@ -1100,6 +1100,8 @@ const Timesheet = () => {
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
       if (res.status) {
+        setActiveIndex(null);
+        setActiveField(null);
         sweatalert.fire({
           icon: "success",
           title: res.message,
@@ -1115,8 +1117,7 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
-        setActiveIndex(null);
-        setActiveField(null);
+        
       }
     }
   };
@@ -1264,12 +1265,14 @@ const Timesheet = () => {
 
       }
 
-
-
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
       if (res.status) {
+
+        setActiveIndex(null);
+        setActiveField(null);
+
         setRemarkText(null);
         setUpdateTimeSheetRows([]);
         setRemarkModel(false);
