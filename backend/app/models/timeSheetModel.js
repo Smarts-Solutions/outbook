@@ -361,9 +361,7 @@ ORDER BY
     //   .filter(Boolean);
 
       
-    console.log("rows1 ", rows1);
-
-
+ 
      const filterDataWeek = rows1
       .map(item => {
         if (
@@ -392,6 +390,7 @@ ORDER BY
       })
       .filter(Boolean);
 
+      // Submitted Timesheet Week Filter Data
       const filterDataWeekSubmitTimeSheet = rows1
       .map(item => {
         if (
