@@ -125,6 +125,8 @@ const CreateJob = () => {
 
   });
 
+  console.log("jobData", jobData.Service);
+
   // console.log("CustomerDetails", jobData.CustomerDetails);
   // console.log("Reviewer", jobData.Reviewer);
   // console.log("staffCreatedId", staffCreatedId);
@@ -169,7 +171,7 @@ const CreateJob = () => {
             const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id) && client?.client_client_type == "2") || "";
             console.log("clientInfo", clientInfo);
             if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
-              await get_information_company_umber(clientInfo?.client_company_number);
+              await get_information_company_umber(clientInfo?.client_company_number ,response.data?.services?.[0]?.service_id);
             }
           }
         } else {
@@ -189,13 +191,21 @@ const CreateJob = () => {
     GetJobData();
   }, []);
 
-  const get_information_company_umber = async (company_number) => {
+  const get_information_company_umber = async (company_number , service_id) => {
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
           setClientInfoCompanyDetails(res.data);
+          if (!['',null,undefined].includes(service_id) && Number(service_id) == 1) {
+            setJobData((prevState) => ({
+              ...prevState,
+              Year_Ending_id_1: res.data?.accounts?.next_accounts?.period_end_on,
+              DueOn : res.data?.accounts?.next_accounts?.due_on,
+            }));
+          }
+
         } else {
           setClientInfoCompanyDetails({});
 
@@ -331,7 +341,7 @@ const CreateJob = () => {
     if (name == 'Client') {
       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value) && client?.client_client_type == "2") || "";
       if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
-        get_information_company_umber(clientInfo?.client_company_number);
+        get_information_company_umber(clientInfo?.client_company_number ,jobData?.Service);
       } else {
         setClientInfoCompanyDetails({});
       }
@@ -353,7 +363,27 @@ const CreateJob = () => {
           ...prevState,
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
-      } else if (value == 4) {
+
+        if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
+          alert("Data exists");
+          setJobData((prevState) => ({
+          ...prevState,
+          Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
+          DueOn : clientInfoCompanyDetails?.accounts?.next_accounts?.due_on,
+        }));
+        } 
+      }else{
+        alert("No Data");
+        setJobData((prevState) => ({
+          ...prevState,
+          Year_Ending_id_1: null,
+          DueOn: null,
+        }));
+      }
+      
+      
+      
+      if (value == 4) {
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
           ...prevState,
@@ -435,6 +465,8 @@ const CreateJob = () => {
 
     validate(name, value);
   };
+
+ 
 
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
@@ -901,7 +933,6 @@ const CreateJob = () => {
       return matchesCondition(depVal, values[depKey]);
     });
   };
-
 
   const serviceFields = [
     {
@@ -3244,7 +3275,7 @@ const CreateJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="DueOn"
                                         onChange={HandleChange}
-                                        value={jobData.DueOn}
+                                        defaultValue={jobData.DueOn}
                                       />
                                       {errors["DueOn"] && (
                                         <div className="error-text">
