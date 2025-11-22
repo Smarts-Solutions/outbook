@@ -68,7 +68,7 @@ const CreateJob = () => {
   const [selectedStaffData, setSelectedStaffData] = useState([]);
   const [allClientDetails, setAllClientDetails] = useState([]);
   const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
-  
+
 
 
   console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
@@ -166,10 +166,10 @@ const CreateJob = () => {
           setAllClientDetails(response?.data?.client || []);
 
           if (location?.state?.goto != "Customer") {
-           const clientInfo =   response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id) && client?.client_client_type == "2") || "";
-           console.log("clientInfo", clientInfo);
+            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id) && client?.client_client_type == "2") || "";
+            console.log("clientInfo", clientInfo);
             if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
-            await  get_information_company_umber(clientInfo?.client_company_number);
+              await get_information_company_umber(clientInfo?.client_company_number);
             }
           }
         } else {
@@ -190,23 +190,22 @@ const CreateJob = () => {
   }, []);
 
   const get_information_company_umber = async (company_number) => {
-      const data = { company_number: company_number , type:'company_info' };
-      await dispatch(GetOfficerDetails(data))
-        .unwrap()
-        .then((res) => {
-          if (res.status) {
-              setClientInfoCompanyDetails(res.data);
-          } else {
-             setClientInfoCompanyDetails({});
+    const data = { company_number: company_number, type: 'company_info' };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setClientInfoCompanyDetails(res.data);
+        } else {
+          setClientInfoCompanyDetails({});
 
-          }
-        })
-        .catch((err) => {
-          return;
         }
-        );
-    };
-
+      })
+      .catch((err) => {
+        return;
+      }
+      );
+  };
 
   const getAllChecklist = async () => {
     if (
@@ -329,11 +328,11 @@ const CreateJob = () => {
     let name = e.target.name;
     let value = e.target.value;
 
-    if(name == 'Client'){
-      const clientInfo =   allClientDetails?.find((client) => Number(client?.client_id) == Number(value) && client?.client_client_type == "2") || "";
+    if (name == 'Client') {
+      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value) && client?.client_client_type == "2") || "";
       if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
         get_information_company_umber(clientInfo?.client_company_number);
-      } else {  
+      } else {
         setClientInfoCompanyDetails({});
       }
     }
@@ -676,7 +675,7 @@ const CreateJob = () => {
     }
   };
 
- 
+
 
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
