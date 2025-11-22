@@ -1269,7 +1269,6 @@ const Timesheet = () => {
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
       if (res.status) {
-
         setActiveIndex(null);
         setActiveField(null);
 
