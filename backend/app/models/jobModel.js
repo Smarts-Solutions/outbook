@@ -2778,10 +2778,7 @@ const updateJobStatus = async (job) => {
     [job_id]
   );
 
-  // console.log("job_id", job_id);
-  // console.log("status_type", status_type);
-  // console.log("ExistJobData", ExistJobData);  
-
+  
   
   try {
 
@@ -2795,7 +2792,7 @@ const updateJobStatus = async (job) => {
       if (['', null, undefined, 0, '0'].includes(ExistAllocatedTo?.allocated_to)) {
         return {
           status: false,
-          message: "Please sent to be Processing.",
+          message: "Please assign the job to the Processor.",
           data: "W",
         };
       }
@@ -2803,7 +2800,7 @@ const updateJobStatus = async (job) => {
 
 
     // only Reviewer sent one record
-    if ([7,17,18,19,20].includes(parseInt(status_type))) {
+    if ([5,7,17,18,19,20].includes(parseInt(status_type))) {
       const [[ExistReviewer]] = await pool.execute(
         `SELECT reviewer FROM jobs WHERE id = ?`,
         [job_id]
