@@ -191,7 +191,7 @@ const CreateJob = () => {
     GetJobData();
   }, []);
 
-  
+
 
   const get_information_company_umber = async (company_number , service_id) => {
     const data = { company_number: company_number, type: 'company_info' };
@@ -367,7 +367,7 @@ const CreateJob = () => {
         }));
 
         if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
-          alert("Data exists");
+          
           setJobData((prevState) => ({
           ...prevState,
           Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
@@ -375,7 +375,7 @@ const CreateJob = () => {
         }));
         } 
       }else{
-        alert("No Data");
+        
         setJobData((prevState) => ({
           ...prevState,
           Year_Ending_id_1: null,
