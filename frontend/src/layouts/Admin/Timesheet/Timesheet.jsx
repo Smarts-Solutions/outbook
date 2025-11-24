@@ -118,6 +118,28 @@ const Timesheet = () => {
     data: [],
   });
 
+
+  const [lineMangerData, setLineMangerData] = useState([]);
+  const [selectedLineManager, setSelectedLineManager] = useState("");
+
+  console.log(`selectedLineManager`, selectedLineManager);
+
+  const GetLineManagerData = async () => {
+    await dispatch(Staff({ req: { action: "get_line_manager" }, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          console.log(`response`, response);
+          setLineMangerData(response.data);
+        } else {
+          setLineMangerData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
   const GetTimeSheet = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
@@ -167,7 +189,7 @@ const Timesheet = () => {
 
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
-    
+
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -245,6 +267,7 @@ const Timesheet = () => {
 
   useEffect(() => {
     staffData();
+    GetLineManagerData();
   }, []);
 
   useEffect(() => {
@@ -275,6 +298,8 @@ const Timesheet = () => {
     ];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
+
+
   }, []);
 
   // Function to handle week change
@@ -293,6 +318,7 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
+
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -764,7 +790,7 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
-  
+
     let final_value = value;
 
     let [intPart, decimalPart] = value.toString().split(".");
@@ -1117,7 +1143,7 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
-        
+
       }
     }
   };
@@ -1212,7 +1238,7 @@ const Timesheet = () => {
         const decimal = hours + '.' + minutes;
         staff_hourminute = parseFloat(decimal);
       } else if (staff_hourminute != null) {
-        
+
         staff_hourminute = parseFloat(staff_hourminute)
       }
 
@@ -1554,7 +1580,7 @@ const Timesheet = () => {
 
 
   const weekOptionsSubmitTimeSheet = [];
-  
+
   if (staffDataWeekDataAllSubmitTImeSheet.data) {
     staffDataWeekDataAllSubmitTImeSheet.data.forEach((val) => {
       weekOptionsSubmitTimeSheet.push({
@@ -1565,7 +1591,7 @@ const Timesheet = () => {
   }
 
 
-  const currentValue = weekOptions.find(
+  let currentValue = weekOptions.find(
     (opt) => opt.value == weekOffSetValue.current
   );
 
@@ -1606,15 +1632,49 @@ const Timesheet = () => {
     { label: "-- select --", value: "" },
     ...weekOptions
   ];
-   
-   
+
+
   // COPY TIMESHEET FUNCTIONALITY START //
   const weekOptionsWithPlaceholderSubmitTimeSheet = [
     { label: "-- select --", value: "" },
     ...weekOptionsSubmitTimeSheet
   ];
 
+  //lineMangerDataWithPlaceholder
+  const lineMangerDataOptions = lineMangerData?.map((val) => ({
+    value: val.staff_id,
+    label: `${val.staff_name}`
+  })) || [];
+  const lineMangerDataWithPlaceholder = [
+    { label: "-- select --", value: "" },
+    ...lineMangerDataOptions
+  ];
 
+  const selectLineManager = async (e) => {
+    // console.log("e ", e); 
+    let name = e.target.name;
+    let value = e.target.value;
+
+    if (!['', '0', undefined, null].includes(value)) {
+      setSelectedLineManager(value);
+      const e = { target: { name: 'staff_id', value: value } };
+      selectFilterStaffANdWeek(e);
+    } else {
+      
+      setSelectedLineManager("");
+      const e = { target: { name: 'staff_id', value: staffDetails?.id } };
+      selectFilterStaffANdWeek(e);
+
+   
+
+
+    }
+
+  };
+
+
+  console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
+  console.log("weekOptions ", weekOptions);
 
   const convertDateFormatForCopy = (dateString) => {
     const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
@@ -1724,26 +1784,6 @@ const Timesheet = () => {
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
 
-
-                {/* <select
-                  name="staff_id"
-                  className="form-select"
-                  id="tabSelect"
-                  defaultValue={staffDetails.id}
-                  onChange={(e) => selectFilterStaffANdWeek(e)}
-                  
-                >
-                  {staffDataAll.data &&
-                    staffDataAll.data.map((val, index) => (
-                      <option
-                        key={index}
-                        value={val.id}
-                        selected={staffDetails.id === val.id}
-                      >
-                        {val.first_name + " " + val.last_name}
-                      </option>
-                    ))}
-                </select> */}
                 <Select
                   id="tabSelect"
                   name="staff_id"
@@ -1762,7 +1802,7 @@ const Timesheet = () => {
             ) : (
               ""
             )}
-           
+
             <div className="form-group col-md-8 row align-items-center">
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
@@ -1775,6 +1815,61 @@ const Timesheet = () => {
                     // options={weekOptions}
                     // defaultValue={currentValue}
                     options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+
+              {lineMangerData &&
+                lineMangerData.length > 0 ? (
+                <div className="form-group col-md-6 pe-0">
+                  <label className="form-label mb-2">Line Manager</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={lineMangerDataWithPlaceholder}
+                    defaultValue={null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'lineManger', value: selectedOption.value } };
+                      selectLineManager(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+
+              {selectedLineManager != "" && staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-6 pe-0">
+                  <label className="form-label mb-2">Line Manager Select Week</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
                     defaultValue={null}
                     placeholder="-- Select --"
                     onChange={(selectedOption) => {
@@ -1820,7 +1915,7 @@ const Timesheet = () => {
                 )}
             </div>
 
-          
+
 
 
 

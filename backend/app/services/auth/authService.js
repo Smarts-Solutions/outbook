@@ -47,6 +47,10 @@ const managePortfolio = async (staff_id) => {
   return staffModel.managePortfolio(staff_id);
 };
 
+const getLineManagerStaff = async (staff) => {
+  return staffModel.getLineManagerStaff(staff);
+}
+
 const getManagerStaff = async () => {
   return staffModel.getManagerStaff();
 };
@@ -228,6 +232,7 @@ module.exports = {
   UpdateStaffPortfolio,
   deleteStaff,
   GetStaffByRole,
-  GetStaffAndDeleteData
+  GetStaffAndDeleteData,
+  getLineManagerStaff
 
 };

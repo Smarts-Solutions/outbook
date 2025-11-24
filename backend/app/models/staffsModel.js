@@ -428,6 +428,27 @@ const managePortfolio = async (staff_id) => {
   }
 };
 
+const getLineManagerStaff = async (staff) => {
+
+  let staff_by = staff.StaffUserId;
+   const LineManageQuery = `
+    SELECT 
+    line_managers.staff_to AS staff_id, 
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name 
+    FROM line_managers 
+    JOIN staffs ON line_managers.staff_to = staffs.id
+    WHERE line_managers.staff_by = ?
+  `
+  try {
+    const [lineManagerResult] = await pool.execute(LineManageQuery, [staff_by]);
+    return lineManagerResult;
+  } catch (err) {
+    console.error("Error selecting data:", err);
+    throw err;
+  }
+  
+}
+
 const status = async (id) => {
   if (id != undefined) {
     const query = `SELECT status FROM staffs WHERE id = ?`;
@@ -819,4 +840,5 @@ module.exports = {
   deleteStaffUpdateStaff,
   GetStaffByRoleId,
   GetStaffAndDelete,
+  getLineManagerStaff
 };
