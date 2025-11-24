@@ -1486,10 +1486,11 @@ const Timesheet = () => {
       "Remark"
     ];
 
-
+   let  total_hours = 0
     const rows = timeSheetRows
       .filter(item => item.id !== null && item.id !== undefined)
       .map((item, index) => {
+        total_hours += parseFloat(item.total_hours) || 0;
         return [
           index + 1,
           item.task_type === "1" ? "Internal" : "External",
@@ -1520,7 +1521,10 @@ const Timesheet = () => {
 
 
 
-    const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark || ""}`, ...new Array(headers.length - 1).fill("")];
+    const finalRemarkRow = [
+    `Total Weekly Hours : ${(total_hours).toFixed(2) || ""}`,
+    `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
+    ...new Array(headers.length - 1).fill("")];
 
     const csvContent = [headers, ...rows, finalRemarkRow]
       .map((row) => row.join(","))
