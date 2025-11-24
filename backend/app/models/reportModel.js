@@ -2510,9 +2510,6 @@ const getTimesheetReportData = async (Report) => {
         const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
 
 
-
-      
-
         return {
             status: true,
             message: 'Success.',
