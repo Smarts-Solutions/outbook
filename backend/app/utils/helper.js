@@ -363,12 +363,25 @@ id DESC;`;
 
 }
 
+// async function LineManageStaffIdHelperFunction(staff_id) {
+//   const LineManageQuery = `
+//     SELECT staff_to FROM line_managers WHERE staff_by = ?
+//   `
+//   const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
+//   let LineManageStaffId = LineManage?.map(item => item.staff_to);
+//   // if (LineManageStaffId.length == 0) {
+//   //     LineManageStaffId.push(staff_id);
+//   // }
+//   LineManageStaffId.push(staff_id);
+//   return LineManageStaffId;
+// }
+
 async function LineManageStaffIdHelperFunction(staff_id) {
   const LineManageQuery = `
-    SELECT staff_to FROM line_managers WHERE staff_by = ?
+    SELECT staff_by FROM line_managers WHERE staff_to = ?
   `
   const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
-  let LineManageStaffId = LineManage?.map(item => item.staff_to);
+  let LineManageStaffId = LineManage?.map(item => item.staff_by);
   // if (LineManageStaffId.length == 0) {
   //     LineManageStaffId.push(staff_id);
   // }
