@@ -17,12 +17,9 @@ parentPort.on("message", async (rows) => {
         // });
         let processedStaff = new Set();
         getStaffNameMissingReport?.forEach(val => {
-          // Agar staff_id pehle aa chuka hai → skip
           if (processedStaff.has(val?.staff_id)) {
             return;
           }
-
-          // Staff ko mark kar do as processed
           processedStaff.add(val?.staff_id);
           csvContent += `${val?.staff_fullname},${val?.staff_email}\n`;
         });
@@ -34,9 +31,9 @@ parentPort.on("message", async (rows) => {
         const dynamic_attachment = csvContent;
         const filename = "MissingTimesheetReport.csv";
 
-       // parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
+        // parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment , filename);
+        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
           //console.log("Missing Timesheet Report email sent successfully.");
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);

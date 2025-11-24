@@ -595,7 +595,7 @@ const getSharePointToken = async (staff) => {
 };
 
 const GetStaffPortfolio = async (staff) => {
-  console.log("staff_id ->>>", staff);
+  
   const id = staff.staff_id;
   const type = staff.type;
   if (type === 'assignCustomer') {
