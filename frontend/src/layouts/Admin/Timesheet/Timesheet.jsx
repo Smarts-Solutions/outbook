@@ -1715,6 +1715,8 @@ const Timesheet = () => {
           </div>
         </div>
       </div>
+
+
       <div className="report-data mt-4">
         <div className="col-md-12">
           <div className="row ">
@@ -1760,38 +1762,13 @@ const Timesheet = () => {
             ) : (
               ""
             )}
+            
             <div className="form-group col-md-8 row align-items-center">
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
                 <div className="form-group col-md-6 pe-0">
                   <label className="form-label mb-2">Select Date</label>
 
-                  {/* <select
-                    name="week"
-                    className="form-select"
-                    id="tabSelect"
-                    // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
-                    onChange={(e) => selectFilterStaffANdWeek(e)}
-                  >
-                    {!hasValidWeekOffsetZero && (
-                      <option value="0">
-                        {getFormattedDate("current", "")}
-                      </option>
-                    )}
-
-                    {staffDataWeekDataAll.data &&
-                      staffDataWeekDataAll.data.map((val, index) => (
-                        <option
-                          key={index}
-                          value={val.valid_weekOffsets}
-                          selected={
-                            weekOffSetValue.current == val.valid_weekOffsets
-                          }
-                        >
-                          {getFormattedDate("convert", val.month_date)}
-                        </option>
-                      ))}
-                  </select> */}
                   <Select
                     id="tabSelect"
                     name="week"
@@ -1843,6 +1820,15 @@ const Timesheet = () => {
                   ""
                 )}
             </div>
+
+          
+
+
+
+
+
+
+
           </div>
 
           {/* Tabs Content */}
@@ -3072,6 +3058,7 @@ const Timesheet = () => {
 
         </div>
       </div>
+
     </div>
   );
 };
