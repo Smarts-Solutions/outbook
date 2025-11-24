@@ -1758,7 +1758,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
                 const day = String(d.getDate()).padStart(2, "0");
                 const monthName = d.toLocaleString("default", { month: "short" });
                 const yearShort = String(d.getFullYear()).slice(-2);
-                result.push(`${weekday} ${day} ${monthName} ${yearShort}`); // Mon 08 Sep 25
+                result.push(`${weekday} ${day} ${monthName} ${yearShort}`); 
                 current.setDate(current.getDate() + 1);
                 break;
             }
@@ -2311,7 +2311,9 @@ const getTimesheetReportData = async (Report) => {
             timesheet.job_id,
             timesheet.task_id,
             ${groupValueSQL},
-            timesheet.tuesday_date, timesheet.tuesday_hours, timesheet.task_type
+            timesheet.tuesday_date AS work_date,
+            timesheet.tuesday_hours AS work_hours, 
+            timesheet.task_type
             FROM timesheet
             LEFT JOIN staffs s ON timesheet.staff_id = s.id
             WHERE timesheet.tuesday_date IS NOT NULL
@@ -2324,7 +2326,9 @@ const getTimesheetReportData = async (Report) => {
             timesheet.job_id,
             timesheet.task_id,
             ${groupValueSQL},
-            timesheet.wednesday_date, timesheet.wednesday_hours, timesheet.task_type
+            timesheet.wednesday_date AS work_date, 
+            timesheet.wednesday_hours AS work_hours, 
+            timesheet.task_type
             FROM timesheet
             LEFT JOIN staffs s ON timesheet.staff_id = s.id
             WHERE
@@ -2338,7 +2342,9 @@ const getTimesheetReportData = async (Report) => {
             timesheet.job_id,
             timesheet.task_id,
             ${groupValueSQL},
-            timesheet.thursday_date, timesheet.thursday_hours, timesheet.task_type
+            timesheet.thursday_date AS work_date, 
+            timesheet.thursday_hours AS work_hours, 
+            timesheet.task_type
             FROM timesheet
             LEFT JOIN staffs s ON timesheet.staff_id = s.id
             WHERE   
@@ -2352,7 +2358,9 @@ const getTimesheetReportData = async (Report) => {
             timesheet.job_id,
             timesheet.task_id,
             ${groupValueSQL},
-            timesheet.friday_date, timesheet.friday_hours, timesheet.task_type
+            timesheet.friday_date AS work_date, 
+            timesheet.friday_hours AS work_hours, 
+            timesheet.task_type
             FROM timesheet
             LEFT JOIN staffs s ON timesheet.staff_id = s.id
             WHERE
@@ -2366,7 +2374,9 @@ const getTimesheetReportData = async (Report) => {
             timesheet.job_id,   
             timesheet.task_id,
             ${groupValueSQL},
-            timesheet.saturday_date, timesheet.saturday_hours, timesheet.task_type
+            timesheet.saturday_date AS work_date, 
+            timesheet.saturday_hours AS work_hours, 
+            timesheet.task_type
             FROM timesheet
             LEFT JOIN staffs s ON timesheet.staff_id = s.id
             WHERE
@@ -2380,7 +2390,9 @@ const getTimesheetReportData = async (Report) => {
             timesheet.job_id,
             timesheet.task_id,
             ${groupValueSQL},
-            timesheet.sunday_date, timesheet.sunday_hours, timesheet.task_type
+            timesheet.sunday_date AS work_date,
+            timesheet.sunday_hours AS work_hours,
+            timesheet.task_type
             FROM timesheet
             LEFT JOIN staffs s ON timesheet.staff_id = s.id
             WHERE
@@ -2416,7 +2428,7 @@ const getTimesheetReportData = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
-            console.log("r.work_hours --------> " ,r.work_hours);
+            console.log("r.work_hours --------> ", r.work_hours);
 
             //  const gid = r.group_value || 'NULL';
             const gid = r.group_value + '_' + r.task_type || 'NULL';
@@ -2492,6 +2504,7 @@ const getTimesheetReportData = async (Report) => {
 
 
         // const columns = ['group', ...periods, 'total_hours', 'total_records'];
+        console.log("fromDate ,", fromDate, 'toDate ', toDate);
 
         const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
 
@@ -3211,8 +3224,8 @@ const getStaffWithRole = async (Report) => {
         GROUP BY job_allowed_staffs.staff_id
         ORDER BY staffs.first_name ASC;
         `
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: result };
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
         }
 
         if (role_id == "employee_number") {
@@ -3230,26 +3243,26 @@ const getStaffWithRole = async (Report) => {
         GROUP BY staffs.employee_number
         ORDER BY staffs.employee_number ASC;
         `
-        const [result] = await pool.execute(query); 
-        return { status: true, message: 'Success.', data: result };
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
         }
         else {
             let where = `staffs.role_id = ${role_id} AND staffs.status = '1'`;
             if ([3, 6].includes(Number(role_id))) {
                 where = `(staffs.role_id = ${role_id} || staffs.role_id = 4) AND staffs.status = '1'`;
             }
-        let condition = `JOIN jobs ON jobs.account_manager_id = staffs.id
-        WHERE ${where} AND jobs.id = ${job_id}`;    
-         if(role_id == 3){
-              condition = `JOIN jobs ON jobs.allocated_to = staffs.id
-        WHERE ${where} AND jobs.id = ${job_id}`; 
-        }
-        else if(role_id == 6){
-             condition = `JOIN jobs ON jobs.reviewer = staffs.id
-        WHERE ${where} AND jobs.id = ${job_id}`; 
-        }
+            let condition = `JOIN jobs ON jobs.account_manager_id = staffs.id
+        WHERE ${where} AND jobs.id = ${job_id}`;
+            if (role_id == 3) {
+                condition = `JOIN jobs ON jobs.allocated_to = staffs.id
+        WHERE ${where} AND jobs.id = ${job_id}`;
+            }
+            else if (role_id == 6) {
+                condition = `JOIN jobs ON jobs.reviewer = staffs.id
+        WHERE ${where} AND jobs.id = ${job_id}`;
+            }
 
-        const query = `
+            const query = `
         SELECT
         DISTINCT staffs.id,
         staffs.first_name,
