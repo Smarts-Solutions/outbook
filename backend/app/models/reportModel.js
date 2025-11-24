@@ -3764,7 +3764,7 @@ const getJobCustomReport = async (Report) => {
                 raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
                 raw.Whose_Tax_Return_is_it_id_4,
                 raw.Type_of_Payslip_id_3,
-                raw.Year_Ending_id_1,
+                DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
                 raw.Bookkeeping_Frequency_id_2,
                 raw.CIS_Frequency_id_3,
                 raw.Filing_Frequency_id_8,
