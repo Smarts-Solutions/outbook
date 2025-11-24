@@ -2204,13 +2204,7 @@ const getTimesheetReportData = async (Report) => {
         }
 
 
-
-
-
-
         where = where.length ? `WHERE ${where.join(" AND ")}` : '';
-
-
 
         // Build group_value for SQL
         // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
@@ -2422,6 +2416,8 @@ const getTimesheetReportData = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
+            console.log("r.work_hours --------> " ,r.work_hours);
+
             //  const gid = r.group_value || 'NULL';
             const gid = r.group_value + '_' + r.task_type || 'NULL';
             const label = r.group_label;
@@ -2433,7 +2429,8 @@ const getTimesheetReportData = async (Report) => {
             const taskType = r.task_type_label;
             const employeeNumber = r.employee_number;
 
-            const secs = r.work_hours;
+            //const secs = r?.work_hours;
+            const secs = ['', null, undefined].includes(r.work_hours) ? '0' : r.work_hours;
             // console.log("displayBy", displayBy, "workDateStr", workDateStr);
             const periodKey = getPeriodKey(displayBy, workDateStr);
             if (!periodKey) continue;
@@ -2500,7 +2497,6 @@ const getTimesheetReportData = async (Report) => {
 
         const columnsWeeks = [...groupBy, ...weeks, 'total_hours'];
         // const columns = [...groupBy, ...periods, 'total_hours'];
-
         // console.log("columnsWeeks", columnsWeeks);
 
 
@@ -2515,21 +2511,7 @@ const getTimesheetReportData = async (Report) => {
 
 
 
-        // console.log("columns", columns);
-        // console.log("outRows", outRows);
-
-        // console.log("columnsWeeks", columnsWeeks);
-        // console.log("finalRows", finalRows);
-
-        // return {
-        //     status: true,
-        //     message: 'Success.',
-        //     data: {
-        //         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
-        //         columns,
-        //         rows: outRows
-        //     }
-        // };
+      
 
         return {
             status: true,
