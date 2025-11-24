@@ -499,7 +499,6 @@ const StaffPage = () => {
     },
   ];
 
-
   const GetAllStaffPortfolio = async (row) => {
    let AssignCustomer = [];
    // get Assign Customer in staff
@@ -752,7 +751,6 @@ const StaffPage = () => {
     },
   ];
 
-
   const handleCheckboxChange = (event, id) => {
     const { checked } = event.target;
 
@@ -829,7 +827,6 @@ const StaffPage = () => {
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
   };
-
 
   const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
