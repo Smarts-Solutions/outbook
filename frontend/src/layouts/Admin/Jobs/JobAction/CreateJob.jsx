@@ -405,6 +405,7 @@ const CreateJob = () => {
         }));
       }
     }
+    
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
 
       if (value == "Daily") {
