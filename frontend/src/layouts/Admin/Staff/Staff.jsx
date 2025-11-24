@@ -32,6 +32,7 @@ const StaffPage = () => {
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
   const [allCustomerData, setAllCustomerData] = useState([]);
+ 
   const [deleteStaff, setDeleteStaff] = useState();
   const [deleteStaffCustomer, setDeleteStaffCustomer] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -40,6 +41,7 @@ const StaffPage = () => {
     minutes: "",
   });
   const [selectedStaff, setSelectedStaff] = useState(null);
+   const [assignCustomerData, setAssignCustomerData] = useState([]);
 
   // console.log("deleteStaffCustomer", deleteStaffCustomer);
 
@@ -219,7 +221,7 @@ const StaffPage = () => {
       });
   };
 
-  const GetAllCustomer = async () => {
+  const GetAllCustomer = async (AssignCustomer) => {
     await dispatch(
       Staff({
         req: { action: "portfolio", staff_id: StaffUserId.id },
@@ -229,7 +231,12 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setAllCustomerData(response.data);
+          // Filter out assigned customers
+          const filteredCustomers = response.data.filter((customer => {
+            return !AssignCustomer.some(assigned => assigned.customer_id === customer.id);
+          }));
+          setAllCustomerData(filteredCustomers);
+         // setAllCustomerData(response.data);
         } else {
           setAllCustomerData([]);
         }
@@ -494,6 +501,29 @@ const StaffPage = () => {
 
 
   const GetAllStaffPortfolio = async (row) => {
+   let AssignCustomer = [];
+   // get Assign Customer in staff
+     try {
+      const response = await staffPortfolio({
+        req: {
+          action: "get",
+          staff_id: row.id,
+          type: 'assignCustomer',
+        },
+        authToken: token,
+      });
+      if (response?.status && Array.isArray(response.data)) {
+         console.log("Assigned Customers Response:", response.data);
+         setAssignCustomerData(response.data);
+         AssignCustomer = response.data;
+      } else {
+        console.warn("Invalid response format:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching staff portfolio:", error);
+    }
+
+
     try {
       const response = await staffPortfolio({
         req: {
@@ -503,6 +533,7 @@ const StaffPage = () => {
         authToken: token,
       });
       if (response?.status && Array.isArray(response.data)) {
+        console.log("Staff Portfolio Response:", response.data);
         setAddCustomer(
           response.data.map((item) => ({
             value: item.customer_id,
@@ -510,13 +541,16 @@ const StaffPage = () => {
           }))
         );
         setPortfolio(row);
-        GetAllCustomer();
+        GetAllCustomer(AssignCustomer);
       } else {
         console.warn("Invalid response format:", response);
       }
     } catch (error) {
       console.error("Error fetching staff portfolio:", error);
     }
+
+    
+
   };
 
   const formik = useFormik({
@@ -1103,6 +1137,26 @@ const StaffPage = () => {
                 isMulti
               />
             </div>
+
+
+            <div className="col-12 mt-2">
+              <small className="text-muted">
+                Select customers to assign to this staff member.
+              </small>
+              {
+                assignCustomerData && assignCustomerData.length > 0 ? (
+                  <div className="mt-3">
+                    <h6>Assigned Customers:</h6>
+                    <ul>
+                      {assignCustomerData.map((customer) => (
+                        <li key={customer.customer_id}>{customer.trading_name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : ("" )
+              }
+            </div>
+
           </div>
         </div>
       </CommanModal>

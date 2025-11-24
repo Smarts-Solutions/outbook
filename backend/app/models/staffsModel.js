@@ -20,7 +20,7 @@ const createStaff = async (staff) => {
     ip,
     staff_to,
   } = staff;
-  
+
   // Exist Email Check
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
   const [check] = await pool.execute(checkQuery, [email]);
@@ -194,10 +194,10 @@ const updateStaff = async (staff) => {
     }
   }
   else {
-  //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
+    //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
-  
+
   // Exist Email Check
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
@@ -595,23 +595,53 @@ const getSharePointToken = async (staff) => {
 };
 
 const GetStaffPortfolio = async (staff) => {
-  console.log("staff_id", staff);
+  console.log("staff_id ->>>", staff);
   const id = staff.staff_id;
+  const type = staff.type;
+  if (type === 'assignCustomer') {
+    const queryCustomerAssign = `
+    SELECT 
+    assigned_jobs_staff_view.customer_id, 
+    customers.trading_name 
+    FROM assigned_jobs_staff_view
+    JOIN customers ON assigned_jobs_staff_view.customer_id = customers.id
+    WHERE assigned_jobs_staff_view.staff_id = ${id} AND assigned_jobs_staff_view.source != 'assign_customer_portfolio'
+    GROUP BY assigned_jobs_staff_view.customer_id
+  `;
 
-  const query = `
+
+    try {
+      const [assignedCustomers] = await pool.execute(queryCustomerAssign);
+      return assignedCustomers;
+    } catch (err) {
+      console.error("Error selecting data:", err);
+      throw err;
+    }
+
+
+
+
+  } else {
+
+    const query = `
     SELECT sp.customer_id, c.trading_name 
     FROM staff_portfolio sp
     JOIN customers c ON sp.customer_id = c.id
     WHERE sp.staff_id = ?
   `;
 
-  try {
-    const [result] = await pool.execute(query, [id]);
-    return result;
-  } catch (err) {
-    console.error("Error selecting data:", err);
-    throw err;
+    try {
+      const [result] = await pool.execute(query, [id]);
+      return result;
+    } catch (err) {
+      console.error("Error selecting data:", err);
+      throw err;
+    }
+
   }
+
+
+
 };
 
 const UpdateStaffPortfolio = async (staff) => {
