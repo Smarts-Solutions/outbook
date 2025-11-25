@@ -895,9 +895,6 @@ const EditJob = () => {
 
     }
 
-
-
-    return;
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
