@@ -266,13 +266,9 @@ const CreateJob = () => {
       return `${y}-01-31`;
     }
 
-
-
-
-
   }
 
-  console.log("dueOn_date_set - jobData.DueOn ", jobData.DueOn);
+
 
 
   const getAllChecklist = async () => {
