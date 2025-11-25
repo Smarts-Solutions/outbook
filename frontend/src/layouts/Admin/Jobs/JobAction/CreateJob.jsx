@@ -167,6 +167,8 @@ const CreateJob = () => {
           setAllStaffData(response?.data?.allStaff || []);
           setAllClientDetails(response?.data?.client || []);
 
+          console.log("location.response?.data?.client", response?.data?.client);
+
           if (location?.state?.goto != "Customer") {
             const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id) && client?.client_client_type == "2") || "";
             console.log("clientInfo", clientInfo);
