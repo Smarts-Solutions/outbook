@@ -876,8 +876,7 @@ const EditJob = () => {
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 2000,
-        });  
-
+        });
         due_on = dueOnDate;
       }
 
@@ -889,7 +888,6 @@ const EditJob = () => {
           showConfirmButton: true,
           timer: 2000,
         });
-
         Year_Ending_id_1 = yearEndOnDate;
       }
 
