@@ -68,6 +68,8 @@ const CreateJob = () => {
   const [selectedStaffData, setSelectedStaffData] = useState([]);
   const [allClientDetails, setAllClientDetails] = useState([]);
   const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
+  const [clientType, setClientType] = useState("");
+
 
 
 
@@ -125,7 +127,7 @@ const CreateJob = () => {
 
   });
 
-  console.log("jobData", jobData.Service);
+
 
   // console.log("CustomerDetails", jobData.CustomerDetails);
   // console.log("Reviewer", jobData.Reviewer);
@@ -167,14 +169,20 @@ const CreateJob = () => {
           setAllStaffData(response?.data?.allStaff || []);
           setAllClientDetails(response?.data?.client || []);
 
-          console.log("location.response?.data?.client", response?.data?.client);
 
           if (location?.state?.goto != "Customer") {
-            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id) && client?.client_client_type == "2") || "";
+            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
             console.log("clientInfo", clientInfo);
-            if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
-              await get_information_company_umber(clientInfo?.client_company_number ,response.data?.services?.[0]?.service_id);
+            setClientType(clientInfo?.client_client_type || "");
+            if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+              await get_information_company_umber(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
             }
+
+            else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+              await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+            }
+
+
           }
         } else {
           setAllJobData({
@@ -195,18 +203,18 @@ const CreateJob = () => {
 
 
 
-  const get_information_company_umber = async (company_number , service_id) => {
+  const get_information_company_umber = async (company_number, service_id) => {
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
           setClientInfoCompanyDetails(res.data);
-          if (!['',null,undefined].includes(service_id) && Number(service_id) == 1) {
+          if (!['', null, undefined].includes(service_id) && Number(service_id) == 1) {
             setJobData((prevState) => ({
               ...prevState,
               Year_Ending_id_1: res.data?.accounts?.next_accounts?.period_end_on,
-              DueOn : res.data?.accounts?.next_accounts?.due_on,
+              DueOn: res.data?.accounts?.next_accounts?.due_on,
             }));
           }
 
@@ -220,6 +228,44 @@ const CreateJob = () => {
       }
       );
   };
+
+  const dueOn_date_set = async (client_type, service_id) => {
+    let due_date = getDueDate(service_id);
+    console.log("due_date ----- ", due_date);
+  }
+
+  function getDueDate(service_id) {
+
+    // Service Account Production
+    if (Number(service_id) === 1) {
+      const d = new Date();
+      const year = d.getFullYear();
+      let dueYear = year;
+      // If created date is AFTER Jan 31 → next year's Jan 31
+      if (d > new Date(`${year}-01-31`)) {
+        dueYear = year + 1;
+      }
+      return new Date(`${dueYear}-01-31`);
+    }
+
+    // Service Personal Tax Return
+    else if (Number(service_id) === 4) {
+      //const d = new Date('2026-02-31'); // Example date
+      const d = new Date(); // Example date
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      if (m >= 4 || m <= 1) {
+        return new Date(`${m >= 4 ? y + 1 : y}-01-31`);
+      }
+      return new Date(`${y}-01-31`);
+    }
+
+
+
+
+
+  }
+
 
   const getAllChecklist = async () => {
     if (
@@ -343,11 +389,16 @@ const CreateJob = () => {
     let value = e.target.value;
 
     if (name == 'Client') {
-      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value) && client?.client_client_type == "2") || "";
-      if (clientInfo != "" && clientInfo?.client_company_number != undefined) {
-        get_information_company_umber(clientInfo?.client_company_number ,jobData?.Service);
+      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value)) || "";
+      setClientType(clientInfo?.client_client_type || "");
+      if (clientInfo != "" && clientInfo?.client_company_number != undefined, clientInfo?.client_client_type == "2") {
+        get_information_company_umber(clientInfo?.client_company_number, jobData?.Service);
       } else {
         setClientInfoCompanyDetails({});
+      }
+
+      if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+        dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
     }
 
@@ -369,24 +420,24 @@ const CreateJob = () => {
         }));
 
         if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
-          
+
           setJobData((prevState) => ({
-          ...prevState,
-          Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
-          DueOn : clientInfoCompanyDetails?.accounts?.next_accounts?.due_on,
-        }));
-        } 
-      }else{
-        
+            ...prevState,
+            Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
+            DueOn: clientInfoCompanyDetails?.accounts?.next_accounts?.due_on,
+          }));
+        }
+      } else {
+
         setJobData((prevState) => ({
           ...prevState,
           Year_Ending_id_1: null,
           DueOn: null,
         }));
       }
-      
-      
-      
+
+
+
       if (value == 4) {
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
@@ -407,7 +458,7 @@ const CreateJob = () => {
         }));
       }
     }
-    
+
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
 
       if (value == "Daily") {
@@ -471,7 +522,7 @@ const CreateJob = () => {
     validate(name, value);
   };
 
- 
+
 
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
@@ -582,6 +633,8 @@ const CreateJob = () => {
       minutes: budgeted_hour_totalTime.minutes || "0",
     });
   }, [AddTaskArr]);
+
+
 
   const handleSubmit = async () => {
 
