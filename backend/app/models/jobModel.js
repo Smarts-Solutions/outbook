@@ -20,6 +20,7 @@ const getAddJobData = async (job) => {
         clients.id AS client_id,
         clients.trading_name AS client_trading_name,
         clients.client_type AS client_client_type,
+        clients.company_number AS company_number,
 
         client_company_information.company_number AS client_company_number
 
@@ -49,7 +50,8 @@ const getAddJobData = async (job) => {
         client_id: row.client_id,
         client_trading_name: row.client_trading_name,
         client_client_type: row.client_client_type,
-        client_company_number: row.client_company_number
+        client_company_number: row.client_company_number,
+        company_number: row.company_number
       }));
     }
 

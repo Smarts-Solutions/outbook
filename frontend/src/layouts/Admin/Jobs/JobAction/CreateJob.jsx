@@ -178,7 +178,11 @@ const CreateJob = () => {
               await get_information_company_umber(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
             }
 
-            else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+            else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+            await get_information_company_umber(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
+            }
+
+            else if (clientInfo != "" && ["1", "3", "7"].includes(clientInfo?.client_client_type)) {
               await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
             }
 
@@ -397,11 +401,12 @@ const CreateJob = () => {
       setClientType(clientInfo?.client_client_type || "");
       if (clientInfo != "" && clientInfo?.client_company_number != undefined, clientInfo?.client_client_type == "2") {
         get_information_company_umber(clientInfo?.client_company_number, jobData?.Service);
-      } else {
-        setClientInfoCompanyDetails({});
+      } 
+      else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+        get_information_company_umber(clientInfo?.company_number, jobData?.Service);
       }
 
-      if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+      else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
         dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
     }
