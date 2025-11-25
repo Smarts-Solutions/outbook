@@ -2303,8 +2303,6 @@ const EditJob = () => {
   ];
 
 
-
-
   const isReviewerDisabled = !(
     ["ADMIN", "SUPERADMIN"].includes(role) ||
     (getJobDetails.data?.staff_created_id !== undefined &&
@@ -2315,7 +2313,6 @@ const EditJob = () => {
 
       ))
   );
-
 
   // Select options for Allocated To
   const allocatedStaffOptions = [
@@ -2336,7 +2333,6 @@ const EditJob = () => {
 
       ))
   );
-
 
   const handleBudgetTime = (e, index, row, type) => {
     const { value } = e.target;

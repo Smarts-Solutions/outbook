@@ -877,14 +877,14 @@ const CreateClient = () => {
       }
     }
     else {
-
-      delete newErrors[name];
-      setErrors2((prevErrors) => {
-        const updatedErrors = { ...prevErrors };
-        delete updatedErrors[name];
-        return updatedErrors;
-      });
-
+      
+        delete newErrors[name];
+        setErrors2((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      
     }
 
     ScrollToViewFirstError(newErrors);
@@ -1127,7 +1127,7 @@ const CreateClient = () => {
 
             setSoleTraderDetails({ ...getSoleTraderDetails, IndustryType: (response.data[0].id).toString() });
             setCompanyDetails({ ...getCompanyDetails, ClientIndustry: (response.data[0].id).toString(), IncorporationIn: "4" });
-
+            
           }
         } else {
           setClientIndustry(response.data);
@@ -1735,7 +1735,6 @@ const CreateClient = () => {
           notes: getCharityIncorporatedOrganisation.notes,
           member_details: contactsMembers,
           trustee_details: contactsTrustee,
-          company_number : getCompanyDetails.CompanyNumber,
         };
         await AddClientFun(req);
 
@@ -3262,7 +3261,7 @@ const CreateClient = () => {
                                                     getPartnershipDetails.VATNumber
                                                   }
                                                   onChange={(e) => handleChange3(e)}
-                                                // maxLength={9}
+                                                 // maxLength={9}
                                                 />
                                                 {errors3["VATNumber"] && (
                                                   <div className="error-text">
@@ -3991,90 +3990,6 @@ const CreateClient = () => {
 
                                               <div className="col-lg-4">
                                                 <div className="mb-3">
-                                                  <div className="position-relative">
-                                                    <label className="form-label">
-                                                      Search Company
-                                                    </label>
-                                                    <input
-                                                      type="text"
-                                                      placeholder="Search Company"
-                                                      className="form-select"
-                                                      name="SearchCompany"
-                                                      id="SearchCompany"
-                                                      onChange={(e) =>
-                                                        setSearchItem(e.target.value)
-                                                      }
-                                                      value={searchItem}
-                                                      onClick={() =>
-                                                        setShowDropdown(true)
-                                                      }
-                                                      style={{ cursor: "pointer" }}
-                                                    />
-                                                    {getAllSearchCompany.length > 0 &&
-                                                      showDropdown ? (
-                                                      <div className="dropdown-list">
-                                                        {getAllSearchCompany &&
-                                                          getAllSearchCompany.map(
-                                                            (company, index) => (
-                                                              <div
-                                                                key={index}
-                                                                onClick={() => {
-                                                                  setSearchItem(
-                                                                    company.title
-                                                                  );
-                                                                  setShowDropdown(
-                                                                    false
-                                                                  );
-                                                                }}
-                                                                style={{
-                                                                  cursor: "pointer",
-                                                                  padding: "8px 0",
-                                                                }} // Adjust padding as needed
-                                                              >
-                                                                {company.title}
-                                                              </div>
-                                                            )
-                                                          )}
-                                                      </div>
-                                                    ) : (
-                                                      ""
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              </div>
-
-                                              <div className="col-lg-4">
-                                                <div className="mb-3">
-                                                  <label className="form-label">
-                                                    Company Number
-                                                    <span style={{ color: "red" }}>
-                                                      *
-                                                    </span>
-                                                  </label>
-                                                  <input
-                                                    type="text"
-
-                                                    className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
-
-                                                    placeholder="Enter Company Number"
-                                                    name="CompanyNumber"
-                                                    id="CompanyNumber"
-                                                    onChange={(e) => handleChange5(e)}
-                                                    value={
-                                                      getCompanyDetails.CompanyNumber
-                                                    }
-                                                  // disabled
-                                                  />
-                                                  {errors2["CompanyNumber"] && (
-                                                    <div className="error-text">
-                                                      {errors2["CompanyNumber"]}
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </div>
-
-                                              <div className="col-lg-4">
-                                                <div className="mb-3">
                                                   <label className="form-label">
                                                     Charity Name
                                                     <span style={{ color: "red" }}>
@@ -4230,7 +4145,7 @@ const CreateClient = () => {
                                                         getCharityIncorporatedOrganisation.VATNumber
                                                       }
                                                       onChange={(e) => handleChange5(e)}
-                                                    // maxLength={9}
+                                                     // maxLength={9}
                                                     />
                                                     {errors5["VATNumber"] && (
                                                       <div className="error-text">
@@ -5222,7 +5137,7 @@ const CreateClient = () => {
                                                           getAssociationDetails.VATNumber
                                                         }
                                                         onChange={(e) => handleChange6(e)}
-                                                      //maxLength={9}
+                                                        //maxLength={9}
                                                       />
                                                       {errors6["VATNumber"] && (
                                                         <div className="error-text">
@@ -5808,7 +5723,7 @@ const CreateClient = () => {
                                                             getTrust.VATNumber
                                                           }
                                                           onChange={(e) => handleChange7(e)}
-                                                        //maxLength={9}
+                                                          //maxLength={9}
                                                         />
                                                         {errors7["VATNumber"] && (
                                                           <div className="error-text">

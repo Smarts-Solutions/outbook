@@ -619,7 +619,7 @@ const ClientEdit = () => {
     }
     if (location?.state?.row?.client_type_name == "Trust") {
 
-      
+
       setTrust((prevState) => ({
         ...prevState,
         TrustName: !getClientDetails.loading && getClientDetails.data.client.trading_name,
@@ -1227,7 +1227,7 @@ const ClientEdit = () => {
 
   const validateAllFields = (type) => {
 
-     
+
     let isValid = true;
     for (const key in ClientTypeArr[type - 1]) {
       if (!validate(key, ClientTypeArr[type - 1][key], errorsArr[type - 1], setErrorsArr[type - 1])) {
@@ -1348,8 +1348,8 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
-    
-    
+
+
     switch (field) {
       case "first_name":
       case "last_name":
@@ -1525,7 +1525,7 @@ const ClientEdit = () => {
   };
 
   const handleUpdate = async () => {
-    
+
 
     console.log("getSoleTraderDetails.VATNumber", getSoleTraderDetails.VATNumber)
     console.log("selectClientType", selectClientType)
@@ -1752,7 +1752,7 @@ const ClientEdit = () => {
         await EditClientFun(req);
 
       }
-      
+
     }
     else if (selectClientType == 6 && validateAllFields(6)) {
       let formIsValid = true;
@@ -1789,7 +1789,7 @@ const ClientEdit = () => {
         await EditClientFun(req);
 
       }
-     
+
     }
     else if (selectClientType == 7 && validateAllFields(7)) {
       let formIsValid = true;
@@ -1842,7 +1842,7 @@ const ClientEdit = () => {
         await EditClientFun(req);
 
       }
-     
+
     }
 
 
@@ -2073,7 +2073,7 @@ const ClientEdit = () => {
                                               getSoleTraderDetails.VATNumber
                                             }
                                             onChange={(e) => handleInputsChange(e, 1)}
-                                            //maxLength={9}
+                                          //maxLength={9}
                                           />
                                         </div>
                                       </div>
@@ -2616,7 +2616,7 @@ const ClientEdit = () => {
                                                 value={
                                                   getCompanyDetails.VATNumber
                                                 }
-                                                //maxLength={9}
+                                              //maxLength={9}
                                               />
                                               {errors2["VATNumber"] && (
                                                 <div style={{ color: "red" }}>
@@ -3265,7 +3265,7 @@ const ClientEdit = () => {
                                                 getPartnershipDetails.VATNumber
                                               }
                                               onChange={(e) => handleInputsChange(e, 3)}
-                                             // maxLength={9}
+                                            // maxLength={9}
                                             />
                                             {errors3["VATNumber"] && (
                                               <div style={{ color: "red" }}>
@@ -4036,6 +4036,91 @@ const ClientEdit = () => {
 
                                       <div className="col-lg-4">
                                         <div className="mb-3">
+                                          <div className="position-relative">
+                                            <label className="form-label">
+                                              Search Company
+                                            </label>
+                                            <input
+                                              type="text"
+                                              placeholder="Search Company"
+                                              className="form-select"
+                                              name="SearchCompany"
+                                              id="SearchCompany"
+                                              onChange={(e) =>
+                                                setSearchItem(e.target.value)
+                                              }
+                                              value={searchItem}
+                                              onClick={() =>
+                                                setShowDropdown(true)
+                                              }
+                                              style={{ cursor: "pointer" }}
+                                            />
+                                            {getAllSearchCompany.length > 0 &&
+                                              showDropdown ? (
+                                              <div className="dropdown-list">
+                                                {getAllSearchCompany &&
+                                                  getAllSearchCompany.map(
+                                                    (company, index) => (
+                                                      <div
+                                                        key={index}
+                                                        onClick={() => {
+                                                          setSearchItem(
+                                                            company.title
+                                                          );
+                                                          setShowDropdown(
+                                                            false
+                                                          );
+                                                        }}
+                                                        style={{
+                                                          cursor: "pointer",
+                                                          padding: "8px 0",
+                                                        }} // Adjust padding as needed
+                                                      >
+                                                        {company.title}
+                                                      </div>
+                                                    )
+                                                  )}
+                                              </div>
+                                            ) : (
+                                              ""
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Company Number
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+
+                                            className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Company Number"
+                                            name="CompanyNumber"
+                                            id="CompanyNumber"
+                                            onChange={(e) => handleChange5(e)}
+                                            value={
+                                              getCompanyDetails.CompanyNumber
+                                            }
+                                          // disabled
+                                          />
+                                          {errors2["CompanyNumber"] && (
+                                            <div className="error-text">
+                                              {errors2["CompanyNumber"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
                                           <label className="form-label">
                                             Charity Name
                                             <span style={{ color: "red" }}>
@@ -4191,7 +4276,7 @@ const ClientEdit = () => {
                                                 getCharityIncorporatedOrganisation.VATNumber
                                               }
                                               onChange={(e) => handleChange5(e)}
-                                             // maxLength={9}
+                                            // maxLength={9}
                                             />
                                             {errors5["VATNumber"] && (
                                               <div className="error-text">
@@ -5181,7 +5266,7 @@ const ClientEdit = () => {
                                                 getAssociationDetails.VATNumber
                                               }
                                               onChange={(e) => handleChange6(e)}
-                                              //maxLength={9}
+                                            //maxLength={9}
                                             />
                                             {errors6["VATNumber"] && (
                                               <div className="error-text">
@@ -5677,7 +5762,7 @@ const ClientEdit = () => {
                                               *
                                             </span>
                                           </label>
-                                         
+
                                           <input
                                             type="text"
                                             className={errors7["TrustName"] ? "error-field form-control" : "form-control"}
@@ -5764,7 +5849,7 @@ const ClientEdit = () => {
                                                 getTrust.VATNumber
                                               }
                                               onChange={(e) => handleChange7(e)}
-                                             // maxLength={9}
+                                            // maxLength={9}
                                             />
                                             {errors7["VATNumber"] && (
                                               <div className="error-text">
