@@ -231,7 +231,7 @@ const CreateJob = () => {
 
   const dueOn_date_set = async (client_type, service_id) => {
     let due_date = getDueDate(service_id);
-    console.log("due_date ----- ", due_date);
+  
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
         ...prevState,
@@ -251,7 +251,7 @@ const CreateJob = () => {
       if (d > new Date(`${year}-01-31`)) {
         dueYear = year + 1;
       }
-      return new Date(`${dueYear}-01-31`);
+      return `${dueYear}-01-31`;
     }
 
     // Service Personal Tax Return
@@ -263,7 +263,7 @@ const CreateJob = () => {
       if (m >= 4 || m <= 1) {
         return new Date(`${m >= 4 ? y + 1 : y}-01-31`);
       }
-      return new Date(`${y}-01-31`);
+      return `${y}-01-31`;
     }
 
 
@@ -271,6 +271,8 @@ const CreateJob = () => {
 
 
   }
+
+  console.log("dueOn_date_set - jobData.DueOn ", jobData.DueOn);
 
 
   const getAllChecklist = async () => {
@@ -419,6 +421,7 @@ const CreateJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
+        dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 28);
         setJobData((prevState) => ({
           ...prevState,
@@ -445,6 +448,7 @@ const CreateJob = () => {
 
 
       if (value == 4) {
+        dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
           ...prevState,
