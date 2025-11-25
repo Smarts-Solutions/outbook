@@ -728,6 +728,13 @@ const CreateClient = () => {
     //     return;
     //   }
     // }
+    if (name == "CompanyNumber") {
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyNumber: value
+      }));
+      return;
+    }
     validate5(name, value);
     setCharityIncorporatedOrganisation({ ...getCharityIncorporatedOrganisation, [name]: value });
   };
@@ -1499,7 +1506,6 @@ const CreateClient = () => {
 
 
 
-
     if (selectClientType == 1 && validateAllFields(1)) {
       const req = {
         client_type: "1",
@@ -1735,7 +1741,7 @@ const CreateClient = () => {
           notes: getCharityIncorporatedOrganisation.notes,
           member_details: contactsMembers,
           trustee_details: contactsTrustee,
-          company_number : getCompanyDetails.CompanyNumber,
+          company_number: getCompanyDetails.CompanyNumber,
         };
         await AddClientFun(req);
 

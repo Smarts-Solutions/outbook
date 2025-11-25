@@ -42,11 +42,11 @@ const createClient = async (client) => {
 
   if (client_type != "4") {
     if (client_type == "5") {
-      //console.log('client', client)
-      let { service_address, charity_commission_number } = client;
+      let { service_address, charity_commission_number ,company_number } = client;
+      
       const query = `
-      INSERT INTO clients (client_type,customer_id,staff_created_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes,service_address,charity_commission_number)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO clients (client_type,customer_id,staff_created_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes,service_address,charity_commission_number,company_number)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
       try {
         const [result] = await pool.execute(query, [
@@ -62,6 +62,7 @@ const createClient = async (client) => {
           notes,
           service_address,
           charity_commission_number,
+          company_number,
         ]);
         client_id = result.insertId;
         const currentDate = new Date();
@@ -1443,6 +1444,7 @@ WHERE
     clients.service_address AS service_address,
     clients.notes AS notes,
     clients.status AS status, 
+    clients.company_number AS company_number, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
     client_contact_details.last_name AS last_name,
@@ -1529,6 +1531,7 @@ WHERE
         charity_commission_number: rows[0].charity_commission_number,
         service_address: rows[0].service_address,
         status: rows[0].status,
+        company_number: rows[0].company_number,
       };
 
       const contactDetails = rows
@@ -1862,6 +1865,9 @@ WHERE
 };
 
 const getCustomerId = async (client) => {
+
+
+
   const { client_id } = client;
   const [ExistClient] = await pool.execute(
     "SELECT client_type FROM `clients` WHERE id =" + client_id
@@ -2129,7 +2135,7 @@ const clientUpdate = async (client) => {
 
   if (client_type != "4") {
     if (client_type == "5") {
-      const { charity_commission_number, service_address } = client;
+      const { charity_commission_number, service_address ,company_number } = client;
       try {
         const query = `
            UPDATE clients
@@ -2142,7 +2148,8 @@ const clientUpdate = async (client) => {
                website = ?,
                notes = ?,
                charity_commission_number = ?,
-               service_address = ?
+               service_address = ?,
+                company_number = ?
            WHERE
                id = ?
         `;
@@ -2156,6 +2163,7 @@ const clientUpdate = async (client) => {
           notes,
           charity_commission_number,
           service_address,
+          company_number,
           client_id,
         ]);
         if (result.changedRows > 0) {

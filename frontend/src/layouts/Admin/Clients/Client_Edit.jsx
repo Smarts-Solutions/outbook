@@ -552,6 +552,16 @@ const ClientEdit = () => {
         Website: !getClientDetails.loading && getClientDetails.data.client.website,
         notes: !getClientDetails.loading && getClientDetails.data.client.notes,
       }));
+
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyNumber:
+          !getClientDetails.loading &&
+          getClientDetails?.data?.client?.company_number
+      }));
+
+
+
       if (getClientDetails?.data?.member_details) {
 
         setContactsMembers(getClientDetails?.data?.member_details)
@@ -1121,6 +1131,16 @@ const ClientEdit = () => {
     //     return;
     //   }
     // }
+   
+    
+    if(name=="CompanyNumber"){
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyNumber: value
+      }));      
+      return;
+    }
+
     validate5(name, value);
     setCharityIncorporatedOrganisation({ ...getCharityIncorporatedOrganisation, [name]: value });
   };
@@ -1527,9 +1547,9 @@ const ClientEdit = () => {
   const handleUpdate = async () => {
 
 
-    console.log("getSoleTraderDetails.VATNumber", getSoleTraderDetails.VATNumber)
-    console.log("selectClientType", selectClientType)
-    console.log("validateAllFields(1)", validateAllFields(1))
+    // console.log("getSoleTraderDetails.VATNumber", getSoleTraderDetails.VATNumber)
+    // console.log("selectClientType", selectClientType)
+    // console.log("validateAllFields(1)", validateAllFields(1))
 
 
 
@@ -1748,6 +1768,7 @@ const ClientEdit = () => {
           notes: getCharityIncorporatedOrganisation.notes,
           member_details: contactsMembers,
           trustee_details: contactsTrustee,
+          company_number: getCompanyDetails?.CompanyNumber,
         };
         await EditClientFun(req);
 
@@ -4106,7 +4127,7 @@ const ClientEdit = () => {
                                             id="CompanyNumber"
                                             onChange={(e) => handleChange5(e)}
                                             value={
-                                              getCompanyDetails.CompanyNumber
+                                              getCompanyDetails?.CompanyNumber
                                             }
                                           // disabled
                                           />
