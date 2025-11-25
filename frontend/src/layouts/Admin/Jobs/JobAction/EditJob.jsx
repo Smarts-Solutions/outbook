@@ -87,11 +87,10 @@ const EditJob = () => {
 
   const [allClientDetails, setAllClientDetails] = useState([]);
   const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
+  const [clientType, setClientType] = useState("");
 
 
-
-
-  console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
+  // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
   //  console.log("CustomerDetails", CustomerDetails);
 
 
@@ -318,9 +317,12 @@ const EditJob = () => {
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
 
-
+            setClientType(response.data.client_type ?? "");
             if (response.data.client_type == "2" && response.data.client_company_number != undefined) {
               get_information_company_umber(response.data.client_company_number);
+            }
+            else if (["1", "3", "7"].includes(response.data.client_type)) {
+              dueOn_date_set(response.data.client_type, response.data.service_id);
             }
 
             setJobData((prevState) => ({
@@ -561,6 +563,45 @@ const EditJob = () => {
       );
   };
 
+   const dueOn_date_set = async (client_type, service_id) => {
+    let due_date = getDueDate(service_id);
+  
+    if (!['', null, undefined].includes(due_date)) {
+      setJobData((prevState) => ({
+        ...prevState,
+        DueOn: due_date,
+      }));
+    }
+  }
+
+  function getDueDate(service_id) {
+
+    // Service Account Production
+    if (Number(service_id) === 1) {
+      const d = new Date();
+      const year = d.getFullYear();
+      let dueYear = year;
+      // If created date is AFTER Jan 31 → next year's Jan 31
+      if (d > new Date(`${year}-01-31`)) {
+        dueYear = year + 1;
+      }
+      return `${dueYear}-01-31`;
+    }
+
+    // Service Personal Tax Return
+    else if (Number(service_id) === 4) {
+      //const d = new Date('2026-02-31'); // Example date
+      const d = new Date(); // Example date
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      if (m >= 4 || m <= 1) {
+        return new Date(`${m >= 4 ? y + 1 : y}-01-31`);
+      }
+      return `${y}-01-31`;
+    }
+
+  }
+
   const getAllChecklist = async () => {
     const req = {
       action: "getByServiceWithJobType",
@@ -701,12 +742,14 @@ const EditJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
+        dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 28);
         setJobData((prevState) => ({
           ...prevState,
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
       } else if (value == 4) {
+        dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
           ...prevState,
