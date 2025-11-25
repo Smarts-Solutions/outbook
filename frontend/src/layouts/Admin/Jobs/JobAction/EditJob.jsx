@@ -91,7 +91,7 @@ const EditJob = () => {
 
 
 
-   console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
+  console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
   //  console.log("CustomerDetails", CustomerDetails);
 
 
@@ -318,8 +318,8 @@ const EditJob = () => {
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
 
-            
-            if( response.data.client_type == "2" && response.data.client_company_number != undefined){
+
+            if (response.data.client_type == "2" && response.data.client_company_number != undefined) {
               get_information_company_umber(response.data.client_company_number);
             }
 
@@ -449,6 +449,9 @@ const EditJob = () => {
                 response.data.Management_Accounts_Frequency_id_6 ?? "",
 
               //////////////////////////
+
+
+
               Year_Ending_id_1: response.data.Year_Ending_id_1 ?? null,
               Day_Date_id_2: response.data.Day_Date_id_2 ?? null,
               Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
@@ -533,6 +536,8 @@ const EditJob = () => {
         return;
       });
   };
+
+
 
   useEffect(() => {
     JobDetails();
@@ -814,8 +819,85 @@ const EditJob = () => {
 
   const handleSubmit = async () => {
 
+    // console.log("handleSubmit service", Number(jobData?.Service));
+    // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
+    // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
+
+    let due_on = jobData?.DueOn;
+    let Year_Ending_id_1 = jobData?.Year_Ending_id_1;
+
+    // Logic Service 1 Account Production in companie house client
+    if ([1].includes(Number(jobData?.Service)) && clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails)?.length > 0) {
+      
+      // Year Ending validation
+      if (['', null, undefined].includes(jobData?.Year_Ending_id_1)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Please select Year Ending.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+        return;
+      }
+
+      // Due On validation
+      if (['', null, undefined].includes(jobData?.DueOn)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Please select Due On.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+        return;
+      }
+
+      const dueOnDate = clientInfoCompanyDetails?.accounts?.next_accounts?.due_on ?? null;
+      const yearEndOnDate = clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on ?? null;
+      
+      if(dueOnDate != due_on && yearEndOnDate != Year_Ending_id_1){
+        sweatalert.fire({
+          icon: "warning",
+          title: `Due On date should be same as company due on date ${dueOnDate} and Year Ending date should be same as company year ending date ${yearEndOnDate}.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+        due_on = dueOnDate;
+        Year_Ending_id_1 = yearEndOnDate;
+      }
+      
+      
+      else if(dueOnDate != due_on){
+        sweatalert.fire({
+          icon: "warning",
+          title: `Due On date should be same as company due on date ${dueOnDate}.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });  
+
+        due_on = dueOnDate;
+      }
+
+      else if(yearEndOnDate != Year_Ending_id_1){
+        sweatalert.fire({
+          icon: "warning",
+          title: `Year Ending date should be same as company year ending date ${yearEndOnDate}.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+
+        Year_Ending_id_1 = yearEndOnDate;
+      }
+
+    }
 
 
+
+    return;
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
@@ -842,6 +924,8 @@ const EditJob = () => {
     const req = {
       job_id: location.state.job_id,
       ...jobData,
+      due_on: due_on,
+      Year_Ending_id_1: Year_Ending_id_1,
       selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
@@ -874,7 +958,6 @@ const EditJob = () => {
       total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
       engagement_model: jobData.EngagementModel,
       expected_delivery_date: jobData.ExpectedDeliveryDate,
-      due_on: jobData.DueOn,
       submission_deadline: jobData.SubmissionDeadline,
       customer_deadline_date: jobData.CustomerDeadlineDate,
       sla_deadline_date: jobData.SLADeadlineDate,
@@ -2182,7 +2265,7 @@ const EditJob = () => {
   ];
 
 
-  console.log("getJobDetails.data", getJobDetails);
+
 
   const isReviewerDisabled = !(
     ["ADMIN", "SUPERADMIN"].includes(role) ||
