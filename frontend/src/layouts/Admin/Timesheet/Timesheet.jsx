@@ -1777,6 +1777,22 @@ const Timesheet = () => {
               </div>
             </div>
           </div>
+          <div className="col-md-4">
+              {
+                timeSheetRows.length > 0 ? (
+                  <div className="form-group float-md-end">
+                    <button
+                      className=" btn btn-info "
+                      onClick={() => exportToCSV(timeSheetRows)}
+                    >
+                      Export Timesheet Data
+                      <i className="fa fa-download ms-2" />
+                    </button>
+                  </div>
+                ) : (
+                  ""
+                )}
+          </div>
         </div>
       </div>
 
@@ -1807,10 +1823,10 @@ const Timesheet = () => {
               ""
             )}
 
-            <div className="form-group col-md-8 row align-items-center">
+            <div className="form-group  row align-items-end">
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-6 pe-0">
+                <div className="form-group col-md-4 pe-0">
                   <label className="form-label mb-2">Select Date</label>
                   <Select
                     id="tabSelect"
@@ -1838,7 +1854,7 @@ const Timesheet = () => {
 
               {lineMangerData &&
                 lineMangerData.length > 0 ? (
-                <div className="form-group col-md-6 pe-0">
+                <div className="form-group col-md-4 pe-0">
                   <label className="form-label mb-2">Line Manager</label>
                   <Select
                     id="tabSelect"
@@ -1865,7 +1881,7 @@ const Timesheet = () => {
 
               {selectedLineManager != "" && staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-6 pe-0">
+                <div className="form-group col-md-4 pe-0">
                   <label className="form-label mb-2">Line Manager Select Week</label>
                   <Select
                     id="tabSelect"
@@ -1903,20 +1919,7 @@ const Timesheet = () => {
               ) : (
                 ""
               )} */}
-              {
-                timeSheetRows.length > 0 ? (
-                  <div className="form-group col-md-6">
-                    <button
-                      className=" btn btn-info float-md-end mt-lg-2"
-                      onClick={() => exportToCSV(timeSheetRows)}
-                    >
-                      Export Timesheet Data
-                      <i className="fa fa-download ms-2" />
-                    </button>
-                  </div>
-                ) : (
-                  ""
-                )}
+            
             </div>
 
 
