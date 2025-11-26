@@ -113,6 +113,11 @@ const Timesheet = () => {
     data: [],
   });
 
+  const [isExistStaffDataWeekDataAll, setIsExistStaffDataWeekDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+
   const [staffDataWeekDataAllSubmitTImeSheet, setStaffDataWeekDataAllSubmitTImeSheet] = useState({
     loading: true,
     data: [],
@@ -148,6 +153,9 @@ const Timesheet = () => {
     setSubmitStatusAllKey(0);
     setDeleteRows([]);
     if (res.status) {
+      if(isExistStaffDataWeekDataAll?.data?.length === 0){
+      setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+      }
 
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       setStaffDataWeekDataAllSubmitTImeSheet({ loading: false, data: res.filterDataWeekSubmitTimeSheet });
@@ -1847,6 +1855,33 @@ const Timesheet = () => {
             <div className="form-group  row align-items-end">
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-4 pe-0">
+                  <label className="form-label mb-2">Select Date</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {isExistStaffDataWeekDataAll?.data &&
+                isExistStaffDataWeekDataAll?.data.length > 0 && staffDataWeekDataAll?.data.length === 0 ? (
                 <div className="form-group col-md-4 pe-0">
                   <label className="form-label mb-2">Select Date</label>
                   <Select
