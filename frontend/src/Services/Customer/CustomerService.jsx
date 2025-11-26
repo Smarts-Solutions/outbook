@@ -5,6 +5,27 @@ import * as Config from "../../Utils/Config";
 import { header } from "../../Utils/ApiHeader";
 const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
+// Customer Users Start
+export async function get_All_Customer_Users(data, token) {
+  try {
+    
+    const res = await axios.post(`${Config.base_url}getAllCustomerUsers`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await
+      err;
+  }
+}
+
+
+// Customer Users End
+
+
+
+
 
 // get Timesheet Report Data
 export async function get_Timesheet_ReportData(data) {

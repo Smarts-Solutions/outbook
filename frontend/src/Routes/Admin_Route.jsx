@@ -10,10 +10,14 @@ import Dashboard from "../layouts/Admin/DashboardPage/Dashboard";
 import DashboardLinkData from "../layouts/Admin/DashboardPage/DashboardLinkData";
 
 import Service from "../layouts/Admin/customer/customer_add_process/Service";
-import Customer from "../layouts/Admin/customer/Customer";
 
+// Customers
+import Customer from "../layouts/Admin/customer/Customer";
 import Addcustomer from "../layouts/Admin/customer/customer_add_process/Addcustomer";
 import Editcustomer from "../layouts/Admin/customer/customer_edit_process/Editcustomer";
+
+// Customers Details
+import CustomerDetails from "../layouts/Admin/customer/CustomerDetails";
 
 import Status from "../layouts/Admin/StatusPage/Status";
 import Access from "../layouts/Admin/AccessPage/Access";
@@ -267,7 +271,12 @@ const Admin_Route = () => {
               <Route path="/settings/task" element={<Task />} />
               <Route path="/setting" element={<Setting />} />
               <Route path="/addcustomer" element={<Addcustomer />} />
+
+            
               <Route path="/customer" element={<Customer />} />
+
+              <Route path="/cust_details" element={<CustomerDetails />} />
+              
               <Route path="/service" element={<Service />} />
               <Route path="/addclient" element={<AddNewClient />} />
               <Route path="/Clientlist" element={<ClientList />} />

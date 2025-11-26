@@ -35,12 +35,40 @@ import {
   delete_Customer,
   UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY,
   get_All_Task_ByStaff,
-  get_Timesheet_ReportData
+  get_Timesheet_ReportData,
+
+  // customer users
+  get_All_Customer_Users,
+  
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
+
+
+// Customer Users Start
+
+export const getAllCustomerUsers = createAsyncThunk( 
+  "getAllCustomerUsers",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await get_All_Customer_Users(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+// Customer Users End
 
 
 
@@ -56,8 +84,6 @@ export const getTimesheetReportData = createAsyncThunk("getTimesheetReportData",
     throw err;
   }
 });
-
-
 
 export const getAllTaskByStaff = createAsyncThunk("getAllTaskByStaff", async (data) => {
   try {
