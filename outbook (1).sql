@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 25, 2025 at 11:53 AM
+-- Generation Time: Nov 26, 2025 at 01:35 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -875,15 +875,24 @@ CREATE TABLE IF NOT EXISTS `customer_contact_person_role` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_contact_person_role`
 --
 
 INSERT INTO `customer_contact_person_role` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'RoleName1', '1', '2025-04-03 05:06:14', '2025-04-03 05:06:14'),
-(2, 'RoleName2', '1', '2025-04-03 05:06:22', '2025-04-03 05:06:22');
+(1, 'Partner', '1', '2025-05-12 12:30:58', '2025-05-12 12:30:58'),
+(2, 'Client Manager', '1', '2025-05-12 12:31:06', '2025-05-12 12:31:06'),
+(3, 'Accountant', '1', '2025-05-12 12:31:20', '2025-05-12 12:31:20'),
+(4, 'Bookkeeper', '1', '2025-05-12 12:31:24', '2025-05-12 12:31:24'),
+(5, 'Payroll Expert', '1', '2025-05-12 12:31:34', '2025-05-12 12:31:34'),
+(6, 'Tax Expert', '1', '2025-05-12 12:31:39', '2025-05-12 12:31:48'),
+(7, 'CS Expert', '1', '2025-05-12 12:31:55', '2025-05-12 12:31:55'),
+(8, 'Director ', '1', '2025-05-23 11:19:43', '2025-05-23 11:19:43'),
+(9, 'Secretary', '1', '2025-05-28 06:45:22', '2025-05-28 06:45:22'),
+(10, 'LLP Designated Member', '1', '2025-05-28 07:06:58', '2025-05-28 07:06:58'),
+(11, 'Trustee', '1', '2025-06-16 11:34:52', '2025-06-16 11:34:52');
 
 -- --------------------------------------------------------
 
@@ -1347,6 +1356,39 @@ INSERT INTO `customer_sub_source` (`id`, `customer_source_id`, `name`, `status`,
 (13, 10, 'f', '1', '2024-11-23 07:22:00', '2024-11-23 07:22:00'),
 (14, 10, 'ff', '1', '2024-11-23 07:22:04', '2024-11-23 07:22:04'),
 (15, 9, 'f', '1', '2025-01-08 07:27:15', '2025-01-08 07:27:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_users`
+--
+
+DROP TABLE IF EXISTS `customer_users`;
+CREATE TABLE IF NOT EXISTS `customer_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_contact_person_role_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_code` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
+  `staff_id` int(11) NOT NULL,
+  `employee_number` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `login_auth_token` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_users`
+--
+
+INSERT INTO `customer_users` (`id`, `customer_contact_person_role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `status`, `is_disable`, `staff_id`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
+(1, 2, 'shk', 'hh', 'shk@gmail.com', '91', '9999999999', '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '1', '0', 1, '145DD55', '2025-11-26 13:24:37', '2025-11-26 13:24:37', NULL);
 
 -- --------------------------------------------------------
 
@@ -2333,7 +2375,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-11-25 04:49:35', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NDA0NjE3NSwiZXhwIjoxNzY0MDgyMTc1fQ.vPCzLiIewbfhAe_M2lo5x5j1RsLyQPHnPuFLa2LtlYI'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-11-26 06:11:57', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NDEzNzUxNywiZXhwIjoxNzY0MTczNTE3fQ.cfpSezm6-NmCMwBlk8UOYAsn8KO5Pk7jKFYuuBhHSnk'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2343,7 +2385,7 @@ INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phon
 (10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, NULL, '2025-02-08 11:36:28', '2025-10-06 07:12:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTk3MzQ3MzcsImV4cCI6MTc1OTc3MDczN30.luIo8TYrG2_9Eu3yel9cakru6lg_GzFmJJ0s964l6_c'),
 (12, 6, 'BBBBBB 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, 'fff', '2025-04-17 05:56:18', '2025-11-17 05:27:51', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NTk3MzQ1NjIsImV4cCI6MTc1OTc3MDU2Mn0.TUGCAS5_R7m-lQWmK_8wpDvYpNTrc3wDjQim-aGc6DU'),
 (13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, 'SHK13', '2025-06-11 09:18:34', '2025-11-17 06:57:53', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NjMwMjU3NDgsImV4cCI6MTc2MzA2MTc0OH0.I-FNELieNjnnmKC-ryrfX7pqHfz-50vMl96aBdLSyEM'),
-(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-25 04:57:12', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjQwNDY2MzIsImV4cCI6MTc2NDA4MjYzMn0.0W7K9IlW3gM9Fcu4sQ9veX3h7ARp0blFxk0G2_3YJKA'),
+(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-26 06:12:57', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjQxMzc1NzcsImV4cCI6MTc2NDE3MzU3N30.czdkW0wlo0_Y-dnZBkPCtehTzb-JegqnPZXKuBisMJo'),
 (15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, 'SS9', '2025-07-11 10:48:30', '2025-11-24 11:44:36', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NjM5ODQ2NzYsImV4cCI6MTc2NDAyMDY3Nn0.RFGkiNKzyV-vYOLMVogyRyAHynH8jUGu_82Fp3wjzSM'),
 (16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '232:59', '1', '0', 1, NULL, '2025-08-13 11:32:32', '2025-11-20 05:55:42', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NjM2MTgxNDIsImV4cCI6MTc2MzY1NDE0Mn0.q0FTxFt-5s1D-m9EX8SRcbRuFVBCHfjS-icn8ogVkcU'),
 (17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, NULL, '2025-08-18 08:20:15', '2025-10-06 07:09:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NTk3MzQ1OTQsImV4cCI6MTc1OTc3MDU5NH0.bdxXzq8DGTDBzz1cRmrCF4CZR87D2itNEbHTrUBdpd0'),
@@ -2390,7 +2432,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1219 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1221 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3619,7 +3661,9 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1215, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:13:16', '2025-11-25 11:13:16'),
 (1216, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:13:16', '2025-11-25 11:13:16'),
 (1217, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:31:29', '2025-11-25 11:31:29'),
-(1218, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:31:29', '2025-11-25 11:31:29');
+(1218, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:31:29', '2025-11-25 11:31:29'),
+(1219, 1, '2025-11-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-26 06:11:57', '2025-11-26 06:11:57'),
+(1220, 14, '2025-11-26', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-11-26 06:12:57', '2025-11-26 06:12:57');
 
 -- --------------------------------------------------------
 
