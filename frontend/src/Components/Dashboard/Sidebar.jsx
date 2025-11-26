@@ -62,8 +62,18 @@ const Sidebar = () => {
   // Handle link click and set the active tab
   const handleLinkClick = (e, linkPathname) => {
     e.preventDefault();
-    setActiveLink(linkPathname); // Update the active link state
-    navigate(linkPathname); // Navigate to the new link
+    setActiveLink(linkPathname);
+    // Prevent opening Customer dropdown when clicking Customer Details
+    if (linkPathname === "/admin/customerUsers") {
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/customer": false,
+        },
+      }));
+    }
+    navigate(linkPathname);
   };
 
   // Handle dropdown menu click
@@ -428,14 +438,10 @@ const Sidebar = () => {
                     </Link>
                   </li>
 
-
-
-
-
-
-
                 </>
               )}
+
+
             {((updatedShowTab && updatedShowTab.setting) ||
               role === "SUPERADMIN") && (
                 <li
@@ -455,6 +461,30 @@ const Sidebar = () => {
                   </Link>
                 </li>
               )}
+              
+
+            {/* Coustomer users*/}
+              {( 
+              role === "SUPERADMIN") && (
+                <li
+                  className={
+                    activeLink === "/admin/cust_details" ? "active" : ""
+                  }
+                >
+                  <Link
+                    to="/admin/cust_details"
+                    aria-expanded="false"
+                    onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
+                  >
+                    <span className="sidebar-icons">
+                      <i className="fas fa-user-cog"></i> {/* Customer Details icon */}
+                    </span>
+                    <span>Customer Details</span>
+                  </Link>
+                </li>
+              )}
+
+
           </ul>
         </div>
       </div >
