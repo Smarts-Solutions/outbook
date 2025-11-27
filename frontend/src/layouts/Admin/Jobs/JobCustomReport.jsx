@@ -957,7 +957,7 @@ function JobCustomReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { action: "getJobCustomReport", filters: filters };
+    const req = { action: "getJobCustomReport", filters: filters , role: role};
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
@@ -976,9 +976,9 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-    if (role?.toUpperCase() === "SUPERADMIN") {
+   // if (role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
-    }
+   // }
   }, [filters.groupBy, filters.additionalField, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id, filters.employee_number]);
 
 

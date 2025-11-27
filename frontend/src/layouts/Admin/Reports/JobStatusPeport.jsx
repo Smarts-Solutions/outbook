@@ -206,7 +206,6 @@ const JobStatus = () => {
     },
   ];
 
-
   const exportData = JobStatusData.map((item) => {
     return {
       "Job Id": item.job_code_id,
@@ -232,7 +231,6 @@ const JobStatus = () => {
       "Final Draft Sent": convertDate(item.final_draft_sent_on),
     };
   });
-
 
   return (
     <div>

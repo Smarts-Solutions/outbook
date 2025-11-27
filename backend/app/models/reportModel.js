@@ -3388,7 +3388,7 @@ const getAllStatus = async (Report) => {
 ////////////////////-----START getJobCustomReports -----//////////////////////
 const getJobCustomReport = async (Report) => {
     const { StaffUserId, data } = Report;
-    // console.log("Call Custome Job Report");
+     console.log("Call Custome Job Report",data);
     var {
         groupBy = ['job_id'],
         additionalField = [],
@@ -3451,12 +3451,6 @@ const getJobCustomReport = async (Report) => {
         staff_status,
 
 
-
-
-
-
-
-
         line_manager_id,
         timePeriod,
         displayBy,
@@ -3464,6 +3458,8 @@ const getJobCustomReport = async (Report) => {
         toDate
 
     } = data.filters;
+
+    let role_user = data?.role?.toUpperCase() || '';
 
 
 
@@ -3729,6 +3725,12 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(staff_status)) {
             where.push(`jobcreatestaff.status = '${staff_status}'`);
         }
+       
+
+        if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
+          
+            where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
+        }
 
 
 
@@ -3893,10 +3895,9 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
             LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
             LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
-            LEFT JOIN line_managers AS lm 
-            ON lm.staff_by = jobcreatestaff.id
-            LEFT JOIN staffs AS managerstaff 
-            ON lm.staff_to = managerstaff.id
+            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
             ${where}
             ORDER BY raw.job_id
         `;
