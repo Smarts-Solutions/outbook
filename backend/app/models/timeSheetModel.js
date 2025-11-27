@@ -257,7 +257,64 @@ const getTimesheet = async (Timesheet) => {
 
 
     // get week filter data
-    const query_week_filter = `SELECT  
+//     const query_week_filter = `SELECT  
+//     id,
+//     staff_id,
+//     submit_status,
+//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS monday_date,
+//     DATE_FORMAT(tuesday_date, '%Y-%m-%d') AS tuesday_date,
+//     DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
+//     DATE_FORMAT(thursday_date, '%Y-%m-%d') AS thursday_date,
+//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS friday_date,
+//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS saturday_date,
+//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS sunday_date,
+//     CONCAT(
+//         CASE 
+//             WHEN monday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), monday_date), ' ') 
+//             ELSE '' 
+//         END,
+//         CASE 
+//             WHEN monday_date IS NOT NULL AND tuesday_date IS NOT NULL THEN ''
+//             WHEN tuesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), tuesday_date), ' ') 
+//             ELSE '' 
+//         END,
+//         CASE 
+//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL) AND wednesday_date IS NOT NULL THEN ''
+//             WHEN wednesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), wednesday_date), ' ') 
+//             ELSE '' 
+//         END,
+//         CASE 
+//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL) AND thursday_date IS NOT NULL THEN ''
+//             WHEN thursday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), thursday_date), ' ') 
+//             ELSE '' 
+//         END,
+//         CASE 
+//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL) AND friday_date IS NOT NULL THEN ''
+//             WHEN friday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), friday_date), ' ') 
+//             ELSE '' 
+//         END,
+//         CASE 
+//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL) AND saturday_date IS NOT NULL THEN ''
+//             WHEN saturday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), saturday_date), ' ') 
+//             ELSE '' 
+//         END,
+//         CASE 
+//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL OR saturday_date IS NOT NULL) AND sunday_date IS NOT NULL THEN ''
+//             WHEN sunday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), sunday_date), ' ') 
+//             ELSE '' 
+//         END
+//     ) AS valid_weekOffsets
+// FROM 
+// timesheet 
+// WHERE 
+//     staff_id = ? AND submit_status = '1'
+// GROUP BY valid_weekOffsets  
+// ORDER BY
+//     valid_weekOffsets ASC
+//     `
+
+   const query_week_filter = `
+    SELECT  
     id,
     staff_id,
     submit_status,
@@ -265,103 +322,66 @@ const getTimesheet = async (Timesheet) => {
     DATE_FORMAT(tuesday_date, '%Y-%m-%d') AS tuesday_date,
     DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
     DATE_FORMAT(thursday_date, '%Y-%m-%d') AS thursday_date,
-    DATE_FORMAT(monday_date, '%Y-%m-%d') AS friday_date,
-    DATE_FORMAT(monday_date, '%Y-%m-%d') AS saturday_date,
-    DATE_FORMAT(monday_date, '%Y-%m-%d') AS sunday_date,
-    CONCAT(
-        CASE 
-            WHEN monday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), monday_date), ' ') 
-            ELSE '' 
-        END,
-        CASE 
-            WHEN monday_date IS NOT NULL AND tuesday_date IS NOT NULL THEN ''
-            WHEN tuesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), tuesday_date), ' ') 
-            ELSE '' 
-        END,
-        CASE 
-            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL) AND wednesday_date IS NOT NULL THEN ''
-            WHEN wednesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), wednesday_date), ' ') 
-            ELSE '' 
-        END,
-        CASE 
-            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL) AND thursday_date IS NOT NULL THEN ''
-            WHEN thursday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), thursday_date), ' ') 
-            ELSE '' 
-        END,
-        CASE 
-            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL) AND friday_date IS NOT NULL THEN ''
-            WHEN friday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), friday_date), ' ') 
-            ELSE '' 
-        END,
-        CASE 
-            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL) AND saturday_date IS NOT NULL THEN ''
-            WHEN saturday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), saturday_date), ' ') 
-            ELSE '' 
-        END,
-        CASE 
-            WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL OR saturday_date IS NOT NULL) AND sunday_date IS NOT NULL THEN ''
-            WHEN sunday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), sunday_date), ' ') 
-            ELSE '' 
-        END
+    DATE_FORMAT(friday_date, '%Y-%m-%d') AS friday_date,
+    DATE_FORMAT(saturday_date, '%Y-%m-%d') AS saturday_date,
+    DATE_FORMAT(sunday_date, '%Y-%m-%d') AS sunday_date,
+
+    -- Correct Week Offset Calculation
+    LEAST(
+        IF(monday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(monday_date, INTERVAL WEEKDAY(monday_date) DAY)
+        ), 999),
+
+        IF(tuesday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(tuesday_date, INTERVAL WEEKDAY(tuesday_date) DAY)
+        ), 999),
+
+        IF(wednesday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(wednesday_date, INTERVAL WEEKDAY(wednesday_date) DAY)
+        ), 999),
+
+        IF(thursday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(thursday_date, INTERVAL WEEKDAY(thursday_date) DAY)
+        ), 999),
+
+        IF(friday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(friday_date, INTERVAL WEEKDAY(friday_date) DAY)
+        ), 999),
+
+        IF(saturday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(saturday_date, INTERVAL WEEKDAY(saturday_date) DAY)
+        ), 999),
+
+        IF(sunday_date IS NOT NULL, TIMESTAMPDIFF(
+            WEEK,
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+            DATE_SUB(sunday_date, INTERVAL WEEKDAY(sunday_date) DAY)
+        ), 999)
     ) AS valid_weekOffsets
+
 FROM 
-timesheet 
+    timesheet 
 WHERE 
-    staff_id = ? AND submit_status = '1'
+    staff_id = ? 
+    AND submit_status = '1'
+
 GROUP BY valid_weekOffsets  
-ORDER BY
-    valid_weekOffsets ASC
+ORDER BY valid_weekOffsets ASC;
     `
     const [rows1] = await pool.query(query_week_filter, [staff_id]);
-    // const filterDataWeek = rows1.map(item => {
-    //   const firstDate = 
-    //     item.monday_date || item.tuesday_date || item.wednesday_date || 
-    //     item.thursday_date || item.friday_date || item.saturday_date || item.sunday_date;
-
-    //   const result = { 
-    //     id: item.id,
-    //     staff_id: item.staff_id,
-    //     valid_weekOffsets: item.valid_weekOffsets
-    //   };
-    //   if (firstDate) {
-    //     result.month_date = firstDate;
-    //   }
-
-    //   return result;
-    // });
-
-
-    // const filterDataWeek = rows1
-    //   .map(item => {
-    //     if (
-    //       item.valid_weekOffsets != null &&
-    //       item.valid_weekOffsets != '' &&
-    //       item.valid_weekOffsets != undefined
-    //     ) {
-    //       const firstDate =
-    //         item.monday_date ||
-    //         item.tuesday_date ||
-    //         item.wednesday_date ||
-    //         item.thursday_date ||
-    //         item.friday_date ||
-    //         item.saturday_date ||
-    //         item.sunday_date;
-
-    //       const result = {
-    //         id: item.id,
-    //         staff_id: item.staff_id,
-    //         valid_weekOffsets: item.valid_weekOffsets,
-    //       };
-    //       if (firstDate) {
-    //         result.month_date = firstDate;
-    //       }
-    //       return result;
-    //     }
-    //   })
-    //   .filter(Boolean);
-
-      
- 
+    
      const filterDataWeek = rows1
       .map(item => {
         if (
