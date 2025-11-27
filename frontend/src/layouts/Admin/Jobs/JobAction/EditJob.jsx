@@ -595,7 +595,7 @@ const EditJob = () => {
       const y = d.getFullYear();
       const m = d.getMonth() + 1;
       if (m >= 4 || m <= 1) {
-        return new Date(`${m >= 4 ? y + 1 : y}-01-31`);
+        return `${m >= 4 ? y + 1 : y}-01-31`;
       }
       return `${y}-01-31`;
     }
