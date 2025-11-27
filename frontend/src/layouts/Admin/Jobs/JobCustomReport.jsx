@@ -1077,9 +1077,6 @@ function JobCustomReport() {
     // { value: "line_manager_id", label: "Line Manager" },
   ];
 
-
-
-
   const optionAdditionalBy = [
     { value: "date_received_on", label: "Date Received On" },
     { value: "staff_full_name", label: "Staff Full Name" },
