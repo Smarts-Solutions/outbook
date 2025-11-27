@@ -270,8 +270,10 @@ const CreateJob = () => {
         }
         return `${y}-01-31`;
       }
+
+       // 1 month + 7 day added for this service
       else if (Number(service_id) === 8) {
-        
+
         const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
         const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
@@ -287,6 +289,7 @@ const CreateJob = () => {
     }
     else {
       
+       // 1 month + 7 day added for this service
       if (Number(service_id) === 8) {
         const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);

@@ -599,9 +599,11 @@ const EditJob = () => {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
-      } else if (Number(service_id) === 8) {
-
-         const today = new Date();
+      } 
+      
+       // 1 month + 7 day added for this service
+      else if (Number(service_id) === 8) {
+        const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
         const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
         nextNextMonth.setDate(nextNextMonth.getDate() + 6);
@@ -615,6 +617,8 @@ const EditJob = () => {
       }
     }
     else {
+
+      // 1 month + 7 day added for this service
       if (Number(service_id) == 8) {
          const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
