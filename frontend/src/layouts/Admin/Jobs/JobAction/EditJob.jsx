@@ -600,26 +600,30 @@ const EditJob = () => {
         }
         return `${y}-01-31`;
       } else if (Number(service_id) === 8) {
-        const d = new Date();
-        const nextMonthDate = new Date(d.getFullYear(), d.getMonth() + 1, d.getDate());
-        nextMonthDate.setDate(nextMonthDate.getDate() + 7);
-        const y = nextMonthDate.getFullYear();
-        const m = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
-        const day = String(nextMonthDate.getDate()).padStart(2, "0");
-        return `${y}-${m}-${day}`;
+
+         const today = new Date();
+        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+        nextNextMonth.setDate(nextNextMonth.getDate() + 6);
+        const y = nextNextMonth.getFullYear();
+        const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
+        const d = String(nextNextMonth.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+
       }else{
         return null;
       }
     }
     else {
-      if ((service_id) == 8) {
-        const d = new Date();
-        const nextMonthDate = new Date(d.getFullYear(), d.getMonth() + 1, d.getDate());
-        nextMonthDate.setDate(nextMonthDate.getDate() + 7);
-        const y = nextMonthDate.getFullYear();
-        const m = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
-        const day = String(nextMonthDate.getDate()).padStart(2, "0");
-        return `${y}-${m}-${day}`;
+      if (Number(service_id) == 8) {
+         const today = new Date();
+        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+        nextNextMonth.setDate(nextNextMonth.getDate() + 6);
+        const y = nextNextMonth.getFullYear();
+        const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
+        const d = String(nextNextMonth.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
       } else {
         return null;
       }
