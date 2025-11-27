@@ -599,7 +599,31 @@ const EditJob = () => {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
+      } else if (Number(service_id) === 8) {
+        const d = new Date();
+        const nextMonthDate = new Date(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        nextMonthDate.setDate(nextMonthDate.getDate() + 7);
+        const y = nextMonthDate.getFullYear();
+        const m = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
+        const day = String(nextMonthDate.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }else{
+        return null;
       }
+    }
+    else {
+      if ((service_id) == 8) {
+        const d = new Date();
+        const nextMonthDate = new Date(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        nextMonthDate.setDate(nextMonthDate.getDate() + 7);
+        const y = nextMonthDate.getFullYear();
+        const m = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
+        const day = String(nextMonthDate.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      } else {
+        return null;
+      }
+
     }
 
   }
