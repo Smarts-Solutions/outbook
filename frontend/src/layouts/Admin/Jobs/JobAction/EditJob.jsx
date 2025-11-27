@@ -796,6 +796,7 @@ const EditJob = () => {
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
       } else if (value == 8) {
+        dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 10);
         setJobData((prevState) => ({
           ...prevState,
