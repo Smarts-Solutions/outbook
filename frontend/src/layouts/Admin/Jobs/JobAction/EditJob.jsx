@@ -563,9 +563,9 @@ const EditJob = () => {
       );
   };
 
-   const dueOn_date_set = async (client_type, service_id) => {
-    let due_date = getDueDate(service_id);
-  
+  const dueOn_date_set = async (client_type, service_id) => {
+    let due_date = getDueDate(client_type, service_id);
+
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
         ...prevState,
@@ -574,30 +574,32 @@ const EditJob = () => {
     }
   }
 
-  function getDueDate(service_id) {
+  function getDueDate(client_type, service_id) {
 
-    // Service Account Production
-    if (Number(service_id) === 1) {
-      const d = new Date();
-      const year = d.getFullYear();
-      let dueYear = year;
-      // If created date is AFTER Jan 31 → next year's Jan 31
-      if (d > new Date(`${year}-01-31`)) {
-        dueYear = year + 1;
+    if (["1", "3", "7"].includes(client_type)) {
+      // Service Account Production
+      if (Number(service_id) === 1) {
+        const d = new Date();
+        const year = d.getFullYear();
+        let dueYear = year;
+        // If created date is AFTER Jan 31 → next year's Jan 31
+        if (d > new Date(`${year}-01-31`)) {
+          dueYear = year + 1;
+        }
+        return `${dueYear}-01-31`;
       }
-      return `${dueYear}-01-31`;
-    }
 
-    // Service Personal Tax Return
-    else if (Number(service_id) === 4) {
-      //const d = new Date('2026-02-31'); // Example date
-      const d = new Date(); // Example date
-      const y = d.getFullYear();
-      const m = d.getMonth() + 1;
-      if (m >= 4 || m <= 1) {
-        return `${m >= 4 ? y + 1 : y}-01-31`;
+      // Service Personal Tax Return
+      else if (Number(service_id) === 4) {
+        //const d = new Date('2026-02-31'); // Example date
+        const d = new Date(); // Example date
+        const y = d.getFullYear();
+        const m = d.getMonth() + 1;
+        if (m >= 4 || m <= 1) {
+          return `${m >= 4 ? y + 1 : y}-01-31`;
+        }
+        return `${y}-01-31`;
       }
-      return `${y}-01-31`;
     }
 
   }
@@ -871,7 +873,7 @@ const EditJob = () => {
 
     // Logic Service 1 Account Production in companie house client
     if ([1].includes(Number(jobData?.Service)) && clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails)?.length > 0) {
-      
+
       // Year Ending validation
       if (['', null, undefined].includes(jobData?.Year_Ending_id_1)) {
         sweatalert.fire({
@@ -898,8 +900,8 @@ const EditJob = () => {
 
       const dueOnDate = clientInfoCompanyDetails?.accounts?.next_accounts?.due_on ?? null;
       const yearEndOnDate = clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on ?? null;
-      
-      if(dueOnDate != due_on && yearEndOnDate != Year_Ending_id_1){
+
+      if (dueOnDate != due_on && yearEndOnDate != Year_Ending_id_1) {
         sweatalert.fire({
           icon: "warning",
           title: `Due On date should be same as company due on date ${dueOnDate} and Year Ending date should be same as company year ending date ${yearEndOnDate}.`,
@@ -910,9 +912,9 @@ const EditJob = () => {
         due_on = dueOnDate;
         Year_Ending_id_1 = yearEndOnDate;
       }
-      
-      
-      else if(dueOnDate != due_on){
+
+
+      else if (dueOnDate != due_on) {
         sweatalert.fire({
           icon: "warning",
           title: `Due On date should be same as company due on date ${dueOnDate}.`,
@@ -923,7 +925,7 @@ const EditJob = () => {
         due_on = dueOnDate;
       }
 
-      else if(yearEndOnDate != Year_Ending_id_1){
+      else if (yearEndOnDate != Year_Ending_id_1) {
         sweatalert.fire({
           icon: "warning",
           title: `Year Ending date should be same as company year ending date ${yearEndOnDate}.`,
