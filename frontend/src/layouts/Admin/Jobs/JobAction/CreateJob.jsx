@@ -234,7 +234,7 @@ const CreateJob = () => {
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
-    let due_date = getDueDate(service_id);
+    let due_date = getDueDate(client_type, service_id);
    
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
@@ -244,8 +244,9 @@ const CreateJob = () => {
     }
   }
 
-  function getDueDate(service_id) {
-
+  function getDueDate(client_type, service_id) {
+   
+    if(["1", "3", "7"].includes(client_type)) {
     // Service Account Production
     if (Number(service_id) === 1) {
       const d = new Date();
@@ -257,7 +258,6 @@ const CreateJob = () => {
       }
       return `${dueYear}-01-31`;
     }
-
     // Service Personal Tax Return
     else if (Number(service_id) === 4) {
    
@@ -270,6 +270,7 @@ const CreateJob = () => {
       }
       return `${y}-01-31`;
     }
+   }
 
   }
 
