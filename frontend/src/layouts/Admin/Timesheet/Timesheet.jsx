@@ -201,11 +201,6 @@ const Timesheet = () => {
   const selectFilterStaffANdWeek = async (e) => {
     let { name, value } = e.target;
 
-    console.log(`name, value`, name);
-    console.log(` value`, value , 'value', typeof value);
-
-      
-
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
