@@ -235,7 +235,7 @@ const CreateJob = () => {
 
   const dueOn_date_set = async (client_type, service_id) => {
     let due_date = getDueDate(service_id);
-  
+   
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
         ...prevState,
@@ -260,19 +260,20 @@ const CreateJob = () => {
 
     // Service Personal Tax Return
     else if (Number(service_id) === 4) {
+   
       //const d = new Date('2026-02-31'); // Example date
       const d = new Date(); // Example date
       const y = d.getFullYear();
       const m = d.getMonth() + 1;
       if (m >= 4 || m <= 1) {
-        return new Date(`${m >= 4 ? y + 1 : y}-01-31`);
+        return `${m >= 4 ? y + 1 : y}-01-31`;
       }
       return `${y}-01-31`;
     }
 
   }
 
-
+ console.log("due_on --- ", jobData.DueOn);
 
 
   const getAllChecklist = async () => {
