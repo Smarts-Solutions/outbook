@@ -235,7 +235,7 @@ const CreateJob = () => {
 
   const dueOn_date_set = async (client_type, service_id) => {
     let due_date = getDueDate(client_type, service_id);
-    console.log("due_date insid :--", due_date);
+
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
         ...prevState,
