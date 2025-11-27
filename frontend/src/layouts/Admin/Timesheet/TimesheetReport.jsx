@@ -716,7 +716,7 @@ function TimesheetReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { action: "get", filters: filters };
+    const req = { action: "get", filters: filters , role : role };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
@@ -735,9 +735,9 @@ function TimesheetReport() {
   };
 
   useEffect(() => {
-    if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
+    //if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
       callFilterApi();
-    }
+   // }
   }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id,filters.employee_number]);
 
 

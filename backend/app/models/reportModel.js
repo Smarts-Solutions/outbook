@@ -2125,6 +2125,8 @@ const getTimesheetReportData = async (Report) => {
         toDate
     } = data.filters;
 
+    let role_user = data?.role?.toUpperCase() || '';
+
     //console.log("groupBy", groupBy);
     // console.log("fieldsToDisplayId", fieldsToDisplayId);
     if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
@@ -2201,6 +2203,10 @@ const getTimesheetReportData = async (Report) => {
         }
         if (!["", null, undefined].includes(employee_number)) {
             where.push(`s.employee_number = '${employee_number}'`);
+        }
+
+        if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
+            where.push(`raw.staff_id = ${StaffUserId}`);
         }
 
 
@@ -3728,7 +3734,6 @@ const getJobCustomReport = async (Report) => {
        
 
         if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
-          
             where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
         }
 
