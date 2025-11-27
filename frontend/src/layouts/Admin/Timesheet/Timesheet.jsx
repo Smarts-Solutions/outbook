@@ -157,6 +157,9 @@ const Timesheet = () => {
       setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       }
 
+
+      console.log(`res.res.filterDataWeekSubmitTimeSheet`, res?.filterDataWeekSubmitTimeSheet);
+
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       setStaffDataWeekDataAllSubmitTImeSheet({ loading: false, data: res.filterDataWeekSubmitTimeSheet });
 
@@ -196,7 +199,12 @@ const Timesheet = () => {
   };
 
   const selectFilterStaffANdWeek = async (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    console.log(`name, value`, name);
+    console.log(` value`, value , 'value', typeof value);
+
+      
 
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
@@ -205,6 +213,7 @@ const Timesheet = () => {
       setSelectedStaff(value);
       // await GetTimeSheet(0)
     } else if (name === "week") {
+      value = parseInt(value);
       weekOffSetValue.current = parseInt(value);
       setWeekOffset(value);
       await GetTimeSheet(value);
@@ -1841,7 +1850,7 @@ const Timesheet = () => {
                   value={staffOptions.find(opt => Number(opt.value) === Number(selectedStaff))}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'staff_id', value: selectedOption.value } };
+                    const e = { target: { name: 'staff_id', value:selectedOption.value } };
                     selectFilterStaffANdWeek(e);
                   }}
                   classNamePrefix="react-select"
