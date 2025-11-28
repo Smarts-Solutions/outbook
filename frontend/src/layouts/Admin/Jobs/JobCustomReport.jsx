@@ -1084,9 +1084,7 @@ function JobCustomReport() {
     { value: "staff_email", label: "Email Address" },
     { value: "line_manager", label: "Line Manager" },
     { value: "staff_status", label: "Status" },
-
   ];
-
 
   const orderMap = {};
   for (let i = 0; i < optionGroupBy.length; i++) {
