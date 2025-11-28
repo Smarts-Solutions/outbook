@@ -34,27 +34,22 @@ const Sidebar = () => {
         "/admin/job/customreport": false,
       };
 
-      // open correct parent based on current route
-      // if (location.pathname.startsWith("/admin/customer")) {
-      //   allKeys["/admin/customer"] = true;
-      // } 
-      
-       if (
+      if (
+        location.pathname.startsWith("/admin/customer") ||
+        location.pathname.startsWith("/admin/ClientLists") ||
+        location.pathname.startsWith("/admin/client/profiles")
+      ) {
+        allKeys["/admin/customer"] = true;
+      }
+      else if (
         location.pathname.startsWith("/admin/reports") ||
         location.pathname.startsWith("/admin/timesheetReports") ||
         location.pathname.startsWith("/admin/job/customreport")
       ) {
         // any report-related path -> open the Reports parent
         allKeys["/admin/reports"] = true;
-      } 
-      
-      else if(
-        location.pathname.startsWith("/admin/customer") ||
-        location.pathname.startsWith("/admin/ClientLists") ||
-        location.pathname.startsWith("/admin/client/profiles")
-        ){
-        allKeys["/admin/customer"] = true;
       }
+
 
       return {
         ...prev,
