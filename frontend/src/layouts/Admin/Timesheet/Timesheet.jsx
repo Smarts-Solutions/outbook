@@ -153,8 +153,8 @@ const Timesheet = () => {
     setSubmitStatusAllKey(0);
     setDeleteRows([]);
     if (res.status) {
-      if(isExistStaffDataWeekDataAll?.data?.length === 0){
-      setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+      if (isExistStaffDataWeekDataAll?.data?.length === 0) {
+        setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       }
 
 
@@ -201,6 +201,7 @@ const Timesheet = () => {
   const selectFilterStaffANdWeek = async (e) => {
     let { name, value } = e.target;
 
+ 
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -208,7 +209,11 @@ const Timesheet = () => {
       setSelectedStaff(value);
       // await GetTimeSheet(0)
     } else if (name === "week") {
-      value = parseInt(value);
+      if ([null, undefined, ''].includes(value)) {
+        value = 0;
+      } else {
+        value = parseInt(value);
+      }
       weekOffSetValue.current = parseInt(value);
       setWeekOffset(value);
       await GetTimeSheet(value);
@@ -1498,7 +1503,7 @@ const Timesheet = () => {
       "Remark"
     ];
 
-   let  total_hours = 0
+    let total_hours = 0
     const rows = timeSheetRows
       .filter(item => item.id !== null && item.id !== undefined)
       .map((item, index) => {
@@ -1534,9 +1539,9 @@ const Timesheet = () => {
 
 
     const finalRemarkRow = [
-    `Total Weekly Hours : ${(total_hours).toFixed(2) || ""}`,
-    `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
-    ...new Array(headers.length - 1).fill("")];
+      `Total Weekly Hours : ${(total_hours).toFixed(2) || ""}`,
+      `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
+      ...new Array(headers.length - 1).fill("")];
 
     const csvContent = [headers, ...rows, finalRemarkRow]
       .map((row) => row.join(","))
@@ -1676,12 +1681,12 @@ const Timesheet = () => {
       const e = { target: { name: 'staff_id', value: value } };
       selectFilterStaffANdWeek(e);
     } else {
-      
+
       setSelectedLineManager("");
       const e = { target: { name: 'staff_id', value: staffDetails?.id } };
       selectFilterStaffANdWeek(e);
 
-   
+
 
 
     }
@@ -1790,11 +1795,11 @@ const Timesheet = () => {
             </div>
           </div>
 
-        
+
 
           <div className="col-md-4">
-             
-              {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
+
+            {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
                 timeSheetRows.length > 0 ? (
                 <div className="form-group col-md-6">
                   <button
@@ -1811,20 +1816,20 @@ const Timesheet = () => {
 
 
 
-              {
-                timeSheetRows.length > 0 ? (
-                  <div className="form-group float-md-end">
-                    <button
-                      className="btn btn-info "
-                      onClick={() => exportToCSV(timeSheetRows)}
-                    >
-                      Export Timesheet Data
-                      <i className="fa fa-download ms-2" />
-                    </button>
-                  </div>
-                ) : (
-                  ""
-                )}
+            {
+              timeSheetRows.length > 0 ? (
+                <div className="form-group float-md-end">
+                  <button
+                    className="btn btn-info "
+                    onClick={() => exportToCSV(timeSheetRows)}
+                  >
+                    Export Timesheet Data
+                    <i className="fa fa-download ms-2" />
+                  </button>
+                </div>
+              ) : (
+                ""
+              )}
           </div>
         </div>
       </div>
@@ -1845,7 +1850,7 @@ const Timesheet = () => {
                   value={staffOptions.find(opt => Number(opt.value) === Number(selectedStaff))}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'staff_id', value:selectedOption.value } };
+                    const e = { target: { name: 'staff_id', value: selectedOption.value } };
                     selectFilterStaffANdWeek(e);
                   }}
                   classNamePrefix="react-select"
@@ -1965,7 +1970,7 @@ const Timesheet = () => {
                 ""
               )}
 
-              
+
             </div>
 
           </div>
