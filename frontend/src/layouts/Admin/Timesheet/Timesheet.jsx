@@ -157,7 +157,17 @@ const Timesheet = () => {
         setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       }
 
-    
+       if(selectedLineManager != "" && res.filterDataWeekSubmitTimeSheet.length === 0){
+        sweatalert.fire({
+          icon: "warning",
+          title: "No timesheets have been submitted yet.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+       }
+
+
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       setStaffDataWeekDataAllSubmitTImeSheet({ loading: false, data: res.filterDataWeekSubmitTimeSheet });
 
@@ -1685,8 +1695,6 @@ const Timesheet = () => {
       selectFilterStaffANdWeek(e);
 
 
-
-
     }
 
   };
@@ -1918,7 +1926,7 @@ const Timesheet = () => {
               {lineMangerData &&
                 lineMangerData.length > 0 ? (
                 <div className="form-group col-md-4 pe-0">
-                  <label className="form-label mb-2">Line Manager</label>
+                  <label className="form-label mb-2">Team Timesheet Status</label>
                   <Select
                     id="tabSelect"
                     name="week"
