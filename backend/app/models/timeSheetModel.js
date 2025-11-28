@@ -39,42 +39,42 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 //     DECLARE v_end_date DATE;
 
 //     
-    // IF p_time_period = 'this_week' THEN
-    //     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY);
-    //     SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
+// IF p_time_period = 'this_week' THEN
+//     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY);
+//     SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
 
-    // ELSEIF p_time_period = 'last_week' THEN
-    //     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())+7) DAY);
-    //     SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
+// ELSEIF p_time_period = 'last_week' THEN
+//     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())+7) DAY);
+//     SET v_end_date   = DATE_ADD(v_start_date, INTERVAL 6 DAY);
 
-    // ELSEIF p_time_period = 'this_month' THEN
-    //     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY);
-    //     SET v_end_date   = LAST_DAY(CURDATE());
+// ELSEIF p_time_period = 'this_month' THEN
+//     SET v_start_date = DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY);
+//     SET v_end_date   = LAST_DAY(CURDATE());
 
-    // ELSEIF p_time_period = 'last_month' THEN
-    //     SET v_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH);
-    //     SET v_end_date   = LAST_DAY(v_start_date);
+// ELSEIF p_time_period = 'last_month' THEN
+//     SET v_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH);
+//     SET v_end_date   = LAST_DAY(v_start_date);
 
-    // ELSEIF p_time_period = 'this_quarter' THEN
-    //     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL QUARTER(CURDATE())*3-3 MONTH;
-    //     SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
+// ELSEIF p_time_period = 'this_quarter' THEN
+//     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL QUARTER(CURDATE())*3-3 MONTH;
+//     SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
 
-    // ELSEIF p_time_period = 'last_quarter' THEN
-    //     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL (QUARTER(CURDATE())-2)*3 MONTH;
-    //     SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
+// ELSEIF p_time_period = 'last_quarter' THEN
+//     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1) + INTERVAL (QUARTER(CURDATE())-2)*3 MONTH;
+//     SET v_end_date   = LAST_DAY(v_start_date + INTERVAL 2 MONTH);
 
-    // ELSEIF p_time_period = 'this_year' THEN
-    //     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1);
-    //     SET v_end_date   = MAKEDATE(YEAR(CURDATE()), 365);
+// ELSEIF p_time_period = 'this_year' THEN
+//     SET v_start_date = MAKEDATE(YEAR(CURDATE()), 1);
+//     SET v_end_date   = MAKEDATE(YEAR(CURDATE()), 365);
 
-    // ELSEIF p_time_period = 'last_year' THEN
-    //     SET v_start_date = MAKEDATE(YEAR(CURDATE())-1, 1);
-    //     SET v_end_date   = MAKEDATE(YEAR(CURDATE())-1, 365);
+// ELSEIF p_time_period = 'last_year' THEN
+//     SET v_start_date = MAKEDATE(YEAR(CURDATE())-1, 1);
+//     SET v_end_date   = MAKEDATE(YEAR(CURDATE())-1, 365);
 
-    // ELSEIF p_time_period = 'custom' THEN
-    //     SET v_start_date = p_from_date;
-    //     SET v_end_date   = p_to_date;
-    // END IF;
+// ELSEIF p_time_period = 'custom' THEN
+//     SET v_start_date = p_from_date;
+//     SET v_end_date   = p_to_date;
+// END IF;
 
 //    
 //     SELECT 
@@ -257,63 +257,63 @@ const getTimesheet = async (Timesheet) => {
 
 
     // get week filter data
-//     const query_week_filter = `SELECT  
-//     id,
-//     staff_id,
-//     submit_status,
-//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS monday_date,
-//     DATE_FORMAT(tuesday_date, '%Y-%m-%d') AS tuesday_date,
-//     DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
-//     DATE_FORMAT(thursday_date, '%Y-%m-%d') AS thursday_date,
-//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS friday_date,
-//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS saturday_date,
-//     DATE_FORMAT(monday_date, '%Y-%m-%d') AS sunday_date,
-//     CONCAT(
-//         CASE 
-//             WHEN monday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), monday_date), ' ') 
-//             ELSE '' 
-//         END,
-//         CASE 
-//             WHEN monday_date IS NOT NULL AND tuesday_date IS NOT NULL THEN ''
-//             WHEN tuesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), tuesday_date), ' ') 
-//             ELSE '' 
-//         END,
-//         CASE 
-//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL) AND wednesday_date IS NOT NULL THEN ''
-//             WHEN wednesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), wednesday_date), ' ') 
-//             ELSE '' 
-//         END,
-//         CASE 
-//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL) AND thursday_date IS NOT NULL THEN ''
-//             WHEN thursday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), thursday_date), ' ') 
-//             ELSE '' 
-//         END,
-//         CASE 
-//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL) AND friday_date IS NOT NULL THEN ''
-//             WHEN friday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), friday_date), ' ') 
-//             ELSE '' 
-//         END,
-//         CASE 
-//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL) AND saturday_date IS NOT NULL THEN ''
-//             WHEN saturday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), saturday_date), ' ') 
-//             ELSE '' 
-//         END,
-//         CASE 
-//             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL OR saturday_date IS NOT NULL) AND sunday_date IS NOT NULL THEN ''
-//             WHEN sunday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), sunday_date), ' ') 
-//             ELSE '' 
-//         END
-//     ) AS valid_weekOffsets
-// FROM 
-// timesheet 
-// WHERE 
-//     staff_id = ? AND submit_status = '1'
-// GROUP BY valid_weekOffsets  
-// ORDER BY
-//     valid_weekOffsets ASC
-//     `
+    //     const query_week_filter = `SELECT  
+    //     id,
+    //     staff_id,
+    //     submit_status,
+    //     DATE_FORMAT(monday_date, '%Y-%m-%d') AS monday_date,
+    //     DATE_FORMAT(tuesday_date, '%Y-%m-%d') AS tuesday_date,
+    //     DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
+    //     DATE_FORMAT(thursday_date, '%Y-%m-%d') AS thursday_date,
+    //     DATE_FORMAT(monday_date, '%Y-%m-%d') AS friday_date,
+    //     DATE_FORMAT(monday_date, '%Y-%m-%d') AS saturday_date,
+    //     DATE_FORMAT(monday_date, '%Y-%m-%d') AS sunday_date,
+    //     CONCAT(
+    //         CASE 
+    //             WHEN monday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), monday_date), ' ') 
+    //             ELSE '' 
+    //         END,
+    //         CASE 
+    //             WHEN monday_date IS NOT NULL AND tuesday_date IS NOT NULL THEN ''
+    //             WHEN tuesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), tuesday_date), ' ') 
+    //             ELSE '' 
+    //         END,
+    //         CASE 
+    //             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL) AND wednesday_date IS NOT NULL THEN ''
+    //             WHEN wednesday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), wednesday_date), ' ') 
+    //             ELSE '' 
+    //         END,
+    //         CASE 
+    //             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL) AND thursday_date IS NOT NULL THEN ''
+    //             WHEN thursday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), thursday_date), ' ') 
+    //             ELSE '' 
+    //         END,
+    //         CASE 
+    //             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL) AND friday_date IS NOT NULL THEN ''
+    //             WHEN friday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), friday_date), ' ') 
+    //             ELSE '' 
+    //         END,
+    //         CASE 
+    //             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL) AND saturday_date IS NOT NULL THEN ''
+    //             WHEN saturday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), saturday_date), ' ') 
+    //             ELSE '' 
+    //         END,
+    //         CASE 
+    //             WHEN (monday_date IS NOT NULL OR tuesday_date IS NOT NULL OR wednesday_date IS NOT NULL OR thursday_date IS NOT NULL OR friday_date IS NOT NULL OR saturday_date IS NOT NULL) AND sunday_date IS NOT NULL THEN ''
+    //             WHEN sunday_date IS NOT NULL THEN CONCAT(TIMESTAMPDIFF(WEEK, CURDATE(), sunday_date), ' ') 
+    //             ELSE '' 
+    //         END
+    //     ) AS valid_weekOffsets
+    // FROM 
+    // timesheet 
+    // WHERE 
+    //     staff_id = ? AND submit_status = '1'
+    // GROUP BY valid_weekOffsets  
+    // ORDER BY
+    //     valid_weekOffsets ASC
+    //     `
 
-   const query_week_filter = `
+    const query_week_filter = `
     SELECT  
     id,
     staff_id,
@@ -381,8 +381,8 @@ GROUP BY valid_weekOffsets
 ORDER BY valid_weekOffsets ASC;
     `
     const [rows1] = await pool.query(query_week_filter, [staff_id]);
-    
-     const filterDataWeek = rows1
+
+    const filterDataWeek = rows1
       .map(item => {
         if (
           item.valid_weekOffsets != null &&
@@ -410,13 +410,18 @@ ORDER BY valid_weekOffsets ASC;
       })
       .filter(Boolean);
 
-      // Submitted Timesheet Week Filter Data
-      const filterDataWeekSubmitTimeSheet = rows1
+    // Submitted Timesheet Week Filter Data
+    const filterDataWeekSubmitTimeSheet = rows1
       .map(item => {
+        // if (
+        //   item.valid_weekOffsets != null &&
+        //   item.valid_weekOffsets != '' &&
+        //   item.valid_weekOffsets != undefined && 
+        //   item.submit_status === '1'
+        // ) 
         if (
-          item.valid_weekOffsets != null &&
-          item.valid_weekOffsets != '' &&
-          item.valid_weekOffsets != undefined && 
+          item.valid_weekOffsets !== null &&
+          item.valid_weekOffsets !== undefined &&
           item.submit_status === '1'
         ) {
           const firstDate =
@@ -440,7 +445,7 @@ ORDER BY valid_weekOffsets ASC;
       })
       .filter(Boolean);
 
-    return { status: true, message: "success.", data: rows, filterDataWeek: filterDataWeek , filterDataWeekSubmitTimeSheet: filterDataWeekSubmitTimeSheet };
+    return { status: true, message: "success.", data: rows, filterDataWeek: filterDataWeek, filterDataWeekSubmitTimeSheet: filterDataWeekSubmitTimeSheet };
   } catch (err) {
     console.log(err);
     return { status: false, message: "Err getTimesheet Data View Get", error: err.message };
@@ -500,37 +505,37 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
         // Other Role Data
-      //   let query = `
-      //  SELECT  
-      //   customers.id AS id,
-      //   customers.status AS status,
-      //   customers.form_process AS form_process,
-      //   customers.trading_name AS trading_name,
-      //   CONCAT(
-      //   'cust_', 
-      //   SUBSTRING(customers.trading_name, 1, 3), '_',
-      //   SUBSTRING(customers.customer_code, 1, 15)
-      //   ) AS customer_code
-      //   FROM 
-      //       customers  
-      //   JOIN 
-      //       staffs AS staff1 ON customers.staff_id = staff1.id
-      //   JOIN 
-      //       staffs AS staff2 ON customers.account_manager_id = staff2.id
-      //   LEFT JOIN clients ON clients.customer_id = customers.id
-      //   LEFT JOIN
-      //       assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-      //   LEFT JOIN
-      //       customer_company_information ON customers.id = customer_company_information.customer_id
-      //   WHERE
-      //       (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
-      //       OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-      //       )
-      //      GROUP BY customers.id
-      //      ORDER BY customers.id DESC
-      //    `;
-      //   const [result] = await pool.execute(query, [staff_id, staff_id]);
-      let query = `
+        //   let query = `
+        //  SELECT  
+        //   customers.id AS id,
+        //   customers.status AS status,
+        //   customers.form_process AS form_process,
+        //   customers.trading_name AS trading_name,
+        //   CONCAT(
+        //   'cust_', 
+        //   SUBSTRING(customers.trading_name, 1, 3), '_',
+        //   SUBSTRING(customers.customer_code, 1, 15)
+        //   ) AS customer_code
+        //   FROM 
+        //       customers  
+        //   JOIN 
+        //       staffs AS staff1 ON customers.staff_id = staff1.id
+        //   JOIN 
+        //       staffs AS staff2 ON customers.account_manager_id = staff2.id
+        //   LEFT JOIN clients ON clients.customer_id = customers.id
+        //   LEFT JOIN
+        //       assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        //   LEFT JOIN
+        //       customer_company_information ON customers.id = customer_company_information.customer_id
+        //   WHERE
+        //       (customers.staff_id = ?  OR assigned_jobs_staff_view.staff_id = ?
+        //       OR customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+        //       )
+        //      GROUP BY customers.id
+        //      ORDER BY customers.id DESC
+        //    `;
+        //   const [result] = await pool.execute(query, [staff_id, staff_id]);
+        let query = `
        SELECT  
         customers.id AS id,
         customers.status AS status,
@@ -848,23 +853,23 @@ const getTimesheetTaskType = async (Timesheet) => {
      `;
       const [rows] = await pool.execute(query, [job_id]);
       return { status: true, message: "success.", data: rows };
-    //   if (rows.length > 0) {
-    //     return { status: true, message: "success.", data: rows };
-    //   } else {
+      //   if (rows.length > 0) {
+      //     return { status: true, message: "success.", data: rows };
+      //   } else {
 
-    //     const query = `
-    //  SELECT task.id AS id, task.name AS name
-    //  FROM task
-    //  INNER JOIN jobs 
-    //     ON task.service_id = jobs.service_id 
-    //     AND task.job_type_id = jobs.job_type_id
-    //  WHERE 
-    //  jobs.id = ?
-    //   GROUP BY task.id
-    //  `;
-    //     const [rows] = await pool.execute(query, [job_id]);
-    //     return { status: true, message: "success.", data: rows };
-    //   }
+      //     const query = `
+      //  SELECT task.id AS id, task.name AS name
+      //  FROM task
+      //  INNER JOIN jobs 
+      //     ON task.service_id = jobs.service_id 
+      //     AND task.job_type_id = jobs.job_type_id
+      //  WHERE 
+      //  jobs.id = ?
+      //   GROUP BY task.id
+      //  `;
+      //     const [rows] = await pool.execute(query, [job_id]);
+      //     return { status: true, message: "success.", data: rows };
+      //   }
     }
 
     return { status: false, message: "Invalid Task Type." };
@@ -953,7 +958,7 @@ const saveTimesheet = async (Timesheet) => {
             staff_id, row.task_type, customer_id, client_id, row.job_id, row.task_id,
             row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
             wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, final_remark, row.submit_status ,monday_note, tuesday_note, wednesday_note, thursday_note, friday_note, saturday_note, sunday_note
+            row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark, final_remark, row.submit_status, monday_note, tuesday_note, wednesday_note, thursday_note, friday_note, saturday_note, sunday_note
           ];
           await pool.query(insertQuery, insertValues);
 
