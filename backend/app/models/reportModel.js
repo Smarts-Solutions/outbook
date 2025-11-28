@@ -1732,10 +1732,10 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
     let current = new Date(fromDate);
 
     // date return current date
-    const today = new Date();
-    if (toDate > today) {
-        toDate = today;
-    }
+    // const today = new Date();
+    // if (toDate > today) {
+    //     toDate = today;
+    // }
 
     while (current <= toDate) {
         const d = new Date(current);
