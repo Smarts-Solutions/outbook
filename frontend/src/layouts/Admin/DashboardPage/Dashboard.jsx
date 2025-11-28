@@ -4,11 +4,13 @@ import {
   DashboardData,
   ActivityLog,
 } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import qs from 'qs';
 import jwtDecode from "jwt-decode";
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
+import Select from 'react-select';
 
 const Dashboard = () => {
   const [visibleLogs, setVisibleLogs] = useState(4); // Initially show 5 logs
@@ -33,6 +35,11 @@ const Dashboard = () => {
     setSelectedTab(event.target.value);
   };
 
+  const [selectedStaff, setSelectedStaff] = useState("")
+  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [selectedFromDate, setSelectedFromDate] = useState("");
+  const [selectedToDate, setSelectedToDate] = useState("");
+
   const hours = currentDate.getHours();
 
   let greeting;
@@ -46,6 +53,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     GetDashboardData();
+    GetAllStaff();
   }, [selectedTab]);
 
   useEffect(() => {
@@ -68,6 +76,35 @@ const Dashboard = () => {
         console.log(error);
       });
   };
+
+  const GetAllStaff = async () => {
+    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          // const filteredData = response.data.filter((item) => {
+          //   return item.status === "1";
+          // });
+          const filteredData = response.data;
+          setStaffDataAll({ loading: false, data: filteredData });
+        } else {
+          setStaffDataAll({ loading: false, data: [] });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  const staffOptions = staffDataAll.data?.map((val) => ({
+    value: val.id,
+    label: `${val.first_name} ${val.last_name}`
+  })) || [];
+
+  const staffOptionPlaceholder = [
+    { value: "", label: "-- Select Staff --" },
+    ...staffOptions
+  ]
 
   const ActivityLogData = async () => {
     const req = { staff_id: staffDetails.id };
@@ -503,6 +540,21 @@ const Dashboard = () => {
     created_at: formatDate(item.created_at),
   }));
 
+  const selectFilterValue = (e) => {
+    let { name, value } = e;
+    if (name === "staff") {
+      setSelectedStaff(value);
+    }
+    else if(name === "fromDate"){
+      setSelectedFromDate(value);
+
+    }
+    else if(name === "toDate"){
+      setSelectedToDate(value);
+    }
+
+  }
+
 
 
   return (
@@ -516,13 +568,13 @@ const Dashboard = () => {
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
-                  <div className="col-md-2">
-                <ExportToExcel
-                  className="btn btn-outline-info fw-bold float-end border-3 "
-                  apiData={exportData}
-                  fileName={"Logs Details"}
-                />
-              </div>
+                <div className="col-md-2">
+                  <ExportToExcel
+                    className="btn btn-outline-info fw-bold float-end border-3 "
+                    apiData={exportData}
+                    fileName={"Logs Details"}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -575,7 +627,7 @@ const Dashboard = () => {
                 </div> */}
 
               </div>
-            
+
               <div className="tab-content mt-5">
 
                 <div className="tab-pane show active">
@@ -717,7 +769,52 @@ const Dashboard = () => {
               </div>
             </>
           </div>
+
           <div className="col-lg-4 col-md-4 mt-2">
+
+            <div className="row">
+              <div className="col-lg-6 col-md-6">
+                <label>Select Staff</label>
+                <Select
+                  id="tabSelect"
+                  name="staff"
+                  className="basic-multi-select"
+                  options={staffOptionPlaceholder}
+                  defaultValue={null}
+                  placeholder="-- Select --"
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'staff', value: selectedOption.value } };
+                    selectFilterValue(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                />
+              </div>
+              <div className="col-lg-3 col-md-3">
+                <label>From Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={selectedFromDate}
+                  name='fromDate'
+                  onChange={(e) => selectFilterValue(e.target)}
+                />
+              </div>
+              <div className="col-lg-3 col-md-3">
+                <label>To Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={selectedToDate}
+                  name='toDate'
+                  onChange={(e) => selectFilterValue(e.target)}
+                />
+              </div>
+            </div>
+
+
+
             <div className="card activity-card">
               <div className="card-header border-bottom-0">
                 <div className="row align-items-center">
