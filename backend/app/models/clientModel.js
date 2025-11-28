@@ -790,6 +790,9 @@ const getClientFilter = async (client) => {
 //  console.log("getClient client", client);
   let { customer_id, StaffUserId , filters } = client;
   let { job_id } = filters;
+
+  // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
   
     //console.log("getClientFilter filters", filters?.customer_id);
     customer_id = filters?.customer_id;
@@ -798,7 +801,7 @@ const getClientFilter = async (client) => {
 
 
   if(customer_id == undefined || customer_id == null || customer_id == ''){
-    return await getAllClientsSidebarFilter(StaffUserId , rows ,job_id);
+    return await getAllClientsSidebarFilter(StaffUserId , rows ,job_id ,LineManageStaffId);
   }
 
   // console.log("getClient customer_id", customer_id);
@@ -873,8 +876,6 @@ ORDER BY
           clients
       JOIN 
           staffs ON clients.staff_created_id = staffs.id
-      LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})  
       JOIN 
           customers ON customers.id = clients.customer_id    
       JOIN 
@@ -882,7 +883,7 @@ ORDER BY
       LEFT JOIN 
           jobs ON clients.id = jobs.client_id 
       WHERE 
-       (clients.staff_created_id IN (${LineManageStaffId}) OR  assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND clients.customer_id = ${customer_id}
+        clients.customer_id = ${customer_id}
       GROUP BY
           clients.id
       ORDER BY 
@@ -893,8 +894,7 @@ ORDER BY
      return { status: true, message: "success.", data: result };
 
 };
-
-async function getAllClientsSidebarFilter(StaffUserId, rows, job_id) {
+async function getAllClientsSidebarFilter(StaffUserId, rows, job_id, LineManageStaffId) {
 
 
   try {
@@ -987,8 +987,6 @@ ORDER BY
       const [result] = await pool.execute(query);
       return { status: true, message: "success.", data: result };
 }
-
-
 
 
 const getByidClient = async (client) => {
