@@ -1867,10 +1867,10 @@ const Timesheet = () => {
               ""
             )}
 
-            <div className="form-group  row align-items-end">
+            
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-4 pe-0">
+                <div className="form-group col-md-4   pe-0">
                   <label className="form-label mb-2">Select Date</label>
                   <Select
                     id="tabSelect"
@@ -1925,7 +1925,7 @@ const Timesheet = () => {
 
               {lineMangerData &&
                 lineMangerData.length > 0 ? (
-                <div className="form-group col-md-4 pe-0">
+                <div className="form-group  col-md-4  pe-0">
                   <label className="form-label mb-2">Team Timesheet Status</label>
                   <Select
                     id="tabSelect"
@@ -1952,7 +1952,7 @@ const Timesheet = () => {
 
               {selectedLineManager != "" && staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-4 pe-0">
+                <div className="form-group col-md-4  pe-0">
                   <label className="form-label mb-2">Line Manager Select Week</label>
                   <Select
                     id="tabSelect"
@@ -1979,7 +1979,7 @@ const Timesheet = () => {
 
             </div>
 
-          </div>
+         
 
           {/* Tabs Content */}
           <div className="tab-content mt-1">
