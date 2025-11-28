@@ -172,17 +172,30 @@ const CreateJob = () => {
 
           if (location?.state?.goto != "Customer") {
             const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
-            console.log("clientInfo", clientInfo);
             setClientType(clientInfo?.client_client_type || "");
             if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-              await get_information_company_umber(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
+              if (response.data?.services?.[0]?.service_id == 1) {
+                await get_information_company_umber(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
+              }
+              else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
+                await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+              }
             }
 
             else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-              await get_information_company_umber(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
+
+              if (response.data?.services?.[0]?.service_id == 1) {
+                await get_information_company_umber(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
+              }
+              else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
+                await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+              }
             }
 
             else if (clientInfo != "" && ["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+              await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+            }
+            else if ([1,4,8].includes(Number(response.data?.services?.[0]?.service_id))) {
               await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
             }
 
@@ -234,8 +247,8 @@ const CreateJob = () => {
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
-    let due_date = getDueDate(client_type, service_id);
 
+    let due_date = getDueDate(client_type, service_id);
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
         ...prevState,
@@ -271,7 +284,7 @@ const CreateJob = () => {
         return `${y}-01-31`;
       }
 
-       // 1 month + 7 day added for this service
+      // 1 month + 7 day added for this service
       else if (Number(service_id) === 8) {
 
         const today = new Date();
@@ -288,8 +301,7 @@ const CreateJob = () => {
       }
     }
     else {
-      
-       // 1 month + 7 day added for this service
+      // 1 month + 7 day added for this service
       if (Number(service_id) === 8) {
         const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
@@ -445,6 +457,9 @@ const CreateJob = () => {
       else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
         dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
+      else if (Number(jobData?.Service) === 8) {
+        dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+      }
     }
 
     if (name === "JobType") {
@@ -464,9 +479,7 @@ const CreateJob = () => {
           ...prevState,
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
-
         if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
-
           setJobData((prevState) => ({
             ...prevState,
             Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
@@ -474,7 +487,6 @@ const CreateJob = () => {
           }));
         }
       } else {
-
         setJobData((prevState) => ({
           ...prevState,
           Year_Ending_id_1: null,
