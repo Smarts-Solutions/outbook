@@ -2141,6 +2141,7 @@ const getTimesheetReportData = async (Report) => {
     }
 
     try {
+        
         // compute date range
         let range;
         try {
@@ -2430,7 +2431,7 @@ const getTimesheetReportData = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
-            console.log("r.work_hours --------> ", r.work_hours);
+           // console.log("r.work_hours --------> ", r.work_hours);
 
             //  const gid = r.group_value || 'NULL';
             const gid = r.group_value + '_' + r.task_type || 'NULL';
@@ -2506,7 +2507,7 @@ const getTimesheetReportData = async (Report) => {
 
 
         // const columns = ['group', ...periods, 'total_hours', 'total_records'];
-        console.log("fromDate ,", fromDate, 'toDate ', toDate);
+        // console.log("fromDate ,", fromDate, 'toDate ', toDate);
 
         const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
 
