@@ -408,7 +408,9 @@ const getDashboardData = async (dashboard) => {
 
 
 const getDashboardActivityLog = async (dashboard) => {
-  const { staff_id, type } = dashboard;
+  const { staff_id, type , filter_type , filter_staff_id, from_date, to_date } = dashboard;
+
+
   const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -432,22 +434,45 @@ const getDashboardActivityLog = async (dashboard) => {
   }
 
   try {
-    const query = `
-  SELECT
-    staff_logs.id AS log_id,
-    staff_logs.staff_id AS staff_id,
-    DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
-    staff_logs.created_at AS created_at,
-    staff_logs.log_message_all AS log_message,
-    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
-  FROM
-  staff_logs
-  LEFT JOIN
-    staffs ON staffs.id = staff_logs.staff_id
-   ${MatchCondition}
-  ORDER BY
-    staff_logs.id DESC
-`;
+    let query = `
+      SELECT
+        staff_logs.id AS log_id,
+        staff_logs.staff_id AS staff_id,
+        DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+        staff_logs.created_at AS created_at,
+        staff_logs.log_message_all AS log_message,
+        CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
+      FROM
+      staff_logs
+      LEFT JOIN
+        staffs ON staffs.id = staff_logs.staff_id
+      ${MatchCondition}
+      ORDER BY
+        staff_logs.id DESC
+    `;
+
+    if(filter_type === 'filter'){
+      query = `
+      SELECT
+        staff_logs.id AS log_id,
+        staff_logs.staff_id AS staff_id,
+        DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+        staff_logs.created_at AS created_at,
+        staff_logs.log_message_all AS log_message,
+        CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
+      FROM
+      staff_logs
+      LEFT JOIN
+        staffs ON staffs.id = staff_logs.staff_id
+      WHERE
+        staff_logs.staff_id = ${filter_staff_id}
+        AND staff_logs.date BETWEEN '${from_date}' AND '${to_date}'
+      ORDER BY
+        staff_logs.id DESC
+    `;
+    }
+
+    console.log("query ", query);
 
     const [result] = await pool.execute(query);
 

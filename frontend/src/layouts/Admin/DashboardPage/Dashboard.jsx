@@ -106,8 +106,18 @@ const Dashboard = () => {
     ...staffOptions
   ]
 
-  const ActivityLogData = async () => {
-    const req = { staff_id: staffDetails.id };
+  console.log("staffOptionPlaceholder", staffOptionPlaceholder);
+
+  const ActivityLogData = async (type , staff_id , fromDate , toDate) => {
+
+    let req = { staff_id: staffDetails.id };
+    if(type === 'filter'){
+       req = { staff_id: staffDetails.id, filter_type :type, filter_staff_id: staff_id, from_date: fromDate, to_date: toDate };
+    } else {
+       req = { staff_id: staffDetails.id };
+    }
+      
+   // const req = { staff_id: staffDetails.id };
     const data = { req: req, authToken: token };
     await dispatch(ActivityLog(data))
       .unwrap()
@@ -540,17 +550,21 @@ const Dashboard = () => {
     created_at: formatDate(item.created_at),
   }));
 
-  const selectFilterValue = (e) => {
-    let { name, value } = e;
+  const selectFilterValue = async (e) => {
+    let { name, value } = e.target;
+
     if (name === "staff") {
       setSelectedStaff(value);
+     await ActivityLogData('filter', value , selectedFromDate, selectedToDate);
     }
     else if(name === "fromDate"){
       setSelectedFromDate(value);
+     await ActivityLogData('filter', selectedStaff, value, selectedToDate);
 
     }
     else if(name === "toDate"){
       setSelectedToDate(value);
+      await ActivityLogData('filter', selectedStaff, selectedFromDate, value);
     }
 
   }
@@ -780,7 +794,7 @@ const Dashboard = () => {
                   name="staff"
                   className="basic-multi-select"
                   options={staffOptionPlaceholder}
-                  defaultValue={null}
+                  value={staffOptionPlaceholder.find((obj) => Number(obj.value) === Number(selectedStaff))}
                   placeholder="-- Select --"
                   onChange={(selectedOption) => {
                     // simulate e.target.value
@@ -798,7 +812,7 @@ const Dashboard = () => {
                   className="form-control"
                   value={selectedFromDate}
                   name='fromDate'
-                  onChange={(e) => selectFilterValue(e.target)}
+                  onChange={(e) => selectFilterValue(e)}
                 />
               </div>
               <div className="col-lg-3 col-md-3">
@@ -808,7 +822,7 @@ const Dashboard = () => {
                   className="form-control"
                   value={selectedToDate}
                   name='toDate'
-                  onChange={(e) => selectFilterValue(e.target)}
+                  onChange={(e) => selectFilterValue(e)}
                 />
               </div>
             </div>
