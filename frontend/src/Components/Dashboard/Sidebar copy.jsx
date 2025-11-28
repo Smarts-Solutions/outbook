@@ -12,91 +12,81 @@ const Sidebar = () => {
       "/admin/customer": false, // Initially set the "Customer" dropdown to be closed or open based on current location
       "/admin/client/profiles": false, // For "Job" dropdown
       "/admin/ClientLists": false, // For "Client" dropdown
-      "/admin/reports": false, // For "Reports" dropdown
-      "admin/timesheetReports": false, // For "Time Sheet Reports" dropdown
-      "/admin/job/customreport": false, // For "Custom Job Report" dropdown
     },
   });
 
+  // Update active link when location changes
+  useEffect(() => {
+    setActiveLink(location.pathname);
 
-
-useEffect(() => {
-  setActiveLink(location.pathname);
-
-  setMenuState(prev => {
-    // default: all closed
-    const allKeys = {
-      "/admin/customer": false,
-      "/admin/client/profiles": false,
-      "/admin/ClientLists": false,
-      "/admin/reports": false,
-      "/admin/timesheetReports": false,
-      "/admin/job/customreport": false,
-    };
-
-    // open correct parent based on current route
+    // Check if we're on any customer-related page, and set the dropdown state accordingly
     if (location.pathname.startsWith("/admin/customer")) {
-      allKeys["/admin/customer"] = true;
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/customer": true, // Keep the "Customer" dropdown open if we're on any customer-related page
+        },
+      }));
     } else if (location.pathname.startsWith("/admin/client")) {
-      allKeys["/admin/client/profiles"] = true;
-    } else if (
-      location.pathname.startsWith("/admin/reports") ||
-      location.pathname.startsWith("/admin/timesheetReports") ||
-      location.pathname.startsWith("/admin/job/customreport")
-    ) {
-      // any report-related path -> open the Reports parent
-      allKeys["/admin/reports"] = true;
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/client/profiles": true, // Keep the "Job" dropdown open if we're on any job-related page
+        },
+      }));
     } else if (location.pathname === "/admin/ClientLists") {
-      allKeys["/admin/ClientLists"] = true;
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/ClientLists": true, // Keep the "Client" dropdown open when on Client Lists page
+        },
+      }));
+    } else {
+      // Close the dropdowns if we're not on any customer or job-related page
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/customer": false,
+          "/admin/client/profiles": false,
+          "/admin/ClientLists": false, // Close Client dropdown as well
+        },
+      }));
     }
-
-    return {
-      ...prev,
-      dropdownOpen: allKeys,
-    };
-  });
-}, [location]);
+  }, [location]);
 
 
-const handleLinkClick = (e, linkPathname) => {
-  if (e) e.preventDefault();
-  setActiveLink(linkPathname);
-
-  // Decide which parent should be open after navigation
-  const reportPaths = ["/admin/reports", "/admin/timesheetReports", "/admin/job/customreport"];
-  const customerPaths = ["/admin/customer", "/admin/ClientLists", "/admin/client"];
-
-  setMenuState(prev => {
-    const newDropdown = Object.keys(prev.dropdownOpen || {}).reduce((acc, k) => {
-      acc[k] = false;
-      return acc;
-    }, {});
-
-    if (reportPaths.some(p => linkPathname.startsWith(p))) {
-      newDropdown["/admin/reports"] = true;
-    } else if (linkPathname.startsWith("/admin/customer") || linkPathname.startsWith("/admin/client") || linkPathname === "/admin/ClientLists") {
-      newDropdown["/admin/customer"] = true;
+  // Handle link click and set the active tab
+  const handleLinkClick = (e, linkPathname) => {
+    e.preventDefault();
+    setActiveLink(linkPathname);
+    // Prevent opening Customer dropdown when clicking Customer Details
+    if (linkPathname === "/admin/customerUsers") {
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/customer": false,
+        },
+      }));
     }
+    navigate(linkPathname);
+  };
 
-    return { ...prev, dropdownOpen: newDropdown };
-  });
-
-  navigate(linkPathname);
-};
-
-
- const handleMenuClick = (e, key) => {
-  if (e) e.preventDefault();
-  setMenuState(prev => {
-    // close all known keys then toggle requested key
-    const newDropdown = Object.keys(prev.dropdownOpen || {}).reduce((acc, k) => {
-      acc[k] = false;
-      return acc;
-    }, {});
-    newDropdown[key] = !prev.dropdownOpen[key];
-    return { ...prev, dropdownOpen: newDropdown };
-  });
-};
+  // Handle dropdown menu click
+  const handleMenuClick = (e, linkPathname) => {
+    e.preventDefault();
+    setMenuState((prevState) => ({
+      ...prevState,
+      dropdownOpen: {
+        ...prevState.dropdownOpen,
+        [linkPathname]: !prevState.dropdownOpen[linkPathname], // Toggle current dropdown
+      },
+    }));
+  };
 
 
   return (
@@ -337,110 +327,9 @@ const handleLinkClick = (e, linkPathname) => {
                 : ""
             } */}
 
-  {/* Customer Dropdown */}
-            <li
-              className={
-                activeLink.startsWith("/admin/reports") ||
-                  activeLink.startsWith("/admin/timesheetReports") ||
-                  activeLink.startsWith("/admin/job/customreport")
-                  ? "active"
-                  : ""
-              }
-            >
-
-             {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
-  <a
-    href="#"
-    onClick={(e) => handleMenuClick(e, "/admin/reports")}
-    className="sidebar-parent"
-  >
-    <div>
-      <span className="sidebar-icons">
-        <i className="fas fa-users"></i>
-      </span>
-      <span className="pe-4 pe-lg-4">Reports</span>
-    </div>
-    <span className="chevron-icon">
-      <i
-        className={`fas ${
-          menuState.dropdownOpen["/admin/reports"]
-            ? "fa-chevron-down"
-            : "fa-chevron-right"
-        }`}
-      ></i>
-    </span>
-  </a>
-)}
 
 
-              <ul
-                className={`nav-second-level ${menuState.dropdownOpen["/admin/reports"] ? "in" : "mm-collapse"
-                  }`}
-                aria-expanded={
-                  menuState.dropdownOpen["/admin/reports"] ? "true" : "false"
-                }
-              >
-              <li
-                    className={
-                      activeLink === "/admin/reports" ? "active" : ""
-                    }
-                  >
-                    <Link
-                      to="/admin/reports"
-                      aria-expanded="false"
-                      onClick={(e) => handleLinkClick(e, "/admin/reports")}
-                    >
-                      <span className="sidebar-icons">
-                        <i className="fas fa-file-alt"></i>{" "}
-                      
-                      </span>
-                      <span>Standard</span>
-                    </Link>
-                  </li>
-
-
-                  
-            
-                  <li
-                    className={
-                      activeLink === "/admin/timesheetReports" ? "active" : ""
-                    }
-                  >
-                    <Link
-                      to="/admin/timesheetReports"
-                      aria-expanded="false"
-                      onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
-                    >
-                      <span className="sidebar-icons">
-                        <i className="fas fa-clock"></i>{" "}
-                      </span>
-                      <span>Custom TimeSheet</span>
-                    </Link>
-                  </li>
-
-
-                  <li
-                    className={
-                      activeLink === "/admin/job/customreport" ? "active" : ""
-                    }
-                  >
-                    <Link
-                      to="/admin/job/customreport"
-                      aria-expanded="false"
-                      onClick={(e) => handleLinkClick(e, "/admin/job/customreport")}
-                    >
-                      <span className="sidebar-icons">
-                        <i className="fas fa-clock"></i>{" "}
-
-                      </span>
-                      <span>Custom Job</span>
-                    </Link>
-                  </li>
-
-              </ul>
-            </li>
-
-            {/* {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
+            {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
               <li className={activeLink.startsWith("/admin/reports") ? "active" : ""}>
                 <Link
                   to="/admin/reports"
@@ -523,7 +412,7 @@ const handleLinkClick = (e, linkPathname) => {
 
                 </ul>
               </li>
-            )} */}
+            )}
 
 
 
