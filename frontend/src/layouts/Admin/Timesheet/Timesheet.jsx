@@ -127,7 +127,7 @@ const Timesheet = () => {
   const [lineMangerData, setLineMangerData] = useState([]);
   const [selectedLineManager, setSelectedLineManager] = useState("");
 
-  console.log(`selectedLineManager`, selectedLineManager);
+  
 
   const GetLineManagerData = async () => {
     await dispatch(Staff({ req: { action: "get_line_manager" }, authToken: token }))
