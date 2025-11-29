@@ -5,20 +5,46 @@ import Datatable from "../../../Components/ExtraComponents/Datatable_1";
 import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
+import Validation_Message from "../../../Utils/Validation_Message";
+import { useFormik } from "formik";
 
 
 import Swal from "sweetalert2";
+import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
+import * as Yup from "yup";
 
 
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
 const Customer = () => {
+
+  const convertDate = (date) => {
+    if ([null, undefined, ''].includes(date)) {
+      return "-";
+    }
+    if (date) {
+      let newDate = new Date(date);
+      let day = newDate.getDate();
+      let month = newDate.getMonth() + 1;
+      let year = newDate.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    return "-";
+  }
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+
+
+
+
   const [customerData, setCustomerData] = useState([]);
   const [showManagerModal, setShowManagerModal] = useState(false);
   const [managerList, setManagerList] = useState([]);
@@ -56,7 +82,6 @@ const Customer = () => {
 
 
   useEffect(() => {
-
     GetAllCustomerData(1, pageSize, '');
   }, [activeTab]);
 
@@ -102,7 +127,7 @@ const Customer = () => {
       idth: "300px",
       reorder: false,
     },
-     {
+    {
       name: "Role",
       selector: (row) => row.role_name,
       sortable: true,
@@ -130,7 +155,7 @@ const Customer = () => {
       width: "150px",
       reorder: false,
     },
-   
+
     {
       name: "Created At",
       selector: (row) => row.created_at,
@@ -138,11 +163,11 @@ const Customer = () => {
         <div
           title={row.created_at}
         >
-          {row.created_at}
+          {convertDate(row.created_at)}
         </div>
       ),
       sortable: true,
-      
+
     },
 
     {
@@ -494,45 +519,235 @@ const Customer = () => {
     a.click();
   };
 
+//////////////////////////////////////////////////
+
+ const fields = [
+    {
+      type: "text6",
+      name: "first_name",
+      label: "First Name",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter First Name",
+    },
+    {
+      type: "text6",
+      name: "last_name",
+      label: "Last Name",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Last Name",
+    },
+
+    {
+      type: "select2",
+      name: "phone_code",
+      label: "Phone Code",
+      options: [
+        { label: "+44", value: "+44" },
+        { label: "+91", value: "+91" },
+      ],
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Phone Number",
+    },
+    {
+      type: "number1",
+      name: "phone",
+      label: "Phone",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Phone Number",
+    },
+    {
+      type: "email",
+      name: "email",
+      label: "Email",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Email",
+    },
+    // {
+    //   type: "select1",
+    //   name: "role",
+    //   label: "Role",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   //disable: editStaff ? true : false,
+    //   options:
+    //     roleDataAll &&
+    //     roleDataAll.data.map((data) => {
+    //       if (formik.values.role_id == data.id) {
+    //         return { label: data.role_name, value: data.id, selected: true };
+    //       } else {
+    //         return { label: data.role_name, value: data.id };
+    //       }
+    //     }),
+    // },
+    {
+      type: "select1",
+      name: "status",
+      label: "Status",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: [
+        { label: "Active", value: "1" },
+        { label: "Inactive", value: "0" },
+      ],
+    },
+    // {
+    //   type: "selectSearch",
+    //   name: "staff_to",
+    //   label: "Line Manager",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   disable: false,
+    //   options: staffDataAll.data
+    //     .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN" && data.id !== editStaffData.id))
+    //     .map((data) => ({
+    //       label: `${data.first_name} ${data.last_name}`,
+    //       value: data.id,
+    //     })),
+    // },
+    {
+      type: "text6",
+      name: "employee_number",
+      label: "Employee ID",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Employee ID",
+    },
+  ];
+
+  const formik = useFormik({
+      initialValues: {
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        phone_code: "+44",
+        role: "1",
+        status: "1",
+        staff_to: "",
+        employee_number: "",
+      },
+      validationSchema: Yup.object({
+        first_name: Yup.string()
+          .trim(Validation_Message.FirstNameValidation)
+          .required(Validation_Message.FirstNameValidation),
+        last_name: Yup.string()
+          .trim(Validation_Message.LastNameValidation)
+          .required(Validation_Message.LastNameValidation),
+        email: Yup.string()
+          .trim(Validation_Message.EmailValidation)
+          .email(Validation_Message.EmailValidation)
+          .required(Validation_Message.EmailIsRequire),
+        role: Yup.string()
+          .trim(Validation_Message.RoleValidation)
+          .required(Validation_Message.RoleValidation),
+      //   status: Yup.string()
+      //     .trim(Validation_Message.StatusValidation)
+      //     .required(Validation_Message.StatusValidation),
+      //   employee_number: Yup.string()
+      //     .trim(Validation_Message.EmployeeNumberValidation)
+      //     .required(Validation_Message.EmployeeNumberValidation)
+       }),
+  
+      onSubmit: async (values) => {
+        let req = {
+          first_name: (values.first_name).trim(),
+          last_name: values.last_name,
+          email: values.email,
+          phone: values.phone,
+          phone_code: values.phone_code,
+          role_id: values.role,
+          status: values.status,
+          employee_number: values.employee_number,
+          staff_to: values.staff_to,
+         // created_by: StaffUserId.id,
+         // hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+        };
+
+     alert("Submit function called");
+
+
+        // if (editStaff) {
+        //   req.id = editStaffData && editStaffData.id;
+        // }
+  
+  
+        // await dispatch(
+        //   Staff({
+        //     req: { action: editStaff ? "update" : "add", ...req },
+        //     authToken: token,
+        //   })
+        // )
+        //   .unwrap()
+        //   .then(async (response) => {
+        //     if (response.status) {
+        //       sweatalert.fire({
+        //         icon: "success",
+        //         title: "Success",
+        //         text: response.message,
+        //         timer: 1500,
+        //         timerProgressBar: true,
+        //       });
+        //       setTimeout(() => {
+        //         setAddStaff(false);
+        //         setEditStaff(false);
+        //         setEditStaffData({});
+        //         SetRefresh(!refresh);
+        //         formik.resetForm();
+        //         window.location.reload();
+        //       }, 1500);
+        //     } else {
+        //       sweatalert.fire({
+        //         icon: "error",
+        //         title: "Oops...",
+        //         text: response.message,
+        //       });
+        //     }
+        //   })
+  
+        //   .catch((error) => {
+        //     return;
+        //   });
+      },
+    });
+
+
+
   return (
     <div>
-      <CommanModal
-        isOpen={showManagerModal}
-        handleClose={() => { setShowManagerModal(false); setManagerList([]); }}
+    <CommanModal
+        isOpen={showAddCustomerModal}
+        backdrop="static"
+        size="ms-7"
+        title="Add Customer User"
         hideBtn={true}
-        title="Individual Service Account Managers"
-
+        handleClose={() => {
+          setShowAddCustomerModal(false);
+          formik.resetForm();
+        }}
       >
-        <div>
-
-          {managerList && managerList?.length > 0 ? (
-            <div className="table-responsive">
-              <table className="table table-bordered table-striped align-middle">
-                <thead className="table-light"
-                >
-                  <tr>
-                    <th>#</th>
-                    <th>Service Name</th>
-                    <th>Account Managers</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {managerList?.map((value, idx) => (
-                    <tr key={idx}>
-                      <td>{idx + 1}</td>
-                      <td>{value.service_name}</td>
-                      <td>{value?.account_managers?.map(item => item?.account_manager_name)?.join(" , ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center p-3 text-muted">
-              No account managers found.
-            </div>
+        <Formicform
+          fieldtype={fields.filter(
+            (field) => !field.showWhen || field.showWhen(formik.values)
           )}
-        </div>
+          formik={formik}
+          btn_name="Add"
+          closeBtn={(e) => {
+            formik.resetForm();
+            setShowAddCustomerModal(false);
+          }}
+        />
       </CommanModal>
 
       <div className="container-fluid">
@@ -545,12 +760,19 @@ const Customer = () => {
             </div>
             {role === "SUPERADMIN" ? (
               <div className="col-md-6 col-sm-7">
-                <Link
+                {/* <Link
                   to="/admin/addcustomer"
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
                   <i className="fa fa-plus" /> Add Customer User
-                </Link>
+                </Link> */}
+                <button
+                  className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
+                  onClick={() => setShowAddCustomerModal(true)}
+                >
+                  <i className="fa fa-plus" />
+                  Add Customer User
+                </button>
               </div>
             ) : (
               ""
