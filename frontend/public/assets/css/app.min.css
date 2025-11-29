@@ -4857,3 +4857,12 @@ border-bottom-width: 4px;
   z-index: 9999 !important;
   position: absolute !important;
 }
+
+.dashboard-date-filter input ,.dashboard-date-filter .react-select__control
+{
+font-size: 12px !important;
+}
+.dashboard-date-filter .react-select__indicator
+{
+  padding: 3px !important;
+}

@@ -796,8 +796,8 @@ const Dashboard = () => {
               </div>
               <div className="card-body">
 
-                <div className="row">
-                  <div className="col-lg-6 col-md-6">
+                <div className="row dashboard-date-filter ">
+                  <div className="col-lg-4 col-md-4 px-1">
                     <label>Select Staff</label>
                     <Select
                       id="tabSelect"
@@ -815,7 +815,7 @@ const Dashboard = () => {
                       isSearchable
                     />
                   </div>
-                  <div className="col-lg-3 col-md-3">
+                  <div className="col-lg-4 col-md-4 px-1">
                     <label>From Date</label>
                     <input
                       type="date"
@@ -823,9 +823,10 @@ const Dashboard = () => {
                       value={selectedFromDate}
                       name='fromDate'
                       onChange={(e) => selectFilterValue(e)}
+                    
                     />
                   </div>
-                  <div className="col-lg-3 col-md-3">
+                  <div className="col-lg-4 col-md-4 px-1">
                     <label>To Date</label>
                     <input
                       type="date"
@@ -833,6 +834,7 @@ const Dashboard = () => {
                       value={selectedToDate}
                       name='toDate'
                       onChange={(e) => selectFilterValue(e)}
+                    
                     />
                   </div>
                 </div>
