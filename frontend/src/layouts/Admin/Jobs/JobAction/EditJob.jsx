@@ -635,7 +635,20 @@ const EditJob = () => {
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-      } else {
+      }
+        // Service Personal Tax Return
+      else if (Number(service_id) === 4) {
+        //const d = new Date('2026-02-31'); // Example date
+        const d = new Date(); // Example date
+        const y = d.getFullYear();
+        const m = d.getMonth() + 1;
+        if (m >= 4 || m <= 1) {
+          return `${m >= 4 ? y + 1 : y}-01-31`;
+        }
+        return `${y}-01-31`;
+      }
+    
+      else {
         return null;
       }
 

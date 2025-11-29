@@ -177,10 +177,13 @@ const CreateJob = () => {
             const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
             setClientType(clientInfo?.client_client_type || "");
             if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+             
               if (response.data?.services?.[0]?.service_id == 1) {
+                
                 await get_information_company_number(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
               }
               else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
+                 
                 await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
               }
             }
@@ -201,7 +204,6 @@ const CreateJob = () => {
             else if ([1, 4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
               await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
             }
-
 
           }
         } else {
@@ -250,7 +252,7 @@ const CreateJob = () => {
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
-
+    
     let due_date = getDueDate(client_type, service_id);
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
@@ -315,7 +317,20 @@ const CreateJob = () => {
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
 
-      } else {
+      }
+       // Service Personal Tax Return
+      else if (Number(service_id) === 4) {
+        //const d = new Date('2026-02-31'); // Example date
+        const d = new Date(); // Example date
+        const y = d.getFullYear();
+        const m = d.getMonth() + 1;
+        if (m >= 4 || m <= 1) {
+          return `${m >= 4 ? y + 1 : y}-01-31`;
+        }
+        return `${y}-01-31`;
+      }
+      
+      else {
         return null;
       }
 
