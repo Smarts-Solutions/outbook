@@ -142,7 +142,7 @@ const Customer = () => {
         </div>
       ),
       sortable: true,
-
+      
     },
 
     {
