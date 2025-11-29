@@ -610,22 +610,21 @@ function JobCustomReport() {
       return data.columns.map((col) => {
         let val = row[col];
 
-        if (val === undefined || val === null) val = "-";
+        // if (val === undefined || val === null) val = "-";
 
-        val = String(val); // force string
+        // val = String(val); 
 
-        if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-          val = `"${(val)}"`; // safe date
-        }
+        // if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+        //   val = `"${(val)}"`; // safe date
+        // }
 
-        if (val?.includes(",")) {
-          val = `${val}`;
-        }
+        // if (val?.includes(",")) {
+        //   val = `${val}`;
+        // }
 
-        if (val.includes('"')) {
-          val = `"${val.replace(/"/g, '""')}"`;
-          // convert to Date
-        }
+        // if (val.includes('"')) {
+        //   val = `"${val.replace(/"/g, '""')}"`;
+        // }
 
 
         return val;
