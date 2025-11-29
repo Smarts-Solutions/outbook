@@ -329,8 +329,8 @@ const StaffPage = () => {
       reorder: false,
     },
     {
-      cell: (row) => <div title={row.email}>{row.email}</div>,
       name: "Email Address",
+      cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
       idth: "300px",

@@ -20,10 +20,22 @@ const getAllCustomerUsers = async (req, res) => {
         const limit = customerUsers.limit || 10;
         const search = customerUsers.search || '';
         const offset = (page - 1) * limit;
-        let query = `SELECT * FROM customer_users WHERE 1=1`;
+        let query = `SELECT 
+          customer_users.id,
+          customer_users.first_name,
+          customer_users.last_name,
+          customer_users.email,
+          customer_users.phone,
+          customer_users.phone_code,
+          customer_contact_person_role.name AS role_name,
+          customer_users.status,
+          customer_users.created_at
+          FROM customer_users 
+          LEFT JOIN customer_contact_person_role ON customer_contact_person_role.id = customer_users.customer_contact_person_role_id
+          WHERE 1=1`;
 
         if(search){
-          query += ` AND (first_name LIKE ? OR email LIKE ? )`;
+          query += ` AND (customer_users.first_name LIKE ? OR customer_users.email LIKE ? )`;
         }
         query += ` LIMIT ? OFFSET ?`;
 
@@ -43,6 +55,7 @@ const getAllCustomerUsers = async (req, res) => {
         const countParams = [];
         if(search){
           countQuery += ` AND (first_name LIKE ? OR email LIKE ? )`;
+
           const searchParam = `%${search}%`;
           countParams.push(searchParam, searchParam);
         }

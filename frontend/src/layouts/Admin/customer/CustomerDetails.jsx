@@ -56,7 +56,7 @@ const Customer = () => {
 
 
   useEffect(() => {
-    
+
     GetAllCustomerData(1, pageSize, '');
   }, [activeTab]);
 
@@ -95,62 +95,42 @@ const Customer = () => {
 
     },
     {
-      name: "Customer Code",
-      selector: (row) => row.customer_code,
+      name: "Email Address",
+      cell: (row) => <div title={row.email}>{row.email}</div>,
+      selector: (row) => row.email,
+      sortable: true,
+      idth: "300px",
+      reorder: false,
+    },
+     {
+      name: "Role",
+      selector: (row) => row.role_name,
+      sortable: true,
+      width: "150px",
+      reorder: false,
+    },
+    {
+      name: "Phone",
       cell: (row) => (
         <div
-          title={row.customer_code}
+          title={
+            row.phone && row.phone_code
+              ? row.phone_code + "-" + row.phone
+              : " - "
+          }
         >
-          {row.customer_code}
+          {row.phone && row.phone_code
+            ? row.phone_code + "-" + row.phone
+            : " - "}
         </div>
       ),
-      sortable: true,
-
-    },
-
-    {
-      name: "Type",
       selector: (row) =>
-        row.customer_type === '1'
-          ? "Sole Trader"
-          : row.customer_type === '2'
-            ? "Company"
-            : row.customer_type === '3'
-              ? "Partnership"
-              : "-",
+        row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
-
+      width: "150px",
+      reorder: false,
     },
-    {
-      name: "Account Manager",
-      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
-      sortable: true,
-      cell: row => (
-        <div
-          title={row.account_manager_firstname + " " + row.account_manager_lastname}
-          className="data-table-cell"
-          data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
-          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {row.account_manager_firstname + " " + row.account_manager_lastname}
-        </div>
-      ),
-    },
-
-    {
-      name: "Created by",
-      selector: (row) => row.customer_created_by,
-      cell: (row) => (
-        <div
-          title={row.customer_created_by}
-        >
-          {row.customer_created_by}
-        </div>
-      ),
-      sortable: true,
-
-    },
-
+   
     {
       name: "Created At",
       selector: (row) => row.created_at,
@@ -167,28 +147,18 @@ const Customer = () => {
 
     {
       name: "Status",
-      selector: (row) => row.form_process,
       cell: (row) => (
         <div>
-          <div>
-            {row.form_process === "4" ?
-              <select
-                className="form-select form-control"
-                value={row.status}
-                onChange={(e) => handleChangeStatus(e, row)}
-              >
-                <option value="0" className="text-danger">Deactive</option>
-                <option value="1" className="text-success">Active</option>
-              </select>
-              : (
-                <span className="text-warning">Inprogress</span>
-              )}
-
-
-          </div>
+          <span
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
+          >
+            {row.status === "1" ? "Active" : "Inactive"}
+          </span>
         </div>
       ),
-      sortable: true,
+      width: "100px",
+      reorder: false,
     },
 
 
@@ -409,7 +379,7 @@ const Customer = () => {
   };
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
-   
+
     // console.log("limit", limit)
     // console.log("page", page)
     const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page, limit, search: term };
@@ -444,7 +414,7 @@ const Customer = () => {
   }, [filteredData, statusFilter]);
 
 
-  
+
   const HandleClientView = (row) => {
     if (row.form_process == "4") {
       navigate("/admin/Clientlist", { state: row });
@@ -583,7 +553,7 @@ const Customer = () => {
                 </Link>
               </div>
             ) : (
-             ""
+              ""
             )}
           </div>
         </div>
@@ -627,9 +597,9 @@ const Customer = () => {
                               apiData={exportData}
                               fileName={"Customer Details"}
                             /> */}
-                           
 
-                            <button className="btn btn-outline-info fw-bold float-end border-3 "   onClick={handleExport}>
+
+                            <button className="btn btn-outline-info fw-bold float-end border-3 " onClick={handleExport}>
                               Export Excel
                             </button>
                           </div>
