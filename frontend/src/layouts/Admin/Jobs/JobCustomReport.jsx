@@ -101,14 +101,14 @@ function JobCustomReport() {
   //  console.log("lastGroupValue ", lastGroupValue);
 
   // Get All Jobs
-  const GetAllJobs = async (type , filter) => {
+  const GetAllJobs = async (type, filter) => {
     // External get All jobs
     let req = { action: "getByCustomer", customer_id: "" };
     if (type == 'customer') {
       req = { action: 'getByCustomer', customer_id: filter?.customer_id };
-    }else if(type == 'client'){
+    } else if (type == 'client') {
       req = { action: "getByClient", client_id: filter?.client_id };
-    }else{
+    } else {
       req = { action: "getByCustomer", customer_id: "" };
     }
 
@@ -610,22 +610,25 @@ function JobCustomReport() {
       return data.columns.map((col) => {
         let val = row[col];
 
-        if (val === undefined || val === null) val = "-";
+        // 1) NULL / undefined / empty
+        if (val === undefined || val === null || val === "") {
+          val = "-";
+        }
 
-        val = String(val); 
+        // 2) Convert to string
+        val = String(val);
 
+        // 3) Safe date (dd/mm/yyyy)
         if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-          val = `"${(val)}"`; // safe date
+          val = `"${(val)}"`; 
+          return val;
         }
 
-        if (val?.includes(",")) {
-          val = `${val}`;
+        // 4) If contains comma OR quotes → wrap in quotes
+        if (val.includes(",") || val.includes('"')) {
+          val = val.replace(/"/g, '""'); // escape inner quotes
+          val = `"${val}"`;              // wrap for CSV
         }
-
-        if (val.includes('"')) {
-          val = `"${val.replace(/"/g, '""')}"`;
-        }
-
 
         return val;
       });
@@ -634,6 +637,7 @@ function JobCustomReport() {
     const csvContent = [headers, ...rows]
       .map((r) => r.join(","))
       .join("\n");
+
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
@@ -760,9 +764,9 @@ function JobCustomReport() {
       else if (key == 'client_id') {
         if ([null, '', 'null', undefined].includes(value)) {
 
-           if ([null, '', 'null', undefined].includes(filters.job_id)) {
-           GetAllCustomer('all')
-           }
+          if ([null, '', 'null', undefined].includes(filters.job_id)) {
+            GetAllCustomer('all')
+          }
 
           if (![null, '', 'null', undefined].includes(filters.customer_id)) {
             GetAllJobs();
@@ -956,7 +960,7 @@ function JobCustomReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { action: "getJobCustomReport", filters: filters , role: role};
+    const req = { action: "getJobCustomReport", filters: filters, role: role };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
@@ -975,9 +979,9 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-   // if (role?.toUpperCase() === "SUPERADMIN") {
-      callFilterApi();
-   // }
+    // if (role?.toUpperCase() === "SUPERADMIN") {
+    callFilterApi();
+    // }
   }, [filters.groupBy, filters.additionalField, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.job_id, filters.customer_id, filters.client_id, filters.account_manager_id, filters.allocated_to_id, filters.reviewer_id, filters.allocated_to_other_id, filters.service_id, filters.job_type_id, filters.status_type_id, filters.employee_number]);
 
 
