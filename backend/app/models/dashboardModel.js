@@ -485,7 +485,7 @@ const getDashboardActivityLog = async (dashboard) => {
 
     }
 
-    console.log("query ", query);
+   // console.log("query ", query);
 
     const [result] = await pool.execute(query);
 
