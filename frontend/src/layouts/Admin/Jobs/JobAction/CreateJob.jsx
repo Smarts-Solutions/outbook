@@ -81,6 +81,7 @@ const CreateJob = () => {
     AccountManager: "",
     Customer: "",
     Client: "",
+    client_id: "",
     ClientJobCode: "",
     CustomerAccountManager: "",
     Service: "",
@@ -144,6 +145,8 @@ const CreateJob = () => {
         location.state.goto == "Customer"
           ? ""
           : location.state.clientName.client_name || "",
+      client_id: location.state.goto == "Customer"
+        ? "" : location.state.clientName.id || "",
     }));
   }, [AllJobData]);
 
@@ -488,19 +491,18 @@ const CreateJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
-       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.Client)) || "";
+       
+        const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
+        
         if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-
           await get_information_company_umber(clientInfo?.client_company_number, value);
-
         }
         else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-
           await get_information_company_umber(clientInfo?.company_number, value);
-          
+        } else {
+          await dueOn_date_set(clientType, value);
         }
 
-       await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 28);
         setJobData((prevState) => ({
           ...prevState,
@@ -524,7 +526,7 @@ const CreateJob = () => {
 
 
       if (value == 4) {
-       await dueOn_date_set(clientType, value);
+        await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
           ...prevState,
@@ -537,7 +539,7 @@ const CreateJob = () => {
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
       } else if (value == 8) {
-       await dueOn_date_set(clientType, value);
+        await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 10);
         setJobData((prevState) => ({
           ...prevState,
@@ -724,6 +726,8 @@ const CreateJob = () => {
 
 
   const handleSubmit = async () => {
+
+
 
 
     if (AddTaskArr.length === 0) {
