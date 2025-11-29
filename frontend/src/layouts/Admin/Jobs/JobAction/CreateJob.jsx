@@ -471,7 +471,7 @@ const CreateJob = () => {
       else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
         dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
-      
+
       else if ([1, 4, 8].includes(Number(jobData?.Service))) {
         dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
@@ -488,7 +488,19 @@ const CreateJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
-        dueOn_date_set(clientType, value);
+       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.Client)) || "";
+        if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+
+          await get_information_company_umber(clientInfo?.client_company_number, value);
+
+        }
+        else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+
+          await get_information_company_umber(clientInfo?.company_number, value);
+          
+        }
+
+       await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 28);
         setJobData((prevState) => ({
           ...prevState,
@@ -512,7 +524,7 @@ const CreateJob = () => {
 
 
       if (value == 4) {
-        dueOn_date_set(clientType, value);
+       await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
           ...prevState,
@@ -525,7 +537,7 @@ const CreateJob = () => {
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
       } else if (value == 8) {
-        dueOn_date_set(clientType, value);
+       await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 10);
         setJobData((prevState) => ({
           ...prevState,
