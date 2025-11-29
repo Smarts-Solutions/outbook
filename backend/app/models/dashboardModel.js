@@ -1,6 +1,6 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange ,LineManageStaffIdHelperFunction,QueryRoleHelperFunction } = require('../utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../utils/helper');
 
 
 /*
@@ -109,13 +109,13 @@ const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
   const { startDate, endDate } = await getDateRange(date_filter);
 
-   // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
-    // Get Role
-    const rowRoles = await QueryRoleHelperFunction(staff_id)
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
+  // Get Role
+  const rowRoles = await QueryRoleHelperFunction(staff_id)
 
   try {
-   
+
     const [RoleAccessCustomer] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 33]);
 
     const [RoleAccessClient] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 34]);
@@ -124,10 +124,10 @@ const getDashboardData = async (dashboard) => {
 
     // console.log("rows startDate ", startDate);
     // console.log("rows endDate ", endDate);
-    
+
     // For Cutomer Data
     let CustomerResult = [];
-    if(rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessCustomer.length >0)){
+    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessCustomer.length > 0)) {
       const CustomerQuery = `
       SELECT  
           customers.id AS id
@@ -141,8 +141,8 @@ const getDashboardData = async (dashboard) => {
       const [CustomerData] = await pool.execute(CustomerQuery, [startDate, endDate]);
       CustomerResult = CustomerData;
     }
-    else{
-    const CustomerQuery = `
+    else {
+      const CustomerQuery = `
         SELECT  
             customers.id AS id
         FROM customers  
@@ -163,13 +163,13 @@ const getDashboardData = async (dashboard) => {
         GROUP BY customers.id
         ORDER BY customers.id DESC;
     `;
-    const [CustomerData] = await pool.execute(CustomerQuery, [startDate, endDate]);
-    CustomerResult = CustomerData;
+      const [CustomerData] = await pool.execute(CustomerQuery, [startDate, endDate]);
+      CustomerResult = CustomerData;
     }
 
     // For Client Data
     let ClientResult = [];
-    if(rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessClient.length >0)){
+    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessClient.length > 0)) {
       const ClientQuery = `
    SELECT  
     clients.id AS id
@@ -197,8 +197,8 @@ const getDashboardData = async (dashboard) => {
       const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
       ClientResult = ClientData;
 
-    }else{
-    const ClientQuery = `
+    } else {
+      const ClientQuery = `
     SELECT  
       clients.id AS id
       FROM 
@@ -228,13 +228,13 @@ const getDashboardData = async (dashboard) => {
       ORDER BY 
           clients.id DESC;
     `;
-    const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
-    ClientResult = ClientData;
+      const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
+      ClientResult = ClientData;
     }
 
     // For Staff Data
     let StaffResult = []
-    if(rowRoles.length > 0 && rowRoles[0].role_name == "SUPERADMIN" ){
+    if (rowRoles.length > 0 && rowRoles[0].role_name == "SUPERADMIN") {
       const StaffQuery = `
         SELECT  
             id
@@ -242,11 +242,11 @@ const getDashboardData = async (dashboard) => {
         WHERE created_at BETWEEN ? AND ?
         ORDER BY id DESC;
         `;
-    const [StaffData] = await pool.execute(StaffQuery, [startDate, endDate]);
-    StaffResult = StaffData;
+      const [StaffData] = await pool.execute(StaffQuery, [startDate, endDate]);
+      StaffResult = StaffData;
 
-    }else{
-    const StaffQuery = `
+    } else {
+      const StaffQuery = `
         SELECT  
             id
         FROM staffs
@@ -254,14 +254,14 @@ const getDashboardData = async (dashboard) => {
           AND created_at BETWEEN ? AND ?
         ORDER BY id DESC;
         `;
-    const [StaffData] = await pool.execute(StaffQuery, [startDate, endDate]);
-    StaffResult = StaffData;
+      const [StaffData] = await pool.execute(StaffQuery, [startDate, endDate]);
+      StaffResult = StaffData;
     }
 
     // For Jobs Data
     let JobResult = []
-    if(rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessJob.length >0)){
-    const JobQuery = `
+    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessJob.length > 0)) {
+      const JobQuery = `
         SELECT 
         jobs.id AS id,
         jobs.status_type AS status_type
@@ -296,8 +296,8 @@ const getDashboardData = async (dashboard) => {
       const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
       JobResult = JobData;
     }
-    else{
-    const JobQuery = `
+    else {
+      const JobQuery = `
         SELECT 
         jobs.id AS id,
         jobs.status_type AS status_type,
@@ -346,26 +346,26 @@ const getDashboardData = async (dashboard) => {
         ORDER BY 
         jobs.id DESC;
         `;
-    const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
+      const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
 
-    
+
       //////-----START Assign Customer Service Data START----////////
-   let isExistAssignCustomer = JobData?.find(item => item?.assigned_source === 'assign_customer_service');
-   if(isExistAssignCustomer != undefined){
-    let matched = JobData?.filter(item =>
-      item?.assigned_source === 'assign_customer_service' &&
-      Number(item?.service_id_assign) === Number(item?.job_service_id)
-    )
-    let matched2 = JobData?.filter(item =>
-    item?.assigned_source !== 'assign_customer_service'
-    )
-    const resultAssignCustomer = [...matched, ...matched2]
-    JobResult = resultAssignCustomer;
-    }
-    //////-----END Assign Customer Service Data END----////////
-    else{
-      JobResult = JobData;
-    }
+      let isExistAssignCustomer = JobData?.find(item => item?.assigned_source === 'assign_customer_service');
+      if (isExistAssignCustomer != undefined) {
+        let matched = JobData?.filter(item =>
+          item?.assigned_source === 'assign_customer_service' &&
+          Number(item?.service_id_assign) === Number(item?.job_service_id)
+        )
+        let matched2 = JobData?.filter(item =>
+          item?.assigned_source !== 'assign_customer_service'
+        )
+        const resultAssignCustomer = [...matched, ...matched2]
+        JobResult = resultAssignCustomer;
+      }
+      //////-----END Assign Customer Service Data END----////////
+      else {
+        JobResult = JobData;
+      }
 
     }
 
@@ -388,8 +388,8 @@ const getDashboardData = async (dashboard) => {
         ids: JobResult.map(row => row.id).join(',')
       },
       pending_job: {
-        count: JobResult?.filter(row => Number(row.status_type)  != 6).length,
-        ids: JobResult?.filter(row => Number(row.status_type)  != 6).map(row => row.id).join(',')
+        count: JobResult?.filter(row => Number(row.status_type) != 6).length,
+        ids: JobResult?.filter(row => Number(row.status_type) != 6).map(row => row.id).join(',')
       },
       completed_job: {
         count: JobResult?.filter(row => Number(row.status_type) === 6).length,
@@ -408,7 +408,7 @@ const getDashboardData = async (dashboard) => {
 
 
 const getDashboardActivityLog = async (dashboard) => {
-  const { staff_id, type , filter_type , filter_staff_id, from_date, to_date } = dashboard;
+  const { staff_id, type, filter_type, filter_staff_id, from_date, to_date } = dashboard;
 
 
   const QueryRole = `
@@ -451,28 +451,41 @@ const getDashboardActivityLog = async (dashboard) => {
         staff_logs.id DESC
     `;
 
-    if(filter_type === 'filter'){
-      query = `
-      SELECT
-        staff_logs.id AS log_id,
-        staff_logs.staff_id AS staff_id,
-        DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
-        staff_logs.created_at AS created_at,
-        staff_logs.log_message_all AS log_message,
-        CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
-      FROM
-      staff_logs
-      LEFT JOIN
-        staffs ON staffs.id = staff_logs.staff_id
-      WHERE
-        staff_logs.staff_id = ${filter_staff_id}
-        AND staff_logs.date BETWEEN '${from_date}' AND '${to_date}'
-      ORDER BY
-        staff_logs.id DESC
-    `;
+    if (filter_type === 'filter') {
+
+      let MatchCondition = `WHERE
+      staff_logs.staff_id = ${staff_id}`
+
+      if (filter_staff_id && filter_staff_id != '') {
+        MatchCondition = `WHERE
+        staff_logs.staff_id = ${filter_staff_id}`
+      }
+
+      if (from_date && to_date) {
+        MatchCondition += ` AND staff_logs.date BETWEEN '${from_date}' AND '${to_date}' `;
+      }
+
+
+       query = `
+        SELECT
+          staff_logs.id AS log_id,
+          staff_logs.staff_id AS staff_id,
+          DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+          staff_logs.created_at AS created_at,
+          staff_logs.log_message_all AS log_message,
+          CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
+        FROM
+          staff_logs
+        LEFT JOIN
+          staffs ON staffs.id = staff_logs.staff_id
+        ${MatchCondition}
+        ORDER BY 
+         staff_logs.id DESC
+      `;
+
     }
 
-    // console.log("query ", query);
+    console.log("query ", query);
 
     const [result] = await pool.execute(query);
 
