@@ -106,18 +106,18 @@ const Dashboard = () => {
     ...staffOptions
   ]
 
-  console.log("staffOptionPlaceholder", staffOptionPlaceholder);
+  // console.log("staffOptionPlaceholder", staffOptionPlaceholder);
 
-  const ActivityLogData = async (type , staff_id , fromDate , toDate) => {
+  const ActivityLogData = async (type, staff_id, fromDate, toDate) => {
 
     let req = { staff_id: staffDetails.id };
-    if(type === 'filter'){
-       req = { staff_id: staffDetails.id, filter_type :type, filter_staff_id: staff_id, from_date: fromDate, to_date: toDate };
+    if (type === 'filter') {
+      req = { staff_id: staffDetails.id, filter_type: type, filter_staff_id: staff_id, from_date: fromDate, to_date: toDate };
     } else {
-       req = { staff_id: staffDetails.id };
+      req = { staff_id: staffDetails.id };
     }
-      
-   // const req = { staff_id: staffDetails.id };
+
+    // const req = { staff_id: staffDetails.id };
     const data = { req: req, authToken: token };
     await dispatch(ActivityLog(data))
       .unwrap()
@@ -555,14 +555,14 @@ const Dashboard = () => {
 
     if (name === "staff") {
       setSelectedStaff(value);
-     await ActivityLogData('filter', value , selectedFromDate, selectedToDate);
+      await ActivityLogData('filter', value, selectedFromDate, selectedToDate);
     }
-    else if(name === "fromDate"){
+    else if (name === "fromDate") {
       setSelectedFromDate(value);
-     await ActivityLogData('filter', selectedStaff, value, selectedToDate);
+      await ActivityLogData('filter', selectedStaff, value, selectedToDate);
 
     }
-    else if(name === "toDate"){
+    else if (name === "toDate") {
       setSelectedToDate(value);
       await ActivityLogData('filter', selectedStaff, selectedFromDate, value);
     }
@@ -786,49 +786,6 @@ const Dashboard = () => {
 
           <div className="col-lg-4 col-md-4 mt-2">
 
-            <div className="row">
-              <div className="col-lg-6 col-md-6">
-                <label>Select Staff</label>
-                <Select
-                  id="tabSelect"
-                  name="staff"
-                  className="basic-multi-select"
-                  options={staffOptionPlaceholder}
-                  value={staffOptionPlaceholder.find((obj) => Number(obj.value) === Number(selectedStaff))}
-                  placeholder="-- Select --"
-                  onChange={(selectedOption) => {
-                    // simulate e.target.value
-                    const e = { target: { name: 'staff', value: selectedOption.value } };
-                    selectFilterValue(e);
-                  }}
-                  classNamePrefix="react-select"
-                  isSearchable
-                />
-              </div>
-              <div className="col-lg-3 col-md-3">
-                <label>From Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={selectedFromDate}
-                  name='fromDate'
-                  onChange={(e) => selectFilterValue(e)}
-                />
-              </div>
-              <div className="col-lg-3 col-md-3">
-                <label>To Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={selectedToDate}
-                  name='toDate'
-                  onChange={(e) => selectFilterValue(e)}
-                />
-              </div>
-            </div>
-
-
-
             <div className="card activity-card">
               <div className="card-header border-bottom-0">
                 <div className="row align-items-center">
@@ -838,6 +795,49 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="card-body">
+
+                <div className="row">
+                  <div className="col-lg-6 col-md-6">
+                    <label>Select Staff</label>
+                    <Select
+                      id="tabSelect"
+                      name="staff"
+                      className="basic-multi-select"
+                      options={staffOptionPlaceholder}
+                      value={staffOptionPlaceholder.find((obj) => Number(obj.value) === Number(selectedStaff))}
+                      placeholder="-- Select --"
+                      onChange={(selectedOption) => {
+                        // simulate e.target.value
+                        const e = { target: { name: 'staff', value: selectedOption.value } };
+                        selectFilterValue(e);
+                      }}
+                      classNamePrefix="react-select"
+                      isSearchable
+                    />
+                  </div>
+                  <div className="col-lg-3 col-md-3">
+                    <label>From Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={selectedFromDate}
+                      name='fromDate'
+                      onChange={(e) => selectFilterValue(e)}
+                    />
+                  </div>
+                  <div className="col-lg-3 col-md-3">
+                    <label>To Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={selectedToDate}
+                      name='toDate'
+                      onChange={(e) => selectFilterValue(e)}
+                    />
+                  </div>
+                </div>
+
+
                 <div className="analytic-dash-activity" data-simplebar="init">
                   <div className="simplebar-mask1">
                     <div className="">
