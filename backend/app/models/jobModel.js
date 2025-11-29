@@ -1474,6 +1474,7 @@ const getJobById = async (job) => {
      clients.trading_name AS client_trading_name,
      clients.client_type AS client_type,
      client_company_information.company_number AS client_company_number,
+     clients.company_number AS company_number,
      jobs.client_job_code AS client_job_code,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -1734,6 +1735,7 @@ const getJobById = async (job) => {
         client_trading_name: rows[0].client_trading_name,
         client_type: rows[0].client_type,
         client_company_number: rows[0].client_company_number,
+        company_number: rows[0].company_number,
         client_job_code: rows[0].client_job_code,
         outbooks_acount_manager_id: rows[0].outbooks_acount_manager_id,
         outbooks_acount_manager_first_name:
