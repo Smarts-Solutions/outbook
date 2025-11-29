@@ -195,7 +195,7 @@ const CreateJob = () => {
             else if (clientInfo != "" && ["1", "3", "7"].includes(clientInfo?.client_client_type)) {
               await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
             }
-            else if ([1,4,8].includes(Number(response.data?.services?.[0]?.service_id))) {
+            else if ([1, 4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
               await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
             }
 
@@ -440,7 +440,7 @@ const CreateJob = () => {
     getChecklistData();
   }, [getChecklistId]);
 
-  const HandleChange = (e) => {
+  const HandleChange = async (e) => {
     let name = e.target.name;
     let value = e.target.value;
 
@@ -448,16 +448,31 @@ const CreateJob = () => {
       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value)) || "";
       setClientType(clientInfo?.client_client_type || "");
       if (clientInfo != "" && clientInfo?.client_company_number != undefined, clientInfo?.client_client_type == "2") {
-        get_information_company_umber(clientInfo?.client_company_number, jobData?.Service);
+
+        if (Number(jobData?.Service) == 1) {
+          await get_information_company_umber(clientInfo?.client_company_number, jobData?.Service);
+        }
+        else if ([4, 8].includes(Number(jobData?.Service))) {
+          await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+        }
+
       }
       else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-        get_information_company_umber(clientInfo?.company_number, jobData?.Service);
+
+        if (Number(jobData?.Service) == 1) {
+          await get_information_company_umber(clientInfo?.company_number, jobData?.Service);
+        }
+        else if ([4, 8].includes(Number(jobData?.Service))) {
+          await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+        }
+
       }
 
       else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
         dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
-      else if (Number(jobData?.Service) === 8) {
+      
+      else if ([1, 4, 8].includes(Number(jobData?.Service))) {
         dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
     }
