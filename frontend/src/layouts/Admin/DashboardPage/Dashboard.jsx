@@ -102,7 +102,7 @@ const Dashboard = () => {
   })) || [];
 
   const staffOptionPlaceholder = [
-    { value: "", label: "-- Select Staff --" },
+    { value: "", label: "-- Select --" },
     ...staffOptions
   ]
 
@@ -798,7 +798,7 @@ const Dashboard = () => {
 
                 <div className="row dashboard-date-filter ">
                   <div className="col-lg-4 col-md-4 px-1">
-                    <label>Select Staff</label>
+                    <label><b>Select Staff</b></label>
                     <Select
                       id="tabSelect"
                       name="staff"
@@ -816,7 +816,7 @@ const Dashboard = () => {
                     />
                   </div>
                   <div className="col-lg-4 col-md-4 px-1">
-                    <label>From Date</label>
+                    <label><b>From Date</b></label>
                     <input
                       type="date"
                       className="form-control"
@@ -827,7 +827,7 @@ const Dashboard = () => {
                     />
                   </div>
                   <div className="col-lg-4 col-md-4 px-1">
-                    <label>To Date</label>
+                    <label><b>To Date</b></label>
                     <input
                       type="date"
                       className="form-control"
