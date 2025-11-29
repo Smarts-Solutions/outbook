@@ -269,7 +269,7 @@ const EditJob = () => {
     }));
   }, []);
 
-  
+
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id };
@@ -318,13 +318,13 @@ const EditJob = () => {
               hours: response.data.invoice_hours?.split(":")[0] ?? "",
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
-            
-           
+
+
             setClientType(response.data.client_type ?? "");
             if (response.data.client_type == "2" && response.data.client_company_number != undefined) {
               get_information_company_umber(response.data.client_company_number);
             }
-            else if(["5"].includes(response.data.client_type)){
+            else if (["5"].includes(response.data.client_type)) {
               get_information_company_umber(response.data.company_number);
             }
             else if (["1", "3", "7"].includes(response.data.client_type)) {
@@ -769,7 +769,7 @@ const EditJob = () => {
     GetJobType();
   }, [jobData.Service]);
 
-  const HandleChange = async(e) => {
+  const HandleChange = async (e) => {
     const { name, value } = e.target;
 
     if (name === "JobType") {
@@ -783,19 +783,19 @@ const EditJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
-       
-        const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
-         if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-           await get_information_company_umber(clientInfo.client_company_number , value);
-        }
-          
-         else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) { 
-          await get_information_company_umber(clientInfo.company_number , value);
-         }else{
-         await dueOn_date_set(clientType, value);
-         }
 
-       
+        const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
+        if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+          await get_information_company_umber(clientInfo.client_company_number);
+        }
+        else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+          await get_information_company_umber(clientInfo.company_number);
+        } 
+        else {
+          await dueOn_date_set(clientType, value);
+        }
+
+
         date.setDate(date.getDate() + 28);
         setJobData((prevState) => ({
           ...prevState,
