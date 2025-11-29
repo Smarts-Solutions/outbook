@@ -322,10 +322,10 @@ const EditJob = () => {
 
             setClientType(response.data.client_type ?? "");
             if (response.data.client_type == "2" && response.data.client_company_number != undefined) {
-              get_information_company_umber(response.data.client_company_number);
+              get_information_company_number(response.data.client_company_number);
             }
             else if (["5"].includes(response.data.client_type)) {
-              get_information_company_umber(response.data.company_number);
+              get_information_company_number(response.data.company_number);
             }
             else if (["1", "3", "7"].includes(response.data.client_type)) {
               dueOn_date_set(response.data.client_type, response.data.service_id);
@@ -552,7 +552,7 @@ const EditJob = () => {
     JobDetails();
   }, []);
 
-  const get_information_company_umber = async (company_number) => {
+  const get_information_company_number = async (company_number) => {
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
@@ -786,10 +786,10 @@ const EditJob = () => {
 
         const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
         if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-          await get_information_company_umber(clientInfo.client_company_number);
+          await get_information_company_number(clientInfo.client_company_number);
         }
         else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-          await get_information_company_umber(clientInfo.company_number);
+          await get_information_company_number(clientInfo.company_number);
         } 
         else {
           await dueOn_date_set(clientType, value);

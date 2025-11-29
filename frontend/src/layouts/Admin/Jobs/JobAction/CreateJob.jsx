@@ -178,7 +178,7 @@ const CreateJob = () => {
             setClientType(clientInfo?.client_client_type || "");
             if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
               if (response.data?.services?.[0]?.service_id == 1) {
-                await get_information_company_umber(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
+                await get_information_company_number(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
               }
               else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
                 await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
@@ -188,7 +188,7 @@ const CreateJob = () => {
             else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
 
               if (response.data?.services?.[0]?.service_id == 1) {
-                await get_information_company_umber(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
+                await get_information_company_number(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
               }
               else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
                 await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
@@ -223,7 +223,7 @@ const CreateJob = () => {
 
 
 
-  const get_information_company_umber = async (company_number, service_id) => {
+  const get_information_company_number = async (company_number, service_id) => {
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
@@ -453,7 +453,7 @@ const CreateJob = () => {
       if (clientInfo != "" && clientInfo?.client_company_number != undefined, clientInfo?.client_client_type == "2") {
 
         if (Number(jobData?.Service) == 1) {
-          await get_information_company_umber(clientInfo?.client_company_number, jobData?.Service);
+          await get_information_company_number(clientInfo?.client_company_number, jobData?.Service);
         }
         else if ([4, 8].includes(Number(jobData?.Service))) {
           await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
@@ -463,7 +463,7 @@ const CreateJob = () => {
       else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
 
         if (Number(jobData?.Service) == 1) {
-          await get_information_company_umber(clientInfo?.company_number, jobData?.Service);
+          await get_information_company_number(clientInfo?.company_number, jobData?.Service);
         }
         else if ([4, 8].includes(Number(jobData?.Service))) {
           await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
@@ -495,10 +495,10 @@ const CreateJob = () => {
         const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
         
         if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-          await get_information_company_umber(clientInfo?.client_company_number, value);
+          await get_information_company_number(clientInfo?.client_company_number, value);
         }
         else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-          await get_information_company_umber(clientInfo?.company_number, value);
+          await get_information_company_number(clientInfo?.company_number, value);
         } else {
           await dueOn_date_set(clientType, value);
         }
