@@ -32,7 +32,7 @@ const StaffPage = () => {
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
   const [allCustomerData, setAllCustomerData] = useState([]);
- 
+
   const [deleteStaff, setDeleteStaff] = useState();
   const [deleteStaffCustomer, setDeleteStaffCustomer] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -41,7 +41,7 @@ const StaffPage = () => {
     minutes: "",
   });
   const [selectedStaff, setSelectedStaff] = useState(null);
-   const [assignCustomerData, setAssignCustomerData] = useState([]);
+  const [assignCustomerData, setAssignCustomerData] = useState([]);
 
   // console.log("deleteStaffCustomer", deleteStaffCustomer);
 
@@ -236,7 +236,7 @@ const StaffPage = () => {
             return !AssignCustomer.some(assigned => assigned.customer_id === customer.id);
           }));
           setAllCustomerData(filteredCustomers);
-         // setAllCustomerData(response.data);
+          // setAllCustomerData(response.data);
         } else {
           setAllCustomerData([]);
         }
@@ -500,9 +500,9 @@ const StaffPage = () => {
   ];
 
   const GetAllStaffPortfolio = async (row) => {
-   let AssignCustomer = [];
-   // get Assign Customer in staff
-     try {
+    let AssignCustomer = [];
+    // get Assign Customer in staff
+    try {
       const response = await staffPortfolio({
         req: {
           action: "get",
@@ -512,9 +512,9 @@ const StaffPage = () => {
         authToken: token,
       });
       if (response?.status && Array.isArray(response.data)) {
-         console.log("Assigned Customers Response:", response.data);
-         setAssignCustomerData(response.data);
-         AssignCustomer = response.data;
+        console.log("Assigned Customers Response:", response.data);
+        setAssignCustomerData(response.data);
+        AssignCustomer = response.data;
       } else {
         console.warn("Invalid response format:", response);
       }
@@ -548,7 +548,7 @@ const StaffPage = () => {
       console.error("Error fetching staff portfolio:", error);
     }
 
-    
+
 
   };
 
@@ -583,8 +583,8 @@ const StaffPage = () => {
         .trim(Validation_Message.StatusValidation)
         .required(Validation_Message.StatusValidation),
       employee_number: Yup.string()
-        .trim(Validation_Message.EmployeeNumberValidation)
-        .required(Validation_Message.EmployeeNumberValidation)
+        .trim("Employee ID is invalid")
+        .required("Employee ID is required")
     }),
 
     onSubmit: async (values) => {
@@ -1150,7 +1150,7 @@ const StaffPage = () => {
                       ))}
                     </ul>
                   </div>
-                ) : ("" )
+                ) : ("")
               }
             </div>
 
