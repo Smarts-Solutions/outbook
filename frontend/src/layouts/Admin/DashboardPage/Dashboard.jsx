@@ -20,6 +20,7 @@ const Dashboard = () => {
     setVisibleLogs((prev) => prev + 4); // Show 5 more logs each time
   };
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const getActiveTab = sessionStorage.getItem('activDashborde');
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -29,6 +30,8 @@ const Dashboard = () => {
 
   const currentDate = new Date();
   const [selectedTab, setSelectedTab] = useState(getActiveTab || "this_week");
+
+  console.log("role dashboard - ", role);
 
   const handleTabChange = (event) => {
     sessionStorage.setItem('activDashborde', event.target.value);
@@ -795,8 +798,9 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="card-body">
-
-                <div className="row dashboard-date-filter ">
+                {
+                ['SUPERADMIN', 'ADMIN' , 'MANAGEMENT'].includes(role) ? 
+                 <div className="row dashboard-date-filter ">
                   <div className="col-lg-4 col-md-4 px-1">
                     <label><b>Select Staff</b></label>
                     <Select
@@ -838,6 +842,10 @@ const Dashboard = () => {
                     />
                   </div>
                 </div>
+                
+                :""
+                }
+                
 
 
                 <div className="analytic-dash-activity" data-simplebar="init">
