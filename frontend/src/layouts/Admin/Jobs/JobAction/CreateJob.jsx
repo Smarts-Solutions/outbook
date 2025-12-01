@@ -768,12 +768,13 @@ const CreateJob = () => {
     }
 
 
-
     const req = {
+      ...jobData,
       selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
+      Client_id : jobData.client_id,
       client_id:
         location?.state?.goto == "Customer"
           ? Number(jobData.Client)
@@ -837,8 +838,7 @@ const CreateJob = () => {
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr,
-      },
-      ...jobData,
+      }
     };
 
 

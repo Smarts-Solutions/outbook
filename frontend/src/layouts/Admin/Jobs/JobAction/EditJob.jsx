@@ -2549,6 +2549,7 @@ const EditJob = () => {
                                         id="Client"
                                         onChange={HandleChange}
                                         value={jobData.Client}
+                                        disabled={location.state.goto == "Customer"}
                                       >
                                         <option value="">Select Client</option>
 
