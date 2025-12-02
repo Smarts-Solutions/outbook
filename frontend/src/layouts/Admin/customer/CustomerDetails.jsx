@@ -19,7 +19,7 @@ import * as Yup from "yup";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
-const Customer = () => {
+const CustomerUsers = () => {
 
   const convertDate = (date) => {
     if ([null, undefined, ''].includes(date)) {
@@ -862,4 +862,4 @@ const Customer = () => {
   );
 };
 
-export default Customer;
+export default CustomerUsers;
