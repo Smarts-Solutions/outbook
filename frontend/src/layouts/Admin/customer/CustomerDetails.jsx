@@ -427,7 +427,7 @@ const CustomerUsers = () => {
     try {
       const response = await dispatch(getAllCustomerUsers(data)).unwrap();
       if (response.status) {
-      
+
         setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
 
@@ -506,7 +506,7 @@ const CustomerUsers = () => {
       return;
     }
 
-    
+
     const exportData = apiData?.map((item) => ({
       "Trading Name": item.trading_name,
       "Customer Code": item.customer_code,
@@ -529,11 +529,11 @@ const CustomerUsers = () => {
   const downloadCSV = (data, filename) => {
     const csvRows = [];
 
-   
+
     const headers = Object.keys(data[0]);
     csvRows.push(headers.join(","));
 
-    
+
     data.forEach((row) => {
       const values = headers.map((h) => `"${row[h] || ""}"`);
       csvRows.push(values.join(","));
@@ -602,23 +602,6 @@ const CustomerUsers = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    // {
-    //   type: "select1",
-    //   name: "role",
-    //   label: "Role",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   //disable: editStaff ? true : false,
-    //   options:
-    //     roleDataAll &&
-    //     roleDataAll.data.map((data) => {
-    //       if (formik.values.role_id == data.id) {
-    //         return { label: data.role_name, value: data.id, selected: true };
-    //       } else {
-    //         return { label: data.role_name, value: data.id };
-    //       }
-    //     }),
-    // },
     {
       type: "select1",
       name: "status",
@@ -630,21 +613,7 @@ const CustomerUsers = () => {
         { label: "Active", value: "1" },
         { label: "Inactive", value: "0" },
       ],
-    },
-    // {
-    //   type: "selectSearch",
-    //   name: "staff_to",
-    //   label: "Line Manager",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   options: staffDataAll.data
-    //     .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN" && data.id !== editStaffData.id))
-    //     .map((data) => ({
-    //       label: `${data.first_name} ${data.last_name}`,
-    //       value: data.id,
-    //     })),
-    // },
+    }, 
     {
       type: "multiselect",
       name: "allCustomerAccess",
@@ -667,8 +636,8 @@ const CustomerUsers = () => {
       placeholder: "Enter Employee ID",
     },
 
-
   ];
+
 
   const formik = useFormik({
     initialValues: {
@@ -716,7 +685,7 @@ const CustomerUsers = () => {
         staff_to: values.staff_to,
         allCustomerAccess: values.allCustomerAccess,
         created_by: staffDetails.id,
-        action: "add"
+        action: type === "edit" ? "edit" : "add"
       };
 
       console.log("req", req)
@@ -799,7 +768,7 @@ const CustomerUsers = () => {
               <div className="col-md-6 col-sm-7">
                 <button
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
-                  onClick={() => setShowAddCustomerModal(true)}
+                  onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
                 >
                   <i className="fa fa-plus" />
                   Add Customer User
@@ -822,7 +791,7 @@ const CustomerUsers = () => {
                 </div>
 
                 <div className="col-12">
-                 
+
                   <div className="tab-content mt-minus-60" id="pills-tabContent">
                     <div className="card-datatable">
                       <div className="card-datatable">
@@ -845,7 +814,7 @@ const CustomerUsers = () => {
                             </select>
                           </div>
                           <div className="col-md-2">
-                        
+
                             <button className="btn btn-outline-info fw-bold float-end border-3 " onClick={handleExport}>
                               Export Excel
                             </button>
@@ -855,7 +824,7 @@ const CustomerUsers = () => {
 
                         <Datatable columns={columns} data={filteredData1} />
 
-                      
+
                         <ReactPaginate
                           previousLabel={"Previous"}
                           nextLabel={"Next"}
