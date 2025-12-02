@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA ,getAllCustomerDropDown} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA, getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -10,13 +10,10 @@ import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import Validation_Message from "../../../Utils/Validation_Message";
 import { useFormik } from "formik";
 
-
 import Swal from "sweetalert2";
 import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
-
-
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
@@ -42,6 +39,11 @@ const CustomerUsers = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+
+  const [type, setType] = useState("add")
+  const [updatedata, setUpdatedata] = useState("")
+
+  console.log("updatedata", updatedata)
 
 
 
@@ -79,10 +81,9 @@ const CustomerUsers = () => {
       (item) => item.permission_name === "all_clients"
     )?.items || [];
 
-  
-  console.log("customerDataAll -->>> ", customerDataAll);
 
-   useEffect(() => {
+
+  useEffect(() => {
     GetAllCustomer();
   }, []);
 
@@ -193,7 +194,7 @@ const CustomerUsers = () => {
 
 
     {
-      name: "Actions      ",
+      name: "Actions",
       cell: (row) => {
         const hasUpdateAccess = getAccessData.update === 1;
         const hasDeleteAccess = getAccessData.delete === 1;
@@ -203,7 +204,13 @@ const CustomerUsers = () => {
 
               <>
                 <div className="d-flex justify-content-start">
-                  <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <button className="edit-icon rounded-pills border-primary"
+                    onClick={() => {
+                      setType("edit");
+                      setUpdatedata(row);
+                      setShowAddCustomerModal(true);
+                    }}
+                  >
                     <i className="ti-pencil text-primary" />
                   </button>
 
@@ -389,16 +396,16 @@ const CustomerUsers = () => {
   const [totalRecords, setTotalRecords] = useState(0);
 
   const handlePageChange = (selected) => {
-    const newPage = selected.selected + 1; // Pagination libraries use 0-based indexing.
+    const newPage = selected.selected + 1;
     setCurrentPage(newPage);
-    GetAllCustomerData(newPage, pageSize, ''); // Fetch data for the new page.
+    GetAllCustomerData(newPage, pageSize, '');
   };
 
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
-    setCurrentPage(1); // Reset to the first page
-    GetAllCustomerData(1, newSize, ''); // Fetch data with new page size
+    setCurrentPage(1);
+    GetAllCustomerData(1, newSize, '');
   };
 
   const handleSearchChange = (term) => {
@@ -436,32 +443,32 @@ const CustomerUsers = () => {
     }
   };
 
-   const GetAllCustomer = async () => {
-      const req = { action: "get_dropdown" };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllCustomerDropDown(data)).unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            setCustomerDataAll(response.data);
-            // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-  
-            //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
-            //   if(FilterCustomer.length > 0){
-            //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-            //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
-            //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
-            //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-            //   }
-  
-            // }
-          } else {
-            setCustomerDataAll(response.data);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    };
+  const GetAllCustomer = async () => {
+    const req = { action: "get_dropdown" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllCustomerDropDown(data)).unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCustomerDataAll(response.data);
+          // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+
+          //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
+          //   if(FilterCustomer.length > 0){
+          //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+          //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
+          //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
+          //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+          //   }
+
+          // }
+        } else {
+          setCustomerDataAll(response.data);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
 
   useEffect(() => {
@@ -489,7 +496,6 @@ const CustomerUsers = () => {
     navigate("/admin/editcustomer", { state: row });
   };
   const handleExport = async () => {
-    ///const apiData = await GetAllCustomerData(1, 10000, searchTerm);
     const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
     const data = { req, authToken: token };
     const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
@@ -547,9 +553,9 @@ const CustomerUsers = () => {
     a.click();
   };
 
-//////////////////////////////////////////////////
 
- const fields = [
+
+  const fields = [
     {
       type: "text6",
       name: "first_name",
@@ -644,6 +650,18 @@ const CustomerUsers = () => {
     //     })),
     // },
     {
+      type: "multiselect",
+      name: "allCustomerAccess",
+      label: "All Customer Access",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: customerDataAll.map((item) => ({
+        value: item.id,
+        label: item.trading_name,
+      }))
+    },
+    {
       type: "text6",
       name: "employee_number",
       label: "Employee ID",
@@ -652,129 +670,124 @@ const CustomerUsers = () => {
       disable: false,
       placeholder: "Enter Employee ID",
     },
+
+
   ];
 
   const formik = useFormik({
-      initialValues: {
-        first_name: "",
-        last_name: "",
-        email: "",
-        phone: "",
-        phone_code: "+44",
-        role: "1",
-        status: "1",
-        staff_to: "",
-        employee_number: "",
-      },
-      validationSchema: Yup.object({
-        first_name: Yup.string()
-          .trim(Validation_Message.FirstNameValidation)
-          .required(Validation_Message.FirstNameValidation),
-        last_name: Yup.string()
-          .trim(Validation_Message.LastNameValidation)
-          .required(Validation_Message.LastNameValidation),
-        email: Yup.string()
-          .trim(Validation_Message.EmailValidation)
-          .email(Validation_Message.EmailValidation)
-          .required(Validation_Message.EmailIsRequire),
-        role: Yup.string()
-          .trim(Validation_Message.RoleValidation)
-          .required(Validation_Message.RoleValidation),
-      //   status: Yup.string()
-      //     .trim(Validation_Message.StatusValidation)
-      //     .required(Validation_Message.StatusValidation),
-      //   employee_number: Yup.string()
-      //     .trim(Validation_Message.EmployeeNumberValidation)
-      //     .required(Validation_Message.EmployeeNumberValidation)
-       }),
-  
-      onSubmit: async (values) => {
-        let req = {
-          first_name: (values.first_name).trim(),
-          last_name: values.last_name,
-          email: values.email,
-          phone: values.phone,
-          phone_code: values.phone_code,
-          role_id: values.role,
-          status: values.status,
-          employee_number: values.employee_number,
-          staff_to: values.staff_to,
-         // created_by: StaffUserId.id,
-         // hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
-        };
+    initialValues: {
+      first_name: updatedata.first_name || "",
+      last_name: updatedata.first_name || "",
+      email: updatedata.email || "",
+      phone: updatedata.phone || "",
+      phone_code: updatedata.phone_code || "+44",
+      role: "1",
+      status: updatedata.first_name || "1",
+      employee_number: updatedata.first_name || null,
+      allCustomerAccess: updatedata.first_name || [],
 
-     alert("Submit function called");
+    },
+    enableReinitialize: true,
+    validationSchema: Yup.object({
+      first_name: Yup.string()
+        .trim()
+        .required("First name is required"),
+      last_name: Yup.string()
+        .trim()
+        .required("Last name is required"),
+      email: Yup.string()
+        .trim()
+        .email("Invalid email address")
+        .required("Email is required"),
+      allCustomerAccess: Yup.array()
+        .min(1, "Please select at least one customer")
+        .required("Customer access is required"),
+    }),
 
+    onSubmit: async (values) => {
 
-        // if (editStaff) {
-        //   req.id = editStaffData && editStaffData.id;
-        // }
-  
-  
-        // await dispatch(
-        //   Staff({
-        //     req: { action: editStaff ? "update" : "add", ...req },
-        //     authToken: token,
-        //   })
-        // )
-        //   .unwrap()
-        //   .then(async (response) => {
-        //     if (response.status) {
-        //       sweatalert.fire({
-        //         icon: "success",
-        //         title: "Success",
-        //         text: response.message,
-        //         timer: 1500,
-        //         timerProgressBar: true,
-        //       });
-        //       setTimeout(() => {
-        //         setAddStaff(false);
-        //         setEditStaff(false);
-        //         setEditStaffData({});
-        //         SetRefresh(!refresh);
-        //         formik.resetForm();
-        //         window.location.reload();
-        //       }, 1500);
-        //     } else {
-        //       sweatalert.fire({
-        //         icon: "error",
-        //         title: "Oops...",
-        //         text: response.message,
-        //       });
-        //     }
-        //   })
-  
-        //   .catch((error) => {
-        //     return;
+      console.log("values", values)
+
+      let req = {
+        first_name: (values.first_name).trim(),
+        last_name: (values.last_name).trim(),
+        email: (values.email).trim(),
+        phone: values.phone,
+        phone_code: values.phone_code,
+        role_id: values.role,
+        status: values.status,
+        employee_number: values.employee_number,
+        staff_to: values.staff_to,
+        allCustomerAccess: values.allCustomerAccess,
+        created_by: staffDetails.id,
+        action: "add"
+      };
+
+      console.log("req", req)
+
+      try {
+        // const response = await dispatch(addCustomerUser({ req, authToken: token })).unwrap();
+
+        // if (response.status) {
+        //   sweatalert.fire({
+        //     icon: "success",
+        //     title: "Success",
+        //     text: response.message || "Customer user added successfully",
+        //     timer: 1500,
+        //     timerProgressBar: true,
         //   });
-      },
-    });
+
+        //   setTimeout(() => {
+        //     setShowAddCustomerModal(false);
+        //     formik.resetForm();
+        //     GetAllCustomerData(1, pageSize, '');
+        //   }, 1500);
+        // } else {
+        //   sweatalert.fire({
+        //     icon: "error",
+        //     title: "Error",
+        //     text: response.message || "Failed to add customer user",
+        //   });
+        // }
+      } catch (error) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "An error occurred while adding customer user",
+        });
+      }
+    },
+  });
+
+
 
 
 
   return (
     <div>
-    <CommanModal
+      <CommanModal
         isOpen={showAddCustomerModal}
         backdrop="static"
         size="ms-7"
-        title="Add Customer User"
+        title={type === "edit" ? "Edit Customer User" : "Add Customer User"}
         hideBtn={true}
         handleClose={() => {
           setShowAddCustomerModal(false);
           formik.resetForm();
         }}
+
       >
         <Formicform
           fieldtype={fields.filter(
             (field) => !field.showWhen || field.showWhen(formik.values)
           )}
           formik={formik}
-          btn_name="Add"
+          btn_name={type === "edit" ? "Edit Customer User" : "Add Customer User"}
           closeBtn={(e) => {
             formik.resetForm();
             setShowAddCustomerModal(false);
           }}
+
         />
       </CommanModal>
 
