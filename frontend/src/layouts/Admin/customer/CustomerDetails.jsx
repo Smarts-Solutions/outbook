@@ -704,7 +704,9 @@ const CustomerUsers = () => {
         staff_to: values.staff_to,
         allCustomerAccess: values.allCustomerAccess,
         created_by: staffDetails.id,
-        action: type === "edit" ? "edit" : "add"
+        action: "addCustomerUsers",
+        staff_id: staffDetails.id,
+
       };
 
       console.log("req", req)
