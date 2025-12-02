@@ -43,9 +43,11 @@ const CustomerUsers = () => {
   const [type, setType] = useState("add")
   const [updatedata, setUpdatedata] = useState("")
 
-  console.log("updatedata", updatedata)
+
+
+
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
-  console.log("personRoleDataAll", personRoleDataAll)
+
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [showManagerModal, setShowManagerModal] = useState(false);
@@ -87,28 +89,34 @@ const CustomerUsers = () => {
     CustomerPersonRoleData();
   }, []);
 
+
+
+
   const CustomerPersonRoleData = async () => {
-      const req = {
-        action: "get",
-      };
-      const data = { req: req, authToken: token };
-      await dispatch(PersonRole(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            setPersonRoleDataAll({ loading: false, data: response.data });
-          } else {
-            setPersonRoleDataAll({ loading: false, data: [] });
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+    const req = {
+      action: "get",
     };
+    const data = { req: req, authToken: token };
+    await dispatch(PersonRole(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setPersonRoleDataAll({ loading: false, data: response.data });
+        } else {
+          setPersonRoleDataAll({ loading: false, data: [] });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   useEffect(() => {
     GetAllCustomerData(1, pageSize, '');
   }, [activeTab]);
+
+
+
 
   useEffect(() => {
     if (accessData.length === 0) return;
@@ -210,66 +218,39 @@ const CustomerUsers = () => {
       width: "100px",
       reorder: false,
     },
-
-
     {
       name: "Actions",
       cell: (row) => {
-        const hasUpdateAccess = getAccessData.update === 1;
-        const hasDeleteAccess = getAccessData.delete === 1;
         return (
           <div className="w-100">
-            {(role === "SUPERADMIN") && row.status == 1 ? (
 
-              <>
-                <div className="d-flex justify-content-start">
-                  <button className="edit-icon rounded-pills border-primary"
-                    onClick={() => {
-                      setType("edit");
-                      setUpdatedata(row);
-                      setShowAddCustomerModal(true);
-                    }}
-                  >
-                    <i className="ti-pencil text-primary" />
-                  </button>
+            <>
+              <div className="d-flex justify-content-start">
+                <button className="edit-icon rounded-pills border-primary"
+                  onClick={() => {
+                    setType("edit");
+                    setUpdatedata(row);
+                    setShowAddCustomerModal(true);
+                  }}
+                >
+                  <i className="ti-pencil text-primary" />
+                </button>
 
-                  {/*view Icon Button*/}
-                  <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
-                    <i className="ti-eye text-primary" />
-                  </button>
+                {/*view Icon Button*/}
+                <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
+                  <i className="ti-eye text-primary" />
+                </button>
 
-                  {(row.form_process != "4" || row.is_client == 0) && <button
-                    className="delete-icon "
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger " />
-                  </button>}
-
-                </div>
-              </>
-            ) : (
-              <div className="d-flex justify-content-end">
-                {hasUpdateAccess && row.status == 1 && (
-                  <button className="edit-icon "
-                    onClick={() => {
-                      setType("edit");
-                      setUpdatedata(row);
-                      setShowAddCustomerModal(true);
-                    }}>
-                    <i className="ti-pencil text-primary" />
-                  </button>
-                )}
-                {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) && (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )}
+                {(row.form_process != "4" || row.is_client == 0) && <button
+                  className="delete-icon "
+                  onClick={() => handleDelete(row)}
+                >
+                  <i className="ti-trash text-danger " />
+                </button>}
 
               </div>
-            )}
+            </>
+
           </div>
         );
       },
@@ -384,6 +365,8 @@ const CustomerUsers = () => {
     });
   };
 
+
+
   const handleViewAllAccountManager = async (customerId) => {
     try {
       const response = await dispatch(
@@ -439,6 +422,9 @@ const CustomerUsers = () => {
     GetAllCustomerData(1, pageSize, term);
   };
 
+
+
+
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
     const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
@@ -465,17 +451,6 @@ const CustomerUsers = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerDataAll(response.data);
-          // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-
-          //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
-          //   if(FilterCustomer.length > 0){
-          //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
-          //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
-          //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   }
-
-          // }
         } else {
           setCustomerDataAll(response.data);
         }
@@ -632,7 +607,7 @@ const CustomerUsers = () => {
         { label: "Active", value: "1" },
         { label: "Inactive", value: "0" },
       ],
-    }, 
+    },
     {
       type: "multiselect",
       name: "allCustomerAccess",
@@ -640,19 +615,22 @@ const CustomerUsers = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      options: customerDataAll.map((item) => ({
+      options: customerDataAll?.map((item) => ({
         value: item.id,
         label: item.trading_name,
       }))
     },
     {
-      type: "text6",
-      name: "employee_number",
-      label: "Employee ID",
+      type: "select",
+      name: "customer_contact_person_role_id",
+      label: "Customer Role",
       label_size: 12,
       col_size: 6,
       disable: false,
-      placeholder: "Enter Employee ID",
+      options: personRoleDataAll?.data?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }))
     },
 
   ];
@@ -660,15 +638,18 @@ const CustomerUsers = () => {
 
   const formik = useFormik({
     initialValues: {
-      first_name: updatedata.first_name || "",
-      last_name: updatedata.first_name || "",
-      email: updatedata.email || "",
-      phone: updatedata.phone || "",
-      phone_code: updatedata.phone_code || "+44",
+      first_name: updatedata?.first_name || "",
+      last_name: updatedata?.first_name || "",
+      email: updatedata?.email || "",
+      phone: updatedata?.phone || "",
+      phone_code: updatedata?.phone_code || "+44",
       role: "1",
-      status: updatedata.first_name || "1",
-      employee_number: updatedata.first_name || null,
-      allCustomerAccess: updatedata.first_name || [],
+      status: updatedata?.status || "1",
+      customer_contact_person_role_id: updatedata?.customer_contact_person_role_id || null,
+      allCustomerAccess: updatedata?.allCustomerAccess
+        ? updatedata.allCustomerAccess.split(",").map(Number)
+        : [] || [],
+
 
     },
     enableReinitialize: true,
@@ -679,6 +660,9 @@ const CustomerUsers = () => {
       last_name: Yup.string()
         .trim()
         .required("Last name is required"),
+      phone: Yup.string()
+        .trim()
+        .required("phone is required"),
       email: Yup.string()
         .trim()
         .email("Invalid email address")
@@ -686,11 +670,12 @@ const CustomerUsers = () => {
       allCustomerAccess: Yup.array()
         .min(1, "Please select at least one customer")
         .required("Customer access is required"),
+      customer_contact_person_role_id: Yup.string()
+        .trim()
+        .required("Please select customer role"),
     }),
 
     onSubmit: async (values) => {
-
-      console.log("values", values)
 
       let req = {
         first_name: (values.first_name).trim(),
@@ -700,51 +685,52 @@ const CustomerUsers = () => {
         phone_code: values.phone_code,
         role_id: values.role,
         status: values.status,
-        employee_number: values.employee_number,
         staff_to: values.staff_to,
         allCustomerAccess: values.allCustomerAccess,
+        customer_contact_person_role_id: values.customer_contact_person_role_id,
         created_by: staffDetails.id,
-        action: "addCustomerUsers",
+        action: type === "edit" ? "updateCustomerUsers" : "addCustomerUsers",
         staff_id: staffDetails.id,
+        customer_user_id: updatedata?.id
 
       };
 
-      console.log("req", req)
-
       try {
-          const data = { req, authToken: token };
-          const response = await dispatch(getAllCustomerUsers(data)).unwrap();
+        const data = { req, authToken: token };
+        const response = await dispatch(getAllCustomerUsers(data)).unwrap();
 
-          if (response.status) {
-            sweatalert.fire({
-              icon: "success",
-              title: "Success",
-              text: response.message || "Customer user added successfully",
-              timer: 1500,
-              timerProgressBar: true,
-            });
+        if (response.status) {
+          sweatalert.fire({
+            icon: "success",
+            title: "Success",
+            text: response.message || "Customer user added successfully",
+            timer: 1500,
+            timerProgressBar: true,
+          });
 
-            setTimeout(() => {
-              setShowAddCustomerModal(false);
-              formik.resetForm();
-              GetAllCustomerData(1, pageSize, '');
-            }, 1500);
-          } else {
-            sweatalert.fire({
-              icon: "error",
-              title: "Error",
-              text: response.message || "Failed to add customer user",
-            });
-          }
-        } catch (error) {
+          setTimeout(() => {
+            setShowAddCustomerModal(false);
+            formik.resetForm();
+            GetAllCustomerData(1, pageSize, '');
+          }, 1500);
+
+          setType("")
+        } else {
           sweatalert.fire({
             icon: "error",
             title: "Error",
-            text: error.message || "An error occurred while adding customer user",
+            text: response.message || "Failed to add customer user",
           });
         }
-      },
-    });
+      } catch (error) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "An error occurred while adding customer user",
+        });
+      }
+    },
+  });
 
 
 
