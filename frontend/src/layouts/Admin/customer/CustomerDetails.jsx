@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA ,getAllCustomerDropDown} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+
 
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
@@ -44,7 +45,7 @@ const CustomerUsers = () => {
 
 
 
-
+  const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [showManagerModal, setShowManagerModal] = useState(false);
   const [managerList, setManagerList] = useState([]);
@@ -78,8 +79,12 @@ const CustomerUsers = () => {
       (item) => item.permission_name === "all_clients"
     )?.items || [];
 
+  
+  console.log("customerDataAll -->>> ", customerDataAll);
 
-
+   useEffect(() => {
+    GetAllCustomer();
+  }, []);
 
   useEffect(() => {
     GetAllCustomerData(1, pageSize, '');
@@ -431,6 +436,33 @@ const CustomerUsers = () => {
     }
   };
 
+   const GetAllCustomer = async () => {
+      const req = { action: "get_dropdown" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllCustomerDropDown(data)).unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            setCustomerDataAll(response.data);
+            // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+  
+            //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
+            //   if(FilterCustomer.length > 0){
+            //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+            //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
+            //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
+            //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
+            //   }
+  
+            // }
+          } else {
+            setCustomerDataAll(response.data);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    };
+
 
   useEffect(() => {
     const StatusfilterData = filteredData.filter((item) => (item.status == statusFilter || statusFilter == ""))
@@ -456,10 +488,6 @@ const CustomerUsers = () => {
   const handleEdit = (row) => {
     navigate("/admin/editcustomer", { state: row });
   };
-
-
-
-
   const handleExport = async () => {
     ///const apiData = await GetAllCustomerData(1, 10000, searchTerm);
     const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
