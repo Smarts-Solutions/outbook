@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
 import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA, getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
-
+import { PersonRole } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import Validation_Message from "../../../Utils/Validation_Message";
@@ -44,9 +44,8 @@ const CustomerUsers = () => {
   const [updatedata, setUpdatedata] = useState("")
 
   console.log("updatedata", updatedata)
-
-
-
+  const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
+  console.log("personRoleDataAll", personRoleDataAll)
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [showManagerModal, setShowManagerModal] = useState(false);
@@ -85,7 +84,27 @@ const CustomerUsers = () => {
 
   useEffect(() => {
     GetAllCustomer();
+    CustomerPersonRoleData();
   }, []);
+
+  const CustomerPersonRoleData = async () => {
+      const req = {
+        action: "get",
+      };
+      const data = { req: req, authToken: token };
+      await dispatch(PersonRole(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            setPersonRoleDataAll({ loading: false, data: response.data });
+          } else {
+            setPersonRoleDataAll({ loading: false, data: [] });
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    };
 
   useEffect(() => {
     GetAllCustomerData(1, pageSize, '');
@@ -691,38 +710,39 @@ const CustomerUsers = () => {
       console.log("req", req)
 
       try {
-        // const response = await dispatch(addCustomerUser({ req, authToken: token })).unwrap();
+          const data = { req, authToken: token };
+          const response = await dispatch(getAllCustomerUsers(data)).unwrap();
 
-        // if (response.status) {
-        //   sweatalert.fire({
-        //     icon: "success",
-        //     title: "Success",
-        //     text: response.message || "Customer user added successfully",
-        //     timer: 1500,
-        //     timerProgressBar: true,
-        //   });
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message || "Customer user added successfully",
+              timer: 1500,
+              timerProgressBar: true,
+            });
 
-        //   setTimeout(() => {
-        //     setShowAddCustomerModal(false);
-        //     formik.resetForm();
-        //     GetAllCustomerData(1, pageSize, '');
-        //   }, 1500);
-        // } else {
-        //   sweatalert.fire({
-        //     icon: "error",
-        //     title: "Error",
-        //     text: response.message || "Failed to add customer user",
-        //   });
-        // }
-      } catch (error) {
-        sweatalert.fire({
-          icon: "error",
-          title: "Error",
-          text: error.message || "An error occurred while adding customer user",
-        });
-      }
-    },
-  });
+            setTimeout(() => {
+              setShowAddCustomerModal(false);
+              formik.resetForm();
+              GetAllCustomerData(1, pageSize, '');
+            }, 1500);
+          } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Error",
+              text: response.message || "Failed to add customer user",
+            });
+          }
+        } catch (error) {
+          sweatalert.fire({
+            icon: "error",
+            title: "Error",
+            text: error.message || "An error occurred while adding customer user",
+          });
+        }
+      },
+    });
 
 
 
