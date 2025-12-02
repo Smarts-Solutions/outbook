@@ -231,7 +231,12 @@ const CustomerUsers = () => {
             ) : (
               <div className="d-flex justify-content-end">
                 {hasUpdateAccess && row.status == 1 && (
-                  <button className="edit-icon " onClick={() => handleEdit(row)}>
+                  <button className="edit-icon "
+                    onClick={() => {
+                      setType("edit");
+                      setUpdatedata(row);
+                      setShowAddCustomerModal(true);
+                    }}>
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
@@ -416,22 +421,13 @@ const CustomerUsers = () => {
   };
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
-
-    // console.log("limit", limit)
-    // console.log("page", page)
     const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
 
     try {
       const response = await dispatch(getAllCustomerUsers(data)).unwrap();
       if (response.status) {
-        // const filteredData = response.data.data.filter((item) => {
-        //   const itemDate = new Date(item.created_at);
-        //   const { startDate, endDate } = getDateRange(selectedTab);
-        //   return itemDate >= startDate && itemDate <= endDate;
-        // });
-
-
+      
         setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
 
@@ -492,9 +488,9 @@ const CustomerUsers = () => {
     }
   };
 
-  const handleEdit = (row) => {
-    navigate("/admin/editcustomer", { state: row });
-  };
+
+
+
   const handleExport = async () => {
     const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
     const data = { req, authToken: token };
@@ -510,7 +506,7 @@ const CustomerUsers = () => {
       return;
     }
 
-    // export format
+    
     const exportData = apiData?.map((item) => ({
       "Trading Name": item.trading_name,
       "Customer Code": item.customer_code,
@@ -533,11 +529,11 @@ const CustomerUsers = () => {
   const downloadCSV = (data, filename) => {
     const csvRows = [];
 
-    // headers
+   
     const headers = Object.keys(data[0]);
     csvRows.push(headers.join(","));
 
-    // rows
+    
     data.forEach((row) => {
       const values = headers.map((h) => `"${row[h] || ""}"`);
       csvRows.push(values.join(","));
@@ -801,12 +797,6 @@ const CustomerUsers = () => {
             </div>
             {role === "SUPERADMIN" ? (
               <div className="col-md-6 col-sm-7">
-                {/* <Link
-                  to="/admin/addcustomer"
-                  className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
-                >
-                  <i className="fa fa-plus" /> Add Customer User
-                </Link> */}
                 <button
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                   onClick={() => setShowAddCustomerModal(true)}
@@ -832,7 +822,7 @@ const CustomerUsers = () => {
                 </div>
 
                 <div className="col-12">
-                  {/* Tab content */}
+                 
                   <div className="tab-content mt-minus-60" id="pills-tabContent">
                     <div className="card-datatable">
                       <div className="card-datatable">
@@ -855,13 +845,7 @@ const CustomerUsers = () => {
                             </select>
                           </div>
                           <div className="col-md-2">
-                            {/* <ExportToExcel
-                              className="btn btn-outline-info fw-bold float-end border-3 "
-                              apiData={exportData}
-                              fileName={"Customer Details"}
-                            /> */}
-
-
+                        
                             <button className="btn btn-outline-info fw-bold float-end border-3 " onClick={handleExport}>
                               Export Excel
                             </button>
@@ -871,7 +855,7 @@ const CustomerUsers = () => {
 
                         <Datatable columns={columns} data={filteredData1} />
 
-                        {/* Pagination Controls */}
+                      
                         <ReactPaginate
                           previousLabel={"Previous"}
                           nextLabel={"Next"}
