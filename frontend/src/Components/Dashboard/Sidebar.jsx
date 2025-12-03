@@ -573,7 +573,8 @@ const Sidebar = () => {
 
 
             {/* Coustomer users*/}
-            {(
+            {
+            (
               role === "SUPERADMIN") && (
                 <li
                   className={
@@ -586,12 +587,13 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-user-cog"></i> {/* Customer Details icon */}
+                      <i className="fas fa-user-cog"></i> 
                     </span>
                     <span>Customer Details</span>
                   </Link>
                 </li>
-              )}
+              )
+              }
 
 
           </ul>
