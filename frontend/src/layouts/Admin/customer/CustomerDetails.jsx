@@ -58,29 +58,6 @@ const CustomerUsers = () => {
   const [filteredData1, setFilteredData1] = useState([])
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [getAccessData, setAccessData] = useState({
-    insert: 0,
-    update: 0,
-    delete: 0,
-    client: 0,
-    all_clients: 0,
-  });
-
-
-  const accessData =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "customer"
-    )?.items || [];
-
-  const accessData1 =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "client"
-    )?.items || [];
-
-  const accessDataAllClients =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_clients"
-    )?.items || [];
 
 
 
@@ -116,26 +93,6 @@ const CustomerUsers = () => {
   }, [activeTab]);
 
 
-
-
-  useEffect(() => {
-    if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0, all_clients: 0 };
-    accessData.forEach((item) => {
-      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-      if (item.type === "update") updatedAccess.update = item.is_assigned;
-      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-    });
-    accessData1.forEach((item) => {
-      if (item.type === "view") updatedAccess.client = item.is_assigned;
-    });
-
-    accessDataAllClients.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
-    });
-
-    setAccessData(updatedAccess);
-  }, []);
 
 
   const columns = [
@@ -236,10 +193,10 @@ const CustomerUsers = () => {
                   <i className="ti-pencil text-primary" />
                 </button>
 
-                {/*view Icon Button*/}
-                <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
+                {/* view Icon Button */}
+                {/* <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
                   <i className="ti-eye text-primary" />
-                </button>
+                </button> */}
 
                 {(row.form_process != "4" || row.is_client == 0) && <button
                   className="delete-icon "
@@ -273,8 +230,8 @@ const CustomerUsers = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const req = { customer_id: row.id };
-          const res = await dispatch(deleteCustomer({ req, authToken: token })).unwrap();
+          const req = { customer_user_id: row.id, action: 'deleteCustomerUsers' };
+          const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
 
           if (res.status) {
             Swal.fire({
@@ -313,90 +270,6 @@ const CustomerUsers = () => {
 
   };
 
-  const handleChangeStatus = async (e, row) => {
-    const newStatus = e.target.value;
-
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const req = { customer_id: row.id, status: newStatus };
-          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
-
-          if (res.status) {
-            Swal.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
-            GetAllCustomerData(1, pageSize, '');
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: res.message,
-              icon: "error",
-              confirmButtonText: "Ok",
-            });
-          }
-        } catch (error) {
-          Swal.fire({
-            title: "Error",
-            text: "An error occurred while updating the status.",
-            icon: "error",
-            confirmButtonText: "Ok",
-          });
-        }
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
-          icon: "error",
-          confirmButtonText: "Ok",
-        });
-      }
-    });
-  };
-
-
-
-  const handleViewAllAccountManager = async (customerId) => {
-    try {
-      const response = await dispatch(
-        GET_CUSTOMER_DATA({
-          req: { customer_id: customerId.id, action: 'allAccountManager' },
-          authToken: token,
-        })
-      ).unwrap();
-      if (response.status) {
-        if (response.status == true) {
-          setManagerList(response?.data?.data);
-          setShowManagerModal(true);
-        } else {
-          Swal.fire({
-            title: 'Info',
-            text: 'No account managers found for this customer.',
-            icon: 'info',
-          });
-        }
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to fetch account managers.',
-          icon: 'error',
-        });
-      }
-    } catch (error) {
-      return;
-    }
-  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -423,8 +296,6 @@ const CustomerUsers = () => {
   };
 
 
-
-
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
     const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
@@ -434,7 +305,7 @@ const CustomerUsers = () => {
       if (response.status) {
 
         setFilteredData(response.data.data);
-        setTotalRecords(response.data.pagination.totalItems);
+        setTotalRecords(response.data.totalRecords);
 
       } else {
         setFilteredData([]);
@@ -443,6 +314,7 @@ const CustomerUsers = () => {
       console.error('Error fetching customer data:', error);
     }
   };
+
 
   const GetAllCustomer = async () => {
     const req = { action: "get_dropdown" };
@@ -469,26 +341,10 @@ const CustomerUsers = () => {
 
 
 
-  const HandleClientView = (row) => {
-    if (row.form_process == "4") {
-      navigate("/admin/Clientlist", { state: row });
-    } else {
-      Swal.fire({
-        title: "Form not completed",
-        text: "Please complete the form",
-        icon: "error",
-        confirmButtonText: "Ok",
-      });
-    }
-  };
-
-
-
-
   const handleExport = async () => {
-    const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
+    const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
     const data = { req, authToken: token };
-    const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+    const response = await dispatch(getAllCustomerUsers(data)).unwrap();
     if (!response.status) {
       alert("No data to export!");
       return;
@@ -502,17 +358,10 @@ const CustomerUsers = () => {
 
 
     const exportData = apiData?.map((item) => ({
-      "Trading Name": item.trading_name,
-      "Customer Code": item.customer_code,
-      "Type":
-        item.customer_type === "1"
-          ? "Sole Trader"
-          : item.customer_type === "2"
-            ? "Company"
-            : item.customer_type === "3"
-              ? "Partnership"
-              : "-",
-      "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+      "First Name": item.first_name,
+      "Last Name": item.customer_code,
+      "Email": item.email,
+      "Phone": item.phone_code + item.phone,
       "Created by": item.customer_created_by,
       "Created At": item.created_at,
       "Status": item.status == 1 ? "Active" : "Deactive",
@@ -649,8 +498,6 @@ const CustomerUsers = () => {
       allCustomerAccess: updatedata?.allCustomerAccess
         ? updatedata.allCustomerAccess.split(",").map(Number)
         : [] || [],
-
-
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
