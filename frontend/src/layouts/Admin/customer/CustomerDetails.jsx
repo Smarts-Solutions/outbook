@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA, getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { PersonRole } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -19,6 +19,8 @@ import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal'
 
 const CustomerUsers = () => {
 
+
+
   const convertDate = (date) => {
     if ([null, undefined, ''].includes(date)) {
       return "-";
@@ -33,6 +35,8 @@ const CustomerUsers = () => {
     return "-";
   }
 
+
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -42,7 +46,6 @@ const CustomerUsers = () => {
 
   const [type, setType] = useState("add")
   const [updatedata, setUpdatedata] = useState("")
-
 
 
 
@@ -68,7 +71,6 @@ const CustomerUsers = () => {
 
 
 
-
   const CustomerPersonRoleData = async () => {
     const req = {
       action: "get",
@@ -87,6 +89,9 @@ const CustomerUsers = () => {
         return;
       });
   };
+
+
+
 
   useEffect(() => {
     GetAllCustomerData(1, pageSize, '');
@@ -289,7 +294,6 @@ const CustomerUsers = () => {
   };
 
   const handleSearchChange = (term) => {
-    console.log("term ", term);
     setSearchTerm(term);
     setCurrentPage(1);
     GetAllCustomerData(1, pageSize, term);
@@ -566,7 +570,7 @@ const CustomerUsers = () => {
           sweatalert.fire({
             icon: "error",
             title: "Error",
-            text: response.message || "Failed to add customer user",
+            text: response.response.data.message || "Failed to add customer user",
           });
         }
       } catch (error) {
@@ -578,9 +582,6 @@ const CustomerUsers = () => {
       }
     },
   });
-
-
-
 
 
   return (
