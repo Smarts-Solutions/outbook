@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA, getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { PersonRole } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -19,6 +19,8 @@ import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal'
 
 const CustomerUsers = () => {
 
+
+
   const convertDate = (date) => {
     if ([null, undefined, ''].includes(date)) {
       return "-";
@@ -33,6 +35,8 @@ const CustomerUsers = () => {
     return "-";
   }
 
+
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -43,9 +47,10 @@ const CustomerUsers = () => {
   const [type, setType] = useState("add")
   const [updatedata, setUpdatedata] = useState("")
 
-  console.log("updatedata", updatedata)
+
+
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
-  console.log("personRoleDataAll", personRoleDataAll)
+
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [showManagerModal, setShowManagerModal] = useState(false);
@@ -56,29 +61,6 @@ const CustomerUsers = () => {
   const [filteredData1, setFilteredData1] = useState([])
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [getAccessData, setAccessData] = useState({
-    insert: 0,
-    update: 0,
-    delete: 0,
-    client: 0,
-    all_clients: 0,
-  });
-
-
-  const accessData =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "customer"
-    )?.items || [];
-
-  const accessData1 =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "client"
-    )?.items || [];
-
-  const accessDataAllClients =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_clients"
-    )?.items || [];
 
 
 
@@ -87,47 +69,35 @@ const CustomerUsers = () => {
     CustomerPersonRoleData();
   }, []);
 
+
+
   const CustomerPersonRoleData = async () => {
-      const req = {
-        action: "get",
-      };
-      const data = { req: req, authToken: token };
-      await dispatch(PersonRole(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            setPersonRoleDataAll({ loading: false, data: response.data });
-          } else {
-            setPersonRoleDataAll({ loading: false, data: [] });
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+    const req = {
+      action: "get",
     };
+    const data = { req: req, authToken: token };
+    await dispatch(PersonRole(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setPersonRoleDataAll({ loading: false, data: response.data });
+        } else {
+          setPersonRoleDataAll({ loading: false, data: [] });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+
+
 
   useEffect(() => {
     GetAllCustomerData(1, pageSize, '');
   }, [activeTab]);
 
-  useEffect(() => {
-    if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0, all_clients: 0 };
-    accessData.forEach((item) => {
-      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-      if (item.type === "update") updatedAccess.update = item.is_assigned;
-      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-    });
-    accessData1.forEach((item) => {
-      if (item.type === "view") updatedAccess.client = item.is_assigned;
-    });
 
-    accessDataAllClients.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
-    });
-
-    setAccessData(updatedAccess);
-  }, []);
 
 
   const columns = [
@@ -210,66 +180,39 @@ const CustomerUsers = () => {
       width: "100px",
       reorder: false,
     },
-
-
     {
       name: "Actions",
       cell: (row) => {
-        const hasUpdateAccess = getAccessData.update === 1;
-        const hasDeleteAccess = getAccessData.delete === 1;
         return (
           <div className="w-100">
-            {(role === "SUPERADMIN") && row.status == 1 ? (
 
-              <>
-                <div className="d-flex justify-content-start">
-                  <button className="edit-icon rounded-pills border-primary"
-                    onClick={() => {
-                      setType("edit");
-                      setUpdatedata(row);
-                      setShowAddCustomerModal(true);
-                    }}
-                  >
-                    <i className="ti-pencil text-primary" />
-                  </button>
+            <>
+              <div className="d-flex justify-content-start">
+                <button className="edit-icon rounded-pills border-primary"
+                  onClick={() => {
+                    setType("edit");
+                    setUpdatedata(row);
+                    setShowAddCustomerModal(true);
+                  }}
+                >
+                  <i className="ti-pencil text-primary" />
+                </button>
 
-                  {/*view Icon Button*/}
-                  <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
-                    <i className="ti-eye text-primary" />
-                  </button>
+                {/* view Icon Button */}
+                {/* <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
+                  <i className="ti-eye text-primary" />
+                </button> */}
 
-                  {(row.form_process != "4" || row.is_client == 0) && <button
-                    className="delete-icon "
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger " />
-                  </button>}
-
-                </div>
-              </>
-            ) : (
-              <div className="d-flex justify-content-end">
-                {hasUpdateAccess && row.status == 1 && (
-                  <button className="edit-icon "
-                    onClick={() => {
-                      setType("edit");
-                      setUpdatedata(row);
-                      setShowAddCustomerModal(true);
-                    }}>
-                    <i className="ti-pencil text-primary" />
-                  </button>
-                )}
-                {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) && (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )}
+                {(row.form_process != "4" || row.is_client == 0) && <button
+                  className="delete-icon "
+                  onClick={() => handleDelete(row)}
+                >
+                  <i className="ti-trash text-danger " />
+                </button>}
 
               </div>
-            )}
+            </>
+
           </div>
         );
       },
@@ -292,8 +235,8 @@ const CustomerUsers = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const req = { customer_id: row.id };
-          const res = await dispatch(deleteCustomer({ req, authToken: token })).unwrap();
+          const req = { customer_user_id: row.id, action: 'deleteCustomerUsers' };
+          const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
 
           if (res.status) {
             Swal.fire({
@@ -332,88 +275,6 @@ const CustomerUsers = () => {
 
   };
 
-  const handleChangeStatus = async (e, row) => {
-    const newStatus = e.target.value;
-
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const req = { customer_id: row.id, status: newStatus };
-          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
-
-          if (res.status) {
-            Swal.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
-            GetAllCustomerData(1, pageSize, '');
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: res.message,
-              icon: "error",
-              confirmButtonText: "Ok",
-            });
-          }
-        } catch (error) {
-          Swal.fire({
-            title: "Error",
-            text: "An error occurred while updating the status.",
-            icon: "error",
-            confirmButtonText: "Ok",
-          });
-        }
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
-          icon: "error",
-          confirmButtonText: "Ok",
-        });
-      }
-    });
-  };
-
-  const handleViewAllAccountManager = async (customerId) => {
-    try {
-      const response = await dispatch(
-        GET_CUSTOMER_DATA({
-          req: { customer_id: customerId.id, action: 'allAccountManager' },
-          authToken: token,
-        })
-      ).unwrap();
-      if (response.status) {
-        if (response.status == true) {
-          setManagerList(response?.data?.data);
-          setShowManagerModal(true);
-        } else {
-          Swal.fire({
-            title: 'Info',
-            text: 'No account managers found for this customer.',
-            icon: 'info',
-          });
-        }
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to fetch account managers.',
-          icon: 'error',
-        });
-      }
-    } catch (error) {
-      return;
-    }
-  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -433,11 +294,11 @@ const CustomerUsers = () => {
   };
 
   const handleSearchChange = (term) => {
-    console.log("term ", term);
     setSearchTerm(term);
     setCurrentPage(1);
     GetAllCustomerData(1, pageSize, term);
   };
+
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
     const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page, limit, search: term };
@@ -448,7 +309,7 @@ const CustomerUsers = () => {
       if (response.status) {
 
         setFilteredData(response.data.data);
-        setTotalRecords(response.data.pagination.totalItems);
+        setTotalRecords(response.data.totalRecords);
 
       } else {
         setFilteredData([]);
@@ -458,6 +319,7 @@ const CustomerUsers = () => {
     }
   };
 
+
   const GetAllCustomer = async () => {
     const req = { action: "get_dropdown" };
     const data = { req: req, authToken: token };
@@ -465,17 +327,6 @@ const CustomerUsers = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerDataAll(response.data);
-          // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-
-          //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
-          //   if(FilterCustomer.length > 0){
-          //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
-          //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
-          //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   }
-
-          // }
         } else {
           setCustomerDataAll(response.data);
         }
@@ -494,26 +345,10 @@ const CustomerUsers = () => {
 
 
 
-  const HandleClientView = (row) => {
-    if (row.form_process == "4") {
-      navigate("/admin/Clientlist", { state: row });
-    } else {
-      Swal.fire({
-        title: "Form not completed",
-        text: "Please complete the form",
-        icon: "error",
-        confirmButtonText: "Ok",
-      });
-    }
-  };
-
-
-
-
   const handleExport = async () => {
-    const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
+    const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
     const data = { req, authToken: token };
-    const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+    const response = await dispatch(getAllCustomerUsers(data)).unwrap();
     if (!response.status) {
       alert("No data to export!");
       return;
@@ -527,17 +362,10 @@ const CustomerUsers = () => {
 
 
     const exportData = apiData?.map((item) => ({
-      "Trading Name": item.trading_name,
-      "Customer Code": item.customer_code,
-      "Type":
-        item.customer_type === "1"
-          ? "Sole Trader"
-          : item.customer_type === "2"
-            ? "Company"
-            : item.customer_type === "3"
-              ? "Partnership"
-              : "-",
-      "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+      "First Name": item.first_name,
+      "Last Name": item.customer_code,
+      "Email": item.email,
+      "Phone": item.phone_code + item.phone,
       "Created by": item.customer_created_by,
       "Created At": item.created_at,
       "Status": item.status == 1 ? "Active" : "Deactive",
@@ -621,23 +449,6 @@ const CustomerUsers = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    // {
-    //   type: "select1",
-    //   name: "role",
-    //   label: "Role",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   //disable: editStaff ? true : false,
-    //   options:
-    //     roleDataAll &&
-    //     roleDataAll.data.map((data) => {
-    //       if (formik.values.role_id == data.id) {
-    //         return { label: data.role_name, value: data.id, selected: true };
-    //       } else {
-    //         return { label: data.role_name, value: data.id };
-    //       }
-    //     }),
-    // },
     {
       type: "select1",
       name: "status",
@@ -650,20 +461,6 @@ const CustomerUsers = () => {
         { label: "Inactive", value: "0" },
       ],
     },
-    // {
-    //   type: "selectSearch",
-    //   name: "staff_to",
-    //   label: "Line Manager",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   options: staffDataAll.data
-    //     .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN" && data.id !== editStaffData.id))
-    //     .map((data) => ({
-    //       label: `${data.first_name} ${data.last_name}`,
-    //       value: data.id,
-    //     })),
-    // },
     {
       type: "multiselect",
       name: "allCustomerAccess",
@@ -671,36 +468,40 @@ const CustomerUsers = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      options: customerDataAll.map((item) => ({
+      options: customerDataAll?.map((item) => ({
         value: item.id,
         label: item.trading_name,
       }))
     },
     {
-      type: "text6",
-      name: "employee_number",
-      label: "Employee ID",
+      type: "select",
+      name: "customer_contact_person_role_id",
+      label: "Customer Role",
       label_size: 12,
       col_size: 6,
       disable: false,
-      placeholder: "Enter Employee ID",
+      options: personRoleDataAll?.data?.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }))
     },
-
 
   ];
 
+
   const formik = useFormik({
     initialValues: {
-      first_name: updatedata.first_name || "",
-      last_name: updatedata.first_name || "",
-      email: updatedata.email || "",
-      phone: updatedata.phone || "",
-      phone_code: updatedata.phone_code || "+44",
+      first_name: updatedata?.first_name || "",
+      last_name: updatedata?.first_name || "",
+      email: updatedata?.email || "",
+      phone: updatedata?.phone || "",
+      phone_code: updatedata?.phone_code || "+44",
       role: "1",
-      status: updatedata.first_name || "1",
-      employee_number: updatedata.first_name || null,
-      allCustomerAccess: updatedata.first_name || [],
-
+      status: updatedata?.status || "1",
+      customer_contact_person_role_id: updatedata?.customer_contact_person_role_id || null,
+      allCustomerAccess: updatedata?.allCustomerAccess
+        ? updatedata.allCustomerAccess.split(",").map(Number)
+        : [] || [],
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
@@ -710,6 +511,9 @@ const CustomerUsers = () => {
       last_name: Yup.string()
         .trim()
         .required("Last name is required"),
+      phone: Yup.string()
+        .trim()
+        .required("phone is required"),
       email: Yup.string()
         .trim()
         .email("Invalid email address")
@@ -717,11 +521,12 @@ const CustomerUsers = () => {
       allCustomerAccess: Yup.array()
         .min(1, "Please select at least one customer")
         .required("Customer access is required"),
+      customer_contact_person_role_id: Yup.string()
+        .trim()
+        .required("Please select customer role"),
     }),
 
     onSubmit: async (values) => {
-
-      console.log("values", values)
 
       let req = {
         first_name: (values.first_name).trim(),
@@ -731,54 +536,52 @@ const CustomerUsers = () => {
         phone_code: values.phone_code,
         role_id: values.role,
         status: values.status,
-        employee_number: values.employee_number,
         staff_to: values.staff_to,
         allCustomerAccess: values.allCustomerAccess,
+        customer_contact_person_role_id: values.customer_contact_person_role_id,
         created_by: staffDetails.id,
-        action: "addCustomerUsers",
+        action: type === "edit" ? "updateCustomerUsers" : "addCustomerUsers",
         staff_id: staffDetails.id,
+        customer_user_id: updatedata?.id
 
       };
 
-      console.log("req", req)
-
       try {
-          const data = { req, authToken: token };
-          const response = await dispatch(getAllCustomerUsers(data)).unwrap();
+        const data = { req, authToken: token };
+        const response = await dispatch(getAllCustomerUsers(data)).unwrap();
 
-          if (response.status) {
-            sweatalert.fire({
-              icon: "success",
-              title: "Success",
-              text: response.message || "Customer user added successfully",
-              timer: 1500,
-              timerProgressBar: true,
-            });
+        if (response.status) {
+          sweatalert.fire({
+            icon: "success",
+            title: "Success",
+            text: response.message || "Customer user added successfully",
+            timer: 1500,
+            timerProgressBar: true,
+          });
 
-            setTimeout(() => {
-              setShowAddCustomerModal(false);
-              formik.resetForm();
-              GetAllCustomerData(1, pageSize, '');
-            }, 1500);
-          } else {
-            sweatalert.fire({
-              icon: "error",
-              title: "Error",
-              text: response.message || "Failed to add customer user",
-            });
-          }
-        } catch (error) {
+          setTimeout(() => {
+            setShowAddCustomerModal(false);
+            formik.resetForm();
+            GetAllCustomerData(1, pageSize, '');
+          }, 1500);
+
+          setType("")
+        } else {
           sweatalert.fire({
             icon: "error",
             title: "Error",
-            text: error.message || "An error occurred while adding customer user",
+            text: response.response.data.message || "Failed to add customer user",
           });
         }
-      },
-    });
-
-
-
+      } catch (error) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "An error occurred while adding customer user",
+        });
+      }
+    },
+  });
 
 
   return (
@@ -821,7 +624,7 @@ const CustomerUsers = () => {
               <div className="col-md-6 col-sm-7">
                 <button
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
-                  onClick={() => setShowAddCustomerModal(true)}
+                  onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
                 >
                   <i className="fa fa-plus" />
                   Add Customer User
