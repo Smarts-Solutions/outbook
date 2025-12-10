@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 02, 2025 at 12:10 PM
+-- Generation Time: Dec 10, 2025 at 09:41 AM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -804,7 +804,7 @@ CREATE TABLE IF NOT EXISTS `customer_access` (
   `customer_user_id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_access`
@@ -813,7 +813,9 @@ CREATE TABLE IF NOT EXISTS `customer_access` (
 INSERT INTO `customer_access` (`id`, `customer_user_id`, `customer_id`) VALUES
 (1, 2, 2),
 (2, 2, 12),
-(3, 2, 9);
+(3, 2, 9),
+(4, 1, 6),
+(5, 1, 8);
 
 -- --------------------------------------------------------
 
@@ -1413,7 +1415,7 @@ CREATE TABLE IF NOT EXISTS `customer_users` (
 --
 
 INSERT INTO `customer_users` (`id`, `customer_contact_person_role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `status`, `is_disable`, `staff_id`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 2, 'shk', 'hh', 'shk@gmail.com', '91', '9999999999', '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '1', '0', 1, '145DD55', '2025-11-26 13:24:37', '2025-11-26 13:24:37', NULL),
+(1, 2, 'shk', 'shk', 'shk@gmail.com', '91', '9999999999', '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '1', '0', 1, '145DD55', '2025-11-26 13:24:37', '2025-11-26 13:24:37', NULL),
 (2, 1, 'wdsdsd', 'sdsdd', 's@gmail.com', '+44', '', '$2a$10$PuIOj/dJKB26gkHmE/zy3eER1jy4DcxeGH.X/RM/4poMGXwX1/N3u', '1', '0', 1, NULL, '2025-12-02 11:36:49', '2025-12-02 11:36:49', NULL);
 
 -- --------------------------------------------------------
@@ -2410,7 +2412,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-12-02 05:13:30', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NDY1MjQxMCwiZXhwIjoxNzY0Njg4NDEwfQ.vOegaGishqfRsLxZyNhDc8mg6yMWmnaZ-6hfzHMZdzs'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2025-12-10 09:36:26', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NTM1OTM4NiwiZXhwIjoxNzY1Mzk1Mzg2fQ._wlKG9dAAyVzBKspqYLiKa9zJqrV-i1eKuo7bYz60VI'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2467,7 +2469,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1253 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1256 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3731,7 +3733,10 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1249, 1, '2025-12-01', 'job', 45, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_HHH_comp_000045', 'updated', '122.168.114.106', '2025-12-01 05:32:24', '2025-12-01 05:32:24'),
 (1250, 1, '2025-12-01', 'job', 46, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_JJJ_JAP_000046', 'created', '122.168.114.106', '2025-12-01 05:42:41', '2025-12-01 05:42:41'),
 (1251, 24, '2025-12-01', '-', 0, ' Logged In', 'Processor FFFFFFFF hhhhh  Logged In ', '-', NULL, '2025-12-01 08:49:00', '2025-12-01 08:49:00'),
-(1252, 1, '2025-12-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-02 05:13:30', '2025-12-02 05:13:30');
+(1252, 1, '2025-12-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-02 05:13:30', '2025-12-02 05:13:30'),
+(1253, 1, '2025-12-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-03 04:50:46', '2025-12-03 04:50:46'),
+(1254, 1, '2025-12-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-09 12:30:15', '2025-12-09 12:30:15'),
+(1255, 1, '2025-12-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-10 09:36:26', '2025-12-10 09:36:26');
 
 -- --------------------------------------------------------
 

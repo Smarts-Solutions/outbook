@@ -29,10 +29,10 @@ const getAllCustomerUsers = async (req, res) => {
           customer_users.phone,
           customer_users.phone_code,
           customer_contact_person_role.name AS role_name,
+          customer_contact_person_role.id AS customer_contact_person_role_id,
           customer_users.status,
           customer_users.created_at,
-          GROUP_CONCAT(customer_access.customer_id) AS customer_access_ids,
-          JSON_ARRAYAGG(customer_access.customer_id) AS access_list
+          GROUP_CONCAT(customer_access.customer_id) AS allCustomerAccess
           FROM customer_users 
           LEFT JOIN customer_contact_person_role ON customer_contact_person_role.id = customer_users.customer_contact_person_role_id
           LEFT JOIN customer_access ON customer_access.customer_user_id = customer_users.id
@@ -96,13 +96,13 @@ const getAllCustomerUsers = async (req, res) => {
       const insertQuery = `INSERT INTO customer_users 
         (customer_contact_person_role_id,first_name, last_name, email, phone, phone_code, status, password,staff_id, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
-      const [insertResult] = await pool.execute(insertQuery, 
-        [customer_contact_person_role_id,first_name, last_name, email, phone, phone_code, status, hashedPassword, StaffUserId]);
+      const [insertResult] = await pool.execute(insertQuery,
+        [customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, hashedPassword, StaffUserId]);
       const newCustomerUserId = insertResult.insertId;
 
       // insert into customer_user_access table
       if (allCustomerAccess && allCustomerAccess.length > 0) {
-        const accessInsertQuery = `INSERT INTO customer_access (customer_user_id, customer_id) VALUES (?, ?)`; 
+        const accessInsertQuery = `INSERT INTO customer_access (customer_user_id, customer_id) VALUES (?, ?)`;
         for (const customerId of allCustomerAccess) {
           await pool.execute(accessInsertQuery, [newCustomerUserId, customerId]);
         }
@@ -130,6 +130,8 @@ const getAllCustomerUsers = async (req, res) => {
       let ip = customerUsers.ip;
       let StaffUserId = customerUsers.StaffUserId;
 
+
+
       // check if email already exists for other user
       const checkQuery = `SELECT id FROM customer_users WHERE email = ? AND id != ?`;
       const [checkRows] = await pool.execute(checkQuery, [email, customer_user_id]);
@@ -137,22 +139,31 @@ const getAllCustomerUsers = async (req, res) => {
         return res.status(400).json({ status: false, message: "Email already exists for another user." });
       }
       // update customer user
-      const updateQuery = `UPDATE customer_users SET 
+
+      try {
+
+
+        const updateQuery = `UPDATE customer_users SET 
         customer_contact_person_role_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?, phone_code = ?, status = ?, staff_id = ? 
         WHERE id = ?`;
-      await pool.execute(updateQuery, 
-        [customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, StaffUserId, customer_user_id]);
-      // update customer_user_access table
-      const deleteAccessQuery = `DELETE FROM customer_access WHERE customer_user_id = ?`;
-      await pool.execute(deleteAccessQuery, [customer_user_id]);
-      if (allCustomerAccess && allCustomerAccess.length > 0) {
-        const accessInsertQuery = `INSERT INTO customer_access (customer_user_id, customer_id) VALUES (?, ?)`;  
-        for (const customerId of allCustomerAccess) {
-          await pool.execute(accessInsertQuery, [customer_user_id, customerId]);
+        await pool.execute(updateQuery,
+          [customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, StaffUserId, customer_user_id]);
+        // update customer_user_access table
+        const deleteAccessQuery = `DELETE FROM customer_access WHERE customer_user_id = ?`;
+        await pool.execute(deleteAccessQuery, [customer_user_id]);
+        if (allCustomerAccess && allCustomerAccess.length > 0) {
+          const accessInsertQuery = `INSERT INTO customer_access (customer_user_id, customer_id) VALUES (?, ?)`;
+          for (const customerId of allCustomerAccess) {
+            await pool.execute(accessInsertQuery, [customer_user_id, customerId]);
+          }
         }
-      }
 
-      return res.status(200).json({ status: true, message: "Customer User updated successfully." });
+        return res.status(200).json({ status: true, message: "Customer User updated successfully." });
+
+      } catch (error) {
+        console.log("error", error)
+
+      }
     }
     else {
       return res.status(400).json({ status: false, message: "Invalid action parameter." });
