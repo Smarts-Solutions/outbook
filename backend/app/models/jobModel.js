@@ -890,7 +890,7 @@ const getJobByCustomer = async (job) => {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
-        jobs.customer_id = ${customer_id}
+        jobs.customer_id = ${customer_id} AND customers.status = '1'
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
@@ -966,8 +966,8 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (jobs.customer_id = customers.id AND
-        assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.customer_id = ${customer_id}
+       ( (jobs.customer_id = customers.id AND
+        assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.customer_id = ${customer_id}) AND customers.status = '1'
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
