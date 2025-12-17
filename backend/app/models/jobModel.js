@@ -1530,7 +1530,7 @@ async function getAllJobsSidebar(
         JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         LEFT JOIN clients ON jobs.client_id = clients.id
-        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id AND customers.status = '1'
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN staffs ON jobs.allocated_to = staffs.id
         LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
@@ -1635,7 +1635,7 @@ async function getAllJobsSidebar(
       LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
       LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
       LEFT JOIN clients ON jobs.client_id = clients.id
-      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id AND customers.status = '1'
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
       LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
