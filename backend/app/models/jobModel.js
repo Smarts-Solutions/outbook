@@ -1054,7 +1054,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         LEFT JOIN 
         clients ON jobs.client_id = clients.id
         LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
+        customers ON jobs.customer_id = customers.id AND customers.status = '1'
         LEFT JOIN 
         job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN 
@@ -1069,8 +1069,6 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         master_status ON master_status.id = jobs.status_type
         LEFT JOIN
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
-        WHERE
-        customers.status = '1'
         GROUP BY jobs.id
         ORDER BY 
         job_code_id ASC;
@@ -1138,7 +1136,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         LEFT JOIN 
         clients ON jobs.client_id = clients.id
         LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
+        customers ON jobs.customer_id = customers.id AND customers.status = '1'
         LEFT JOIN 
         job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN 
@@ -1152,7 +1150,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         LEFT JOIN
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-          ( assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND customers.status = '1'
+          ( assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
         GROUP BY jobs.id 
         ORDER BY 
         job_code_id ASC;
