@@ -14,7 +14,6 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
-import ReactPaginate from "react-paginate";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -22,12 +21,6 @@ const ClientLists = () => {
   const [CustomerData, setCustomerData] = useState([]);
   const [customerId, setCustomerId] = useState(customer_id_sidebar || "");
   const [customerName, setCustomerName] = useState("");
-
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const GetAllCustomer = async () => {
     const req = { action: "get_dropdown" };
@@ -37,6 +30,29 @@ const ClientLists = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerData(response.data);
+          // if (response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
+          //   const FilterCustomer = response.data.filter(
+          //     (item) => item.status === "1" && item.form_process === "4"
+          //   );
+          //   if (FilterCustomer.length > 0) {
+          //     selectCustomerId(
+          //       FilterCustomer[0]?.id,
+          //       FilterCustomer[0]?.trading_name
+          //     );
+          //     setCustomerId(customer_id_sidebar || FilterCustomer[0]?.id);
+          //     GetAllClientData(customer_id_sidebar || FilterCustomer[0]?.id);
+          //     setCustomerName(FilterCustomer[0]?.trading_name);
+          //     setHararchyData({
+          //       customer: {
+          //         id: customer_id_sidebar || FilterCustomer[0]?.id,
+          //         trading_name: FilterCustomer[0]?.trading_name,
+          //       },
+          //     });
+          //     setActiveTab("client");
+          //   } else {
+          //     setCustomerData([]);
+          //   }
+          // }
         } else {
           setCustomerData([]);
         }
@@ -60,6 +76,7 @@ const ClientLists = () => {
   const [hararchyData, setHararchyData] = useState({
     customer: { id: customerId, trading_name: customerName },
   });
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState("");
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [getAccessDataClient, setAccessDataClient] = useState({
@@ -99,13 +116,7 @@ const ClientLists = () => {
 
   useEffect(() => {
     if (accessDataCustomer.length === 0) return;
-    const updatedAccess = {
-      insert: 0,
-      update: 0,
-      delete: 0,
-      view: 0,
-      all_customers: 0,
-    };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, all_customers: 0 };
     accessDataCustomer.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -113,7 +124,8 @@ const ClientLists = () => {
       if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
     accessDataCustomerAll.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_customers = item.is_assigned;
+      if (item.type === "view")
+        updatedAccess.all_customers = item.is_assigned;
     });
     setAccessDataCustomer(updatedAccess);
   }, []);
@@ -128,21 +140,24 @@ const ClientLists = () => {
       setActiveTab(retrievedData);
     } else {
       setActiveTab(
-        (getAccessDataClient &&
-          (getAccessDataClient.client == 1 ||
-            getAccessDataClient.all_clients == 1)) ||
+        (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1)) ||
+
           role === "SUPERADMIN"
           ? "client"
-          : (getAccessDataJob &&
-              (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
+          : (getAccessDataJob && (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
+
             role === "SUPERADMIN"
-          ? "job"
-          : "documents"
+            ? "job"
+            : "documents"
       );
     }
   }, [getAccessDataJob, getAccessDataClient]);
 
-  const initialTabs = [];
+  const initialTabs = [
+    // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    // { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    //{ id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
+  ];
 
   const [tabs, setTabs] = useState(initialTabs);
 
@@ -166,15 +181,10 @@ const ClientLists = () => {
       (item) => item.permission_name === "all_jobs"
     )?.items || [];
 
+
   useEffect(() => {
     if (accessDataClient.length === 0) return;
-    const updatedAccess = {
-      insert: 0,
-      update: 0,
-      delete: 0,
-      client: 0,
-      all_clients: 0,
-    };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0, all_clients: 0 };
     accessDataClient.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -183,20 +193,15 @@ const ClientLists = () => {
     });
 
     accessDataClientAll.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_clients = item.is_assigned;
+      if (item.type === "view")
+        updatedAccess.all_clients = item.is_assigned;
     });
     setAccessDataClient(updatedAccess);
   }, []);
 
   useEffect(() => {
     if (accessDataJob.length === 0) return;
-    const updatedAccess = {
-      insert: 0,
-      update: 0,
-      delete: 0,
-      job: 0,
-      all_jobs: 0,
-    };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, job: 0, all_jobs: 0 };
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -205,15 +210,14 @@ const ClientLists = () => {
     });
 
     accessDataJobAll.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
+      if (item.type === "view")
+        updatedAccess.all_jobs = item.is_assigned;
     });
     setAccessDataJob(updatedAccess);
   }, []);
 
   const SetTab = (e) => {
     setActiveTab(e);
-    setCurrentPage(1);
-    setSearchTerm("");
   };
 
   useEffect(() => {
@@ -222,9 +226,10 @@ const ClientLists = () => {
       if (activeTab === "checklist") {
         getCheckListData();
       } else if (activeTab === "client") {
-        GetAllClientData(customerId, 1, pageSize, "");
+        GetAllClientData(customerId);
       } else if (activeTab === "job") {
-        JobDetails(1, pageSize, "");
+        GetAllClientData(customerId);
+        JobDetails();
       }
     }
   }, [activeTab]);
@@ -233,21 +238,20 @@ const ClientLists = () => {
     if (getCheckList) {
       const filteredData = getCheckList.filter((item) =>
         Object.values(item).some((val) =>
-          val.toString().toLowerCase().includes(searchTerm.toLowerCase())
+          val.toString().toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
       setCheckList1(filteredData);
     } else {
       setCheckList1([]);
     }
-  }, [searchTerm, getCheckList]);
+  }, [searchQuery]);
 
   useEffect(() => {
     let tabsData = [];
     if (
-      (getAccessDataClient &&
-        (getAccessDataClient.client == 1 ||
-          getAccessDataClient.all_clients == 1)) ||
+      (getAccessDataClient && (getAccessDataClient.client == 1 || getAccessDataClient.all_clients == 1)) ||
+
       role === "SUPERADMIN"
     ) {
       tabsData.push({
@@ -257,19 +261,13 @@ const ClientLists = () => {
       });
     }
     if (
-      (getAccessDataJob &&
-        (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
-      role === "SUPERADMIN"
-    ) {
+      (getAccessDataJob && (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) || role === "SUPERADMIN") {
       if (customerId != "") {
-        tabsData.push({
-          id: "job",
-          label: "Job",
-          icon: "fa-solid fa-briefcase",
-        });
+        tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
       }
     }
 
+    // console.log("tabsData", tabsData);
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData, customerId]);
 
@@ -278,9 +276,9 @@ const ClientLists = () => {
       name: "Client Name",
       cell: (row) => (
         <div>
-          {getAccessDataJob.job === 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+          {(getAccessDataJob.job === 1 || getAccessDataJob.all_jobs == 1) ||
+
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -295,6 +293,7 @@ const ClientLists = () => {
       selector: (row) => row.client_name,
       sortable: true,
     },
+
     {
       name: "Client Code",
       cell: (row) => (
@@ -304,6 +303,7 @@ const ClientLists = () => {
       sortable: true,
       reorder: false,
     },
+
     {
       name: "Customer Name",
       cell: (row) => (
@@ -321,17 +321,17 @@ const ClientLists = () => {
       width: "150px",
       reorder: false,
     },
-    {
+
+     {
       name: "Created By",
       cell: (row) => (
-        <div title={row.client_created_by || "-"}>
-          {row.client_created_by || "-"}
-        </div>
+        <div title={row.client_created_by || "-"}>{row.client_created_by || "-"}</div>
       ),
       selector: (row) => row.client_created_by || "-",
       sortable: true,
       reorder: false,
     },
+
     {
       name: "Created At",
       cell: (row) => (
@@ -346,9 +346,8 @@ const ClientLists = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -362,7 +361,9 @@ const ClientLists = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {getAccessDataClient.update === 1 || role === "SUPERADMIN" ? (
+          {getAccessDataClient.update === 1 ||
+
+            role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
               onClick={() =>
@@ -374,7 +375,9 @@ const ClientLists = () => {
               <i className="ti-pencil" />
             </button>
           ) : null}
-          {getAccessDataClient.delete === 1 || role === "SUPERADMIN" ? (
+          {getAccessDataClient.delete === 1 ||
+
+            role === "SUPERADMIN" ? (
             <>
               {row?.Delete_Status == null && (
                 <button
@@ -459,7 +462,9 @@ const ClientLists = () => {
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
               disabled={
-                getAccessDataJob.update === 1 || role === "SUPERADMIN"
+                getAccessDataJob.update === 1 ||
+
+                  role === "SUPERADMIN"
                   ? false
                   : true
               }
@@ -479,12 +484,13 @@ const ClientLists = () => {
     },
     {
       name: "Client Contact Person",
+
       cell: (row) => (
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -494,8 +500,8 @@ const ClientLists = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -516,8 +522,8 @@ const ClientLists = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -527,11 +533,12 @@ const ClientLists = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
+
     {
       name: "Allocated To",
       selector: (row) =>
@@ -547,26 +554,26 @@ const ClientLists = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -577,18 +584,24 @@ const ClientLists = () => {
       sortable: true,
       reorder: false,
     },
-    {
+
+     {
       name: "Created By",
       cell: (row) => (
-        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
+        <div title={row.job_created_by || "-"}>
+          {row.job_created_by || "-"}
+        </div>
       ),
       selector: (row) => row.job_created_by || "-",
       sortable: true,
     },
-    {
+
+     {
       name: "Created At",
       cell: (row) => (
-        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
+        <div title={row.created_at || "-"}>
+          {row.created_at || "-"}
+        </div>
       ),
       selector: (row) => row.created_at || "-",
       sortable: true,
@@ -597,7 +610,9 @@ const ClientLists = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {getAccessDataJob.update === 1 || role === "SUPERADMIN" ? (
+          {getAccessDataJob.update === 1 ||
+
+            role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
               onClick={() =>
@@ -614,7 +629,9 @@ const ClientLists = () => {
             </button>
           ) : null}
           {row.timesheet_job_id == null ? (
-            getAccessDataJob.delete === 1 || role === "SUPERADMIN" ? (
+            getAccessDataJob.delete === 1 ||
+
+              role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"
                 onClick={() => handleDelete(row, "job")}
@@ -663,7 +680,7 @@ const ClientLists = () => {
               });
 
               setStatusId(Id);
-              JobDetails(currentPage, pageSize, searchTerm);
+              JobDetails();
             } else if (res.data === "W") {
               sweatalert.fire({
                 title: "Warning",
@@ -727,12 +744,19 @@ const ClientLists = () => {
       name: "Checklist Name",
       cell: (row) => (
         <div>
-          <a title={row.check_list_name}>{row.check_list_name}</a>
+          <a
+            title={row.check_list_name}
+          // onClick={() => HandleClientView(row)}
+          // style={{ cursor: "pointer", color: "#26bdf0" }}
+          >
+            {row.check_list_name}
+          </a>
         </div>
       ),
       selector: (row) => row.check_list_name,
       sortable: true,
     },
+
     {
       name: "Service Type",
       cell: (row) => <div title={row.service_name}>{row.service_name}</div>,
@@ -765,7 +789,9 @@ const ClientLists = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {getAccessDataCustomer.update === 1 || role === "SUPERADMIN" ? (
+          {getAccessDataCustomer.update === 1 ||
+
+            role === "SUPERADMIN" ? (
             <button
               className="edit-icon"
               onClick={() =>
@@ -781,7 +807,9 @@ const ClientLists = () => {
               <i className="ti-pencil" />
             </button>
           ) : null}
-          {getAccessDataCustomer.delete === 1 || role === "SUPERADMIN" ? (
+          {getAccessDataCustomer.delete === 1 ||
+
+            role === "SUPERADMIN" ? (
             <button
               className="delete-icon"
               onClick={() => ChecklistDelete(row)}
@@ -800,6 +828,7 @@ const ClientLists = () => {
   const tabs1 = [
     {
       key: "client",
+
       title: "Clients",
       placeholder: "Search clients...",
       data: ClientData,
@@ -835,59 +864,16 @@ const ClientLists = () => {
     },
   ];
 
-  // Pagination handlers
-  const handlePageChange = (selected) => {
-    const newPage = selected.selected + 1;
-    setCurrentPage(newPage);
-
-    if (activeTab === "client") {
-      GetAllClientData(customerId, newPage, pageSize, searchTerm);
-    } else if (activeTab === "job") {
-      JobDetails(newPage, pageSize, searchTerm);
-    }
-  };
-
-  const handlePageSizeChange = (event) => {
-    const newSize = parseInt(event.target.value, 10);
-    setPageSize(newSize);
-    setCurrentPage(1);
-
-    if (activeTab === "client") {
-      GetAllClientData(customerId, 1, newSize, searchTerm);
-    } else if (activeTab === "job") {
-      JobDetails(1, newSize, searchTerm);
-    }
-  };
-
-  const handleSearchChange = (term) => {
-    setSearchTerm(term);
-    setCurrentPage(1);
-
-    if (activeTab === "client") {
-      GetAllClientData(customerId, 1, pageSize, term);
-    } else if (activeTab === "job") {
-      JobDetails(1, pageSize, term);
-    }
-  };
-
-  const JobDetails = async (page = 1, limit = 10, search = "") => {
-    const req = {
-      action: "getByCustomer",
-      customer_id: customerId,
-      page,
-      limit,
-      search,
-    };
+  const JobDetails = async () => {
+    const req = { action: "getByCustomer", customer_id: customerId };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
           setGetJobDetails(response.data);
-          setTotalRecords(response.pagination?.total || 0);
         } else {
           setGetJobDetails([]);
-          setTotalRecords(0);
         }
       })
       .catch((error) => {
@@ -895,24 +881,16 @@ const ClientLists = () => {
       });
   };
 
-  const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
-    const req = {
-      action: "get",
-      customer_id: id,
-      page,
-      limit,
-      search,
-    };
+  const GetAllClientData = async (id) => {
+    const req = { action: "get", customer_id: id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
           setClientData(response.data);
-          setTotalRecords(response.pagination?.total || 0);
         } else {
-          setClientData([]);
-          setTotalRecords(0);
+          setClientData(response.data);
         }
       })
       .catch((error) => {
@@ -940,6 +918,7 @@ const ClientLists = () => {
                 check_list_name: item.check_list_name,
                 service_name: item.service_name,
                 job_type_type: item.job_type_type,
+                // client_type_type: item.client_type_type,
                 status: item.status,
                 checklists_id: item.checklists_id,
                 client_type_type: item.checklists_client_type_id
@@ -960,6 +939,9 @@ const ClientLists = () => {
           } else {
             setCheckList([]);
           }
+
+          // setCheckList(response.data);
+          // setCheckList1(response.data);
         } else {
           setCheckList([]);
         }
@@ -1029,16 +1011,8 @@ const ClientLists = () => {
                   showConfirmButton: false,
                   timer: 1500,
                 });
-                if (type === "job") {
-                  JobDetails(currentPage, pageSize, searchTerm);
-                } else {
-                  GetAllClientData(
-                    customerId,
-                    currentPage,
-                    pageSize,
-                    searchTerm
-                  );
-                }
+                JobDetails();
+                GetAllClientData(customerId);
               } else {
                 sweatalert.fire({
                   title: "Failed",
@@ -1098,30 +1072,30 @@ const ClientLists = () => {
   };
 
   const selectCustomerId = (id, name) => {
+
     if (id != "") {
       sessionStorage.setItem("customer_id_sidebar", id);
       setCustomerId(id);
+      GetAllClientData(id);
       setCustomerName(name);
       setHararchyData({ customer: { id: id, trading_name: name } });
       setActiveTab("client");
-      setCurrentPage(1);
-      setSearchTerm("");
-      GetAllClientData(id, 1, pageSize, "");
     } else {
       sessionStorage.removeItem("customer_id_sidebar");
       setGetJobDetails([]);
       setCustomerId("");
       setCustomerName("");
+      GetAllClientData("");
       setClientData([]);
       setHararchyData({ customer: { id: "", trading_name: "" } });
-      setCurrentPage(1);
-      setSearchTerm("");
     }
   };
 
+
+  // SELECT CUSTOMER OPTIONS
   const customerOptions = (CustomerData || [])
-    .filter((val) => Number(val.status) === 1 && Number(val.form_process) === 4)
-    .map((val) => ({
+    .filter(val => Number(val.status) === 1 && Number(val.form_process) === 4)
+    .map(val => ({
       value: val.id,
       label: val.trading_name,
     }));
@@ -1130,106 +1104,6 @@ const ClientLists = () => {
     (opt) => Number(opt.value) === Number(customerId)
   );
 
-  const handleExport = async () => {
-    let exportData = [];
-
-    if (activeTab === "client") {
-      const req = {
-        action: "get",
-        customer_id: customerId,
-        page: 1,
-        limit: 100000,
-        search: "",
-      };
-      const data = { req, authToken: token };
-      const response = await dispatch(ClientAction(data)).unwrap();
-
-      if (!response.status || !response.data || response.data.length === 0) {
-        alert("No data to export!");
-        return;
-      }
-
-      exportData = response.data.map((item) => ({
-        "Client Name": item.client_name,
-        "Client Code": item.client_code,
-        "Customer Name": item.customer_name,
-        "Client Type Name": item.client_type_name,
-        "Created By": item.client_created_by,
-        "Created At": item.created_at,
-        Status: item.status == 1 ? "Active" : "Deactive",
-      }));
-    } else if (activeTab === "job") {
-      const req = {
-        action: "getByCustomer",
-        customer_id: customerId,
-        page: 1,
-        limit: 100000,
-        search: "",
-      };
-      const data = { req, authToken: token };
-      const response = await dispatch(JobAction(data)).unwrap();
-
-      if (!response.status || !response.data || response.data.length === 0) {
-        alert("No data to export!");
-        return;
-      }
-
-      exportData = response.data.map((item) => ({
-        "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
-        "Client Name": item.client_trading_name,
-        "Job Type": item.job_type_name,
-        Status: item.status,
-        "Client Contact Person":
-          item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name,
-        "Client Job Code": item.client_job_code,
-        "Outbook Account Manager":
-          item.outbooks_acount_manager_first_name +
-          " " +
-          item.outbooks_acount_manager_last_name,
-        "Allocated To":
-          item.allocated_id != null
-            ? item.allocated_first_name + " " + item.allocated_last_name
-            : "",
-        Timesheet:
-          item.total_hours_status == 1 && item.total_hours != null
-            ? item.total_hours?.split(":")[0] +
-              "h " +
-              item.total_hours.split(":")[1] +
-              "m"
-            : "-",
-        Invoicing: item.invoiced == 1 ? "YES" : "NO",
-        "Created By": item.job_created_by,
-        "Created At": item.created_at,
-      }));
-    }
-
-    downloadCSV(
-      exportData,
-      `${activeTab === "client" ? "Client" : "Job"} Details.csv`
-    );
-  };
-
-  const downloadCSV = (data, filename) => {
-    const csvRows = [];
-    const headers = Object.keys(data[0]);
-    csvRows.push(headers.join(","));
-
-    data.forEach((row) => {
-      const values = headers.map((h) => `"${row[h] || ""}"`);
-      csvRows.push(values.join(","));
-    });
-
-    const csvString = csvRows.join("\n");
-    const blob = new Blob([csvString], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.setAttribute("href", url);
-    a.setAttribute("download", filename);
-    a.click();
-  };
-
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -1237,6 +1111,35 @@ const ClientLists = () => {
           <div className="col-sm-12">
             <div className="form-group col-md-4 mb-0">
               <label className="form-label mb-2">Select Customer</label>
+                      {/* <select
+                name="staff_id"
+                className="form-select"
+                id="tabSelect"
+                defaultValue={customerId}
+                // onChange={(e) => selectCustomerId(e)}
+                onChange={(e) => {
+                  const selectedId = e.target.value;
+                  const selectedCustomer = CustomerData.find(
+                    (customer) => customer.id == selectedId
+                  );
+                  selectCustomerId(selectedId, selectedCustomer?.trading_name);
+                }}
+              >
+                <option value="">Select Customer</option>
+                {CustomerData &&
+                  CustomerData.map((val, index) =>
+                    Number(val.status) === 1 &&
+                    Number(val.form_process) === 4 ? (
+                      <option
+                        key={index}
+                        value={val.id}
+                        selected={Number(customerId) === Number(val.id)}
+                      >
+                        {val.trading_name}
+                      </option>
+                    ) : null
+                  )}
+              </select> */}
               <Select
                 id="tabSelect"
                 name="staff_id"
@@ -1249,10 +1152,7 @@ const ClientLists = () => {
                   const selectedCustomer = CustomerData.find(
                     (customer) => customer.id == selected.value
                   );
-                  selectCustomerId(
-                    selected.value,
-                    selectedCustomer?.trading_name
-                  );
+                  selectCustomerId(selected.value, selectedCustomer?.trading_name);
                 }}
                 placeholder="Select Customer"
               />
@@ -1269,9 +1169,8 @@ const ClientLists = () => {
                     {tabs.map((tab) => (
                       <li className="nav-item" role="presentation" key={tab.id}>
                         <button
-                          className={`nav-link ${
-                            activeTab === tab.id ? "active" : ""
-                          }`}
+                          className={`nav-link ${activeTab === tab.id ? "active" : ""
+                            }`}
                           id={`${tab.id}-tab`}
                           data-bs-toggle="pill"
                           data-bs-target={`#${tab.id}`}
@@ -1290,14 +1189,15 @@ const ClientLists = () => {
                 </div>
                 <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                   {activeTab === "client" ||
-                  activeTab === "checklist" ||
-                  activeTab === "" ||
-                  activeTab === "job" ? (
+                    activeTab === "checklist" ||
+                    activeTab === "" ||
+                    activeTab === "job" ? (
                     <>
                       {(getAccessDataClient.insert === 1 ||
+
                         role === "SUPERADMIN") &&
-                      activeTab === "client" &&
-                      customerId != "" ? (
+                        activeTab === "client" &&
+                        customerId != "" ? (
                         <>
                           <div
                             className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
@@ -1312,6 +1212,7 @@ const ClientLists = () => {
                         </>
                       ) : ClientData?.length > 0 &&
                         (getAccessDataJob.insert == 1 ||
+
                           role === "SUPERADMIN") &&
                         activeTab === "job" ? (
                         <>
@@ -1331,7 +1232,8 @@ const ClientLists = () => {
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
-                          role === "SUPERADMIN") &&
+
+                        role === "SUPERADMIN") &&
                         activeTab === "checklist" ? (
                         <>
                           <div
@@ -1347,59 +1249,62 @@ const ClientLists = () => {
                         </>
                       ) : null}
                     </>
-                  ) : activeTab === "documents" ? (
-                    <>
-                      <div
-                        className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                        onClick={() => {
-                          window.history.back();
-                        }}
-                      >
-                        <i className="fa fa-arrow-left pe-1" /> Back
-                      </div>
-                    </>
-                  ) : activeTab === "status" ? (
-                    <>
-                      <div
-                        className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                        onClick={() => {
-                          window.history.back();
-                        }}
-                      >
-                        <i className="fa fa-arrow-left pe-1" /> Back
-                      </div>
-                    </>
-                  ) : null}
+                  ) :
+                    activeTab === "documents" ? (
+                      <>
+                        <div
+                          className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                          onClick={() => {
+                            window.history.back();
+                          }}
+                        >
+                          <i className="fa fa-arrow-left pe-1" /> Back
+                        </div>
+                      </>
+                    ) :
+                      activeTab === "status" ? (
+                        <>
+                          <div
+                            className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                            onClick={() => {
+                              window.history.back();
+                            }}
+                          >
+                            <i className="fa fa-arrow-left pe-1" /> Back
+                          </div>
+                        </>
+                      ) : null
+
+                  }
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {customerId != "" ? (
-          <Hierarchy
-            show={["Customer", activeTab]}
-            active={1}
-            data={hararchyData}
-            NumberOfActive={
-              activeTab == "client"
-                ? ClientData?.length
-                : activeTab == "job"
-                ? getJobDetails?.length
-                : ""
-            }
-          />
-        ) : (
-          ""
-        )}
+        {
+          customerId != "" ?
+            <Hierarchy
+              show={["Customer", activeTab]}
+              active={1}
+              data={hararchyData}
+              NumberOfActive={
+                activeTab == "client"
+                  ? ClientData?.length
+                  : activeTab == "job"
+                    ? getJobDetails?.length
+                    : ""
+              }
+            />
+            : ""
+        }
 
         <div className="tab-content" id="pills-tabContent">
           {tabs1.map((tab) => (
             <div
               key={tab.key}
-              className={`tab-pane fade ${
-                activeTab == tab.key ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+                }`}
               id={tab.key}
               role="tabpanel"
               aria-labelledby={`${tab.key}-tab`}
@@ -1409,69 +1314,80 @@ const ClientLists = () => {
                   <div className="tab-title">
                     <h3 className="mt-0">{tab?.title}</h3>
                   </div>
-                  {(activeTab === "client" || activeTab === "job") && (
-                    <div className="col-md-2">
-                      <button
-                        className="btn btn-outline-info fw-bold float-end border-3"
-                        onClick={handleExport}
-                      >
-                        Export Excel
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {(activeTab === "client" || activeTab === "job") && (
-                  <div className="row mb-3 mt-3">
-                    <div className="col-md-4">
-                      <input
-                        type="text"
-                        placeholder={`Search ${tab?.title}...`}
-                        className="form-control"
-                        value={searchTerm}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                      />
-                    </div>
+                  <div className="col-md-2">
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3 "
+                      apiData={
+                        tab?.title == "Clients"
+                          ? tab?.data?.map((item) => ({
+                            "Client Name": item?.client_name,
+                            "Client Code": item?.client_code,
+                            "Customer Name": item?.customer_name,
+                            "Client Type Name": item.client_type_name,
+                            "Created By": item.client_created_by,
+                            "Created At": item.created_at,
+                            Status: item.status == 1 ? "Active" : "Deactive",
+                          }))
+                          : tab.title == "Jobs"
+                            ? tab?.data?.map((item) => ({
+                              "Job ID (CustName+ClientName+UniqueNo)":
+                                item.job_code_id,
+                              "Client Name": item.client_trading_name,
+                              "Job Type": item.job_type_name,
+                              Status: item.status,
+                              "Client Contact Person":
+                                item.account_manager_officer_first_name +
+                                " " +
+                                item.account_manager_officer_last_name,
+                              "Client Job Code": item.client_job_code,
+                              "Outbook Account Manager":
+                                item.outbooks_acount_manager_first_name +
+                                " " +
+                                item.outbooks_acount_manager_last_name,
+                              "Allocated To":
+                                item.allocated_id != null
+                                  ? item.allocated_first_name +
+                                  " " +
+                                  item.allocated_last_name
+                                  : "",
+                              Timesheet:
+                                item.total_hours_status == 1 &&
+                                  item.total_hours != null
+                                  ? item.total_hours?.split(":")[0] +
+                                  "h " +
+                                  item.total_hours.split(":")[1] +
+                                  "m"
+                                  : "-",
+                              Invoicing: item.invoiced == 1 ? "YES" : "NO",
+                              "Created By": item.job_created_by,
+                              "Created At": item.created_at,
+                            }))
+                            : tab.data
+                      }
+                      fileName={`${tab.title} Details`}
+                    />
                   </div>
-                )}
+
+                  {/* {tab.placeholder && (
+                  <div className="search-input">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={tab.placeholder}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                )} */}
+                </div>
 
                 <div className="datatable-wrapper">
                   {tab.data && tab.data.length > 0 ? (
-                    <>
-                      <Datatable
-                        columns={tab.columns}
-                        data={tab.data}
-                        filter={false}
-                        pagination={false}
-                      />
-
-                      {(activeTab === "client" || activeTab === "job") && (
-                        <>
-                          <ReactPaginate
-                            previousLabel={"Previous"}
-                            nextLabel={"Next"}
-                            breakLabel={"..."}
-                            pageCount={Math.ceil(totalRecords / pageSize)}
-                            marginPagesDisplayed={2}
-                            pageRangeDisplayed={5}
-                            onPageChange={handlePageChange}
-                            containerClassName={"pagination"}
-                            activeClassName={"active"}
-                            forcePage={currentPage - 1}
-                          />
-                          <select
-                            className="perpage-select"
-                            value={pageSize}
-                            onChange={handlePageSizeChange}
-                          >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                          </select>
-                        </>
-                      )}
-                    </>
+                    <Datatable
+                      columns={tab.columns}
+                      data={tab.data}
+                      filter={true}
+                    />
                   ) : (
                     <div className="text-center">
                       <img
