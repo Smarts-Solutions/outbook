@@ -1304,6 +1304,8 @@ const getJobByCustomer = async (job) => {
     } else {
       // 🔹 OTHER ROLE
 
+       const placeholders = LineManageStaffId?.map(() => '?').join(',');
+
       // TOTAL COUNT
       const [countResult] = await pool.execute(
         `
@@ -1314,17 +1316,17 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
         WHERE (
-          assigned_jobs_staff_view.staff_id IN(?)
-          OR jobs.staff_created_id IN(?)
-          OR clients.staff_created_id IN(?)
+          assigned_jobs_staff_view.staff_id IN (${placeholders})
+          OR jobs.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders})
         )
         AND jobs.customer_id = ?
         ${searchCondition}
         `,
         [
-          LineManageStaffId,
-          LineManageStaffId,
-          LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
           customer_id,
           ...searchParams,
         ]
@@ -1383,9 +1385,9 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN master_status ON master_status.id = jobs.status_type
         LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE (
-          assigned_jobs_staff_view.staff_id IN(?)
-          OR jobs.staff_created_id IN(?)
-          OR clients.staff_created_id IN(?)
+          assigned_jobs_staff_view.staff_id IN (${placeholders})
+          OR jobs.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders})
         )
         AND jobs.customer_id = ?
         ${searchCondition}
@@ -1394,9 +1396,9 @@ const getJobByCustomer = async (job) => {
         LIMIT ? OFFSET ?;
       `;
       [result] = await pool.execute(query, [
-        LineManageStaffId,
-        LineManageStaffId,
-        LineManageStaffId,
+        ...LineManageStaffId,
+        ...LineManageStaffId,
+        ...LineManageStaffId,
         customer_id,
         ...searchParams,
         limit,
@@ -1566,6 +1568,8 @@ async function getAllJobsSidebar(
 
     // ================= OTHER ROLE =================
 
+     const placeholders = LineManageStaffId?.map(() => '?').join(',');
+
     // 🔹 TOTAL COUNT
     const [countResult] = await pool.execute(
       `
@@ -1576,16 +1580,16 @@ async function getAllJobsSidebar(
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       WHERE (
-        assigned_jobs_staff_view.staff_id IN(?)
-        OR jobs.staff_created_id IN(?)
-        OR clients.staff_created_id IN(?)
+        assigned_jobs_staff_view.staff_id IN (${placeholders})
+        OR jobs.staff_created_id IN (${placeholders})
+        OR clients.staff_created_id IN (${placeholders})
       )
       ${searchCondition}
       `,
       [
-        LineManageStaffId,
-        LineManageStaffId,
-        LineManageStaffId,
+        ...LineManageStaffId,
+        ...LineManageStaffId,
+        ...LineManageStaffId,
         ...searchParams,
       ]
     );
@@ -1643,9 +1647,9 @@ async function getAllJobsSidebar(
       LEFT JOIN master_status ON master_status.id = jobs.status_type
       LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
       WHERE (
-        assigned_jobs_staff_view.staff_id IN(?)
-        OR jobs.staff_created_id IN(?)
-        OR clients.staff_created_id IN(?)
+        assigned_jobs_staff_view.staff_id IN (${placeholders})
+        OR jobs.staff_created_id IN (${placeholders})
+        OR clients.staff_created_id IN (${placeholders})
       )
       ${searchCondition}
       GROUP BY jobs.id
@@ -1654,9 +1658,9 @@ async function getAllJobsSidebar(
     `;
 
     let [result] = await pool.execute(query, [
-      LineManageStaffId,
-      LineManageStaffId,
-      LineManageStaffId,
+      ...LineManageStaffId,
+      ...LineManageStaffId,
+      ...LineManageStaffId,
       ...searchParams,
       limit,
       offset,
