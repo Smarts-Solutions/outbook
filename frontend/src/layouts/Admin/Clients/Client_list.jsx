@@ -216,7 +216,7 @@ const ClientList = () => {
     if (activeTab === "client") {
       GetAllClientData(location?.state?.id, newPage, pageSize, searchTerm);
     } else if (activeTab === "job") {
-      JobDetails(newPage, pageSize, searchTerm);
+      JobDetails(location?.state?.id,newPage, pageSize, searchTerm);
     }
   };
 
@@ -228,7 +228,7 @@ const ClientList = () => {
     if (activeTab === "client") {
       GetAllClientData(location?.state?.id, 1, newSize, searchTerm);
     } else if (activeTab === "job") {
-      JobDetails(1, newSize, searchTerm);
+      JobDetails(location?.state?.id,1, newSize, searchTerm);
     }
   };
 
@@ -239,7 +239,7 @@ const ClientList = () => {
     if (activeTab === "client") {
       GetAllClientData(location?.state?.id, 1, pageSize, term);
     } else if (activeTab === "job") {
-      JobDetails(1, pageSize, term);
+      JobDetails(location?.state?.id,1, pageSize, term);
     }
   };
 
