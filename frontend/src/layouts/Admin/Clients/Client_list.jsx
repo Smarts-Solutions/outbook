@@ -1123,7 +1123,15 @@ const ClientList = () => {
   ];
 
   const JobDetails = async () => {
-    const req = { action: "getByCustomer", customer_id: location.state.id };
+    //const req = { action: "getByCustomer", customer_id: location.state.id };
+    const req = {
+          action: "getByCustomer",
+          customer_id :location.state.id,
+          page : 1,
+          limit : 100000,
+          search : "",
+        };
+
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -1138,6 +1146,9 @@ const ClientList = () => {
         return;
       });
   };
+
+
+  
 
   const GetCustomerData = async () => {
     const req = { customer_id: location?.state?.id, pageStatus: "4" };
@@ -1166,25 +1177,9 @@ const ClientList = () => {
       });
   };
 
-  // const GetAllClientData = async () => {
-  //   const req = { action: "get", customer_id: location?.state?.id };
-  //   const data = { req: req, authToken: token };
-  //   await dispatch(ClientAction(data))
-  //     .unwrap()
-  //     .then(async (response) => {
-  //       if (response.status) {
-  //         setClientData(response.data);
-  //       } else {
-  //         setClientData(response.data);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       return;
-  //     });
-  // };
-
-  const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
-    const req = {
+  const GetAllClientData = async () => {
+    //const req = { action: "get", customer_id: location?.state?.id };
+     const req = {
       action: "get",
       customer_id: location?.state?.id,
       page : 1,
@@ -1197,16 +1192,16 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setClientData(response.data);
-          setTotalRecords(response.pagination?.total || 0);
         } else {
-          setClientData([]);
-          setTotalRecords(0);
+          setClientData(response.data);
         }
       })
       .catch((error) => {
         return;
       });
   };
+
+ 
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id };
