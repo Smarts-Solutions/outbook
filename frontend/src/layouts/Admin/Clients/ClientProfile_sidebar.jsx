@@ -112,7 +112,15 @@ const ClientList = () => {
     client_name: "",
   });
   const GetAllClientData = async (id, name) => {
-    const req = { action: "get", customer_id: id };
+   // const req = { action: "get", customer_id: id };
+
+    const req = {
+      action: "get",
+      customer_id: id,
+      page :1,
+      limit:100000,
+      search:"",
+    };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
