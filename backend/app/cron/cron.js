@@ -82,27 +82,27 @@ module.exports = (app) => {
 
 };
 
-cron.schedule("* * * * 1", async () => {
-  console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
-  const [superAdminAdminManagementRole] = await pool.execute(`
-    SELECT 
-        staffs.id AS id,
-        CONCAT(first_name,' ',last_name) AS staff_fullname,
-        staffs.email AS staff_email
-    FROM staffs
-    JOIN roles ON roles.id = staffs.role_id
-    LEFT JOIN timesheet 
-        ON staffs.id = timesheet.staff_id
-      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8))
-    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
-    GROUP BY staffs.id
-    `);
+// cron.schedule("* * * * 1", async () => {
+//   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
+//   const [superAdminAdminManagementRole] = await pool.execute(`
+//     SELECT 
+//         staffs.id AS id,
+//         CONCAT(first_name,' ',last_name) AS staff_fullname,
+//         staffs.email AS staff_email
+//     FROM staffs
+//     JOIN roles ON roles.id = staffs.role_id
+//     LEFT JOIN timesheet 
+//         ON staffs.id = timesheet.staff_id
+//       AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8))
+//     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
+//     GROUP BY staffs.id
+//     `);
 
   
 
-}, {
-  timezone: "Europe/London"
-});
+// }, {
+//   timezone: "Europe/London"
+// });
 
 
 

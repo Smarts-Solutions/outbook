@@ -396,7 +396,7 @@ const ClientList = () => {
       sortable: true,
       reorder: false,
     },
-     {
+    {
       name: "Job Priority",
       cell: (row) => {
         const v = row.job_priority || "-";
@@ -433,7 +433,7 @@ const ClientList = () => {
       sortable: true,
       reorder: false,
     },
-     {
+    {
       name: "Status",
       selector: (row) => {
         const status = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
@@ -554,7 +554,7 @@ const ClientList = () => {
       sortable: true,
       reorder: false,
     },
-     {
+    {
       name: "Created By",
       cell: (row) => (
         <div title={row.job_created_by || "-"}>
@@ -565,7 +565,7 @@ const ClientList = () => {
       sortable: true,
     },
 
-     {
+    {
       name: "Created At",
       cell: (row) => (
         <div title={row.created_at || "-"}>
@@ -1123,7 +1123,15 @@ const ClientList = () => {
   ];
 
   const JobDetails = async () => {
-    const req = { action: "getByCustomer", customer_id: location.state.id };
+    //const req = { action: "getByCustomer", customer_id: location.state.id };
+    const req = {
+          action: "getByCustomer",
+          customer_id :location.state.id,
+          page : 1,
+          limit : 100000,
+          search : "",
+        };
+
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -1138,6 +1146,9 @@ const ClientList = () => {
         return;
       });
   };
+
+
+  
 
   const GetCustomerData = async () => {
     const req = { customer_id: location?.state?.id, pageStatus: "4" };
@@ -1167,7 +1178,14 @@ const ClientList = () => {
   };
 
   const GetAllClientData = async () => {
-    const req = { action: "get", customer_id: location?.state?.id };
+    //const req = { action: "get", customer_id: location?.state?.id };
+     const req = {
+      action: "get",
+      customer_id: location?.state?.id,
+      page : 1,
+      limit : 100000,
+      search : "",
+    };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -1182,6 +1200,8 @@ const ClientList = () => {
         return;
       });
   };
+
+ 
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id };

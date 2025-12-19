@@ -47,14 +47,29 @@ const deleteClientFile = async (req, res) => {
 }
 
 
+// const clientAction = async (req, res) => {
+//   try {
+//       const { ...client } = req.body;
+//       const result = await clientService.clientAction(client);
+//       if(!result.status){
+//         return  res.status(200).json({ status: false, message: result.message });  
+//         }else{
+//         return  res.status(200).json({ status: true, message: result.message , data : result.data});
+//         }
+//     } catch (error) {
+//       res.status(500).json({ status:false, message: error.message});
+//     }
+// }
+
 const clientAction = async (req, res) => {
   try {
       const { ...client } = req.body;
       const result = await clientService.clientAction(client);
+     // console.log("🚀 ~ file: clientController.js:70 ~ clientAction ~ result:", result.pagination);
       if(!result.status){
-        return  res.status(200).json({ status: false, message: result.message });  
+        return  res.status(200).json({ status: false, message: result.message, pagination: result.pagination });  
         }else{
-        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        return  res.status(200).json({ status: true, message: result.message , data : result.data, pagination: result.pagination });
         }
     } catch (error) {
       res.status(500).json({ status:false, message: error.message});

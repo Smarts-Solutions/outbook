@@ -272,7 +272,7 @@ const getDashboardData = async (dashboard) => {
         LEFT JOIN 
         clients ON jobs.client_id = clients.id
         LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
+        customers ON jobs.customer_id = customers.id AND customers.status = '1'
         LEFT JOIN 
         job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN 
@@ -321,7 +321,7 @@ const getDashboardData = async (dashboard) => {
         LEFT JOIN 
         clients ON jobs.client_id = clients.id
         LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
+        customers ON jobs.customer_id = customers.id AND customers.status = '1'
         LEFT JOIN 
         staff_portfolio ON staff_portfolio.customer_id = customers.id
         LEFT JOIN 

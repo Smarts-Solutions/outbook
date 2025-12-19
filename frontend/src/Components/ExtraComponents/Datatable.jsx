@@ -3,7 +3,7 @@ import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
 import 'react-data-table-component-extensions/dist/index.css';
 
-const Datatable = ({ columns, data, filter }) => {
+const Datatable = ({ columns, data, filter ,pagination = true }) => {
   const noDataImage = '/assets/images/No-data-amico.png';
 
   const handleTableRef = (node) => {
@@ -43,7 +43,7 @@ const Datatable = ({ columns, data, filter }) => {
               noHeader
               defaultSortField="JobId"
               defaultSortAsc={false}
-              pagination
+              pagination = {pagination}
               onColumnOrderChange={cols => console.log(cols)}
               highlightOnHover
               paginationRowsPerPageOptions={[10, 50, 100]}
