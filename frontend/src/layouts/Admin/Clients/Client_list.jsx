@@ -22,7 +22,6 @@ import {
   SiteUrlFolderPath,
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
-import ReactPaginate from "react-paginate";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -202,72 +201,19 @@ const ClientList = () => {
     setActiveTab(e);
   };
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Pagination handlers
-  const handlePageChange = (selected) => {
-    const newPage = selected.selected + 1;
-    setCurrentPage(newPage);
-
-    if (activeTab === "client") {
-      GetAllClientData(location?.state?.id, newPage, pageSize, searchTerm);
-    } else if (activeTab === "job") {
-      JobDetails(location?.state?.id,newPage, pageSize, searchTerm);
-    }
-  };
-
-  const handlePageSizeChange = (event) => {
-    const newSize = parseInt(event.target.value, 10);
-    setPageSize(newSize);
-    setCurrentPage(1);
-
-    if (activeTab === "client") {
-      GetAllClientData(location?.state?.id, 1, newSize, searchTerm);
-    } else if (activeTab === "job") {
-      JobDetails(location?.state?.id,1, newSize, searchTerm);
-    }
-  };
-
-  const handleSearchChange = (term) => {
-    setSearchTerm(term);
-    setCurrentPage(1);
-
-    if (activeTab === "client") {
-      GetAllClientData(location?.state?.id, 1, pageSize, term);
-    } else if (activeTab === "job") {
-      JobDetails(location?.state?.id,1, pageSize, term);
-    }
-  };
-
   useEffect(() => {
     GetStatus();
     if (activeTab !== "") {
       if (activeTab === "checklist") {
         getCheckListData();
       } else if (activeTab === "client") {
-        setCurrentPage(1)
-        setPageSize(10)
-        setTotalRecords(0)
-        setSearchTerm("")
-       // GetAllClientData();
-        GetAllClientData(location?.state?.id, 1, pageSize, "");
+        GetAllClientData();
       } else if (activeTab === "job") {
-       // GetAllClientData();
-        // JobDetails();
-        setCurrentPage(1)
-        setPageSize(10)
-        setTotalRecords(0)
-        setSearchTerm("")
-        JobDetails(location?.state?.id, 1, pageSize, "");
+        GetAllClientData();
+        JobDetails();
       }
     }
   }, [activeTab]);
-
-   
 
   useEffect(() => {
     if (getCheckList) {
@@ -993,8 +939,7 @@ const ClientList = () => {
               });
 
               setStatusId(Id);
-              // JobDetails();
-              JobDetails(location?.state?.id, 1, pageSize, "");
+              JobDetails();
             } else if (res.data === "W") {
               sweatalert.fire({
                 title: "Warning",
@@ -1177,49 +1122,22 @@ const ClientList = () => {
     },
   ];
 
-  // const JobDetails = async () => {
-  //   const req = { action: "getByCustomer", customer_id: location.state.id };
-  //   const data = { req: req, authToken: token };
-  //   await dispatch(JobAction(data))
-  //     .unwrap()
-  //     .then(async (response) => {
-  //       if (response.status) {
-  //         setGetJobDetails(response.data);
-  //       } else {
-  //         setGetJobDetails([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       return;
-  //     });
-  // };
-
-    const JobDetails = async (
-      customer_id,
-      page = currentPage,
-      limit = pageSize,
-      search = searchTerm
-    ) => {
-      const req = {
-        action: "getByCustomer",
-        customer_id,
-        page,
-        limit,
-        search,
-      };
-      const data = { req, authToken: token };
-      await dispatch(JobAction(data))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            setGetJobDetails(response.data);
-            setTotalRecords(response.pagination?.total || 0);
-          } else {
-            setGetJobDetails([]);
-            setTotalRecords(0);
-          }
-        });
-    };
+  const JobDetails = async () => {
+    const req = { action: "getByCustomer", customer_id: location.state.id };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setGetJobDetails(response.data);
+        } else {
+          setGetJobDetails([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const GetCustomerData = async () => {
     const req = { customer_id: location?.state?.id, pageStatus: "4" };
@@ -1265,30 +1183,30 @@ const ClientList = () => {
   //     });
   // };
 
-   const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
-      const req = {
-        action: "get",
-        customer_id: id,
-        page,
-        limit,
-        search,
-      };
-      const data = { req: req, authToken: token };
-      await dispatch(ClientAction(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            setClientData(response.data);
-            setTotalRecords(response.pagination?.total || 0);
-          } else {
-            setClientData([]);
-            setTotalRecords(0);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+  const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
+    const req = {
+      action: "get",
+      customer_id: location?.state?.id,
+      page : 1,
+      limit : 100000,
+      search : "",
     };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setClientData(response.data);
+          setTotalRecords(response.pagination?.total || 0);
+        } else {
+          setClientData([]);
+          setTotalRecords(0);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id };
@@ -1407,12 +1325,8 @@ const ClientList = () => {
                   showConfirmButton: false,
                   timer: 1500,
                 });
-                if(type == "job"){
-                  JobDetails(location?.state?.id, 1, pageSize, "");
-                }else{
-                  GetAllClientData(location?.state?.id, 1, pageSize, "");
-                }
-                //GetAllClientData();
+                JobDetails();
+                GetAllClientData();
               } else {
                 sweatalert.fire({
                   title: "Failed",
@@ -1654,59 +1568,13 @@ const ClientList = () => {
                 )} */}
               </div>
 
-              {(activeTab === "client" || activeTab === "job") && (
-                  <div className="row mb-3 mt-3">
-                    <div className="col-md-4">
-                      <input
-                        type="text"
-                        placeholder={`Search ${tab?.title}...`}
-                        className="form-control"
-                        value={searchTerm}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                )}
-
               <div className="datatable-wrapper">
                 {tab.data && tab.data.length > 0 ? (
-                  <>
-                    <Datatable
-                      columns={tab.columns}
-                      data={tab.data}
-                     // filter={true}
-                      filter={false}
-                      pagination={false}
-                    />
-
-                    <ReactPaginate
-                      previousLabel={"Previous"}
-                      nextLabel={"Next"}
-                      breakLabel={"..."}
-                      pageCount={Math.ceil(totalRecords / pageSize)}
-                      marginPagesDisplayed={2}
-                      pageRangeDisplayed={5}
-                      onPageChange={handlePageChange}
-                      containerClassName={"pagination"}
-                      activeClassName={"active"}
-                      forcePage={currentPage - 1}
-                    />
-
-
-
-                    <select
-                      className="perpage-select"
-                      value={pageSize}
-                      onChange={handlePageSizeChange}
-                    >
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
-                  </>
-
-
+                  <Datatable
+                    columns={tab.columns}
+                    data={tab.data}
+                    filter={true}
+                  />
                 ) : (
                   <div className="text-center">
                     <img
