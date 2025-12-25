@@ -1,5 +1,4 @@
 ﻿# 📚 Outbook
-
 **Project Type:** Management Product  
 **Technologies Used:** HTML, CSS, Bootstrap, React, Node.js, Redux, SQL
 
