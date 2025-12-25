@@ -4,248 +4,177 @@ const { SatffLogUpdateOperation, LineManageStaffIdHelperFunction,
     QueryRoleHelperFunction } = require('../utils/helper');
 
 const jobStatusReports = async (Report) => {
-    const { StaffUserId } = Report;
+  const { StaffUserId, page = 1, limit = 10, search = "" } = Report;
+  const offset = (page - 1) * limit;
 
-    // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
-    // Get Role
-    const rows = await QueryRoleHelperFunction(StaffUserId)
+  const rows = await QueryRoleHelperFunction(StaffUserId);
 
-    try {
+  const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
 
-        const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
+  let searchQuery = "";
+  let searchValues = [];
 
-        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-            //     const query = `
-            // SELECT 
-            //  jobs.id AS id,
-            //  CONCAT(
-            //         SUBSTRING(customers.trading_name, 1, 3), '_',
-            //         SUBSTRING(clients.trading_name, 1, 3), '_',
-            //         SUBSTRING(job_types.type, 1, 4), '_',
-            //         SUBSTRING(jobs.job_id, 1, 15)
-            //         ) AS job_code_id,
-            // customers.id AS customer_id,
-            // customers.trading_name AS customer_trading_name,
-            // clients.id AS client_id,
-            // clients.trading_name AS client_trading_name,
-            // staffs3.id AS account_manager_id,
-            // CONCAT(
-            //  staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
-            //  services.id AS service_id,
-            //  services.name AS service_name,
-            //  job_types.id AS job_type_id,
-            //  job_types.type AS job_type_name,
-            //  master_status.name AS status,
-            //  staffs2.id AS reviewer_id,
-            //  CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
-            //  staffs.id AS allocated_id,
-            //  CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
-            //  DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-            //  DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-            //  DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
-            //  DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
-            //  DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-            //  DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
-            //  DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on
-            //  FROM 
-            //  jobs
-            //  JOIN 
-            //  clients ON jobs.client_id = clients.id
-            //  JOIN 
-            //  customers ON jobs.customer_id = customers.id
-            //  JOIN 
-            //  job_types ON jobs.job_type_id = job_types.id
-            //  JOIN 
-            //  services ON jobs.service_id = services.id
-            //  LEFT JOIN 
-            //  staffs ON jobs.allocated_to = staffs.id
-            //  LEFT JOIN 
-            //  staffs AS staffs2 ON jobs.reviewer = staffs2.id
-            //  LEFT JOIN 
-            //  staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-            //  LEFT JOIN
-            //  master_status ON master_status.id = jobs.status_type
-            //  LEFT JOIN
-            //  queries ON queries.job_id = jobs.id
-            //  LEFT JOIN
-            //  drafts ON drafts.job_id = jobs.id
-            //  ORDER BY jobs.id DESC
-            //  `;
-            //     const [result] = await pool.execute(query);
-            //     return { status: true, message: 'Success.', data: result };
+  if (search) {
+    searchQuery = `
+      AND (
+        customers.trading_name LIKE ?
+        OR clients.trading_name LIKE ?
+        OR job_types.type LIKE ?
+        OR services.name LIKE ?
+        OR staffs.first_name LIKE ?
+        OR staffs.last_name LIKE ?
+        OR jobs.job_id LIKE ?
+        OR ${jobCodeExpr} LIKE ?
+      )
+    `;
+    const s = `%${search}%`;
+    searchValues = Array(8).fill(s);
+  }
 
-            const query = `
-                SELECT 
-                jobs.id AS id,
-                jobs.service_id AS job_service_id,
-                jobs.job_priority AS job_priority,
-                 CONCAT(
-                        SUBSTRING(customers.trading_name, 1, 3), '_',
-                        SUBSTRING(clients.trading_name, 1, 3), '_',
-                        SUBSTRING(job_types.type, 1, 4), '_',
-                        SUBSTRING(jobs.job_id, 1, 15)
-                        ) AS job_code_id,
-                customers.id AS customer_id,
-                customers.trading_name AS customer_trading_name,
-                clients.id AS client_id,
-                clients.trading_name AS client_trading_name,
-                staffs3.id AS account_manager_id,
-                CONCAT(
-                 staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
-                 services.id AS service_id,
-                 services.name AS service_name,
-                 job_types.id AS job_type_id,
-                 job_types.type AS job_type_name,
-                 master_status.name AS status,
-                 staffs2.id AS reviewer_id,
-                 CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
-                 staffs.id AS allocated_id,
-                 CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
-                 DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-                 DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-                 DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
-                 DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
-                 DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-                 DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
-                 DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-                 DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
-                GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
-                FROM 
-                jobs
-                LEFT JOIN 
-                job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-                LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
-                LEFT JOIN 
-                customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-                LEFT JOIN 
-                clients ON jobs.client_id = clients.id
-                LEFT JOIN 
-                customers ON jobs.customer_id = customers.id
-                LEFT JOIN 
-                job_types ON jobs.job_type_id = job_types.id
-                LEFT JOIN 
-                services ON jobs.service_id = services.id
-                LEFT JOIN 
-                staffs ON jobs.allocated_to = staffs.id
-                LEFT JOIN 
-                staffs AS staffs2 ON jobs.reviewer = staffs2.id
-                LEFT JOIN 
-                staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-                LEFT JOIN 
-                master_status ON master_status.id = jobs.status_type
-                LEFT JOIN
-                queries ON queries.job_id = jobs.id
-                LEFT JOIN
-                drafts ON drafts.job_id = jobs.id
-                GROUP BY jobs.id
-                ORDER BY 
-                 jobs.id DESC;
-                `;
-            const [result] = await pool.execute(query);
-            return { status: true, message: 'Success.', data: result };
-        }
+  try {
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
 
-        // Other Role Data
-        const query = `
-        SELECT 
-                jobs.id AS id,
-                jobs.service_id AS job_service_id,
-                jobs.job_priority AS job_priority,
-                 CONCAT(
-                        SUBSTRING(customers.trading_name, 1, 3), '_',
-                        SUBSTRING(clients.trading_name, 1, 3), '_',
-                        SUBSTRING(job_types.type, 1, 4), '_',
-                        SUBSTRING(jobs.job_id, 1, 15)
-                        ) AS job_code_id,
-                customers.id AS customer_id,
-                customers.trading_name AS customer_trading_name,
-                clients.id AS client_id,
-                clients.trading_name AS client_trading_name,
-                staffs3.id AS account_manager_id,
-                CONCAT(
-                 staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
-                 services.id AS service_id,
-                 services.name AS service_name,
-                 job_types.id AS job_type_id,
-                 job_types.type AS job_type_name,
-                 master_status.name AS status,
-                 staffs2.id AS reviewer_id,
-                 CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
-                 staffs.id AS allocated_id,
-                 CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
-                 DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-                 DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-                 DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
-                 DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
-                 DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-                 DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
-                 DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-                 DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
-                GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
-                FROM 
-                jobs
-                LEFT JOIN 
-                job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-                LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
-                LEFT JOIN 
-                customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-                LEFT JOIN 
-                clients ON jobs.client_id = clients.id
-                LEFT JOIN 
-                customers ON jobs.customer_id = customers.id
-                LEFT JOIN 
-                job_types ON jobs.job_type_id = job_types.id
-                LEFT JOIN 
-                services ON jobs.service_id = services.id
-                LEFT JOIN 
-                staffs ON jobs.allocated_to = staffs.id
-                LEFT JOIN 
-                staffs AS staffs2 ON jobs.reviewer = staffs2.id
-                LEFT JOIN 
-                staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-                LEFT JOIN 
-                master_status ON master_status.id = jobs.status_type
-                LEFT JOIN
-                queries ON queries.job_id = jobs.id
-                LEFT JOIN
-                drafts ON drafts.job_id = jobs.id
-                WHERE
-                jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
-                GROUP BY jobs.id
-                ORDER BY 
-                 jobs.id DESC;
-                 `;
-        const [result] = await pool.execute(query);
-        
-        //////-----START Assign Customer Service Data START----////////
-        let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
-        if (isExistAssignCustomer != undefined) {
-            let matched = result?.filter(item =>
-                item?.assigned_source === 'assign_customer_service' &&
-                Number(item?.service_id_assign) === Number(item?.job_service_id)
-            )
-            let matched2 = result?.filter(item =>
-                item?.assigned_source !== 'assign_customer_service'
-            )
-            const resultAssignCustomer = [...matched, ...matched2]
-            return { status: true, message: "Success.", data: resultAssignCustomer };
-        }
-        //////-----END Assign Customer Service Data END----////////
+    const isSuperAdmin =
+      rows.length > 0 &&
+      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
 
+    const baseSelect = `
+      SELECT 
+        jobs.id AS id,
+        jobs.service_id AS job_service_id,
+        jobs.job_priority AS job_priority,
+        ${jobCodeExpr} AS job_code_id,
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        clients.id AS client_id,
+        clients.trading_name AS client_trading_name,
+        staffs3.id AS account_manager_id,
+        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+        services.id AS service_id,
+        services.name AS service_name,
+        job_types.id AS job_type_id,
+        job_types.type AS job_type_name,
+        master_status.name AS status,
+        staffs2.id AS reviewer_id,
+        CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
+        staffs.id AS allocated_id,
+        CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
+        DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+        DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+        DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+        DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
+        DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
+        DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+        DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+        DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
+      FROM jobs
+      LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+      LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN services ON jobs.service_id = services.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      LEFT JOIN queries ON queries.job_id = jobs.id
+      LEFT JOIN drafts ON drafts.job_id = jobs.id
+    `;
 
-        return { status: true, message: 'Success.', data: result };
+    if (isSuperAdmin) {
+      const dataQuery = `
+        ${baseSelect}
+        WHERE 1=1
+        ${searchQuery}
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+        LIMIT ? OFFSET ?
+      `;
 
+      const [rowsData] = await pool.execute(dataQuery, [
+        ...searchValues,
+        Number(limit),
+        Number(offset),
+      ]);
 
+      const countQuery = `
+        SELECT COUNT(DISTINCT jobs.id) AS total
+        FROM jobs
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN services ON jobs.service_id = services.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        WHERE 1=1
+        ${searchQuery}
+      `;
 
+      const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
-    } catch (error) {
-        console.log("error ", error);
-        return { status: false, message: 'Error getting job status report.' };
+      return {
+        status: true,
+        message: "Success.",
+        data: { rows: rowsData, total },
+      };
     }
 
-}
+    const dataQuery = `
+      ${baseSelect}
+      WHERE
+        (jobs.staff_created_id IN(${LineManageStaffId})
+         OR clients.staff_created_id IN(${LineManageStaffId}))
+      ${searchQuery}
+      GROUP BY jobs.id
+      ORDER BY jobs.id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [rowsData] = await pool.execute(dataQuery, [
+      ...searchValues,
+      Number(limit),
+      Number(offset),
+    ]);
+
+    const countQuery = `
+      SELECT COUNT(DISTINCT jobs.id) AS total
+      FROM jobs
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN services ON jobs.service_id = services.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      WHERE
+        (jobs.staff_created_id IN(${LineManageStaffId})
+         OR clients.staff_created_id IN(${LineManageStaffId}))
+      ${searchQuery}
+    `;
+
+    const [[{ total }]] = await pool.execute(countQuery, searchValues);
+
+    return {
+      status: true,
+      message: "Success.",
+      data: { rows: rowsData, total },
+    };
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting job status report." };
+  }
+};
 
 const getCustomWeekNumber = (day) => {
     if (day >= 1 && day <= 7) return 1;

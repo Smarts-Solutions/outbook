@@ -1463,18 +1463,24 @@ async function getAllJobsSidebar(
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
   let searchParams = [];
-  if (search) {
-    searchCondition = `
-      AND (
-        jobs.client_job_code LIKE ?
-        OR clients.trading_name LIKE ?
-        OR customers.trading_name LIKE ?
-        OR job_types.type LIKE ?
-      )
-    `;
-    const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
-  }
+ if (search) {
+  searchCondition = `
+    AND (
+      jobs.client_job_code LIKE ?
+      OR clients.trading_name LIKE ?
+      OR customers.trading_name LIKE ?
+      OR job_types.type LIKE ?
+      OR CONCAT(
+            SUBSTRING(customers.trading_name,1,3),'_',
+            SUBSTRING(clients.trading_name,1,3),'_',
+            SUBSTRING(job_types.type,1,4),'_',
+            LPAD(jobs.job_id,5,'0')
+         ) LIKE ?
+    )
+  `;
+  const likeSearch = `%${search}%`;
+  searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+}
 
   try {
     // Check role access

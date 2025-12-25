@@ -2,27 +2,52 @@ import React, { useState, useEffect } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
-import { convertDate ,convertDate1 } from "../../../Utils/Comman_function";
-import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
+import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import ReactPaginate from "react-paginate";
 
 const JobStatus = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [JobStatusData, setJobStatusData] = useState([]);
 
-  useEffect(() => {
-    GetJobStatus();
-  }, []);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const GetJobStatus = async () => {
-    const data = { req: {}, authToken: token };
+  const handlePageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    // GetJobStatus(newPage, pageSize, searchTerm);
+  };
+
+  const handlePageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    // GetJobStatus(1, newSize, searchTerm);
+  };
+
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+    // GetJobStatus(1, pageSize, term);
+  };
+
+  useEffect(() => {
+    GetJobStatus(currentPage, pageSize, searchTerm);
+  }, [currentPage, pageSize, searchTerm]);
+
+  const GetJobStatus = async (page = 1, limit = 10, search = "") => {
+    const data = { req: { page, limit, search }, authToken: token };
     await dispatch(JobStatusReport(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
-
           console.log("Job Status Data:", res.data);
-          setJobStatusData(res.data);
+          setJobStatusData(res.data.rows);
+          setTotalRecords(res.data.total || 0);
         } else {
           setJobStatusData([]);
         }
@@ -40,7 +65,7 @@ const JobStatus = () => {
       reorder: false,
       sortable: true,
     },
-    
+
     {
       name: "Job Received On",
       selector: (row) => convertDate(row.job_received_on),
@@ -48,7 +73,7 @@ const JobStatus = () => {
       sortable: true,
     },
 
-     {
+    {
       name: "Job Priority",
       cell: (row) => {
         const v = row.job_priority || "-";
@@ -94,36 +119,28 @@ const JobStatus = () => {
     },
     {
       name: "Service Type",
-      cell: (row) => (
-        <div title={row.service_name}>{row.service_name}</div>
-      ),
+      cell: (row) => <div title={row.service_name}>{row.service_name}</div>,
       selector: (row) => row.service_name,
       reorder: false,
       sortable: true,
     },
     {
       name: "Job Type",
-      cell: (row) => (
-        <div title={row.job_type_name}>{row.job_type_name}</div>
-      ),
+      cell: (row) => <div title={row.job_type_name}>{row.job_type_name}</div>,
       selector: (row) => row.job_type_name,
       reorder: false,
       sortable: true,
     },
     {
       name: "Status",
-      cell: (row) => (
-        <div title={row.status}>{row.status}</div>
-      ),
+      cell: (row) => <div title={row.status}>{row.status}</div>,
       selector: (row) => row.status,
       reorder: false,
       sortable: true,
     },
     {
       name: "Allocated To",
-      cell: (row) => (
-        <div title={row.allocated_name}>{row.allocated_name}</div>
-      ),
+      cell: (row) => <div title={row.allocated_name}>{row.allocated_name}</div>,
       selector: (row) => row.allocated_name,
       reorder: false,
       sortable: true,
@@ -149,9 +166,7 @@ const JobStatus = () => {
     },
     {
       name: "Reviewer Name",
-      cell: (row) => (
-        <div title={row.reviewer_name}>{row.reviewer_name}</div>
-      ),
+      cell: (row) => <div title={row.reviewer_name}>{row.reviewer_name}</div>,
       selector: (row) => row.reviewer_name,
       reorder: false,
       sortable: true,
@@ -206,17 +221,20 @@ const JobStatus = () => {
     },
   ];
 
-  const exportData = JobStatusData.map((item) => {
+  const exportData = JobStatusData?.map((item) => {
     return {
       "Job Id": item.job_code_id,
       "Job Received On": convertDate(item.job_received_on),
-      "Job Priority": item.job_priority ? (item.job_priority.charAt(0).toUpperCase() + item.job_priority.slice(1).toLowerCase()) : "-",
+      "Job Priority": item.job_priority
+        ? item.job_priority.charAt(0).toUpperCase() +
+          item.job_priority.slice(1).toLowerCase()
+        : "-",
       "Customer Name": item.customer_trading_name,
       "Account Manager": item.account_manager_name,
-      "Clients": item.client_trading_name,
+      Clients: item.client_trading_name,
       "Service Type": item.service_name,
       "Job Type": item.job_type_name,
-      "Status": item.status,
+      Status: item.status,
       "Allocated To": item.allocated_name,
       "Allocated to (Other)": item.multiple_staff_names,
       "Reviewer Name": item.reviewer_name,
@@ -250,11 +268,49 @@ const JobStatus = () => {
               fileName={`Job Status Report`}
             />
           </div>
+
+          <div className="row mb-3 mt-3">
+            <div className="col-md-4">
+              <input
+                type="text"
+                placeholder={`Search ...`}
+                className="form-control"
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+          </div>
+
           <Datatable
-            filter={true}
+            // filter={true}
             columns={columns}
             data={JobStatusData && JobStatusData}
+            filter={false}
+            pagination={false}
           />
+
+          <ReactPaginate
+            previousLabel={"Previous"}
+            nextLabel={"Next"}
+            breakLabel={"..."}
+            pageCount={Math.ceil(totalRecords / pageSize)}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageChange}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+            forcePage={currentPage - 1}
+          />
+          <select
+            className="perpage-select"
+            value={pageSize}
+            onChange={handlePageSizeChange}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
         </div>
       </div>
     </div>
