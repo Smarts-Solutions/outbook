@@ -110,9 +110,6 @@ const StaffPage = () => {
       .then(async (response) => {
         if (response.status) {
 
-          console.log("response in staff", response);
-
-
           setStaffDataAll({ loading: false, data: response?.data?.data });
           setTotalRecords(response?.data?.pagination?.total || 0);
         } else {
