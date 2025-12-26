@@ -95,7 +95,16 @@ const createStaff = async (staff) => {
   }
 };
 
-const getStaff = async ({ page = 1, limit = 10, search = "" }) => {
+const getStaff = async (data) => {
+  console.log("data in model", data);
+  let { page, limit, search } = data;
+
+  console.log("page", page);
+  console.log("limit", limit);
+  console.log("search", search);
+
+
+
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
   const offset = (page - 1) * limit;

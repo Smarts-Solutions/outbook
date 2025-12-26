@@ -39,8 +39,8 @@ const addStaff = async (staff) => {
   });
 };
 
-const getStaff = async () => {
-  return staffModel.getStaff();
+const getStaff = async (data) => {
+  return staffModel.getStaff(data);
 };
 
 const managePortfolio = async (staff_id) => {

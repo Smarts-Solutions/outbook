@@ -18,7 +18,7 @@ const handleStaff = async (req, res) => {
         }
 
       case "get":
-        result = await authService.getStaff();
+        result = await authService.getStaff(req.body);
         res.status(200).json({ status: true, data: result });
         break;
       case "getmanager":

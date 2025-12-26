@@ -109,8 +109,12 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setStaffDataAll({ loading: false, data: response.data });
-          setTotalRecords(response.pagination?.total || 0);
+
+          console.log("response in staff", response);
+
+
+          setStaffDataAll({ loading: false, data: response?.data?.data });
+          setTotalRecords(response?.data?.pagination?.total || 0);
         } else {
           setStaffDataAll({ loading: false, data: [] });
           setTotalRecords(0);
