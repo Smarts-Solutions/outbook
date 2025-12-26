@@ -7,10 +7,10 @@ import {
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import qs from 'qs';
+import qs from "qs";
 import jwtDecode from "jwt-decode";
-import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
-import Select from 'react-select';
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import Select from "react-select";
 
 const Dashboard = () => {
   const [visibleLogs, setVisibleLogs] = useState(4); // Initially show 5 logs
@@ -21,7 +21,7 @@ const Dashboard = () => {
   };
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const getActiveTab = sessionStorage.getItem('activDashborde');
+  const getActiveTab = sessionStorage.getItem("activDashborde");
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
@@ -34,11 +34,11 @@ const Dashboard = () => {
   console.log("role dashboard - ", role);
 
   const handleTabChange = (event) => {
-    sessionStorage.setItem('activDashborde', event.target.value);
+    sessionStorage.setItem("activDashborde", event.target.value);
     setSelectedTab(event.target.value);
   };
 
-  const [selectedStaff, setSelectedStaff] = useState("")
+  const [selectedStaff, setSelectedStaff] = useState("");
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const [selectedFromDate, setSelectedFromDate] = useState("");
   const [selectedToDate, setSelectedToDate] = useState("");
@@ -99,23 +99,29 @@ const Dashboard = () => {
       });
   };
 
-  const staffOptions = staffDataAll.data?.map((val) => ({
-    value: val.id,
-    label: `${val.first_name} ${val.last_name}`
-  })) || [];
+  const staffOptions =
+    staffDataAll.data?.map((val) => ({
+      value: val.id,
+      label: `${val.first_name} ${val.last_name}`,
+    })) || [];
 
   const staffOptionPlaceholder = [
     { value: "", label: "-- Select --" },
-    ...staffOptions
-  ]
+    ...staffOptions,
+  ];
 
   // console.log("staffOptionPlaceholder", staffOptionPlaceholder);
 
   const ActivityLogData = async (type, staff_id, fromDate, toDate) => {
-
     let req = { staff_id: staffDetails.id };
-    if (type === 'filter') {
-      req = { staff_id: staffDetails.id, filter_type: type, filter_staff_id: staff_id, from_date: fromDate, to_date: toDate };
+    if (type === "filter") {
+      req = {
+        staff_id: staffDetails.id,
+        filter_type: type,
+        filter_staff_id: staff_id,
+        from_date: fromDate,
+        to_date: toDate,
+      };
     } else {
       req = { staff_id: staffDetails.id };
     }
@@ -145,19 +151,18 @@ const Dashboard = () => {
     return `${monthDay} (${time.toUpperCase()})`;
   };
 
-
   const handleClick = async (type, data, heading) => {
     if (parseInt(data.count) === 0) {
       return;
     }
-    const req = { staff_id: staffDetails.id, key: type, ids: data.ids, heading: heading }
+    const req = {
+      staff_id: staffDetails.id,
+      key: type,
+      ids: data.ids,
+      heading: heading,
+    };
     navigate("/admin/dashboard/data", { state: { req: req } });
-  }
-
-
-
-
-
+  };
 
   // Start Process SharePoint Refresh Process Start //
 
@@ -190,39 +195,35 @@ const Dashboard = () => {
     //   setError("Error: " + err.message);
     // }
 
-
     let data = qs.stringify({
-      'grant_type': 'refresh_token',
-      'client_id': '9185857f-7365-4d35-b00a-5a31dcdd58d2',
-      'client_secret': 'aCE8Q~nIMereO8MzR6cDsf4QUjJIGLhuBMlcPc-t',
-      'refresh_token': '1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8j5F-GZwVFOh_by_NPXfxUEByMvJcplAKWNhsPQtT40epQO-lc2g1x_FflTMS94BxphBD7OSKaLes4Iyx5IjdwcpAxXB1ZZos6FvTEMe8zQ8rEVnwawlow-mIjikU01Dw7bfxMH2PdnoU-mgSszjmGfSCZfRhQpqEd0SqPznBomn7CEuHDGWqfzh-h3eqAy9mK-YtzjWSQoPceC3-ohC6gNctmAf-WxI0QyERB8xCi1oRd0U3u5by1UQtqWqo80L5T8t8iqOAhV8n6brsSmt-ZlB28bY-HQYeQ6R8G8K0US_3rWtKIBTF5ZDljnzsu_SYjb_zO9NNj8B9-L-aIRz4truIfgvhVVXParWf6MjICTJ2Tq8wKa5nZcgo6UFnS0J-u8ixeRZkjSo8Uz__Oh3pXfkeZvoRrlWITUuMkJDJt-wHvq_Y5Eq0GxMWEWBoQZDTRm5T2ZgXCSImwnePGmerSpLfODswuph2akuhs9ub7Va_feoDRZDahnmh6FCqOX98mjEBUC4k3yiZYI_ZbhZnURL_A7z_kPBcX02Hmr5-n5jVHhZHFJbFzW53DMZ3Fcxd6k8WCOKjWatwXwpeAFmpqnGBUedZL8W0D95Dny7z_qk94eemwpu_aZQl5sETFYpAJ1XU9c-HzEAzK02ppsoLBTHNV76PQ0H-Yhetvt2vF6mHcj6NpYaGM5BM3RTvq-SmXp7vdkb5Rps4Sj4jv9YdhI1Mg0odiz8pPuLbBAHyMppB4mznvsus'
+      grant_type: "refresh_token",
+      client_id: "9185857f-7365-4d35-b00a-5a31dcdd58d2",
+      client_secret: "aCE8Q~nIMereO8MzR6cDsf4QUjJIGLhuBMlcPc-t",
+      refresh_token:
+        "1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8j5F-GZwVFOh_by_NPXfxUEByMvJcplAKWNhsPQtT40epQO-lc2g1x_FflTMS94BxphBD7OSKaLes4Iyx5IjdwcpAxXB1ZZos6FvTEMe8zQ8rEVnwawlow-mIjikU01Dw7bfxMH2PdnoU-mgSszjmGfSCZfRhQpqEd0SqPznBomn7CEuHDGWqfzh-h3eqAy9mK-YtzjWSQoPceC3-ohC6gNctmAf-WxI0QyERB8xCi1oRd0U3u5by1UQtqWqo80L5T8t8iqOAhV8n6brsSmt-ZlB28bY-HQYeQ6R8G8K0US_3rWtKIBTF5ZDljnzsu_SYjb_zO9NNj8B9-L-aIRz4truIfgvhVVXParWf6MjICTJ2Tq8wKa5nZcgo6UFnS0J-u8ixeRZkjSo8Uz__Oh3pXfkeZvoRrlWITUuMkJDJt-wHvq_Y5Eq0GxMWEWBoQZDTRm5T2ZgXCSImwnePGmerSpLfODswuph2akuhs9ub7Va_feoDRZDahnmh6FCqOX98mjEBUC4k3yiZYI_ZbhZnURL_A7z_kPBcX02Hmr5-n5jVHhZHFJbFzW53DMZ3Fcxd6k8WCOKjWatwXwpeAFmpqnGBUedZL8W0D95Dny7z_qk94eemwpu_aZQl5sETFYpAJ1XU9c-HzEAzK02ppsoLBTHNV76PQ0H-Yhetvt2vF6mHcj6NpYaGM5BM3RTvq-SmXp7vdkb5Rps4Sj4jv9YdhI1Mg0odiz8pPuLbBAHyMppB4mznvsus",
     });
 
     let config = {
-      method: 'post',
+      method: "post",
       maxBodyLength: Infinity,
-      url: 'https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token',
+      url: "https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': 'fpc=AshJ25n1ISVAouDe8Gv6k9fASJ25AQAAAByKBd8OAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie:
+          "fpc=AshJ25n1ISVAouDe8Gv6k9fASJ25AQAAAByKBd8OAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd",
       },
-      data: data
+      data: data,
     };
 
-    axios.request(config)
+    axios
+      .request(config)
       .then((response) => {
         console.log("response - ", response);
       })
       .catch((error) => {
         console.log(error);
       });
-
-
-
-
   };
-
-
 
   let site_ID = "";
   let folder_path = "/Shared Documents/Job Management"; // Replace with your folder path
@@ -232,8 +233,8 @@ const Dashboard = () => {
   // get data
   const [data, setData] = useState(null);
 
-
-  const accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IjI3UTNtMTdGU083ZHZXSE5uTGdia3NRbnNUMDZablZ6cjhvYWJVWmJVcW8iLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1Nzk4MTQ4LCJuYmYiOjE3MzU3OTgxNDgsImV4cCI6MTczNTgwMzE3NiwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQTU4Qm4vOUJvcTViY0xlU1BxZy8yaHNIQkpDRUdJKzRRZEFlZ2lKTHF4V09GQXRucUZGVVRZT3Zldk91SEY4YXUiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiZTg3M2Y2OWYtYTE5NS00N2EwLTljYWUtYjc3MDc1MDQ5NzlhIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6IkctVHk0anZkUzBHLXZ6YlZrck9DQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiI2IDEiLCJ4bXNfc3QiOnsic3ViIjoiNGJ2MkJ6aURZTFQ1OE9XNXpQX3U3ZmpzdGQtYXFURjNqYW5kd0NsX1Z2RSJ9LCJ4bXNfdGNkdCI6MTYwMzQ1NjYwMn0.MAD8ZaQhJGAqb-FsFTewg8YTAcBKrH6D4MDEaQ89CJ80_gzCxxmca4BmpKWmAklEJKsrb0tdMssVvJsc6S1MaUdozDSOg9l5ag02DOtMYxneSEab5rljUNLbep6JCJ8pkrJDC6Fv8z1p4GO43h8ffzG-FSjc7dmf8y_EHUhXuD9_Z7-6veD2g3rioeCxk2tkAlp0_p7rY8GGH-fgtPRwNazryUAdhkxk-dHuPzkFwr3Qf0dhuaG2iOqsFGfa36M4guCUutYyBszGLQ03XAdCTFdHotdKzz0GPQHfltVDTqD8LsVfWiwEZarUjYaSAFxAmLnoSnyMHnEw_jPnBva62Q";
+  const accessToken =
+    "eyJ0eXAiOiJKV1QiLCJub25jZSI6IjI3UTNtMTdGU083ZHZXSE5uTGdia3NRbnNUMDZablZ6cjhvYWJVWmJVcW8iLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1Nzk4MTQ4LCJuYmYiOjE3MzU3OTgxNDgsImV4cCI6MTczNTgwMzE3NiwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQTU4Qm4vOUJvcTViY0xlU1BxZy8yaHNIQkpDRUdJKzRRZEFlZ2lKTHF4V09GQXRucUZGVVRZT3Zldk91SEY4YXUiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiZTg3M2Y2OWYtYTE5NS00N2EwLTljYWUtYjc3MDc1MDQ5NzlhIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6IkctVHk0anZkUzBHLXZ6YlZrck9DQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiI2IDEiLCJ4bXNfc3QiOnsic3ViIjoiNGJ2MkJ6aURZTFQ1OE9XNXpQX3U3ZmpzdGQtYXFURjNqYW5kd0NsX1Z2RSJ9LCJ4bXNfdGNkdCI6MTYwMzQ1NjYwMn0.MAD8ZaQhJGAqb-FsFTewg8YTAcBKrH6D4MDEaQ89CJ80_gzCxxmca4BmpKWmAklEJKsrb0tdMssVvJsc6S1MaUdozDSOg9l5ag02DOtMYxneSEab5rljUNLbep6JCJ8pkrJDC6Fv8z1p4GO43h8ffzG-FSjc7dmf8y_EHUhXuD9_Z7-6veD2g3rioeCxk2tkAlp0_p7rY8GGH-fgtPRwNazryUAdhkxk-dHuPzkFwr3Qf0dhuaG2iOqsFGfa36M4guCUutYyBszGLQ03XAdCTFdHotdKzz0GPQHfltVDTqD8LsVfWiwEZarUjYaSAFxAmLnoSnyMHnEw_jPnBva62Q";
 
   const siteUrl =
     "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
@@ -247,10 +248,13 @@ const Dashboard = () => {
         },
       });
 
-      if (response.data.id != undefined && response.data.id != null && response.data.id != "") {
+      if (
+        response.data.id != undefined &&
+        response.data.id != null &&
+        response.data.id != ""
+      ) {
         const parts = response.data.id.split(",");
         site_ID = parts[1];
-
 
         // Get Drive ID
         const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives`;
@@ -263,12 +267,12 @@ const Dashboard = () => {
           },
         });
 
-        if (driveResponse.data.value != undefined && driveResponse.data.value != null && driveResponse.data.value != "") {
-
+        if (
+          driveResponse.data.value != undefined &&
+          driveResponse.data.value != null &&
+          driveResponse.data.value != ""
+        ) {
           drive_ID = driveResponse.data.value[0].id;
-
-
-
 
           // Get Folder ID
           const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
@@ -279,18 +283,28 @@ const Dashboard = () => {
             },
           });
 
+          if (
+            folderResponse.data.value != undefined &&
+            folderResponse.data.value != null &&
+            folderResponse.data.value != ""
+          ) {
+            const jobManagementObject = folderResponse.data.value.find(
+              (item) => item.name === "JobManagement"
+            );
 
-          if (folderResponse.data.value != undefined && folderResponse.data.value != null && folderResponse.data.value != "") {
-
-
-            const jobManagementObject = folderResponse.data.value.find((item) => item.name === "JobManagement");
-
-            if (jobManagementObject != undefined && jobManagementObject != null && jobManagementObject != "") {
+            if (
+              jobManagementObject != undefined &&
+              jobManagementObject != null &&
+              jobManagementObject != ""
+            ) {
               folder_ID = jobManagementObject.id;
             }
 
-
-            return { site_ID: site_ID, drive_ID: drive_ID, folder_ID: folder_ID };
+            return {
+              site_ID: site_ID,
+              drive_ID: drive_ID,
+              folder_ID: folder_ID,
+            };
 
             //uploadFileToFolder
             const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/shk.txt:/content`;
@@ -306,14 +320,9 @@ const Dashboard = () => {
             });
 
             console.log("uploadResponse - ", uploadResponse);
-
-
           }
-
         }
-
       }
-
 
       setData(response.data);
     } catch (err) {
@@ -340,7 +349,6 @@ const Dashboard = () => {
     // const folderId = await createFolderIfNotExists(userName);
     // folder_ID = folderId;
     try {
-
       const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
 
       const response = await axios.put(uploadUrl, file, {
@@ -402,7 +410,9 @@ const Dashboard = () => {
       });
 
       // Check if the folder already exists
-      const folderExists = response.data.value.some(item => item.name === folderName && item.folder);
+      const folderExists = response.data.value.some(
+        (item) => item.name === folderName && item.folder
+      );
 
       if (!folderExists) {
         // Create the folder if it doesn't exist
@@ -410,7 +420,7 @@ const Dashboard = () => {
         const folderData = {
           name: folderName,
           folder: {},
-          "@microsoft.graph.conflictBehavior": "rename" // Handle conflicts by renaming
+          "@microsoft.graph.conflictBehavior": "rename", // Handle conflicts by renaming
         };
 
         await axios.post(createFolderUrl, folderData, {
@@ -432,9 +442,10 @@ const Dashboard = () => {
         },
       });
 
-      const createdFolder = folderResponse.data.value.find(item => item.name === folderName);
+      const createdFolder = folderResponse.data.value.find(
+        (item) => item.name === folderName
+      );
       return createdFolder.id; // Return the ID of the created or existing folder
-
     } catch (error) {
       console.error("Error checking or creating folder:", error);
       throw error; // Rethrow the error for handling in the upload function
@@ -451,8 +462,6 @@ const Dashboard = () => {
     }
   };
 
-
-
   const deleteImage = async () => {
     const val = await fetchData();
     let fileName = "Clipboard - August 20, 2024 3_26 PM.png";
@@ -464,13 +473,11 @@ const Dashboard = () => {
     console.log("drive_ID - ", drive_ID);
     console.log("folder_ID - ", folder_ID);
 
-
     const filePath = `${folder_path}/${fileName}`;
 
     const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
 
     try {
-
       const response = await axios.delete(deleteUrl, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -483,15 +490,7 @@ const Dashboard = () => {
     }
   };
 
-
-
-
-
-
-
-
-  // cheked AcessToken status 
-
+  // cheked AcessToken status
 
   // const checkTokenExpiration = (token) => {
   //   try {
@@ -510,12 +509,10 @@ const Dashboard = () => {
   //   }
   // };
 
-
   // const { isExpired, remainingTime } = checkTokenExpiration(accessToken);
 
   // console.log("Token Expired:", isExpired);
   // console.log("Time Left (seconds):", remainingTime);
-
 
   const SharePointToken = async (token) => {
     if (token != null && token != undefined && token != "") {
@@ -527,23 +524,11 @@ const Dashboard = () => {
       } else {
         //console.log("Token Not Expired");
       }
-
     } else {
-
     }
-
   };
 
   SharePointToken(accessToken);
-
-
-
-
-
-
-
-
-
 
   // End Process SharePoint Refresh Process End //
 
@@ -558,21 +543,20 @@ const Dashboard = () => {
 
     if (name === "staff") {
       setSelectedStaff(value);
-      await ActivityLogData('filter', value, selectedFromDate, selectedToDate);
-    }
-    else if (name === "fromDate") {
+      await ActivityLogData("filter", value, selectedFromDate, selectedToDate);
+    } else if (name === "fromDate") {
       setSelectedFromDate(value);
-      await ActivityLogData('filter', selectedStaff, value, selectedToDate);
-
-    }
-    else if (name === "toDate") {
+      await ActivityLogData("filter", selectedStaff, value, selectedToDate);
+    } else if (name === "toDate") {
       setSelectedToDate(value);
-      await ActivityLogData('filter', selectedStaff, selectedFromDate, value);
+      await ActivityLogData("filter", selectedStaff, selectedFromDate, value);
     }
+  };
 
+  function formatNumberSafe(value) {
+    if (value == null || value === "") return "";
+    return Number(value).toLocaleString("en-IN");
   }
-
-
 
   return (
     <div>
@@ -623,8 +607,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-
-
                 {/* <div className="col-lg-4 col-md-6 col-sm-6">
                   <div className="form-group">
                     <button className="form-control" onClick={fetchData}>Refresh Token</button>
@@ -642,14 +624,15 @@ const Dashboard = () => {
                  
                   </div>
                 </div> */}
-
               </div>
 
               <div className="tab-content mt-5">
-
                 <div className="tab-pane show active">
                   <div className="row justify-content-center">
-                    <div className="col-md-12 col-xl-4 col-lg-6" style={{ cursor: 'pointer' }}>
+                    <div
+                      className="col-md-12 col-xl-4 col-lg-6"
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
@@ -658,10 +641,21 @@ const Dashboard = () => {
                                 NO OF CUSTOMERS
                               </p>
                             </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between"
-                              onClick={() => handleClick("customer", dashboard.customer, "Customers")}
+                            <div
+                              className="col-12 d-flex align-items-center justify-content-between"
+                              onClick={() =>
+                                handleClick(
+                                  "customer",
+                                  dashboard.customer,
+                                  "Customers"
+                                )
+                              }
                             >
-                              <h3 className="my-4">{dashboard.customer && dashboard.customer.count}</h3>
+                              <h3 className="my-4">
+                                {formatNumberSafe(
+                                  dashboard.customer && dashboard.customer.count
+                                )}
+                              </h3>
                               <img
                                 className="dashboad-img"
                                 src="/assets/images/dashboards/users.png"
@@ -671,7 +665,10 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-12 col-xl-4 col-lg-6" style={{ cursor: 'pointer' }}>
+                    <div
+                      className="col-md-12 col-xl-4 col-lg-6"
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
@@ -680,11 +677,21 @@ const Dashboard = () => {
                                 NO OF CLIENTS
                               </p>
                             </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between"
-                              onClick={() => handleClick("client", dashboard.client, "Clients")}
-
+                            <div
+                              className="col-12 d-flex align-items-center justify-content-between"
+                              onClick={() =>
+                                handleClick(
+                                  "client",
+                                  dashboard.client,
+                                  "Clients"
+                                )
+                              }
                             >
-                              <h3 className="my-4">{dashboard.client && dashboard.client.count}</h3>
+                              <h3 className="my-4">
+                                {formatNumberSafe(
+                                  dashboard.client && dashboard.client.count
+                                )}
+                              </h3>
                               <img
                                 className="dashboad-img"
                                 src="/assets/images/dashboards/teamwork.png"
@@ -694,7 +701,10 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-12 col-xl-4 col-lg-6" style={{ cursor: 'pointer' }}>
+                    <div
+                      className="col-md-12 col-xl-4 col-lg-6"
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card report-card dashboard-card ">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
@@ -703,10 +713,17 @@ const Dashboard = () => {
                                 NO OF STAFF
                               </p>
                             </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between"
-                              onClick={() => handleClick("staff", dashboard.staff, "Staff")}
+                            <div
+                              className="col-12 d-flex align-items-center justify-content-between"
+                              onClick={() =>
+                                handleClick("staff", dashboard.staff, "Staff")
+                              }
                             >
-                              <h3 className="my-4">{dashboard.staff && dashboard.staff.count}</h3>
+                              <h3 className="my-4">
+                                {formatNumberSafe(
+                                  dashboard.staff && dashboard.staff.count
+                                )}
+                              </h3>
                               <img
                                 className="dashboad-img"
                                 src="/assets/images/dashboards/handshake.png"
@@ -716,17 +733,27 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-12 col-xl-4 col-lg-6" style={{ cursor: 'pointer' }}>
+                    <div
+                      className="col-md-12 col-xl-4 col-lg-6"
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
                               <p className=" mb-1">NO OF JOBS</p>
                             </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between"
-                              onClick={() => handleClick("job", dashboard.job, "Jobs")}
+                            <div
+                              className="col-12 d-flex align-items-center justify-content-between"
+                              onClick={() =>
+                                handleClick("job", dashboard.job, "Jobs")
+                              }
                             >
-                              <h3 className="my-4">{dashboard.job && dashboard.job.count}</h3>
+                              <h3 className="my-4">
+                                {formatNumberSafe(
+                                  dashboard.job && dashboard.job.count
+                                )}
+                              </h3>
                               <img
                                 className="dashboad-img"
                                 src="/assets/images/dashboards/suitcase.png"
@@ -736,7 +763,10 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-12 col-xl-4 col-lg-6" style={{ cursor: 'pointer' }}>
+                    <div
+                      className="col-md-12 col-xl-4 col-lg-6"
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
@@ -745,10 +775,22 @@ const Dashboard = () => {
                                 PENDING JOBS
                               </p>
                             </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between"
-                              onClick={() => handleClick("pending_job", dashboard.pending_job, "Pending Jobs")}
+                            <div
+                              className="col-12 d-flex align-items-center justify-content-between"
+                              onClick={() =>
+                                handleClick(
+                                  "pending_job",
+                                  dashboard.pending_job,
+                                  "Pending Jobs"
+                                )
+                              }
                             >
-                              <h3 className="my-4">{dashboard.pending_job && dashboard.pending_job.count}</h3>
+                              <h3 className="my-4">
+                                {formatNumberSafe(
+                                  dashboard.pending_job &&
+                                    dashboard.pending_job.count
+                                )}
+                              </h3>
                               <img
                                 className="dashboad-img"
                                 src="/assets/images/dashboards/pending.png"
@@ -758,7 +800,10 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-12 col-xl-4 col-lg-6" style={{ cursor: 'pointer' }}>
+                    <div
+                      className="col-md-12 col-xl-4 col-lg-6"
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
@@ -767,11 +812,22 @@ const Dashboard = () => {
                                 COMPLETED JOBS
                               </p>
                             </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between"
-                              onClick={() => handleClick("completed_job", dashboard.completed_job, "Completed Jobs")}
-
+                            <div
+                              className="col-12 d-flex align-items-center justify-content-between"
+                              onClick={() =>
+                                handleClick(
+                                  "completed_job",
+                                  dashboard.completed_job,
+                                  "Completed Jobs"
+                                )
+                              }
                             >
-                              <h3 className="my-4">{dashboard.completed_job && dashboard.completed_job.count}</h3>
+                              <h3 className="my-4">
+                                {formatNumberSafe(
+                                  dashboard.completed_job &&
+                                    dashboard.completed_job.count
+                                )}
+                              </h3>
                               <img
                                 className="dashboad-img"
                                 src="/assets/images/dashboards/time-management.png"
@@ -788,7 +844,6 @@ const Dashboard = () => {
           </div>
 
           <div className="col-lg-4 col-md-4 mt-2">
-
             <div className="card activity-card">
               <div className="card-header border-bottom-0">
                 <div className="row align-items-center">
@@ -798,55 +853,66 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="card-body">
-                {
-                ['SUPERADMIN', 'ADMIN' , 'MANAGEMENT'].includes(role) ? 
-                 <div className="row dashboard-date-filter ">
-                  <div className="col-lg-4 col-md-4 px-1">
-                    <label><b>Select Staff</b></label>
-                    <Select
-                      id="tabSelect"
-                      name="staff"
-                      className="basic-multi-select"
-                      options={staffOptionPlaceholder}
-                      value={staffOptionPlaceholder.find((obj) => Number(obj.value) === Number(selectedStaff))}
-                      placeholder="-- Select --"
-                      onChange={(selectedOption) => {
-                        // simulate e.target.value
-                        const e = { target: { name: 'staff', value: selectedOption.value } };
-                        selectFilterValue(e);
-                      }}
-                      classNamePrefix="react-select"
-                      isSearchable
-                    />
-                  </div>
-                  <div className="col-lg-4 col-md-4 px-1">
-                    <label><b>From Date</b></label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={selectedFromDate}
-                      name='fromDate'
-                      onChange={(e) => selectFilterValue(e)}
-                    
-                    />
-                  </div>
-                  <div className="col-lg-4 col-md-4 px-1">
-                    <label><b>To Date</b></label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={selectedToDate}
-                      name='toDate'
-                      onChange={(e) => selectFilterValue(e)}
-                    
-                    />
-                  </div>
-                </div>
-                
-                :""
-                }
-                
+                {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
+                  <div className="row dashboard-date-filter ">
+                    <div className="col-lg-4 col-md-4 px-1">
+                      <label>
+                        <b>Select Staff</b>
+                      </label>
+                      <Select
+                        id="tabSelect"
+                        name="staff"
+                        className="basic-multi-select"
+                        options={staffOptionPlaceholder}
+                        value={staffOptionPlaceholder.find(
+                          (obj) => Number(obj.value) === Number(selectedStaff)
+                        )}
+                        placeholder="-- Select --"
+                        onChange={(selectedOption) => {
+                          // simulate e.target.value
+                          const e = {
+                            target: {
+                              name: "staff",
+                              value: selectedOption.value,
+                            },
+                          };
+                          selectFilterValue(e);
+                        }}
+                        classNamePrefix="react-select"
+                        isSearchable
+                      />
+                    </div>
+                    <div className="col-lg-4 col-md-4 px-1">
+                      <label>
+                        <b>From Date</b>
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={selectedFromDate}
+                        name="fromDate"
+                        onChange={(e) => selectFilterValue(e)}
+                        max={selectedToDate} // no || ""
+                      />
+                    </div>
 
+                    <div className="col-lg-4 col-md-4 px-1">
+                      <label>
+                        <b>To Date</b>
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={selectedToDate}
+                        name="toDate"
+                        onChange={(e) => selectFilterValue(e)}
+                        min={selectedFromDate} // no || ""
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
 
                 <div className="analytic-dash-activity" data-simplebar="init">
                   <div className="simplebar-mask1">
@@ -856,21 +922,27 @@ const Dashboard = () => {
                           {/* Conditional Rendering */}
                           <div>
                             {getActiviyLog && getActiviyLog.length > 0 ? (
-                              getActiviyLog.slice(0, visibleLogs).map((item, index) => {
-                                return (
-                                  <div className="activity-info" key={index}>
-                                    <div className="icon-info-activity">
-                                      <i className="fa-solid fa-circle"></i>
-                                    </div>
-                                    <div className="activity-info-text">
-                                      <div className="">
-                                        <small className="">{formatDate(item?.created_at)}</small>
-                                        <p className="">{item?.log_message}</p>
+                              getActiviyLog
+                                .slice(0, visibleLogs)
+                                .map((item, index) => {
+                                  return (
+                                    <div className="activity-info" key={index}>
+                                      <div className="icon-info-activity">
+                                        <i className="fa-solid fa-circle"></i>
+                                      </div>
+                                      <div className="activity-info-text">
+                                        <div className="">
+                                          <small className="">
+                                            {formatDate(item?.created_at)}
+                                          </small>
+                                          <p className="">
+                                            {item?.log_message}
+                                          </p>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                );
-                              })
+                                  );
+                                })
                             ) : (
                               <div className="no-data-found">
                                 <img
@@ -878,19 +950,24 @@ const Dashboard = () => {
                                   alt="No data found"
                                   style={{ maxWidth: "100%", height: "auto" }}
                                 />
-                                <p className="text-center">No Activity Logs Found</p>
+                                <p className="text-center">
+                                  No Activity Logs Found
+                                </p>
                               </div>
                             )}
 
                             {/* Show "Load More" button if there are more logs */}
-                            {getActiviyLog && getActiviyLog.length > visibleLogs && (
-                              <div className="load-more-btn-container text-center">
-                                <button className="btn btn-info w-75" onClick={loadMoreLogs}>
-                                  Load More
-
-                                </button>
-                              </div>
-                            )}
+                            {getActiviyLog &&
+                              getActiviyLog.length > visibleLogs && (
+                                <div className="load-more-btn-container text-center">
+                                  <button
+                                    className="btn btn-info w-75"
+                                    onClick={loadMoreLogs}
+                                  >
+                                    Load More
+                                  </button>
+                                </div>
+                              )}
                           </div>
                         </div>
                       </div>

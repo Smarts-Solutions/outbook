@@ -16,9 +16,12 @@ import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { staffPortfolio, DELETESTAFF } from "../../../Services/Staff/staff";
-import { GET_ALL_CUSTOMERS, getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { use } from "react";
+import {
+  GET_ALL_CUSTOMERS,
+  getAllTaskByStaff,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
+import ReactPaginate from "react-paginate";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -43,10 +46,82 @@ const StaffPage = () => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [assignCustomerData, setAssignCustomerData] = useState([]);
 
-  // console.log("deleteStaffCustomer", deleteStaffCustomer);
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const dispatch = useDispatch();
+  const [addStaff, setAddStaff] = useState(false);
+  const [portfolio, setPortfolio] = useState();
+  const [editStaff, setEditStaff] = useState(false);
+  const [editShowModel, setEditShowModel] = useState(false);
+  const [editStaffData, setEditStaffData] = useState({});
+  const [addCompetancy, SetCompetancy] = useState(false);
+  const [staffViewLog, SetStaffViewLog] = useState(false);
+  const [getActiviyLog, setActivityLog] = useState([]);
+  const [refresh, SetRefresh] = useState(false);
+  const [activeTab, setActiveTab] = useState("this-year");
+  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
+  const [AddCustomer, setAddCustomer] = useState([]);
+  const [serviceDataAll, setServiceDataAll] = useState({
+    loading: true,
+    data: [],
+    staff_id: "",
+  });
+  const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
+  const [changeRole, setChangeRole] = useState(false);
+
+  useEffect(() => {
+    staffData(currentPage, pageSize, searchTerm);
+    roleData();
+  }, [refresh]);
+
+  // Pagination handlers
+  const handlePageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    staffData(newPage, pageSize, searchTerm);
+  };
+
+  const handlePageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    staffData(1, newSize, searchTerm);
+  };
+
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+    staffData(1, pageSize, term);
+  };
+
+  const staffData = async (page = 1, limit = 10, search = "") => {
+    await dispatch(
+      Staff({
+        req: { action: "get", page, limit, search },
+        authToken: token,
+      })
+    )
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setStaffDataAll({ loading: false, data: response.data });
+          setTotalRecords(response.pagination?.total || 0);
+        } else {
+          setStaffDataAll({ loading: false, data: [] });
+          setTotalRecords(0);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const handleDeleteClick = async () => {
-
     let data = {
       delete_id: deleteStaff.id,
       update_staff: selectedStaff?.id,
@@ -96,7 +171,6 @@ const StaffPage = () => {
   };
 
   const handleDeleteIsNotExistCustomer = async (row) => {
-    // conformation alert
     setSelectedStaff(null);
     Swal.fire({
       title: "Are you sure?",
@@ -105,7 +179,7 @@ const StaffPage = () => {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         await dispatch(
@@ -138,22 +212,14 @@ const StaffPage = () => {
           .catch((error) => {
             return;
           });
-      }
-      else {
+      } else {
         return;
       }
     });
-
-
-  }
+  };
 
   useEffect(() => {
-    if (
-      accessData &&
-      accessData.length > 0 &&
-      // role !== "ADMIN" &&
-      role !== "SUPERADMIN"
-    ) {
+    if (accessData && accessData.length > 0 && role !== "SUPERADMIN") {
       accessData &&
         accessData.map((item) => {
           if (item.permission_name === "staff") {
@@ -175,52 +241,6 @@ const StaffPage = () => {
     }
   }, [accessData]);
 
-  const dispatch = useDispatch();
-  const [addStaff, setAddStaff] = useState(false);
-  const [portfolio, setPortfolio] = useState();
-  const [editStaff, setEditStaff] = useState(false);
-  const [editShowModel, setEditShowModel] = useState(false);
-  const [editStaffData, setEditStaffData] = useState({});
-  const [addCompetancy, SetCompetancy] = useState(false);
-  const [staffViewLog, SetStaffViewLog] = useState(false);
-  const [getActiviyLog, setActivityLog] = useState([]);
-  const [refresh, SetRefresh] = useState(false);
-  const [activeTab, setActiveTab] = useState("this-year");
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
-  const [AddCustomer, setAddCustomer] = useState([]);
-  const [serviceDataAll, setServiceDataAll] = useState({
-    loading: true,
-    data: [],
-    staff_id: "",
-  });
-
-  useEffect(() => {
-    staffData();
-    roleData();
-  }, [refresh, activeTab]);
-
-
-  const staffData = async () => {
-    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-
-          // console.log("response.data ", response.data);
-
-          setStaffDataAll({ loading: false, data: response.data });
-
-
-        } else {
-          setStaffDataAll({ loading: false, data: [] });
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
-
   const GetAllCustomer = async (AssignCustomer) => {
     await dispatch(
       Staff({
@@ -231,12 +251,12 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          // Filter out assigned customers
-          const filteredCustomers = response.data.filter((customer => {
-            return !AssignCustomer.some(assigned => assigned.customer_id === customer.id);
-          }));
+          const filteredCustomers = response.data.filter((customer) => {
+            return !AssignCustomer.some(
+              (assigned) => assigned.customer_id === customer.id
+            );
+          });
           setAllCustomerData(filteredCustomers);
-          // setAllCustomerData(response.data);
         } else {
           setAllCustomerData([]);
         }
@@ -383,8 +403,9 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -399,96 +420,88 @@ const StaffPage = () => {
         return (
           <>
             <div className="px-2">
-              {
-                showStaffDeleteTab == true ?
-                  row?.is_disable == 0 && (
-                    row.is_customer_exist == 1 ?
-                      <button
-                        className="delete-icon dropdown-item  w-auto mb-2"
-                        onClick={() => setDeleteStaff(row)}
-                      >
-                        {" "}
-                        <i className="ti-trash text-danger" />
-                      </button>
-                      :
-                      <button
-                        className="delete-icon dropdown-item  w-auto mb-2"
-                        onClick={() => handleDeleteIsNotExistCustomer(row)}
-                      > {" "}<i className="ti-trash text-danger" />
-                      </button>
-                  )
-                  : ""
-
-              }
+              {showStaffDeleteTab == true
+                ? row?.is_disable == 0 &&
+                  (row.is_customer_exist == 1 ? (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => setDeleteStaff(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ) : (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => handleDeleteIsNotExistCustomer(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ))
+                : ""}
             </div>
 
-            {
-              showStaffUpdateTab == true ?
-                <div className="dropdown">
-                  <button
-                    className="btn "
-                    type="button"
-                    id="dropdownMenuButton"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
+            {showStaffUpdateTab == true ? (
+              <div className="dropdown">
+                <button
+                  className="btn "
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                </button>
+                <div
+                  className="dropdown-menu custom-dropdown"
+                  aria-labelledby="dropdownMenuButton"
+                >
+                  <a
+                    className="dropdown-item"
+                    onClick={() => {
+                      GetAllStaffPortfolio(row);
+                    }}
+                    style={{ cursor: "pointer" }}
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
-                  </button>
-                  <div
-                    className="dropdown-menu custom-dropdown"
-                    aria-labelledby="dropdownMenuButton"
+                    <FaPencilAlt /> Portfolio
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    onClick={() => {
+                      setEditShowModel(true);
+                      setEditStaff(true);
+                      setEditStaffData(row);
+                    }}
+                    style={{ cursor: "pointer" }}
                   >
-                    <a
-                      className="dropdown-item"
-                      onClick={() => {
-                        GetAllStaffPortfolio(row);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <FaPencilAlt /> Portfolio
-                    </a>
-                    <a
-                      className="dropdown-item"
-                      onClick={() => {
-                        setEditShowModel(true);
-                        setEditStaff(true);
-                        setEditStaffData(row);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <FaBriefcase /> Edit
-                    </a>
-                    <a
-                      className="dropdown-item"
-                      onClick={() => {
-                        ServiceData(row);
-                        SetCompetancy(true);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <FaPlus /> Competency
-                    </a>
-                    {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
-                    <a
-                      className="dropdown-item"
-                      style={{ cursor: "pointer" }}
-                      onClick={() =>
-                        navigate(`/admin/staff/viewlogs`, { state: { row: row } })
-                      }
-                    >
-                      <FaEye /> Logs
-                    </a>
-                  </div>
+                    <FaBriefcase /> Edit
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    onClick={() => {
+                      ServiceData(row);
+                      SetCompetancy(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FaPlus /> Competency
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+                    }
+                  >
+                    <FaEye /> Logs
+                  </a>
                 </div>
-
-                :
-                ""
-
-
-            }
-
-
+              </div>
+            ) : (
+              ""
+            )}
           </>
         );
       },
@@ -501,18 +514,16 @@ const StaffPage = () => {
 
   const GetAllStaffPortfolio = async (row) => {
     let AssignCustomer = [];
-    // get Assign Customer in staff
     try {
       const response = await staffPortfolio({
         req: {
           action: "get",
           staff_id: row.id,
-          type: 'assignCustomer',
+          type: "assignCustomer",
         },
         authToken: token,
       });
       if (response?.status && Array.isArray(response.data)) {
-        console.log("Assigned Customers Response:", response.data);
         setAssignCustomerData(response.data);
         AssignCustomer = response.data;
       } else {
@@ -522,7 +533,6 @@ const StaffPage = () => {
       console.error("Error fetching staff portfolio:", error);
     }
 
-
     try {
       const response = await staffPortfolio({
         req: {
@@ -532,7 +542,6 @@ const StaffPage = () => {
         authToken: token,
       });
       if (response?.status && Array.isArray(response.data)) {
-        console.log("Staff Portfolio Response:", response.data);
         setAddCustomer(
           response.data.map((item) => ({
             value: item.customer_id,
@@ -547,9 +556,6 @@ const StaffPage = () => {
     } catch (error) {
       console.error("Error fetching staff portfolio:", error);
     }
-
-
-
   };
 
   const formik = useFormik({
@@ -559,7 +565,6 @@ const StaffPage = () => {
       email: "",
       phone: "",
       phone_code: "+44",
-      // password: "",
       role: "3",
       status: "1",
       staff_to: "",
@@ -584,12 +589,12 @@ const StaffPage = () => {
         .required(Validation_Message.StatusValidation),
       employee_number: Yup.string()
         .trim("Employee ID is invalid")
-        .required("Employee ID is required")
+        .required("Employee ID is required"),
     }),
 
     onSubmit: async (values) => {
       let req = {
-        first_name: (values.first_name).trim(),
+        first_name: values.first_name.trim(),
         last_name: values.last_name,
         email: values.email,
         phone: values.phone,
@@ -599,13 +604,13 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
-
 
       await dispatch(
         Staff({
@@ -703,7 +708,6 @@ const StaffPage = () => {
       label: "Role",
       label_size: 12,
       col_size: 6,
-      //disable: editStaff ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
@@ -734,7 +738,12 @@ const StaffPage = () => {
       col_size: 6,
       disable: false,
       options: staffDataAll.data
-        .filter((data) => (data.role !== "ADMIN" && data.role !== "SUPERADMIN" && data.id !== editStaffData.id))
+        .filter(
+          (data) =>
+            data.role !== "ADMIN" &&
+            data.role !== "SUPERADMIN" &&
+            data.id !== editStaffData.id
+        )
         .map((data) => ({
           label: `${data.first_name} ${data.last_name}`,
           value: data.id,
@@ -763,7 +772,6 @@ const StaffPage = () => {
   };
 
   const handleUpdate = async () => {
-
     try {
       const response = await dispatch(
         Competency({
@@ -798,7 +806,6 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
-
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
@@ -806,7 +813,10 @@ const StaffPage = () => {
       formik.setFieldValue("phone", editStaffData.phone || null);
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
-      formik.setFieldValue("employee_number", editStaffData.employee_number || null);
+      formik.setFieldValue(
+        "employee_number",
+        editStaffData.employee_number || null
+      );
       formik.setFieldValue("phone_code", editStaffData.phone_code || null);
       formik.setFieldValue("staff_to", editStaffData.staff_to || "");
       formik.setFieldValue("id", editStaffData?.id || "");
@@ -838,14 +848,6 @@ const StaffPage = () => {
     "Line Manager": item.line_manager_name || "-",
     Status: item.status === "1" ? "Active" : "Inactive",
   }));
-
-  const colourOptions = [
-    { value: "ocean", label: "Ocean" },
-    { value: "blue", label: "Blue" },
-    { value: "purple", label: "Purple" },
-    { value: "red", label: "Red" },
-    { value: "orange", label: "Orange" },
-  ];
 
   const handleAddCustomer = (e) => {
     setAddCustomer(e);
@@ -914,12 +916,7 @@ const StaffPage = () => {
     getCustomersName(deleteStaff?.id);
   }, [deleteStaff?.id, token]);
 
-
-  /// CHANGE ROLE GET STAFF
-  const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
-  const [changeRole, setChangeRole] = useState(false);
   const getChangedRoleStaff = async (staffData) => {
-    //  console.log("Get Changed Role Staff:", staffData);
     getCustomersNameChangeRole(staffData.id);
     try {
       const req = { action: "getChangedRoleStaff", staffData: staffData };
@@ -928,10 +925,8 @@ const StaffPage = () => {
         .unwrap()
         .then((res) => {
           if (res.status) {
-            // console.log("Changed Role Staff Data:", res);
             setChangedRoleStaffData(res.data);
-          }
-          else {
+          } else {
             setChangedRoleStaffData([]);
           }
         })
@@ -945,46 +940,43 @@ const StaffPage = () => {
 
   useEffect(() => {
     const fetchChangedRoleStaff = async () => {
-      if (editStaffData.id !== undefined && Number(formik.values.role) !== Number(editStaffData.role_id)
+      if (
+        editStaffData.id !== undefined &&
+        Number(formik.values.role) !== Number(editStaffData.role_id)
       ) {
-        // PROCESSOR
         if (Number(editStaffData.role_id) === 3) {
           await getChangedRoleStaff(editStaffData);
-        }
-        // MANAGER
-        else if (Number(editStaffData.role_id) === 4) {
+        } else if (Number(editStaffData.role_id) === 4) {
           await getChangedRoleStaff(editStaffData);
-        }
-        // REVIEWER
-        else if (Number(editStaffData.role_id) === 6) {
+        } else if (Number(editStaffData.role_id) === 6) {
           await getChangedRoleStaff(editStaffData);
         }
 
         setChangeRole(true);
         setEditStaff(false);
-        // console.log("role value: editStaffData", editStaffData);
       }
     };
-    // console.log("editStaffData is_customer_exist", editStaffData.is_customer_exist);
-    if ([3, 4, 6].includes(Number(editStaffData.role_id)) && editStaffData.is_customer_exist == 1) {
+    if (
+      [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+      editStaffData.is_customer_exist == 1
+    ) {
       fetchChangedRoleStaff();
     }
   }, [formik.values.role]);
 
-
-
   const handleChangeRole = async () => {
-    // console.log("handleChangeRole clicked");
-    // console.log("editStaffData:", editStaffData);
-    // console.log("selected role:", selectedStaff);
     try {
-      const req = { action: "staffRoleChangeUpdate", editStaffData: editStaffData, updateData: formik.values, selectedStaff: selectedStaff };
+      const req = {
+        action: "staffRoleChangeUpdate",
+        editStaffData: editStaffData,
+        updateData: formik.values,
+        selectedStaff: selectedStaff,
+      };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then((res) => {
           if (res.status) {
-            // console.log("Changed Role Staff Data:", res);
             setChangeRole(false);
             setSelectedStaff(null);
             formik.resetForm();
@@ -993,20 +985,16 @@ const StaffPage = () => {
               title: "Success!",
               text: "Staff role updated successfully.",
               icon: "success",
-              confirmButtonText: "OK"
+              confirmButtonText: "OK",
             });
             SetRefresh(!refresh);
-
-
-          }
-          else {
+          } else {
             Swal.fire({
               title: "Error!",
               text: "Failed to update staff role.",
               icon: "error",
-              confirmButtonText: "OK"
+              confirmButtonText: "OK",
             });
-
           }
         })
         .catch((err) => {
@@ -1015,6 +1003,54 @@ const StaffPage = () => {
     } catch (error) {
       console.error("Error fetching staff tasks:", error);
     }
+  };
+
+  const handleExport = async () => {
+    const req = {
+      action: "get",
+      page: 1,
+      limit: 100000,
+      search: "",
+    };
+    const data = { req, authToken: token };
+    const response = await dispatch(Staff(data)).unwrap();
+
+    if (!response.status || !response.data || response.data.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
+    const exportData = response.data.map((item) => ({
+      "First Name": item.first_name,
+      "Last Name": item.last_name,
+      Email: item.email,
+      Phone: item.phone,
+      Role: item.role_name,
+      "Employee ID": item.employee_number || "-",
+      "Line Manager": item.line_manager_name || "-",
+      Status: item.status === "1" ? "Active" : "Inactive",
+    }));
+
+    downloadCSV(exportData, "Staff Details.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
   };
 
   return (
@@ -1054,27 +1090,84 @@ const StaffPage = () => {
           </div>
         </div>
         <div className="tab-content mt-minus-90" id="pills-tabContent">
-          <div className="d-flex justify-content-end">
-            <ExportToExcel
-              className="btn btn-outline-info fw-bold float-end border-3 "
-              apiData={exportData}
-              fileName={`Staff Details`}
-            />
+          <div className="row mb-3">
+            <div className="col-md-4">
+              <input
+                type="text"
+                placeholder="Search Staff..."
+                className="form-control"
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+            <div className="col-md-8 d-flex justify-content-end">
+              <button
+                className="btn btn-outline-info fw-bold border-3"
+                onClick={handleExport}
+              >
+                Export Excel
+              </button>
+            </div>
           </div>
 
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
             >
-              <Datatable
-                columns={columns}
-                data={staffDataAll.data}
-                filter={true}
-              />
+              <div className="datatable-wrapper">
+                {staffDataAll.data && staffDataAll.data.length > 0 ? (
+                  <>
+                    <Datatable
+                      columns={columns}
+                      data={staffDataAll.data}
+                      filter={false}
+                      pagination={false}
+                    />
+
+                    <ReactPaginate
+                      previousLabel={"Previous"}
+                      nextLabel={"Next"}
+                      breakLabel={"..."}
+                      pageCount={Math.ceil(totalRecords / pageSize)}
+                      marginPagesDisplayed={2}
+                      pageRangeDisplayed={5}
+                      onPageChange={handlePageChange}
+                      containerClassName={"pagination"}
+                      activeClassName={"active"}
+                      forcePage={currentPage - 1}
+                    />
+
+                    <select
+                      className="perpage-select"
+                      value={pageSize}
+                      onChange={handlePageSizeChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <img
+                      src="/assets/images/No-data-amico.png"
+                      alt="No records available"
+                      style={{
+                        width: "250px",
+                        height: "auto",
+                        objectFit: "contain",
+                      }}
+                    />
+                    <p>No data available.</p>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -1111,7 +1204,6 @@ const StaffPage = () => {
         title="Manage Portfolio"
         handleClose={() => setPortfolio()}
         Submit_Function={() => {
-          // setPortfolio(false);
           HandleChangeStaffPortfolio();
         }}
         Submit_Cancel_Function={() => {
@@ -1135,25 +1227,25 @@ const StaffPage = () => {
               />
             </div>
 
-
             <div className="col-12 mt-2">
               <small className="text-muted">
                 Select customers to assign to this staff member.
               </small>
-              {
-                assignCustomerData && assignCustomerData.length > 0 ? (
-                  <div className="mt-3">
-                    <h6>Assigned Customers:</h6>
-                    <ul>
-                      {assignCustomerData.map((customer) => (
-                        <li key={customer.customer_id}>{customer.trading_name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : ("")
-              }
+              {assignCustomerData && assignCustomerData.length > 0 ? (
+                <div className="mt-3">
+                  <h6>Assigned Customers:</h6>
+                  <ul>
+                    {assignCustomerData.map((customer) => (
+                      <li key={customer.customer_id}>
+                        {customer.trading_name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
-
           </div>
         </div>
       </CommanModal>
@@ -1168,7 +1260,6 @@ const StaffPage = () => {
           setEditStaff(false);
           formik.resetForm();
           setEditStaffData({});
-
         }}
       >
         <Formicform
@@ -1181,13 +1272,11 @@ const StaffPage = () => {
             formik.resetForm();
             setEditStaff(false);
             setEditStaffData({});
-
           }}
           additional_field={
             <div className="row mt-2 ">
               <label className="form-label">Weekly Timesheet Hours</label>
               <div className="input-group row">
-                {/* Hours Input */}
                 <div className="hours-div col-6">
                   <input
                     type="text"
@@ -1300,7 +1389,6 @@ const StaffPage = () => {
                   <div className="">
                     <div className="simplebar-content" style={{ padding: 0 }}>
                       <div className="activity">
-                        {/* Conditional Rendering */}
                         {getActiviyLog && getActiviyLog.length > 0 ? (
                           getActiviyLog.map((item, index) => {
                             return (
@@ -1342,10 +1430,12 @@ const StaffPage = () => {
         size="ms-5"
         title="Delete Staff"
         hideBtn={true}
-        handleClose={() => { setDeleteStaff(false); setSelectedStaff(null); }}
+        handleClose={() => {
+          setDeleteStaff(false);
+          setSelectedStaff(null);
+        }}
       >
         <div className="modal-body">
-          {/* Staff Deletion Title */}
           <div className="text-start mb-3">
             <h5 className="text-danger fw-bold">
               <i className="bi bi-trash3"></i> Delete Staff:{" "}
@@ -1355,7 +1445,6 @@ const StaffPage = () => {
             </h5>
           </div>
 
-          {/* Select Staff to Replace */}
           <div className="mb-4">
             <label htmlFor="staff-select" className="form-label fw-semibold">
               <i className="bi bi-person-fill"></i> Select Staff to Replace:
@@ -1367,7 +1456,8 @@ const StaffPage = () => {
                 type="button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                Choose Staff {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
+                Choose Staff{" "}
+                {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
               </button>
 
               {dropdownOpen && (
@@ -1375,45 +1465,40 @@ const StaffPage = () => {
                   className="dropdown-menu show w-100"
                   style={{ maxHeight: "200px", overflowY: "auto" }}
                 >
-                  {
-                    staffDataAll?.data
-                      // ?.filter(
-                      //   (staff) =>
-                      //     staff.id !== deleteStaff?.id && staff.id !== 1 && staff.id !== 2
-                      // )
-                      ?.filter((staff) => {
-                        if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
-                          return (
-                            staff.role?.toUpperCase() === "MANAGER" &&
-                            staff.id !== deleteStaff?.id &&
-                            staff.id !== 1 &&
-                            staff.id !== 2
-                          );
-                        }
+                  {staffDataAll?.data
+                    ?.filter((staff) => {
+                      if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
                         return (
+                          staff.role?.toUpperCase() === "MANAGER" &&
                           staff.id !== deleteStaff?.id &&
                           staff.id !== 1 &&
                           staff.id !== 2
                         );
-                      })
-                      .map((staff) => (
-                        <li key={staff.id}>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => { setSelectedStaff(staff); setDropdownOpen(!dropdownOpen); }}
-                          >
-                            {staff.first_name + " " + staff.last_name}
-                          </button>
-                        </li>
-                      ))}
+                      }
+                      return (
+                        staff.id !== deleteStaff?.id &&
+                        staff.id !== 1 &&
+                        staff.id !== 2
+                      );
+                    })
+                    .map((staff) => (
+                      <li key={staff.id}>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => {
+                            setSelectedStaff(staff);
+                            setDropdownOpen(!dropdownOpen);
+                          }}
+                        >
+                          {staff.first_name + " " + staff.last_name}
+                        </button>
+                      </li>
+                    ))}
                 </ul>
               )}
             </div>
           </div>
 
-
-
-          {/* Buttons */}
           <div className="d-grid gap-2">
             {selectedStaff && (
               <button onClick={handleDeleteClick} className="btn btn-danger">
@@ -1421,15 +1506,16 @@ const StaffPage = () => {
               </button>
             )}
             <button
-              onClick={() => { setDeleteStaff(false); setSelectedStaff(null); }}
+              onClick={() => {
+                setDeleteStaff(false);
+                setSelectedStaff(null);
+              }}
               className="btn btn-secondary"
             >
               <i className="bi bi-x-circle"></i> Cancel
             </button>
           </div>
 
-
-          {/* Customers List */}
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
@@ -1437,10 +1523,15 @@ const StaffPage = () => {
               </h6>
               <ul className="list-group">
                 {deleteStaffCustomer.map((customer) => (
-                  <li key={customer.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  <li
+                    key={customer.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
                     <span className="text-dark">
                       {customer?.trading_name}{" "}
-                      <span className="badge bg-secondary">{customer?.customer_code}</span>
+                      <span className="badge bg-secondary">
+                        {customer?.customer_code}
+                      </span>
                     </span>
                   </li>
                 ))}
@@ -1453,7 +1544,6 @@ const StaffPage = () => {
       <CommanModal
         isOpen={changeRole}
         backdrop="static"
-
         title="Change Role - Staff"
         hideBtn={true}
         handleClose={() => {
@@ -1465,8 +1555,6 @@ const StaffPage = () => {
         }}
       >
         <div className="modal-body">
-
-          {/* Select Staff to Replace */}
           <div className="mb-4">
             <label htmlFor="staff-select" className="form-label fw-semibold">
               <i className="bi bi-person-fill me-2"></i> Select Staff to Replace
@@ -1512,7 +1600,6 @@ const StaffPage = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="d-flex justify-content-end gap-2">
             {selectedStaff && (
               <button onClick={handleChangeRole} className="btn btn-info">
@@ -1533,7 +1620,6 @@ const StaffPage = () => {
             </button>
           </div>
 
-          {/* Customers List */}
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
@@ -1541,10 +1627,15 @@ const StaffPage = () => {
               </h6>
               <ul className="list-group">
                 {deleteStaffCustomer.map((customer) => (
-                  <li key={customer.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  <li
+                    key={customer.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
                     <span className="text-dark">
                       {customer?.trading_name}{" "}
-                      <span className="badge bg-secondary">{customer?.customer_code}</span>
+                      <span className="badge bg-secondary">
+                        {customer?.customer_code}
+                      </span>
                     </span>
                   </li>
                 ))}
@@ -1553,8 +1644,6 @@ const StaffPage = () => {
           )}
         </div>
       </CommanModal>
-
-
     </div>
   );
 };

@@ -31,7 +31,9 @@ const createStaff = async (staff) => {
 
   // Exist Employee Number Check
   const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ?`;
-  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [employee_number]);
+  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [
+    employee_number,
+  ]);
   if (checkEmployeeNumber.length > 0) {
     return { status: false, message: "Employee Number Already Exists." };
   }
@@ -61,7 +63,7 @@ const createStaff = async (staff) => {
       hourminute,
       status,
       created_by,
-      employee_number
+      employee_number,
     ]);
 
     if (staff_to != "" && staff_to != undefined) {
@@ -93,53 +95,109 @@ const createStaff = async (staff) => {
   }
 };
 
-const getStaff = async () => {
-  const [rows] = await pool.query(
-    `SELECT 
-     staffs.id , 
-     staffs.role_id , 
-     staffs.first_name ,
-     staffs.last_name ,
-     staffs.email ,
-     staffs.phone_code ,
-     staffs.phone ,
-     staffs.is_disable ,
-     staffs.status ,
-     staffs.employee_number ,
-     staffs.created_at ,
-     staffs.hourminute ,
-     
-     roles.role_name ,
-     roles.role ,
+const getStaff = async ({ page = 1, limit = 10, search = "" }) => {
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const offset = (page - 1) * limit;
+  search = search.trim();
 
-     lm.staff_to,
-     CONCAT(manager.first_name, ' ', manager.last_name) AS line_manager_name,
-     
-     CASE 
-        WHEN EXISTS (
-            SELECT 1 FROM assigned_jobs_staff_view WHERE assigned_jobs_staff_view.staff_id = staffs.id
-        ) 
-        OR EXISTS (
-            SELECT 1 FROM customers WHERE customers.staff_id = staffs.id OR customers.account_manager_id = staffs.id
-        )
-        OR EXISTS (
-            SELECT 1 FROM clients WHERE clients.staff_created_id = staffs.id
-        )
-        OR EXISTS (
-            SELECT 1 FROM jobs WHERE jobs.staff_created_id = staffs.id OR jobs.account_manager_id = staffs.id
-        )
-        THEN TRUE ELSE FALSE 
-     END AS is_customer_exist
+  // 🔍 SEARCH CONDITION
+  let searchCondition = "";
+  let searchParams = [];
+  if (search) {
+    searchCondition = `
+      AND (
+        staffs.first_name LIKE ?
+        OR staffs.last_name LIKE ?
+        OR staffs.email LIKE ?
+        OR staffs.phone LIKE ?
+        OR staffs.employee_number LIKE ?
+      )
+    `;
+    const likeSearch = `%${search}%`;
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+  }
 
+  try {
+    // 🔹 TOTAL COUNT
+    const [countResult] = await pool.query(
+      `
+      SELECT COUNT(*) AS total
+      FROM staffs
+      JOIN roles ON staffs.role_id = roles.id
+      LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
+      LEFT JOIN staffs manager ON manager.id = lm.staff_to
+      WHERE 1=1
+      ${searchCondition}
+      `,
+      searchParams
+    );
 
-     FROM staffs 
-     JOIN roles ON staffs.role_id = roles.id 
-     LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
-     LEFT JOIN staffs manager ON manager.id = lm.staff_to
-     ORDER BY staffs.first_name ASC
-     `
-  );
-  return rows;
+    const total = countResult[0]?.total || 0;
+
+    // 🔹 DATA
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        staffs.id, 
+        staffs.role_id, 
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email,
+        staffs.phone_code,
+        staffs.phone,
+        staffs.is_disable,
+        staffs.status,
+        staffs.employee_number,
+        staffs.created_at,
+        staffs.hourminute,
+        roles.role_name,
+        roles.role,
+        lm.staff_to,
+        CONCAT(manager.first_name, ' ', manager.last_name) AS line_manager_name,
+        CASE 
+          WHEN EXISTS (
+              SELECT 1 FROM assigned_jobs_staff_view WHERE assigned_jobs_staff_view.staff_id = staffs.id
+          ) 
+          OR EXISTS (
+              SELECT 1 FROM customers WHERE customers.staff_id = staffs.id OR customers.account_manager_id = staffs.id
+          )
+          OR EXISTS (
+              SELECT 1 FROM clients WHERE clients.staff_created_id = staffs.id
+          )
+          OR EXISTS (
+              SELECT 1 FROM jobs WHERE jobs.staff_created_id = staffs.id OR jobs.account_manager_id = staffs.id
+          )
+          THEN TRUE ELSE FALSE 
+        END AS is_customer_exist
+      FROM staffs
+      JOIN roles ON staffs.role_id = roles.id
+      LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
+      LEFT JOIN staffs manager ON manager.id = lm.staff_to
+      WHERE 1=1
+      ${searchCondition}
+      ORDER BY staffs.first_name ASC
+      LIMIT ? OFFSET ?
+      `,
+      [...searchParams, limit, offset]
+    );
+
+    return {
+      status: true,
+      message: "Success",
+      data: rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        search,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getStaff:", error);
+    return { status: false, message: "Error fetching staff." };
+  }
 };
 
 const getManagerStaff = async () => {
@@ -167,18 +225,15 @@ const updateStaff = async (staff) => {
 
   console.log("fields", fields);
 
-
   // Line Manage Code
   let staff_to = fields.staff_to;
   if (staff_to != "" && staff_to != undefined) {
     let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
     let [staff_by_result] = await pool.execute(staff_by_query, [id]);
     if (staff_by_result.length > 0) {
-
       // console.log("staff_by_result", staff_by_result);
       // console.log("staff_to", staff_to);
       // console.log("staff_by", id);
-
 
       const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
       const [staff_to_result] = await pool.execute(staff_to_query, [
@@ -192,8 +247,7 @@ const updateStaff = async (staff) => {
         staff_to,
       ]);
     }
-  }
-  else {
+  } else {
     //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
@@ -207,7 +261,10 @@ const updateStaff = async (staff) => {
 
   // Exist Employee Number Check
   const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ? AND id != ?`;
-  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [fields.employee_number, id]);
+  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [
+    fields.employee_number,
+    id,
+  ]);
   if (checkEmployeeNumber.length > 0) {
     return { status: false, message: "Employee Number Already Exists." };
   }
@@ -429,16 +486,15 @@ const managePortfolio = async (staff_id) => {
 };
 
 const getLineManagerStaff = async (staff) => {
-
   let staff_to = staff.StaffUserId;
-   const LineManageQuery = `
+  const LineManageQuery = `
     SELECT 
     line_managers.staff_by AS staff_id, 
     CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name 
     FROM line_managers 
     JOIN staffs ON line_managers.staff_by = staffs.id
     WHERE line_managers.staff_to = ?
-  `
+  `;
   try {
     const [lineManagerResult] = await pool.execute(LineManageQuery, [staff_to]);
     return lineManagerResult;
@@ -446,8 +502,7 @@ const getLineManagerStaff = async (staff) => {
     console.error("Error selecting data:", err);
     throw err;
   }
-  
-}
+};
 
 const status = async (id) => {
   if (id != undefined) {
@@ -589,10 +644,16 @@ const getSharePointToken = async (staff) => {
         result.access_token != "" &&
         result.access_token != undefined
       ) {
-        const TokenExpiry = await CheckExpirySharePointToken(result.access_token);
+        const TokenExpiry = await CheckExpirySharePointToken(
+          result.access_token
+        );
 
         if (TokenExpiry) {
-          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token, result.client_id, result.client_secret);
+          const genrateAccessToken = await genrateSharePointAccessToken(
+            result.refresh_token,
+            result.client_id,
+            result.client_secret
+          );
 
           if (genrateAccessToken == "error") {
             return "sharepoint_token_not_found";
@@ -616,10 +677,9 @@ const getSharePointToken = async (staff) => {
 };
 
 const GetStaffPortfolio = async (staff) => {
-  
   const id = staff.staff_id;
   const type = staff.type;
-  if (type === 'assignCustomer') {
+  if (type === "assignCustomer") {
     const queryCustomerAssign = `
     SELECT 
     assigned_jobs_staff_view.customer_id, 
@@ -630,7 +690,6 @@ const GetStaffPortfolio = async (staff) => {
     GROUP BY assigned_jobs_staff_view.customer_id
   `;
 
-
     try {
       const [assignedCustomers] = await pool.execute(queryCustomerAssign);
       return assignedCustomers;
@@ -638,12 +697,7 @@ const GetStaffPortfolio = async (staff) => {
       console.error("Error selecting data:", err);
       throw err;
     }
-
-
-
-
   } else {
-
     const query = `
     SELECT sp.customer_id, c.trading_name 
     FROM staff_portfolio sp
@@ -658,11 +712,7 @@ const GetStaffPortfolio = async (staff) => {
       console.error("Error selecting data:", err);
       throw err;
     }
-
   }
-
-
-
 };
 
 const UpdateStaffPortfolio = async (staff) => {
@@ -697,9 +747,15 @@ const deleteStaffUpdateStaff = async (staff) => {
   const { delete_id, update_staff, role } = staff;
 
   if (role.toUpperCase() === "MANAGER") {
-    await pool.execute(`UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`, [update_staff, delete_id]);
+    await pool.execute(
+      `UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`,
+      [update_staff, delete_id]
+    );
 
-    await pool.execute(`UPDATE customer_service_account_managers SET account_manager_id  = ? WHERE account_manager_id  = ?`, [update_staff, delete_id]);
+    await pool.execute(
+      `UPDATE customer_service_account_managers SET account_manager_id  = ? WHERE account_manager_id  = ?`,
+      [update_staff, delete_id]
+    );
   }
 
   if (delete_id == update_staff) {
@@ -738,7 +794,8 @@ const deleteStaffUpdateStaff = async (staff) => {
       params: [update_staff, delete_id],
     },
     {
-      query: "UPDATE jobs SET account_manager_id = ? WHERE account_manager_id = ?",
+      query:
+        "UPDATE jobs SET account_manager_id = ? WHERE account_manager_id = ?",
       params: [update_staff, delete_id],
     },
     {
@@ -840,5 +897,5 @@ module.exports = {
   deleteStaffUpdateStaff,
   GetStaffByRoleId,
   GetStaffAndDelete,
-  getLineManagerStaff
+  getLineManagerStaff,
 };
