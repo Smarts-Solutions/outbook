@@ -81,14 +81,14 @@ const Dashboard = () => {
   };
 
   const GetAllStaff = async () => {
-    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+    await dispatch(Staff({ req: { action: "get", page :1, limit:100000, search:""}, authToken: token }))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
           // const filteredData = response.data.filter((item) => {
           //   return item.status === "1";
           // });
-          const filteredData = response.data;
+          const filteredData = response?.data?.data;
           setStaffDataAll({ loading: false, data: filteredData });
         } else {
           setStaffDataAll({ loading: false, data: [] });
