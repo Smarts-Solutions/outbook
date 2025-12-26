@@ -151,7 +151,7 @@ parentPort.on("message", async (rows) => {
           Regards,<br>
           Your Automation System
         </p>
-      `;
+        `;
 
         const dynamic_attachment = csvContent;
         const filename = `Jobs_Not_Delivered_Within_14_Days_${new Date()
@@ -174,7 +174,6 @@ parentPort.on("message", async (rows) => {
       } else {
         parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
       }
-
 
     } catch (err) {
       parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);

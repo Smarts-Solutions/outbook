@@ -15,7 +15,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 require("./app/routes")(app);
-//  require("./app/cron/cron")(app);
+require("./app/cron/cron")(app);
 
 
 // Get Token Process

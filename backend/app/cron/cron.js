@@ -40,69 +40,107 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
     sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet || []);
-
   },
 
     {
       timezone: "Europe/London"
     });
 
-  cron.schedule("0 9 * * *", async () => {
-    ////////-----------Trigger Report Email --------------------//////
-    const [superAdminAdminManagementRole] = await pool.execute(`
-    SELECT 
-        staffs.id AS id,
-        CONCAT(first_name,' ',last_name) AS staff_fullname,
-        staffs.email AS staff_email
-    FROM staffs
-    JOIN roles ON roles.id = staffs.role_id
-    LEFT JOIN timesheet 
-        ON staffs.id = timesheet.staff_id 
-      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
-    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
-    GROUP BY staffs.id
-    `);
-    wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole || []);
+  // cron.schedule("0 9 * * *", async () => {
+  //   ////////-----------Trigger Report Email --------------------//////
+  //   const [superAdminAdminManagementRole] = await pool.execute(`
+  //   SELECT 
+  //       staffs.id AS id,
+  //       CONCAT(first_name,' ',last_name) AS staff_fullname,
+  //       staffs.email AS staff_email
+  //   FROM staffs
+  //   JOIN roles ON roles.id = staffs.role_id
+  //   LEFT JOIN timesheet 
+  //       ON staffs.id = timesheet.staff_id 
+  //     AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
+  //   WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
+  //   GROUP BY staffs.id
+  //   `);
+  //   wipAndToBeStartedMoreThan_7(superAdminAdminManagementRole || []);
 
-    expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
+  //   expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
 
-    missingPaperworkInMax2Days(superAdminAdminManagementRole || []);
+  //   missingPaperworkInMax2Days(superAdminAdminManagementRole || []);
 
-    jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
+  //   jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
 
-    JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
-    
-    JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
+  //   JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
 
-  }
-    , {
-      timezone: "Europe/London"
-    }
-  );
+  //   JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
+
+  // }
+  //   , {
+  //     timezone: "Europe/London"
+  //   }
+  // );
 
 };
 
-// cron.schedule("* * * * 1", async () => {
-//   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
-//   const [superAdminAdminManagementRole] = await pool.execute(`
-//     SELECT 
-//         staffs.id AS id,
-//         CONCAT(first_name,' ',last_name) AS staff_fullname,
-//         staffs.email AS staff_email
-//     FROM staffs
-//     JOIN roles ON roles.id = staffs.role_id
-//     LEFT JOIN timesheet 
-//         ON staffs.id = timesheet.staff_id
-//       AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8))
-//     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
-//     GROUP BY staffs.id
-//     `);
+cron.schedule("* * * * *", async () => {
+  console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
+  // const [superAdminAdminManagementRole] = await pool.execute(`
+  //   SELECT 
+  //       staffs.id AS id,
+  //       CONCAT(first_name,' ',last_name) AS staff_fullname,
+  //       staffs.email AS staff_email,
+  //       roles.role AS staff_role
+  //   FROM staffs
+  //   JOIN roles ON roles.id = staffs.role_id
+  //   LEFT JOIN timesheet 
+  //       ON staffs.id = timesheet.staff_id
+  //     AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8))
+  //   WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
+  //   GROUP BY staffs.id
+  //   `);
 
-  
+  const query_access = `
+       SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role
+        FROM staffs
+        JOIN roles ON roles.id = staffs.role_id 
+        WHERE roles.id = 1 OR roles.id = 2 OR roles.id = 8
+        GROUP BY staffs.id
+      `
+    ;
+  const [staffs] = await pool.execute(query_access);
 
-// }, {
-//   timezone: "Europe/London"
-// });
+  console.log("Staffs with Access for WIP and To Be Started More Than 7 Days Cron Job:", staffs);
+
+
+  const query = `
+        SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role
+        FROM staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN jobs
+          ON staffs.id = jobs.staff_created_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id  
+        WHERE (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) OR (roles.id != 1 OR roles.id != 2 OR roles.id != 8)
+        GROUP BY staffs.id
+        ORDER BY 
+          jobs.id DESC;
+        `;
+
+  const [result] = await pool.execute(query);
+
+  console.log("Result for WIP and To Be Started More Than 7 Days Cron Job:", result);
+
+  wipAndToBeStartedMoreThan_7(result || []);
+
+}, {
+  timezone: "Europe/London"
+});
 
 
 

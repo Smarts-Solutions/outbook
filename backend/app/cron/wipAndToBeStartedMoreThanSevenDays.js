@@ -21,6 +21,8 @@ parentPort.on("message", async (rows) => {
   const query = `
         SELECT 
         jobs.id AS id,
+        job_allowed_staffs.staff_id AS job_allowed_staff_id,
+        jobs.staff_created_id AS staff_created_id,
           CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -85,6 +87,9 @@ parentPort.on("message", async (rows) => {
           jobs.id DESC;
         `;
   const [result] = await pool.execute(query);
+
+//  console.log("WIP and To Be Started More Than 7 Days - Jobs fetched:", result);
+
   let  csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
   if (result && result.length > 0) {
     result?.forEach(val => {
@@ -113,7 +118,10 @@ parentPort.on("message", async (rows) => {
     });
   }
 
+  
+ //  console.log("CSV Content Generated:-- rows", rows);
 
+   return
   for (const row of rows) {
     try {
 
