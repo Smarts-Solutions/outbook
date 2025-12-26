@@ -115,22 +115,38 @@ cron.schedule("* * * * *", async () => {
   console.log("Staffs with Access for WIP and To Be Started More Than 7 Days Cron Job:", staffs);
 
 
-  const query = `
-        SELECT 
-        staffs.id AS id,
-        CONCAT(first_name,' ',last_name) AS staff_fullname,
-        staffs.email AS staff_email,
-        roles.role AS staff_role
-        FROM staffs
-        JOIN roles ON roles.id = staffs.role_id
-        LEFT JOIN jobs
-          ON staffs.id = jobs.staff_created_id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id  
-        WHERE (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) OR (roles.id != 1 OR roles.id != 2 OR roles.id != 8)
-        GROUP BY staffs.id
+  // const query = `
+  //       SELECT 
+  //       staffs.id AS id,
+  //       CONCAT(first_name,' ',last_name) AS staff_fullname,
+  //       staffs.email AS staff_email,
+  //       roles.role AS staff_role
+  //       FROM staffs
+  //       JOIN roles ON roles.id = staffs.role_id
+  //       LEFT JOIN jobs
+  //         ON staffs.id = jobs.staff_created_id
+  //       LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id  
+  //       WHERE (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) OR (roles.id != 1 OR roles.id != 2 OR roles.id != 8)
+  //       GROUP BY staffs.id
+  //       ORDER BY 
+  //         jobs.id DESC;
+  //       `;
+
+     const query = `
+         SELECT 
+        jobs.id AS id,
+        jobs.staff_created_id AS staff_created_id,
+        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
+        FROM 
+        jobs
+        JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        WHERE jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        GROUP BY assigned_jobs_staff_view.staff_id
         ORDER BY 
           jobs.id DESC;
-        `;
+        `;    
+
+    
 
   const [result] = await pool.execute(query);
 
