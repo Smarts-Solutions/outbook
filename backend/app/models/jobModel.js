@@ -365,15 +365,15 @@ const jobAdd = async (job) => {
   let notes = job.notes == undefined ? "" : job.notes;
 
   // Set Status type
-  let status_type = 0;
+  let status_type = 1; // To Be Started
 
   if (allocated_to > 0) {
     status_type = 3;
   }
 
-  // if (reviewer > 0) {
-  //   status_type = 5;
-  // }
+  if (reviewer > 0 && allocated_to == 0) {
+    status_type = 5;
+  }
 
   if (reviewer == 0 && allocated_to == 0) {
     status_type = 1;
