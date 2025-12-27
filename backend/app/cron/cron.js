@@ -81,7 +81,7 @@ module.exports = (app) => {
 
     // Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
 
-    const expectedDeliveryDateChanged_7_query = `
+      const expectedDeliveryDateChanged_7_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -94,14 +94,15 @@ module.exports = (app) => {
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
         LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
         WHERE
-        (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
+        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old) 
         OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
         ORDER BY 
           staffs.id DESC;
         `;
 
-    expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
+  const [expectedDeliveryDateChanged_7_result] = await pool.execute(expectedDeliveryDateChanged_7_query);
+  expectedDeliveryDateChanged(expectedDeliveryDateChanged_7_result || []);
 
 
 
@@ -140,7 +141,7 @@ module.exports = (app) => {
 };
 
 cron.schedule("* * * * *", async () => {
-  console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
+  
 
   const expectedDeliveryDateChanged_7_query = `
         SELECT 
