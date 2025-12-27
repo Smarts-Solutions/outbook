@@ -91,7 +91,7 @@ parentPort.on("message", async (rows) => {
         `;
   const [result] = await pool.execute(query);
   let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
-  
+
   if (result && result.length > 0) {
     result?.forEach(val => {
 
@@ -123,10 +123,12 @@ parentPort.on("message", async (rows) => {
     try {
 
       if (result && result.length > 0) {
-        //console.log("CSV Content -->>>:\n", csvContent);
-        let toEmail = row.staff_email;
-        let subjectEmail = "Alert: Jobs with Missing Paperwork Due in the Next 2 Days";
-        let htmlEmail = `
+
+        if ([1, 2, 8].includes(row.role_id)) {
+          //console.log("CSV Content -->>>:\n", csvContent);
+          let toEmail = row.staff_email;
+          let subjectEmail = "Alert: Jobs with Missing Paperwork Due in the Next 2 Days";
+          let htmlEmail = `
           <h3>Alert: Jobs with Missing Paperwork Due in the Next 2 Days</h3>
           <p>Hello,</p>
           <p>This is to inform you that some jobs are missing required paperwork and are due within the next 2 days.</p>
@@ -134,20 +136,45 @@ parentPort.on("message", async (rows) => {
           <br>
           <p>Regards,<br>Your Automation System</p>
         `;
-        const dynamic_attachment = csvContent;
-        const filename = `Jobs_Missing_Paperwork_Max2Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+          const dynamic_attachment = csvContent;
+          const filename = `Jobs_Missing_Paperwork_Max2Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
 
 
-        //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
+          //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-        if (emailSent) {
-          //console.log("Missing Timesheet Report email sent successfully.");
-          parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+          // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+          // if (emailSent) {
+          //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+          // } else {
+          //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          // }
+
         } else {
-          // console.log("Failed to send Missing Timesheet Report email.");
-          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          await otherUserDataGet(row).then(async (res) => {
+            if (res.status) {
+              let toEmail = row.staff_email;
+              let subjectEmail = "Alert: Jobs with Missing Paperwork Due in the Next 2 Days";
+              let htmlEmail = `
+              <h3>Alert: Jobs with Missing Paperwork Due in the Next 2 Days</h3>
+              <p>Hello,</p>
+              <p>This is to inform you that some jobs are missing required paperwork and are due within the next 2 days.</p>
+              <p>Please review the attached report to take necessary actions.</p>
+              <br>
+              <p>Regards,<br>Your Automation System</p>
+            `;
+              const dynamic_attachment = res.csvContent;
+              const filename = `Jobs_Missing_Paperwork_Max2Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+              // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+              // if (emailSent) {
+              //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+              // } else {
+              //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+              // }
+            }
+          });
+
         }
+
       } else {
         parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
       }
@@ -162,8 +189,8 @@ parentPort.on("message", async (rows) => {
 
 
 
- async function otherUserDataGet(row) {
- const query = `
+async function otherUserDataGet(row) {
+  const query = `
         SELECT 
         jobs.id AS id,
           CONCAT(
@@ -243,9 +270,9 @@ parentPort.on("message", async (rows) => {
         `;
 
   const [result] = await pool.execute(query);
- // console.log("Generating CSV for other user: Length --- ", result.length);
+  // console.log("Generating CSV for other user: Length --- ", result.length);
   let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
-  
+
   if (result && result.length > 0) {
     result?.forEach(val => {
 
@@ -271,14 +298,14 @@ parentPort.on("message", async (rows) => {
 
       csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
-    return {status:true, csvContent:csvContent};
-  }
-  
-  else{
-   return {status:false};
+    return { status: true, csvContent: csvContent };
   }
 
-  
+  else {
+    return { status: false };
+  }
+
+
 }
 
 
