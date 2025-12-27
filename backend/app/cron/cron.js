@@ -130,6 +130,10 @@ module.exports = (app) => {
   missingPaperworkInMax2Days(missingPaperworkInMax2Days_result || []);
 
 
+  // 4. Jobs Sitting With Staff For Over Month Report Email to Super Admin and Admin and Management Role Staffs
+
+
+
 
 
 
@@ -149,7 +153,6 @@ module.exports = (app) => {
 
     
 
-    // missingPaperworkInMax2Days(superAdminAdminManagementRole || []);
 
     // jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
 
@@ -168,7 +171,7 @@ module.exports = (app) => {
 cron.schedule("* * * * *", async () => {
   
 
-const missingPaperworkInMax2Days_query = `
+const jobsSittingWithForOverMonth_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -189,8 +192,8 @@ const missingPaperworkInMax2Days_query = `
           staffs.id DESC;
         `;
 
-     const [missingPaperworkInMax2Days_result] = await pool.execute(missingPaperworkInMax2Days_query);   
-  missingPaperworkInMax2Days(missingPaperworkInMax2Days_result || []);
+     const [jobsSittingWithForOverMonth_result] = await pool.execute(jobsSittingWithForOverMonth_query);   
+  jobsSittingWithForOverMonth(jobsSittingWithForOverMonth_result || []);
 
 }, {
   timezone: "Europe/London"
