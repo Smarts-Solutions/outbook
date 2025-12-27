@@ -50,7 +50,7 @@ module.exports = (app) => {
     ////////-----------Trigger Report Email --------------------//////
 
 
-    // WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs  
+    // 1 . WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs  
     const wipAndToBeStartedMoreThan_7_query = `
         SELECT 
         staffs.id AS id,
@@ -79,8 +79,7 @@ module.exports = (app) => {
 
 
 
-    // Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
-
+    // 2. Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
       const expectedDeliveryDateChanged_7_query = `
         SELECT 
         staffs.id AS id,
