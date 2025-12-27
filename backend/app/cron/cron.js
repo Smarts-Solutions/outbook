@@ -138,16 +138,23 @@ cron.schedule("* * * * *", async () => {
         CONCAT(first_name,' ',last_name) AS staff_fullname,
         staffs.email AS staff_email,
         roles.role AS staff_role,
-        roles.id AS role_id
+        roles.id AS role_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id
+        
         FROM 
-        jobs
-        JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        JOIN staffs ON staffs.id = assigned_jobs_staff_view.staff_id
+        staffs
         JOIN roles ON roles.id = staffs.role_id
-        WHERE jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-        GROUP BY assigned_jobs_staff_view.staff_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        WHERE 
+        (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
+        OR roles.id IN (1, 2, 8)
+        GROUP BY staffs.id
         ORDER BY 
-          jobs.id DESC;
+          staffs.id DESC;
         `;    
 
     
