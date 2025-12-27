@@ -216,8 +216,8 @@ const JobsNotDeliveredWithin14Days_query = `
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
-        jobs.created_at >= NOW() - INTERVAL 30 DAY
-        AND jobs.created_at <= NOW()
+        jobs.date_received_on >= NOW() - INTERVAL 14 DAY
+        AND jobs.date_received_on <= NOW()
         AND jobs.status_type NOT IN (6,7,17,18,19,20)
         ) 
         OR roles.id IN (1, 2, 8)
