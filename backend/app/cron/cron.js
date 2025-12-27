@@ -190,35 +190,7 @@ module.exports = (app) => {
 
   // 6. Jobs Not Delivered After Missing Paperwork 7 Days Report Email to Super Admin and Admin and Management Role Staffs
 
-
-
-
-
-
-
-
-   
-
-    
-
-
-  
-    
-
-    // JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
-
-  }
-    , {
-      timezone: "Europe/London"
-    }
-  );
-
-};
-
-cron.schedule("* * * * *", async () => {
-  
-
-const JobsNotDeliveredMissingPaperwork7Days_query = `
+  const JobsNotDeliveredMissingPaperwork7Days_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -251,9 +223,54 @@ const JobsNotDeliveredMissingPaperwork7Days_query = `
      const [JobsNotDeliveredMissingPaperwork7Days_result] = await pool.execute(JobsNotDeliveredMissingPaperwork7Days_query);   
   JobsNotDeliveredMissingPaperwork7Days(JobsNotDeliveredMissingPaperwork7Days_result || []);
 
-}, {
-  timezone: "Europe/London"
-});
+
+
+  }
+    , {
+      timezone: "Europe/London"
+    }
+  );
+
+};
+
+// cron.schedule("* * * * *", async () => {
+
+// const JobsNotDeliveredMissingPaperwork7Days_query = `
+//         SELECT 
+//         staffs.id AS id,
+//         CONCAT(first_name,' ',last_name) AS staff_fullname,
+//         staffs.email AS staff_email,
+//         roles.role AS staff_role,
+//         roles.id AS role_id
+//         FROM 
+//         staffs
+//         JOIN roles ON roles.id = staffs.role_id
+//         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+//         LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+//         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+//         WHERE
+//         (
+//          jobs.status_type NOT IN (6,7,17,18,19,20)
+//          AND EXISTS (
+//           SELECT 1
+//           FROM missing_logs 
+//           WHERE missing_logs.job_id = jobs.id
+//             AND missing_logs.status = '1'
+//             AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
+//         )
+//         ) 
+//         OR roles.id IN (1, 2, 8)
+//         GROUP BY staffs.id
+//         ORDER BY 
+//           staffs.id DESC;
+//         `;
+
+//      const [JobsNotDeliveredMissingPaperwork7Days_result] = await pool.execute(JobsNotDeliveredMissingPaperwork7Days_query);   
+//   JobsNotDeliveredMissingPaperwork7Days(JobsNotDeliveredMissingPaperwork7Days_result || []);
+
+// }, {
+//   timezone: "Europe/London"
+// });
 
 
 
