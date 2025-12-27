@@ -80,7 +80,7 @@ module.exports = (app) => {
 
 
     // 2. Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
-      const expectedDeliveryDateChanged_7_query = `
+      const expectedDeliveryDateChanged_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -100,8 +100,33 @@ module.exports = (app) => {
           staffs.id DESC;
         `;
 
-  const [expectedDeliveryDateChanged_7_result] = await pool.execute(expectedDeliveryDateChanged_7_query);
-  expectedDeliveryDateChanged(expectedDeliveryDateChanged_7_result || []);
+  const [expectedDeliveryDateChanged_result] = await pool.execute(expectedDeliveryDateChanged_query);
+  expectedDeliveryDateChanged(expectedDeliveryDateChanged_result || []);
+
+
+  // 3. Missing Paperwork in Max 2 Days Report Email to Super Admin and Admin and Management Role Staffs
+  const missingPaperworkInMax2Days_query = `
+        SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id
+        FROM 
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        WHERE
+        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old) 
+        OR roles.id IN (1, 2, 8)
+        GROUP BY staffs.id
+        ORDER BY 
+          staffs.id DESC;
+        `;
+
+     const [missingPaperworkInMax2Days_result] = await pool.execute(missingPaperworkInMax2Days_query);   
+  missingPaperworkInMax2Days(missingPaperworkInMax2Days_result || []);
 
 
 
@@ -121,7 +146,7 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
 
-    // expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
+    
 
     // missingPaperworkInMax2Days(superAdminAdminManagementRole || []);
 
@@ -142,7 +167,7 @@ module.exports = (app) => {
 cron.schedule("* * * * *", async () => {
   
 
-  const expectedDeliveryDateChanged_7_query = `
+const missingPaperworkInMax2Days_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -162,8 +187,8 @@ cron.schedule("* * * * *", async () => {
           staffs.id DESC;
         `;
 
-  const [expectedDeliveryDateChanged_7_result] = await pool.execute(expectedDeliveryDateChanged_7_query);
-  expectedDeliveryDateChanged(expectedDeliveryDateChanged_7_result || []);
+     const [missingPaperworkInMax2Days_result] = await pool.execute(missingPaperworkInMax2Days_query);   
+  missingPaperworkInMax2Days(missingPaperworkInMax2Days_result || []);
 
 }, {
   timezone: "Europe/London"
