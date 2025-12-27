@@ -160,6 +160,33 @@ module.exports = (app) => {
   jobsSittingWithForOverMonth(jobsSittingWithForOverMonth_result || []);
 
   // 5. Jobs Not Delivered Within 14 Days Report Email to Super Admin and Admin and Management Role Staffs
+  const JobsNotDeliveredWithin14Days_query = `
+        SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id
+        FROM 
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE
+        (
+        jobs.date_received_on >= NOW() - INTERVAL 14 DAY
+        AND jobs.date_received_on <= NOW()
+        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        ) 
+        OR roles.id IN (1, 2, 8)
+        GROUP BY staffs.id
+        ORDER BY 
+          staffs.id DESC;
+        `;
+
+     const [JobsNotDeliveredWithin14Days_result] = await pool.execute(JobsNotDeliveredWithin14Days_query);   
+  JobsNotDeliveredWithin14Days(JobsNotDeliveredWithin14Days_result || []);
 
 
 
@@ -186,7 +213,7 @@ module.exports = (app) => {
 
     
 
-    // JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
+    
 
     // JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
 
