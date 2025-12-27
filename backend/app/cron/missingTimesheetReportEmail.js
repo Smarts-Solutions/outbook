@@ -35,10 +35,8 @@ parentPort.on("message", async (rows) => {
 
         const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
-          //console.log("Missing Timesheet Report email sent successfully.");
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
         } else {
-          // console.log("Failed to send Missing Timesheet Report email.");
           parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
         }
       } else {

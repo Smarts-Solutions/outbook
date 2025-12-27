@@ -142,21 +142,19 @@ parentPort.on("message", async (rows) => {
         const dynamic_attachment = csvContent;
         const filename = `Jobs_Changed_Expected_Delivery_Dates_Report_${new Date().toISOString().slice(0, 10)}.csv`;
 
-        // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-        // if (emailSent) {
-        //   //console.log("Missing Timesheet Report email sent successfully.");
-        //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-        // } else {
-        //   // console.log("Failed to send Missing Timesheet Report email.");
-        //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-        // }
+        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+        if (emailSent) {
+         
+          parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+        } else {
+          
+          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+        }
 
       }else{
         await otherUserDataGet(row).then(async (res)=>{
           if(res.status){
 
-            console.log("Generating CSV for other user completed:", row.id);
-            console.log("Generating CSV for other user completed:", res.csvContent);
             let toEmail = row.staff_email;
             let subjectEmail = "Alert: Jobs with Changed Expected Delivery Dates";
             let htmlEmail = `
@@ -169,14 +167,14 @@ parentPort.on("message", async (rows) => {
                   `;
             const dynamic_attachment = res.csvContent;
             const filename = `Jobs_Changed_Expected_Delivery_Dates_Report_${new Date().toISOString().slice(0, 10)}.csv`;
-            // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-            // if (emailSent) {
-            //   //console.log("Missing Timesheet Report email sent successfully.");
-            //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-            // } else {
-            //   // console.log("Failed to send Missing Timesheet Report email.");
-            //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-            // }
+            const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+            if (emailSent) {
+             
+              parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+            } else {
+              
+              parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+            }
           } else {
             parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
           }
@@ -279,7 +277,6 @@ async function otherUserDataGet(row) {
         `;
 
   const [result] = await pool.execute(query);
-  console.log("Generating CSV for other user: Length --- ", result.length);
   let csvContent = "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
 
   if (result && result.length > 0) {

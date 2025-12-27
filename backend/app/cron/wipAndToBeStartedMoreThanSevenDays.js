@@ -118,7 +118,6 @@ parentPort.on("message", async (rows) => {
     });
   }
 
-  
  //  console.log("CSV Content Generated:-- rows", rows);
 
   for (const row of rows) {
@@ -137,14 +136,14 @@ parentPort.on("message", async (rows) => {
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-        // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-        // if (emailSent) {
+        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+        if (emailSent) {
           
-        //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-        // } else {
+          parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+        } else {
         
-        //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-        // }
+          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+        }
 
       }else{
            
@@ -156,15 +155,13 @@ parentPort.on("message", async (rows) => {
           const dynamic_attachment = res.csvContent;
           const filename = `Jobs_Not_Updated_7Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
 
-          console.log("CSV Content for other user generated:-- ",row, " attachement ",dynamic_attachment);
+          const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+          if (emailSent) {
 
-          // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-          // if (emailSent) {
-
-          //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-          // } else {
-          //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-          // }
+            parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+          } else {
+            parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          }
         }
       });
 

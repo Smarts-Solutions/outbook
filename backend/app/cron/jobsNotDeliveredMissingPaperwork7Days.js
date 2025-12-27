@@ -119,7 +119,6 @@ parentPort.on("message", async (rows) => {
 
       if (result && result.length > 0) {
 
-        // console.log("CSV Content -->>>:\n", csvContent);
         if ([1, 2, 8].includes(row.role_id)) {
           let toEmail = row.staff_email;
           let subjectEmail = "Alert: Jobs Not Delivered Within 7 Days of Receiving the Missing Paperwork";
@@ -146,17 +145,17 @@ parentPort.on("message", async (rows) => {
             .slice(0, 10)}.csv`;
           const dynamic_attachment = csvContent;
 
-          // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-          // if (emailSent) {
-          //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-          // } else {
-          //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-          // }
+          const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+          if (emailSent) {
+            parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+          } else {
+            parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          }
         } else {
 
           await otherUserDataGet(row).then(async (res) => {
             if (res.status) {
-              console.log("res.csvContent ",res.csvContent)
+             
               let toEmail = row.staff_email;
               let subjectEmail = "Alert: Jobs Not Delivered Within 7 Days of Receiving the Missing Paperwork";
               let htmlEmail = `
@@ -181,16 +180,13 @@ parentPort.on("message", async (rows) => {
                 .toISOString()
                 .slice(0, 10)}.csv`;
               const dynamic_attachment = res.csvContent;
+              const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+              if (emailSent) {
 
-
-
-              // const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-              // if (emailSent) {
-
-              //   parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-              // } else {
-              //   parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-              // }
+                parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+              } else {
+                parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+              }
             }
           });
 
