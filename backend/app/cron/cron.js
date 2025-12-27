@@ -134,12 +134,18 @@ cron.schedule("* * * * *", async () => {
 
      const query = `
          SELECT 
-        jobs.id AS id,
+        jobs.id AS job_id,
         jobs.staff_created_id AS staff_created_id,
-        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
+        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id,
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role
         FROM 
         jobs
         JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        JOIN staffs ON staffs.id = assigned_jobs_staff_view.satff_id
+        JOIN roles ON roles.id = staffs.role_id
         WHERE jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         GROUP BY assigned_jobs_staff_view.staff_id
         ORDER BY 
