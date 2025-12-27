@@ -117,9 +117,10 @@ module.exports = (app) => {
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
         LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
-        WHERE
-        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old) 
-        OR roles.id IN (1, 2, 8)
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE 
+        ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,17,18,19,20)
+        AND missing_logs.job_id IS NULL)  OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
         ORDER BY 
           staffs.id DESC;
