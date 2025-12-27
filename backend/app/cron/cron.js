@@ -188,31 +188,21 @@ module.exports = (app) => {
      const [JobsNotDeliveredWithin14Days_result] = await pool.execute(JobsNotDeliveredWithin14Days_query);   
   JobsNotDeliveredWithin14Days(JobsNotDeliveredWithin14Days_result || []);
 
+  // 6. Jobs Not Delivered After Missing Paperwork 7 Days Report Email to Super Admin and Admin and Management Role Staffs
 
 
 
 
 
 
-    const [superAdminAdminManagementRole] = await pool.execute(`
-    SELECT 
-        staffs.id AS id,
-        CONCAT(first_name,' ',last_name) AS staff_fullname,
-        staffs.email AS staff_email
-    FROM staffs
-    JOIN roles ON roles.id = staffs.role_id
-    LEFT JOIN timesheet 
-        ON staffs.id = timesheet.staff_id 
-      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
-    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
-    GROUP BY staffs.id
-    `);
+
+
+   
 
     
 
 
-    
-
+  
     
 
     // JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
@@ -228,7 +218,7 @@ module.exports = (app) => {
 cron.schedule("* * * * *", async () => {
   
 
-const JobsNotDeliveredWithin14Days_query = `
+const JobsNotDeliveredMissingPaperwork7Days_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -243,9 +233,14 @@ const JobsNotDeliveredWithin14Days_query = `
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
-        jobs.date_received_on >= NOW() - INTERVAL 14 DAY
-        AND jobs.date_received_on <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+         jobs.status_type NOT IN (6,7,17,18,19,20)
+         AND EXISTS (
+          SELECT 1
+          FROM missing_logs 
+          WHERE missing_logs.job_id = jobs.id
+            AND missing_logs.status = '1'
+            AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
+        )
         ) 
         OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
@@ -253,8 +248,8 @@ const JobsNotDeliveredWithin14Days_query = `
           staffs.id DESC;
         `;
 
-     const [JobsNotDeliveredWithin14Days_result] = await pool.execute(JobsNotDeliveredWithin14Days_query);   
-  JobsNotDeliveredWithin14Days(JobsNotDeliveredWithin14Days_result || []);
+     const [JobsNotDeliveredMissingPaperwork7Days_result] = await pool.execute(JobsNotDeliveredMissingPaperwork7Days_query);   
+  JobsNotDeliveredMissingPaperwork7Days(JobsNotDeliveredMissingPaperwork7Days_result || []);
 
 }, {
   timezone: "Europe/London"

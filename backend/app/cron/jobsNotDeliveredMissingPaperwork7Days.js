@@ -71,7 +71,7 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN drafts ON drafts.job_id = jobs.id
 
       WHERE 
-        jobs.status_type != 6
+        jobs.status_type NOT IN (6,7,17,18,19,20)
         AND EXISTS (
           SELECT 1
           FROM missing_logs 
