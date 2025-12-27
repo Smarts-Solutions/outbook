@@ -152,6 +152,7 @@ parentPort.on("message", async (rows) => {
         } else {
           await otherUserDataGet(row).then(async (res)=>{
             if(res.status){
+              console.log("CSV Content -->>>:\n", res.csvContent);
               let toEmail = row.staff_email;
               let subjectEmail = "Alert: Jobs That Have Been Sitting With Us for Over a Month";
 
@@ -192,6 +193,7 @@ parentPort.on("message", async (rows) => {
 
 
 async function otherUserDataGet(row) {
+  console.log("Generating CSV for other user: ID ", row.id);
   const query = `
         SELECT 
         jobs.id AS id,
@@ -275,6 +277,8 @@ async function otherUserDataGet(row) {
   const [result] = await pool.execute(query);
   // console.log("Generating CSV for other user: Length --- ", result.length);
   let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+
+  console.log("Generating CSV for other user Length:", result.length);
 
   if (result && result.length > 0) {
 
