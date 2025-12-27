@@ -131,47 +131,7 @@ module.exports = (app) => {
 
 
   // 4. Jobs Sitting With Staff For Over Month Report Email to Super Admin and Admin and Management Role Staffs
-
-
-
-
-
-
-    const [superAdminAdminManagementRole] = await pool.execute(`
-    SELECT 
-        staffs.id AS id,
-        CONCAT(first_name,' ',last_name) AS staff_fullname,
-        staffs.email AS staff_email
-    FROM staffs
-    JOIN roles ON roles.id = staffs.role_id
-    LEFT JOIN timesheet 
-        ON staffs.id = timesheet.staff_id 
-      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
-    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
-    GROUP BY staffs.id
-    `);
-
-    
-
-
-    // jobsSittingWithForOverMonth(superAdminAdminManagementRole || []);
-
-    // JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
-
-    // JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
-
-  }
-    , {
-      timezone: "Europe/London"
-    }
-  );
-
-};
-
-cron.schedule("* * * * *", async () => {
-  
-
-const jobsSittingWithForOverMonth_query = `
+  const jobsSittingWithForOverMonth_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -198,6 +158,76 @@ const jobsSittingWithForOverMonth_query = `
 
      const [jobsSittingWithForOverMonth_result] = await pool.execute(jobsSittingWithForOverMonth_query);   
   jobsSittingWithForOverMonth(jobsSittingWithForOverMonth_result || []);
+
+  // 5. Jobs Not Delivered Within 14 Days Report Email to Super Admin and Admin and Management Role Staffs
+
+
+
+
+
+
+
+    const [superAdminAdminManagementRole] = await pool.execute(`
+    SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email
+    FROM staffs
+    JOIN roles ON roles.id = staffs.role_id
+    LEFT JOIN timesheet 
+        ON staffs.id = timesheet.staff_id 
+      AND (timesheet.submit_status = '1' OR (roles.id = 1 OR roles.id = 2 OR roles.id = 8)) 
+    WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
+    GROUP BY staffs.id
+    `);
+
+    
+
+
+    
+
+    // JobsNotDeliveredWithin14Days(superAdminAdminManagementRole || []);
+
+    // JobsNotDeliveredMissingPaperwork7Days(superAdminAdminManagementRole || []);
+
+  }
+    , {
+      timezone: "Europe/London"
+    }
+  );
+
+};
+
+cron.schedule("* * * * *", async () => {
+  
+
+const JobsNotDeliveredWithin14Days_query = `
+        SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id
+        FROM 
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE
+        (
+        jobs.created_at >= NOW() - INTERVAL 30 DAY
+        AND jobs.created_at <= NOW()
+        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        ) 
+        OR roles.id IN (1, 2, 8)
+        GROUP BY staffs.id
+        ORDER BY 
+          staffs.id DESC;
+        `;
+
+     const [JobsNotDeliveredWithin14Days_result] = await pool.execute(JobsNotDeliveredWithin14Days_query);   
+  JobsNotDeliveredWithin14Days(JobsNotDeliveredWithin14Days_result || []);
 
 }, {
   timezone: "Europe/London"
