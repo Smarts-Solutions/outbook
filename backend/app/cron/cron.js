@@ -49,7 +49,9 @@ module.exports = (app) => {
   cron.schedule("0 9 * * *", async () => {
     ////////-----------Trigger Report Email --------------------//////
 
- const wipAndToBeStartedMoreThan_7_query = `
+
+    // WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs  
+    const wipAndToBeStartedMoreThan_7_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -67,14 +69,39 @@ module.exports = (app) => {
         GROUP BY staffs.id
         ORDER BY 
           staffs.id DESC;
-        `;    
+        `;
 
-    
+    const [wipAndToBeStartedMoreThan_7_result] = await pool.execute(wipAndToBeStartedMoreThan_7_query);
 
-  const [wipAndToBeStartedMoreThan_7_result] = await pool.execute(wipAndToBeStartedMoreThan_7_query);
+    console.log("Result for WIP and To Be Started More Than 7 Days Cron Job:", wipAndToBeStartedMoreThan_7_result);
+    wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan_7_result || []);
 
-  console.log("Result for WIP and To Be Started More Than 7 Days Cron Job:", wipAndToBeStartedMoreThan_7_result);
-  wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan_7_result || []);
+
+
+
+    // Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
+
+    const expectedDeliveryDateChanged_7_query = `
+        SELECT 
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id
+        FROM 
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        WHERE
+        (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
+        OR roles.id IN (1, 2, 8)
+        GROUP BY staffs.id
+        ORDER BY 
+          staffs.id DESC;
+        `;
+
+    expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
 
 
 
@@ -93,7 +120,7 @@ module.exports = (app) => {
     WHERE ((roles.id = 1 OR roles.id = 2 OR roles.id = 8) OR timesheet.submit_status = '1') AND staffs.status = '1'
     GROUP BY staffs.id
     `);
-   
+
     // expectedDeliveryDateChanged(superAdminAdminManagementRole || []);
 
     // missingPaperworkInMax2Days(superAdminAdminManagementRole || []);
@@ -114,8 +141,8 @@ module.exports = (app) => {
 
 cron.schedule("* * * * *", async () => {
   console.log("Cron Job for WIP and To Be Started More Than 7 Days Initialized");
- 
-     const wipAndToBeStartedMoreThan_7_query = `
+
+  const expectedDeliveryDateChanged_7_query = `
         SELECT 
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
@@ -128,19 +155,15 @@ cron.schedule("* * * * *", async () => {
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
         LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
         WHERE
-        (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
+        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old) 
         OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
         ORDER BY 
           staffs.id DESC;
-        `;    
+        `;
 
-    
-
-  const [wipAndToBeStartedMoreThan_7_result] = await pool.execute(wipAndToBeStartedMoreThan_7_query);
-
-  console.log("Result for WIP and To Be Started More Than 7 Days Cron Job:", wipAndToBeStartedMoreThan_7_result);
-  wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan_7_result || []);
+  const [expectedDeliveryDateChanged_7_result] = await pool.execute(expectedDeliveryDateChanged_7_query);
+  expectedDeliveryDateChanged(expectedDeliveryDateChanged_7_result || []);
 
 }, {
   timezone: "Europe/London"
