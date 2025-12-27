@@ -1,7 +1,12 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../utils/helper');
-
+const {
+  SatffLogUpdateOperation,
+  generateNextUniqueCode,
+  getDateRange,
+  LineManageStaffIdHelperFunction,
+  QueryRoleHelperFunction,
+} = require("../utils/helper");
 
 /*
 VIEW
@@ -102,32 +107,40 @@ JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
 
 */
 
-
-
-
 const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
   const { startDate, endDate } = await getDateRange(date_filter);
 
   // Line Manager
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
   // Get Role
-  const rowRoles = await QueryRoleHelperFunction(staff_id)
+  const rowRoles = await QueryRoleHelperFunction(staff_id);
 
   try {
+    const [RoleAccessCustomer] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rowRoles[0].role_id, 33]
+    );
 
-    const [RoleAccessCustomer] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 33]);
+    const [RoleAccessClient] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rowRoles[0].role_id, 34]
+    );
 
-    const [RoleAccessClient] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 34]);
-
-    const [RoleAccessJob] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rowRoles[0].role_id, 35]);
+    const [RoleAccessJob] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rowRoles[0].role_id, 35]
+    );
 
     // console.log("rows startDate ", startDate);
     // console.log("rows endDate ", endDate);
 
     // For Cutomer Data
     let CustomerResult = [];
-    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessCustomer.length > 0)) {
+    if (
+      rowRoles.length > 0 &&
+      (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessCustomer.length > 0)
+    ) {
       const CustomerQuery = `
       SELECT  
           customers.id AS id
@@ -138,10 +151,12 @@ const getDashboardData = async (dashboard) => {
       ORDER BY 
       id DESC;`;
 
-      const [CustomerData] = await pool.execute(CustomerQuery, [startDate, endDate]);
+      const [CustomerData] = await pool.execute(CustomerQuery, [
+        startDate,
+        endDate,
+      ]);
       CustomerResult = CustomerData;
-    }
-    else {
+    } else {
       const CustomerQuery = `
         SELECT  
             customers.id AS id
@@ -163,13 +178,19 @@ const getDashboardData = async (dashboard) => {
         GROUP BY customers.id
         ORDER BY customers.id DESC;
     `;
-      const [CustomerData] = await pool.execute(CustomerQuery, [startDate, endDate]);
+      const [CustomerData] = await pool.execute(CustomerQuery, [
+        startDate,
+        endDate,
+      ]);
       CustomerResult = CustomerData;
     }
 
     // For Client Data
     let ClientResult = [];
-    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessClient.length > 0)) {
+    if (
+      rowRoles.length > 0 &&
+      (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessClient.length > 0)
+    ) {
       const ClientQuery = `
    SELECT  
     clients.id AS id
@@ -194,9 +215,11 @@ const getDashboardData = async (dashboard) => {
     ORDER BY 
         clients.id DESC;
     `;
-      const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
+      const [ClientData] = await pool.execute(ClientQuery, [
+        startDate,
+        endDate,
+      ]);
       ClientResult = ClientData;
-
     } else {
       const ClientQuery = `
     SELECT  
@@ -228,12 +251,15 @@ const getDashboardData = async (dashboard) => {
       ORDER BY 
           clients.id DESC;
     `;
-      const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
+      const [ClientData] = await pool.execute(ClientQuery, [
+        startDate,
+        endDate,
+      ]);
       ClientResult = ClientData;
     }
 
     // For Staff Data
-    let StaffResult = []
+    let StaffResult = [];
     if (rowRoles.length > 0 && rowRoles[0].role_name == "SUPERADMIN") {
       const StaffQuery = `
         SELECT  
@@ -244,7 +270,6 @@ const getDashboardData = async (dashboard) => {
         `;
       const [StaffData] = await pool.execute(StaffQuery, [startDate, endDate]);
       StaffResult = StaffData;
-
     } else {
       const StaffQuery = `
         SELECT  
@@ -259,8 +284,11 @@ const getDashboardData = async (dashboard) => {
     }
 
     // For Jobs Data
-    let JobResult = []
-    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessJob.length > 0)) {
+    let JobResult = [];
+    if (
+      rowRoles.length > 0 &&
+      (rowRoles[0].role_name == "SUPERADMIN" || RoleAccessJob.length > 0)
+    ) {
       const JobQuery = `
         SELECT 
         jobs.id AS id,
@@ -295,8 +323,7 @@ const getDashboardData = async (dashboard) => {
         `;
       const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
       JobResult = JobData;
-    }
-    else {
+    } else {
       const JobQuery = `
         SELECT 
         jobs.id AS id,
@@ -348,93 +375,204 @@ const getDashboardData = async (dashboard) => {
         `;
       const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
 
-
       //////-----START Assign Customer Service Data START----////////
-      let isExistAssignCustomer = JobData?.find(item => item?.assigned_source === 'assign_customer_service');
+      let isExistAssignCustomer = JobData?.find(
+        (item) => item?.assigned_source === "assign_customer_service"
+      );
       if (isExistAssignCustomer != undefined) {
-        let matched = JobData?.filter(item =>
-          item?.assigned_source === 'assign_customer_service' &&
-          Number(item?.service_id_assign) === Number(item?.job_service_id)
-        )
-        let matched2 = JobData?.filter(item =>
-          item?.assigned_source !== 'assign_customer_service'
-        )
-        const resultAssignCustomer = [...matched, ...matched2]
+        let matched = JobData?.filter(
+          (item) =>
+            item?.assigned_source === "assign_customer_service" &&
+            Number(item?.service_id_assign) === Number(item?.job_service_id)
+        );
+        let matched2 = JobData?.filter(
+          (item) => item?.assigned_source !== "assign_customer_service"
+        );
+        const resultAssignCustomer = [...matched, ...matched2];
         JobResult = resultAssignCustomer;
       }
       //////-----END Assign Customer Service Data END----////////
       else {
         JobResult = JobData;
       }
-
     }
-
 
     const result = {
       customer: {
         count: CustomerResult.length,
-        ids: CustomerResult.map(row => row.id).join(',')
+        ids: CustomerResult.map((row) => row.id).join(","),
       },
       client: {
         count: ClientResult.length,
-        ids: ClientResult.map(row => row.id).join(',')
+        ids: ClientResult.map((row) => row.id).join(","),
       },
       staff: {
         count: StaffResult.length,
-        ids: StaffResult.map(row => row.id).join(',')
+        ids: StaffResult.map((row) => row.id).join(","),
       },
       job: {
         count: JobResult.length,
-        ids: JobResult.map(row => row.id).join(',')
+        ids: JobResult.map((row) => row.id).join(","),
       },
       pending_job: {
-        count: JobResult?.filter(row => Number(row.status_type) != 6).length,
-        ids: JobResult?.filter(row => Number(row.status_type) != 6).map(row => row.id).join(',')
+        count: JobResult?.filter((row) => Number(row.status_type) != 6).length,
+        ids: JobResult?.filter((row) => Number(row.status_type) != 6)
+          .map((row) => row.id)
+          .join(","),
       },
       completed_job: {
-        count: JobResult?.filter(row => Number(row.status_type) === 6).length,
-        ids: JobResult?.filter(row => Number(row.status_type) === 6).map(row => row.id).join(',')
-      }
+        count: JobResult?.filter((row) => Number(row.status_type) === 6).length,
+        ids: JobResult?.filter((row) => Number(row.status_type) === 6)
+          .map((row) => row.id)
+          .join(","),
+      },
     };
     return { status: true, message: "success.", data: result };
-
-
   } catch (err) {
     console.error("eeee", err);
-    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: err.message,
+    };
   }
-
 };
 
-
 const getDashboardActivityLog = async (dashboard) => {
-  const { staff_id, type, filter_type, filter_staff_id, from_date, to_date } = dashboard;
+  const {
+    staff_id,
+    type,
+    filter_type,
+    filter_staff_id,
+    from_date,
+    to_date,
+    page = 1,
+  } = dashboard;
 
-
-  const QueryRole = `
-  SELECT
-    staffs.id AS id,
-    staffs.role_id AS role_id,
-    roles.role AS role_name
-  FROM
-    staffs
-  JOIN
-    roles ON roles.id = staffs.role_id
-  WHERE
-    staffs.id = ${staff_id}
-  LIMIT 1
-  `
-  const [rows] = await pool.execute(QueryRole);
-  // Condition with Admin And SuperAdmin
-  let MatchCondition = `WHERE
-    staff_logs.staff_id = ${staff_id}`
-
-  if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN")) {
-    MatchCondition = ''
-  }
+  const limit = 50;
+  const offset = (page - 1) * limit;
 
   try {
-    let query = `
+    const QueryRole = `
+      SELECT
+        staffs.id AS id,
+        roles.role AS role_name
+      FROM staffs
+      JOIN roles ON roles.id = staffs.role_id
+      WHERE staffs.id = ?
+      LIMIT 1
+    `;
+    const [rows] = await pool.execute(QueryRole, [staff_id]);
+
+    const isSuperAdmin = rows.length > 0 && rows[0].role_name === "SUPERADMIN";
+
+    const getDateRangeByFilter = () => {
+      const today = new Date();
+      let startDate = null;
+      let endDate = null;
+
+      switch (filter_type) {
+        // ✅ This Week (Monday → Today)
+        case "this_week": {
+          const day = today.getDay() || 7;
+          startDate = new Date(today);
+          startDate.setDate(today.getDate() - day + 1);
+          endDate = today;
+          break;
+        }
+
+        // ✅ Last Week (Monday → Sunday)
+        case "last_week": {
+          const day = today.getDay() || 7;
+          endDate = new Date(today);
+          endDate.setDate(today.getDate() - day);
+          startDate = new Date(endDate);
+          startDate.setDate(endDate.getDate() - 6);
+          break;
+        }
+
+        // ✅ This Month (1st → Today)
+        case "this_month": {
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          endDate = today;
+          break;
+        }
+
+        // ✅ Last Month (1st → Last Day)
+        case "last_month": {
+          startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+          break;
+        }
+
+        // ✅ Last 6 Months
+        case "last_six_month": {
+          startDate = new Date(today);
+          startDate.setMonth(today.getMonth() - 6);
+          endDate = today;
+          break;
+        }
+
+        // ✅ Last Year (1 Jan → 31 Dec)
+        case "last_year": {
+          startDate = new Date(today.getFullYear() - 1, 0, 1);
+          endDate = new Date(today.getFullYear() - 1, 11, 31);
+          break;
+        }
+
+        // ✅ Custom Range
+        case "custom": {
+          if (from_date && to_date) {
+            startDate = new Date(from_date);
+            endDate = new Date(to_date);
+          }
+          break;
+        }
+      }
+
+      const format = (d) => d.toISOString().slice(0, 10);
+
+      return {
+        startDate: startDate ? format(startDate) : null,
+        endDate: endDate ? format(endDate) : null,
+      };
+    };
+
+    // ================= BUILD QUERY WITH PREPARED STATEMENTS =================
+    const { startDate, endDate } = getDateRangeByFilter();
+    
+    // Prepare query parts and parameters
+    let whereConditions = [];
+    let queryParams = [];
+
+    // Add staff filter for non-superadmin
+    if (!isSuperAdmin) {
+      whereConditions.push('staff_logs.staff_id = ?');
+      queryParams.push(staff_id);
+    }
+
+    // Add staff filter if specified
+    if (filter_staff_id) {
+      whereConditions.push('staff_logs.staff_id = ?');
+      queryParams.push(filter_staff_id);
+    }
+
+    // Add date range filter
+    if (startDate && endDate) {
+      whereConditions.push('staff_logs.date BETWEEN ? AND ?');
+      queryParams.push(startDate, endDate);
+    }
+
+    // Build WHERE clause
+    const whereClause = whereConditions.length > 0 
+      ? `WHERE ${whereConditions.join(' AND ')}` 
+      : '';
+
+    // Add limit and offset to params
+    queryParams.push(limit, offset);
+
+    // ================= MAIN QUERY (Fixed SQL Injection) =================
+    const query = `
       SELECT
         staff_logs.id AS log_id,
         staff_logs.staff_id AS staff_id,
@@ -442,102 +580,67 @@ const getDashboardActivityLog = async (dashboard) => {
         staff_logs.created_at AS created_at,
         staff_logs.log_message_all AS log_message,
         CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
-      FROM
-      staff_logs
-      LEFT JOIN
-        staffs ON staffs.id = staff_logs.staff_id
-      ${MatchCondition}
-      ORDER BY
-        staff_logs.id DESC
+      FROM staff_logs
+      LEFT JOIN staffs ON staffs.id = staff_logs.staff_id
+      ${whereClause}
+      ORDER BY staff_logs.id DESC
+      LIMIT ? OFFSET ?
     `;
 
-    if (filter_type === 'filter') {
+    const [result] = await pool.execute(query, queryParams);
 
-      let MatchCondition = `WHERE
-      staff_logs.staff_id = ${staff_id}`
+    // ================= GROUP BY DATE (STAFF VIEW) =================
+    let finalResult = result;
 
-      if (filter_staff_id && filter_staff_id != '') {
-        MatchCondition = `WHERE
-        staff_logs.staff_id = ${filter_staff_id}`
-      }
-
-      if (from_date && to_date) {
-        MatchCondition += ` AND staff_logs.date BETWEEN '${from_date}' AND '${to_date}' `;
-      }
-
-
-       query = `
-        SELECT
-          staff_logs.id AS log_id,
-          staff_logs.staff_id AS staff_id,
-          DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
-          staff_logs.created_at AS created_at,
-          staff_logs.log_message_all AS log_message,
-          CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
-        FROM
-          staff_logs
-        LEFT JOIN
-          staffs ON staffs.id = staff_logs.staff_id
-        ${MatchCondition}
-        ORDER BY 
-         staff_logs.id DESC
-      `;
-
-    }
-
-   // console.log("query ", query);
-
-    const [result] = await pool.execute(query);
-
-
-    if (result.length > 0) {
-      const groupedResult = result.reduce((acc, log) => {
-        const existingDate = acc.find(item => item.date === log.date);
-        if (existingDate) {
-          existingDate.allContain.push({
+    if (type === "staff" && result.length > 0) {
+      finalResult = result.reduce((acc, log) => {
+        const found = acc.find((item) => item.date === log.date);
+        if (found) {
+          found.allContain.push({
             created_at: log.created_at,
-            log_message: log.log_message
+            log_message: log.log_message,
           });
         } else {
           acc.push({
             date: log.date,
-            allContain: [{
-              created_at: log.created_at,
-              log_message: log.log_message
-            }]
+            allContain: [
+              {
+                created_at: log.created_at,
+                log_message: log.log_message,
+              },
+            ],
           });
         }
-
         return acc;
       }, []);
-
-
-      let finalResult = result
-      if (type == "staff") {
-        finalResult = groupedResult
-      }
-      return { status: true, message: "success.", data: finalResult };
-    } else {
-      return { status: true, message: "No Activity Log found.", data: [] }
     }
 
-
+    return {
+      status: true,
+      message: result.length ? "success." : "No Activity Log found.",
+      page,
+      limit,
+      data: finalResult,
+    };
   } catch (error) {
-    console.log("error - 488 ", error)
-    return { status: false, message: "Err Dashboard Activity Log Get", error: error.message };
+    console.error("Dashboard Activity Log Error:", error);
+    return {
+      status: false,
+      message: "Error fetching activity logs. Please try again.",
+      error: error.message,
+    };
   }
-
-
-}
+};
 
 const getByAllClient = async (dashboard) => {
   try {
     const { staff_id, ids } = dashboard;
-    const cleane_ids = ids.replace(/^,+|,+$/g, '');
-    // const query = `SELECT id 
-    //                FROM clients 
+    const cleane_ids = ids.replace(/^,+|,+$/g, "");
+    // const query = `SELECT id
+    //                FROM clients
     //                WHERE id IN (`+ cleane_ids + `)`;
-    const query = `
+    const query =
+      `
                    SELECT  
                        clients.id AS id,
                        clients.trading_name AS client_name,
@@ -564,7 +667,9 @@ const getByAllClient = async (dashboard) => {
                            FROM client_contact_details cd
                            WHERE cd.client_id = clients.id
                        )
-                   WHERE clients.id IN (`+ cleane_ids + `)
+                   WHERE clients.id IN (` +
+      cleane_ids +
+      `)
                    ORDER BY 
                    clients.id DESC;
                    `;
@@ -572,21 +677,26 @@ const getByAllClient = async (dashboard) => {
     if (result.length > 0) {
       return { status: true, message: "success.", data: result };
     } else {
-      return { status: false, message: "No client found.", data: [] }
+      return { status: false, message: "No client found.", data: [] };
     }
   } catch (error) {
-    return { status: false, message: "Err Dashboard Data View Get", error: error.message };
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: error.message,
+    };
   }
-}
+};
 
 const getByAllCustomer = async (dashboard) => {
   try {
     const { staff_id, ids } = dashboard;
-    const cleane_ids = ids.replace(/^,+|,+$/g, '');
-    // const query = `SELECT id 
-    //                FROM customers 
+    const cleane_ids = ids.replace(/^,+|,+$/g, "");
+    // const query = `SELECT id
+    //                FROM customers
     //                WHERE id IN (`+ cleane_ids + `)`;
-    const query = `
+    const query =
+      `
                    SELECT  
                    customers.id AS id,
                    customers.customer_type AS customer_type,
@@ -620,7 +730,9 @@ const getByAllCustomer = async (dashboard) => {
                    staffs AS staff2 ON customers.account_manager_id = staff2.id
                LEFT JOIN 
                    customer_company_information ON customers.id = customer_company_information.customer_id
-               WHERE customers.id IN (`+ cleane_ids + `)   
+               WHERE customers.id IN (` +
+      cleane_ids +
+      `)   
                ORDER BY 
                    customers.id DESC;
                    `;
@@ -628,19 +740,23 @@ const getByAllCustomer = async (dashboard) => {
     if (result.length > 0) {
       return { status: true, message: "success.", data: result };
     } else {
-      return { status: false, message: "No customer found.", data: [] }
+      return { status: false, message: "No customer found.", data: [] };
     }
+  } catch (error) {
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: error.message,
+    };
   }
-  catch (error) {
-    return { status: false, message: "Err Dashboard Data View Get", error: error.message };
-  }
-}
+};
 
 const getByAllJob = async (dashboard) => {
   try {
     const { staff_id, ids } = dashboard;
-    const cleane_ids = ids.replace(/^,+|,+$/g, '');
-    const query = `
+    const cleane_ids = ids.replace(/^,+|,+$/g, "");
+    const query =
+      `
                    SELECT 
                    jobs.id AS job_id,
                    job_types.type AS job_type_name,
@@ -696,7 +812,9 @@ const getByAllJob = async (dashboard) => {
                    staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
                    LEFT JOIN
                    master_status ON master_status.id = jobs.status_type
-                   WHERE jobs.id IN (`+ cleane_ids + `) 
+                   WHERE jobs.id IN (` +
+      cleane_ids +
+      `) 
                    ORDER BY
                    jobs.id DESC
                    `;
@@ -704,19 +822,23 @@ const getByAllJob = async (dashboard) => {
     if (result.length > 0) {
       return { status: true, message: "success.", data: result };
     } else {
-      return { status: false, message: "No customer found.", data: [] }
+      return { status: false, message: "No customer found.", data: [] };
     }
+  } catch (error) {
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: error.message,
+    };
   }
-  catch (error) {
-    return { status: false, message: "Err Dashboard Data View Get", error: error.message };
-  }
-}
+};
 
 const getByAllCompletedJob = async (dashboard) => {
   try {
     const { staff_id, ids } = dashboard;
-    const cleane_ids = ids.replace(/^,+|,+$/g, '');
-    const query = `
+    const cleane_ids = ids.replace(/^,+|,+$/g, "");
+    const query =
+      `
                    SELECT 
                    jobs.id AS job_id,
                    job_types.type AS job_type_name,
@@ -772,7 +894,9 @@ const getByAllCompletedJob = async (dashboard) => {
                    staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
                    LEFT JOIN
                    master_status ON master_status.id = jobs.status_type
-                   WHERE jobs.id IN (`+ cleane_ids + `) 
+                   WHERE jobs.id IN (` +
+      cleane_ids +
+      `) 
                    ORDER BY
                    jobs.id DESC
                    `;
@@ -780,19 +904,23 @@ const getByAllCompletedJob = async (dashboard) => {
     if (result.length > 0) {
       return { status: true, message: "success.", data: result };
     } else {
-      return { status: false, message: "No customer found.", data: [] }
+      return { status: false, message: "No customer found.", data: [] };
     }
+  } catch (error) {
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: error.message,
+    };
   }
-  catch (error) {
-    return { status: false, message: "Err Dashboard Data View Get", error: error.message };
-  }
-}
+};
 
 const getByAllPendingJob = async (dashboard) => {
   try {
     const { staff_id, ids } = dashboard;
-    const cleane_ids = ids.replace(/^,+|,+$/g, '');
-    const query = `
+    const cleane_ids = ids.replace(/^,+|,+$/g, "");
+    const query =
+      `
                    SELECT 
                    jobs.id AS job_id,
                    job_types.type AS job_type_name,
@@ -848,7 +976,9 @@ const getByAllPendingJob = async (dashboard) => {
                    staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
                    LEFT JOIN
                    master_status ON master_status.id = jobs.status_type
-                   WHERE jobs.id IN (`+ cleane_ids + `) 
+                   WHERE jobs.id IN (` +
+      cleane_ids +
+      `) 
                    ORDER BY
                    jobs.id DESC
                    `;
@@ -856,19 +986,23 @@ const getByAllPendingJob = async (dashboard) => {
     if (result.length > 0) {
       return { status: true, message: "success.", data: result };
     } else {
-      return { status: false, message: "No customer found.", data: [] }
+      return { status: false, message: "No customer found.", data: [] };
     }
+  } catch (error) {
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: error.message,
+    };
   }
-  catch (error) {
-    return { status: false, message: "Err Dashboard Data View Get", error: error.message };
-  }
-}
+};
 
 const getByAllStaff = async (dashboard) => {
   try {
     const { staff_id, ids } = dashboard;
-    const cleane_ids = ids.replace(/^,+|,+$/g, '');
-    const query = `
+    const cleane_ids = ids.replace(/^,+|,+$/g, "");
+    const query =
+      `
              SELECT 
              staffs.id, 
              staffs.role_id,
@@ -884,21 +1018,25 @@ const getByAllStaff = async (dashboard) => {
              roles.role 
              FROM staffs 
              JOIN roles ON staffs.role_id = roles.id
-             WHERE staffs.id IN (`+ cleane_ids + `)
+             WHERE staffs.id IN (` +
+      cleane_ids +
+      `)
              ORDER BY staffs.id DESC
                    `;
     const [result] = await pool.execute(query);
     if (result.length > 0) {
       return { status: true, message: "success.", data: result };
     } else {
-      return { status: false, message: "No customer found.", data: [] }
+      return { status: false, message: "No customer found.", data: [] };
     }
+  } catch (error) {
+    return {
+      status: false,
+      message: "Err Dashboard Data View Get",
+      error: error.message,
+    };
   }
-  catch (error) {
-    return { status: false, message: "Err Dashboard Data View Get", error: error.message };
-  }
-}
-
+};
 
 module.exports = {
   getDashboardData,
@@ -908,5 +1046,5 @@ module.exports = {
   getByAllJob,
   getByAllCompletedJob,
   getByAllPendingJob,
-  getByAllStaff
+  getByAllStaff,
 };
