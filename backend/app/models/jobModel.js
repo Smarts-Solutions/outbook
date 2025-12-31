@@ -1597,31 +1597,96 @@ async function getAllJobsSidebar(
     const placeholders = LineManageStaffId?.map(() => '?').join(',');
 
   
-    // 🔹 TOTAL COUNT
-    const [countResult] = await pool.execute(
-      `
-      SELECT COUNT(DISTINCT jobs.id) AS total
-      FROM jobs
-      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-      LEFT JOIN clients ON jobs.client_id = clients.id
-      LEFT JOIN customers ON jobs.customer_id = customers.id
-      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-      WHERE (
-        assigned_jobs_staff_view.staff_id IN (${placeholders})
-        OR jobs.staff_created_id IN (${placeholders})
-        OR clients.staff_created_id IN (${placeholders})
-      )
-      ${searchCondition}
-      `,
-      [
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        ...searchParams,
-      ]
-    );
+    // // 🔹 TOTAL COUNT
+    // const [countResult] = await pool.execute(
+    //   `
+    //   SELECT COUNT(DISTINCT jobs.id) AS total
+    //   FROM jobs
+    //   LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+    //   LEFT JOIN clients ON jobs.client_id = clients.id
+    //   LEFT JOIN customers ON jobs.customer_id = customers.id
+    //   LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+    //   WHERE (
+    //     assigned_jobs_staff_view.staff_id IN (${placeholders})
+    //     OR jobs.staff_created_id IN (${placeholders})
+    //     OR clients.staff_created_id IN (${placeholders})
+    //   )
+    //   ${searchCondition}
+    //   `,
+    //   [
+    //     ...LineManageStaffId,
+    //     ...LineManageStaffId,
+    //     ...LineManageStaffId,
+    //     ...searchParams,
+    //   ]
+    // );
 
-    total = countResult[0].total || 0;
+      const [countResult] = await pool.execute(
+          `
+          SELECT 
+            jobs.id AS id,
+            jobs.status_type AS status_type,
+            
+            assigned_jobs_staff_view.source AS assigned_source,
+            assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+            jobs.service_id AS job_service_id
+    
+            FROM 
+            jobs
+            LEFT JOIN 
+              assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+            JOIN 
+            services ON jobs.service_id = services.id
+            JOIN
+            customer_services ON customer_services.service_id = jobs.service_id
+            JOIN
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+            LEFT JOIN 
+            customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+             JOIN 
+            clients ON jobs.client_id = clients.id
+             JOIN 
+            customers ON jobs.customer_id = customers.id AND customers.status = '1'
+            LEFT JOIN 
+            staff_portfolio ON staff_portfolio.customer_id = customers.id
+            LEFT JOIN 
+            job_types ON jobs.job_type_id = job_types.id
+            LEFT JOIN 
+            staffs ON jobs.allocated_to = staffs.id
+            LEFT JOIN 
+            staffs AS staffs2 ON jobs.reviewer = staffs2.id
+            LEFT JOIN 
+            staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+            LEFT JOIN 
+            master_status ON master_status.id = jobs.status_type
+             LEFT JOIN
+             timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+            WHERE
+            (
+            (assigned_jobs_staff_view.staff_id IN(${placeholders}) 
+            OR jobs.staff_created_id IN(${placeholders}) 
+            OR clients.staff_created_id IN(${placeholders}))
+             AND (
+                assigned_jobs_staff_view.source != 'assign_customer_service'
+                OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+              )
+         )
+    
+          ${searchCondition}
+          GROUP BY jobs.id
+          `,
+          [
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            ...searchParams,
+          ]
+        );
+    
+        
+       // console.log("total ",countResult.length)
+        total = countResult.length || 0;
+       // total = countResult[0].total || 0;
 
     // 🔹 DATA
     const query = `
