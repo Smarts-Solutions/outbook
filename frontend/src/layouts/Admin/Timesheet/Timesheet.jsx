@@ -1810,6 +1810,12 @@ const Timesheet = () => {
       label: task.name,
     })) || [];
 
+  const taskTypeOptions = [
+    { value: "1", label: "Internal" },
+    { value: "2", label: "External" },
+  ];
+
+
 
 
   console.log("timeSheetRows", timeSheetRows)
@@ -2170,17 +2176,43 @@ const Timesheet = () => {
 
                                 <td className="ps-0">
                                   {item.newRow === 1 ? (
-                                    <select
-                                      className="form-select form-control"
-                                      style={{ width: "100px" }}
-                                      value={item.task_type}
-                                      onChange={(e) =>
-                                        handleChangeTaskType(e, item, index)
-                                      }
-                                    >
-                                      <option value="1">Internal</option>
-                                      <option value="2">External</option>
-                                    </select>
+                                    // <select
+                                    //   className="form-select form-control"
+                                    //   style={{ width: "100px" }}
+                                    //   value={item.task_type}
+                                    //   onChange={(e) =>
+                                    //     handleChangeTaskType(e, item, index)
+                                    //   }
+                                    // >
+                                    //   <option value="1">Internal</option>
+                                    //   <option value="2">External</option>
+                                    // </select>
+                                    <Select
+                                      className="basic-multi-select"
+                                      classNamePrefix="react-select"
+                                      styles={{
+                                        container: (base) => ({
+                                          ...base,
+                                          width: 140, // 100px select ka clean replacement
+                                        }),
+                                      }}
+                                      options={taskTypeOptions}
+                                      value={taskTypeOptions.find(
+                                        (opt) => String(opt.value) === String(item.task_type)
+                                      )}
+                                      isSearchable={false}   // only 2 options, search not needed
+                                      placeholder="Task Type"
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: "task_type",
+                                            value: selectedOption.value,
+                                          },
+                                        };
+
+                                        handleChangeTaskType(e, item, index);
+                                      }}
+                                    />
                                   ) : (
                                     <select
                                       className="form-select form-control"
@@ -2437,7 +2469,7 @@ const Timesheet = () => {
                                         (opt) => Number(opt.value) === Number(item.task_id)
                                       )}
                                       isSearchable
-                                       isDisabled={!item.taskData || item.taskData.length === 0}
+                                      isDisabled={!item.taskData || item.taskData.length === 0}
                                       placeholder={
                                         !item.taskData || item.taskData.length === 0
                                           ? "No Task"
