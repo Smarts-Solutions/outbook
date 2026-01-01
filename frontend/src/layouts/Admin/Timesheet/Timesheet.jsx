@@ -2291,7 +2291,12 @@ const Timesheet = () => {
                                         (opt) => Number(opt.value) === Number(item.client_id)
                                       )}
                                       isSearchable
-                                      placeholder="Client"
+                                      isDisabled={!item.clientData || item.clientData.length === 0}
+                                      placeholder={
+                                        !item.clientData || item.clientData.length === 0
+                                          ? "No Client"
+                                          : "Client"
+                                      }
                                       onChange={(selectedOption) => {
                                         // normal select jaisa event simulate
                                         const e = {
@@ -2349,7 +2354,12 @@ const Timesheet = () => {
                                         (opt) => Number(opt.value) === Number(item.job_id)
                                       )}
                                       isSearchable
-                                      placeholder="Job"
+                                      isDisabled={!item.jobData || item.jobData.length === 0}
+                                      placeholder={
+                                        !item.jobData || item.jobData.length === 0
+                                          ? "No Job"
+                                          : "Job"
+                                      }
                                       onChange={(selectedOption) => {
                                         // normal select jaisa event simulate
                                         const e = {
@@ -2427,7 +2437,12 @@ const Timesheet = () => {
                                         (opt) => Number(opt.value) === Number(item.task_id)
                                       )}
                                       isSearchable
-                                      placeholder="Task"
+                                       isDisabled={!item.taskData || item.taskData.length === 0}
+                                      placeholder={
+                                        !item.taskData || item.taskData.length === 0
+                                          ? "No Task"
+                                          : "Task"
+                                      }
                                       onChange={(selectedOption) => {
                                         // normal select jaisa event simulate
                                         const e = {
