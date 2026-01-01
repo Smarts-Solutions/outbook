@@ -127,7 +127,7 @@ const Timesheet = () => {
   const [lineMangerData, setLineMangerData] = useState([]);
   const [selectedLineManager, setSelectedLineManager] = useState("");
 
-  
+
 
   const GetLineManagerData = async () => {
     await dispatch(Staff({ req: { action: "get_line_manager" }, authToken: token }))
@@ -157,7 +157,7 @@ const Timesheet = () => {
         setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       }
 
-       if(selectedLineManager != "" && res.filterDataWeekSubmitTimeSheet.length === 0){
+      if (selectedLineManager != "" && res.filterDataWeekSubmitTimeSheet.length === 0) {
         sweatalert.fire({
           icon: "warning",
           title: "No timesheets have been submitted yet.",
@@ -165,7 +165,7 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 2000,
         });
-       }
+      }
 
 
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
@@ -209,7 +209,7 @@ const Timesheet = () => {
   const selectFilterStaffANdWeek = async (e) => {
     let { name, value } = e.target;
 
- 
+
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -260,14 +260,14 @@ const Timesheet = () => {
 
 
   const staffData = async () => {
-    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+    await dispatch(Staff({ req: { action: "get", page: 1, limit: 10000, search: "" }, authToken: token }))
       .unwrap()
       .then(async (response) => {
-        if (response.status) {
+        if (response?.data?.status) {
           // const filteredData = response.data.filter((item) => {
           //   return item.status === "1";
           // });
-          const filteredData = response.data;
+          const filteredData = response?.data?.data;
           setStaffDataAll({ loading: false, data: filteredData });
         } else {
           setStaffDataAll({ loading: false, data: [] });
@@ -667,6 +667,7 @@ const Timesheet = () => {
           }
         }
       } else {
+        updatedRows[index].customer_id = e.target.value;
         sweatalert.fire({
           icon: "warning",
           title: "There is no client available for this customer.",
@@ -739,6 +740,7 @@ const Timesheet = () => {
           }
         }
       } else {
+        updatedRows[index].client_id = e.target.value;
         sweatalert.fire({
           icon: "warning",
           title: "There is no job available for this client.",
@@ -1780,7 +1782,39 @@ const Timesheet = () => {
 
   //  console.log("timeSheetRows -- > ", timeSheetRows);
 
-  // Example usage
+
+  // External Customer DropDown
+
+
+  const getCustomerOptions = (item) =>
+    item.customerData?.map((customer) => ({
+      value: customer.id,
+      label: customer.trading_name,
+    })) || [];
+
+  const getClientOptions = (item) =>
+    item.clientData?.map((client) => ({
+      value: client.id,
+      label: client.trading_name,
+    })) || [];
+
+  const getJobOptions = (item) =>
+    item.jobData?.map((job) => ({
+      value: job.id,
+      label: job.name,
+    })) || [];
+
+  const getTaskOptions = (item) =>
+    item.taskData?.map((task) => ({
+      value: task.id,
+      label: task.name,
+    })) || [];
+
+
+
+  console.log("timeSheetRows", timeSheetRows)
+
+
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -1867,119 +1901,119 @@ const Timesheet = () => {
               ""
             )}
 
-            
-              {staffDataWeekDataAll.data &&
-                staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-4   pe-0">
-                  <label className="form-label mb-2">Select Date</label>
-                  <Select
-                    id="tabSelect"
-                    name="week"
-                    className="basic-multi-select"
-                    // options={weekOptions}
-                    // defaultValue={currentValue}
-                    options={weekOptionsWithPlaceholder}
-                    value={currentValue || null}
-                    placeholder="-- Select --"
-                    onChange={(selectedOption) => {
-                      // simulate e.target.value
-                      const e = { target: { name: 'week', value: selectedOption.value } };
-                      selectFilterStaffANdWeek(e);
-                    }}
-                    classNamePrefix="react-select"
-                    isSearchable
-                    isDisabled={selectedLineManager != "" ? true : false}
-                  />
-                </div>
-              ) : (
-                ""
-              )}
 
-              {isExistStaffDataWeekDataAll?.data &&
-                isExistStaffDataWeekDataAll?.data.length > 0 && staffDataWeekDataAll?.data.length === 0 ? (
-                <div className="form-group col-md-4 pe-0">
-                  <label className="form-label mb-2">Select Date</label>
-                  <Select
-                    id="tabSelect"
-                    name="week"
-                    className="basic-multi-select"
-                    // options={weekOptions}
-                    // defaultValue={currentValue}
-                    options={weekOptionsWithPlaceholder}
-                    value={currentValue || null}
-                    placeholder="-- Select --"
-                    onChange={(selectedOption) => {
-                      // simulate e.target.value
-                      const e = { target: { name: 'week', value: selectedOption.value } };
-                      selectFilterStaffANdWeek(e);
-                    }}
-                    classNamePrefix="react-select"
-                    isSearchable
-                    isDisabled={selectedLineManager != "" ? true : false}
-                  />
-                </div>
-              ) : (
-                ""
-              )}
+            {staffDataWeekDataAll.data &&
+              staffDataWeekDataAll.data.length > 0 ? (
+              <div className="form-group col-md-4   pe-0">
+                <label className="form-label mb-2">Select Date</label>
+                <Select
+                  id="tabSelect"
+                  name="week"
+                  className="basic-multi-select"
+                  // options={weekOptions}
+                  // defaultValue={currentValue}
+                  options={weekOptionsWithPlaceholder}
+                  value={currentValue || null}
+                  placeholder="-- Select --"
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    selectFilterStaffANdWeek(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                  isDisabled={selectedLineManager != "" ? true : false}
+                />
+              </div>
+            ) : (
+              ""
+            )}
 
-
-              {lineMangerData &&
-                lineMangerData.length > 0 ? (
-                <div className="form-group  col-md-4  pe-0">
-                  <label className="form-label mb-2">Team Timesheet Status</label>
-                  <Select
-                    id="tabSelect"
-                    name="week"
-                    className="basic-multi-select"
-                    // options={weekOptions}
-                    // defaultValue={currentValue}
-                    options={lineMangerDataWithPlaceholder}
-                    defaultValue={null}
-                    placeholder="-- Select --"
-                    onChange={(selectedOption) => {
-                      // simulate e.target.value
-                      const e = { target: { name: 'lineManger', value: selectedOption.value } };
-                      selectLineManager(e);
-                    }}
-                    classNamePrefix="react-select"
-                    isSearchable
-                  />
-                </div>
-              ) : (
-                ""
-              )}
+            {isExistStaffDataWeekDataAll?.data &&
+              isExistStaffDataWeekDataAll?.data.length > 0 && staffDataWeekDataAll?.data.length === 0 ? (
+              <div className="form-group col-md-4 pe-0">
+                <label className="form-label mb-2">Select Date</label>
+                <Select
+                  id="tabSelect"
+                  name="week"
+                  className="basic-multi-select"
+                  // options={weekOptions}
+                  // defaultValue={currentValue}
+                  options={weekOptionsWithPlaceholder}
+                  value={currentValue || null}
+                  placeholder="-- Select --"
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    selectFilterStaffANdWeek(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                  isDisabled={selectedLineManager != "" ? true : false}
+                />
+              </div>
+            ) : (
+              ""
+            )}
 
 
-              {selectedLineManager != "" && staffDataWeekDataAll.data &&
-                staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-4  pe-0">
-                  <label className="form-label mb-2">Line Manager Select Week</label>
-                  <Select
-                    id="tabSelect"
-                    name="week"
-                    className="basic-multi-select"
-                    // options={weekOptions}
-                    // defaultValue={currentValue}
-                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
-                    defaultValue={null}
-                    placeholder="-- Select --"
-                    onChange={(selectedOption) => {
-                      // simulate e.target.value
-                      const e = { target: { name: 'week', value: selectedOption.value } };
-                      selectFilterStaffANdWeek(e);
-                    }}
-                    classNamePrefix="react-select"
-                    isSearchable
-                  />
-                </div>
-              ) : (
-                ""
-              )}
+            {lineMangerData &&
+              lineMangerData.length > 0 ? (
+              <div className="form-group  col-md-4  pe-0">
+                <label className="form-label mb-2">Team Timesheet Status</label>
+                <Select
+                  id="tabSelect"
+                  name="week"
+                  className="basic-multi-select"
+                  // options={weekOptions}
+                  // defaultValue={currentValue}
+                  options={lineMangerDataWithPlaceholder}
+                  defaultValue={null}
+                  placeholder="-- Select --"
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'lineManger', value: selectedOption.value } };
+                    selectLineManager(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                />
+              </div>
+            ) : (
+              ""
+            )}
 
 
-            </div>
+            {selectedLineManager != "" && staffDataWeekDataAll.data &&
+              staffDataWeekDataAll.data.length > 0 ? (
+              <div className="form-group col-md-4  pe-0">
+                <label className="form-label mb-2">Line Manager Select Week</label>
+                <Select
+                  id="tabSelect"
+                  name="week"
+                  className="basic-multi-select"
+                  // options={weekOptions}
+                  // defaultValue={currentValue}
+                  options={weekOptionsWithPlaceholderSubmitTimeSheet}
+                  defaultValue={null}
+                  placeholder="-- Select --"
+                  onChange={(selectedOption) => {
+                    // simulate e.target.value
+                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    selectFilterStaffANdWeek(e);
+                  }}
+                  classNamePrefix="react-select"
+                  isSearchable
+                />
+              </div>
+            ) : (
+              ""
+            )}
 
-         
+
+          </div>
+
+
 
           {/* Tabs Content */}
           <div className="tab-content mt-1">
@@ -2164,23 +2198,50 @@ const Timesheet = () => {
                                 <td>
                                   {item.newRow === 1 &&
                                     item.task_type === "2" ? (
-                                    <select
-                                      className="form-select"
-                                      style={{ width: "100px" }}
-                                      defaultValue={item.customer_id || ""}
-                                      onChange={(e) =>
-                                        selectCustomerData(e, index)
-                                      }
-                                    >
-                                      {item.customerData?.map((customer) => (
-                                        <option
-                                          key={customer.id}
-                                          value={customer.id}
-                                        >
-                                          {customer.trading_name}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    // <select
+                                    //   className="form-select"
+                                    //   style={{ width: "100px" }}
+                                    //   defaultValue={item.customer_id || ""}
+                                    //   onChange={(e) =>
+                                    //     selectCustomerData(e, index)
+                                    //   }
+                                    // >
+                                    //   {item.customerData?.map((customer) => (
+                                    //     <option
+                                    //       key={customer.id}
+                                    //       value={customer.id}
+                                    //     >
+                                    //       {customer.trading_name}
+                                    //     </option>
+                                    //   ))}
+                                    // </select>
+
+                                    <Select
+                                      className="basic-multi-select"
+                                      classNamePrefix="react-select"
+                                      styles={{
+                                        container: (base) => ({
+                                          ...base,
+                                          width: 150,
+                                        }),
+                                      }}
+                                      options={getCustomerOptions(item)}
+                                      value={getCustomerOptions(item).find(
+                                        (opt) => Number(opt.value) === Number(item.customer_id)
+                                      )}
+                                      isSearchable
+                                      onChange={(selectedOption) => {
+                                        // normal select jaisa event simulate
+                                        const e = {
+                                          target: {
+                                            name: "customer_id",
+                                            value: selectedOption?.value || "",
+                                          },
+                                        };
+
+                                        selectCustomerData(e, index);
+                                      }}
+                                    />
                                   ) : (
                                     <input
                                       className="form-control cursor-pointer"
@@ -2199,23 +2260,50 @@ const Timesheet = () => {
                                 <td>
                                   {item.newRow === 1 &&
                                     item.task_type === "2" ? (
-                                    <select
-                                      className="form-select"
-                                      style={{ width: "90px" }}
-                                      defaultValue={item.client_id || ""}
-                                      onChange={(e) =>
-                                        selectClientData(e, index)
-                                      }
-                                    >
-                                      {item.clientData?.map((client) => (
-                                        <option
-                                          key={client.id}
-                                          value={client.id}
-                                        >
-                                          {client.trading_name}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    // <select
+                                    //   className="form-select"
+                                    //   style={{ width: "90px" }}
+                                    //   defaultValue={item.client_id || ""}
+                                    //   onChange={(e) =>
+                                    //     selectClientData(e, index)
+                                    //   }
+                                    // >
+                                    //   {item.clientData?.map((client) => (
+                                    //     <option
+                                    //       key={client.id}
+                                    //       value={client.id}
+                                    //     >
+                                    //       {client.trading_name}
+                                    //     </option>
+                                    //   ))}
+                                    // </select>
+                                    <Select
+                                      className="basic-multi-select"
+                                      classNamePrefix="react-select"
+                                      styles={{
+                                        container: (base) => ({
+                                          ...base,
+                                          width: 150,
+                                        }),
+                                      }}
+                                      options={getClientOptions(item)}
+                                      value={getClientOptions(item).find(
+                                        (opt) => Number(opt.value) === Number(item.client_id)
+                                      )}
+                                      isSearchable
+                                      placeholder="Client"
+                                      onChange={(selectedOption) => {
+                                        // normal select jaisa event simulate
+                                        const e = {
+                                          target: {
+                                            name: "client_id",
+                                            value: selectedOption?.value || "",
+                                          },
+                                        };
+
+                                        selectClientData(e, index);
+                                      }}
+                                    />
                                   ) : (
                                     <input
                                       className="form-control cursor-pointer"
@@ -2233,20 +2321,47 @@ const Timesheet = () => {
                                 {/* Job Selection */}
                                 <td>
                                   {item.newRow === 1 ? (
-                                    <select
-                                      className="form-select"
-                                      style={{ width: "100px" }}
-                                      defaultValue={item.job_id || ""}
-                                      onChange={(e) =>
-                                        selectJobData(e, item.task_type, index)
-                                      }
-                                    >
-                                      {item.jobData?.map((job) => (
-                                        <option key={job.id} value={job.id}>
-                                          {job.name}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    // <select
+                                    //   className="form-select"
+                                    //   style={{ width: "100px" }}
+                                    //   defaultValue={item.job_id || ""}
+                                    //   onChange={(e) =>
+                                    //     selectJobData(e, item.task_type, index)
+                                    //   }
+                                    // >
+                                    //   {item.jobData?.map((job) => (
+                                    //     <option key={job.id} value={job.id}>
+                                    //       {job.name}
+                                    //     </option>
+                                    //   ))}
+                                    // </select>
+                                    <Select
+                                      className="basic-multi-select"
+                                      classNamePrefix="react-select"
+                                      styles={{
+                                        container: (base) => ({
+                                          ...base,
+                                          width: 140, // 100px select ka comfortable replacement
+                                        }),
+                                      }}
+                                      options={getJobOptions(item)}
+                                      value={getJobOptions(item).find(
+                                        (opt) => Number(opt.value) === Number(item.job_id)
+                                      )}
+                                      isSearchable
+                                      placeholder="Job"
+                                      onChange={(selectedOption) => {
+                                        // normal select jaisa event simulate
+                                        const e = {
+                                          target: {
+                                            name: "job_id",
+                                            value: selectedOption?.value || "",
+                                          },
+                                        };
+
+                                        selectJobData(e, item.task_type, index);
+                                      }}
+                                    />
                                   ) : (
                                     <input
                                       style={{ width: "100px" }}
@@ -2286,18 +2401,45 @@ const Timesheet = () => {
                                 {/* Task Selection */}
                                 <td>
                                   {item.newRow === 1 ? (
-                                    <select
-                                      className="form-select"
-                                      style={{ width: "100px" }}
-                                      defaultValue={item.task_id || ""}
-                                      onChange={(e) => selectTaskData(e, index)}
-                                    >
-                                      {item.taskData?.map((task) => (
-                                        <option key={task.id} value={task.id}>
-                                          {task.name}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    // <select
+                                    //   className="form-select"
+                                    //   style={{ width: "100px" }}
+                                    //   defaultValue={item.task_id || ""}
+                                    //   onChange={(e) => selectTaskData(e, index)}
+                                    // >
+                                    //   {item.taskData?.map((task) => (
+                                    //     <option key={task.id} value={task.id}>
+                                    //       {task.name}
+                                    //     </option>
+                                    //   ))}
+                                    // </select>
+                                    <Select
+                                      className="basic-multi-select"
+                                      classNamePrefix="react-select"
+                                      styles={{
+                                        container: (base) => ({
+                                          ...base,
+                                          width: 140, // 100px select ka comfortable replacement
+                                        }),
+                                      }}
+                                      options={getTaskOptions(item)}
+                                      value={getTaskOptions(item).find(
+                                        (opt) => Number(opt.value) === Number(item.task_id)
+                                      )}
+                                      isSearchable
+                                      placeholder="Task"
+                                      onChange={(selectedOption) => {
+                                        // normal select jaisa event simulate
+                                        const e = {
+                                          target: {
+                                            name: "task_id",
+                                            value: selectedOption?.value || "",
+                                          },
+                                        };
+
+                                        selectTaskData(e, index);
+                                      }}
+                                    />
                                   ) : (
                                     <input
                                       className="form-control cursor-pointer"

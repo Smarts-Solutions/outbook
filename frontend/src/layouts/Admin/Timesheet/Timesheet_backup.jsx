@@ -19,9 +19,15 @@ const Timesheet = () => {
   const [activeIndex, setActiveIndex] = useState(null);   // row
   const [activeField, setActiveField] = useState(null);   // field name
 
+  // add node state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
   const [selectedRowIndex, setSelectedRowIndex] = useState(null)
+
+  // copy timesheet modal state
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
+
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -107,6 +113,38 @@ const Timesheet = () => {
     data: [],
   });
 
+  const [isExistStaffDataWeekDataAll, setIsExistStaffDataWeekDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+
+  const [staffDataWeekDataAllSubmitTImeSheet, setStaffDataWeekDataAllSubmitTImeSheet] = useState({
+    loading: true,
+    data: [],
+  });
+
+
+  const [lineMangerData, setLineMangerData] = useState([]);
+  const [selectedLineManager, setSelectedLineManager] = useState("");
+
+  
+
+  const GetLineManagerData = async () => {
+    await dispatch(Staff({ req: { action: "get_line_manager" }, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          console.log(`response`, response);
+          setLineMangerData(response.data);
+        } else {
+          setLineMangerData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
   const GetTimeSheet = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
@@ -115,7 +153,23 @@ const Timesheet = () => {
     setSubmitStatusAllKey(0);
     setDeleteRows([]);
     if (res.status) {
+      if (isExistStaffDataWeekDataAll?.data?.length === 0) {
+        setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+      }
+
+       if(selectedLineManager != "" && res.filterDataWeekSubmitTimeSheet.length === 0){
+        sweatalert.fire({
+          icon: "warning",
+          title: "No timesheets have been submitted yet.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+       }
+
+
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+      setStaffDataWeekDataAllSubmitTImeSheet({ loading: false, data: res.filterDataWeekSubmitTimeSheet });
 
       const hasValidWeekOffsetZeroValue =
         res.filterDataWeek.length > 0 &&
@@ -153,10 +207,9 @@ const Timesheet = () => {
   };
 
   const selectFilterStaffANdWeek = async (e) => {
-    const { name, value } = e.target;
-    console.log(`name`, name);
-    console.log(`value`, value);
+    let { name, value } = e.target;
 
+ 
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -164,21 +217,57 @@ const Timesheet = () => {
       setSelectedStaff(value);
       // await GetTimeSheet(0)
     } else if (name === "week") {
+      if ([null, undefined, ''].includes(value)) {
+        value = 0;
+      } else {
+        value = parseInt(value);
+      }
       weekOffSetValue.current = parseInt(value);
       setWeekOffset(value);
       await GetTimeSheet(value);
     }
+    else if (name === "copy_week") {
+      await getTimeSheetCopyRecord(value);
+    }
+
   };
 
+  const getTimeSheetCopyRecord = async (weekOffset) => {
+    const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
+    const res = await dispatch(
+      getTimesheetData({ req, authToken: token })
+    ).unwrap();
+
+    if (res.status) {
+      setCopyTimeSheetRows(res.data);
+      setCopyTimeSheetRows((prevRows) =>
+        prevRows.map((row) => {
+          const sum =
+            (parseFloat(row.monday_hours) || 0) +
+            (parseFloat(row.tuesday_hours) || 0) +
+            (parseFloat(row.wednesday_hours) || 0) +
+            (parseFloat(row.thursday_hours) || 0) +
+            (parseFloat(row.friday_hours) || 0) +
+            (parseFloat(row.saturday_hours) || 0) +
+            (parseFloat(row.sunday_hours) || 0);
+          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+        })
+      );
+    }
+
+  }
+
+
+
   const staffData = async () => {
-    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+    await dispatch(Staff({ req: { action: "get" ,page : 1,limit : 10000 ,search : ""}, authToken: token }))
       .unwrap()
       .then(async (response) => {
-        if (response.status) {
+        if (response?.data?.status) {
           // const filteredData = response.data.filter((item) => {
           //   return item.status === "1";
           // });
-          const filteredData = response.data;
+          const filteredData = response?.data?.data;
           setStaffDataAll({ loading: false, data: filteredData });
         } else {
           setStaffDataAll({ loading: false, data: [] });
@@ -203,6 +292,7 @@ const Timesheet = () => {
 
   useEffect(() => {
     staffData();
+    GetLineManagerData();
   }, []);
 
   useEffect(() => {
@@ -233,6 +323,8 @@ const Timesheet = () => {
     ];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
+
+
   }, []);
 
   // Function to handle week change
@@ -251,6 +343,7 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
+
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -722,9 +815,6 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
-    console.log(`name`, name);
-    console.log(`value`, value);
-
 
     let final_value = value;
 
@@ -1061,6 +1151,8 @@ const Timesheet = () => {
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
       if (res.status) {
+        setActiveIndex(null);
+        setActiveField(null);
         sweatalert.fire({
           icon: "success",
           title: res.message,
@@ -1076,8 +1168,7 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
-        setActiveIndex(null);
-        setActiveField(null);
+
       }
     }
   };
@@ -1172,7 +1263,7 @@ const Timesheet = () => {
         const decimal = hours + '.' + minutes;
         staff_hourminute = parseFloat(decimal);
       } else if (staff_hourminute != null) {
-        console.log(staff_hourminute);
+
         staff_hourminute = parseFloat(staff_hourminute)
       }
 
@@ -1225,12 +1316,13 @@ const Timesheet = () => {
 
       }
 
-
-
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
       ).unwrap();
       if (res.status) {
+        setActiveIndex(null);
+        setActiveField(null);
+
         setRemarkText(null);
         setUpdateTimeSheetRows([]);
         setRemarkModel(false);
@@ -1396,7 +1488,7 @@ const Timesheet = () => {
     //   "Remark"
     // ];
 
-     const headers = [
+    const headers = [
       "Index",
       "Task Type",
       "Customer Name",
@@ -1419,10 +1511,11 @@ const Timesheet = () => {
       "Remark"
     ];
 
-
+    let total_hours = 0
     const rows = timeSheetRows
       .filter(item => item.id !== null && item.id !== undefined)
       .map((item, index) => {
+        total_hours += parseFloat(item.total_hours) || 0;
         return [
           index + 1,
           item.task_type === "1" ? "Internal" : "External",
@@ -1434,7 +1527,7 @@ const Timesheet = () => {
           item.task_type === "1" ? " - " : item.job_type_name || " - ",
           item.task_type === "1"
             ? item.sub_internal_name || "No Task"
-            : item.task_name || "No Task", 
+            : item.task_name || "No Task",
           item.monday_hours || 0,
           item.monday_note || "",
           item.tuesday_hours || 0,
@@ -1453,7 +1546,10 @@ const Timesheet = () => {
 
 
 
-    const finalRemarkRow = [`Final Remark: ${timeSheetRows[0].final_remark || ""}`, ...new Array(headers.length - 1).fill("")];
+    const finalRemarkRow = [
+      `Total Weekly Hours : ${(total_hours).toFixed(2) || ""}`,
+      `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
+      ...new Array(headers.length - 1).fill("")];
 
     const csvContent = [headers, ...rows, finalRemarkRow]
       .map((row) => row.join(","))
@@ -1510,7 +1606,21 @@ const Timesheet = () => {
       });
     });
   }
-  const currentValue = weekOptions.find(
+
+
+  const weekOptionsSubmitTimeSheet = [];
+
+  if (staffDataWeekDataAllSubmitTImeSheet.data) {
+    staffDataWeekDataAllSubmitTImeSheet.data.forEach((val) => {
+      weekOptionsSubmitTimeSheet.push({
+        value: val.valid_weekOffsets,
+        label: getFormattedDate("convert", val.month_date),
+      });
+    });
+  }
+
+
+  let currentValue = weekOptions.find(
     (opt) => opt.value == weekOffSetValue.current
   );
 
@@ -1518,15 +1628,12 @@ const Timesheet = () => {
 
 
   const handleSaveNote = (e) => {
-
     // console.log("modalText ",modalText);
     // console.log("activeField ",activeField);
-
     const updatedRows = [...timeSheetRows];
     let key = activeField + "_note";
     updatedRows[selectedRowIndex][key] = modalText;
     setTimeSheetRows(updatedRows);
-
     setUpdateTimeSheetRows((prev) => {
       const existingIndex = prev.findIndex(
         (row) => row.id === updatedRows[selectedRowIndex].id
@@ -1547,10 +1654,131 @@ const Timesheet = () => {
     setActiveIndex(null);
     setActiveField(null);
 
+  };
+
+  //  timeSheet functionality
+  const weekOptionsWithPlaceholder = [
+    { label: "-- select --", value: "" },
+    ...weekOptions
+  ];
+
+
+  // COPY TIMESHEET FUNCTIONALITY START //
+  const weekOptionsWithPlaceholderSubmitTimeSheet = [
+    { label: "-- select --", value: "" },
+    ...weekOptionsSubmitTimeSheet
+  ];
+
+  //lineMangerDataWithPlaceholder
+  const lineMangerDataOptions = lineMangerData?.map((val) => ({
+    value: val.staff_id,
+    label: `${val.staff_name}`
+  })) || [];
+  const lineMangerDataWithPlaceholder = [
+    { label: "-- select --", value: "" },
+    ...lineMangerDataOptions
+  ];
+
+  const selectLineManager = async (e) => {
+    // console.log("e ", e); 
+    let name = e.target.name;
+    let value = e.target.value;
+
+    if (!['', '0', undefined, null].includes(value)) {
+      setSelectedLineManager(value);
+      const e = { target: { name: 'staff_id', value: value } };
+      selectFilterStaffANdWeek(e);
+    } else {
+
+      setSelectedLineManager("");
+      const e = { target: { name: 'staff_id', value: staffDetails?.id } };
+      selectFilterStaffANdWeek(e);
+
+
+    }
 
   };
 
-  console.log("timeSheetRows -->>", timeSheetRows);
+
+  console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
+  console.log("weekOptions ", weekOptions);
+
+  const convertDateFormatForCopy = (dateString) => {
+    const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
+    const [day, month, year] = datePart.split("/");
+    const formattedDate = new Date(`${year}-${month}-${day}`);
+    const date_final_value = formattedDate.toISOString().split("T")[0];
+    return date_final_value;
+  }
+
+  const handleCopyTimeSheetAutoFill = async () => {
+
+    if (copyTimeSheetRows && copyTimeSheetRows.length > 0) {
+      setTimeSheetRows((prev) => [
+        ...prev,  // previous state retained
+        ...copyTimeSheetRows.map((row) => {
+          const sum =
+            (parseFloat(row.monday_hours) || 0) +
+            (parseFloat(row.tuesday_hours) || 0) +
+            (parseFloat(row.wednesday_hours) || 0) +
+            (parseFloat(row.thursday_hours) || 0) +
+            (parseFloat(row.friday_hours) || 0) +
+            (parseFloat(row.saturday_hours) || 0) +
+            (parseFloat(row.sunday_hours) || 0);
+
+          return {
+            ...row,
+            id: null,
+            submit_status: "0",
+            monday_date: convertDateFormatForCopy(weekDays.monday),
+            tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
+            wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
+            thursday_date: convertDateFormatForCopy(weekDays.thursday),
+            friday_date: convertDateFormatForCopy(weekDays.friday),
+            saturday_date: convertDateFormatForCopy(weekDays.saturday),
+            sunday_date: convertDateFormatForCopy(weekDays.sunday),
+            total_hours: parseFloat(sum).toFixed(2),
+          };
+        })
+      ]);
+
+      setUpdateTimeSheetRows((prev) => [
+        ...prev,
+        ...copyTimeSheetRows.map((row) => {
+          const sum =
+            (parseFloat(row.monday_hours) || 0) +
+            (parseFloat(row.tuesday_hours) || 0) +
+            (parseFloat(row.wednesday_hours) || 0) +
+            (parseFloat(row.thursday_hours) || 0) +
+            (parseFloat(row.friday_hours) || 0) +
+            (parseFloat(row.saturday_hours) || 0) +
+            (parseFloat(row.sunday_hours) || 0);
+
+          return {
+            ...row,
+            id: null,
+            submit_status: "0",
+            monday_date: convertDateFormatForCopy(weekDays.monday),
+            tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
+            wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
+            thursday_date: convertDateFormatForCopy(weekDays.thursday),
+            friday_date: convertDateFormatForCopy(weekDays.friday),
+            saturday_date: convertDateFormatForCopy(weekDays.saturday),
+            sunday_date: convertDateFormatForCopy(weekDays.sunday),
+
+            total_hours: parseFloat(sum).toFixed(2),
+          };
+        })
+      ]);
+
+    }
+    setCopyTimeSheetRows([]);
+    setIsCopyModalOpen(false);
+
+  }
+
+
+  //  console.log("timeSheetRows -- > ", timeSheetRows);
 
   // Example usage
   return (
@@ -1572,8 +1800,47 @@ const Timesheet = () => {
               </div>
             </div>
           </div>
+
+
+
+          <div className="col-md-4">
+
+            {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
+                timeSheetRows.length > 0 ? (
+                <div className="form-group col-md-6">
+                  <button
+                     className="btn btn-info"
+                    onClick={() => exportToCSV(timeSheetRows)}
+                  >
+                    Export Timesheet Data
+                    <i className="fa fa-download ms-2" />
+                  </button>
+                </div>
+              ) : (
+                ""
+              )} */}
+
+
+
+            {
+              timeSheetRows.length > 0 ? (
+                <div className="form-group float-md-end">
+                  <button
+                    className="btn btn-info "
+                    onClick={() => exportToCSV(timeSheetRows)}
+                  >
+                    Export Timesheet Data
+                    <i className="fa fa-download ms-2" />
+                  </button>
+                </div>
+              ) : (
+                ""
+              )}
+          </div>
         </div>
       </div>
+
+
       <div className="report-data mt-4">
         <div className="col-md-12">
           <div className="row ">
@@ -1581,26 +1848,6 @@ const Timesheet = () => {
               <div className="form-group col-md-4">
                 <label className="form-label mb-2">Select Staff</label>
 
-
-                {/* <select
-                  name="staff_id"
-                  className="form-select"
-                  id="tabSelect"
-                  defaultValue={staffDetails.id}
-                  onChange={(e) => selectFilterStaffANdWeek(e)}
-                  
-                >
-                  {staffDataAll.data &&
-                    staffDataAll.data.map((val, index) => (
-                      <option
-                        key={index}
-                        value={val.id}
-                        selected={staffDetails.id === val.id}
-                      >
-                        {val.first_name + " " + val.last_name}
-                      </option>
-                    ))}
-                </select> */}
                 <Select
                   id="tabSelect"
                   name="staff_id"
@@ -1619,44 +1866,103 @@ const Timesheet = () => {
             ) : (
               ""
             )}
-            <div className="form-group col-md-8 row align-items-center">
+
+            
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
-                <div className="form-group col-md-6 pe-0">
+                <div className="form-group col-md-4   pe-0">
                   <label className="form-label mb-2">Select Date</label>
-
-                  {/* <select
-                    name="week"
-                    className="form-select"
-                    id="tabSelect"
-                    // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
-                    onChange={(e) => selectFilterStaffANdWeek(e)}
-                  >
-                    {!hasValidWeekOffsetZero && (
-                      <option value="0">
-                        {getFormattedDate("current", "")}
-                      </option>
-                    )}
-
-                    {staffDataWeekDataAll.data &&
-                      staffDataWeekDataAll.data.map((val, index) => (
-                        <option
-                          key={index}
-                          value={val.valid_weekOffsets}
-                          selected={
-                            weekOffSetValue.current == val.valid_weekOffsets
-                          }
-                        >
-                          {getFormattedDate("convert", val.month_date)}
-                        </option>
-                      ))}
-                  </select> */}
                   <Select
                     id="tabSelect"
                     name="week"
                     className="basic-multi-select"
-                    options={weekOptions}
-                    defaultValue={currentValue}
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {isExistStaffDataWeekDataAll?.data &&
+                isExistStaffDataWeekDataAll?.data.length > 0 && staffDataWeekDataAll?.data.length === 0 ? (
+                <div className="form-group col-md-4 pe-0">
+                  <label className="form-label mb-2">Select Date</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+
+              {lineMangerData &&
+                lineMangerData.length > 0 ? (
+                <div className="form-group  col-md-4  pe-0">
+                  <label className="form-label mb-2">Team Timesheet Status</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={lineMangerDataWithPlaceholder}
+                    defaultValue={null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'lineManger', value: selectedOption.value } };
+                      selectLineManager(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+
+              {selectedLineManager != "" && staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-4  pe-0">
+                  <label className="form-label mb-2">Line Manager Select Week</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
+                    defaultValue={null}
+                    placeholder="-- Select --"
                     onChange={(selectedOption) => {
                       // simulate e.target.value
                       const e = { target: { name: 'week', value: selectedOption.value } };
@@ -1670,36 +1976,10 @@ const Timesheet = () => {
                 ""
               )}
 
-              {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
-                timeSheetRows.length > 0 ? (
-                <div className="form-group col-md-6">
-                  <button
-                    className=" btn btn-info float-md-end mt-lg-2"
-                    onClick={() => exportToCSV(timeSheetRows)}
-                  >
-                    Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
-                  </button>
-                </div>
-              ) : (
-                ""
-              )} */}
-              {
-                timeSheetRows.length > 0 ? (
-                  <div className="form-group col-md-6">
-                    <button
-                      className=" btn btn-info float-md-end mt-lg-2"
-                      onClick={() => exportToCSV(timeSheetRows)}
-                    >
-                      Export Timesheet Data
-                      <i className="fa fa-download ms-2" />
-                    </button>
-                  </div>
-                ) : (
-                  ""
-                )}
+
             </div>
-          </div>
+
+         
 
           {/* Tabs Content */}
           <div className="tab-content mt-1">
@@ -2441,6 +2721,8 @@ const Timesheet = () => {
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
                                     <div className="d-flex align-items-center">
+
+
                                       <button
                                         className="view-icon"
                                         onClick={(e) => {
@@ -2449,6 +2731,9 @@ const Timesheet = () => {
                                       >
                                         <i className="ti-comment text-warning"></i>
                                       </button>
+
+
+
                                       <button
                                         className="delete-icon"
                                         onClick={() => handleDeleteRow(index)}
@@ -2599,20 +2884,40 @@ const Timesheet = () => {
                             <td className="border-none" style={{ border: 'none' }}>
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
-                                  <button
-                                    style={{ zIndex: 'unset' }}
-                                    className="d-flex btn btn-info fw-normal px-2"
-                                    onClick={handleAddNewSheet}
-                                  >
-                                    <i
-                                      style={{
-                                        display: "block",
-                                        fontSize: 18,
-                                        cursor: "pointer",
-                                      }}
-                                      className="ri-add-circle-fill"
-                                    />
-                                  </button>
+                                  <>
+                                    {/* Add new row */}
+                                    <button
+                                      style={{ zIndex: 'unset' }}
+                                      className="d-flex btn btn-info fw-normal px-2"
+                                      onClick={handleAddNewSheet}
+                                    >
+                                      <i
+                                        style={{
+                                          display: "block",
+                                          fontSize: 18,
+                                          cursor: "pointer",
+                                        }}
+                                        className="ri-add-circle-fill"
+                                      />
+                                    </button>
+
+
+
+                                    {/* copy Timesheet */}
+                                    <span style={{ marginTop: "2rem" }} className="ms-3">
+                                      <button
+                                        style={{ zIndex: 'unset' }}
+                                        className="d-flex btn btn-info fw-normal px-2"
+                                        onClick={() => setIsCopyModalOpen(true)}
+                                      >
+                                        <span className="ms-2">Copy Timesheet</span>
+                                      </button>
+                                    </span>
+
+
+                                  </>
+
+
                                 ) : (
                                   ""
                                 )
@@ -2834,6 +3139,9 @@ const Timesheet = () => {
             handleClose={() => {
               setIsModalOpen(false);
               setModalText("");
+              setActiveIndex(null);
+              setActiveField(null);
+
             }}
             Submit_Function={(e) => handleSaveNote(e)}
           >
@@ -2854,36 +3162,53 @@ const Timesheet = () => {
             </div>
           </CommonModal>
 
-          {/* {isModalOpen && (
-            <div className="custom-modal">
-              <div className="modal-content p-3">
-                <h5>Add Notes</h5>
+          { /* Copy Timesheet Modal */}
+          <CommonModal
+            isOpen={isCopyModalOpen}
+            backdrop="static"
+            size="lg"
+            cancel_btn={false}
+            btn_2="true"
+            btn_name={"Save"}
+            title={"Timesheet"}
+            hideBtn={false}
+            handleClose={() => {
+              setIsCopyModalOpen(false);
 
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={modalText}
-                  onChange={(e) => setModalText(e.target.value)}
-                />
+            }}
+            Submit_Function={(e) => handleCopyTimeSheetAutoFill(e)}
+          >
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-lg-12">
+                  <h5>Select Week to Copy Timesheet From</h5>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
+                    defaultValue={null}
+                    //defaultValue={currentValue}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = { target: { name: 'copy_week', value: selectedOption.value } };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
 
-                <div className="d-flex justify-content-end mt-3">
-                  <button className="btn btn-secondary me-2" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
-
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleSaveNote()}
-                  >
-                    Save
-                  </button>
                 </div>
               </div>
             </div>
-          )} */}
+          </CommonModal>
+
+
 
         </div>
       </div>
+
     </div>
   );
 };
