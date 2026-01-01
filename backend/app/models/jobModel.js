@@ -1325,6 +1325,10 @@ const getJobByCustomer = async (job) => {
           OR jobs.staff_created_id IN (${placeholders})
           OR clients.staff_created_id IN (${placeholders})
         )
+          AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
         AND jobs.customer_id = ?
         ${searchCondition}
         `,
@@ -1399,6 +1403,10 @@ const getJobByCustomer = async (job) => {
           OR jobs.staff_created_id IN (${placeholders})
           OR clients.staff_created_id IN (${placeholders})
         )
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )  
         AND jobs.customer_id = ?
         ${searchCondition}
         GROUP BY jobs.id
@@ -1416,20 +1424,20 @@ const getJobByCustomer = async (job) => {
       ]);
 
       // assign_customer_service logic (UNCHANGED)
-      let isExistAssignCustomer = result?.find(
-        (item) => item?.assigned_source === "assign_customer_service"
-      );
-      if (isExistAssignCustomer) {
-        const matched = result.filter(
-          (item) =>
-            item.assigned_source === "assign_customer_service" &&
-            Number(item.service_id_assign) === Number(item.job_service_id)
-        );
-        const matched2 = result.filter(
-          (item) => item.assigned_source !== "assign_customer_service"
-        );
-        result = [...matched, ...matched2];
-      }
+      // let isExistAssignCustomer = result?.find(
+      //   (item) => item?.assigned_source === "assign_customer_service"
+      // );
+      // if (isExistAssignCustomer) {
+      //   const matched = result.filter(
+      //     (item) =>
+      //       item.assigned_source === "assign_customer_service" &&
+      //       Number(item.service_id_assign) === Number(item.job_service_id)
+      //   );
+      //   const matched2 = result.filter(
+      //     (item) => item.assigned_source !== "assign_customer_service"
+      //   );
+      //   result = [...matched, ...matched2];
+      // }
     }
 
     return {
@@ -1956,6 +1964,10 @@ const getJobByClient = async (job) => {
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
         (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
         GROUP BY 
         jobs.id 
         ORDER BY 
@@ -1964,21 +1976,21 @@ const getJobByClient = async (job) => {
     const [result] = await pool.execute(query);
 
     //////-----START Assign Customer Service Data START----////////
-    let isExistAssignCustomer = result?.find(
-      (item) => item?.assigned_source === "assign_customer_service"
-    );
-    if (isExistAssignCustomer != undefined) {
-      let matched = result?.filter(
-        (item) =>
-          item?.assigned_source === "assign_customer_service" &&
-          Number(item?.service_id_assign) === Number(item?.job_service_id)
-      );
-      let matched2 = result?.filter(
-        (item) => item?.assigned_source !== "assign_customer_service"
-      );
-      const resultAssignCustomer = [...matched, ...matched2];
-      return { status: true, message: "Success.", data: resultAssignCustomer };
-    }
+    // let isExistAssignCustomer = result?.find(
+    //   (item) => item?.assigned_source === "assign_customer_service"
+    // );
+    // if (isExistAssignCustomer != undefined) {
+    //   let matched = result?.filter(
+    //     (item) =>
+    //       item?.assigned_source === "assign_customer_service" &&
+    //       Number(item?.service_id_assign) === Number(item?.job_service_id)
+    //   );
+    //   let matched2 = result?.filter(
+    //     (item) => item?.assigned_source !== "assign_customer_service"
+    //   );
+    //   const resultAssignCustomer = [...matched, ...matched2];
+    //   return { status: true, message: "Success.", data: resultAssignCustomer };
+    // }
     //////-----END Assign Customer Service Data END----////////
 
     return { status: true, message: "Success.", data: result };
