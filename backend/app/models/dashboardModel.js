@@ -109,7 +109,7 @@ JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
 
 const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
-  const { startDate, endDate } = await getDateRange(date_filter);
+  let { startDate, endDate } = await getDateRange(date_filter);
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
@@ -324,6 +324,59 @@ const getDashboardData = async (dashboard) => {
       const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
       JobResult = JobData;
     } else {
+      // const JobQuery = `
+      //   SELECT 
+      //   jobs.id AS id,
+      //   jobs.status_type AS status_type,
+
+      //   assigned_jobs_staff_view.source AS assigned_source,
+      //   assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+      //   jobs.service_id AS job_service_id
+
+      //   FROM 
+      //   jobs
+      //   LEFT JOIN 
+      //     assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+      //   JOIN 
+      //   services ON jobs.service_id = services.id
+      //   JOIN
+      //   customer_services ON customer_services.service_id = jobs.service_id
+      //   JOIN
+      //   customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+      //   LEFT JOIN 
+      //   customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      //   LEFT JOIN 
+      //   clients ON jobs.client_id = clients.id
+      //   LEFT JOIN 
+      //   customers ON jobs.customer_id = customers.id AND customers.status = '1'
+      //   LEFT JOIN 
+      //   staff_portfolio ON staff_portfolio.customer_id = customers.id
+      //   LEFT JOIN 
+      //   job_types ON jobs.job_type_id = job_types.id
+      //   LEFT JOIN 
+      //   staffs ON jobs.allocated_to = staffs.id
+      //   LEFT JOIN 
+      //   staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      //   LEFT JOIN 
+      //   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      //   LEFT JOIN 
+      //   master_status ON master_status.id = jobs.status_type
+      //    LEFT JOIN
+      //    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+      //   WHERE
+      //   (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) 
+      //   OR jobs.staff_created_id IN(${LineManageStaffId}) 
+      //   OR clients.staff_created_id IN(${LineManageStaffId}))
+      //   AND jobs.created_at BETWEEN ? AND ?
+      //   GROUP BY 
+      //   jobs.id 
+      //   ORDER BY 
+      //   jobs.id DESC;
+      //   `;
+
+      startDate = startDate + " 00:00:00"
+      endDate = endDate + " 00:00:00"
+
       const JobQuery = `
         SELECT 
         jobs.id AS id,
@@ -332,42 +385,29 @@ const getDashboardData = async (dashboard) => {
         assigned_jobs_staff_view.source AS assigned_source,
         assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id
-
-        FROM 
+        FROM
         jobs
-        LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        JOIN 
-        services ON jobs.service_id = services.id
-        JOIN
-        customer_services ON customer_services.service_id = jobs.service_id
-        JOIN
-        customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-        LEFT JOIN 
-        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-        LEFT JOIN 
-        clients ON jobs.client_id = clients.id
-        LEFT JOIN 
-        customers ON jobs.customer_id = customers.id AND customers.status = '1'
-        LEFT JOIN 
-        staff_portfolio ON staff_portfolio.customer_id = customers.id
-        LEFT JOIN 
-        job_types ON jobs.job_type_id = job_types.id
-        LEFT JOIN 
-        staffs ON jobs.allocated_to = staffs.id
-        LEFT JOIN 
-        staffs AS staffs2 ON jobs.reviewer = staffs2.id
-        LEFT JOIN 
-        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-        LEFT JOIN 
-        master_status ON master_status.id = jobs.status_type
-         LEFT JOIN
-         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) 
+        ((assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) 
         OR jobs.staff_created_id IN(${LineManageStaffId}) 
         OR clients.staff_created_id IN(${LineManageStaffId}))
-        AND jobs.created_at BETWEEN ? AND ?
+        AND DATE(jobs.created_at) BETWEEN ? AND ?)
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+        AND customers.status = '1'    
         GROUP BY 
         jobs.id 
         ORDER BY 
@@ -540,7 +580,7 @@ const getDashboardActivityLog = async (dashboard) => {
 
     // ================= BUILD QUERY WITH PREPARED STATEMENTS =================
     const { startDate, endDate } = getDateRangeByFilter();
-    
+
     // Prepare query parts and parameters
     let whereConditions = [];
     let queryParams = [];
@@ -564,8 +604,8 @@ const getDashboardActivityLog = async (dashboard) => {
     }
 
     // Build WHERE clause
-    const whereClause = whereConditions.length > 0 
-      ? `WHERE ${whereConditions.join(' AND ')}` 
+    const whereClause = whereConditions.length > 0
+      ? `WHERE ${whereConditions.join(' AND ')}`
       : '';
 
     // Add limit and offset to params
