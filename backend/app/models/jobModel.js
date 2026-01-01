@@ -1450,7 +1450,6 @@ const getJobByCustomer = async (job) => {
   }
 };
 
-
 async function getAllJobsSidebar(
   StaffUserId,
   LineManageStaffId,
@@ -1465,21 +1464,15 @@ async function getAllJobsSidebar(
   let searchParams = [];
   if (search) {
     searchCondition = `
-    AND (
-      jobs.client_job_code LIKE ?
-      OR clients.trading_name LIKE ?
-      OR customers.trading_name LIKE ?
-      OR job_types.type LIKE ?
-      OR CONCAT(
-            SUBSTRING(customers.trading_name,1,3),'_',
-            SUBSTRING(clients.trading_name,1,3),'_',
-            SUBSTRING(job_types.type,1,4),'_',
-            LPAD(jobs.job_id,5,'0')
-         ) LIKE ?
-    )
-  `;
+      AND (
+        jobs.client_job_code LIKE ?
+        OR clients.trading_name LIKE ?
+        OR customers.trading_name LIKE ?
+        OR job_types.type LIKE ?
+      )
+    `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
   }
 
   try {
@@ -1554,7 +1547,7 @@ async function getAllJobsSidebar(
         jobs
         JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id 
         LEFT JOIN clients ON jobs.client_id = clients.id
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN staffs ON jobs.allocated_to = staffs.id
@@ -1597,7 +1590,7 @@ async function getAllJobsSidebar(
     const placeholders = LineManageStaffId?.map(() => '?').join(',');
 
 
-    // // 🔹 TOTAL COUNT
+    //🔹 TOTAL COUNT
     // const [countResult] = await pool.execute(
     //   `
     //   SELECT COUNT(DISTINCT jobs.id) AS total
@@ -1610,6 +1603,11 @@ async function getAllJobsSidebar(
     //     assigned_jobs_staff_view.staff_id IN (${placeholders})
     //     OR jobs.staff_created_id IN (${placeholders})
     //     OR clients.staff_created_id IN (${placeholders})
+    //     AND customers.status = '1'
+    //     AND (
+    //         assigned_jobs_staff_view.source != 'assign_customer_service'
+    //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+    //       )
     //   )
     //   ${searchCondition}
     //   `,
@@ -1623,41 +1621,40 @@ async function getAllJobsSidebar(
 
     const [countResult] = await pool.execute(
       `
-          SELECT 
-            jobs.id AS id,
-            jobs.status_type AS status_type,
-            
-            assigned_jobs_staff_view.source AS assigned_source,
-            assigned_jobs_staff_view.service_id_assign AS service_id_assign,
-            jobs.service_id AS job_service_id
-    
-            FROM 
-            jobs
-            JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-            LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-            LEFT JOIN clients ON jobs.client_id = clients.id
-            LEFT JOIN customers ON jobs.customer_id = customers.id
-            LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-            LEFT JOIN staffs ON jobs.allocated_to = staffs.id
-            LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
-            LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-            LEFT JOIN master_status ON master_status.id = jobs.status_type
-            LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
-            WHERE (
-              (assigned_jobs_staff_view.staff_id IN (${placeholders})
-              OR jobs.staff_created_id IN (${placeholders})
-              OR clients.staff_created_id IN (${placeholders})) 
-              AND (
-                  assigned_jobs_staff_view.source != 'assign_customer_service'
-                  OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-                )
-            ) 
-            AND customers.status = '1'
-    
-          ${searchCondition}
-          GROUP BY jobs.id
-          `,
+      SELECT 
+        jobs.id AS id,
+        jobs.status_type AS status_type,
+        
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id
+
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+       WHERE (
+        (assigned_jobs_staff_view.staff_id IN (${placeholders})
+        OR jobs.staff_created_id IN (${placeholders})
+        OR clients.staff_created_id IN (${placeholders})) 
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+      ) 
+      AND customers.status = '1'
+      ${searchCondition}
+      GROUP BY jobs.id
+      `,
       [
         ...LineManageStaffId,
         ...LineManageStaffId,
@@ -1673,7 +1670,7 @@ async function getAllJobsSidebar(
 
     // 🔹 DATA
     const query = `
-      SELECT 
+        SELECT 
         jobs.id AS job_id,
         timesheet.job_id AS timesheet_job_id,
         job_types.type AS job_type_name,
@@ -1757,21 +1754,25 @@ async function getAllJobsSidebar(
       offset,
     ]);
 
+    console.log("result 1 -->", result.length)
+
     // 🔹 assign_customer_service logic (UNCHANGED)
-    let isExistAssignCustomer = result.find(
-      (item) => item.assigned_source === "assign_customer_service"
-    );
-    if (isExistAssignCustomer) {
-      const matched = result.filter(
-        (item) =>
-          item.assigned_source === "assign_customer_service" &&
-          Number(item.service_id_assign) === Number(item.job_service_id)
-      );
-      const matched2 = result.filter(
-        (item) => item.assigned_source !== "assign_customer_service"
-      );
-      result = [...matched, ...matched2];
-    }
+    // let isExistAssignCustomer = result.find(
+    //   (item) => item.assigned_source === "assign_customer_service"
+    // );
+    // if (isExistAssignCustomer) {
+    //   const matched = result.filter(
+    //     (item) =>
+    //       item.assigned_source === "assign_customer_service" &&
+    //       Number(item.service_id_assign) === Number(item.job_service_id)
+    //   );
+    //   const matched2 = result.filter(
+    //     (item) => item.assigned_source !== "assign_customer_service"
+    //   );
+    //   result = [...matched, ...matched2];
+    // }
+
+    console.log("result 2 -->", result.length)
 
     return {
       status: true,
@@ -1790,10 +1791,6 @@ async function getAllJobsSidebar(
     return { status: false, message: "Error getting job. All Jobs" };
   }
 }
-
-
-
-
 
 const getJobByClient = async (job) => {
   const { client_id, StaffUserId } = job;
