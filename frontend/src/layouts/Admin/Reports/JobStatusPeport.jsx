@@ -227,7 +227,7 @@ const JobStatus = () => {
       "Job Received On": convertDate(item.job_received_on),
       "Job Priority": item.job_priority
         ? item.job_priority.charAt(0).toUpperCase() +
-          item.job_priority.slice(1).toLowerCase()
+        item.job_priority.slice(1).toLowerCase()
         : "-",
       "Customer Name": item.customer_trading_name,
       "Account Manager": item.account_manager_name,
@@ -250,6 +250,69 @@ const JobStatus = () => {
     };
   });
 
+  const handleExport = async () => {
+    
+    const data = { req: { page :1, limit: 1000000, search : "" }, authToken: token };
+    const response = await dispatch(JobStatusReport(data)).unwrap();
+
+    if (!response.status || !response?.data?.rows || response?.data?.rows?.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
+     
+
+    const exportData = response?.data?.rows?.map((item) => {
+      return {
+        "Job Id": item.job_code_id,
+        "Job Received On": convertDate(item.job_received_on),
+        "Job Priority": item.job_priority
+          ? item.job_priority.charAt(0).toUpperCase() +
+          item.job_priority.slice(1).toLowerCase()
+          : "-",
+        "Customer Name": item.customer_trading_name,
+        "Account Manager": item.account_manager_name,
+        Clients: item.client_trading_name,
+        "Service Type": item.service_name,
+        "Job Type": item.job_type_name,
+        Status: item.status,
+        "Allocated To": item.allocated_name,
+        "Allocated to (Other)": item.multiple_staff_names,
+        "Reviewer Name": item.reviewer_name,
+        "Companies House Due Date": convertDate(item.filing_Companies_date),
+        "Internal Deadline": convertDate(item.internal_deadline_date),
+        "Customer Deadline": convertDate(item.customer_deadline_date),
+        "Initial Query Sent Date": convertDate(item.query_sent_date),
+        "Final Query Response Received Date": convertDate(
+          item.final_query_response_received_date
+        ),
+        "First Draft Sent": convertDate(item.draft_sent_on),
+        "Final Draft Sent": convertDate(item.final_draft_sent_on),
+      };
+    });
+
+    downloadCSV(exportData, "Job Status Report.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
   return (
     <div>
       <div className="report-data">
@@ -262,11 +325,19 @@ const JobStatus = () => {
         </div>
         <div className="datatable-wrapper mt-minus">
           <div className="d-flex justify-content-end mb-3">
-            <ExportToExcel
+            {/* <ExportToExcel
               className="btn btn-outline-info fw-bold float-end border-3 "
               apiData={exportData}
               fileName={`Job Status Report`}
-            />
+            /> */}
+             <div className="col-md-8 d-flex justify-content-end">
+              <button
+                className="btn btn-outline-info fw-bold float-end border-3 "
+                onClick={handleExport}
+              >
+                Export Excel
+              </button>
+            </div>
           </div>
 
           <div className="row mb-3 mt-3">
