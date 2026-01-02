@@ -838,7 +838,7 @@ const StaffPage = () => {
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
   };
-
+  
   const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
     "Last Name": item.last_name,
@@ -1015,13 +1015,13 @@ const StaffPage = () => {
     };
     const data = { req, authToken: token };
     const response = await dispatch(Staff(data)).unwrap();
-
-    if (!response.status || !response.data || response.data.length === 0) {
+  
+    if (!response.status || !response?.data?.data || response?.data?.data?.length === 0) {
       alert("No data to export!");
       return;
     }
 
-    const exportData = response.data.map((item) => ({
+    const exportData = response?.data?.data?.map((item) => ({
       "First Name": item.first_name,
       "Last Name": item.last_name,
       Email: item.email,
