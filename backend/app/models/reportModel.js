@@ -138,7 +138,7 @@ const jobStatusReports = async (Report) => {
       WHERE(
         (   
          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            jobs.staff_created_id IN(${LineManageStaffId})
+         OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
             assigned_jobs_staff_view.source != 'assign_customer_service'
@@ -161,14 +161,23 @@ const jobStatusReports = async (Report) => {
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       LEFT JOIN services ON jobs.service_id = services.id
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
-      WHERE
-        (jobs.staff_created_id IN(${LineManageStaffId})
+      WHERE(
+        (   
+         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+         OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
+         AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+       )
+      AND customers.status = '1' 
       ${searchQuery}
     `;
 
