@@ -1171,9 +1171,6 @@ VALUES (
 // }
 
 
-
-
-
 const getJobByCustomer = async (job) => {
   let { customer_id, StaffUserId, page, limit, search } = job;
   page = parseInt(page) || 1;
@@ -1590,11 +1587,9 @@ async function getAllJobsSidebar(
         },
       };
     }
+    
 
     // ================= OTHER ROLE =================
-
-
-
     const placeholders = LineManageStaffId?.map(() => '?').join(',');
 
 

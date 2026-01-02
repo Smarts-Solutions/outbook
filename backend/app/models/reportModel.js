@@ -82,6 +82,7 @@ const jobStatusReports = async (Report) => {
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR ', ') AS multiple_staff_names
       FROM jobs
       LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
       LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
@@ -134,9 +135,17 @@ const jobStatusReports = async (Report) => {
 
     const dataQuery = `
       ${baseSelect}
-      WHERE
-        (jobs.staff_created_id IN(${LineManageStaffId})
+      WHERE(
+        (   
+         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+            jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
+         AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+       )
+      AND customers.status = '1'    
       ${searchQuery}
       GROUP BY jobs.id
       ORDER BY jobs.id DESC
