@@ -1467,17 +1467,43 @@ async function getAllJobsSidebar(
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
   let searchParams = [];
-  if (search) {
+  
+  
+
+  // if (search) {
+  //   searchCondition = `
+  //     AND (
+  //       jobs.client_job_code LIKE ?
+  //       OR clients.trading_name LIKE ?
+  //       OR customers.trading_name LIKE ?
+  //       OR job_types.type LIKE ?
+  //     )
+  //   `;
+  //   const likeSearch = `%${search}%`;
+  //   searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
+  // }
+
+   const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+
+   if (search) {
     searchCondition = `
       AND (
-        jobs.client_job_code LIKE ?
+        customers.trading_name LIKE ?
         OR clients.trading_name LIKE ?
-        OR customers.trading_name LIKE ?
         OR job_types.type LIKE ?
+        OR jobs.job_id LIKE ?
+        OR ${jobCodeExpr} LIKE ?
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch,likeSearch];
   }
 
   try {
@@ -1497,15 +1523,17 @@ async function getAllJobsSidebar(
         `
         SELECT COUNT(DISTINCT jobs.id) AS total
         FROM jobs
-        LEFT JOIN customers ON jobs.customer_id = customers.id AND customers.status = '1'
+        LEFT JOIN customers ON jobs.customer_id = customers.id
         LEFT JOIN clients ON jobs.client_id = clients.id
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
         WHERE 1 = 1
+        AND customers.status = '1'
         ${searchCondition}
         `,
         [...searchParams]
       );
       total = countResult[0].total || 0;
+      
 
       // 🔹 DATA
       const query = `
@@ -1514,7 +1542,7 @@ async function getAllJobsSidebar(
         clients.trading_name AS client_trading_name,
         job_types.type AS job_type_name,
         jobs.job_id AS jobs_job_id,
-        
+        ${jobCodeExpr} AS job_code_id,
         jobs.id AS job_id,
         timesheet.job_id AS timesheet_job_id,
         jobs.status_type AS status_type,
@@ -1541,13 +1569,7 @@ async function getAllJobsSidebar(
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
-          CONCAT(
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(clients.trading_name, 1, 3), '_',
-            SUBSTRING(job_types.type, 1, 4), '_',
-            SUBSTRING(jobs.job_id, 1, 15)
-            ) AS job_code_id
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at
         FROM
         jobs
         JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
@@ -1593,34 +1615,6 @@ async function getAllJobsSidebar(
     const placeholders = LineManageStaffId?.map(() => '?').join(',');
 
 
-    //🔹 TOTAL COUNT
-    // const [countResult] = await pool.execute(
-    //   `
-    //   SELECT COUNT(DISTINCT jobs.id) AS total
-    //   FROM jobs
-    //   LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-    //   LEFT JOIN clients ON jobs.client_id = clients.id
-    //   LEFT JOIN customers ON jobs.customer_id = customers.id
-    //   LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-    //   WHERE (
-    //     assigned_jobs_staff_view.staff_id IN (${placeholders})
-    //     OR jobs.staff_created_id IN (${placeholders})
-    //     OR clients.staff_created_id IN (${placeholders})
-    //     AND customers.status = '1'
-    //     AND (
-    //         assigned_jobs_staff_view.source != 'assign_customer_service'
-    //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-    //       )
-    //   )
-    //   ${searchCondition}
-    //   `,
-    //   [
-    //     ...LineManageStaffId,
-    //     ...LineManageStaffId,
-    //     ...LineManageStaffId,
-    //     ...searchParams,
-    //   ]
-    // );
 
     const [countResult] = await pool.execute(
       `
@@ -1712,12 +1706,7 @@ async function getAllJobsSidebar(
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
         DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
-        CONCAT(
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(clients.trading_name, 1, 3), '_',
-            SUBSTRING(job_types.type, 1, 4), '_',
-            SUBSTRING(jobs.job_id, 1, 15)
-            ) AS job_code_id
+        ${jobCodeExpr} AS job_code_id
    
       FROM
       jobs
