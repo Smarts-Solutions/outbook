@@ -260,8 +260,6 @@ const JobStatus = () => {
       return;
     }
 
-     
-
     const exportData = response?.data?.rows?.map((item) => {
       return {
         "Job Id": item.job_code_id,
