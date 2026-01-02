@@ -460,13 +460,13 @@ const getTimesheetTaskType = async (Timesheet) => {
   try {
     //get internal Data
     if (task_type === "1") {
-      const [rows] = await pool.query("SELECT id , name FROM internal");
+      const [rows] = await pool.query("SELECT id , name FROM internal ORDER BY name ASC");
       return { status: true, message: "success.", data: rows };
     }
     //get Sub internal Data by Internal
     else if (task_type === "5") {
       const internal_id = Timesheet.internal_id
-      const [rows] = await pool.query(`SELECT id , name FROM sub_internal WHERE status = '1' AND internal_id=${internal_id} ORDER BY id DESC`);
+      const [rows] = await pool.query(`SELECT id , name FROM sub_internal WHERE status = '1' AND internal_id=${internal_id} ORDER BY name ASC`);
       return { status: true, message: "success.", data: rows };
     }
 
@@ -498,7 +498,7 @@ const getTimesheetTaskType = async (Timesheet) => {
           FROM 
               customers 
           ORDER BY 
-          id DESC;`;
+          customers.trading_name ASC;`;
 
           const [result] = await pool.execute(query);
           return { status: true, message: 'Success..', data: result };
@@ -553,7 +553,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         WHERE
            customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
-           ORDER BY customers.id DESC
+           ORDER BY customers.trading_name ASC
          `;
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success..', data: result };
@@ -607,7 +607,7 @@ const getTimesheetTaskType = async (Timesheet) => {
               GROUP BY
                   clients.id    
               ORDER BY 
-                  clients.id DESC;
+                  clients.trading_name ASC;
                   `;
             const [result] = await pool.execute(query);
             return { status: true, message: "success.", data: result };
@@ -676,7 +676,7 @@ const getTimesheetTaskType = async (Timesheet) => {
                   GROUP BY
                       clients.id
                   ORDER BY 
-                      clients.id DESC;
+                      clients.trading_name ASC;
         `;
         const [result] = await pool.execute(query);
         return { status: true, message: "success.", data: result };
@@ -849,7 +849,7 @@ const getTimesheetTaskType = async (Timesheet) => {
      GROUP BY
       task.id
       ORDER BY
-      client_job_task.id DESC;
+      task.name ASC;
      `;
       const [rows] = await pool.execute(query, [job_id]);
       return { status: true, message: "success.", data: rows };
