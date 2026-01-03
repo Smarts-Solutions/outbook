@@ -331,7 +331,8 @@ function JobCustomReport() {
 
   // All Type Staff Get
   const staffData = async (role_id, type) => {
-    //  console.log("role ", role);
+      console.log("role ", role);
+     /// alert(role_id);
     if (["", null, undefined].includes(role_id)) {
       return;
     }
