@@ -3949,7 +3949,10 @@ const getJobCustomReport = async (Report) => {
 
 
 
-
+       where.push(`(
+            assigned_jobs_staff_view.source != 'assign_customer_service'
+            OR raw.service_id = assigned_jobs_staff_view.service_id_assign
+          )`)
 
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -4113,6 +4116,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
             LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
             ${where}
+            ${GROUPBY}
             ORDER BY raw.job_id
         `;
 
