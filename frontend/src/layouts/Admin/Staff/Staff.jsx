@@ -1111,7 +1111,7 @@ const StaffPage = () => {
             </div>
           </div>
 
-          {tabs.map((tab) => (
+          {tabs?.map((tab) => (
             <div
               key={tab.id}
               className={`tab-pane fade ${
