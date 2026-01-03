@@ -3543,6 +3543,7 @@ const getJobCustomReport = async (Report) => {
     if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod)) {
         return { status: false, message: `empty groupBy field`, data: [] };
     }
+      let GROUPBY = ""
     //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
     const ALLOWED_GROUP_FIELDS = [
@@ -3607,12 +3608,155 @@ const getJobCustomReport = async (Report) => {
 
         //'line_manager_id'
     ]
-
+    
     // validate groupBy
     if (!Array.isArray(groupBy)) groupBy = [groupBy];
     for (const g of groupBy) {
         if (!ALLOWED_GROUP_FIELDS.includes(g)) {
             return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
+        }else{
+            if (g === 'job_id') {
+             GROUPBY = GROUPBY !=""? GROUPBY += " , raw.job_id" :`GROUP BY raw.job_id`;
+            }
+            else if (g === 'customer_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.customer_id" :`GROUP BY raw.customer_id`;
+            }
+            else if (g === 'client_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.client_id" :`GROUP BY raw.client_id`;
+            }
+            else if (g === 'account_manager_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.account_manager_id" :`GROUP BY raw.account_manager_id`;
+            }
+            else if (g === 'allocated_to_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.allocated_to_id" :`GROUP BY raw.allocated_to_id`;
+            }
+            else if (g === 'reviewer_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.reviewer_id" :`GROUP BY raw.reviewer_id`;
+            }
+            else if (g === 'service_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.service_id" :`GROUP BY raw.service_id`;
+            }
+            else if (g === 'job_type_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.job_type_id" :`GROUP BY raw.job_type_id`;
+            }
+            else if (g === 'status_type_id'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.status_type_id" :`GROUP BY raw.status_type_id`;
+            }
+            else if (g === 'employee_number'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , sf.employee_number" :`GROUP BY sf.employee_number`;
+            }
+            else if (g === 'date_received_on'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.date_received_on" :`GROUP BY raw.date_received_on`;
+            }
+            else if (g === 'allocated_on'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.allocated_on" :`GROUP BY raw.allocated_on`;
+            }
+            else if (g === 'job_priority'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.job_priority" :`GROUP BY raw.job_priority`;
+            }
+            else if (g === 'engagement_model'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.engagement_model" :`GROUP BY raw.engagement_model`;
+            }
+            else if (g === 'customer_account_manager_officer'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , ccd.id" :`GROUP BY ccd.id`;
+            }
+            else if (g === 'status_updation_date'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.status_updation_date" :`GROUP BY raw.status_updation_date`;
+            }
+            else if (g === 'Transactions_Posting_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Transactions_Posting_id_2" :`GROUP BY raw.Transactions_Posting_id_2`;
+            }
+            else if (g === 'Number_of_Bank_Transactions_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Bank_Transactions_id_2" :`GROUP BY raw.Number_of_Bank_Transactions_id_2`;
+            }
+            else if (g === 'Number_of_Journal_Entries_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Journal_Entries_id_2" :`GROUP BY raw.Number_of_Journal_Entries_id_2`;
+            }
+            else if (g === 'Number_of_Other_Transactions_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Other_Transactions_id_2" :`GROUP BY raw.Number_of_Other_Transactions_id_2`;
+            }
+            else if (g === 'Number_of_Petty_Cash_Transactions_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Petty_Cash_Transactions_id_2" :`GROUP BY raw.Number_of_Petty_Cash_Transactions_id_2`;
+            }
+            else if (g === 'Number_of_Purchase_Invoices_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Purchase_Invoices_id_2" :`GROUP BY raw.Number_of_Purchase_Invoices_id_2`;
+            }
+            else if (g === 'Number_of_Sales_Invoices_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Sales_Invoices_id_2" :`GROUP BY raw.Number_of_Sales_Invoices_id_2`;
+            }
+            else if (g === 'Number_of_Total_Transactions_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Total_Transactions_id_2" :`GROUP BY raw.Number_of_Total_Transactions_id_2`;
+            }
+            else if (g === 'submission_deadline'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.submission_deadline" :`GROUP BY raw.submission_deadline`;
+            }
+            else if (g === 'Tax_Year_id_4'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Tax_Year_id_4" :`GROUP BY raw.Tax_Year_id_4`;
+            }
+            else if (g === 'If_Sole_Trader_Who_is_doing_Bookkeeping_id_4'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4" :`GROUP BY raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`;
+            }
+            else if (g === 'Whose_Tax_Return_is_it_id_4'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Whose_Tax_Return_is_it_id_4" :`GROUP BY raw.Whose_Tax_Return_is_it_id_4`;
+            }
+            else if (g === 'Type_of_Payslip_id_3'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Type_of_Payslip_id_3" :`GROUP BY raw.Type_of_Payslip_id_3`;
+            }
+            else if (g === 'Year_Ending_id_1'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Year_Ending_id_1" :`GROUP BY raw.Year_Ending_id_1`;
+            }
+            else if (g === 'Bookkeeping_Frequency_id_2'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Bookkeeping_Frequency_id_2" :`GROUP BY raw.Bookkeeping_Frequency_id_2`;
+            }
+            else if (g === 'CIS_Frequency_id_3'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.CIS_Frequency_id_3" :`GROUP BY raw.CIS_Frequency_id_3`;
+            }
+            else if (g === 'Filing_Frequency_id_8'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Filing_Frequency_id_8" :`GROUP BY raw.Filing_Frequency_id_8`;
+            }
+            else if (g === 'Management_Accounts_Frequency_id_6'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Management_Accounts_Frequency_id_6" :`GROUP BY raw.Management_Accounts_Frequency_id_6`;
+            }
+            else if (g === 'Payroll_Frequency_id_3'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Payroll_Frequency_id_3" :`GROUP BY raw.Payroll_Frequency_id_3`;
+            }
+            else if (g === 'budgeted_hours'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.budgeted_hours" :`GROUP BY raw.budgeted_hours`;
+            }
+            else if (g === 'feedback_incorporation_time'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.feedback_incorporation_time" :`GROUP BY raw.feedback_incorporation_time`;
+            }
+            else if (g === 'review_time'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.review_time" :`GROUP BY raw.review_time`;
+            }
+            else if (g === 'total_preparation_time'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.total_preparation_time" :`GROUP BY raw.total_preparation_time`;
+            }
+            else if (g === 'total_time'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.total_time" :`GROUP BY raw.total_time`;
+            }
+            else if (g === 'due_on'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.due_on" :`GROUP BY raw.due_on`;
+            }
+            else if (g === 'customer_deadline_date'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.customer_deadline_date" :`GROUP BY raw.customer_deadline_date`;
+            }
+            else if (g === 'expected_delivery_date'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.expected_delivery_date" :`GROUP BY raw.expected_delivery_date`;
+            }
+            else if (g === 'internal_deadline_date'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.internal_deadline_date" :`GROUP BY raw.internal_deadline_date`;
+            }
+            else if (g === 'sla_deadline_date'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.sla_deadline_date" :`GROUP BY raw.sla_deadline_date`;
+            }
+            else if (g === 'Management_Accounts_FromDate_id_6'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Management_Accounts_FromDate_id_6" :`GROUP BY raw.Management_Accounts_FromDate_id_6`;
+            }
+            else if (g === 'Management_Accounts_ToDate_id_6'){
+            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Management_Accounts_ToDate_id_6" :`GROUP BY raw.Management_Accounts_ToDate_id_6`;
+            }
+            
         }
     }
 
