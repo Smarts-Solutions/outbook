@@ -568,8 +568,6 @@ const ClientList = () => {
  
 
   const HandleJob = (row) => {
-      
-   
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,

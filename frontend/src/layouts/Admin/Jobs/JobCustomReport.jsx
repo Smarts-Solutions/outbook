@@ -1383,15 +1383,11 @@ function JobCustomReport() {
   };
 
   const HandleJob = (jobData) => {
-   
-    console.log("jobData",jobData)
-
-    
-     
+    //console.log("jobData",jobData)
     navigate("/admin/job/logs", {
       state: {
         job_id: jobData?.id,
-        timesheet_job_id: 5,
+        timesheet_job_id: 1,
         data: {
           client:{},
           customer:{},
