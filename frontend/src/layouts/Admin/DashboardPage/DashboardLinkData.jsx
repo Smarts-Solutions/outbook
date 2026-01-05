@@ -282,8 +282,16 @@ const JobStatus = () => {
     {
       name: "Allocated To",
       cell: (row) => (
-        <div title={row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}>
-          {row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
+        // <div title={row.allocated_first_name == null ? "-" : 
+        //  row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}>
+        //   {row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
+        // </div>
+
+        <div>
+          {
+          row?.allocated_first_name != null ?
+          row?.allocated_first_name +" " +row?.allocated_last_name
+           : "-"}
         </div>
       ),
 
