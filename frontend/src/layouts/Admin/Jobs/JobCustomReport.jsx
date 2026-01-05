@@ -969,7 +969,7 @@ function JobCustomReport() {
     }
   };
 
-  console.log("filters ", filters);
+  // console.log("filters ", filters);
 
   const callFilterApi = async () => {
     // Call your filter API here
