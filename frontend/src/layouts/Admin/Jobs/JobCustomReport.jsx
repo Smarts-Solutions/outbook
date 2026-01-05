@@ -1383,13 +1383,26 @@ function JobCustomReport() {
   };
 
   const HandleJob = (jobData) => {
+   
+    console.log("jobData",jobData)
+
+    
+     
     navigate("/admin/job/logs", {
       state: {
-        job_id: filters.job_id,
-        timesheet_job_id: jobData?.timesheet_job_id,
-        data: jobData,
+        job_id: jobData?.id,
+        timesheet_job_id: 5,
+        data: {
+          client:{},
+          customer:{},
+          job:{
+            job_id : jobData?.id,
+            job_code_id : jobData?.job_id
+
+          }
+        },
         goto: "client",
-        activeTab: "job_custom_report",
+        activeTab: undefined,
       },
     });
   };

@@ -17,6 +17,9 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
+
+  console.log("location --->>",location?.state)
+
   const [AllJobData, setAllJobData] = useState([]);
   const dispatch = useDispatch();
   const [budgetedhours, setBudgetedHours] = useState({

@@ -4146,6 +4146,7 @@ const getJobCustomReport = async (Report) => {
 
             // Map of id → name field relation
             const idToNameMap = {
+                id:"job_id",
                 job_id: "job_name",
                 customer_id: "customer_name",
                 client_id: "client_name",
@@ -4233,10 +4234,11 @@ const getJobCustomReport = async (Report) => {
             const periodKey = getPeriodKey(displayBy, workDateStr);
             if (!periodKey) continue;
             periodSet.add(periodKey);
-
             if (!groups[gid]) {
                 groups[gid] = {
                     //  group_value: gid,
+                   
+                    id:r.job_id,
                     job_name: r.job_name,
                     customer_name: r.customer_name,
                     client_name: r.client_name,
@@ -4317,6 +4319,8 @@ const getJobCustomReport = async (Report) => {
             const g = groups[gid];
             const row = {};
             // fill group fields
+           
+            row['id'] = g.id;
             row['job_id'] = g.job_name;
             row['customer_id'] = g.customer_name;
             row['client_id'] = g.client_name;
@@ -4398,6 +4402,7 @@ const getJobCustomReport = async (Report) => {
             outRows.push(row);
         }
 
+         console.log("outRows --->>>", outRows);
         // console.log("displayBy --->>>", displayBy);
         let total_count = [];
         let weeks = [];
