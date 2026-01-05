@@ -525,7 +525,7 @@ function JobCustomReport() {
             return;
           });
       } else {
-        alert("Ok")
+       
         let data = [
           {
             id: staffDetails?.employee_number,
