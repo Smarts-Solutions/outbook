@@ -25,6 +25,8 @@ function JobCustomReport() {
   const today = new Date().toISOString().split("T")[0];
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = staffDetails?.role;
+
+  console.log("staffDetails ",staffDetails)
   const [showData, setShowData] = useState([]);
   const navigate = useNavigate();
   console.log("showData ", showData);
@@ -332,6 +334,7 @@ function JobCustomReport() {
   // All Type Staff Get
   const staffData = async (role_id, type) => {
       console.log("role ", role);
+      console.log("role_id ", role_id);
      /// alert(role_id);
     if (["", null, undefined].includes(role_id)) {
       return;
@@ -522,6 +525,7 @@ function JobCustomReport() {
             return;
           });
       } else {
+        alert("Ok")
         let data = [
           {
             id: staffDetails?.employee_number,

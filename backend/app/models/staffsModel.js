@@ -229,10 +229,11 @@ const deleteStaff = async (staffId) => {
 };
 
 const updateStaff = async (staff) => {
-  const { id, ...fields } = staff;
+  // const { id, ...fields } = staff;
+  const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
 
-  console.log("fields", fields);
+  
 
   // Line Manage Code
   let staff_to = fields.staff_to;
@@ -309,6 +310,8 @@ const updateStaff = async (staff) => {
       existStatus.status === staff.status
         ? `edited staff ${staff.first_name} ${staff.last_name}`
         : `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`;
+
+        
 
     const [rows] = await pool.execute(query, values);
     if (rows.changedRows) {
@@ -442,7 +445,7 @@ const staffCompetency = async (staffCompetency) => {
 
 const getStaffByEmail = async (email) => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.email , staffs.password ,staffs.first_name, staffs.last_name, staffs.role_id, staffs.status,roles.role_name ,roles.role  FROM staffs JOIN roles ON staffs.role_id = roles.id  WHERE staffs.email = ?",
+    "SELECT staffs.id , staffs.email , staffs.password ,staffs.first_name, staffs.last_name, staffs.role_id, staffs.status,roles.role_name ,roles.role ,staffs.employee_number  FROM staffs JOIN roles ON staffs.role_id = roles.id  WHERE staffs.email = ?",
     [email]
   );
 
