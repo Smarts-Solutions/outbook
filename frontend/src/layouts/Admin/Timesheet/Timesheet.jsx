@@ -2189,6 +2189,8 @@ const Timesheet = () => {
                                     // </select>
                                     <Select
                                       className="basic-multi-select"
+                                        menuPortalTarget={document.body}
+  menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2216,6 +2218,8 @@ const Timesheet = () => {
                                   ) : (
                                     <select
                                       className="form-select form-control"
+                                        menuPortalTarget={document.body}
+  menuPosition="fixed"
                                       style={{ width: "100px" }}
                                       value={item.task_type}
                                       disabled
@@ -2250,6 +2254,8 @@ const Timesheet = () => {
 
                                     <Select
                                       className="basic-multi-select"
+                                        menuPortalTarget={document.body}
+  menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({

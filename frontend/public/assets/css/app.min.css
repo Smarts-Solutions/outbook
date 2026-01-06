@@ -4866,3 +4866,6 @@ font-size: 12px !important;
 {
   padding: 3px !important;
 }
+.react-select__menu-portal {
+  z-index: 9999;
+}
