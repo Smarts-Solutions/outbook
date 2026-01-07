@@ -2432,6 +2432,8 @@ const Timesheet = () => {
                                     // </select>
                                     <Select
                                       className="basic-multi-select"
+                                            menuPortalTarget={document.body}
+                                         menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
