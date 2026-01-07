@@ -1,9 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight, Download, FileAxis3d, Eye, Pencil } from "lucide-react";
+import {
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  FileAxis3d,
+  Eye,
+  Pencil,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import Select from 'react-select';
+import Select from "react-select";
 import {
   getTimesheetData,
   getTimesheetTaskTypedData,
@@ -13,21 +21,18 @@ import {
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
-
 const Timesheet = () => {
-
-  const [activeIndex, setActiveIndex] = useState(null);   // row
-  const [activeField, setActiveField] = useState(null);   // field name
+  const [activeIndex, setActiveIndex] = useState(null); // row
+  const [activeField, setActiveField] = useState(null); // field name
 
   // add node state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
-  const [selectedRowIndex, setSelectedRowIndex] = useState(null)
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
   // copy timesheet modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
-
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -97,7 +102,6 @@ const Timesheet = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [selectedStaff, setSelectedStaff] = useState(staffDetails.id);
 
-
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
   const [expandedRows, setExpandedRows] = useState([]);
@@ -113,24 +117,27 @@ const Timesheet = () => {
     data: [],
   });
 
-  const [isExistStaffDataWeekDataAll, setIsExistStaffDataWeekDataAll] = useState({
+  const [isExistStaffDataWeekDataAll, setIsExistStaffDataWeekDataAll] =
+    useState({
+      loading: true,
+      data: [],
+    });
+
+  const [
+    staffDataWeekDataAllSubmitTImeSheet,
+    setStaffDataWeekDataAllSubmitTImeSheet,
+  ] = useState({
     loading: true,
     data: [],
   });
-
-  const [staffDataWeekDataAllSubmitTImeSheet, setStaffDataWeekDataAllSubmitTImeSheet] = useState({
-    loading: true,
-    data: [],
-  });
-
 
   const [lineMangerData, setLineMangerData] = useState([]);
   const [selectedLineManager, setSelectedLineManager] = useState("");
 
-
-
   const GetLineManagerData = async () => {
-    await dispatch(Staff({ req: { action: "get_line_manager" }, authToken: token }))
+    await dispatch(
+      Staff({ req: { action: "get_line_manager" }, authToken: token })
+    )
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -154,10 +161,16 @@ const Timesheet = () => {
     setDeleteRows([]);
     if (res.status) {
       if (isExistStaffDataWeekDataAll?.data?.length === 0) {
-        setIsExistStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+        setIsExistStaffDataWeekDataAll({
+          loading: false,
+          data: res.filterDataWeek,
+        });
       }
 
-      if (selectedLineManager != "" && res.filterDataWeekSubmitTimeSheet.length === 0) {
+      if (
+        selectedLineManager != "" &&
+        res.filterDataWeekSubmitTimeSheet.length === 0
+      ) {
         sweatalert.fire({
           icon: "warning",
           title: "No timesheets have been submitted yet.",
@@ -167,9 +180,11 @@ const Timesheet = () => {
         });
       }
 
-
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
-      setStaffDataWeekDataAllSubmitTImeSheet({ loading: false, data: res.filterDataWeekSubmitTimeSheet });
+      setStaffDataWeekDataAllSubmitTImeSheet({
+        loading: false,
+        data: res.filterDataWeekSubmitTimeSheet,
+      });
 
       const hasValidWeekOffsetZeroValue =
         res.filterDataWeek.length > 0 &&
@@ -209,7 +224,6 @@ const Timesheet = () => {
   const selectFilterStaffANdWeek = async (e) => {
     let { name, value } = e.target;
 
-
     if (name === "staff_id") {
       setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
@@ -217,7 +231,7 @@ const Timesheet = () => {
       setSelectedStaff(value);
       // await GetTimeSheet(0)
     } else if (name === "week") {
-      if ([null, undefined, ''].includes(value)) {
+      if ([null, undefined, ""].includes(value)) {
         value = 0;
       } else {
         value = parseInt(value);
@@ -225,11 +239,9 @@ const Timesheet = () => {
       weekOffSetValue.current = parseInt(value);
       setWeekOffset(value);
       await GetTimeSheet(value);
-    }
-    else if (name === "copy_week") {
+    } else if (name === "copy_week") {
       await getTimeSheetCopyRecord(value);
     }
-
   };
 
   const getTimeSheetCopyRecord = async (weekOffset) => {
@@ -254,13 +266,15 @@ const Timesheet = () => {
         })
       );
     }
-
-  }
-
-
+  };
 
   const staffData = async () => {
-    await dispatch(Staff({ req: { action: "get", page: 1, limit: 10000, search: "" }, authToken: token }))
+    await dispatch(
+      Staff({
+        req: { action: "get", page: 1, limit: 10000, search: "" },
+        authToken: token,
+      })
+    )
       .unwrap()
       .then(async (response) => {
         if (response?.data?.status) {
@@ -323,8 +337,6 @@ const Timesheet = () => {
     ];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
-
-
   }, []);
 
   // Function to handle week change
@@ -343,7 +355,6 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
-
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -449,7 +460,6 @@ const Timesheet = () => {
       console.log("API call failed:", res);
     }
   };
-
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
@@ -817,7 +827,6 @@ const Timesheet = () => {
     let value = e.target.value;
     let name = e.target.name;
 
-
     let final_value = value;
 
     let [intPart, decimalPart] = value.toString().split(".");
@@ -825,11 +834,10 @@ const Timesheet = () => {
     if (decimalPart) {
       let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
 
-      const multipliedStr = multiplied.toString().padStart(2, '0');
+      const multipliedStr = multiplied.toString().padStart(2, "0");
       final_value = `${intPart}.${multipliedStr}`;
       // final_value = `${intPart}.${multiplied}`;
     }
-
 
     // console.log(`final_value`, final_value);
 
@@ -855,7 +863,6 @@ const Timesheet = () => {
       });
       return;
     }
-
 
     // const [integerPart, fractionalPart] = value.split(".");
     // if (fractionalPart && parseInt(fractionalPart) > 59) {
@@ -890,7 +897,6 @@ const Timesheet = () => {
     const formattedDate = new Date(`${year}-${month}-${day}`);
     const date_final_value = formattedDate.toISOString().split("T")[0];
 
-
     updatedRows[index][day_name] = date_final_value;
     updatedRows[index][name] = value;
 
@@ -903,7 +909,6 @@ const Timesheet = () => {
       (parseFloat(updatedRows[index].saturday_hours) || 0) +
       (parseFloat(updatedRows[index].sunday_hours) || 0);
     updatedRows[index].total_hours = sum;
-
 
     // warning total hours
     if (
@@ -933,8 +938,6 @@ const Timesheet = () => {
 
   // update record only Function
   function updateRecordSheet(rowId, name, value) {
-
-
     // update record only
     const updatedRows_update = [...updateTimeSheetRows];
     const existingUpdateIndex = updatedRows_update.findIndex(
@@ -978,24 +981,25 @@ const Timesheet = () => {
     // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
     // return finalTotalHours;
 
-    const total = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-      const val = parseFloat(item[key] || 0);
-      return acc + val;
-    }, 0);
+    const total =
+      timeSheetRows &&
+      timeSheetRows?.reduce((acc, item) => {
+        const val = parseFloat(item[key] || 0);
+        return acc + val;
+      }, 0);
 
     return total.toFixed(2); // returns something like 8.75
-
   };
 
   function totalWeeklyHoursMinutes(timeData) {
     const dayFields = [
-      'monday_hours',
-      'tuesday_hours',
-      'wednesday_hours',
-      'thursday_hours',
-      'friday_hours',
-      'saturday_hours',
-      'sunday_hours'
+      "monday_hours",
+      "tuesday_hours",
+      "wednesday_hours",
+      "thursday_hours",
+      "friday_hours",
+      "saturday_hours",
+      "sunday_hours",
     ];
 
     const totalMinutes = dayFields.reduce((sum, key) => {
@@ -1011,11 +1015,10 @@ const Timesheet = () => {
     // 3. Convert total minutes to HH:MM
     const finalHours = Math.floor(totalMinutes / 60);
     const finalMinutes = totalMinutes % 60;
-    const formattedMinutes = finalMinutes.toString().padStart(2, '0');
+    const formattedMinutes = finalMinutes.toString().padStart(2, "0");
 
     const totalFormattedTime = `${finalHours}.${formattedMinutes}`;
     return totalFormattedTime;
-
   }
 
   const totalHoursMinute = () => {
@@ -1039,19 +1042,17 @@ const Timesheet = () => {
     // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
     // return finalTotalHours;
 
-    const total = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-      const val = parseFloat(item.total_hours || 0);
-      return acc + val;
-    }, 0);
+    const total =
+      timeSheetRows &&
+      timeSheetRows?.reduce((acc, item) => {
+        const val = parseFloat(item.total_hours || 0);
+        return acc + val;
+      }, 0);
 
     return total.toFixed(2);
-
-  }
+  };
 
   const saveData = async (e) => {
-
-
-
     if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
@@ -1071,11 +1072,7 @@ const Timesheet = () => {
       }
     }
 
-
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
-
-
-
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -1092,33 +1089,37 @@ const Timesheet = () => {
         deleteRows: deleteRows,
       };
 
-
-
-
-      let staff_hourminute = (parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5) || null;
+      let staff_hourminute =
+        parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5 || null;
       //console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
       //console.log(`staff_hourminute`, staff_hourminute);
       if (staff_hourminute != null) {
+        const converted =
+          updatedTimeSheetRows &&
+          updatedTimeSheetRows?.map((item) => {
+            return {
+              original: item.total_hours,
+              totalweeklyHours: totalWeeklyHoursMinutes(item),
+            };
+          });
 
-        const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
-          return {
-            original: item.total_hours,
-            totalweeklyHours: totalWeeklyHoursMinutes(item)
-          };
-        });
+        const total = converted.reduce(
+          (acc, item) => {
+            const val = parseFloat(item.totalweeklyHours || 0);
+            const hrs = Math.floor(val);
+            const mins = Math.round((val - hrs) * 100);
 
-        const total = converted.reduce((acc, item) => {
-          const val = parseFloat(item.totalweeklyHours || 0);
-          const hrs = Math.floor(val);
-          const mins = Math.round((val - hrs) * 100);
-
-          acc.totalMinutes += hrs * 60 + mins;
-          return acc;
-        }, { totalMinutes: 0 });
+            acc.totalMinutes += hrs * 60 + mins;
+            return acc;
+          },
+          { totalMinutes: 0 }
+        );
 
         const totalHours = Math.floor(total.totalMinutes / 60);
         const totalMins = total.totalMinutes % 60;
-        const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
+        const finalTotalHours = `${totalHours}.${totalMins
+          .toString()
+          .padStart(2, "0")}`;
         // console.log(`finalTotalHours`, finalTotalHours);
 
         // if (staff_hourminute > parseFloat(finalTotalHours)) {
@@ -1131,7 +1132,6 @@ const Timesheet = () => {
         //   });
         //   return;
         // }
-
       }
 
       let isvalid = await validateDateFields(req.data);
@@ -1145,9 +1145,6 @@ const Timesheet = () => {
         });
         return;
       }
-
-
-
 
       const res = await dispatch(
         saveTimesheetData({ req, authToken: token })
@@ -1170,7 +1167,6 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
-
       }
     }
   };
@@ -1196,7 +1192,6 @@ const Timesheet = () => {
   };
 
   const submitData = async (e) => {
-
     if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
@@ -1226,12 +1221,11 @@ const Timesheet = () => {
     }
     const hours = Math.floor(totalHours);
     const minutes = Math.round((totalHours - hours) * 60);
-    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, "0");
     return `${hours}.${formattedMinutes}`;
   }
 
   const saveTimeSheetRemark = async (e) => {
-
     if (submitStatus == 1) {
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
@@ -1252,25 +1246,21 @@ const Timesheet = () => {
         deleteRows: deleteRows,
       };
 
-
-
-
       //let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
-      let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
+      let staff_hourminute =
+        updatedTimeSheetRows1?.[0]?.staffs_hourminute || null;
 
       //  console.log(`staff_hourminute 111 `, staff_hourminute);
 
       if (staff_hourminute != null && staff_hourminute?.includes(":")) {
         const [hours, minutes] = staff_hourminute.split(":").map(Number);
-        const decimal = hours + '.' + minutes;
+        const decimal = hours + "." + minutes;
         staff_hourminute = parseFloat(decimal);
       } else if (staff_hourminute != null) {
-
-        staff_hourminute = parseFloat(staff_hourminute)
+        staff_hourminute = parseFloat(staff_hourminute);
       }
 
       if (staff_hourminute != null) {
-
         // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
         //   return {
         //     original: item.total_hours,
@@ -1292,30 +1282,29 @@ const Timesheet = () => {
         // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
         // console.log(`finalTotalHours`, finalTotalHours);
 
+        const totalHours =
+          timeSheetRows &&
+          timeSheetRows?.reduce((acc, item) => {
+            const val = parseFloat(item.total_hours || 0);
+            return acc + val;
+          }, 0);
 
-        const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-          const val = parseFloat(item.total_hours || 0);
-          return acc + val;
-        }, 0);
-
-        let finalTotalHours = await convertHoursMinutes(totalHours)
-
+        let finalTotalHours = await convertHoursMinutes(totalHours);
 
         // console.log(`finalTotalHours`, finalTotalHours);
         // console.log(`staff_hourminute`, staff_hourminute);
 
-
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
             icon: "warning",
-            title: "Please enter the minimum required hourly time in the timesheet before submitting.",
+            title:
+              "Please enter the minimum required hourly time in the timesheet before submitting.",
             timerProgressBar: true,
             showConfirmButton: true,
             timer: 3000,
           });
           return;
         }
-
       }
 
       const res = await dispatch(
@@ -1363,19 +1352,18 @@ const Timesheet = () => {
       deleteRows: deleteRows,
     };
 
-
-    let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
+    let staff_hourminute =
+      updatedTimeSheetRows1?.[0]?.staffs_hourminute || null;
 
     if (staff_hourminute != null && staff_hourminute?.includes(":")) {
       const [hours, minutes] = staff_hourminute.split(":").map(Number);
-      const decimal = hours + '.' + minutes;
+      const decimal = hours + "." + minutes;
       staff_hourminute = parseFloat(decimal);
     } else if (staff_hourminute != null) {
-      staff_hourminute = parseFloat(staff_hourminute)
+      staff_hourminute = parseFloat(staff_hourminute);
     }
 
     if (staff_hourminute != null) {
-
       // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
       //   return {
       //     original: item.total_hours,
@@ -1397,23 +1385,23 @@ const Timesheet = () => {
       // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
       // console.log(`finalTotalHours`, finalTotalHours);
 
+      const totalHours =
+        timeSheetRows &&
+        timeSheetRows?.reduce((acc, item) => {
+          const val = parseFloat(item.total_hours || 0);
+          return acc + val;
+        }, 0);
 
-      const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
-        const val = parseFloat(item.total_hours || 0);
-        return acc + val;
-      }, 0);
-
-      let finalTotalHours = await convertHoursMinutes(totalHours)
-
+      let finalTotalHours = await convertHoursMinutes(totalHours);
 
       // console.log(`finalTotalHours 1 `, finalTotalHours);
       // console.log(`staff_hourminute 1 `, staff_hourminute);
 
-
       if (staff_hourminute > parseFloat(finalTotalHours)) {
         sweatalert.fire({
           icon: "warning",
-          title: "Please enter the minimum required hourly time in the timesheet before submitting.",
+          title:
+            "Please enter the minimum required hourly time in the timesheet before submitting.",
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000,
@@ -1421,8 +1409,6 @@ const Timesheet = () => {
         return;
       }
     }
-
-
 
     const res = await dispatch(
       saveTimesheetData({ req, authToken: token })
@@ -1451,7 +1437,6 @@ const Timesheet = () => {
   };
 
   const dayMonthFormatDate = (dateString) => {
-
     const parts = dateString.split(", ");
     const dayOfWeek = parts[0];
     const dateParts = parts[1].split("/");
@@ -1510,12 +1495,12 @@ const Timesheet = () => {
       "Friday Note",
       weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
       "Saturday Note",
-      "Remark"
+      "Remark",
     ];
 
-    let total_hours = 0
+    let total_hours = 0;
     const rows = timeSheetRows
-      .filter(item => item.id !== null && item.id !== undefined)
+      .filter((item) => item.id !== null && item.id !== undefined)
       .map((item, index) => {
         total_hours += parseFloat(item.total_hours) || 0;
         return [
@@ -1542,16 +1527,15 @@ const Timesheet = () => {
           item.friday_note || "",
           item.saturday_hours || 0,
           item.saturday_note || "",
-          item.remark || ""
+          item.remark || "",
         ];
       });
 
-
-
     const finalRemarkRow = [
-      `Total Weekly Hours : ${(total_hours).toFixed(2) || ""}`,
+      `Total Weekly Hours : ${total_hours.toFixed(2) || ""}`,
       `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
-      ...new Array(headers.length - 1).fill("")];
+      ...new Array(headers.length - 1).fill(""),
+    ];
 
     const csvContent = [headers, ...rows, finalRemarkRow]
       .map((row) => row.join(","))
@@ -1579,17 +1563,15 @@ const Timesheet = () => {
 
   const singleRemarkModalDone = async () => {
     setRemarkSingleModel(false);
-  }
-
+  };
 
   // SELECT OPTIONS FOR STAFF START //
-  const staffOptions = staffDataAll.data?.map((val) => ({
-    value: val.id,
-    label: `${val.first_name} ${val.last_name}`
-  })) || [];
+  const staffOptions =
+    staffDataAll.data?.map((val) => ({
+      value: val.id,
+      label: `${val.first_name} ${val.last_name}`,
+    })) || [];
   // SELECT OPTIONS FOR STAFF END //
-
-
 
   // SELECT OPTIONS FOR WEEK START //
   const weekOptions = [];
@@ -1609,7 +1591,6 @@ const Timesheet = () => {
     });
   }
 
-
   const weekOptionsSubmitTimeSheet = [];
 
   if (staffDataWeekDataAllSubmitTImeSheet.data) {
@@ -1621,13 +1602,11 @@ const Timesheet = () => {
     });
   }
 
-
   let currentValue = weekOptions.find(
     (opt) => opt.value == weekOffSetValue.current
   );
 
   // SELECT OPTIONS FOR WEEK END //
-
 
   const handleSaveNote = (e) => {
     // console.log("modalText ",modalText);
@@ -1655,52 +1634,46 @@ const Timesheet = () => {
     setModalText("");
     setActiveIndex(null);
     setActiveField(null);
-
   };
 
   //  timeSheet functionality
   const weekOptionsWithPlaceholder = [
     { label: "-- select --", value: "" },
-    ...weekOptions
+    ...weekOptions,
   ];
-
 
   // COPY TIMESHEET FUNCTIONALITY START //
   const weekOptionsWithPlaceholderSubmitTimeSheet = [
     { label: "-- select --", value: "" },
-    ...weekOptionsSubmitTimeSheet
+    ...weekOptionsSubmitTimeSheet,
   ];
 
   //lineMangerDataWithPlaceholder
-  const lineMangerDataOptions = lineMangerData?.map((val) => ({
-    value: val.staff_id,
-    label: `${val.staff_name}`
-  })) || [];
+  const lineMangerDataOptions =
+    lineMangerData?.map((val) => ({
+      value: val.staff_id,
+      label: `${val.staff_name}`,
+    })) || [];
   const lineMangerDataWithPlaceholder = [
     { label: "-- select --", value: "" },
-    ...lineMangerDataOptions
+    ...lineMangerDataOptions,
   ];
 
   const selectLineManager = async (e) => {
-    // console.log("e ", e); 
+    // console.log("e ", e);
     let name = e.target.name;
     let value = e.target.value;
 
-    if (!['', '0', undefined, null].includes(value)) {
+    if (!["", "0", undefined, null].includes(value)) {
       setSelectedLineManager(value);
-      const e = { target: { name: 'staff_id', value: value } };
+      const e = { target: { name: "staff_id", value: value } };
       selectFilterStaffANdWeek(e);
     } else {
-
       setSelectedLineManager("");
-      const e = { target: { name: 'staff_id', value: staffDetails?.id } };
+      const e = { target: { name: "staff_id", value: staffDetails?.id } };
       selectFilterStaffANdWeek(e);
-
-
     }
-
   };
-
 
   console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
   console.log("weekOptions ", weekOptions);
@@ -1711,13 +1684,12 @@ const Timesheet = () => {
     const formattedDate = new Date(`${year}-${month}-${day}`);
     const date_final_value = formattedDate.toISOString().split("T")[0];
     return date_final_value;
-  }
+  };
 
   const handleCopyTimeSheetAutoFill = async () => {
-
     if (copyTimeSheetRows && copyTimeSheetRows.length > 0) {
       setTimeSheetRows((prev) => [
-        ...prev,  // previous state retained
+        ...prev, // previous state retained
         ...copyTimeSheetRows.map((row) => {
           const sum =
             (parseFloat(row.monday_hours) || 0) +
@@ -1741,7 +1713,7 @@ const Timesheet = () => {
             sunday_date: convertDateFormatForCopy(weekDays.sunday),
             total_hours: parseFloat(sum).toFixed(2),
           };
-        })
+        }),
       ]);
 
       setUpdateTimeSheetRows((prev) => [
@@ -1770,21 +1742,16 @@ const Timesheet = () => {
 
             total_hours: parseFloat(sum).toFixed(2),
           };
-        })
+        }),
       ]);
-
     }
     setCopyTimeSheetRows([]);
     setIsCopyModalOpen(false);
-
-  }
-
+  };
 
   //  console.log("timeSheetRows -- > ", timeSheetRows);
 
-
   // External Customer DropDown
-
 
   const getCustomerOptions = (item) =>
     item.customerData?.map((customer) => ({
@@ -1815,11 +1782,7 @@ const Timesheet = () => {
     { value: "2", label: "External" },
   ];
 
-
-
-
-  console.log("timeSheetRows", timeSheetRows)
-
+  console.log("timeSheetRows", timeSheetRows);
 
   return (
     <div className="container-fluid">
@@ -1841,10 +1804,7 @@ const Timesheet = () => {
             </div>
           </div>
 
-
-
           <div className="col-md-4">
-
             {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) &&
                 timeSheetRows.length > 0 ? (
                 <div className="form-group col-md-6">
@@ -1860,26 +1820,22 @@ const Timesheet = () => {
                 ""
               )} */}
 
-
-
-            {
-              timeSheetRows.length > 0 ? (
-                <div className="form-group float-md-end">
-                  <button
-                    className="btn btn-info "
-                    onClick={() => exportToCSV(timeSheetRows)}
-                  >
-                    Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
-                  </button>
-                </div>
-              ) : (
-                ""
-              )}
+            {timeSheetRows.length > 0 ? (
+              <div className="form-group float-md-end">
+                <button
+                  className="btn btn-info "
+                  onClick={() => exportToCSV(timeSheetRows)}
+                >
+                  Export Timesheet Data
+                  <i className="fa fa-download ms-2" />
+                </button>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         </div>
       </div>
-
 
       <div className="report-data mt-4">
         <div className="col-md-12">
@@ -1893,10 +1849,14 @@ const Timesheet = () => {
                   name="staff_id"
                   className="basic-multi-select"
                   options={staffOptions}
-                  value={staffOptions.find(opt => Number(opt.value) === Number(selectedStaff))}
+                  value={staffOptions.find(
+                    (opt) => Number(opt.value) === Number(selectedStaff)
+                  )}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'staff_id', value: selectedOption.value } };
+                    const e = {
+                      target: { name: "staff_id", value: selectedOption.value },
+                    };
                     selectFilterStaffANdWeek(e);
                   }}
                   classNamePrefix="react-select"
@@ -1907,9 +1867,8 @@ const Timesheet = () => {
               ""
             )}
 
-
             {staffDataWeekDataAll.data &&
-              staffDataWeekDataAll.data.length > 0 ? (
+            staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4   pe-0">
                 <label className="form-label mb-2">Select Date</label>
                 <Select
@@ -1923,7 +1882,9 @@ const Timesheet = () => {
                   placeholder="-- Select --"
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    const e = {
+                      target: { name: "week", value: selectedOption.value },
+                    };
                     selectFilterStaffANdWeek(e);
                   }}
                   classNamePrefix="react-select"
@@ -1936,7 +1897,8 @@ const Timesheet = () => {
             )}
 
             {isExistStaffDataWeekDataAll?.data &&
-              isExistStaffDataWeekDataAll?.data.length > 0 && staffDataWeekDataAll?.data.length === 0 ? (
+            isExistStaffDataWeekDataAll?.data.length > 0 &&
+            staffDataWeekDataAll?.data.length === 0 ? (
               <div className="form-group col-md-4 pe-0">
                 <label className="form-label mb-2">Select Date</label>
                 <Select
@@ -1950,7 +1912,9 @@ const Timesheet = () => {
                   placeholder="-- Select --"
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    const e = {
+                      target: { name: "week", value: selectedOption.value },
+                    };
                     selectFilterStaffANdWeek(e);
                   }}
                   classNamePrefix="react-select"
@@ -1962,9 +1926,7 @@ const Timesheet = () => {
               ""
             )}
 
-
-            {lineMangerData &&
-              lineMangerData.length > 0 ? (
+            {lineMangerData && lineMangerData.length > 0 ? (
               <div className="form-group  col-md-4  pe-0">
                 <label className="form-label mb-2">Team Timesheet Status</label>
                 <Select
@@ -1978,7 +1940,12 @@ const Timesheet = () => {
                   placeholder="-- Select --"
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'lineManger', value: selectedOption.value } };
+                    const e = {
+                      target: {
+                        name: "lineManger",
+                        value: selectedOption.value,
+                      },
+                    };
                     selectLineManager(e);
                   }}
                   classNamePrefix="react-select"
@@ -1989,11 +1956,13 @@ const Timesheet = () => {
               ""
             )}
 
-
-            {selectedLineManager != "" && staffDataWeekDataAll.data &&
-              staffDataWeekDataAll.data.length > 0 ? (
+            {selectedLineManager != "" &&
+            staffDataWeekDataAll.data &&
+            staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4  pe-0">
-                <label className="form-label mb-2">Line Manager Select Week</label>
+                <label className="form-label mb-2">
+                  Line Manager Select Week
+                </label>
                 <Select
                   id="tabSelect"
                   name="week"
@@ -2005,7 +1974,9 @@ const Timesheet = () => {
                   placeholder="-- Select --"
                   onChange={(selectedOption) => {
                     // simulate e.target.value
-                    const e = { target: { name: 'week', value: selectedOption.value } };
+                    const e = {
+                      target: { name: "week", value: selectedOption.value },
+                    };
                     selectFilterStaffANdWeek(e);
                   }}
                   classNamePrefix="react-select"
@@ -2015,11 +1986,7 @@ const Timesheet = () => {
             ) : (
               ""
             )}
-
-
           </div>
-
-
 
           {/* Tabs Content */}
           <div className="tab-content mt-1">
@@ -2035,59 +2002,33 @@ const Timesheet = () => {
                       >
                         <thead className="table-light table-head-blue">
                           <tr>
-                            <th
-                              className="dropdwnCol2 pe-0"
-                              data-field="phone"
-
-                            >
+                            <th className="dropdwnCol2 pe-0" data-field="phone">
                               No
                             </th>
-                            <th
-                              className=""
-                              data-field="phone"
-
-                            >
+                            <th className="" data-field="phone">
                               Task Type
                             </th>
-                            <th
-                              className="dropdwnCol7"
-                              data-field="phone"
-
-                            >
+                            <th className="dropdwnCol7" data-field="phone">
                               Customer
                             </th>
-                            <th
-                              className="dropdwnCol6"
-                              data-field="phone"
-
-                            >
+                            <th className="dropdwnCol6" data-field="phone">
                               Client
                             </th>
-                            <th
-                              className="dropdwnCol5"
-                              data-field="phone"
-
-                            >
+                            <th className="dropdwnCol5" data-field="phone">
                               Job
                             </th>
-                            <th
-                              className="dropdwnCol5"
-                              data-field="phone"
-
-                            >
+                            <th className="dropdwnCol5" data-field="phone">
                               Job Type
                             </th>
-                            <th
-                              className="dropdwnCol5"
-                              data-field="phone"
-
-                            >
+                            <th className="dropdwnCol5" data-field="phone">
                               Task
                             </th>
 
                             <th
-                              className={`pe-0 week-data ${isExpanded ? "expanded" : ""}`}
-                            // style={{ width: isExpanded ? "50%" : "100px" }}
+                              className={`pe-0 week-data ${
+                                isExpanded ? "expanded" : ""
+                              }`}
+                              // style={{ width: isExpanded ? "50%" : "100px" }}
                             >
                               <div className="d-flex align-items-center">
                                 <ChevronLeft
@@ -2097,19 +2038,30 @@ const Timesheet = () => {
                                   }}
                                 />
                                 <span className="me-0">
-                                  {weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}
+                                  {weekDays.monday
+                                    ? dayMonthFormatDate(weekDays.monday)
+                                    : ""}
                                 </span>
 
                                 {/* Conditionally render weekdays when expanded */}
                                 {isExpanded && (
-                                  <div className="d-flex" style={{ width: "70%" }}>
-                                    {["tuesday", "wednesday", "thursday", "friday", "saturday"].map(
-                                      (day) => (
-                                        <span key={day}>
-                                          {weekDays[day] ? dayMonthFormatDate(weekDays[day]) : ""}
-                                        </span>
-                                      )
-                                    )}
+                                  <div
+                                    className="d-flex"
+                                    style={{ width: "70%" }}
+                                  >
+                                    {[
+                                      "tuesday",
+                                      "wednesday",
+                                      "thursday",
+                                      "friday",
+                                      "saturday",
+                                    ].map((day) => (
+                                      <span key={day}>
+                                        {weekDays[day]
+                                          ? dayMonthFormatDate(weekDays[day])
+                                          : ""}
+                                      </span>
+                                    ))}
                                   </div>
                                 )}
 
@@ -2118,7 +2070,9 @@ const Timesheet = () => {
                                   className="px-0 btn btn-sm btn-link text-decoration-none"
                                 >
                                   <i
-                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"}`}
+                                    className={`fa ${
+                                      isExpanded ? "fa-minus" : "fa-plus"
+                                    }`}
                                     aria-hidden="true"
                                   ></i>
                                 </button>
@@ -2146,22 +2100,12 @@ const Timesheet = () => {
 
                             {submitStatusAllKey === 0 ? (
                               <>
-                                <th
-                                  className="dropdwnCol5"
-                                  data-field="phone"
-
-                                >
+                                <th className="dropdwnCol5" data-field="phone">
                                   Action
                                 </th>
                               </>
-
                             ) : (
-                              <th
-                                className="dropdwnCol5"
-                                data-field="phone"
-
-                              >
-
+                              <th className="dropdwnCol5" data-field="phone">
                                 Remark
                               </th>
                             )}
@@ -2189,8 +2133,8 @@ const Timesheet = () => {
                                     // </select>
                                     <Select
                                       className="basic-multi-select"
-                                        menuPortalTarget={document.body}
-  menuPosition="fixed"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2200,9 +2144,11 @@ const Timesheet = () => {
                                       }}
                                       options={taskTypeOptions}
                                       value={taskTypeOptions.find(
-                                        (opt) => String(opt.value) === String(item.task_type)
+                                        (opt) =>
+                                          String(opt.value) ===
+                                          String(item.task_type)
                                       )}
-                                      isSearchable={false}   // only 2 options, search not needed
+                                      isSearchable={false} // only 2 options, search not needed
                                       placeholder="Task Type"
                                       onChange={(selectedOption) => {
                                         const e = {
@@ -2218,8 +2164,8 @@ const Timesheet = () => {
                                   ) : (
                                     <select
                                       className="form-select form-control"
-                                        menuPortalTarget={document.body}
-  menuPosition="fixed"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       style={{ width: "100px" }}
                                       value={item.task_type}
                                       disabled
@@ -2233,7 +2179,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                    item.task_type === "2" ? (
+                                  item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "100px" }}
@@ -2254,8 +2200,8 @@ const Timesheet = () => {
 
                                     <Select
                                       className="basic-multi-select"
-                                        menuPortalTarget={document.body}
-  menuPosition="fixed"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2265,7 +2211,9 @@ const Timesheet = () => {
                                       }}
                                       options={getCustomerOptions(item)}
                                       value={getCustomerOptions(item).find(
-                                        (opt) => Number(opt.value) === Number(item.customer_id)
+                                        (opt) =>
+                                          Number(opt.value) ===
+                                          Number(item.customer_id)
                                       )}
                                       isSearchable
                                       onChange={(selectedOption) => {
@@ -2297,7 +2245,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                    item.task_type === "2" ? (
+                                  item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "90px" }}
@@ -2317,6 +2265,8 @@ const Timesheet = () => {
                                     // </select>
                                     <Select
                                       className="basic-multi-select"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2326,12 +2276,18 @@ const Timesheet = () => {
                                       }}
                                       options={getClientOptions(item)}
                                       value={getClientOptions(item).find(
-                                        (opt) => Number(opt.value) === Number(item.client_id)
+                                        (opt) =>
+                                          Number(opt.value) ===
+                                          Number(item.client_id)
                                       )}
                                       isSearchable
-                                      isDisabled={!item.clientData || item.clientData.length === 0}
+                                      isDisabled={
+                                        !item.clientData ||
+                                        item.clientData.length === 0
+                                      }
                                       placeholder={
-                                        !item.clientData || item.clientData.length === 0
+                                        !item.clientData ||
+                                        item.clientData.length === 0
                                           ? "No Client"
                                           : "Client"
                                       }
@@ -2380,6 +2336,8 @@ const Timesheet = () => {
                                     // </select>
                                     <Select
                                       className="basic-multi-select"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2389,12 +2347,18 @@ const Timesheet = () => {
                                       }}
                                       options={getJobOptions(item)}
                                       value={getJobOptions(item).find(
-                                        (opt) => Number(opt.value) === Number(item.job_id)
+                                        (opt) =>
+                                          Number(opt.value) ===
+                                          Number(item.job_id)
                                       )}
                                       isSearchable
-                                      isDisabled={!item.jobData || item.jobData.length === 0}
+                                      isDisabled={
+                                        !item.jobData ||
+                                        item.jobData.length === 0
+                                      }
                                       placeholder={
-                                        !item.jobData || item.jobData.length === 0
+                                        !item.jobData ||
+                                        item.jobData.length === 0
                                           ? "No Job"
                                           : "Job"
                                       }
@@ -2424,27 +2388,32 @@ const Timesheet = () => {
                                   )}
                                 </td>
 
-
                                 {/* Job Type Section */}
                                 <td>
-
                                   {item.newRow === 1 ? (
                                     (() => {
-                                      const matchedJob = item.jobData?.find((job) => Number(job.id) === Number(item.job_id));
-                                      return matchedJob && matchedJob.job_type_name !== undefined
-                                        ? <div style={{ width: "100px" }}>{matchedJob.job_type_name}</div>
-                                        : <div style={{ width: "80px" }}>-</div>;
+                                      const matchedJob = item.jobData?.find(
+                                        (job) =>
+                                          Number(job.id) === Number(item.job_id)
+                                      );
+                                      return matchedJob &&
+                                        matchedJob.job_type_name !==
+                                          undefined ? (
+                                        <div style={{ width: "100px" }}>
+                                          {matchedJob.job_type_name}
+                                        </div>
+                                      ) : (
+                                        <div style={{ width: "80px" }}>-</div>
+                                      );
                                     })()
+                                  ) : item.task_type === "1" ? (
+                                    <div style={{ width: "80px" }}>-</div>
                                   ) : (
-                                    item.task_type === "1" ? (
-                                      <div style={{ width: "80px" }}>-</div>
-                                    ) : (
-                                      <div style={{ width: "100px" }}>{item.job_type_name}</div>
-                                    )
-
+                                    <div style={{ width: "100px" }}>
+                                      {item.job_type_name}
+                                    </div>
                                   )}
                                 </td>
-
 
                                 {/* Task Selection */}
                                 <td>
@@ -2472,12 +2441,18 @@ const Timesheet = () => {
                                       }}
                                       options={getTaskOptions(item)}
                                       value={getTaskOptions(item).find(
-                                        (opt) => Number(opt.value) === Number(item.task_id)
+                                        (opt) =>
+                                          Number(opt.value) ===
+                                          Number(item.task_id)
                                       )}
                                       isSearchable
-                                      isDisabled={!item.taskData || item.taskData.length === 0}
+                                      isDisabled={
+                                        !item.taskData ||
+                                        item.taskData.length === 0
+                                      }
                                       placeholder={
-                                        !item.taskData || item.taskData.length === 0
+                                        !item.taskData ||
+                                        item.taskData.length === 0
                                           ? "No Task"
                                           : "Task"
                                       }
@@ -2508,15 +2483,10 @@ const Timesheet = () => {
                                 </td>
 
                                 {/*Monday Input*/}
-                                <td >
-
+                                <td>
                                   <div className="ms-2">
                                     {isExpanded ? (
-                                      <div
-                                        className="d-flex  ms-3"
-
-                                      >
-
+                                      <div className="d-flex  ms-3">
                                         <span>
                                           <input
                                             className="form-control cursor-pointer border-radius-end"
@@ -2540,38 +2510,37 @@ const Timesheet = () => {
                                             // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
                                             disabled={
                                               staffDetails.id !=
-                                                multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
-                                                  ? true
-                                                  : false
+                                                ? true
+                                                : false
                                             }
-
                                             onFocus={() => {
                                               setActiveIndex(index);
                                               setActiveField("monday");
                                             }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                            // onBlur={() => {
+                                            //   setActiveIndex(null);
+                                            //   setActiveField(null);
+                                            // }}
                                           />
                                         </span>
 
-                                        {activeIndex === index && activeField === "monday" && (
-
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);     // store row index
-                                              setModalText(item.monday_note || ""); // existing value if any
-                                              setIsModalOpen(true);           // show modal
-                                            }}
-                                          />
-
-                                        )}
-
+                                        {activeIndex === index &&
+                                          activeField === "monday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index); // store row index
+                                                setModalText(
+                                                  item.monday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true); // show modal
+                                              }}
+                                            />
+                                          )}
 
                                         {/* Tuesday Input*/}
                                         <input
@@ -2596,41 +2565,35 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                              ? true
+                                              : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("tuesday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
-
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
-                                        {activeIndex === index && activeField === "tuesday" && (
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);
-                                              setModalText(item.tuesday_note || ""); // existing value if any
-                                              setIsModalOpen(true);
-                                            }}
-
-
-                                          />
-                                        )}
-
-
-
-
-
-
+                                        {activeIndex === index &&
+                                          activeField === "tuesday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index);
+                                                setModalText(
+                                                  item.tuesday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true);
+                                              }}
+                                            />
+                                          )}
 
                                         {/* Wednesday Input*/}
                                         <input
@@ -2655,35 +2618,35 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                              ? true
+                                              : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("wednesday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
-                                        {activeIndex === index && activeField === "wednesday" && (
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);
-                                              setModalText(item.wednesday_note || ""); // existing value if any
-                                              setIsModalOpen(true);
-                                            }}
-                                          />
-                                        )}
-
-
-
+                                        {activeIndex === index &&
+                                          activeField === "wednesday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index);
+                                                setModalText(
+                                                  item.wednesday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true);
+                                              }}
+                                            />
+                                          )}
 
                                         {/* Thursday Input*/}
                                         <input
@@ -2708,33 +2671,35 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                              ? true
+                                              : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
-                                        {activeIndex === index && activeField === "thursday" && (
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);
-                                              setModalText(item.thursday_note || ""); // existing value if any
-                                              setIsModalOpen(true);
-                                            }}
-                                          />
-                                        )}
-
+                                        {activeIndex === index &&
+                                          activeField === "thursday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index);
+                                                setModalText(
+                                                  item.thursday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true);
+                                              }}
+                                            />
+                                          )}
 
                                         {/* Friday Input*/}
                                         <input
@@ -2759,32 +2724,35 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                              ? true
+                                              : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("friday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
-                                        {activeIndex === index && activeField === "friday" && (
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);
-                                              setModalText(item.friday_note || ""); // existing value if any
-                                              setIsModalOpen(true);
-                                            }}
-                                          />
-                                        )}
+                                        {activeIndex === index &&
+                                          activeField === "friday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index);
+                                                setModalText(
+                                                  item.friday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true);
+                                              }}
+                                            />
+                                          )}
 
                                         {/* Saturday Input*/}
                                         <input
@@ -2809,32 +2777,35 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                              ? true
+                                              : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("saturday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
-                                        {activeIndex === index && activeField === "saturday" && (
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);
-                                              setModalText(item.saturday_note || ""); // existing value if any
-                                              setIsModalOpen(true);
-                                            }}
-                                          />
-                                        )}
+                                        {activeIndex === index &&
+                                          activeField === "saturday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index);
+                                                setModalText(
+                                                  item.saturday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true);
+                                              }}
+                                            />
+                                          )}
                                       </div>
                                     ) : (
                                       <div className="ms-3">
@@ -2861,34 +2832,34 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                              ? true
+                                              : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("monday");
                                           }}
                                         />
-
-                                        {activeIndex === index && activeField === "monday" && (
-                                          <Pencil
-                                            className="ms-1 mt-2 cursor-pointer"
-                                            size={14}
-                                            onClick={() => {
-                                              setSelectedRowIndex(index);     // store row index
-                                              setModalText(item.monday_note || ""); // existing value if any
-                                              setIsModalOpen(true);           // show modal
-                                            }}
-                                          />
-                                        )}
-
+                                        {activeIndex === index &&
+                                          activeField === "monday" && (
+                                            <Pencil
+                                              className="ms-1 mt-2 cursor-pointer"
+                                              size={14}
+                                              onClick={() => {
+                                                setSelectedRowIndex(index); // store row index
+                                                setModalText(
+                                                  item.monday_note || ""
+                                                ); // existing value if any
+                                                setIsModalOpen(true); // show modal
+                                              }}
+                                            />
+                                          )}
                                       </div>
                                     )}
                                   </div>
-
                                 </td>
 
                                 {/*Sunday Input*/}
@@ -2912,22 +2883,17 @@ const Timesheet = () => {
 
                                 </td> */}
 
-
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
                                     <div className="d-flex align-items-center">
-
-
                                       <button
                                         className="view-icon"
                                         onClick={(e) => {
-                                          handleSingleRemark(e, item, index)
+                                          handleSingleRemark(e, item, index);
                                         }}
                                       >
                                         <i className="ti-comment text-warning"></i>
                                       </button>
-
-
 
                                       <button
                                         className="delete-icon"
@@ -2935,38 +2901,23 @@ const Timesheet = () => {
                                       >
                                         <i className="ti-trash text-danger"></i>
                                       </button>
-
-
-
                                     </div>
-
                                   ) : (
                                     <div className="d-flex align-items-center">
-
                                       <button
                                         className="edit-icon"
                                         onClick={(e) => {
-                                          handleSingleRemark(e, item, index)
+                                          handleSingleRemark(e, item, index);
                                         }}
                                       >
                                         <i className="fa fa-eye text-primary"></i>
                                       </button>
-
-
                                     </div>
-
                                   )}
                                   {/* <Trash2 className="delete-icon" /> */}
                                 </td>
-
-
-
-
                               </tr>
-
-
                             ))
-
                           ) : (
                             <tr>
                               <td colSpan={12} className="text-center">
@@ -2974,115 +2925,148 @@ const Timesheet = () => {
                               </td>
                             </tr>
                           )}
-
-
-
-
                         </tbody>
-                        {
-                          timeSheetRows.length > 0 ?
-                            <tfoot className="table-light table-head-blue">
-                              <tr>
-                                <th className="dropdwnCol2 pe-0" data-field="phone" ></th>
-                                <th className="" data-field="phone" > </th>
-                                <th className="dropdwnCol7" data-field="phone" ></th>
-                                <th className="dropdwnCol6" data-field="phone" ></th>
-                                <th className="dropdwnCol5" data-field="phone" ></th>
-                                <th
-                                  className="dropdwnCol5"
-                                  data-field="phone"
-
-                                >
-
-                                </th>
-                                <th className="dropdwnCol5" data-field="phone" ></th>
-                                <th className="pe-0 week-data" >
-                                  <div className="d-flex  ms-3" >
-                                    <input
-                                      className="form-control cursor-pointer border-radius-end"
-                                      type="text"
-                                      readOnly
-                                      disabled
-                                      name="monday_hours"
-                                      value={getTotalHoursFromKey("monday_hours")}
-                                      style={{ width: 80, border: '1px solid #00afef' }}
-
-                                    />
-                                    {isExpanded && (
-                                      <div
-                                        className="d-flex  ms-3"
-
-                                      >
-                                        <input
-                                          className="form-control cursor-pointer ms-2"
-                                          type="text"
-                                          disabled
-                                          readOnly
-                                          name="tuesday_hours"
-                                          value={getTotalHoursFromKey("tuesday_hours")}
-                                          style={{ width: 80, border: '1px solid #00afef' }}
-                                        />
-                                        <input
-                                          className="form-control cursor-pointer ms-2"
-                                          type="text"
-                                          disabled
-                                          readOnly
-                                          name="wednesday_hours"
-                                          value={getTotalHoursFromKey("wednesday_hours")}
-                                          style={{ width: 80, border: '1px solid #00afef' }}
-                                        />
-                                        <input
-                                          className="form-control cursor-pointer ms-2"
-                                          type="text"
-                                          disabled
-                                          readOnly
-                                          name="thursday_hours"
-                                          value={getTotalHoursFromKey("thursday_hours")}
-                                          style={{ width: 80, border: '1px solid #00afef' }}
-                                        />
-                                        <input
-                                          className="form-control cursor-pointer ms-2"
-                                          type="text"
-                                          disabled
-                                          readOnly
-                                          name="friday_hours"
-                                          value={getTotalHoursFromKey("friday_hours")}
-                                          style={{ width: 80, border: '1px solid #00afef' }}
-                                        />
-                                        <input
-                                          className="form-control cursor-pointer ms-2"
-                                          type="text"
-                                          disabled
-                                          readOnly
-                                          name="saturday_hours"
-                                          value={getTotalHoursFromKey("saturday_hours")}
-                                          style={{ width: 80, border: '1px solid #00afef' }}
-                                        />
-
-
-                                      </div>
-
-                                    )}
-                                  </div>
-
-                                </th>
-                                <th className="dropdwnCol5" data-field="phone" style={{ width: "5%" }}></th>
-                              </tr>
-                            </tfoot>
-                            : null
-                        }
-
-
+                        {timeSheetRows.length > 0 ? (
+                          <tfoot className="table-light table-head-blue">
+                            <tr>
+                              <th
+                                className="dropdwnCol2 pe-0"
+                                data-field="phone"
+                              ></th>
+                              <th className="" data-field="phone">
+                                {" "}
+                              </th>
+                              <th
+                                className="dropdwnCol7"
+                                data-field="phone"
+                              ></th>
+                              <th
+                                className="dropdwnCol6"
+                                data-field="phone"
+                              ></th>
+                              <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                              ></th>
+                              <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                              ></th>
+                              <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                              ></th>
+                              <th className="pe-0 week-data">
+                                <div className="d-flex  ms-3">
+                                  <input
+                                    className="form-control cursor-pointer border-radius-end"
+                                    type="text"
+                                    readOnly
+                                    disabled
+                                    name="monday_hours"
+                                    value={getTotalHoursFromKey("monday_hours")}
+                                    style={{
+                                      width: 80,
+                                      border: "1px solid #00afef",
+                                    }}
+                                  />
+                                  {isExpanded && (
+                                    <div className="d-flex  ms-3">
+                                      <input
+                                        className="form-control cursor-pointer ms-2"
+                                        type="text"
+                                        disabled
+                                        readOnly
+                                        name="tuesday_hours"
+                                        value={getTotalHoursFromKey(
+                                          "tuesday_hours"
+                                        )}
+                                        style={{
+                                          width: 80,
+                                          border: "1px solid #00afef",
+                                        }}
+                                      />
+                                      <input
+                                        className="form-control cursor-pointer ms-2"
+                                        type="text"
+                                        disabled
+                                        readOnly
+                                        name="wednesday_hours"
+                                        value={getTotalHoursFromKey(
+                                          "wednesday_hours"
+                                        )}
+                                        style={{
+                                          width: 80,
+                                          border: "1px solid #00afef",
+                                        }}
+                                      />
+                                      <input
+                                        className="form-control cursor-pointer ms-2"
+                                        type="text"
+                                        disabled
+                                        readOnly
+                                        name="thursday_hours"
+                                        value={getTotalHoursFromKey(
+                                          "thursday_hours"
+                                        )}
+                                        style={{
+                                          width: 80,
+                                          border: "1px solid #00afef",
+                                        }}
+                                      />
+                                      <input
+                                        className="form-control cursor-pointer ms-2"
+                                        type="text"
+                                        disabled
+                                        readOnly
+                                        name="friday_hours"
+                                        value={getTotalHoursFromKey(
+                                          "friday_hours"
+                                        )}
+                                        style={{
+                                          width: 80,
+                                          border: "1px solid #00afef",
+                                        }}
+                                      />
+                                      <input
+                                        className="form-control cursor-pointer ms-2"
+                                        type="text"
+                                        disabled
+                                        readOnly
+                                        name="saturday_hours"
+                                        value={getTotalHoursFromKey(
+                                          "saturday_hours"
+                                        )}
+                                        style={{
+                                          width: 80,
+                                          border: "1px solid #00afef",
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </th>
+                              <th
+                                className="dropdwnCol5"
+                                data-field="phone"
+                                style={{ width: "5%" }}
+                              ></th>
+                            </tr>
+                          </tfoot>
+                        ) : null}
 
                         <tfoot>
                           <tr className="tabel_new border-none">
-                            <td className="border-none" style={{ border: 'none' }}>
+                            <td
+                              className="border-none"
+                              style={{ border: "none" }}
+                            >
                               {staffDetails.id == multipleFilter.staff_id ? (
                                 submitStatusAllKey === 0 ? (
                                   <>
                                     {/* Add new row */}
                                     <button
-                                      style={{ zIndex: 'unset' }}
+                                      style={{ zIndex: "unset" }}
                                       className="d-flex btn btn-info fw-normal px-2"
                                       onClick={handleAddNewSheet}
                                     >
@@ -3096,23 +3080,22 @@ const Timesheet = () => {
                                       />
                                     </button>
 
-
-
                                     {/* copy Timesheet */}
-                                    <span style={{ marginTop: "2rem" }} className="ms-3">
+                                    <span
+                                      style={{ marginTop: "2rem" }}
+                                      className="ms-3"
+                                    >
                                       <button
-                                        style={{ zIndex: 'unset' }}
+                                        style={{ zIndex: "unset" }}
                                         className="d-flex btn btn-info fw-normal px-2"
                                         onClick={() => setIsCopyModalOpen(true)}
                                       >
-                                        <span className="ms-2">Copy Timesheet</span>
+                                        <span className="ms-2">
+                                          Copy Timesheet
+                                        </span>
                                       </button>
                                     </span>
-
-
                                   </>
-
-
                                 ) : (
                                   ""
                                 )
@@ -3120,45 +3103,41 @@ const Timesheet = () => {
                                 ""
                               )}
                             </td>
-
                           </tr>
                         </tfoot>
                       </table>
-                      {
-                        timeSheetRows.length > 0 ?
-                          <>
-                            <div className="">
+                      {timeSheetRows.length > 0 ? (
+                        <>
+                          <div className=""></div>
 
-                            </div>
+                          <div className="mt-2 mb-2">
+                            <span className="fs-6 text-dark">
+                              {" "}
+                              <b>Total Weekly Hours : {totalHoursMinute()}</b>
+                            </span>
+                          </div>
 
+                          {submitStatusAllKey === 1 ? (
                             <div className="mt-2 mb-2">
-                              <span className="fs-6 text-dark"> <b>Total Weekly Hours : {totalHoursMinute()}</b></span>
+                              {/* setRemarkModel */}
+                              <span className="fs-6 text-dark">
+                                {" "}
+                                <b>Final Remark :</b>
+                                <button
+                                  className="edit-icon"
+                                  onClick={() => setRemarkModel(true)}
+                                >
+                                  <i className="fa fa-eye text-primary"></i>
+                                </button>
+                              </span>
                             </div>
-
-                            {
-                              submitStatusAllKey === 1 ?
-                                <div className="mt-2 mb-2">
-                                  {/* setRemarkModel */}
-                                  <span className="fs-6 text-dark"> <b>Final Remark :</b>
-
-                                    <button
-                                      className="edit-icon"
-                                      onClick={() => setRemarkModel(true)}
-                                    >
-                                      <i className="fa fa-eye text-primary"></i>
-                                    </button>
-                                  </span>
-                                </div>
-                                :
-                                ""
-                            }
-
-
-                          </>
-
-                          : ""
-                      }
-
+                          ) : (
+                            ""
+                          )}
+                        </>
+                      ) : (
+                        ""
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3234,39 +3213,38 @@ const Timesheet = () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-
-                  {
-                    submitStatusAllKey === 1 ?
-                      <div>
-                        <p>
-                          {timeSheetRows && timeSheetRows.length > 0 ?
-                            timeSheetRows[0].final_remark ? timeSheetRows[0].final_remark : "No Final Remark Found"
-                            : "No Final Remark Found"}
-                        </p>
-                      </div>
-                      :
-                      <>
-                        <label htmlFor="customername-field" className="form-label">
-                          Final Remark
-                        </label>
-                        <textarea
-                          type="text"
-                          className="form-control cursor-pointer"
-                          placeholder="Enter Remark"
-                          defaultValue=""
-                          onChange={(e) => setRemarkText(e.target.value)}
-                          value={remarkText}
-                        />
-                      </>
-
-                  }
-
+                  {submitStatusAllKey === 1 ? (
+                    <div>
+                      <p>
+                        {timeSheetRows && timeSheetRows.length > 0
+                          ? timeSheetRows[0].final_remark
+                            ? timeSheetRows[0].final_remark
+                            : "No Final Remark Found"
+                          : "No Final Remark Found"}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <label
+                        htmlFor="customername-field"
+                        className="form-label"
+                      >
+                        Final Remark
+                      </label>
+                      <textarea
+                        type="text"
+                        className="form-control cursor-pointer"
+                        placeholder="Enter Remark"
+                        defaultValue=""
+                        onChange={(e) => setRemarkText(e.target.value)}
+                        value={remarkText}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </CommonModal>
-
-
 
           <CommonModal
             isOpen={remarkSingleModel}
@@ -3285,42 +3263,52 @@ const Timesheet = () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  {
-                    submitStatusAllKey === 1 ?
-                      <p>
-
-                        {remarkSingleIndex != null && timeSheetRows.length > 0 ?
-                          ['', null, undefined].includes(timeSheetRows[remarkSingleIndex]) ?
-                            "No Remark Found" : !['', null, undefined].includes(timeSheetRows[remarkSingleIndex].remark) ? timeSheetRows[remarkSingleIndex].remark : "No Remark Found" : "No Remark Found"
-
+                  {submitStatusAllKey === 1 ? (
+                    <p>
+                      {remarkSingleIndex != null && timeSheetRows.length > 0
+                        ? ["", null, undefined].includes(
+                            timeSheetRows[remarkSingleIndex]
+                          )
+                          ? "No Remark Found"
+                          : !["", null, undefined].includes(
+                              timeSheetRows[remarkSingleIndex].remark
+                            )
+                          ? timeSheetRows[remarkSingleIndex].remark
+                          : "No Remark Found"
+                        : "No Remark Found"}
+                    </p>
+                  ) : (
+                    <>
+                      <label
+                        htmlFor="customername-field"
+                        className="form-label"
+                      >
+                        Remark
+                      </label>
+                      <textarea
+                        type="text"
+                        className="form-control cursor-pointer"
+                        placeholder="Enter Remark"
+                        defaultValue=""
+                        onChange={(e) =>
+                          handleRemarkSingleText(e, remarkSingleIndex)
                         }
-                      </p>
-                      : <>
-                        <label htmlFor="customername-field" className="form-label">
-                          Remark
-                        </label>
-                        <textarea
-                          type="text"
-                          className="form-control cursor-pointer"
-                          placeholder="Enter Remark"
-                          defaultValue=""
-                          onChange={(e) => handleRemarkSingleText(e, remarkSingleIndex)}
-                          value={
-                            remarkSingleIndex != null && timeSheetRows.length > 0 ?
-                              ['', null, undefined].includes(timeSheetRows[remarkSingleIndex]) ? "" : timeSheetRows[remarkSingleIndex].remark : ""
-
-                          }
-                        />
-                      </>
-                  }
-
+                        value={
+                          remarkSingleIndex != null && timeSheetRows.length > 0
+                            ? ["", null, undefined].includes(
+                                timeSheetRows[remarkSingleIndex]
+                              )
+                              ? ""
+                              : timeSheetRows[remarkSingleIndex].remark
+                            : ""
+                        }
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </CommonModal>
-
-
-
 
           <CommonModal
             isOpen={isModalOpen}
@@ -3336,7 +3324,6 @@ const Timesheet = () => {
               setModalText("");
               setActiveIndex(null);
               setActiveField(null);
-
             }}
             Submit_Function={(e) => handleSaveNote(e)}
           >
@@ -3351,13 +3338,12 @@ const Timesheet = () => {
                     value={modalText}
                     onChange={(e) => setModalText(e.target.value)}
                   />
-
                 </div>
               </div>
             </div>
           </CommonModal>
 
-          { /* Copy Timesheet Modal */}
+          {/* Copy Timesheet Modal */}
           <CommonModal
             isOpen={isCopyModalOpen}
             backdrop="static"
@@ -3369,7 +3355,6 @@ const Timesheet = () => {
             hideBtn={false}
             handleClose={() => {
               setIsCopyModalOpen(false);
-
             }}
             Submit_Function={(e) => handleCopyTimeSheetAutoFill(e)}
           >
@@ -3387,23 +3372,23 @@ const Timesheet = () => {
                     placeholder="-- Select --"
                     onChange={(selectedOption) => {
                       // simulate e.target.value
-                      const e = { target: { name: 'copy_week', value: selectedOption.value } };
+                      const e = {
+                        target: {
+                          name: "copy_week",
+                          value: selectedOption.value,
+                        },
+                      };
                       selectFilterStaffANdWeek(e);
                     }}
                     classNamePrefix="react-select"
                     isSearchable
                   />
-
                 </div>
               </div>
             </div>
           </CommonModal>
-
-
-
         </div>
       </div>
-
     </div>
   );
 };
