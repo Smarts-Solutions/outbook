@@ -3246,7 +3246,11 @@ const CreateJob = () => {
 
                                     <Select
                                       options={allStaffData
-                                        ?.filter(data => data.id !== jobData.AllocatedTo && data.id !== jobData.Reviewer && data.id !== staffCreatedId)
+                                        ?.filter(data => 
+                                          // data.id !== jobData.AllocatedTo && 
+                                          // data.id !== jobData.Reviewer && 
+                                          data.id !== staffCreatedId
+                                        )
                                         ?.map((data) => {
                                           return { label: data.full_name, value: data.id };
                                         })}
