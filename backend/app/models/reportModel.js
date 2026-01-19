@@ -3943,7 +3943,14 @@ const getJobCustomReport = async (Report) => {
        
 
         if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
-            where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
+            //where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
+            where.push(`
+                (
+                    assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+                    OR raw.staff_created_id IN (${LineManageStaffId})
+                    OR cl.staff_created_id IN (${LineManageStaffId})
+                )
+                `);
         }
 
 
