@@ -1450,20 +1450,33 @@ const Timesheet = () => {
     }
   };
 
+  // const dayMonthFormatDate = (dateString) => {
+
+  //   const parts = dateString.split(", ");
+  //   const dayOfWeek = parts[0];
+  //   const dateParts = parts[1].split("/");
+  //   const day = dateParts[0];
+  //   const monthIndex = dateParts[1] - 1;
+  //   const year = dateParts[2];
+  //   const date = new Date(year, monthIndex, day);
+  //   const options = { month: "short" };
+  //   const month = date.toLocaleDateString("en-US", options).toLowerCase();
+  //   // Return formatted string
+  //   return `${dayOfWeek} ${day} ${month}`;
+  // };
+
   const dayMonthFormatDate = (dateString) => {
 
-    const parts = dateString.split(", ");
-    const dayOfWeek = parts[0];
-    const dateParts = parts[1].split("/");
-    const day = dateParts[0];
-    const monthIndex = dateParts[1] - 1;
-    const year = dateParts[2];
-    const date = new Date(year, monthIndex, day);
-    const options = { month: "short" };
-    const month = date.toLocaleDateString("en-US", options).toLowerCase();
-    // Return formatted string
-    return `${dayOfWeek} ${day} ${month}`;
-  };
+  const parts = dateString.split(", ");
+  const dateParts = parts[1].split("/");
+
+  const day = String(dateParts[0]).padStart(2, "0");
+  const month = String(dateParts[1]).padStart(2, "0");
+  const year = String(dateParts[2]).slice(-2); // last 2 digit
+
+  return `${day}/${month}/${year}`;
+};
+
 
   const exportToCSV = (timeSheetRows) => {
     if (!timeSheetRows || timeSheetRows.length === 0) {

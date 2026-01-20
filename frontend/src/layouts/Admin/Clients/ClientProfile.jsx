@@ -3,14 +3,27 @@ import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  JobAction,
+  Update_Status,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ClientAction, addClientDocument, deleteClientFile } from "../../../ReduxStore/Slice/Client/ClientSlice";
+import {
+  ClientAction,
+  addClientDocument,
+  deleteClientFile,
+} from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
+import {
+  fetchSiteAndDriveInfo,
+  createFolderIfNotExists,
+  uploadFileToFolder,
+  SiteUrlFolderPath,
+  deleteFileFromFolder,
+} from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
 
 const ClientList = () => {
@@ -26,14 +39,23 @@ const ClientList = () => {
   // console.log("customerData", customerData);
 
   const [activeTab, setActiveTab] = useState("NoOfJobs");
-  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
+  const [getClientDetails, setClientDetails] = useState({
+    loading: true,
+    data: [],
+  });
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
   const [hararchyData, setHararchyData] = useState(location.state.data);
-  const [statusDataAll, setStatusDataAll] = useState([])
-  const [selectStatusIs, setStatusId] = useState('')
-  const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, all_jobs: 0 });
+  const [statusDataAll, setStatusDataAll] = useState([]);
+  const [selectStatusIs, setStatusId] = useState("");
+  const [getAccessDataJob, setAccessDataJob] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    view: 0,
+    all_jobs: 0,
+  });
   const [fileState, setFileState] = useState([]);
 
   const [fileStateClient, setFileStateClient] = useState([]);
@@ -42,7 +64,6 @@ const ClientList = () => {
   const [siteUrl, setSiteUrl] = useState("");
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
-
 
   //  console.log("getClientDetails", getClientDetails);
 
@@ -62,18 +83,23 @@ const ClientList = () => {
 
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job"
+      (item) => item.permission_name === "job",
     )?.items || [];
 
   const accessDataJobAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs"
+      (item) => item.permission_name === "all_jobs",
     )?.items || [];
-
 
   useEffect(() => {
     if (accessDataJob.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, all_jobs: 0 };
+    const updatedAccess = {
+      insert: 0,
+      update: 0,
+      delete: 0,
+      view: 0,
+      all_jobs: 0,
+    };
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -81,13 +107,9 @@ const ClientList = () => {
       if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
 
-
-
     accessDataJobAll.forEach((item) => {
-      if (item.type === "view")
-        updatedAccess.all_jobs = item.is_assigned;
+      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
     });
-
 
     setAccessDataJob(updatedAccess);
   }, []);
@@ -99,24 +121,22 @@ const ClientList = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-
           setClientDetails({
             loading: false,
             data: response.data,
           });
           if (response.data.client_documents.length > 0) {
-            setFileStateClient(response.data.client_documents)
+            setFileStateClient(response.data.client_documents);
           }
           informationSetData(response?.data?.client);
           setClientInformationData(response?.data?.contact_details[0]);
           setCompanyDetails(response?.data?.company_details);
-
         } else {
           setClientDetails({
             loading: false,
             data: [],
           });
-          setFileStateClient([])
+          setFileStateClient([]);
         }
       })
       .catch((error) => {
@@ -148,70 +168,74 @@ const ClientList = () => {
 
   const handleStatusChange = (e, row) => {
     const Id = e.target.value;
-    sweatalert.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const req = { job_id: row.job_id, status_type: Number(Id) };
-          const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "No, cancel",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const req = { job_id: row.job_id, status_type: Number(Id) };
+            const res = await dispatch(
+              Update_Status({ req, authToken: token }),
+            ).unwrap();
 
-          if (res.status) {
-            sweatalert.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
+            if (res.status) {
+              sweatalert.fire({
+                title: "Success",
+                text: res.message,
+                icon: "success",
+                timer: 1000,
+                showConfirmButton: false,
+              });
 
-            setStatusId(Id);
-            GetAllJobList();
-          } else if (res.data === "W") {
-            sweatalert.fire({
-              title: "Warning",
-              text: res.message,
-              icon: "warning",
-              confirmButtonText: "Ok",
-              timer: 3000,
-              timerProgressBar: true,
-            });
-          } else {
+              setStatusId(Id);
+              GetAllJobList();
+            } else if (res.data === "W") {
+              sweatalert.fire({
+                title: "Warning",
+                text: res.message,
+                icon: "warning",
+                confirmButtonText: "Ok",
+                timer: 3000,
+                timerProgressBar: true,
+              });
+            } else {
+              sweatalert.fire({
+                title: "Error",
+                text: res.message,
+                icon: "error",
+                confirmButtonText: "Ok",
+                timer: 1000,
+                timerProgressBar: true,
+              });
+            }
+          } catch (error) {
             sweatalert.fire({
               title: "Error",
-              text: res.message,
+              text: "An error occurred while updating the status.",
               icon: "error",
               confirmButtonText: "Ok",
               timer: 1000,
               timerProgressBar: true,
             });
           }
-        } catch (error) {
+        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
           sweatalert.fire({
-            title: "Error",
-            text: "An error occurred while updating the status.",
+            title: "Cancelled",
+            text: "Status change was not performed",
             icon: "error",
             confirmButtonText: "Ok",
             timer: 1000,
             timerProgressBar: true,
           });
         }
-      } else if (result.dismiss === sweatalert.DismissReason.cancel) {
-        sweatalert.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
-          icon: "error",
-          confirmButtonText: "Ok",
-          timer: 1000,
-          timerProgressBar: true,
-        });
-      }
-    });
+      });
   };
 
   const columns = [
@@ -219,19 +243,24 @@ const ClientList = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {
-            (getAccessDataJob.view == 1 || getAccessDataJob.all_jobs == 1) || role === "SUPERADMIN" ? (
-              <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-                {row.job_code_id}
-              </a>
-            ) : <a>{row.job_code_id}</a>
-          }
+          {getAccessDataJob.view == 1 ||
+          getAccessDataJob.all_jobs == 1 ||
+          role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleJob(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.job_code_id}
+            </a>
+          ) : (
+            <a>{row.job_code_id}</a>
+          )}
         </div>
       ),
       selector: (row) => row.job_code_id,
       sortable: true,
     },
-     {
+    {
       name: "Job Priority",
       cell: (row) => {
         const v = row.job_priority || "-";
@@ -260,18 +289,16 @@ const ClientList = () => {
 
     {
       name: "Job Type",
-      cell: (row) => (
-        <div title={row.job_type_name}>
-          {row.job_type_name}
-        </div>
-      ),
+      cell: (row) => <div title={row.job_type_name}>{row.job_type_name}</div>,
       selector: (row) => row.job_type_name,
       sortable: true,
     },
     {
       name: "Status",
       selector: (row) => {
-        const status = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
+        const status = statusDataAll.find(
+          (s) => Number(s.id) === Number(row.status_type),
+        );
         return status ? status.name.toLowerCase() : "-";
       },
       sortable: true,
@@ -296,9 +323,13 @@ const ClientList = () => {
     {
       name: "Client Contact Person",
       cell: (row) => (
-        <div title={row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name}>
+        <div
+          title={
+            row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name
+          }
+        >
           {row.account_manager_officer_first_name +
             " " +
             row.account_manager_officer_last_name}
@@ -323,10 +354,16 @@ const ClientList = () => {
     {
       name: "Outbook Account Manager",
       cell: (row) => (
-        <div title={row.outbooks_acount_manager_first_name +
-          " " + row.outbooks_acount_manager_last_name}>
+        <div
+          title={
+            row.outbooks_acount_manager_first_name +
+            " " +
+            row.outbooks_acount_manager_last_name
+          }
+        >
           {row.outbooks_acount_manager_first_name +
-            " " + row.outbooks_acount_manager_last_name}
+            " " +
+            row.outbooks_acount_manager_last_name}
         </div>
       ),
       selector: (row) =>
@@ -334,7 +371,7 @@ const ClientList = () => {
         " " +
         row.outbooks_acount_manager_last_name,
       sortable: true,
-      width: "325px"
+      width: "325px",
     },
     {
       name: "Allocated To",
@@ -354,26 +391,21 @@ const ClientList = () => {
         const bVal = b.invoiced == "1" ? "YES" : "NO";
         return aVal.localeCompare(bVal);
       },
-
     },
 
-     {
+    {
       name: "Created By",
       cell: (row) => (
-        <div title={row.job_created_by || "-"}>
-          {row.job_created_by || "-"}
-        </div>
+        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
       ),
       selector: (row) => row.job_created_by || "-",
       sortable: true,
     },
 
-     {
+    {
       name: "Created At",
       cell: (row) => (
-        <div title={row.created_at || "-"}>
-          {row.created_at || "-"}
-        </div>
+        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
       ),
       selector: (row) => row.created_at || "-",
       sortable: true,
@@ -388,14 +420,16 @@ const ClientList = () => {
               <i className="ti-pencil" />
             </button>
           )}
-          {
-            row.timesheet_job_id == null ?
-              (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-                <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
+          {row.timesheet_job_id == null
+            ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
                   <i className="ti-trash text-danger" />
                 </button>
               )
-              : ""}
+            : ""}
         </div>
       ),
       ignoreRowClick: true,
@@ -405,8 +439,13 @@ const ClientList = () => {
   ];
 
   const handleFileChange = (event) => {
-
-    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    const invalidTokens = [
+      "",
+      "sharepoint_token_not_found",
+      "error",
+      undefined,
+      null,
+    ];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
         icon: "warning",
@@ -427,11 +466,10 @@ const ClientList = () => {
     }
 
     const validFiles = fileArray.filter((file) =>
-      allowedTypes.includes(file.type)
+      allowedTypes.includes(file.type),
     );
 
     if (validFiles.length !== fileArray.length) {
-
       sweatalert.fire({
         icon: "error",
         title: "Oops...",
@@ -442,8 +480,10 @@ const ClientList = () => {
     }
 
     //setNewFiles(validFiles);
-    const existingFileNames = new Set(newFiles.map(file => file.name));
-    const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
+    const existingFileNames = new Set(newFiles.map((file) => file.name));
+    const uniqueValidFiles = validFiles.filter(
+      (file) => !existingFileNames.has(file.name),
+    );
 
     if (uniqueValidFiles.length === 0) {
       Swal.fire({
@@ -480,34 +520,65 @@ const ClientList = () => {
 
   const handleSubmit = async (values) => {
     const invalidValues = [undefined, null, "", 0, "0"];
-    let client_name = "CLIENT_DEMO"
-    if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id)) {
-      client_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id;
+    let client_name = "CLIENT_DEMO";
+    if (
+      !invalidValues.includes(location.state.data.client.id) &&
+      !invalidValues.includes(location.state.data.customer.id)
+    ) {
+      client_name =
+        "CUST" +
+        location.state.data.customer.id +
+        "_CLIENT" +
+        location.state.data.client.id;
     }
 
     const uploadedFilesArray = [];
 
     if (newFiles.length > 0) {
-
-      const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+      const invalidTokens = [
+        "",
+        "sharepoint_token_not_found",
+        "error",
+        undefined,
+        null,
+      ];
       if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
-
         setIsLoading(true);
-        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, client_name, sharepoint_token);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(
+          siteUrl,
+          sharepoint_token,
+        );
+        const folderId = await createFolderIfNotExists(
+          site_ID,
+          drive_ID,
+          folder_ID,
+          client_name,
+          sharepoint_token,
+        );
 
         for (const file of newFiles) {
-          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadDataUrl = await uploadFileToFolder(
+            site_ID,
+            drive_ID,
+            folderId,
+            file,
+            sharepoint_token,
+          );
           const uploadedFileInfo = {
             web_url: uploadDataUrl,
-            filename: file.lastModified + '-' + file.name,
+            filename: file.lastModified + "-" + file.name,
             originalname: file.name,
             mimetype: file.type,
-            size: file.size
+            size: file.size,
           };
           uploadedFilesArray.push(uploadedFileInfo);
         }
-        const req = { fileData: newFiles, client_id: location.state.data.client.id, authToken: token, uploadedFiles: uploadedFilesArray }
+        const req = {
+          fileData: newFiles,
+          client_id: location.state.data.client.id,
+          authToken: token,
+          uploadedFiles: uploadedFilesArray,
+        };
 
         console.log("req", req);
         await dispatch(addClientDocument(req))
@@ -536,9 +607,7 @@ const ClientList = () => {
             setIsLoading(false);
             return;
           });
-
       }
-
     } else {
       sweatalert.fire({
         icon: "warning",
@@ -547,9 +616,6 @@ const ClientList = () => {
       });
       return;
     }
-
-
-
   };
 
   const DocumentListColumns = [
@@ -590,9 +656,7 @@ const ClientList = () => {
     {
       name: "File Name",
       cell: (row) => (
-        <div title={row.original_name || "-"}>
-          {row.original_name || "-"}
-        </div>
+        <div title={row.original_name || "-"}>{row.original_name || "-"}</div>
       ),
       selector: (row) => row.original_name || "-",
       sortable: true,
@@ -602,9 +666,7 @@ const ClientList = () => {
     {
       name: "File Type",
       cell: (row) => (
-        <div title={row.file_type || "-"}>
-          {row.file_type || "-"}
-        </div>
+        <div title={row.file_type || "-"}>{row.file_type || "-"}</div>
       ),
       selector: (row) => row.file_type || "-",
       sortable: true,
@@ -616,13 +678,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.file_size || "-"}>
           {row.file_size < 1024 * 1024
-            ? `${(
-              row.file_size / 1024
-            ).toFixed(2)} KB`
-            : `${(
-              row.file_size /
-              (1024 * 1024)
-            ).toFixed(2)} MB` || "-"}
+            ? `${(row.file_size / 1024).toFixed(2)} KB`
+            : `${(row.file_size / (1024 * 1024)).toFixed(2)} MB` || "-"}
         </div>
       ),
       selector: (row) => row.file_size || "-",
@@ -638,10 +695,18 @@ const ClientList = () => {
             <i className="ti-trash text-danger" />
           </button>
 
-          <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
+          <button
+            className="download-icon"
+            onClick={() =>
+              downloadFileFromSharePoint(
+                row.web_url,
+                sharepoint_token,
+                row.original_name,
+              )
+            }
+          >
             <i className="ti-download" />
           </button>
-
         </div>
       ),
       ignoreRowClick: true,
@@ -649,22 +714,23 @@ const ClientList = () => {
       button: true,
       reorder: false,
     },
-
-
   ];
 
-
-  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+  const downloadFileFromSharePoint = async (
+    sharePointFileUrl,
+    accessToken,
+    fileName,
+  ) => {
     console.log("sharePointFileUrl", sharePointFileUrl);
     console.log("accessToken", accessToken);
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
       });
 
       console.log("response", response);
@@ -681,24 +747,28 @@ const ClientList = () => {
       const fileURL = window.URL.createObjectURL(fileBlob);
 
       // Create a temporary <a> element to trigger the download
-      const downloadLink = document.createElement('a');
+      const downloadLink = document.createElement("a");
       downloadLink.href = fileURL;
       downloadLink.download = fileName; // Provide a file name (optional)
       downloadLink.click(); // Trigger the download
       window.URL.revokeObjectURL(fileURL); // Clean up after the download
     } catch (error) {
-      console.error('Error downloading the file:', error);
+      console.error("Error downloading the file:", error);
     }
   };
-
-
 
   const removeItem = async (file, type) => {
     if (type == 1) {
       return;
     }
 
-    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    const invalidTokens = [
+      "",
+      "sharepoint_token_not_found",
+      "error",
+      undefined,
+      null,
+    ];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
         icon: "warning",
@@ -709,24 +779,29 @@ const ClientList = () => {
     }
 
     const invalidValues = [undefined, null, "", 0, "0"];
-    let client_name = "CLIENT_DEMO"
-    if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id)) {
-      client_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id;
+    let client_name = "CLIENT_DEMO";
+    if (
+      !invalidValues.includes(location.state.data.client.id) &&
+      !invalidValues.includes(location.state.data.customer.id)
+    ) {
+      client_name =
+        "CUST" +
+        location.state.data.customer.id +
+        "_CLIENT" +
+        location.state.data.client.id;
     }
     let fileName = file.name;
     if (type == 2) {
       fileName = file.original_name;
     }
 
-
     if (fileName != undefined) {
-
       const req = {
         action: "delete",
         client_id: location.state.data.client.id,
         id: file.client_documents_id,
         file_name: file.file_name,
-        authToken: token
+        authToken: token,
       };
       console.log("req", req);
 
@@ -752,13 +827,28 @@ const ClientList = () => {
                 });
                 GetClientDetails();
                 setFileStateClient((prevFiles) =>
-                  prevFiles.filter((data) => data.client_documents_id !== file.client_documents_id)
+                  prevFiles.filter(
+                    (data) =>
+                      data.client_documents_id !== file.client_documents_id,
+                  ),
                 );
-                const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-                const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, client_name, sharepoint_token);
-                const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
+                const { site_ID, drive_ID, folder_ID } =
+                  await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+                const folderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  folder_ID,
+                  client_name,
+                  sharepoint_token,
+                );
+                const deleteFile = await deleteFileFromFolder(
+                  site_ID,
+                  drive_ID,
+                  folderId,
+                  fileName,
+                  sharepoint_token,
+                );
                 return;
-
               }
             } catch (error) {
               return;
@@ -771,24 +861,42 @@ const ClientList = () => {
   };
 
   const HandleJob = (row) => {
-    setHararchyData(prevState => {
+    setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
-        job: row
+        job: row,
       };
-      navigate("/admin/job/logs", { state: { job_id: row?.job_id, timesheet_job_id: row?.timesheet_job_id, data: updatedData, goto: "client", activeTab: location?.state?.activeTab } });
+      navigate("/admin/job/logs", {
+        state: {
+          job_id: row?.job_id,
+          timesheet_job_id: row?.timesheet_job_id,
+          data: updatedData,
+          goto: "client",
+          activeTab: location?.state?.activeTab,
+        },
+      });
       return updatedData;
     });
   };
 
   function handleEdit(row) {
-    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab, job: row } });
+    navigate("/admin/job/edit", {
+      state: {
+        job_id: row.job_id,
+        goto: "client",
+        activeTab: location?.state?.activeTab,
+        job: row,
+      },
+    });
   }
 
   const handleDelete = async (row, type) => {
-    const req = { action: "delete", ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }) };
+    const req = {
+      action: "delete",
+      ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
+    };
     const data = { req: req, authToken: token };
-    await dispatch(type == 'job' ? JobAction(data) : ClientAction(data))
+    await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -801,7 +909,6 @@ const ClientList = () => {
           });
 
           type === "job" ? GetAllJobList() : GetClientDetails();
-
         } else {
           sweatalert.fire({
             title: "Failed",
@@ -837,12 +944,76 @@ const ClientList = () => {
   const handleCreateJob = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: location?.state?.data?.client, goto: "client", activeTab: location?.state?.activeTab },
+        state: {
+          customer_id: getClientDetails?.data?.client?.customer_id,
+          clientName: location?.state?.data?.client,
+          goto: "client",
+          activeTab: location?.state?.activeTab,
+        },
       });
     }
   };
-  return (
 
+  const handleExport = async () => {
+    const req = {
+      action: "getByClient",
+      client_id: location.state.Client_id,
+    };
+    const data = { req, authToken: token };
+    const response = await dispatch(JobAction(data)).unwrap();
+    if (!response.status) {
+      alert("No data to export!");
+      return;
+    }
+    const apiData = response?.data;
+
+    if (!apiData || apiData.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
+    const exportData = apiData?.map((item) => ({
+      "Job Code Id": item.job_code_id,
+      "Job Priority": item.job_priority,
+      "Client Trading Name": item.client_trading_name,
+      "Job Type Name": item.job_type_name,
+      Status: item.status,
+      "Client Contact Person Name":
+        `${item.account_manager_officer_first_name || ""} ${item.account_manager_officer_last_name || ""}`.trim(),
+
+      "Outbooks Account Manager Name":
+        `${item.outbooks_acount_manager_first_name || ""} ${item.outbooks_acount_manager_last_name || ""}`.trim(),
+
+      Invoicing: item.invoiced == 1 ? "Yes" : "No",
+      "Job Created By": item.job_created_by,
+      "Created At": item.created_at,
+    }));
+
+    downloadCSV(exportData, "Job Details.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
+  return (
     <div className={isLoading ? "blur-container" : ""}>
       {isLoading && (
         <div className="loader-overlay">
@@ -864,8 +1035,9 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
+                        className={`nav-link ${
+                          activeTab === tab.id ? "active" : ""
+                        }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -888,23 +1060,25 @@ const ClientList = () => {
                     <button
                       type="button"
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-
                       onClick={() => {
-                        sessionStorage.setItem('activeTab', location.state.activeTab);
-                        window.history.back()
-                      }
-                      }
+                        sessionStorage.setItem(
+                          "activeTab",
+                          location.state.activeTab,
+                        );
+                        window.history.back();
+                      }}
                     >
                       <i className="fa fa-arrow-left pe-1" /> Back
                     </button>
-                    {
-                      (getAccessDataJob.insert == 1 || role === "SUPERADMIN") && (
-                        <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
-                          <i className="fa fa-plus pe-1" /> Create Job
-                        </div>
-                      )
-                    }
-
+                    {(getAccessDataJob.insert == 1 ||
+                      role === "SUPERADMIN") && (
+                      <div
+                        className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                        onClick={handleCreateJob}
+                      >
+                        <i className="fa fa-plus pe-1" /> Create Job
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -915,10 +1089,12 @@ const ClientList = () => {
                     type="button"
                     className="btn btn-info text-white float-end blue-btn me-2"
                     onClick={() => {
-                      sessionStorage.setItem('activeTab', location.state.activeTab);
-                      window.history.back()
-                    }
-                    }
+                      sessionStorage.setItem(
+                        "activeTab",
+                        location.state.activeTab,
+                      );
+                      window.history.back();
+                    }}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </button>
@@ -931,12 +1107,13 @@ const ClientList = () => {
                     <button
                       type="button"
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-
                       onClick={() => {
-                        sessionStorage.setItem('activeTab', location.state.activeTab);
-                        window.history.back()
-                      }
-                      }
+                        sessionStorage.setItem(
+                          "activeTab",
+                          location.state.activeTab,
+                        );
+                        window.history.back();
+                      }}
                     >
                       <i className="fa fa-arrow-left pe-1" /> Back
                     </button>
@@ -946,15 +1123,24 @@ const ClientList = () => {
             </div>
           </div>
 
-          <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={activeTab == 'NoOfJobs' ? customerData.length : ""} />
-
+          <Hierarchy
+            show={[
+              "Customer",
+              "Client",
+              activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab,
+            ]}
+            active={2}
+            data={hararchyData}
+            NumberOfActive={activeTab == "NoOfJobs" ? customerData.length : ""}
+          />
         </div>
 
         <div className="mt-4">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab == "NoOfJobs" ? "show active" : ""
+              }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -978,10 +1164,14 @@ const ClientList = () => {
                           Assigned Jobs
                         </button>
                       </li>
-
                     </ul>
 
-
+                    <button
+                      className="btn btn-outline-info fw-bold float-end border-3 "
+                      onClick={handleExport}
+                    >
+                      Export Excel
+                    </button>
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div
@@ -990,7 +1180,6 @@ const ClientList = () => {
                       role="tabpanel"
                       aria-labelledby="assignedjob-tab"
                     >
-
                       <div className="datatable-wrapper ">
                         {customerData && statusDataAll.length > 0 && (
                           <Datatable
@@ -1006,8 +1195,7 @@ const ClientList = () => {
                       id="alljob"
                       role="tabpanel"
                       aria-labelledby="alljob-tab"
-                    >
-                    </div>
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -1031,13 +1219,24 @@ const ClientList = () => {
                           </div>
                           <div className="dastyle-profile_user-detail">
                             <h5 className="dastyle-user-name">
-
-                              {getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
-                                getClientDetails?.data?.member_details?.[0].first_name + " " + getClientDetails?.data?.member_details?.[0].last_name :
-                                getClientDetails?.data?.client?.client_type == 7 ?
-                                  getClientDetails?.data?.beneficiaries_details?.[0].first_name + " " + getClientDetails?.data?.beneficiaries_details?.[0].last_name :
-
-                                  clientInformationData.first_name + " " + clientInformationData.last_name}
+                              {getClientDetails?.data?.client?.client_type ==
+                                5 ||
+                              getClientDetails?.data?.client?.client_type == 6
+                                ? getClientDetails?.data?.member_details?.[0]
+                                    .first_name +
+                                  " " +
+                                  getClientDetails?.data?.member_details?.[0]
+                                    .last_name
+                                : getClientDetails?.data?.client?.client_type ==
+                                    7
+                                  ? getClientDetails?.data
+                                      ?.beneficiaries_details?.[0].first_name +
+                                    " " +
+                                    getClientDetails?.data
+                                      ?.beneficiaries_details?.[0].last_name
+                                  : clientInformationData.first_name +
+                                    " " +
+                                    clientInformationData.last_name}
                             </h5>
                             <p className="mb-0 dastyle-user-name-post">
                               Client Code: {informationData.client_code}
@@ -1050,25 +1249,35 @@ const ClientList = () => {
                           <li className="">
                             <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
                             <b>Phone : </b>
-                            {getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
-                              getClientDetails?.data?.member_details?.[0].phone_code + " " + getClientDetails?.data?.member_details?.[0].phone || 'NA' :
-                              getClientDetails?.data?.client?.client_type == 7 ?
-                                getClientDetails?.data?.beneficiaries_details?.[0].phone_code + " " + getClientDetails?.data?.beneficiaries_details?.[0].phone || 'NA' :
-                                clientInformationData.phone_code + " " + clientInformationData.phone || 'NA'}
-
-
+                            {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                              ? getClientDetails?.data?.member_details?.[0]
+                                  .phone_code +
+                                  " " +
+                                  getClientDetails?.data?.member_details?.[0]
+                                    .phone || "NA"
+                              : getClientDetails?.data?.client?.client_type == 7
+                                ? getClientDetails?.data
+                                    ?.beneficiaries_details?.[0].phone_code +
+                                    " " +
+                                    getClientDetails?.data
+                                      ?.beneficiaries_details?.[0].phone || "NA"
+                                : clientInformationData.phone_code +
+                                    " " +
+                                    clientInformationData.phone || "NA"}
                           </li>
                           <li className="mt-2">
                             <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
                             <b>Email : </b>{" "}
-                            {
-                              getClientDetails?.data?.client?.client_type == 5 || getClientDetails?.data?.client?.client_type == 6 ?
-                                getClientDetails?.data?.member_details?.[0].email || 'NA' :
-                                getClientDetails?.data?.client?.client_type == 7 ?
-                                  getClientDetails?.data?.beneficiaries_details?.[0].email || 'NA' :
-                                  clientInformationData.email || 'NA'}
+                            {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                              ? getClientDetails?.data?.member_details?.[0]
+                                  .email || "NA"
+                              : getClientDetails?.data?.client?.client_type == 7
+                                ? getClientDetails?.data
+                                    ?.beneficiaries_details?.[0].email || "NA"
+                                : clientInformationData.email || "NA"}
                           </li>
-
                         </ul>
                       </div>
 
@@ -1076,12 +1285,18 @@ const ClientList = () => {
                         <ul className="list-unstyled personal-detail mb-0">
                           <li className="row">
                             <div className="col-md-12">
-                              <b>Trading Name :</b> {informationData && informationData.trading_name || 'NA'}</div>
-
+                              <b>Trading Name :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_name) ||
+                                "NA"}
+                            </div>
                           </li>
                           <li className="mt-2 row">
                             <div className="col-md-12">
-                              <b>Trading Address :</b>  {informationData && informationData.trading_address || 'NA'}
+                              <b>Trading Address :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_address) ||
+                                "NA"}
                             </div>
                           </li>
                         </ul>
@@ -1090,302 +1305,356 @@ const ClientList = () => {
                   </div>
                 </div>
               </div>
-              {
-                informationData.client_type == 4 ? "" :
-                  <div className=" report-data mt-4">
-                    <div className="card-header border-bottom pb-3 row">
-                      <div className="col-8">
-                        <h4 className="card-title">
-                          {informationData && informationData.client_type == 1
-                            ? "Sole Trader"
-                            : informationData.client_type == 2
-                              ? "Company" : informationData.client_type == 3 ? "Partnership" : getClientDetails?.data?.client?.client_type == 5 ? "Charity Incorporated Organisation Information" : getClientDetails?.data?.client?.client_type == 6 ? "Charity Unincorporated Association Information" : getClientDetails?.data?.client?.client_type == 7 ? "Trust" : ""
-
-                          }
-                        </h4>
-                      </div>
-
+              {informationData.client_type == 4 ? (
+                ""
+              ) : (
+                <div className=" report-data mt-4">
+                  <div className="card-header border-bottom pb-3 row">
+                    <div className="col-8">
+                      <h4 className="card-title">
+                        {informationData && informationData.client_type == 1
+                          ? "Sole Trader"
+                          : informationData.client_type == 2
+                            ? "Company"
+                            : informationData.client_type == 3
+                              ? "Partnership"
+                              : getClientDetails?.data?.client?.client_type == 5
+                                ? "Charity Incorporated Organisation Information"
+                                : getClientDetails?.data?.client?.client_type ==
+                                    6
+                                  ? "Charity Unincorporated Association Information"
+                                  : getClientDetails?.data?.client
+                                        ?.client_type == 7
+                                    ? "Trust"
+                                    : ""}
+                      </h4>
                     </div>
+                  </div>
 
-                    {informationData.client_type == 1 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b>Trading Name :</b> {informationData.trading_name || 'NA'}
-
-                                {/* <p className="font-14  ml-3">
+                  {informationData.client_type == 1 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b>Trading Name :</b>{" "}
+                              {informationData.trading_name || "NA"}
+                              {/* <p className="font-14  ml-3">
                             {informationData.trading_name}
                           </p> */}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Registered : </b>{informationData.vat_registered == 0 ? "No" : "Yes"}
-                                {/* <p className="font-14  ml-3">
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered : </b>
+                              {informationData.vat_registered == 0
+                                ? "No"
+                                : "Yes"}
+                              {/* <p className="font-14  ml-3">
                             {" "}
                             
                           </p> */}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Website : </b>{informationData.website || 'NA'}
-                                {/* <p className="font-14  ml-3">
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website : </b>
+                              {informationData.website || "NA"}
+                              {/* <p className="font-14  ml-3">
                             
                           </p> */}
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Address :</b> {informationData.trading_address || 'NA'}
-                                {/* <p className="font-14  ml-3">
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b>{" "}
+                              {informationData.trading_address || "NA"}
+                              {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.trading_address}
                           </p> */}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Number :</b>  {informationData.vat_number || 'NA'}
-                                {/* <p className="font-14  ml-3">
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>{" "}
+                              {informationData.vat_number || "NA"}
+                              {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.vat_number}
                           </p> */}
-                              </li>
-                            </ul>
-                          </div>
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : informationData.client_type == 2 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Company Name : </b> {companyDetails.company_name || "NA"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Company Status :</b>  {companyDetails.company_status || "NA"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Registered Office Address :</b>  {companyDetails.registered_office_address || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Entity Type :</b> {companyDetails.entity_type || "NA"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Company Number :</b> {companyDetails.company_number || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
+                    </div>
+                  ) : informationData.client_type == 2 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Company Name : </b>{" "}
+                              {companyDetails.company_name || "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Company Status :</b>{" "}
+                              {companyDetails.company_status || "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Registered Office Address :</b>{" "}
+                              {companyDetails.registered_office_address || "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Entity Type :</b>{" "}
+                              {companyDetails.entity_type || "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Company Number :</b>{" "}
+                              {companyDetails.company_number || "NA"}
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : informationData.client_type == 3 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
-                                <p className="font-14  ml-3">
-
-                                </p>
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Registered :</b> {informationData &&
-                                  informationData.vat_registered == "0"
-                                  ? "No"
-                                  : "Yes"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
-                              </li>
-                            </ul>
-                          </div>
+                    </div>
+                  ) : informationData.client_type == 3 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Name :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_name) ||
+                                "NA"}
+                              <p className="font-14  ml-3"></p>
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered :</b>{" "}
+                              {informationData &&
+                              informationData.vat_registered == "0"
+                                ? "No"
+                                : "Yes"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website :</b>{" "}
+                              {(informationData && informationData.website) ||
+                                "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_address) ||
+                                "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>{" "}
+                              {(informationData &&
+                                informationData.vat_number) ||
+                                "NA"}
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : informationData.client_type == 4 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
-                                <p className="font-14  ml-3">
-
-                                </p>
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Registered :</b> {informationData &&
-                                  informationData.vat_registered == "0"
-                                  ? "No"
-                                  : "Yes"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
-                              </li>
-                            </ul>
-                          </div>
+                    </div>
+                  ) : informationData.client_type == 4 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Name :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_name) ||
+                                "NA"}
+                              <p className="font-14  ml-3"></p>
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered :</b>{" "}
+                              {informationData &&
+                              informationData.vat_registered == "0"
+                                ? "No"
+                                : "Yes"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website :</b>{" "}
+                              {(informationData && informationData.website) ||
+                                "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_address) ||
+                                "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>{" "}
+                              {(informationData &&
+                                informationData.vat_number) ||
+                                "NA"}
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : informationData.client_type == 5 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
-                                <p className="font-14  ml-3">
-
-                                </p>
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Registered :</b> {informationData &&
-                                  informationData.vat_registered == "0"
-                                  ? "No"
-                                  : "Yes"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
-                              </li>
-                            </ul>
-                          </div>
+                    </div>
+                  ) : informationData.client_type == 5 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Name :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_name) ||
+                                "NA"}
+                              <p className="font-14  ml-3"></p>
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered :</b>{" "}
+                              {informationData &&
+                              informationData.vat_registered == "0"
+                                ? "No"
+                                : "Yes"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website :</b>{" "}
+                              {(informationData && informationData.website) ||
+                                "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_address) ||
+                                "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>{" "}
+                              {(informationData &&
+                                informationData.vat_number) ||
+                                "NA"}
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : informationData.client_type == 6 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
-                                <p className="font-14  ml-3">
-
-                                </p>
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Registered :</b> {informationData &&
-                                  informationData.vat_registered == "0"
-                                  ? "No"
-                                  : "Yes"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
-                              </li>
-                            </ul>
-                          </div>
+                    </div>
+                  ) : informationData.client_type == 6 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Name :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_name) ||
+                                "NA"}
+                              <p className="font-14  ml-3"></p>
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered :</b>{" "}
+                              {informationData &&
+                              informationData.vat_registered == "0"
+                                ? "No"
+                                : "Yes"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website :</b>{" "}
+                              {(informationData && informationData.website) ||
+                                "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_address) ||
+                                "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>{" "}
+                              {(informationData &&
+                                informationData.vat_number) ||
+                                "NA"}
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : informationData.client_type == 7 ? (
-                      <div className="card-body pt-3">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
-                                <p className="font-14  ml-3">
-
-                                </p>
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Registered :</b> {informationData &&
-                                  informationData.vat_registered == "0"
-                                  ? "No"
-                                  : "Yes"}
-
-                              </li>
-                              <li className="mb-4">
-                                <b className="">Website :</b> {informationData && informationData.website || "NA"}
-
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4">
-                                <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
-                              </li>
-                              <li className="mb-4">
-                                <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
-                              </li>
-                            </ul>
-                          </div>
+                    </div>
+                  ) : informationData.client_type == 7 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Name :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_name) ||
+                                "NA"}
+                              <p className="font-14  ml-3"></p>
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered :</b>{" "}
+                              {informationData &&
+                              informationData.vat_registered == "0"
+                                ? "No"
+                                : "Yes"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website :</b>{" "}
+                              {(informationData && informationData.website) ||
+                                "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b>{" "}
+                              {(informationData &&
+                                informationData.trading_address) ||
+                                "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>{" "}
+                              {(informationData &&
+                                informationData.vat_number) ||
+                                "NA"}
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-              }
-
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab == "documents" && (
             <div
-              className={`tab-pane fade ${activeTab == "documents" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab == "documents" ? "show active" : ""
+              }`}
               id={"documents"}
               role="tabpanel"
               aria-labelledby={`documents-tab`}
             >
               <div className="">
-
                 <div className="report-data mt-4 ">
                   <Formik
                     initialValues={{ files: [] }}
@@ -1416,8 +1685,10 @@ const ClientList = () => {
                                       multiple
                                       onChange={(event) => {
                                         handleFileChange(event);
-                                        setFieldValue("files", [...fileState, ...newFiles]);
-
+                                        setFieldValue("files", [
+                                          ...fileState,
+                                          ...newFiles,
+                                        ]);
                                       }}
                                       className="custom-file-input form-control"
                                       id="inputGroupFile04"
@@ -1425,7 +1696,10 @@ const ClientList = () => {
                                   </div>
                                 </div>
 
-                                <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
+                                <ul
+                                  className="list-unstyled mb-0"
+                                  id="dropzone-preview"
+                                ></ul>
                                 <div className="container-fluid page-title-box">
                                   <div className="row">
                                     <div className="col-lg-12">
@@ -1444,19 +1718,34 @@ const ClientList = () => {
                                               >
                                                 <thead className="table-light table-head-blue">
                                                   <tr>
-                                                    <th className="" data-sort="file_name">
+                                                    <th
+                                                      className=""
+                                                      data-sort="file_name"
+                                                    >
                                                       File Image
                                                     </th>
-                                                    <th className="" data-sort="file_name">
+                                                    <th
+                                                      className=""
+                                                      data-sort="file_name"
+                                                    >
                                                       File Name
                                                     </th>
-                                                    <th className="" data-sort="file_type">
+                                                    <th
+                                                      className=""
+                                                      data-sort="file_type"
+                                                    >
                                                       File Type
                                                     </th>
-                                                    <th className="" data-sort="size">
+                                                    <th
+                                                      className=""
+                                                      data-sort="size"
+                                                    >
                                                       Size
                                                     </th>
-                                                    <th className="" data-sort="action">
+                                                    <th
+                                                      className=""
+                                                      data-sort="action"
+                                                    >
                                                       Action
                                                     </th>
                                                   </tr>
@@ -1465,7 +1754,9 @@ const ClientList = () => {
                                                   {newFiles.length > 0 &&
                                                     Array.from(newFiles).map(
                                                       (file, index) => (
-                                                        <tr key={`new-${index}`}>
+                                                        <tr
+                                                          key={`new-${index}`}
+                                                        >
                                                           {/* <td className="file_name">
                                                             {" "}
                                                             <img
@@ -1478,31 +1769,39 @@ const ClientList = () => {
                                                             />{" "}
                                                           </td> */}
                                                           <td>
-                                                            {file.type.startsWith("image/") ? (
-
+                                                            {file.type.startsWith(
+                                                              "image/",
+                                                            ) ? (
                                                               <img
-                                                                src={previews[index]}
+                                                                src={
+                                                                  previews[
+                                                                    index
+                                                                  ]
+                                                                }
                                                                 alt="preview"
                                                                 style={{
                                                                   width: "50px",
-                                                                  height: "50px",
+                                                                  height:
+                                                                    "50px",
                                                                 }}
                                                               />
-                                                            ) : file.type === "application/pdf" ? (
-
+                                                            ) : file.type ===
+                                                              "application/pdf" ? (
                                                               <i
                                                                 className="fa fa-file-pdf"
                                                                 style={{
-                                                                  fontSize: "24px",
-                                                                  color: "#FF0000",
+                                                                  fontSize:
+                                                                    "24px",
+                                                                  color:
+                                                                    "#FF0000",
                                                                 }}
                                                               ></i>
                                                             ) : (
-
                                                               <i
                                                                 className="fa fa-file"
                                                                 style={{
-                                                                  fontSize: "24px",
+                                                                  fontSize:
+                                                                    "24px",
                                                                   color: "#000",
                                                                 }}
                                                               ></i>
@@ -1515,14 +1814,20 @@ const ClientList = () => {
                                                             {file.type}
                                                           </td>
                                                           <td className="size">
-                                                            {file.size < 1024 * 1024
-                                                              ? `${(file.size / 1024).toFixed(
-                                                                2
-                                                              )} KB`
+                                                            {file.size <
+                                                            1024 * 1024
+                                                              ? `${(
+                                                                  file.size /
+                                                                  1024
+                                                                ).toFixed(
+                                                                  2,
+                                                                )} KB`
                                                               : `${(
-                                                                file.size /
-                                                                (1024 * 1024)
-                                                              ).toFixed(2)} MB`}
+                                                                  file.size /
+                                                                  (1024 * 1024)
+                                                                ).toFixed(
+                                                                  2,
+                                                                )} MB`}
                                                           </td>
 
                                                           <td className="action">
@@ -1530,24 +1835,37 @@ const ClientList = () => {
                                                               <div className="remove">
                                                                 <button
                                                                   className="delete-icon"
-
                                                                   onClick={() => {
-                                                                    fileInputRef.current.value = "";
+                                                                    fileInputRef.current.value =
+                                                                      "";
                                                                     const updatedFiles =
                                                                       newFiles.filter(
-                                                                        (_, idx) =>
-                                                                          idx !== index
+                                                                        (
+                                                                          _,
+                                                                          idx,
+                                                                        ) =>
+                                                                          idx !==
+                                                                          index,
                                                                       );
-                                                                    setNewFiles(updatedFiles);
-                                                                    setFieldValue("files", [
-                                                                      ...fileState,
-                                                                      ...updatedFiles,
-                                                                    ]);
+                                                                    setNewFiles(
+                                                                      updatedFiles,
+                                                                    );
+                                                                    setFieldValue(
+                                                                      "files",
+                                                                      [
+                                                                        ...fileState,
+                                                                        ...updatedFiles,
+                                                                      ],
+                                                                    );
                                                                     setPreviews(
                                                                       previews.filter(
-                                                                        (_, idx) =>
-                                                                          idx !== index
-                                                                      )
+                                                                        (
+                                                                          _,
+                                                                          idx,
+                                                                        ) =>
+                                                                          idx !==
+                                                                          index,
+                                                                      ),
                                                                     );
                                                                   }}
                                                                 >
@@ -1557,15 +1875,14 @@ const ClientList = () => {
                                                             </div>
                                                           </td>
                                                         </tr>
-                                                      )
+                                                      ),
                                                     )}
                                                 </tbody>
                                               </table>
                                             </div>
                                             <div className="d-flex align-items-start justify-content-between gap-3 mt-4">
-
-
-                                              <Button style={{ height: '40px' }}
+                                              <Button
+                                                style={{ height: "40px" }}
                                                 className="btn btn-outline-success text-center  d-flex align-items-center"
                                                 type="submit"
                                                 onClick={(e) => handleSubmit(e)}
@@ -1607,7 +1924,6 @@ const ClientList = () => {
                           Documents
                         </button>
                       </li>
-
                     </ul>
                   </div>
                   <div className="tab-content" id="pills-tabContent">
@@ -1617,7 +1933,6 @@ const ClientList = () => {
                       role="tabpanel"
                       aria-labelledby="assignedjob-tab"
                     >
-
                       <div className="datatable-wrapper ">
                         {fileStateClient && fileStateClient && (
                           <Datatable
@@ -1633,11 +1948,9 @@ const ClientList = () => {
                       id="alldocuments"
                       role="tabpanel"
                       aria-labelledby="alldocuments-tab"
-                    >
-                    </div>
+                    ></div>
                   </div>
                 </div>
-
               </div>
             </div>
           )}
