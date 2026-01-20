@@ -4127,7 +4127,7 @@ const getJobCustomReport = async (Report) => {
             ORDER BY raw.job_id
         `;
 
-        // console.log("fromDate ,", fromDate, "toDate ", toDate);
+        // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
         // console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();
