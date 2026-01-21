@@ -1166,12 +1166,14 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                    <button
-                      className="btn btn-outline-info fw-bold float-end border-3 "
-                      onClick={handleExport}
-                    >
-                      Export Excel
-                    </button>
+                  {customerData && customerData.length > 0 && (
+      <button
+        className="btn btn-outline-info fw-bold float-end border-3"
+        onClick={handleExport}
+      >
+        Export Excel
+      </button>
+    )}
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div

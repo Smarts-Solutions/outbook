@@ -1608,12 +1608,14 @@ const ClientList = () => {
                   </div>
                 )} */}
 
-                <button
-                  className="btn btn-outline-info fw-bold float-end border-3 "
-                  onClick={handleExport}
-                >
-                  Export Excel
-                </button>
+                {tab.data && tab.data.length > 0 && activeTab === "client" && (
+      <button
+        className="btn btn-outline-info fw-bold float-end border-3"
+        onClick={handleExport}
+      >
+        Export Excel
+      </button>
+    )}
               </div>
 
               <div className="datatable-wrapper">
