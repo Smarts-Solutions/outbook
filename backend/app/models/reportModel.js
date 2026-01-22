@@ -3534,7 +3534,7 @@ const getJobCustomReport = async (Report) => {
 
 
 
-    // console.log("additionalField --- ", additionalField);
+    // console.log("additionalField ---- --- ", additionalField);
 
     // if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
     //     return { status: false, message: `empty groupBy field`, data: [] };
@@ -4008,9 +4008,6 @@ const getJobCustomReport = async (Report) => {
                 DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
                 DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
                 DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
-
-
-
 
 
 
