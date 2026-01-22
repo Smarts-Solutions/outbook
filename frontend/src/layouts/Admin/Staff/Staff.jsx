@@ -74,6 +74,8 @@ const StaffPage = () => {
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
 
+  console.log("staffDataAll --- ", staffDataAll);
+
   useEffect(() => {
     staffData(currentPage, pageSize, searchTerm);
     roleData();
@@ -109,7 +111,7 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-
+          console.log("response", response);
           setStaffDataAll({ loading: false, data: response?.data?.data });
           setTotalRecords(response?.data?.pagination?.total || 0);
         } else {
@@ -738,7 +740,7 @@ const StaffPage = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      options: staffDataAll.data
+      options: staffDataAll?.data
         .filter(
           (data) =>
             data.role !== "ADMIN" &&

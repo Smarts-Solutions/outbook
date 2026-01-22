@@ -3534,7 +3534,7 @@ const getJobCustomReport = async (Report) => {
 
 
 
-    // console.log("additionalField --- ", additionalField);
+    // console.log("additionalField ---- --- ", additionalField);
 
     // if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
     //     return { status: false, message: `empty groupBy field`, data: [] };
@@ -3943,7 +3943,14 @@ const getJobCustomReport = async (Report) => {
        
 
         if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
-            where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
+            //where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
+            where.push(`
+                (
+                    assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+                    OR raw.staff_created_id IN (${LineManageStaffId})
+                    OR cl.staff_created_id IN (${LineManageStaffId})
+                )
+                `);
         }
 
 
@@ -4001,9 +4008,6 @@ const getJobCustomReport = async (Report) => {
                 DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
                 DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
                 DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
-
-
-
 
 
 
@@ -4120,7 +4124,7 @@ const getJobCustomReport = async (Report) => {
             ORDER BY raw.job_id
         `;
 
-        // console.log("fromDate ,", fromDate, "toDate ", toDate);
+        // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
         // console.log("unpivotSQL", unpivotSQL);
 
         const conn = await pool.getConnection();

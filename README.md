@@ -2,7 +2,7 @@
 **Project Type:** Management Product  
 **Technologies Used:** HTML, CSS, Bootstrap, React, Node.js, Redux, SQL
 
-## 🌟 Project Summary
+## 🌟 Project Summary -----
 
 Outbook is a comprehensive management application designed to streamline organizational tasks and enhance productivity. With a modern user interface and powerful backend, Outbook provides a seamless experience for managing various aspects of a business.
 

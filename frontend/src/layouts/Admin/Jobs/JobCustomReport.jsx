@@ -26,7 +26,7 @@ function JobCustomReport() {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = staffDetails?.role;
 
-  console.log("staffDetails ",staffDetails)
+  console.log("staffDetails ", staffDetails);
   const [showData, setShowData] = useState([]);
   const navigate = useNavigate();
   console.log("showData ", showData);
@@ -104,13 +104,33 @@ function JobCustomReport() {
   // Get All Jobs
   const GetAllJobs = async (type, filter) => {
     // External get All jobs
-    let req = { action: "getByCustomer", customer_id: "" };
+    let req = {
+      action: "getByCustomer",
+      customer_id: "",
+      page: 1,
+      limit: 100000,
+    };
     if (type == "customer") {
-      req = { action: "getByCustomer", customer_id: filter?.customer_id };
+      req = {
+        action: "getByCustomer",
+        customer_id: filter?.customer_id,
+        page: 1,
+        limit: 100000,
+      };
     } else if (type == "client") {
-      req = { action: "getByClient", client_id: filter?.client_id };
+      req = {
+        action: "getByClient",
+        client_id: filter?.client_id,
+        page: 1,
+        limit: 100000,
+      };
     } else {
-      req = { action: "getByCustomer", customer_id: "" };
+      req = {
+        action: "getByCustomer",
+        customer_id: "",
+        page: 1,
+        limit: 100000,
+      };
     }
 
     const data = { req: req, authToken: token };
@@ -145,7 +165,7 @@ function JobCustomReport() {
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
             label: `
             Group By : [${JSON.parse(item?.groupBy)?.map((item) =>
-              item.replace(/_id$/i, "")
+              item.replace(/_id$/i, ""),
             )}]<br/>
             
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
@@ -194,14 +214,14 @@ function JobCustomReport() {
             ${
               item.timePeriod
                 ? `⮞ Time Period : ${formatStringToTitleCase(
-                    item.timePeriod
+                    item.timePeriod,
                   )}<br/>`
                 : ""
             }
             ${
               item.displayBy
                 ? `⮞ Display By : ${formatStringToTitleCase(
-                    item.displayBy
+                    item.displayBy,
                   )}<br/>`
                 : ""
             }
@@ -209,7 +229,7 @@ function JobCustomReport() {
               !["", null, "null", undefined].includes(item.fromDate)
                 ? `⮞ From Date : ${formatStringToTitleCase(
                     item.fromDate,
-                    "date"
+                    "date",
                   )}<br/>`
                 : ""
             }
@@ -250,7 +270,7 @@ function JobCustomReport() {
   // Get All Customers
   const GetAllCustomer = async (type) => {
     if (type == "all") {
-      const req = { action: "get_dropdown" };
+      const req = { action: "get_dropdown", page: 1, limit: 100000 };
       const data = { req: req, authToken: token };
       await dispatch(getAllCustomerDropDown(data))
         .unwrap()
@@ -294,7 +314,7 @@ function JobCustomReport() {
   // Get All Clients
   const GetAllClient = async (type) => {
     if (type == "all") {
-      const req = { action: "get", customer_id: "" };
+      const req = { action: "get", customer_id: "", page: 1, limit: 100000 };
       const data = { req: req, authToken: token };
       await dispatch(ClientAction(data))
         .unwrap()
@@ -333,7 +353,7 @@ function JobCustomReport() {
 
   // All Type Staff Get
   const staffData = async (role_id, type) => {
-     /// alert(role_id);
+    /// alert(role_id);
     if (["", null, undefined].includes(role_id)) {
       return;
     }
@@ -506,8 +526,8 @@ function JobCustomReport() {
                 ?.filter(
                   (item) =>
                     ![null, "", "null", undefined].includes(
-                      item.employee_number
-                    )
+                      item.employee_number,
+                    ),
                 )
                 ?.map((item) => ({
                   value: item.employee_number,
@@ -523,7 +543,6 @@ function JobCustomReport() {
             return;
           });
       } else {
-       
         let data = [
           {
             id: staffDetails?.employee_number,
@@ -1219,7 +1238,7 @@ function JobCustomReport() {
     // set filters from selected
     // console.log("selected  1 --", selected);
     let selectedFilter = getAllFilterData?.find(
-      (opt) => Number(opt?.value) === Number(selected?.value)
+      (opt) => Number(opt?.value) === Number(selected?.value),
     );
 
     //console.log("selectedFilter  2 --", selectedFilter);
@@ -1389,13 +1408,12 @@ function JobCustomReport() {
         job_id: jobData?.id,
         timesheet_job_id: 1,
         data: {
-          client:{},
-          customer:{},
-          job:{
-            job_id : jobData?.id,
-            job_code_id : jobData?.job_id
-
-          }
+          client: {},
+          customer: {},
+          job: {
+            job_id: jobData?.id,
+            job_code_id: jobData?.job_id,
+          },
         },
         goto: "client",
         activeTab: undefined,
@@ -1437,7 +1455,7 @@ function JobCustomReport() {
                     value={
                       getAllFilterData && getAllFilterData.length > 0
                         ? getAllFilterData.find(
-                            (opt) => Number(opt.value) === Number(filterId)
+                            (opt) => Number(opt.value) === Number(filterId),
                           ) || null
                         : null
                     }
@@ -1517,7 +1535,7 @@ function JobCustomReport() {
             closeMenuOnSelect={false}
             options={optionGroupBy}
             value={optionGroupBy.filter((opt) =>
-              filters.groupBy.includes(opt.value)
+              filters.groupBy.includes(opt.value),
             )}
             onChange={(selectedOptions, actionMeta) => {
               // console.log("Selected Options:", selectedOptions);
@@ -1565,7 +1583,7 @@ function JobCustomReport() {
               value={
                 jobAllData && jobAllData.length > 0
                   ? jobAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.job_id)
+                      (opt) => Number(opt.value) === Number(filters.job_id),
                     ) || null
                   : null
               }
@@ -1593,7 +1611,8 @@ function JobCustomReport() {
               value={
                 customerAllData && customerAllData.length > 0
                   ? customerAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.customer_id)
+                      (opt) =>
+                        Number(opt.value) === Number(filters.customer_id),
                     ) || null
                   : null
               }
@@ -1621,7 +1640,7 @@ function JobCustomReport() {
               value={
                 clientAllData && clientAllData.length > 0
                   ? clientAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.client_id)
+                      (opt) => Number(opt.value) === Number(filters.client_id),
                     ) || null
                   : null
               }
@@ -1652,7 +1671,7 @@ function JobCustomReport() {
               value={
                 employeeNumberAllData && employeeNumberAllData.length > 0
                   ? employeeNumberAllData.find(
-                      (opt) => opt.value === filters.employee_number
+                      (opt) => opt.value === filters.employee_number,
                     ) || null
                   : null
               }
@@ -1685,7 +1704,8 @@ function JobCustomReport() {
                 accountManagerAllData && accountManagerAllData.length > 0
                   ? accountManagerAllData.find(
                       (opt) =>
-                        Number(opt.value) === Number(filters.account_manager_id)
+                        Number(opt.value) ===
+                        Number(filters.account_manager_id),
                     ) || null
                   : null
               }
@@ -1718,7 +1738,7 @@ function JobCustomReport() {
                 allocatedToAllData && allocatedToAllData?.length > 0
                   ? allocatedToAllData?.find(
                       (opt) =>
-                        Number(opt.value) === Number(filters.allocated_to_id)
+                        Number(opt.value) === Number(filters.allocated_to_id),
                     ) || null
                   : null
               }
@@ -1747,7 +1767,8 @@ function JobCustomReport() {
               value={
                 reviewerAllData && reviewerAllData?.length > 0
                   ? reviewerAllData?.find(
-                      (opt) => Number(opt.value) === Number(filters.reviewer_id)
+                      (opt) =>
+                        Number(opt.value) === Number(filters.reviewer_id),
                     ) || null
                   : null
               }
@@ -1781,7 +1802,7 @@ function JobCustomReport() {
                   ? otherStaffAllData?.find(
                       (opt) =>
                         Number(opt.value) ===
-                        Number(filters.allocated_to_other_id)
+                        Number(filters.allocated_to_other_id),
                     ) || null
                   : null
               }
@@ -1810,7 +1831,7 @@ function JobCustomReport() {
               value={
                 serviceAllData && serviceAllData?.length > 0
                   ? serviceAllData?.find(
-                      (opt) => Number(opt.value) === Number(filters.service_id)
+                      (opt) => Number(opt.value) === Number(filters.service_id),
                     ) || null
                   : null
               }
@@ -1839,7 +1860,8 @@ function JobCustomReport() {
               value={
                 jobTypeAllData && jobTypeAllData?.length > 0
                   ? jobTypeAllData?.find(
-                      (opt) => Number(opt.value) === Number(filters.job_type_id)
+                      (opt) =>
+                        Number(opt.value) === Number(filters.job_type_id),
                     ) || null
                   : null
               }
@@ -1868,7 +1890,7 @@ function JobCustomReport() {
                 statusAllData && statusAllData?.length > 0
                   ? statusAllData?.find(
                       (opt) =>
-                        Number(opt.value) === Number(filters.status_type_id)
+                        Number(opt.value) === Number(filters.status_type_id),
                     ) || null
                   : null
               }
