@@ -16,6 +16,7 @@ import sweatalert from "sweetalert2";
 import { TextSelect } from "lucide-react";
 import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 import { useNavigate } from "react-router-dom";
+import ReactPaginate from "react-paginate";
 
 function JobCustomReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -30,6 +31,14 @@ function JobCustomReport() {
   const [showData, setShowData] = useState([]);
   const navigate = useNavigate();
   console.log("showData ", showData);
+
+  /////////PAGINATION/////////
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100000);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+
+  ////////////////////////
 
   const [accountManagerAllData, setAccountManagerAllData] = useState([]);
   const [allocatedToAllData, setAllocatedToAllData] = useState([]);
@@ -49,6 +58,8 @@ function JobCustomReport() {
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
 
   const [getAllFilterData, setGetAllFilterData] = useState([]);
+
+
   // set filter id
   const [filterId, setFilterId] = useState(null);
 
@@ -169,75 +180,63 @@ function JobCustomReport() {
             )}]<br/>
             
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
-            ${
-              item.customer_name
+            ${item.customer_name
                 ? `⮞ Customer : ${item.customer_name}<br/>`
                 : ""
-            }
+              }
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${
-              item.account_manager_name
+            ${item.account_manager_name
                 ? `⮞ Account Manager Name : ${item.account_manager_name}<br/>`
                 : ""
-            }
-            ${
-              item.allocated_to_name
+              }
+            ${item.allocated_to_name
                 ? `⮞ Allocated To : ${item.allocated_to_name}<br/>`
                 : ""
-            }
-            ${
-              item.reviewer_name
+              }
+            ${item.reviewer_name
                 ? `⮞ Reviewer : ${item.reviewer_name}<br/>`
                 : ""
-            }
-            ${
-              item.allocated_to_other_name
+              }
+            ${item.allocated_to_other_name
                 ? `⮞ Allocated To (Other) : ${item.allocated_to_other_name}<br/>`
                 : ""
-            }
-            ${
-              item.service_name
+              }
+            ${item.service_name
                 ? `⮞ Service Type : ${item.service_name}<br/>`
                 : ""
-            }
-            ${
-              item.job_type_name
+              }
+            ${item.job_type_name
                 ? `⮞ Job Type : ${item.job_type_name}<br/>`
                 : ""
-            }
-            ${
-              item.status_type_name
+              }
+            ${item.status_type_name
                 ? `⮞ Status : ${item.status_type_name}<br/>`
                 : ""
-            }
+              }
 
-            ${
-              item.timePeriod
+            ${item.timePeriod
                 ? `⮞ Time Period : ${formatStringToTitleCase(
-                    item.timePeriod,
-                  )}<br/>`
+                  item.timePeriod,
+                )}<br/>`
                 : ""
-            }
-            ${
-              item.displayBy
+              }
+            ${item.displayBy
                 ? `⮞ Display By : ${formatStringToTitleCase(
-                    item.displayBy,
-                  )}<br/>`
+                  item.displayBy,
+                )}<br/>`
                 : ""
-            }
-            ${
-              !["", null, "null", undefined].includes(item.fromDate)
+              }
+            ${!["", null, "null", undefined].includes(item.fromDate)
                 ? `⮞ From Date : ${formatStringToTitleCase(
-                    item.fromDate,
-                    "date",
-                  )}<br/>`
+                  item.fromDate,
+                  "date",
+                )}<br/>`
                 : ""
-            }
-            ${
-              !["", null, "null", undefined].includes(item.toDate)
+              }
+            ${!["", null, "null", undefined].includes(item.toDate)
                 ? `⮞ To Date : ${formatStringToTitleCase(item.toDate, "date")}`
                 : ""
-            }
+              }
           `,
 
             filters: item.filter_record,
@@ -993,7 +992,13 @@ function JobCustomReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { action: "getJobCustomReport", filters: filters, role: role };
+    const req = { 
+    action: "getJobCustomReport", 
+    filters: filters, 
+    role: role , 
+    page : currentPage,
+    limit : pageSize 
+  };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
@@ -1455,8 +1460,8 @@ function JobCustomReport() {
                     value={
                       getAllFilterData && getAllFilterData.length > 0
                         ? getAllFilterData.find(
-                            (opt) => Number(opt.value) === Number(filterId),
-                          ) || null
+                          (opt) => Number(opt.value) === Number(filterId),
+                        ) || null
                         : null
                     }
                     onChange={handleFilterSelect}
@@ -1583,8 +1588,8 @@ function JobCustomReport() {
               value={
                 jobAllData && jobAllData.length > 0
                   ? jobAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.job_id),
-                    ) || null
+                    (opt) => Number(opt.value) === Number(filters.job_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1611,9 +1616,9 @@ function JobCustomReport() {
               value={
                 customerAllData && customerAllData.length > 0
                   ? customerAllData.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.customer_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) === Number(filters.customer_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1640,8 +1645,8 @@ function JobCustomReport() {
               value={
                 clientAllData && clientAllData.length > 0
                   ? clientAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.client_id),
-                    ) || null
+                    (opt) => Number(opt.value) === Number(filters.client_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1671,8 +1676,8 @@ function JobCustomReport() {
               value={
                 employeeNumberAllData && employeeNumberAllData.length > 0
                   ? employeeNumberAllData.find(
-                      (opt) => opt.value === filters.employee_number,
-                    ) || null
+                    (opt) => opt.value === filters.employee_number,
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1703,10 +1708,10 @@ function JobCustomReport() {
               value={
                 accountManagerAllData && accountManagerAllData.length > 0
                   ? accountManagerAllData.find(
-                      (opt) =>
-                        Number(opt.value) ===
-                        Number(filters.account_manager_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) ===
+                      Number(filters.account_manager_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1737,9 +1742,9 @@ function JobCustomReport() {
               value={
                 allocatedToAllData && allocatedToAllData?.length > 0
                   ? allocatedToAllData?.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.allocated_to_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) === Number(filters.allocated_to_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1767,9 +1772,9 @@ function JobCustomReport() {
               value={
                 reviewerAllData && reviewerAllData?.length > 0
                   ? reviewerAllData?.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.reviewer_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) === Number(filters.reviewer_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1800,10 +1805,10 @@ function JobCustomReport() {
               value={
                 otherStaffAllData && otherStaffAllData?.length > 0
                   ? otherStaffAllData?.find(
-                      (opt) =>
-                        Number(opt.value) ===
-                        Number(filters.allocated_to_other_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) ===
+                      Number(filters.allocated_to_other_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1831,8 +1836,8 @@ function JobCustomReport() {
               value={
                 serviceAllData && serviceAllData?.length > 0
                   ? serviceAllData?.find(
-                      (opt) => Number(opt.value) === Number(filters.service_id),
-                    ) || null
+                    (opt) => Number(opt.value) === Number(filters.service_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1860,9 +1865,9 @@ function JobCustomReport() {
               value={
                 jobTypeAllData && jobTypeAllData?.length > 0
                   ? jobTypeAllData?.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.job_type_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) === Number(filters.job_type_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1889,9 +1894,9 @@ function JobCustomReport() {
               value={
                 statusAllData && statusAllData?.length > 0
                   ? statusAllData?.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.status_type_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) === Number(filters.status_type_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -2032,16 +2037,18 @@ function JobCustomReport() {
             <p className="fs-16">There are no records to display</p>
           </div>
         ) : (
+
+          <>
           <div className="table-responsive fixed-table-header">
             <table
               className="table rdt_Table"
-              // className="table table-bordered"
-              // style={{
-              //   fontSize: "14px",
-              //   width: "100%",
-              //   overflowX: "auto",
-              //   display: "block",
-              // }}
+            // className="table table-bordered"
+            // style={{
+            //   fontSize: "14px",
+            //   width: "100%",
+            //   overflowX: "auto",
+            //   display: "block",
+            // }}
             >
               <thead
               // className="rdt_TableHead"
@@ -2091,6 +2098,36 @@ function JobCustomReport() {
               </tbody>
             </table>
           </div>
+
+
+           <ReactPaginate
+              previousLabel={"Previous"}
+              nextLabel={"Next"}
+              breakLabel={"..."}
+             // pageCount={Math.ceil(totalRecords / pageSize)}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={5}
+            //  onPageChange={handlePageChange}
+              containerClassName={"pagination"}
+              activeClassName={"active"}
+              forcePage={currentPage - 1}
+            />
+
+            <select
+              className="perpage-select"
+              value={pageSize}
+            //  onChange={handlePageSizeChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100000}>All</option>
+            </select>
+
+          </>
+
+          
         )}
       </div>
     </div>
