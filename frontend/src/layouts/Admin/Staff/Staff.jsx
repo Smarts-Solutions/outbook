@@ -29,7 +29,7 @@ const StaffPage = () => {
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
   const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
+    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data,
   );
   const [showStaffInsertTab, setShowStaffInsertTab] = useState(true);
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
@@ -76,6 +76,8 @@ const StaffPage = () => {
 
   console.log("staffDataAll --- ", staffDataAll);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     staffData(currentPage, pageSize, searchTerm);
     roleData();
@@ -102,12 +104,13 @@ const StaffPage = () => {
   };
 
   const staffData = async (page = 1, limit = 10, search = "") => {
-     setStaffDataAll({ loading: true, data: [] });
+    setLoading(true);
+    //  setStaffDataAll({ loading: true, data: [] });
     await dispatch(
       Staff({
         req: { action: "get", page, limit, search },
         authToken: token,
-      })
+      }),
     )
       .unwrap()
       .then(async (response) => {
@@ -122,6 +125,9 @@ const StaffPage = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -138,7 +144,7 @@ const StaffPage = () => {
         Staff({
           req: { action: "delete", id: deleteStaff.id },
           authToken: token,
-        })
+        }),
       )
         .unwrap()
         .then(async (response) => {
@@ -190,7 +196,7 @@ const StaffPage = () => {
           Staff({
             req: { action: "delete", id: row.id },
             authToken: token,
-          })
+          }),
         )
           .unwrap()
           .then(async (response) => {
@@ -228,16 +234,16 @@ const StaffPage = () => {
         accessData.map((item) => {
           if (item.permission_name === "staff") {
             const staffInsert = item.items.find(
-              (item) => item.type === "insert"
+              (item) => item.type === "insert",
             );
             setShowStaffInsertTab(staffInsert && staffInsert.is_assigned == 1);
 
             const staffUpdate = item.items.find(
-              (item) => item.type === "update"
+              (item) => item.type === "update",
             );
             setShowStaffUpdateTab(staffUpdate && staffUpdate.is_assigned == 1);
             const staffDelete = item.items.find(
-              (item) => item.type === "delete"
+              (item) => item.type === "delete",
             );
             setStaffDeleteTab(staffDelete && staffDelete.is_assigned == 1);
           }
@@ -250,14 +256,14 @@ const StaffPage = () => {
       Staff({
         req: { action: "portfolio", staff_id: StaffUserId.id },
         authToken: token,
-      })
+      }),
     )
       .unwrap()
       .then(async (response) => {
         if (response.status) {
           const filteredCustomers = response.data.filter((customer) => {
             return !AssignCustomer.some(
-              (assigned) => assigned.customer_id === customer.id
+              (assigned) => assigned.customer_id === customer.id,
             );
           });
           setAllCustomerData(filteredCustomers);
@@ -276,7 +282,7 @@ const StaffPage = () => {
         Competency({
           req: { action: "get", staff_id: row.id },
           authToken: token,
-        })
+        }),
       ).unwrap();
       if (response.status) {
         var data = response.data.map((item) => {
@@ -550,7 +556,7 @@ const StaffPage = () => {
           response.data.map((item) => ({
             value: item.customer_id,
             label: item.trading_name,
-          }))
+          })),
         );
         setPortfolio(row);
         GetAllCustomer(AssignCustomer);
@@ -620,7 +626,7 @@ const StaffPage = () => {
         Staff({
           req: { action: editStaff ? "update" : "add", ...req },
           authToken: token,
-        })
+        }),
       )
         .unwrap()
         .then(async (response) => {
@@ -746,7 +752,7 @@ const StaffPage = () => {
           (data) =>
             data.role !== "ADMIN" &&
             data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id
+            data.id !== editStaffData.id,
         )
         .map((data) => ({
           label: `${data.first_name} ${data.last_name}`,
@@ -770,7 +776,7 @@ const StaffPage = () => {
     setServiceDataAll((prevState) => ({
       ...prevState,
       data: prevState.data.map((item) =>
-        item.service_id === id ? { ...item, status: checked } : item
+        item.service_id === id ? { ...item, status: checked } : item,
       ),
     }));
   };
@@ -785,7 +791,7 @@ const StaffPage = () => {
             service: serviceDataAll.data,
           },
           authToken: token,
-        })
+        }),
       ).unwrap();
 
       if (response.status) {
@@ -819,7 +825,7 @@ const StaffPage = () => {
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue(
         "employee_number",
-        editStaffData.employee_number || null
+        editStaffData.employee_number || null,
       );
       formik.setFieldValue("phone_code", editStaffData.phone_code || null);
       formik.setFieldValue("staff_to", editStaffData.staff_to || "");
@@ -841,7 +847,7 @@ const StaffPage = () => {
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
   };
-  
+
   const exportData = staffDataAll.data.map((item) => ({
     "First Name": item.first_name,
     "Last Name": item.last_name,
@@ -1018,8 +1024,12 @@ const StaffPage = () => {
     };
     const data = { req, authToken: token };
     const response = await dispatch(Staff(data)).unwrap();
-  
-    if (!response.status || !response?.data?.data || response?.data?.data?.length === 0) {
+
+    if (
+      !response.status ||
+      !response?.data?.data ||
+      response?.data?.data?.length === 0
+    ) {
       alert("No data to export!");
       return;
     }
@@ -1124,11 +1134,11 @@ const StaffPage = () => {
               role="tabpanel"
             >
               <div className="datatable-wrapper">
-              {staffDataAll.loading && (
-  <div className="overlay">
-    <div className="loader"></div>
-  </div>
-)}
+                {loading && (
+                  <div className="overlay">
+                    <div className="loader"></div>
+                  </div>
+                )}
 
                 {staffDataAll.data && staffDataAll.data.length > 0 ? (
                   <>
@@ -1196,7 +1206,7 @@ const StaffPage = () => {
       >
         <Formicform
           fieldtype={fields.filter(
-            (field) => !field.showWhen || field.showWhen(formik.values)
+            (field) => !field.showWhen || field.showWhen(formik.values),
           )}
           formik={formik}
           btn_name="Add"
@@ -1275,7 +1285,7 @@ const StaffPage = () => {
       >
         <Formicform
           fieldtype={fields.filter(
-            (field) => !field.showWhen || field.showWhen(formik.values)
+            (field) => !field.showWhen || field.showWhen(formik.values),
           )}
           formik={formik}
           btn_name="Update"

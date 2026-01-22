@@ -29,7 +29,10 @@ const ClientLists = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   const GetAllCustomer = async () => {
+    setLoading(true);
     const req = { action: "get_dropdown" };
     const data = { req: req, authToken: token };
     await dispatch(getAllCustomerDropDown(data))
@@ -43,6 +46,9 @@ const ClientLists = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -89,12 +95,12 @@ const ClientLists = () => {
 
   const accessDataCustomer =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "customer"
+      (item) => item.permission_name === "customer",
     )?.items || [];
 
   const accessDataCustomerAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_customers"
+      (item) => item.permission_name === "all_customers",
     )?.items || [];
 
   useEffect(() => {
@@ -134,10 +140,11 @@ const ClientLists = () => {
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob &&
-              (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
-            role === "SUPERADMIN"
-          ? "job"
-          : "documents"
+                (getAccessDataJob.job == 1 ||
+                  getAccessDataJob.all_jobs == 1)) ||
+              role === "SUPERADMIN"
+            ? "job"
+            : "documents",
       );
     }
   }, [getAccessDataJob, getAccessDataClient]);
@@ -148,22 +155,22 @@ const ClientLists = () => {
 
   const accessDataClient =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "client"
+      (item) => item.permission_name === "client",
     )?.items || [];
 
   const accessDataClientAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_clients"
+      (item) => item.permission_name === "all_clients",
     )?.items || [];
 
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job"
+      (item) => item.permission_name === "job",
     )?.items || [];
 
   const accessDataJobAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs"
+      (item) => item.permission_name === "all_jobs",
     )?.items || [];
 
   useEffect(() => {
@@ -233,8 +240,8 @@ const ClientLists = () => {
     if (getCheckList) {
       const filteredData = getCheckList.filter((item) =>
         Object.values(item).some((val) =>
-          val.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
+          val.toString().toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
       );
       setCheckList1(filteredData);
     } else {
@@ -650,7 +657,7 @@ const ClientLists = () => {
           try {
             const req = { job_id: row.job_id, status_type: Number(Id) };
             const res = await dispatch(
-              Update_Status({ req, authToken: token })
+              Update_Status({ req, authToken: token }),
             ).unwrap();
 
             if (res.status) {
@@ -896,6 +903,8 @@ const ClientLists = () => {
   };
 
   const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
+    setLoading(true);
+
     const req = {
       action: "get",
       customer_id: id,
@@ -917,6 +926,9 @@ const ClientLists = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -946,7 +958,7 @@ const ClientLists = () => {
                   .split(",")
                   .map((id) => {
                     let matchedItem = Array.find(
-                      (item) => item.id === Number(id)
+                      (item) => item.id === Number(id),
                     );
                     return matchedItem ? matchedItem.name : null;
                   })
@@ -1036,7 +1048,7 @@ const ClientLists = () => {
                     customerId,
                     currentPage,
                     pageSize,
-                    searchTerm
+                    searchTerm,
                   );
                 }
               } else {
@@ -1127,7 +1139,7 @@ const ClientLists = () => {
     }));
 
   const selectedOption = customerOptions.find(
-    (opt) => Number(opt.value) === Number(customerId)
+    (opt) => Number(opt.value) === Number(customerId),
   );
 
   const handleExport = async () => {
@@ -1207,7 +1219,7 @@ const ClientLists = () => {
 
     downloadCSV(
       exportData,
-      `${activeTab === "client" ? "Client" : "Job"} Details.csv`
+      `${activeTab === "client" ? "Client" : "Job"} Details.csv`,
     );
   };
 
@@ -1247,11 +1259,11 @@ const ClientLists = () => {
                 value={selectedOption}
                 onChange={(selected) => {
                   const selectedCustomer = CustomerData.find(
-                    (customer) => customer.id == selected.value
+                    (customer) => customer.id == selected.value,
                   );
                   selectCustomerId(
                     selected.value,
-                    selectedCustomer?.trading_name
+                    selectedCustomer?.trading_name,
                   );
                 }}
                 placeholder="Select Customer"
@@ -1385,8 +1397,8 @@ const ClientLists = () => {
               activeTab == "client"
                 ? ClientData?.length
                 : activeTab == "job"
-                ? getJobDetails?.length
-                : ""
+                  ? getJobDetails?.length
+                  : ""
             }
           />
         ) : (
@@ -1436,6 +1448,12 @@ const ClientLists = () => {
                 )}
 
                 <div className="datatable-wrapper">
+                  {loading && (
+                    <div className="overlay">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+
                   {tab.data && tab.data.length > 0 ? (
                     <>
                       <Datatable
@@ -1459,8 +1477,6 @@ const ClientLists = () => {
                             activeClassName={"active"}
                             forcePage={currentPage - 1}
                           />
-
-                          
 
                           <select
                             className="perpage-select"
