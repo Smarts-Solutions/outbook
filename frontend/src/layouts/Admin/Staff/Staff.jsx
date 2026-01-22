@@ -102,6 +102,7 @@ const StaffPage = () => {
   };
 
   const staffData = async (page = 1, limit = 10, search = "") => {
+     setStaffDataAll({ loading: true, data: [] });
     await dispatch(
       Staff({
         req: { action: "get", page, limit, search },
@@ -1123,6 +1124,12 @@ const StaffPage = () => {
               role="tabpanel"
             >
               <div className="datatable-wrapper">
+              {staffDataAll.loading && (
+  <div className="overlay">
+    <div className="loader"></div>
+  </div>
+)}
+
                 {staffDataAll.data && staffDataAll.data.length > 0 ? (
                   <>
                     <Datatable

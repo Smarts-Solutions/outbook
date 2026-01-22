@@ -34,6 +34,8 @@ const ClientList = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [jobLoading, setJobLoading] = useState(false);
+
   useEffect(() => {
     GetAllJobListByCustomer("");
     GetAllCustomer();
@@ -46,7 +48,7 @@ const ClientList = () => {
         cust_id_sidebar,
         cust_id_sidebar_name,
         cli_id_sidebar,
-        cli_id_sidebar_name
+        cli_id_sidebar_name,
       );
       setHararchyData({
         customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
@@ -59,7 +61,7 @@ const ClientList = () => {
     customer_id,
     customer_name,
     client_id,
-    client_name
+    client_name,
   ) => {
     const req = { action: "get", customer_id: customer_id };
     const data = { req: req, authToken: token };
@@ -112,14 +114,14 @@ const ClientList = () => {
     client_name: "",
   });
   const GetAllClientData = async (id, name) => {
-   // const req = { action: "get", customer_id: id };
+    // const req = { action: "get", customer_id: id };
 
     const req = {
       action: "get",
       customer_id: id,
-      page :1,
-      limit:100000,
-      search:"",
+      page: 1,
+      limit: 100000,
+      search: "",
     };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
@@ -135,7 +137,7 @@ const ClientList = () => {
             sessionStorage.setItem("cli_id_sidebar", response?.data[0]?.id);
             sessionStorage.setItem(
               "cli_id_sidebar_name",
-              response?.data[0]?.client_name
+              response?.data[0]?.client_name,
             );
 
             setClientDetailSingle({
@@ -204,12 +206,12 @@ const ClientList = () => {
 
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job"
+      (item) => item.permission_name === "job",
     )?.items || [];
 
   const accessDataJobAll =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs"
+      (item) => item.permission_name === "all_jobs",
     )?.items || [];
 
   useEffect(() => {
@@ -307,7 +309,7 @@ const ClientList = () => {
           try {
             const req = { job_id: row.job_id, status_type: Number(Id) };
             const res = await dispatch(
-              Update_Status({ req, authToken: token })
+              Update_Status({ req, authToken: token }),
             ).unwrap();
 
             if (res.status) {
@@ -423,7 +425,7 @@ const ClientList = () => {
       name: "Status",
       selector: (row) => {
         const status = statusDataAll.find(
-          (s) => Number(s.id) === Number(row.status_type)
+          (s) => Number(s.id) === Number(row.status_type),
         );
         return status ? status.name.toLowerCase() : "-";
       },
@@ -565,8 +567,6 @@ const ClientList = () => {
     },
   ];
 
- 
-
   const HandleJob = (row) => {
     setHararchyData((prevState) => {
       const updatedData = {
@@ -670,8 +670,10 @@ const ClientList = () => {
     client_id,
     page = currentPage,
     limit = pageSize,
-    search = searchTerm
+    search = searchTerm,
   ) => {
+    setJobLoading(true);
+
     const req = {
       action: "getByClient",
       client_id,
@@ -692,6 +694,9 @@ const ClientList = () => {
           setCustomerData([]);
           setTotalRecords(0);
         }
+      })
+      .finally(() => {
+        setJobLoading(false);
       });
   };
 
@@ -699,8 +704,10 @@ const ClientList = () => {
     customer_id,
     page = currentPage,
     limit = pageSize,
-    search = searchTerm
+    search = searchTerm,
   ) => {
+    setJobLoading(true);
+
     const req = {
       action: "getByCustomer",
       customer_id,
@@ -721,6 +728,9 @@ const ClientList = () => {
           setCustomerData([]);
           setTotalRecords(0);
         }
+      })
+      .finally(() => {
+        setJobLoading(false);
       });
   };
 
@@ -735,7 +745,7 @@ const ClientList = () => {
         customerDetails.id,
         newPage,
         pageSize,
-        searchTerm
+        searchTerm,
       );
     }
   };
@@ -861,7 +871,7 @@ const ClientList = () => {
     }));
 
   const selectedOption = customerOptions.find(
-    (opt) => Number(opt.value) === Number(customerDetails.id)
+    (opt) => Number(opt.value) === Number(customerDetails.id),
   );
 
   // Prepare client options for the select dropdown
@@ -871,7 +881,7 @@ const ClientList = () => {
   }));
 
   const selectedOptionClient = clientOptions.find(
-    (opt) => Number(opt.value) === Number(clientDetailSingle.id)
+    (opt) => Number(opt.value) === Number(clientDetailSingle.id),
   );
 
   return (
@@ -917,11 +927,11 @@ const ClientList = () => {
               value={selectedOption}
               onChange={(selected) => {
                 const selectedCustomer = customerDataAll.find(
-                  (customer) => customer.id == selected.value
+                  (customer) => customer.id == selected.value,
                 );
                 selectCustomerId(
                   selected.value,
-                  selectedCustomer?.trading_name
+                  selectedCustomer?.trading_name,
                 );
               }}
               classNamePrefix="react-select"
@@ -975,11 +985,11 @@ const ClientList = () => {
                     value={selectedOptionClient}
                     onChange={(selected) => {
                       const selectedClient = clientData.find(
-                        (client) => client.id == selected.value
+                        (client) => client.id == selected.value,
                       );
                       selectClientId(
                         selected.value,
-                        selectedClient?.client_name
+                        selectedClient?.client_name,
                       );
                     }}
                     placeholder="Select Client"
@@ -1108,19 +1118,23 @@ const ClientList = () => {
                       role="tabpanel"
                       aria-labelledby="assignedjob-tab"
                     >
-
-<div className="col-md-3 mb-2">
-  <input
-    type="text"
-    className="form-control"
-    placeholder="Search jobs..."
-    value={searchTerm}
-    onChange={(e) => handleSearchChange(e.target.value)}
-  />
-</div>
-
+                      <div className="col-md-3 mb-2">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search jobs..."
+                          value={searchTerm}
+                          onChange={(e) => handleSearchChange(e.target.value)}
+                        />
+                      </div>
 
                       <div className="datatable-wrapper ">
+                        {jobLoading && (
+                          <div className="overlay">
+                            <div className="loader"></div>
+                          </div>
+                        )}
+
                         {customerData && customerData.length > 0 && (
                           <>
                             <Datatable
@@ -1250,10 +1264,10 @@ const ClientList = () => {
                         {informationData && informationData.client_type == 1
                           ? "Sole Trader"
                           : informationData.client_type == 2
-                          ? "Company"
-                          : informationData.client_type == 3
-                          ? "Partnership"
-                          : ""}
+                            ? "Company"
+                            : informationData.client_type == 3
+                              ? "Partnership"
+                              : ""}
                       </h4>
                     </div>
                     {/* <div className="col-4">

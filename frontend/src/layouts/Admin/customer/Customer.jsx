@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { Update_Customer_Status, deleteCustomer, GET_ALL_CUSTOMERS, GET_CUSTOMER_DATA } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  Update_Customer_Status,
+  deleteCustomer,
+  GET_ALL_CUSTOMERS,
+  GET_CUSTOMER_DATA,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
-
-
-import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
+import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -22,7 +25,7 @@ const Customer = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [activeTab, setActiveTab] = useState("this-year");
   const role = JSON.parse(localStorage.getItem("role"));
-  const [filteredData1, setFilteredData1] = useState([])
+  const [filteredData1, setFilteredData1] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [getAccessData, setAccessData] = useState({
@@ -33,32 +36,36 @@ const Customer = () => {
     all_clients: 0,
   });
 
+  const [loading, setLoading] = useState(false);
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "customer"
+      (item) => item.permission_name === "customer",
     )?.items || [];
 
   const accessData1 =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "client"
+      (item) => item.permission_name === "client",
     )?.items || [];
 
   const accessDataAllClients =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_clients"
+      (item) => item.permission_name === "all_clients",
     )?.items || [];
 
-
-
-
   useEffect(() => {
-    GetAllCustomerData(1, pageSize, '');
+    GetAllCustomerData(1, pageSize, "");
   }, [activeTab]);
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0, all_clients: 0 };
+    const updatedAccess = {
+      insert: 0,
+      update: 0,
+      delete: 0,
+      client: 0,
+      all_clients: 0,
+    };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -75,7 +82,6 @@ const Customer = () => {
     setAccessData(updatedAccess);
   }, []);
 
-
   const columns = [
     {
       name: "Trading Name",
@@ -86,10 +92,18 @@ const Customer = () => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-
           }}
         >
-          {(role === "SUPERADMIN") && row.status == 1 ? (
+          {role === "SUPERADMIN" && row.status == 1 ? (
+            <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a>
+          ) : (getAccessData.client == 1 || getAccessData.all_clients) &&
+            row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -98,57 +112,51 @@ const Customer = () => {
               {row.trading_name}
             </a>
           ) : (
-            (getAccessData.client == 1 || getAccessData.all_clients) && row.status == 1 ? <a
-              onClick={() => HandleClientView(row)}
-              style={{ cursor: "pointer", color: "#26bdf0" }}
-              title={row.trading_name}
-            >
-              {row.trading_name}
-            </a> : row.trading_name
+            row.trading_name
           )}
         </div>
       ),
       selector: (row) => row.trading_name,
       sortable: true,
-
     },
     {
       name: "Customer Code",
       selector: (row) => row.customer_code,
-      cell: (row) => (
-        <div
-          title={row.customer_code}
-        >
-          {row.customer_code}
-        </div>
-      ),
+      cell: (row) => <div title={row.customer_code}>{row.customer_code}</div>,
       sortable: true,
-
     },
 
     {
       name: "Type",
       selector: (row) =>
-        row.customer_type === '1'
+        row.customer_type === "1"
           ? "Sole Trader"
-          : row.customer_type === '2'
+          : row.customer_type === "2"
             ? "Company"
-            : row.customer_type === '3'
+            : row.customer_type === "3"
               ? "Partnership"
               : "-",
       sortable: true,
-
     },
     {
       name: "Account Manager",
-      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
+      selector: (row) =>
+        row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
-      cell: row => (
+      cell: (row) => (
         <div
-          title={row.account_manager_firstname + " " + row.account_manager_lastname}
+          title={
+            row.account_manager_firstname + " " + row.account_manager_lastname
+          }
           className="data-table-cell"
-          data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
-          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          data-fulltext={
+            row.account_manager_firstname + " " + row.account_manager_lastname
+          }
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
         >
           {row.account_manager_firstname + " " + row.account_manager_lastname}
         </div>
@@ -159,28 +167,16 @@ const Customer = () => {
       name: "Created by",
       selector: (row) => row.customer_created_by,
       cell: (row) => (
-        <div
-          title={row.customer_created_by}
-        >
-          {row.customer_created_by}
-        </div>
+        <div title={row.customer_created_by}>{row.customer_created_by}</div>
       ),
       sortable: true,
-
     },
 
     {
       name: "Created At",
       selector: (row) => row.created_at,
-      cell: (row) => (
-        <div
-          title={row.created_at}
-        >
-          {row.created_at}
-        </div>
-      ),
+      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
       sortable: true,
-
     },
 
     {
@@ -189,26 +185,27 @@ const Customer = () => {
       cell: (row) => (
         <div>
           <div>
-            {row.form_process === "4" ?
+            {row.form_process === "4" ? (
               <select
                 className="form-select form-control"
                 value={row.status}
                 onChange={(e) => handleChangeStatus(e, row)}
               >
-                <option value="0" className="text-danger">Deactive</option>
-                <option value="1" className="text-success">Active</option>
+                <option value="0" className="text-danger">
+                  Deactive
+                </option>
+                <option value="1" className="text-success">
+                  Active
+                </option>
               </select>
-              : (
-                <span className="text-warning">Inprogress</span>
-              )}
-
-
+            ) : (
+              <span className="text-warning">Inprogress</span>
+            )}
           </div>
         </div>
       ),
       sortable: true,
     },
-
 
     {
       name: "Actions      ",
@@ -217,44 +214,53 @@ const Customer = () => {
         const hasDeleteAccess = getAccessData.delete === 1;
         return (
           <div className="w-100">
-            {(role === "SUPERADMIN") && row.status == 1 ? (
-
+            {role === "SUPERADMIN" && row.status == 1 ? (
               <>
                 <div className="d-flex justify-content-start">
-                  <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <button
+                    className="edit-icon rounded-pills border-primary"
+                    onClick={() => handleEdit(row)}
+                  >
                     <i className="ti-pencil text-primary" />
                   </button>
 
                   {/*view Icon Button*/}
-                  <button className="view-icon rounded-pills border-primary" onClick={() => handleViewAllAccountManager(row)}>
+                  <button
+                    className="view-icon rounded-pills border-primary"
+                    onClick={() => handleViewAllAccountManager(row)}
+                  >
                     <i className="ti-eye text-primary" />
                   </button>
 
-                  {(row.form_process != "4" || row.is_client == 0) && <button
-                    className="delete-icon "
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger " />
-                  </button>}
-
+                  {(row.form_process != "4" || row.is_client == 0) && (
+                    <button
+                      className="delete-icon "
+                      onClick={() => handleDelete(row)}
+                    >
+                      <i className="ti-trash text-danger " />
+                    </button>
+                  )}
                 </div>
               </>
             ) : (
               <div className="d-flex justify-content-end">
                 {hasUpdateAccess && row.status == 1 && (
-                  <button className="edit-icon " onClick={() => handleEdit(row)}>
+                  <button
+                    className="edit-icon "
+                    onClick={() => handleEdit(row)}
+                  >
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {hasDeleteAccess && (row.form_process != "4" || row.is_client == 0) && (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )}
-
+                {hasDeleteAccess &&
+                  (row.form_process != "4" || row.is_client == 0) && (
+                    <button
+                      className="delete-icon"
+                      onClick={() => handleDelete(row)}
+                    >
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  )}
               </div>
             )}
           </div>
@@ -263,8 +269,7 @@ const Customer = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '200px',
-
+      width: "200px",
     },
   ];
 
@@ -280,7 +285,9 @@ const Customer = () => {
       if (result.isConfirmed) {
         try {
           const req = { customer_id: row.id };
-          const res = await dispatch(deleteCustomer({ req, authToken: token })).unwrap();
+          const res = await dispatch(
+            deleteCustomer({ req, authToken: token }),
+          ).unwrap();
 
           if (res.status) {
             Swal.fire({
@@ -290,7 +297,7 @@ const Customer = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetAllCustomerData(1, pageSize, '');
+            GetAllCustomerData(1, pageSize, "");
           } else {
             Swal.fire({
               title: "Error",
@@ -316,7 +323,6 @@ const Customer = () => {
         });
       }
     });
-
   };
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
@@ -332,7 +338,9 @@ const Customer = () => {
       if (result.isConfirmed) {
         try {
           const req = { customer_id: row.id, status: newStatus };
-          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
+          const res = await dispatch(
+            Update_Customer_Status({ req, authToken: token }),
+          ).unwrap();
 
           if (res.status) {
             Swal.fire({
@@ -342,7 +350,7 @@ const Customer = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetAllCustomerData(1, pageSize, '');
+            GetAllCustomerData(1, pageSize, "");
           } else {
             Swal.fire({
               title: "Error",
@@ -374,9 +382,9 @@ const Customer = () => {
     try {
       const response = await dispatch(
         GET_CUSTOMER_DATA({
-          req: { customer_id: customerId.id, action: 'allAccountManager' },
+          req: { customer_id: customerId.id, action: "allAccountManager" },
           authToken: token,
-        })
+        }),
       ).unwrap();
       if (response.status) {
         if (response.status == true) {
@@ -384,16 +392,16 @@ const Customer = () => {
           setShowManagerModal(true);
         } else {
           Swal.fire({
-            title: 'Info',
-            text: 'No account managers found for this customer.',
-            icon: 'info',
+            title: "Info",
+            text: "No account managers found for this customer.",
+            icon: "info",
           });
         }
       } else {
         Swal.fire({
-          title: 'Error',
-          text: 'Failed to fetch account managers.',
-          icon: 'error',
+          title: "Error",
+          text: "Failed to fetch account managers.",
+          icon: "error",
         });
       }
     } catch (error) {
@@ -408,14 +416,14 @@ const Customer = () => {
   const handlePageChange = (selected) => {
     const newPage = selected.selected + 1; // Pagination libraries use 0-based indexing.
     setCurrentPage(newPage);
-    GetAllCustomerData(newPage, pageSize, ''); // Fetch data for the new page.
+    GetAllCustomerData(newPage, pageSize, ""); // Fetch data for the new page.
   };
 
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
     setCurrentPage(1); // Reset to the first page
-    GetAllCustomerData(1, newSize, ''); // Fetch data with new page size
+    GetAllCustomerData(1, newSize, ""); // Fetch data with new page size
   };
 
   const handleSearchChange = (term) => {
@@ -426,9 +434,16 @@ const Customer = () => {
   };
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
-    console.log("limit", limit)
-    console.log("page", page)
-    const req = { action: 'get', staff_id: staffDetails.id, page, limit, search: term };
+    setLoading(true);
+    console.log("limit", limit);
+    console.log("page", page);
+    const req = {
+      action: "get",
+      staff_id: staffDetails.id,
+      page,
+      limit,
+      search: term,
+    };
     const data = { req, authToken: token };
 
     try {
@@ -440,25 +455,24 @@ const Customer = () => {
         //   return itemDate >= startDate && itemDate <= endDate;
         // });
 
-
         setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
-
       } else {
         setFilteredData([]);
       }
     } catch (error) {
-      console.error('Error fetching customer data:', error);
+      console.error("Error fetching customer data:", error);
+    } finally {
+      setLoading(false); // 🔥 loader OFF (success ya error dono me)
     }
   };
 
-
   useEffect(() => {
-    const StatusfilterData = filteredData.filter((item) => (item.status == statusFilter || statusFilter == ""))
+    const StatusfilterData = filteredData.filter(
+      (item) => item.status == statusFilter || statusFilter == "",
+    );
     setFilteredData1(StatusfilterData);
-
   }, [filteredData, statusFilter]);
-
 
   const handleSearch = (event) => {
     const searchValue = event.target.value.toLowerCase();
@@ -495,7 +509,6 @@ const Customer = () => {
     navigate("/admin/editcustomer", { state: row });
   };
 
-
   // const exportData = filteredData.map((item) => ({
   //   "Trading Name": item.trading_name,
   //   "Customer Code": item.customer_code,
@@ -508,7 +521,13 @@ const Customer = () => {
 
   const handleExport = async () => {
     ///const apiData = await GetAllCustomerData(1, 10000, searchTerm);
-    const req = { action: 'get', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
+    const req = {
+      action: "get",
+      staff_id: staffDetails.id,
+      page: 1,
+      limit: 100000,
+      search: "",
+    };
     const data = { req, authToken: token };
     const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
     if (!response.status) {
@@ -526,7 +545,7 @@ const Customer = () => {
     const exportData = apiData?.map((item) => ({
       "Trading Name": item.trading_name,
       "Customer Code": item.customer_code,
-      "Type":
+      Type:
         item.customer_type === "1"
           ? "Sole Trader"
           : item.customer_type === "2"
@@ -534,10 +553,11 @@ const Customer = () => {
             : item.customer_type === "3"
               ? "Partnership"
               : "-",
-      "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+      "Account Manager":
+        item.account_manager_firstname + " " + item.account_manager_lastname,
       "Created by": item.customer_created_by,
       "Created At": item.created_at,
-      "Status": item.status == 1 ? "Active" : "Deactive",
+      Status: item.status == 1 ? "Active" : "Deactive",
     }));
 
     downloadCSV(exportData, "Customer Details.csv");
@@ -565,25 +585,22 @@ const Customer = () => {
     a.click();
   };
 
-
- 
-
   return (
     <div>
       <CommanModal
         isOpen={showManagerModal}
-        handleClose={() => { setShowManagerModal(false); setManagerList([]); }}
+        handleClose={() => {
+          setShowManagerModal(false);
+          setManagerList([]);
+        }}
         hideBtn={true}
         title="Individual Service Account Managers"
-
       >
         <div>
-
           {managerList && managerList?.length > 0 ? (
             <div className="table-responsive">
               <table className="table table-bordered table-striped align-middle">
-                <thead className="table-light"
-                >
+                <thead className="table-light">
                   <tr>
                     <th>#</th>
                     <th>Service Name</th>
@@ -595,7 +612,11 @@ const Customer = () => {
                     <tr key={idx}>
                       <td>{idx + 1}</td>
                       <td>{value.service_name}</td>
-                      <td>{value?.account_managers?.map(item => item?.account_manager_name)?.join(" , ")}</td>
+                      <td>
+                        {value?.account_managers
+                          ?.map((item) => item?.account_manager_name)
+                          ?.join(" , ")}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -645,17 +666,17 @@ const Customer = () => {
             <div className="page-title-box pt-0 pb-0">
               <div className="row align-items-start justify-content-end">
                 <div className="col-4">
-                  <div className="form-group mb-2 mt-1 pe-3 pt-5">
-
-                  </div>
+                  <div className="form-group mb-2 mt-1 pe-3 pt-5"></div>
                 </div>
 
                 <div className="col-12">
                   {/* Tab content */}
-                  <div className="tab-content mt-minus-60" id="pills-tabContent">
+                  <div
+                    className="tab-content mt-minus-60"
+                    id="pills-tabContent"
+                  >
                     <div className="card-datatable">
                       <div className="card-datatable">
-
                         <div className="row mb-3">
                           <div className="col-md-4">
                             <input
@@ -663,11 +684,16 @@ const Customer = () => {
                               placeholder="Search Customers"
                               className="form-control"
                               value={searchTerm}
-                              onChange={(e) => handleSearchChange(e.target.value)}
+                              onChange={(e) =>
+                                handleSearchChange(e.target.value)
+                              }
                             />
                           </div>
                           <div className="col-md-2">
-                            <select className="form-select form-control" onChange={(e) => setStatusFilter(e.target.value)} >
+                            <select
+                              className="form-select form-control"
+                              onChange={(e) => setStatusFilter(e.target.value)}
+                            >
                               <option value="">All</option>
                               <option value="1">Active</option>
                               <option value="0">Inactive</option>
@@ -679,16 +705,25 @@ const Customer = () => {
                               apiData={exportData}
                               fileName={"Customer Details"}
                             /> */}
-                           
 
-                            <button className="btn btn-outline-info fw-bold float-end border-3 "   onClick={handleExport}>
+                            <button
+                              className="btn btn-outline-info fw-bold float-end border-3 "
+                              onClick={handleExport}
+                            >
                               Export Excel
                             </button>
                           </div>
                         </div>
-                        <div className="overlay">
+                        {/* <div className="overlay">
                          <div className="loader"></div>
+                          </div> */}
+
+                        {loading && (
+                          <div className="overlay">
+                            <div className="loader"></div>
                           </div>
+                        )}
+
                         <Datatable columns={columns} data={filteredData1} />
 
                         {/* Pagination Controls */}
@@ -704,8 +739,11 @@ const Customer = () => {
                           activeClassName={"active"}
                         />
                       </div>
-                      <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
-
+                      <select
+                        className="perpage-select"
+                        value={pageSize}
+                        onChange={handlePageSizeChange}
+                      >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
                         <option value={20}>20</option>

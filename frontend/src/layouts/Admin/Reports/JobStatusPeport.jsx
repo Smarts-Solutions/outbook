@@ -16,6 +16,8 @@ const JobStatus = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   const handlePageChange = (selected) => {
     const newPage = selected.selected + 1;
     setCurrentPage(newPage);
@@ -40,6 +42,8 @@ const JobStatus = () => {
   }, [currentPage, pageSize, searchTerm]);
 
   const GetJobStatus = async (page = 1, limit = 10, search = "") => {
+    setLoading(true);
+
     const data = { req: { page, limit, search }, authToken: token };
     await dispatch(JobStatusReport(data))
       .unwrap()
@@ -54,6 +58,9 @@ const JobStatus = () => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -227,7 +234,7 @@ const JobStatus = () => {
       "Job Received On": convertDate(item.job_received_on),
       "Job Priority": item.job_priority
         ? item.job_priority.charAt(0).toUpperCase() +
-        item.job_priority.slice(1).toLowerCase()
+          item.job_priority.slice(1).toLowerCase()
         : "-",
       "Customer Name": item.customer_trading_name,
       "Account Manager": item.account_manager_name,
@@ -243,7 +250,7 @@ const JobStatus = () => {
       "Customer Deadline": convertDate(item.customer_deadline_date),
       "Initial Query Sent Date": convertDate(item.query_sent_date),
       "Final Query Response Received Date": convertDate(
-        item.final_query_response_received_date
+        item.final_query_response_received_date,
       ),
       "First Draft Sent": convertDate(item.draft_sent_on),
       "Final Draft Sent": convertDate(item.final_draft_sent_on),
@@ -251,11 +258,17 @@ const JobStatus = () => {
   });
 
   const handleExport = async () => {
-    
-    const data = { req: { page :1, limit: 1000000, search : "" }, authToken: token };
+    const data = {
+      req: { page: 1, limit: 1000000, search: "" },
+      authToken: token,
+    };
     const response = await dispatch(JobStatusReport(data)).unwrap();
 
-    if (!response.status || !response?.data?.rows || response?.data?.rows?.length === 0) {
+    if (
+      !response.status ||
+      !response?.data?.rows ||
+      response?.data?.rows?.length === 0
+    ) {
       alert("No data to export!");
       return;
     }
@@ -266,7 +279,7 @@ const JobStatus = () => {
         "Job Received On": convertDate(item.job_received_on),
         "Job Priority": item.job_priority
           ? item.job_priority.charAt(0).toUpperCase() +
-          item.job_priority.slice(1).toLowerCase()
+            item.job_priority.slice(1).toLowerCase()
           : "-",
         "Customer Name": item.customer_trading_name,
         "Account Manager": item.account_manager_name,
@@ -282,7 +295,7 @@ const JobStatus = () => {
         "Customer Deadline": convertDate(item.customer_deadline_date),
         "Initial Query Sent Date": convertDate(item.query_sent_date),
         "Final Query Response Received Date": convertDate(
-          item.final_query_response_received_date
+          item.final_query_response_received_date,
         ),
         "First Draft Sent": convertDate(item.draft_sent_on),
         "Final Draft Sent": convertDate(item.final_draft_sent_on),
@@ -328,7 +341,7 @@ const JobStatus = () => {
               apiData={exportData}
               fileName={`Job Status Report`}
             /> */}
-             <div className="col-md-8 d-flex justify-content-end">
+            <div className="col-md-8 d-flex justify-content-end">
               <button
                 className="btn btn-outline-info fw-bold float-end border-3 "
                 onClick={handleExport}
@@ -349,6 +362,12 @@ const JobStatus = () => {
               />
             </div>
           </div>
+
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
 
           <Datatable
             // filter={true}
