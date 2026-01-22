@@ -686,8 +686,9 @@ const Customer = () => {
                             </button>
                           </div>
                         </div>
-
-
+                        <div className="overlay">
+                         <div className="loader"></div>
+                          </div>
                         <Datatable columns={columns} data={filteredData1} />
 
                         {/* Pagination Controls */}
