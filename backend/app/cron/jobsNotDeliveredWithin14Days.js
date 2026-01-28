@@ -285,7 +285,7 @@ async function otherUserDataGet(row) {
         AND jobs.status_type NOT IN (6,7,17,18,19,20))
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
         GROUP BY jobs.id

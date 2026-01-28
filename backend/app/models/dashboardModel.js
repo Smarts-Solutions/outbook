@@ -404,7 +404,7 @@ const getDashboardData = async (dashboard) => {
         OR clients.staff_created_id IN(${LineManageStaffId}))
         AND DATE(jobs.created_at) BETWEEN ? AND ?)
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
         AND customers.status = '1'    

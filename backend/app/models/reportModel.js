@@ -150,7 +150,7 @@ const jobStatusReports = async (Report) => {
          OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
        )
@@ -182,7 +182,7 @@ const jobStatusReports = async (Report) => {
          OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
        )
@@ -300,7 +300,7 @@ const jobStatusReports = async (Report) => {
         //         OR clients.staff_created_id IN (${LineManageStaffId})
         //     )
         //     AND (
-        //         assigned_jobs_staff_view.source != 'assign_customer_service'
+        //         assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
         //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
         //     )
         //     AND customers.status = '1'
@@ -3529,6 +3529,8 @@ const getJobCustomReport = async (Report) => {
         toDate,
 
     } = data.filters;
+
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
     let { page = 1, limit = 10 } = data
 

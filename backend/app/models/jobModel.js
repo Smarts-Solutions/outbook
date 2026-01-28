@@ -1341,7 +1341,7 @@ const getJobByCustomer = async (job) => {
           OR clients.staff_created_id IN (${placeholders})
         )
           AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           ) 
         AND jobs.customer_id = ?
@@ -1413,7 +1413,7 @@ const getJobByCustomer = async (job) => {
           OR clients.staff_created_id IN (${placeholders})
         )
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )  
         AND jobs.customer_id = ?
@@ -1656,7 +1656,7 @@ async function getAllJobsSidebar(
         OR jobs.staff_created_id IN (${placeholders})
         OR clients.staff_created_id IN (${placeholders})) 
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
       ) 
@@ -1738,7 +1738,7 @@ async function getAllJobsSidebar(
         OR jobs.staff_created_id IN (${placeholders})
         OR clients.staff_created_id IN (${placeholders})) 
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
       ) 
@@ -1961,7 +1961,7 @@ const getJobByClient = async (job) => {
         WHERE
         (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           ) 
         GROUP BY 
