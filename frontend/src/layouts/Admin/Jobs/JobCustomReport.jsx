@@ -27,10 +27,10 @@ function JobCustomReport() {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = staffDetails?.role;
 
-  console.log("staffDetails ", staffDetails);
+  // console.log("staffDetails ", staffDetails);
   const [showData, setShowData] = useState([]);
   const navigate = useNavigate();
-  console.log("showData ", showData);
+  // console.log("showData ", showData);
 
   /////////PAGINATION/////////
   const [currentPage, setCurrentPage] = useState(1);
@@ -297,7 +297,7 @@ function JobCustomReport() {
       await dispatch(getAllCustomerDropDown(data))
         .unwrap()
         .then(async (response) => {
-          console.log("customer filter ---  ", response);
+          // console.log("customer filter ---  ", response);
 
           if (response.status) {
             const data = response?.data?.map((item) => ({
@@ -751,7 +751,7 @@ function JobCustomReport() {
       setOptions([]);
       let gropByArray = sortByReference(values);
 
-      console.log("gropByArray ", gropByArray);
+      // console.log("gropByArray ", gropByArray);
       if (gropByArray.length == 0) {
         setIsAllSelected(false);
       }
@@ -1007,7 +1007,7 @@ function JobCustomReport() {
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-        console.log("filter response ", response);
+       // console.log("filter response ", response);
         if (response.status) {
           setLoading(false);
           setShowData(response.data);
@@ -1275,7 +1275,7 @@ function JobCustomReport() {
       try {
         parsedFilters = JSON.parse(selectedFilter.filters);
 
-        console.log("parsedFilters ", parsedFilters?.job_id);
+       // console.log("parsedFilters ", parsedFilters?.job_id);
 
         if (parsedFilters?.groupBy?.includes("job_id")) {
           await GetAllJobs();
@@ -1576,11 +1576,11 @@ function JobCustomReport() {
               //console.log("Action Meta:", actionMeta);
 
               if (actionMeta.action === "remove-value") {
-                console.log("Removed value:", actionMeta.removedValue.value);
+               // console.log("Removed value:", actionMeta.removedValue.value);
                 addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
               }
               if (actionMeta.action === "select-option") {
-                console.log("Added value:", actionMeta.option.value);
+                //console.log("Added value:", actionMeta.option.value);
                 addAndRemoveGroupBy(actionMeta.option.value, "add");
               }
               handleFilterChange(selectedOptions);
