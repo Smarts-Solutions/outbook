@@ -4,14 +4,14 @@ const { SatffLogUpdateOperation, LineManageStaffIdHelperFunction,
     QueryRoleHelperFunction } = require('../utils/helper');
 
 const jobStatusReports = async (Report) => {
-  const { StaffUserId, page = 1, limit = 10, search = "" } = Report;
-  const offset = (page - 1) * limit;
+    const { StaffUserId, page = 1, limit = 10, search = "" } = Report;
+    const offset = (page - 1) * limit;
 
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
-  const rows = await QueryRoleHelperFunction(StaffUserId);
+    const rows = await QueryRoleHelperFunction(StaffUserId);
 
-  const jobCodeExpr = `
+    const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -20,11 +20,11 @@ const jobStatusReports = async (Report) => {
     )
   `;
 
-  let searchQuery = "";
-  let searchValues = [];
+    let searchQuery = "";
+    let searchValues = [];
 
-  if (search) {
-    searchQuery = `
+    if (search) {
+        searchQuery = `
       AND (
         customers.trading_name LIKE ?
         OR clients.trading_name LIKE ?
@@ -36,21 +36,21 @@ const jobStatusReports = async (Report) => {
         OR ${jobCodeExpr} LIKE ?
       )
     `;
-    const s = `%${search}%`;
-    searchValues = Array(8).fill(s);
-  }
+        const s = `%${search}%`;
+        searchValues = Array(8).fill(s);
+    }
 
-  try {
-    const [RoleAccess] = await pool.execute(
-      "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
-      [rows[0].role_id, 35]
-    );
+    try {
+        const [RoleAccess] = await pool.execute(
+            "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
+            [rows[0].role_id, 35]
+        );
 
-    const isSuperAdmin =
-      rows.length > 0 &&
-      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
+        const isSuperAdmin =
+            rows.length > 0 &&
+            (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
 
-    const baseSelect = `
+        const baseSelect = `
       SELECT 
         jobs.id AS id,
         jobs.service_id AS job_service_id,
@@ -105,8 +105,8 @@ const jobStatusReports = async (Report) => {
       LEFT JOIN drafts ON drafts.job_id = jobs.id
     `;
 
-    if (isSuperAdmin) {
-      const dataQuery = `
+        if (isSuperAdmin) {
+            const dataQuery = `
         ${baseSelect}
         WHERE 1=1
         ${searchQuery}
@@ -115,13 +115,13 @@ const jobStatusReports = async (Report) => {
         LIMIT ? OFFSET ?
       `;
 
-      const [rowsData] = await pool.execute(dataQuery, [
-        ...searchValues,
-        Number(limit),
-        Number(offset),
-      ]);
+            const [rowsData] = await pool.execute(dataQuery, [
+                ...searchValues,
+                Number(limit),
+                Number(offset),
+            ]);
 
-      const countQuery = `
+            const countQuery = `
         SELECT COUNT(DISTINCT jobs.id) AS total
         FROM jobs
         LEFT JOIN customers ON jobs.customer_id = customers.id
@@ -133,16 +133,16 @@ const jobStatusReports = async (Report) => {
         ${searchQuery}
       `;
 
-      const [[{ total }]] = await pool.execute(countQuery, searchValues);
+            const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
-      return {
-        status: true,
-        message: "Success.",
-        data: { rows: rowsData, total },
-      };
-    }
+            return {
+                status: true,
+                message: "Success.",
+                data: { rows: rowsData, total },
+            };
+        }
 
-    const dataQuery = `
+        const dataQuery = `
       ${baseSelect}
       WHERE(
         (   
@@ -150,7 +150,7 @@ const jobStatusReports = async (Report) => {
          OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
        )
@@ -161,13 +161,13 @@ const jobStatusReports = async (Report) => {
       LIMIT ? OFFSET ?
     `;
 
-    const [rowsData] = await pool.execute(dataQuery, [
-      ...searchValues,
-      Number(limit),
-      Number(offset),
-    ]);
+        const [rowsData] = await pool.execute(dataQuery, [
+            ...searchValues,
+            Number(limit),
+            Number(offset),
+        ]);
 
-    const countQuery = `
+        const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
       LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
@@ -182,7 +182,7 @@ const jobStatusReports = async (Report) => {
          OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
        )
@@ -190,129 +190,129 @@ const jobStatusReports = async (Report) => {
       ${searchQuery}
     `;
 
-    const [[{ total }]] = await pool.execute(countQuery, searchValues);
+        const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
-    return {
-      status: true,
-      message: "Success.",
-      data: { rows: rowsData, total },
-    };
+        return {
+            status: true,
+            message: "Success.",
+            data: { rows: rowsData, total },
+        };
 
-    // const query = `
-    //     SELECT 
-    //         jobs.id AS id,
-    //         jobs.service_id AS job_service_id,
-    //         jobs.job_priority AS job_priority,
+        // const query = `
+        //     SELECT 
+        //         jobs.id AS id,
+        //         jobs.service_id AS job_service_id,
+        //         jobs.job_priority AS job_priority,
 
-    //         CONCAT(
-    //             SUBSTRING(customers.trading_name, 1, 3), '_',
-    //             SUBSTRING(clients.trading_name, 1, 3), '_',
-    //             SUBSTRING(job_types.type, 1, 4), '_',
-    //             SUBSTRING(jobs.job_id, 1, 15)
-    //         ) AS job_code_id,
+        //         CONCAT(
+        //             SUBSTRING(customers.trading_name, 1, 3), '_',
+        //             SUBSTRING(clients.trading_name, 1, 3), '_',
+        //             SUBSTRING(job_types.type, 1, 4), '_',
+        //             SUBSTRING(jobs.job_id, 1, 15)
+        //         ) AS job_code_id,
 
-    //         customers.id AS customer_id,
-    //         customers.trading_name AS customer_trading_name,
+        //         customers.id AS customer_id,
+        //         customers.trading_name AS customer_trading_name,
 
-    //         clients.id AS client_id,
-    //         clients.trading_name AS client_trading_name,
+        //         clients.id AS client_id,
+        //         clients.trading_name AS client_trading_name,
 
-    //         staffs3.id AS account_manager_id,
-    //         CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+        //         staffs3.id AS account_manager_id,
+        //         CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
 
-    //         services.id AS service_id,
-    //         services.name AS service_name,
+        //         services.id AS service_id,
+        //         services.name AS service_name,
 
-    //         job_types.id AS job_type_id,
-    //         job_types.type AS job_type_name,
+        //         job_types.id AS job_type_id,
+        //         job_types.type AS job_type_name,
 
-    //         master_status.name AS status,
+        //         master_status.name AS status,
 
-    //         staffs2.id AS reviewer_id,
-    //         CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
+        //         staffs2.id AS reviewer_id,
+        //         CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
 
-    //         staffs.id AS allocated_id,
-    //         CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
+        //         staffs.id AS allocated_id,
+        //         CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
 
-    //         DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-    //         DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-    //         DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
-    //         DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
-    //         DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-    //         DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
-    //         DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-    //         DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+        //         DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+        //         DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+        //         DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+        //         DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
+        //         DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
+        //         DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+        //         DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+        //         DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
 
-    //         staff_list.multiple_staff_names
+        //         staff_list.multiple_staff_names
 
-    //     FROM jobs
+        //     FROM jobs
 
-    //     /* ✅ Staff list subquery (UNIQUE + FAST) */
-    //     LEFT JOIN (
-    //         SELECT 
-    //             jas.job_id,
-    //             GROUP_CONCAT(
-    //                 DISTINCT CONCAT(s.first_name, ' ', s.last_name)
-    //                 SEPARATOR ', '
-    //             ) AS multiple_staff_names
-    //         FROM job_allowed_staffs jas
-    //         JOIN staffs s ON s.id = jas.staff_id
-    //         GROUP BY jas.job_id
-    //     ) staff_list ON staff_list.job_id = jobs.id
+        //     /* ✅ Staff list subquery (UNIQUE + FAST) */
+        //     LEFT JOIN (
+        //         SELECT 
+        //             jas.job_id,
+        //             GROUP_CONCAT(
+        //                 DISTINCT CONCAT(s.first_name, ' ', s.last_name)
+        //                 SEPARATOR ', '
+        //             ) AS multiple_staff_names
+        //         FROM job_allowed_staffs jas
+        //         JOIN staffs s ON s.id = jas.staff_id
+        //         GROUP BY jas.job_id
+        //     ) staff_list ON staff_list.job_id = jobs.id
 
-    //     LEFT JOIN assigned_jobs_staff_view 
-    //         ON assigned_jobs_staff_view.job_id = jobs.id
+        //     LEFT JOIN assigned_jobs_staff_view 
+        //         ON assigned_jobs_staff_view.job_id = jobs.id
 
-    //     LEFT JOIN clients 
-    //         ON jobs.client_id = clients.id
+        //     LEFT JOIN clients 
+        //         ON jobs.client_id = clients.id
 
-    //     LEFT JOIN customers 
-    //         ON jobs.customer_id = customers.id
+        //     LEFT JOIN customers 
+        //         ON jobs.customer_id = customers.id
 
-    //     LEFT JOIN job_types 
-    //         ON jobs.job_type_id = job_types.id
+        //     LEFT JOIN job_types 
+        //         ON jobs.job_type_id = job_types.id
 
-    //     LEFT JOIN services 
-    //         ON jobs.service_id = services.id
+        //     LEFT JOIN services 
+        //         ON jobs.service_id = services.id
 
-    //     LEFT JOIN staffs 
-    //         ON jobs.allocated_to = staffs.id
+        //     LEFT JOIN staffs 
+        //         ON jobs.allocated_to = staffs.id
 
-    //     LEFT JOIN staffs AS staffs2 
-    //         ON jobs.reviewer = staffs2.id
+        //     LEFT JOIN staffs AS staffs2 
+        //         ON jobs.reviewer = staffs2.id
 
-    //     LEFT JOIN staffs AS staffs3 
-    //         ON jobs.account_manager_id = staffs3.id
+        //     LEFT JOIN staffs AS staffs3 
+        //         ON jobs.account_manager_id = staffs3.id
 
-    //     LEFT JOIN master_status 
-    //         ON master_status.id = jobs.status_type
+        //     LEFT JOIN master_status 
+        //         ON master_status.id = jobs.status_type
 
-    //     LEFT JOIN queries 
-    //         ON queries.job_id = jobs.id
+        //     LEFT JOIN queries 
+        //         ON queries.job_id = jobs.id
 
-    //     LEFT JOIN drafts 
-    //         ON drafts.job_id = jobs.id
+        //     LEFT JOIN drafts 
+        //         ON drafts.job_id = jobs.id
 
-    //     WHERE
-    //     (
-    //         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-    //         OR jobs.staff_created_id IN (${LineManageStaffId})
-    //         OR clients.staff_created_id IN (${LineManageStaffId})
-    //     )
-    //     AND (
-    //         assigned_jobs_staff_view.source != 'assign_customer_service'
-    //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-    //     )
-    //     AND customers.status = '1'
+        //     WHERE
+        //     (
+        //         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+        //         OR jobs.staff_created_id IN (${LineManageStaffId})
+        //         OR clients.staff_created_id IN (${LineManageStaffId})
+        //     )
+        //     AND (
+        //         assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+        //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+        //     )
+        //     AND customers.status = '1'
 
-    //     GROUP BY jobs.id
-    //     ORDER BY jobs.id DESC;
-    //             `
+        //     GROUP BY jobs.id
+        //     ORDER BY jobs.id DESC;
+        //             `
 
-  } catch (error) {
-    console.log("error ", error);
-    return { status: false, message: "Error getting job status report." };
-  }
+    } catch (error) {
+        console.log("error ", error);
+        return { status: false, message: "Error getting job status report." };
+    }
 };
 
 const getCustomWeekNumber = (day) => {
@@ -1822,7 +1822,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
                 const day = String(d.getDate()).padStart(2, "0");
                 const monthName = d.toLocaleString("default", { month: "short" });
                 const yearShort = String(d.getFullYear()).slice(-2);
-                result.push(`${weekday} ${day} ${monthName} ${yearShort}`); 
+                result.push(`${weekday} ${day} ${monthName} ${yearShort}`);
                 current.setDate(current.getDate() + 1);
                 break;
             }
@@ -2209,7 +2209,7 @@ const getTimesheetReportData = async (Report) => {
     }
 
     try {
-        
+
         // compute date range
         let range;
         try {
@@ -2270,7 +2270,7 @@ const getTimesheetReportData = async (Report) => {
             where.push(`s.employee_number = '${employee_number}'`);
         }
 
-        if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
+        if (!['SUPERADMIN', 'ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
             where.push(`raw.staff_id = ${StaffUserId}`);
         }
 
@@ -2499,7 +2499,7 @@ const getTimesheetReportData = async (Report) => {
             let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
             if (!workDateStr) continue;
 
-           // console.log("r.work_hours --------> ", r.work_hours);
+            // console.log("r.work_hours --------> ", r.work_hours);
 
             //  const gid = r.group_value || 'NULL';
             const gid = r.group_value + '_' + r.task_type || 'NULL';
@@ -3223,8 +3223,8 @@ const getStaffWithRole = async (Report) => {
     const { role_id } = data;
     let job_id = data?.filters?.job_id;
 
-    console.log("Get Staff With Role ID: ===>", role_id);
-    console.log("Get Staff With Role ID: ===>", job_id);
+    // console.log("Get Staff With Role ID: ===>", role_id);
+    // console.log("Get Staff With Role ID: ===>", job_id);
     if (['', null, undefined].includes(job_id)) {
         if (role_id == "other") {
             const query = `
@@ -3459,7 +3459,7 @@ const getAllStatus = async (Report) => {
 ////////////////////-----START getJobCustomReports -----//////////////////////
 const getJobCustomReport = async (Report) => {
     const { StaffUserId, data } = Report;
-     console.log("Call Custome Job Report",data);
+    // console.log("Call Custome Job Report",data);
     var {
         groupBy = ['job_id'],
         additionalField = [],
@@ -3526,11 +3526,21 @@ const getJobCustomReport = async (Report) => {
         timePeriod,
         displayBy,
         fromDate,
-        toDate
+        toDate,
 
     } = data.filters;
 
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+
+    let { page = 1, limit = 10, search = '' } = data
+
     let role_user = data?.role?.toUpperCase() || '';
+
+
+    console.log("page ---- --- ", page);
+    console.log("limit ---- --- ", limit);
+
+    const offset = (page - 1) * limit;
 
 
 
@@ -3543,7 +3553,8 @@ const getJobCustomReport = async (Report) => {
     if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod)) {
         return { status: false, message: `empty groupBy field`, data: [] };
     }
-      let GROUPBY = ""
+    let GROUPBY = ""
+
     //    groupBy = ['staff_id','customer_id','client_id'];
     // allowed fields
     const ALLOWED_GROUP_FIELDS = [
@@ -3608,159 +3619,161 @@ const getJobCustomReport = async (Report) => {
 
         //'line_manager_id'
     ]
-    
+
     // validate groupBy
     if (!Array.isArray(groupBy)) groupBy = [groupBy];
     for (const g of groupBy) {
         if (!ALLOWED_GROUP_FIELDS.includes(g)) {
             return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
-        }else{
+        } else {
             if (g === 'job_id') {
-             GROUPBY = GROUPBY !=""? GROUPBY += " , raw.job_id" :`GROUP BY raw.job_id`;
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.job_id" : `GROUP BY raw.job_id`;
             }
-            else if (g === 'customer_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.customer_id" :`GROUP BY raw.customer_id`;
+            else if (g === 'customer_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.customer_id" : `GROUP BY raw.customer_id`;
             }
-            else if (g === 'client_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.client_id" :`GROUP BY raw.client_id`;
+            else if (g === 'client_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.client_id" : `GROUP BY raw.client_id`;
             }
-            else if (g === 'account_manager_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.account_manager_id" :`GROUP BY raw.account_manager_id`;
+            else if (g === 'account_manager_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.account_manager_id" : `GROUP BY raw.account_manager_id`;
             }
-            else if (g === 'allocated_to_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.allocated_to_id" :`GROUP BY raw.allocated_to_id`;
+            else if (g === 'allocated_to_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.allocated_to_id" : `GROUP BY raw.allocated_to_id`;
             }
-            else if (g === 'reviewer_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.reviewer_id" :`GROUP BY raw.reviewer_id`;
+            else if (g === 'reviewer_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.reviewer_id" : `GROUP BY raw.reviewer_id`;
             }
-            else if (g === 'service_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.service_id" :`GROUP BY raw.service_id`;
+            else if (g === 'service_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.service_id" : `GROUP BY raw.service_id`;
             }
-            else if (g === 'job_type_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.job_type_id" :`GROUP BY raw.job_type_id`;
+            else if (g === 'job_type_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.job_type_id" : `GROUP BY raw.job_type_id`;
             }
-            else if (g === 'status_type_id'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.status_type_id" :`GROUP BY raw.status_type_id`;
+            else if (g === 'status_type_id') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.status_type_id" : `GROUP BY raw.status_type_id`;
             }
-            else if (g === 'employee_number'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , sf.employee_number" :`GROUP BY sf.employee_number`;
+            else if (g === 'employee_number') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , sf.employee_number" : `GROUP BY sf.employee_number`;
             }
-            else if (g === 'date_received_on'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.date_received_on" :`GROUP BY raw.date_received_on`;
+            else if (g === 'date_received_on') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.date_received_on" : `GROUP BY raw.date_received_on`;
             }
-            else if (g === 'allocated_on'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.allocated_on" :`GROUP BY raw.allocated_on`;
+            else if (g === 'allocated_on') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.allocated_on" : `GROUP BY raw.allocated_on`;
             }
-            else if (g === 'job_priority'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.job_priority" :`GROUP BY raw.job_priority`;
+            else if (g === 'job_priority') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.job_priority" : `GROUP BY raw.job_priority`;
             }
-            else if (g === 'engagement_model'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.engagement_model" :`GROUP BY raw.engagement_model`;
+            else if (g === 'engagement_model') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.engagement_model" : `GROUP BY raw.engagement_model`;
             }
-            else if (g === 'customer_account_manager_officer'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , ccd.id" :`GROUP BY ccd.id`;
+            else if (g === 'customer_account_manager_officer') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , ccd.id" : `GROUP BY ccd.id`;
             }
-            else if (g === 'status_updation_date'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.status_updation_date" :`GROUP BY raw.status_updation_date`;
+            else if (g === 'status_updation_date') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.status_updation_date" : `GROUP BY raw.status_updation_date`;
             }
-            else if (g === 'Transactions_Posting_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Transactions_Posting_id_2" :`GROUP BY raw.Transactions_Posting_id_2`;
+            else if (g === 'Transactions_Posting_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Transactions_Posting_id_2" : `GROUP BY raw.Transactions_Posting_id_2`;
             }
-            else if (g === 'Number_of_Bank_Transactions_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Bank_Transactions_id_2" :`GROUP BY raw.Number_of_Bank_Transactions_id_2`;
+            else if (g === 'Number_of_Bank_Transactions_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Bank_Transactions_id_2" : `GROUP BY raw.Number_of_Bank_Transactions_id_2`;
             }
-            else if (g === 'Number_of_Journal_Entries_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Journal_Entries_id_2" :`GROUP BY raw.Number_of_Journal_Entries_id_2`;
+            else if (g === 'Number_of_Journal_Entries_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Journal_Entries_id_2" : `GROUP BY raw.Number_of_Journal_Entries_id_2`;
             }
-            else if (g === 'Number_of_Other_Transactions_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Other_Transactions_id_2" :`GROUP BY raw.Number_of_Other_Transactions_id_2`;
+            else if (g === 'Number_of_Other_Transactions_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Other_Transactions_id_2" : `GROUP BY raw.Number_of_Other_Transactions_id_2`;
             }
-            else if (g === 'Number_of_Petty_Cash_Transactions_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Petty_Cash_Transactions_id_2" :`GROUP BY raw.Number_of_Petty_Cash_Transactions_id_2`;
+            else if (g === 'Number_of_Petty_Cash_Transactions_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Petty_Cash_Transactions_id_2" : `GROUP BY raw.Number_of_Petty_Cash_Transactions_id_2`;
             }
-            else if (g === 'Number_of_Purchase_Invoices_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Purchase_Invoices_id_2" :`GROUP BY raw.Number_of_Purchase_Invoices_id_2`;
+            else if (g === 'Number_of_Purchase_Invoices_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Purchase_Invoices_id_2" : `GROUP BY raw.Number_of_Purchase_Invoices_id_2`;
             }
-            else if (g === 'Number_of_Sales_Invoices_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Sales_Invoices_id_2" :`GROUP BY raw.Number_of_Sales_Invoices_id_2`;
+            else if (g === 'Number_of_Sales_Invoices_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Sales_Invoices_id_2" : `GROUP BY raw.Number_of_Sales_Invoices_id_2`;
             }
-            else if (g === 'Number_of_Total_Transactions_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Number_of_Total_Transactions_id_2" :`GROUP BY raw.Number_of_Total_Transactions_id_2`;
+            else if (g === 'Number_of_Total_Transactions_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Number_of_Total_Transactions_id_2" : `GROUP BY raw.Number_of_Total_Transactions_id_2`;
             }
-            else if (g === 'submission_deadline'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.submission_deadline" :`GROUP BY raw.submission_deadline`;
+            else if (g === 'submission_deadline') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.submission_deadline" : `GROUP BY raw.submission_deadline`;
             }
-            else if (g === 'Tax_Year_id_4'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Tax_Year_id_4" :`GROUP BY raw.Tax_Year_id_4`;
+            else if (g === 'Tax_Year_id_4') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Tax_Year_id_4" : `GROUP BY raw.Tax_Year_id_4`;
             }
-            else if (g === 'If_Sole_Trader_Who_is_doing_Bookkeeping_id_4'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4" :`GROUP BY raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`;
+            else if (g === 'If_Sole_Trader_Who_is_doing_Bookkeeping_id_4') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4" : `GROUP BY raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`;
             }
-            else if (g === 'Whose_Tax_Return_is_it_id_4'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Whose_Tax_Return_is_it_id_4" :`GROUP BY raw.Whose_Tax_Return_is_it_id_4`;
+            else if (g === 'Whose_Tax_Return_is_it_id_4') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Whose_Tax_Return_is_it_id_4" : `GROUP BY raw.Whose_Tax_Return_is_it_id_4`;
             }
-            else if (g === 'Type_of_Payslip_id_3'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Type_of_Payslip_id_3" :`GROUP BY raw.Type_of_Payslip_id_3`;
+            else if (g === 'Type_of_Payslip_id_3') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Type_of_Payslip_id_3" : `GROUP BY raw.Type_of_Payslip_id_3`;
             }
-            else if (g === 'Year_Ending_id_1'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Year_Ending_id_1" :`GROUP BY raw.Year_Ending_id_1`;
+            else if (g === 'Year_Ending_id_1') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Year_Ending_id_1" : `GROUP BY raw.Year_Ending_id_1`;
             }
-            else if (g === 'Bookkeeping_Frequency_id_2'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Bookkeeping_Frequency_id_2" :`GROUP BY raw.Bookkeeping_Frequency_id_2`;
+            else if (g === 'Bookkeeping_Frequency_id_2') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Bookkeeping_Frequency_id_2" : `GROUP BY raw.Bookkeeping_Frequency_id_2`;
             }
-            else if (g === 'CIS_Frequency_id_3'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.CIS_Frequency_id_3" :`GROUP BY raw.CIS_Frequency_id_3`;
+            else if (g === 'CIS_Frequency_id_3') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.CIS_Frequency_id_3" : `GROUP BY raw.CIS_Frequency_id_3`;
             }
-            else if (g === 'Filing_Frequency_id_8'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Filing_Frequency_id_8" :`GROUP BY raw.Filing_Frequency_id_8`;
+            else if (g === 'Filing_Frequency_id_8') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Filing_Frequency_id_8" : `GROUP BY raw.Filing_Frequency_id_8`;
             }
-            else if (g === 'Management_Accounts_Frequency_id_6'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Management_Accounts_Frequency_id_6" :`GROUP BY raw.Management_Accounts_Frequency_id_6`;
+            else if (g === 'Management_Accounts_Frequency_id_6') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Management_Accounts_Frequency_id_6" : `GROUP BY raw.Management_Accounts_Frequency_id_6`;
             }
-            else if (g === 'Payroll_Frequency_id_3'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Payroll_Frequency_id_3" :`GROUP BY raw.Payroll_Frequency_id_3`;
+            else if (g === 'Payroll_Frequency_id_3') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Payroll_Frequency_id_3" : `GROUP BY raw.Payroll_Frequency_id_3`;
             }
-            else if (g === 'budgeted_hours'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.budgeted_hours" :`GROUP BY raw.budgeted_hours`;
+            else if (g === 'budgeted_hours') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.budgeted_hours" : `GROUP BY raw.budgeted_hours`;
             }
-            else if (g === 'feedback_incorporation_time'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.feedback_incorporation_time" :`GROUP BY raw.feedback_incorporation_time`;
+            else if (g === 'feedback_incorporation_time') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.feedback_incorporation_time" : `GROUP BY raw.feedback_incorporation_time`;
             }
-            else if (g === 'review_time'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.review_time" :`GROUP BY raw.review_time`;
+            else if (g === 'review_time') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.review_time" : `GROUP BY raw.review_time`;
             }
-            else if (g === 'total_preparation_time'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.total_preparation_time" :`GROUP BY raw.total_preparation_time`;
+            else if (g === 'total_preparation_time') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.total_preparation_time" : `GROUP BY raw.total_preparation_time`;
             }
-            else if (g === 'total_time'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.total_time" :`GROUP BY raw.total_time`;
+            else if (g === 'total_time') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.total_time" : `GROUP BY raw.total_time`;
             }
-            else if (g === 'due_on'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.due_on" :`GROUP BY raw.due_on`;
+            else if (g === 'due_on') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.due_on" : `GROUP BY raw.due_on`;
             }
-            else if (g === 'customer_deadline_date'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.customer_deadline_date" :`GROUP BY raw.customer_deadline_date`;
+            else if (g === 'customer_deadline_date') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.customer_deadline_date" : `GROUP BY raw.customer_deadline_date`;
             }
-            else if (g === 'expected_delivery_date'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.expected_delivery_date" :`GROUP BY raw.expected_delivery_date`;
+            else if (g === 'expected_delivery_date') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.expected_delivery_date" : `GROUP BY raw.expected_delivery_date`;
             }
-            else if (g === 'internal_deadline_date'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.internal_deadline_date" :`GROUP BY raw.internal_deadline_date`;
+            else if (g === 'internal_deadline_date') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.internal_deadline_date" : `GROUP BY raw.internal_deadline_date`;
             }
-            else if (g === 'sla_deadline_date'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.sla_deadline_date" :`GROUP BY raw.sla_deadline_date`;
+            else if (g === 'sla_deadline_date') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.sla_deadline_date" : `GROUP BY raw.sla_deadline_date`;
             }
-            else if (g === 'Management_Accounts_FromDate_id_6'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Management_Accounts_FromDate_id_6" :`GROUP BY raw.Management_Accounts_FromDate_id_6`;
+            else if (g === 'Management_Accounts_FromDate_id_6') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Management_Accounts_FromDate_id_6" : `GROUP BY raw.Management_Accounts_FromDate_id_6`;
             }
-            else if (g === 'Management_Accounts_ToDate_id_6'){
-            GROUPBY = GROUPBY !=""? GROUPBY += " , raw.Management_Accounts_ToDate_id_6" :`GROUP BY raw.Management_Accounts_ToDate_id_6`;
+            else if (g === 'Management_Accounts_ToDate_id_6') {
+                GROUPBY = GROUPBY != "" ? GROUPBY += " , raw.Management_Accounts_ToDate_id_6" : `GROUP BY raw.Management_Accounts_ToDate_id_6`;
             }
-            
+
         }
     }
 
     try {
+        console.log("fromDate ---- ", fromDate);
+        console.log("toDate ---- ", toDate);
         // compute date range
         let range;
         try {
@@ -3940,9 +3953,9 @@ const getJobCustomReport = async (Report) => {
         if (!["", null, undefined].includes(staff_status)) {
             where.push(`jobcreatestaff.status = '${staff_status}'`);
         }
-       
 
-        if(!['SUPERADMIN','ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
+
+        if (!['SUPERADMIN', 'ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
             //where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
             where.push(`
                 (
@@ -3956,15 +3969,183 @@ const getJobCustomReport = async (Report) => {
 
 
 
-       where.push(`(
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+        where.push(`(
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR raw.service_id = assigned_jobs_staff_view.service_id_assign
           )`)
+
+
 
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
         // console.log("where", where);
+
+        const unpivotSQLCount = `
+              SELECT COUNT(*) AS total_count
+                FROM (
+                    SELECT
+                raw.job_id,
+
+                DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.job_priority,
+                raw.engagement_model,
+                raw.Transactions_Posting_id_2,
+                raw.Number_of_Bank_Transactions_id_2,
+                raw.Number_of_Journal_Entries_id_2,
+                raw.Number_of_Other_Transactions_id_2,
+                raw.Number_of_Petty_Cash_Transactions_id_2,
+                raw.Number_of_Purchase_Invoices_id_2,
+                raw.Number_of_Sales_Invoices_id_2,
+                raw.Number_of_Total_Transactions_id_2,
+                raw.submission_deadline,
+                raw.Tax_Year_id_4,
+                raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                raw.Whose_Tax_Return_is_it_id_4,
+                raw.Type_of_Payslip_id_3,
+                DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
+                raw.Bookkeeping_Frequency_id_2,
+                raw.CIS_Frequency_id_3,
+                raw.Filing_Frequency_id_8,
+                raw.Management_Accounts_Frequency_id_6,
+                raw.Payroll_Frequency_id_3,
+                raw.budgeted_hours,
+                raw.feedback_incorporation_time,
+                raw.review_time,
+                raw.total_preparation_time,
+                raw.total_time,
+                DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+                DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+                DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+                DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+                DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+                DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+                DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+
+
+
+                CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+                jobcreatestaff.email AS staff_email,
+                staffrole.role AS role,
+                jobcreatestaff.status AS staff_status,
+                CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+
+                
+
+                CONCAT_WS('::', raw.job_id) AS group_value,
+                raw.work_date,
+                
+                CONCAT(
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(jt.type, 1, 4), '_',
+                    SUBSTRING(raw.job_code_id, 1, 15)
+                ) AS job_name,
+                CONCAT(raw.job_id) AS group_label,
+                c.trading_name AS customer_name,
+                CONCAT(
+                    'cli_', 
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.client_code, 1, 15)
+                ) AS client_name,
+                CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+                CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+                CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+                CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
+                CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
+                sv.name AS service_name,
+                jt.type AS job_type_name,
+                st.name AS status_type_name,
+                sf.employee_number AS employee_number
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+
+                    j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
+
+
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.staff_created_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+            ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+            LEFT JOIN services AS sv ON raw.service_id = sv.id
+            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+            LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
+            LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
+            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
+            ${where}
+            ${GROUPBY} ) AS count_table
+        `;
+
+        // console.log("fromDate", fromDate);
+        // console.log("toDate", toDate);
+        // console.log("Total Count Query ---- ", unpivotSQLCount);
+        // Get Total Count
+        const [countResult] = await pool.execute(unpivotSQLCount, [fromDate, toDate]);
+        const totalCount = countResult[0]?.total_count || 0;
+
+        console.log("Total Count ---- ", totalCount);
 
 
         // ===== Final Query =====
@@ -4122,10 +4303,13 @@ const getJobCustomReport = async (Report) => {
             ${where}
             ${GROUPBY}
             ORDER BY raw.job_id
+            LIMIT ${limit} OFFSET ${offset}
         `;
 
         // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-        // console.log("unpivotSQL", unpivotSQL);
+        //  console.log("unpivotSQL", unpivotSQL);
+
+        //  console.log("GROUPBY ---->> ", GROUPBY);
 
         const conn = await pool.getConnection();
         const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
@@ -4150,7 +4334,7 @@ const getJobCustomReport = async (Report) => {
 
             // Map of id → name field relation
             const idToNameMap = {
-                id:"job_id",
+                id: "job_id",
                 job_id: "job_name",
                 customer_id: "customer_name",
                 client_id: "client_name",
@@ -4241,8 +4425,8 @@ const getJobCustomReport = async (Report) => {
             if (!groups[gid]) {
                 groups[gid] = {
                     //  group_value: gid,
-                   
-                    id:r.job_id,
+
+                    id: r.job_id,
                     job_name: r.job_name,
                     customer_name: r.customer_name,
                     client_name: r.client_name,
@@ -4323,7 +4507,7 @@ const getJobCustomReport = async (Report) => {
             const g = groups[gid];
             const row = {};
             // fill group fields
-           
+
             row['id'] = g.id;
             row['job_id'] = g.job_name;
             row['customer_id'] = g.customer_name;
@@ -4406,7 +4590,7 @@ const getJobCustomReport = async (Report) => {
             outRows.push(row);
         }
 
-         console.log("outRows --->>>", outRows);
+        console.log("outRows --->>>", outRows.length);
         // console.log("displayBy --->>>", displayBy);
         let total_count = [];
         let weeks = [];
@@ -4442,8 +4626,16 @@ const getJobCustomReport = async (Report) => {
                 meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
                 //columns: columnsWeeks,
                 columns: columnsWeeksDecOrder,
-                rows: finalRows
-            }
+                rows: finalRows,
+                pagination: {
+                    total: totalCount,
+                    page: page,
+                    limit: limit,
+                    totalPages: Math.ceil(totalCount / limit),
+                    search,
+                },
+            },
+
         };
 
     } catch (err) {

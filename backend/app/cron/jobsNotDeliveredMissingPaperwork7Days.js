@@ -271,7 +271,7 @@ async function otherUserDataGet(row) {
         )
         )
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
-        assigned_jobs_staff_view.source != 'assign_customer_service'
+        assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
       )
 

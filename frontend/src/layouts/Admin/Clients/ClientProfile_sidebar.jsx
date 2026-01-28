@@ -371,8 +371,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -551,13 +551,13 @@ const ClientList = () => {
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "job")}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-              )
+              <button
+                className="delete-icon"
+                onClick={() => handleDelete(row, "job")}
+              >
+                <i className="ti-trash text-danger" />
+              </button>
+            )
             : ""}
         </div>
       ),
@@ -884,6 +884,74 @@ const ClientList = () => {
     (opt) => Number(opt.value) === Number(clientDetailSingle.id),
   );
 
+  const handleExport = async () => {
+     const req = {
+      action: "getByCustomer",
+      customer_id : "",
+      page : 1,
+      limit : 100000,
+      search : "",
+    };
+
+    const data = { req, authToken: token };
+     const response = await dispatch(JobAction(data)).unwrap();
+     if (!response.status) {
+       alert("No data to export!");
+       return;
+     }
+     const apiData = response?.data;
+ 
+     if (!apiData || apiData.length === 0) {
+       alert("No data to export!");
+       return;
+     }
+ 
+     // export format
+     const exportData = apiData?.map((item) => ({
+    "Job Code Id": item.job_code_id,
+    "Job Priority": item.job_priority,
+    "Client Trading Name": item.client_trading_name,
+    "Job Type Name": item.job_type_name,
+    "Account Manager":
+      item.account_manager_officer_first_name +
+      " " +
+      item.account_manager_officer_last_name,
+    "Outbooks Account Manager":
+      item.outbooks_acount_manager_first_name +
+      " " +
+      item.outbooks_acount_manager_last_name,
+    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
+    Invoiced: item.invoiced == "1" ? "YES" : "NO",
+    "Created By": item.job_created_by,
+    "Created At": item.created_at,
+    Status: item.status,
+  }));
+ 
+     downloadCSV(exportData, "Job Details.csv");
+   };
+   const downloadCSV = (data, filename) => {
+     const csvRows = [];
+ 
+     // headers
+     const headers = Object.keys(data[0]);
+     csvRows.push(headers.join(","));
+ 
+     // rows
+     data.forEach((row) => {
+       const values = headers.map((h) => `"${row[h] || ""}"`);
+       csvRows.push(values.join(","));
+     });
+ 
+     const csvString = csvRows.join("\n");
+ 
+     const blob = new Blob([csvString], { type: "text/csv" });
+     const url = window.URL.createObjectURL(blob);
+     const a = document.createElement("a");
+     a.setAttribute("href", url);
+     a.setAttribute("download", filename);
+     a.click();
+   };
+
   return (
     <div className="container-fluid">
       <div className="content-title">
@@ -1012,9 +1080,8 @@ const ClientList = () => {
                           key={tab.id}
                         >
                           <button
-                            className={`nav-link ${
-                              activeTab === tab.id ? "active" : ""
-                            }`}
+                            className={`nav-link ${activeTab === tab.id ? "active" : ""
+                              }`}
                             id={`${tab.id}-tab`}
                             data-bs-toggle="pill"
                             data-bs-target={`#${tab.id}`}
@@ -1075,9 +1142,8 @@ const ClientList = () => {
         <div className="mt-2">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${
-                activeTab == "NoOfJobs" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
+                }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1104,11 +1170,17 @@ const ClientList = () => {
                     </ul>
 
                     <div className="col-md-2">
-                      <ExportToExcel
+                      {/* <ExportToExcel
                         className="btn btn-outline-info fw-bold float-end border-3 "
                         apiData={exportData}
                         fileName={`Job Details`}
-                      />
+                      /> */}
+                      <button
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        onClick={handleExport}
+                      >
+                        Export Excel
+                      </button>
                     </div>
                   </div>
                   <div className="tab-content" id="pills-tabContent">
@@ -1216,8 +1288,8 @@ const ClientList = () => {
                             {(clientInformationData &&
                               clientInformationData.phone &&
                               clientInformationData.phone_code +
-                                " " +
-                                clientInformationData.phone) ||
+                              " " +
+                              clientInformationData.phone) ||
                               "NA"}
                           </li>
                           <li className="mt-2">
@@ -1388,7 +1460,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>

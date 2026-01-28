@@ -251,7 +251,7 @@ async function otherUserDataGet(row) {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
-    assigned_jobs_staff_view.source != 'assign_customer_service'
+    assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
     OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
   )
         GROUP BY jobs.id
