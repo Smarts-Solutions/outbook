@@ -37,6 +37,7 @@ function JobCustomReport() {
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
 
 
   ////////////////////////
@@ -990,35 +991,40 @@ function JobCustomReport() {
 
   // console.log("filters ", filters);
 
-  const callFilterApi = async ( currentPage, pageSize, searchTerm) => {
+  const callFilterApi = async (currentPage, pageSize, searchTerm) => {
+    setLoading(true);
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { 
-    action: "getJobCustomReport", 
-    filters: filters, 
-    role: role , 
-    page : currentPage,
-    limit : pageSize 
-  };
+    const req = {
+      action: "getJobCustomReport",
+      filters: filters,
+      role: role,
+      page: currentPage,
+      limit: pageSize
+    };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
       .then(async (response) => {
+        setLoading(false);
         console.log("filter response ", response);
         if (response.status) {
+          setLoading(false);
           setShowData(response.data);
           setTotalRecords(response?.data?.pagination?.total || 0);
         } else {
+          setLoading(false);
           setShowData([]);
           setTotalRecords(0);
         }
       })
       .catch((error) => {
+        setLoading(false);
         return;
       });
   };
 
-   const handlePageChange = ({ selected }) => {
+  const handlePageChange = ({ selected }) => {
     const newPage = selected + 1;
     setCurrentPage(newPage);
     callFilterApi(newPage, pageSize, searchTerm);
@@ -1034,7 +1040,7 @@ function JobCustomReport() {
 
   useEffect(() => {
     // if (role?.toUpperCase() === "SUPERADMIN") {
-    callFilterApi( currentPage, pageSize, searchTerm);
+    callFilterApi(currentPage, pageSize, searchTerm);
     // }
   }, [
     filters.groupBy,
@@ -1447,6 +1453,12 @@ function JobCustomReport() {
 
   return (
     <div className="container-fluid pb-3">
+
+      {loading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       {/* Page Title */}
       <div className="content-title">
         <div className="tab-title mb-3">
@@ -2056,68 +2068,68 @@ function JobCustomReport() {
         ) : (
 
           <>
-          <div className="table-responsive fixed-table-header">
-            <table
-              className="table rdt_Table"
-            // className="table table-bordered"
-            // style={{
-            //   fontSize: "14px",
-            //   width: "100%",
-            //   overflowX: "auto",
-            //   display: "block",
-            // }}
-            >
-              <thead
-              // className="rdt_TableHead"
+            <div className="table-responsive fixed-table-header">
+              <table
+                className="table rdt_Table"
+              // className="table table-bordered"
+              // style={{
+              //   fontSize: "14px",
+              //   width: "100%",
+              //   overflowX: "auto",
+              //   display: "block",
+              // }}
               >
-                <tr className="rdt_TableHeadRow">
-                  {showData?.columns?.map((col, idx) => (
-                    <th
-                      className="border-bottom-0"
-                      key={idx}
-                      style={{
-                        fontSize: "15px",
-                        fontWeight: "bold",
-                        minWidth: "130px",
-                      }}
-                    >
-                      {getColumnName(col)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {showData?.rows?.map((row, rowIdx) => (
-                  <tr key={rowIdx}>
-                    {showData?.columns?.map((col, colIdx) => (
-                      <td key={colIdx} style={{ padding: "10px" }}>
-                        {/* Job ID column ke liye special handling */}
-                        {col === "job_id" && row[col] ? (
-                          <a
-                            onClick={() => HandleJob(row)}
-                            style={{
-                              cursor: "pointer",
-                              color: "#26bdf0",
-                              textDecoration: "underline",
-                            }}
-                          >
-                            {row[col]}
-                          </a>
-                        ) : row[col] !== undefined ? (
-                          row[col]
-                        ) : (
-                          ""
-                        )}
-                      </td>
+                <thead
+                // className="rdt_TableHead"
+                >
+                  <tr className="rdt_TableHeadRow">
+                    {showData?.columns?.map((col, idx) => (
+                      <th
+                        className="border-bottom-0"
+                        key={idx}
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: "bold",
+                          minWidth: "130px",
+                        }}
+                      >
+                        {getColumnName(col)}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {showData?.rows?.map((row, rowIdx) => (
+                    <tr key={rowIdx}>
+                      {showData?.columns?.map((col, colIdx) => (
+                        <td key={colIdx} style={{ padding: "10px" }}>
+                          {/* Job ID column ke liye special handling */}
+                          {col === "job_id" && row[col] ? (
+                            <a
+                              onClick={() => HandleJob(row)}
+                              style={{
+                                cursor: "pointer",
+                                color: "#26bdf0",
+                                textDecoration: "underline",
+                              }}
+                            >
+                              {row[col]}
+                            </a>
+                          ) : row[col] !== undefined ? (
+                            row[col]
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
 
-           <ReactPaginate
+            <ReactPaginate
               previousLabel={"Previous"}
               nextLabel={"Next"}
               breakLabel={"..."}
@@ -2144,7 +2156,7 @@ function JobCustomReport() {
 
           </>
 
-          
+
         )}
       </div>
     </div>
