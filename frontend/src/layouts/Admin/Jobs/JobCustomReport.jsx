@@ -34,8 +34,9 @@ function JobCustomReport() {
 
   /////////PAGINATION/////////
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(100000);
+  const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
 
   ////////////////////////
@@ -989,7 +990,7 @@ function JobCustomReport() {
 
   // console.log("filters ", filters);
 
-  const callFilterApi = async () => {
+  const callFilterApi = async ( currentPage, pageSize, searchTerm) => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
     const req = { 
@@ -1006,8 +1007,10 @@ function JobCustomReport() {
         console.log("filter response ", response);
         if (response.status) {
           setShowData(response.data);
+          setTotalRecords(response?.data?.pagination?.total || 0);
         } else {
           setShowData([]);
+          setTotalRecords(0);
         }
       })
       .catch((error) => {
@@ -1015,9 +1018,23 @@ function JobCustomReport() {
       });
   };
 
+   const handlePageChange = ({ selected }) => {
+    const newPage = selected + 1;
+    setCurrentPage(newPage);
+    callFilterApi(newPage, pageSize, searchTerm);
+  };
+
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    callFilterApi(1, newSize, searchTerm);
+
+  };
+
   useEffect(() => {
     // if (role?.toUpperCase() === "SUPERADMIN") {
-    callFilterApi();
+    callFilterApi( currentPage, pageSize, searchTerm);
     // }
   }, [
     filters.groupBy,
@@ -2104,10 +2121,10 @@ function JobCustomReport() {
               previousLabel={"Previous"}
               nextLabel={"Next"}
               breakLabel={"..."}
-             // pageCount={Math.ceil(totalRecords / pageSize)}
+              pageCount={Math.ceil(totalRecords / pageSize)}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
-            //  onPageChange={handlePageChange}
+              onPageChange={handlePageChange}
               containerClassName={"pagination"}
               activeClassName={"active"}
               forcePage={currentPage - 1}
@@ -2116,7 +2133,7 @@ function JobCustomReport() {
             <select
               className="perpage-select"
               value={pageSize}
-            //  onChange={handlePageSizeChange}
+              onChange={handlePageSizeChange}
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
