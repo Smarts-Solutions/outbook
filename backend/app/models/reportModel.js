@@ -3965,7 +3965,7 @@ const getJobCustomReport = async (Report) => {
 
 
         where.push(`(
-            assigned_jobs_staff_view.source != 'assign_customer_service'
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR raw.service_id = assigned_jobs_staff_view.service_id_assign
           )`)
 
