@@ -1279,6 +1279,7 @@ const getJobByCustomer = async (job) => {
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -1373,6 +1374,8 @@ const getJobByCustomer = async (job) => {
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
         staffs.last_name AS allocated_last_name,
@@ -1566,6 +1569,7 @@ async function getAllJobsSidebar(
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -1693,6 +1697,7 @@ async function getAllJobsSidebar(
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
 
    
         staffs.id AS allocated_id,
@@ -1758,7 +1763,7 @@ async function getAllJobsSidebar(
       offset,
     ]);
 
-    console.log("result 1 -->", result.length)
+    //console.log("result 1 -->", result.length)
 
     // 🔹 assign_customer_service logic (UNCHANGED)
     // let isExistAssignCustomer = result.find(
@@ -1776,7 +1781,7 @@ async function getAllJobsSidebar(
     //   result = [...matched, ...matched2];
     // }
 
-    console.log("result 2 -->", result.length)
+    //console.log("result 2 -->", result.length)
 
     return {
       status: true,
@@ -1832,6 +1837,7 @@ const getJobByClient = async (job) => {
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -1902,7 +1908,7 @@ const getJobByClient = async (job) => {
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
-
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
