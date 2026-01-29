@@ -3009,6 +3009,8 @@ const EditJob = () => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
+                                                                              min={new Date().toISOString().slice(0, 10)}  
+
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
                                       max={
@@ -3032,6 +3034,8 @@ const EditJob = () => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
+                                                                              min={new Date().toISOString().slice(0, 10)}  
+
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn}
                                       max={
@@ -3469,6 +3473,8 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
+                                                                                min={new Date().toISOString().slice(0, 10)}  
+
                                         onChange={HandleChange}
                                         value={jobData.ExpectedDeliveryDate}
                                       />
@@ -3505,6 +3511,8 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
+                                                                                min={new Date().toISOString().slice(0, 10)}  
+
                                         onChange={HandleChange}
                                         value={jobData.SubmissionDeadline}
                                       />
@@ -3523,6 +3531,8 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
+                                                                                min={new Date().toISOString().slice(0, 10)}  
+
                                         onChange={HandleChange}
                                         value={jobData.CustomerDeadlineDate}
                                       />
@@ -3559,6 +3569,7 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
+                                          min={new Date().toISOString().slice(0, 10)}  
                                         onChange={HandleChange}
                                         value={jobData.InternalDeadlineDate}
                                       />
