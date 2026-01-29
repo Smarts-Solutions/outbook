@@ -521,6 +521,7 @@ const Customer = () => {
 
   const handleExport = async () => {
     ///const apiData = await GetAllCustomerData(1, 10000, searchTerm);
+    setLoading(true);
     const req = {
       action: "get",
       staff_id: staffDetails.id,
@@ -532,12 +533,14 @@ const Customer = () => {
     const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
     if (!response.status) {
       alert("No data to export!");
+      setLoading(false);
       return;
     }
     const apiData = response?.data?.data;
 
     if (!apiData || apiData.length === 0) {
       alert("No data to export!");
+      setLoading(false);
       return;
     }
 
@@ -559,6 +562,8 @@ const Customer = () => {
       "Created At": item.created_at,
       Status: item.status == 1 ? "Active" : "Deactive",
     }));
+
+    setLoading(false);
 
     downloadCSV(exportData, "Customer Details.csv");
   };
