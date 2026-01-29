@@ -413,9 +413,8 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -432,23 +431,23 @@ const StaffPage = () => {
             <div className="px-2">
               {showStaffDeleteTab == true
                 ? row?.is_disable == 0 &&
-                  (row.is_customer_exist == 1 ? (
-                    <button
-                      className="delete-icon dropdown-item  w-auto mb-2"
-                      onClick={() => setDeleteStaff(row)}
-                    >
-                      {" "}
-                      <i className="ti-trash text-danger" />
-                    </button>
-                  ) : (
-                    <button
-                      className="delete-icon dropdown-item  w-auto mb-2"
-                      onClick={() => handleDeleteIsNotExistCustomer(row)}
-                    >
-                      {" "}
-                      <i className="ti-trash text-danger" />
-                    </button>
-                  ))
+                (row.is_customer_exist == 1 ? (
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => setDeleteStaff(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                ) : (
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => handleDeleteIsNotExistCustomer(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                ))
                 : ""}
             </div>
 
@@ -614,9 +613,8 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${
-          budgetedHours.minutes || "00"
-        }`,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
+          }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -1127,9 +1125,8 @@ const StaffPage = () => {
           {tabs?.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
               id={tab.id}
               role="tabpanel"
             >
@@ -1171,7 +1168,9 @@ const StaffPage = () => {
                       <option value={10}>10</option>
                       <option value={20}>20</option>
                       <option value={50}>50</option>
-                      <option value={100000}>All</option>
+                      <option value={100}>100</option>
+                      <option value={500}>500</option>
+                      {/* <option value={100000}>All</option> */}
                     </select>
                   </>
                 ) : (
