@@ -36,6 +36,8 @@ const ClientList = () => {
   const fileInputRef = useRef(null);
   const [customerData, setCustomerData] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   // console.log("customerData", customerData);
 
   const [activeTab, setActiveTab] = useState("NoOfJobs");
@@ -955,6 +957,7 @@ const ClientList = () => {
   };
 
   const handleExport = async () => {
+    setLoading(true);
     const req = {
       action: "getByClient",
       client_id: location.state.Client_id,
@@ -963,12 +966,14 @@ const ClientList = () => {
     const response = await dispatch(JobAction(data)).unwrap();
     if (!response.status) {
       alert("No data to export!");
+      setLoading(false);
       return;
     }
     const apiData = response?.data;
 
     if (!apiData || apiData.length === 0) {
       alert("No data to export!");
+      setLoading(false);
       return;
     }
 
@@ -988,6 +993,7 @@ const ClientList = () => {
       "Job Created By": item.job_created_by,
       "Created At": item.created_at,
     }));
+    setLoading(false);
 
     downloadCSV(exportData, "Job Details.csv");
   };
@@ -1022,6 +1028,14 @@ const ClientList = () => {
           </div>
         </div>
       )}
+
+       {loading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
+
+
       <div className="container-fluid">
         <div className="col-sm-12">
           <div className="page-title-box">

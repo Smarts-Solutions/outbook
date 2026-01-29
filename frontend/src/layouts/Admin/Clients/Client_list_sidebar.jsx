@@ -1144,7 +1144,7 @@ const ClientLists = () => {
 
   const handleExport = async () => {
     let exportData = [];
-
+    setLoading(true);
     if (activeTab === "client") {
       const req = {
         action: "get",
@@ -1158,6 +1158,7 @@ const ClientLists = () => {
 
       if (!response.status || !response.data || response.data.length === 0) {
         alert("No data to export!");
+        setLoading(false);
         return;
       }
 
@@ -1170,6 +1171,7 @@ const ClientLists = () => {
         "Created At": item.created_at,
         Status: item.status == 1 ? "Active" : "Deactive",
       }));
+      setLoading(false);
     } else if (activeTab === "job") {
       const req = {
         action: "getByCustomer",
@@ -1183,6 +1185,7 @@ const ClientLists = () => {
 
       if (!response.status || !response.data || response.data.length === 0) {
         alert("No data to export!");
+        setLoading(false);
         return;
       }
 
@@ -1215,7 +1218,10 @@ const ClientLists = () => {
         "Created By": item.job_created_by,
         "Created At": item.created_at,
       }));
+      setLoading(false);
     }
+
+    setLoading(false);
 
     downloadCSV(
       exportData,

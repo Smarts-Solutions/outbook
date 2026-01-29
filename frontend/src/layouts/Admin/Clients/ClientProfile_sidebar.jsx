@@ -33,6 +33,7 @@ const ClientList = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [jobLoading, setJobLoading] = useState(false);
 
@@ -885,75 +886,87 @@ const ClientList = () => {
   );
 
   const handleExport = async () => {
-     const req = {
+
+    setLoading(true);
+    const req = {
       action: "getByCustomer",
-      customer_id : "",
-      page : 1,
-      limit : 100000,
-      search : "",
+      customer_id: "",
+      page: 1,
+      limit: 100000,
+      search: "",
     };
 
     const data = { req, authToken: token };
-     const response = await dispatch(JobAction(data)).unwrap();
-     if (!response.status) {
-       alert("No data to export!");
-       return;
-     }
-     const apiData = response?.data;
- 
-     if (!apiData || apiData.length === 0) {
-       alert("No data to export!");
-       return;
-     }
- 
-     // export format
-     const exportData = apiData?.map((item) => ({
-    "Job Code Id": item.job_code_id,
-    "Job Priority": item.job_priority,
-    "Client Trading Name": item.client_trading_name,
-    "Job Type Name": item.job_type_name,
-    "Account Manager":
-      item.account_manager_officer_first_name +
-      " " +
-      item.account_manager_officer_last_name,
-    "Outbooks Account Manager":
-      item.outbooks_acount_manager_first_name +
-      " " +
-      item.outbooks_acount_manager_last_name,
-    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
-    Invoiced: item.invoiced == "1" ? "YES" : "NO",
-    "Created By": item.job_created_by,
-    "Created At": item.created_at,
-    Status: item.status,
-  }));
- 
-     downloadCSV(exportData, "Job Details.csv");
-   };
-   const downloadCSV = (data, filename) => {
-     const csvRows = [];
- 
-     // headers
-     const headers = Object.keys(data[0]);
-     csvRows.push(headers.join(","));
- 
-     // rows
-     data.forEach((row) => {
-       const values = headers.map((h) => `"${row[h] || ""}"`);
-       csvRows.push(values.join(","));
-     });
- 
-     const csvString = csvRows.join("\n");
- 
-     const blob = new Blob([csvString], { type: "text/csv" });
-     const url = window.URL.createObjectURL(blob);
-     const a = document.createElement("a");
-     a.setAttribute("href", url);
-     a.setAttribute("download", filename);
-     a.click();
-   };
+    const response = await dispatch(JobAction(data)).unwrap();
+    if (!response.status) {
+      alert("No data to export!");
+      setLoading(false);
+      return;
+    }
+    const apiData = response?.data;
+
+    if (!apiData || apiData.length === 0) {
+      alert("No data to export!");
+      setLoading(false);
+      return;
+    }
+
+    // export format
+    const exportData = apiData?.map((item) => ({
+      "Job Code Id": item.job_code_id,
+      "Job Priority": item.job_priority,
+      "Client Trading Name": item.client_trading_name,
+      "Job Type Name": item.job_type_name,
+      "Account Manager":
+        item.account_manager_officer_first_name +
+        " " +
+        item.account_manager_officer_last_name,
+      "Outbooks Account Manager":
+        item.outbooks_acount_manager_first_name +
+        " " +
+        item.outbooks_acount_manager_last_name,
+      "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
+      Invoiced: item.invoiced == "1" ? "YES" : "NO",
+      "Created By": item.job_created_by,
+      "Created At": item.created_at,
+      Status: item.status,
+    }));
+
+    setLoading(false);
+
+    downloadCSV(exportData, "Job Details.csv");
+  };
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+
+    // headers
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    // rows
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
 
   return (
     <div className="container-fluid">
+
+      {loading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="content-title">
         <div className="row">
           <div className="form-group col-md-4 mb-0">

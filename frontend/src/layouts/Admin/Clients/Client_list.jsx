@@ -36,6 +36,8 @@ const ClientList = () => {
     customer: location.state,
   });
 
+  const [loading, setLoading] = useState(false);
+
   // console.log("getJobDetails ", getJobDetails);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,9 +128,9 @@ const ClientList = () => {
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob &&
-                (getAccessDataJob.job == 1 ||
-                  getAccessDataJob.all_jobs == 1)) ||
-              role === "SUPERADMIN"
+            (getAccessDataJob.job == 1 ||
+              getAccessDataJob.all_jobs == 1)) ||
+            role === "SUPERADMIN"
             ? "job"
             : "documents",
       );
@@ -268,8 +270,8 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {getAccessDataJob.job === 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -339,9 +341,8 @@ const ClientList = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -477,8 +478,8 @@ const ClientList = () => {
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -488,8 +489,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -510,8 +511,8 @@ const ClientList = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -521,8 +522,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -542,26 +543,26 @@ const ClientList = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -1010,8 +1011,8 @@ const ClientList = () => {
         <div>
           <a
             title={row.check_list_name}
-            // onClick={() => HandleClientView(row)}
-            // style={{ cursor: "pointer", color: "#26bdf0" }}
+          // onClick={() => HandleClientView(row)}
+          // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.check_list_name}
           </a>
@@ -1376,6 +1377,7 @@ const ClientList = () => {
   };
 
   const handleExport = async () => {
+    setLoading(true);
     const req = {
       action: "get",
       customer_id: customerDetails?.data?.customer?.customer_id,
@@ -1387,12 +1389,14 @@ const ClientList = () => {
     const response = await dispatch(ClientAction(data)).unwrap();
     if (!response.status) {
       alert("No data to export!");
+      setLoading(false);
       return;
     }
     const apiData = response?.data;
 
     if (!apiData || apiData.length === 0) {
       alert("No data to export!");
+      setLoading(false);
       return;
     }
 
@@ -1405,6 +1409,8 @@ const ClientList = () => {
       "Created At": item.created_at,
       Status: item.status == 1 ? "Active" : "Deactive",
     }));
+
+    setLoading(false);
 
     downloadCSV(exportData, "Clients Details.csv");
   };
@@ -1434,6 +1440,11 @@ const ClientList = () => {
 
   return (
     <div className="container-fluid">
+      {loading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="row ">
         <div className="col-sm-12">
           <div className="page-title-box">
@@ -1447,9 +1458,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1468,9 +1478,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
@@ -1482,7 +1492,7 @@ const ClientList = () => {
                     </div>
                     {(getAccessDataClient.insert === 1 ||
                       role === "SUPERADMIN") &&
-                    activeTab === "client" ? (
+                      activeTab === "client" ? (
                       <>
                         <div
                           className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
@@ -1518,7 +1528,7 @@ const ClientList = () => {
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
-                        role === "SUPERADMIN") &&
+                      role === "SUPERADMIN") &&
                       activeTab === "checklist" ? (
                       <>
                         <div
@@ -1583,9 +1593,8 @@ const ClientList = () => {
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${
-              activeTab == tab.key ? "show active" : ""
-            }`}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
@@ -1609,13 +1618,13 @@ const ClientList = () => {
                 )} */}
 
                 {tab.data && tab.data.length > 0 && activeTab === "client" && (
-      <button
-        className="btn btn-outline-info fw-bold float-end border-3"
-        onClick={handleExport}
-      >
-        Export Excel
-      </button>
-    )}
+                  <button
+                    className="btn btn-outline-info fw-bold float-end border-3"
+                    onClick={handleExport}
+                  >
+                    Export Excel
+                  </button>
+                )}
               </div>
 
               <div className="datatable-wrapper">
