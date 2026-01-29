@@ -2440,6 +2440,12 @@ const EditJob = () => {
   };
 
 
+  const minDateRecivedOn=jobData?.DateReceivedOn;
+  const minDateAllocatedOn=jobData?.AllocatedOn;
+
+console.log("minDateRecivedOn",minDateRecivedOn)
+console.log("minDateAllocatedOn",minDateAllocatedOn)
+
   return (
     <div>
       <div className="container-fluid">
@@ -3009,13 +3015,13 @@ const EditJob = () => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
-                                                                              min={new Date().toISOString().slice(0, 10)}  
+                                                                              min={minDateAllocatedOn}  
 
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
-                                      max={
-                                        new Date().toISOString().split("T")[0]
-                                      }
+                                      // max={
+                                      //   new Date().toISOString().split("T")[0]
+                                      // }
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -3034,13 +3040,13 @@ const EditJob = () => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
-                                                                              min={new Date().toISOString().slice(0, 10)}  
+                                                                              min={minDateRecivedOn}  
 
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn}
-                                      max={
-                                        new Date().toISOString().split("T")[0]
-                                      }
+                                      // max={
+                                      //   new Date().toISOString().split("T")[0]
+                                      // }
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
