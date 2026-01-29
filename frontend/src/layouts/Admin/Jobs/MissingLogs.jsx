@@ -652,6 +652,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_reviewed_date"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_reviewed_date}
+                min={minDateRecivedOn||""}
               />
               {errors1["missing_log_reviewed_date"] && (
                 <div className="error-text">
@@ -880,7 +881,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_reviewed_date"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_reviewed_date}
-                min={new Date().toISOString().split("T")[0]}
+                min={minDateRecivedOn||""}
               />
               {errors1["missing_log_reviewed_date"] && (
                 <div className="error-text">
