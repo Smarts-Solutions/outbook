@@ -13,6 +13,9 @@ import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, Sit
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
+  console.log("State",location.state);
+  console.log("State",location.state.data.job.date_received_on);
+
   const fileInputRef = useRef(null);
   const role = JSON.parse(localStorage.getItem("role"));
   const dispatch = useDispatch();
@@ -32,8 +35,6 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
   const [siteUrl, setSiteUrl] = useState("");
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
-
-
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "1",
@@ -486,6 +487,9 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
     },
   ];
 
+  const minDateRecivedOn = location.state?.data?.job?.date_received_on;
+
+
   return (
     <div className={isLoading ? "blur-container" : ""}>
       {isLoading && (
@@ -598,6 +602,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_prepared_date"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_prepared_date}
+                 min={minDateRecivedOn||""}
               />
               {errors1["missing_log_prepared_date"] && (
                 <div className="error-text">
@@ -691,6 +696,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="last_chaser"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.last_chaser}
+                min={minDateRecivedOn||""}
               />
               {errors1["last_chaser"] && (
                 <div className="error-text">
@@ -825,6 +831,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_prepared_date"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_prepared_date}
+                min={minDateRecivedOn||""}
               />
               {errors1["missing_log_prepared_date"] && (
                 <div className="error-text">
@@ -919,6 +926,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="last_chaser"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.last_chaser}
+                min={minDateRecivedOn||""}
               />
               {errors1["last_chaser"] && (
                 <div className="error-text">

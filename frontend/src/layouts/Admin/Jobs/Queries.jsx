@@ -463,6 +463,9 @@ const Queries = ({ getAccessDataJob, goto }) => {
     },
   ];
 
+
+  const minDateRecivedOn = location.state?.data?.job?.date_received_on;
+
   return (
     <div className={isLoading ? "blur-container" : ""}>
       {isLoading && (
@@ -577,6 +580,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="MissingQueriesPreparedDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
+                  min={minDateRecivedOn||""}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
                   <div className="error-text">
@@ -670,6 +674,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="last_chaser"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.last_chaser}
+                  min={minDateRecivedOn||""}
                 />
                 {errors1["last_chaser"] && (
                   <div className="error-text">
@@ -821,6 +826,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="MissingQueriesPreparedDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
+                  min={minDateRecivedOn||""}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
                   <div className="error-text">
@@ -915,6 +921,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="last_chaser"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.last_chaser}
+                  min={minDateRecivedOn||""}
                 />
                 {errors1["last_chaser"] && (
                   <div className="error-text">
