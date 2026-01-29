@@ -280,6 +280,8 @@ const Drafts = ({ getAccessDataJob, goto }) => {
 
   }, [AllDraftInputdata.updated_amendments]);
 
+  const minDateRecivedOn = location.state?.data?.job?.date_received_on;
+
   return (
     <div className=''>
       <div className='row'>
@@ -340,6 +342,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
+                  min={minDateRecivedOn||""}
                 />
                 {errors["draft_sent_on"] && (
                   <div className="error-text">
@@ -462,6 +465,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   id="final_draft_sent_on"
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.final_draft_sent_on}
+                  min={minDateRecivedOn||""}
                 />
                 {errors["final_draft_sent_on"] && (
                   <div className="error-text">
@@ -539,6 +543,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
+                  min={minDateRecivedOn||""}
                 />
                 {errors["draft_sent_on"] && (
                   <div className="error-text">
@@ -687,6 +692,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   id="final_draft_sent_on"
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.final_draft_sent_on}
+                  min={minDateRecivedOn||""}
                 />
                 {errors["final_draft_sent_on"] && (
                   <div className="error-text">
