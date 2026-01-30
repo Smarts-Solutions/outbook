@@ -3392,12 +3392,16 @@ const EditJob = () => {
                                     </label>
 
                                     <Select
-                                      options={allStaffData
-                                        ?.filter(data => 
-                                          // data.id !== jobData.AllocatedTo && 
-                                          // data.id !== jobData.Reviewer && 
-                                          data.id !== staffCreatedId
-                                        )
+                                      // options={allStaffData
+                                      //   ?.filter(data => 
+                                      //     // data.id !== jobData.AllocatedTo && 
+                                      //     // data.id !== jobData.Reviewer && 
+                                      //     data.id !== staffCreatedId
+                                      //   )
+                                      //   ?.map((data) => {
+                                      //     return { label: data.full_name, value: data.id };
+                                      //   })}
+                                      options={allStaffData 
                                         ?.map((data) => {
                                           return { label: data.full_name, value: data.id };
                                         })}
