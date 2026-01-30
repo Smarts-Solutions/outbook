@@ -73,10 +73,43 @@ const StaffPage = () => {
   });
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
-
+  
+  const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+  console.log("staffDataAllRecords --- ", staffDataAllRecords);
   console.log("staffDataAll --- ", staffDataAll);
 
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    GetAllStaffData(1, 10000, "");
+  }, []);
+
+  const GetAllStaffData = async (page = 1, limit = 10, search = "") => {
+    setLoading(true);
+    //  setStaffDataAll({ loading: true, data: [] });
+    await dispatch(
+      Staff({
+        req: { action: "get", page, limit, search },
+        authToken: token,
+      }),
+    )
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          console.log("response", response);
+          setStaffDataAllRecords({ loading: false, data: response?.data?.data });
+        } else {
+          setStaffDataAllRecords({ loading: false, data: [] });
+          
+        }
+      })
+      .catch((error) => {
+        return;
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
     staffData(currentPage, pageSize, searchTerm);
@@ -738,6 +771,25 @@ const StaffPage = () => {
         { label: "Inactive", value: "0" },
       ],
     },
+    // {
+    //   type: "selectSearch",
+    //   name: "staff_to",
+    //   label: "Line Manager",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   disable: false,
+    //   options: staffDataAll?.data
+    //     .filter(
+    //       (data) =>
+    //         data.role !== "ADMIN" &&
+    //         data.role !== "SUPERADMIN" &&
+    //         data.id !== editStaffData.id,
+    //     )
+    //     .map((data) => ({
+    //       label: `${data.first_name} ${data.last_name}`,
+    //       value: data.id,
+    //     })),
+    // },
     {
       type: "selectSearch",
       name: "staff_to",
@@ -745,18 +797,29 @@ const StaffPage = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      options: staffDataAll?.data
+      options: staffDataAllRecords?.data
         .filter(
           (data) =>
             data.role !== "ADMIN" &&
             data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id,
+            data.id !== editStaffData.id
         )
-        .map((data) => ({
-          label: `${data.first_name} ${data.last_name}`,
-          value: data.id,
-        })),
+        .map((data) => {
+          if (formik.values.staff_to == data.id) {
+            return {
+              label: `${data.first_name} ${data.last_name}`,
+              value: data.id,
+              selected: true, // ✅ selected row
+            };
+          } else {
+            return {
+              label: `${data.first_name} ${data.last_name}`,
+              value: data.id,
+            };
+          }
+        }),
     },
+
     {
       type: "text6",
       name: "employee_number",
