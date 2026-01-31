@@ -698,9 +698,11 @@ const GetStaffPortfolio = async (staff) => {
     customers.trading_name 
     FROM assigned_jobs_staff_view
     JOIN customers ON assigned_jobs_staff_view.customer_id = customers.id
-    WHERE assigned_jobs_staff_view.staff_id = ${id} AND assigned_jobs_staff_view.source != 'assign_customer_portfolio'
+    WHERE assigned_jobs_staff_view.staff_id = ${id} AND assigned_jobs_staff_view.source != 'assign_customer_portfolio' COLLATE utf8mb4_unicode_ci
     GROUP BY assigned_jobs_staff_view.customer_id
   `;
+
+  
 
     try {
       const [assignedCustomers] = await pool.execute(queryCustomerAssign);
