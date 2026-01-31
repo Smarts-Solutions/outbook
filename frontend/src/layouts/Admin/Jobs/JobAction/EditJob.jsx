@@ -636,7 +636,7 @@ const EditJob = () => {
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
       }
-        // Service Personal Tax Return
+      // Service Personal Tax Return
       else if (Number(service_id) === 4) {
         //const d = new Date('2026-02-31'); // Example date
         const d = new Date(); // Example date
@@ -647,7 +647,7 @@ const EditJob = () => {
         }
         return `${y}-01-31`;
       }
-    
+
       else {
         return null;
       }
@@ -803,7 +803,7 @@ const EditJob = () => {
         }
         else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
           await get_information_company_number(clientInfo.company_number);
-        } 
+        }
         else {
           await dueOn_date_set(clientType, value);
         }
@@ -3401,7 +3401,7 @@ const EditJob = () => {
                                       //   ?.map((data) => {
                                       //     return { label: data.full_name, value: data.id };
                                       //   })}
-                                      options={allStaffData 
+                                      options={allStaffData
                                         ?.map((data) => {
                                           return { label: data.full_name, value: data.id };
                                         })}
