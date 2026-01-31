@@ -73,8 +73,11 @@ const StaffPage = () => {
   });
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
-  
-  const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+
+  const [staffDataAllRecords, setStaffDataAllRecords] = useState({
+    loading: true,
+    data: [],
+  });
   console.log("staffDataAllRecords --- ", staffDataAllRecords);
   console.log("staffDataAll --- ", staffDataAll);
 
@@ -97,10 +100,12 @@ const StaffPage = () => {
       .then(async (response) => {
         if (response.status) {
           console.log("response", response);
-          setStaffDataAllRecords({ loading: false, data: response?.data?.data });
+          setStaffDataAllRecords({
+            loading: false,
+            data: response?.data?.data,
+          });
         } else {
           setStaffDataAllRecords({ loading: false, data: [] });
-          
         }
       })
       .catch((error) => {
@@ -446,8 +451,9 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -464,23 +470,23 @@ const StaffPage = () => {
             <div className="px-2">
               {showStaffDeleteTab == true
                 ? row?.is_disable == 0 &&
-                (row.is_customer_exist == 1 ? (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => setDeleteStaff(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ) : (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => handleDeleteIsNotExistCustomer(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ))
+                  (row.is_customer_exist == 1 ? (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => setDeleteStaff(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ) : (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => handleDeleteIsNotExistCustomer(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ))
                 : ""}
             </div>
 
@@ -646,8 +652,9 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -802,7 +809,7 @@ const StaffPage = () => {
           (data) =>
             data.role !== "ADMIN" &&
             data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id
+            data.id !== editStaffData.id,
         )
         .map((data) => {
           if (formik.values.staff_to == data.id) {
@@ -1128,6 +1135,19 @@ const StaffPage = () => {
     a.click();
   };
 
+  const exportPortfolioData = () => {
+    if (!assignCustomerData || assignCustomerData.length === 0) {
+      Swal.fire("No Data", "No portfolio data to export", "info");
+      return;
+    }
+
+    const exportData = assignCustomerData.map((item) => ({
+      "Customer Name": item.trading_name,
+    }));
+
+    downloadCSV(exportData, "Staff_Portfolio.csv");
+  };
+
   return (
     <div>
       <div className="container-fluid">
@@ -1188,8 +1208,9 @@ const StaffPage = () => {
           {tabs?.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
             >
@@ -1279,7 +1300,7 @@ const StaffPage = () => {
         />
       </CommanModal>
 
-      <CommanModal
+      {/* <CommanModal
         isOpen={portfolio}
         cancel_btn="cancel"
         hideBtn={false}
@@ -1292,12 +1313,24 @@ const StaffPage = () => {
         Submit_Cancel_Function={() => {
           setPortfolio(false);
         }}
+      > */}
+
+      <CommanModal
+        isOpen={portfolio}
+        cancel_btn="cancel"
+        hideBtn={false}
+        btn_name="Save"
+        title="Manage Portfolio"
+        handleClose={() => setPortfolio(false)}
+        Submit_Function={HandleChangeStaffPortfolio}
+        Submit_Cancel_Function={() => setPortfolio(false)}
       >
         <div className="modal-body px-0">
           <div className="row w-100">
+            {/* Select Customers */}
             <div className="col-12">
               <Select
-                name="colors"
+                name="customers"
                 className="basic-multi-select"
                 classNamePrefix="select"
                 value={AddCustomer}
@@ -1308,25 +1341,36 @@ const StaffPage = () => {
                 onChange={handleAddCustomer}
                 isMulti
               />
-            </div>
-
-            <div className="col-12 mt-2">
               <small className="text-muted">
                 Select customers to assign to this staff member.
               </small>
-              {assignCustomerData && assignCustomerData.length > 0 ? (
-                <div className="mt-3">
+            </div>
+
+            {/* Export Button BELOW input */}
+            <div className="col-12 mt-2 d-flex justify-content-end">
+              <button
+                className="btn btn-sm btn-outline-success"
+                onClick={exportPortfolioData}
+                disabled={!assignCustomerData?.length}
+              >
+                <i className="bi bi-file-earmark-excel me-1"></i>
+                Export Portfolio
+              </button>
+            </div>
+
+            {/* Assigned Customers */}
+            <div className="col-12 mt-3">
+              {assignCustomerData && assignCustomerData.length > 0 && (
+                <>
                   <h6>Assigned Customers:</h6>
-                  <ul>
+                  <ul className="mb-0">
                     {assignCustomerData.map((customer) => (
                       <li key={customer.customer_id}>
                         {customer.trading_name}
                       </li>
                     ))}
                   </ul>
-                </div>
-              ) : (
-                ""
+                </>
               )}
             </div>
           </div>
