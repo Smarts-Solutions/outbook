@@ -3,12 +3,14 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getAllTaskTimeSheet, JobTimeSheetAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  getAllTaskTimeSheet,
+  JobTimeSheetAction,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import sweatalert from 'sweetalert2';
+import sweatalert from "sweetalert2";
 
-
-const TaskTimesheet = ({ getAccessDataJob , goto }) => {
+const TaskTimesheet = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
@@ -18,185 +20,182 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
   const [viewtimesheet, setViewtimesheet] = useState(false);
   const [taskTimeData, setTaskTimeData] = useState([]);
   const [jobTimeData, setJobTimeData] = useState([]);
-  const [TotalTime, setTotalTime] = useState({ hours: 0, minutes: 0 })
-  const [getRowData, setRowData] = useState({})
-  const [getMasterStatusArr, setMasterStatusDataArr] = useState([])
-  const [TaskStatus, setTaskStatus] = useState('')
-  const [BudgetedTime, setBudgetedTime] = useState({ hours: 0, minutes: 0 })
-  const [GetTimeSheetTotalHours, setTimeSheetTotalHours] = useState({ hours: 0, minutes: 0 })
-  const [GetTimeSheetStatus, setTimeSheetStatus] = useState('')
-  const [error, setError] = useState({})
-  const [error1, setError1] = useState({})
-
-
-
-  useEffect(() => {
-    GetAllTaskTimeSheetData()
-  }, [])
+  const [TotalTime, setTotalTime] = useState({ hours: 0, minutes: 0 });
+  const [getRowData, setRowData] = useState({});
+  const [getMasterStatusArr, setMasterStatusDataArr] = useState([]);
+  const [TaskStatus, setTaskStatus] = useState("");
+  const [BudgetedTime, setBudgetedTime] = useState({ hours: 0, minutes: 0 });
+  const [GetTimeSheetTotalHours, setTimeSheetTotalHours] = useState({
+    hours: 0,
+    minutes: 0,
+  });
+  const [GetTimeSheetStatus, setTimeSheetStatus] = useState("");
+  const [error, setError] = useState({});
+  const [error1, setError1] = useState({});
 
   useEffect(() => {
-    getMasterStatusData()
+    GetAllTaskTimeSheetData();
+  }, []);
+
+  useEffect(() => {
+    getMasterStatusData();
     if (getRowData && getRowData.time) {
-      const time = getRowData.time.split(":")
-      setTotalTime({ hours: time[0], minutes: time[1] })
-      setTaskStatus(getRowData.task_status)
+      const time = getRowData.time.split(":");
+      setTotalTime({ hours: time[0], minutes: time[1] });
+      setTaskStatus(getRowData.task_status);
     }
-  }, [getRowData])
+  }, [getRowData]);
 
   useEffect(() => {
     if (jobTimeData?.length > 0) {
-      const budgeted = jobTimeData[0]?.budgeted_hours?.split(":")
-      const time = jobTimeData[0]?.total_hours ? jobTimeData[0].total_hours.split(":") : ["00", "00"];
-      setBudgetedTime({ hours: budgeted[0], minutes: budgeted[1] })
-      setTimeSheetTotalHours({ hours: time[0], minutes: time[1] })
-      setTimeSheetStatus(jobTimeData[0]?.total_hours_status)
+      const budgeted = jobTimeData[0]?.budgeted_hours?.split(":");
+      const time = jobTimeData[0]?.total_hours
+        ? jobTimeData[0].total_hours.split(":")
+        : ["00", "00"];
+      setBudgetedTime({ hours: budgeted[0], minutes: budgeted[1] });
+      setTimeSheetTotalHours({ hours: time[0], minutes: time[1] });
+      setTimeSheetStatus(jobTimeData[0]?.total_hours_status);
     }
-  }, [jobTimeData, addjobtimesheet])
-
-
+  }, [jobTimeData, addjobtimesheet]);
 
   const GetAllTaskTimeSheetData = async () => {
-    const req = { action: "get", job_id: location.state.job_id }
-    const data = { req: req, authToken: token }
+    const req = { action: "get", job_id: location.state.job_id };
+    const data = { req: req, authToken: token };
     await dispatch(getAllTaskTimeSheet(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setTaskTimeData(response.data || [])
-        }
-        else {
-          setTaskTimeData([])
+          setTaskTimeData(response.data || []);
+        } else {
+          setTaskTimeData([]);
         }
       })
       .catch((error) => {
         return;
-      })
-  }
+      });
+  };
 
   const handleTimeSheetView = async (job_id) => {
-    const req = { action: "get", job_id: job_id }
-    const data = { req: req, authToken: token }
+    const req = { action: "get", job_id: job_id };
+    const data = { req: req, authToken: token };
     await dispatch(JobTimeSheetAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setJobTimeData(response.data || [])
-        }
-        else {
-          setJobTimeData([])
+          setJobTimeData(response.data || []);
+        } else {
+          setJobTimeData([]);
         }
       })
       .catch((error) => {
         return;
-      })
-  }
+      });
+  };
 
   const getMasterStatusData = async () => {
-    const req = { action: "get" }
-    const data = { req: req, authToken: token }
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
     await dispatch(MasterStatusData(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setMasterStatusDataArr(response.data || [])
-        }
-        else {
-          setMasterStatusDataArr([])
+          setMasterStatusDataArr(response.data || []);
+        } else {
+          setMasterStatusDataArr([]);
         }
       })
       .catch((error) => {
         return;
-      })
-  }
+      });
+  };
 
   const handleSubmit = async (type) => {
-    let req = {}
+    let req = {};
     if (type === "AddTimesheet" && !validateAllfields()) {
-      return
-    }
-    else if (type === "TimeSheet" && !validateAllfiledsOfTimeSheet()) {
-      return
+      return;
+    } else if (type === "TimeSheet" && !validateAllfiledsOfTimeSheet()) {
+      return;
     }
 
     if (type === "AddTimesheet") {
       req = {
         action: "updateJobTimeTotalHours",
         job_id: location.state.job_id,
-        total_hours: GetTimeSheetTotalHours.hours + ":" + GetTimeSheetTotalHours.minutes,
+        total_hours:
+          GetTimeSheetTotalHours.hours + ":" + GetTimeSheetTotalHours.minutes,
         total_hours_status: GetTimeSheetStatus,
-      }
-    }
-    else {
+      };
+    } else {
       req = {
         action: "updateTaskTimeSheetStatus",
         id: getRowData?.id,
         time: TotalTime.hours + ":" + TotalTime.minutes,
-        task_status: Number(TaskStatus)
-      }
+        task_status: Number(TaskStatus),
+      };
     }
-    const data = { req: req, authToken: token }
+    const data = { req: req, authToken: token };
     await dispatch(JobTimeSheetAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          GetAllTaskTimeSheetData()
+          GetAllTaskTimeSheetData();
           sweatalert.fire({
-            icon: 'success',
+            icon: "success",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
-          })
+            timer: 1500,
+          });
           setTimeout(() => {
-            setViewtimesheet(false)
-            setAddjobtimesheet(false)
-
-          }, 1500)
-        }
-        else {
+            setViewtimesheet(false);
+            setAddjobtimesheet(false);
+          }, 1500);
+        } else {
           sweatalert.fire({
-            icon: 'error',
+            icon: "error",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
-          })
+            timer: 1500,
+          });
         }
       })
       .catch((error) => {
         return;
-      })
-
-  }
+      });
+  };
 
   const columns = [
     {
       name: "Task Name",
-      selector: (row) => row.task_name || '-',
+      selector: (row) => row.task_name || "-",
       sortable: true,
       reorder: false,
     },
     {
       name: "Service Type",
-      selector: (row) => row.service_name || '-',
+      selector: (row) => row.service_name || "-",
       reorder: false,
-      sortable: true
+      sortable: true,
     },
     {
       name: "Job Type",
-      selector: (row) => row.job_type_type || '-',
+      selector: (row) => row.job_type_type || "-",
       reorder: false,
       sortable: true,
     },
     {
       name: "Task Status",
-      selector: (row) => row.task_status_name || '-',
+      selector: (row) => row.task_status_name || "-",
       reorder: false,
       sortable: true,
     },
     {
       name: "Time",
-      selector: (row) => row.time ? row.time.split(":")[0] + "h " + row.time.split(":")[1] + "m" : '-',
+      selector: (row) =>
+        row.time
+          ? row.time.split(":")[0] + "h " + row.time.split(":")[1] + "m"
+          : "-",
       sortable: true,
       reorder: false,
     },
@@ -204,13 +203,19 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       name: "Actions",
       cell: (row) => (
         <div>
-          {
-            goto!="report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") && (
-              <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
+          {goto != "report" &&
+            (getAccessDataJob.update === 1 || role === "SUPERADMIN") && (
+              <button
+                className="view-icon"
+                onClick={() => {
+                  handleTimeSheetView(location.state.job_id);
+                  setRowData(row);
+                  setViewtimesheet(true);
+                }}
+              >
                 <i className="fa fa-eye fs-6 text-warning" />
-              </button>)
-          }
-
+              </button>
+            )}
         </div>
       ),
       ignoreRowClick: true,
@@ -220,53 +225,53 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
     },
   ];
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const isMinutesValid = (value === '' || (Number(value) >= 0 && Number(value) <= 59));
+    const isMinutesValid =
+      value === "" || (Number(value) >= 0 && Number(value) <= 59);
 
     validate(name, value);
 
     switch (name) {
-      case 'totalHours':
+      case "totalHours":
         setTimeSheetTotalHours((prev) => ({ ...prev, hours: value }));
         break;
-      case 'totalMinutes':
+      case "totalMinutes":
         if (isMinutesValid) {
           setTimeSheetTotalHours((prev) => ({ ...prev, minutes: value }));
         }
         break;
-      case 'budgetedHours':
+      case "budgetedHours":
         setBudgetedTime((prev) => ({ ...prev, hours: value }));
         break;
-      case 'budgetedMinutes':
+      case "budgetedMinutes":
         if (isMinutesValid) {
           setBudgetedTime((prev) => ({ ...prev, minutes: value }));
         }
         break;
-      case 'status':
+      case "status":
         setTimeSheetStatus(value);
         break;
       default:
         break;
     }
-
   };
 
   const handleChangeTimeSheet = (e) => {
     const { name, value } = e.target;
-    const isMinutesValid = (value === '' || (Number(value) >= 0 && Number(value) <= 59));
+    const isMinutesValid =
+      value === "" || (Number(value) >= 0 && Number(value) <= 59);
     validateTimeSheet(name, value);
     switch (name) {
-      case 'TotalHours':
+      case "TotalHours":
         setTotalTime((prev) => ({ ...prev, hours: value }));
         break;
-      case 'TotalMinutes':
+      case "TotalMinutes":
         if (isMinutesValid) {
           setTotalTime((prev) => ({ ...prev, minutes: value }));
         }
         break;
-      case 'status':
+      case "status":
         setTaskStatus(value);
         break;
       default:
@@ -276,13 +281,11 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
 
   const validateTimeSheet = (name, value) => {
     let errors = { ...error1 };
-    if (!value && name !== 'TotalHours' && name !== 'TotalMinutes') {
+    if (!value && name !== "TotalHours" && name !== "TotalMinutes") {
       errors[name] = "This field is required";
-    }
-    else if ((name === 'TotalHours' && value == 0)) {
+    } else if (name === "TotalHours" && value == 0) {
       errors[name] = "This field is required";
-    }
-    else {
+    } else {
       delete errors[name];
       setError1((prevErrors) => {
         const updatedErrors = { ...prevErrors };
@@ -297,7 +300,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       }));
     }
     return Object.keys(errors).length === 0;
-  }
+  };
 
   const validateAllfiledsOfTimeSheet = () => {
     let valid = true;
@@ -318,19 +321,15 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       }));
     }
     return valid;
-  }
-
-
+  };
 
   const validate = (name, value) => {
     let errors = { ...error };
-    if (!value && name !== 'budgetedHours' && name !== 'budgetedMinutes') {
+    if (!value && name !== "budgetedHours" && name !== "budgetedMinutes") {
       errors[name] = "This field is required";
-    }
-    else if ((name === 'totalHours' && value == 0)) {
+    } else if (name === "totalHours" && value == 0) {
       errors[name] = "This field is required";
-    }
-    else {
+    } else {
       delete errors[name];
       setError((prevErrors) => {
         const updatedErrors = { ...prevErrors };
@@ -345,7 +344,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       }));
     }
     return Object.keys(errors).length === 0;
-  }
+  };
 
   const validateAllfields = () => {
     let valid = true;
@@ -365,8 +364,55 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       }));
     }
     return valid;
-  }
+  };
 
+  const handleExport = async () => {
+    const req = {
+      action: "get",
+      page: 1,
+      limit: 100000,
+      search: "",
+      job_id: location.state.job_id,
+    };
+    const data = { req, authToken: token };
+    const response = await dispatch(getAllTaskTimeSheet(data)).unwrap();
+
+    if (!response.status || !response?.data || response?.data?.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
+    const exportData = response?.data?.map((item) => ({
+      "Task Name": item.task_name || "-",
+      "Service Type": item.service_name || "-",
+      "Job Type": item.job_type_type || "-",
+      "Task Status": item.task_status_name || "-",
+      Time: item.time
+        ? `${item.time.split(":")[0]}h ${item.time.split(":")[1]}m`
+        : "-",
+    }));
+
+    downloadCSV(exportData, "Task Timesheet.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
 
   return (
     <>
@@ -379,16 +425,28 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
           </div>
           <div className="col-md-4">
             <div>
-              {
-                goto!="report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") && (
-                  <button type="button"
-                    onClick={() => { handleTimeSheetView(location.state.job_id); setAddjobtimesheet(true) }}
-                    className="btn btn-info text-white float-end ms-2">
+              {goto != "report" &&
+                (getAccessDataJob.insert === 1 || role === "SUPERADMIN") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleTimeSheetView(location.state.job_id);
+                      setAddjobtimesheet(true);
+                    }}
+                    className="btn btn-info text-white float-end ms-2"
+                  >
                     <i className="fa fa-plus pe-1"></i> Job Timesheet
                   </button>
-                )
-              }
-
+                )}
+              {taskTimeData && taskTimeData.length > 0 && (
+                <button
+                  className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
+                  onClick={handleExport}
+                >
+                  <i className="fa fa-download" aria-hidden="true" />
+                  <span>Export Excel</span>
+                </button>
+              )}
               {/* <button
                 type="button"
                 onClick={() => { setAddtask(true) }}
@@ -409,22 +467,22 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
         backdrop="static"
         size="ms-5"
         title="Add Timesheet"
-        cancel_btn='true'
+        cancel_btn="true"
         btn_name="Save"
         hideBtn={false}
         handleClose={() => {
           setAddjobtimesheet(false);
-          setBudgetedTime({ hours: 0, minutes: 0 })
-          setTimeSheetTotalHours({ hours: 0, minutes: 0 })
-          setTimeSheetStatus('')
-          setError({})
+          setBudgetedTime({ hours: 0, minutes: 0 });
+          setTimeSheetTotalHours({ hours: 0, minutes: 0 });
+          setTimeSheetStatus("");
+          setError({});
         }}
         Submit_Cancel_Function={() => {
           setAddjobtimesheet(false);
-          setBudgetedTime({ hours: 0, minutes: 0 })
-          setTimeSheetTotalHours({ hours: 0, minutes: 0 })
-          setTimeSheetStatus('')
-          setError({})
+          setBudgetedTime({ hours: 0, minutes: 0 });
+          setTimeSheetTotalHours({ hours: 0, minutes: 0 });
+          setTimeSheetStatus("");
+          setError({});
         }}
         Submit_Function={() => handleSubmit("AddTimesheet")}
       >
@@ -471,7 +529,11 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                 <div className="hours-div w-100">
                   <input
                     type="text"
-                    className={error['totalHours'] ? "error-field form-control" : "form-control"}
+                    className={
+                      error["totalHours"]
+                        ? "error-field form-control"
+                        : "form-control"
+                    }
                     placeholder="Hours"
                     defaultValue=""
                     id="totalHours"
@@ -485,7 +547,11 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                 <div className="hours-div w-100">
                   <input
                     type="text"
-                    className={error['totalMinutes'] ? "error-field form-control" : "form-control"}
+                    className={
+                      error["totalMinutes"]
+                        ? "error-field form-control"
+                        : "form-control"
+                    }
                     placeholder="Minutes"
                     defaultValue=""
                     id="totalMinutes"
@@ -495,29 +561,34 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                   />
                   <span className="input-group-text">M</span>
                 </div>
-
               </div>
-              {error['totalHours'] ? <div className="error-text">{error['totalHours']}</div> :
-                <div className="error-text">{error['totalMinutes']}</div>
-              }
+              {error["totalHours"] ? (
+                <div className="error-text">{error["totalHours"]}</div>
+              ) : (
+                <div className="error-text">{error["totalMinutes"]}</div>
+              )}
             </div>
           </div>
           <div className="col-lg-12">
             <div className="mb-3">
               <label className="form-label">Status</label>
               <select
-                className={error['status'] ? "error-field form-select" : "form-select"}
+                className={
+                  error["status"] ? "error-field form-select" : "form-select"
+                }
                 // className="form-select"
                 id="status"
                 name="status"
                 onChange={(e) => handleChange(e)}
                 value={GetTimeSheetStatus}
               >
-                <option value={''}>Select Status</option>
-                <option value={'1'}>Active</option>
-                <option value={'0'}>Deactive</option>
+                <option value={""}>Select Status</option>
+                <option value={"1"}>Active</option>
+                <option value={"0"}>Deactive</option>
               </select>
-              {error['status'] && <div className="error-text">{error['status']}</div>}
+              {error["status"] && (
+                <div className="error-text">{error["status"]}</div>
+              )}
             </div>
           </div>
         </div>
@@ -672,25 +743,23 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
         backdrop="static"
         size="md"
         title="Time Sheet"
-        cancel_btn='true'
+        cancel_btn="true"
         btn_name="Save"
         hideBtn={false}
         handleClose={() => {
           setViewtimesheet(false);
-          setRowData({})
-          setTotalTime({ hours: 0, minutes: 0 })
-          setTaskStatus('')
-          setError1({})
+          setRowData({});
+          setTotalTime({ hours: 0, minutes: 0 });
+          setTaskStatus("");
+          setError1({});
         }}
         Submit_Cancel_Function={() => {
           setViewtimesheet(false);
-          setRowData({})
-          setTotalTime({ hours: 0, minutes: 0 })
-          setTaskStatus('')
-          setError1({})
-
+          setRowData({});
+          setTotalTime({ hours: 0, minutes: 0 });
+          setTaskStatus("");
+          setError1({});
         }}
-
         Submit_Function={() => handleSubmit("TimeSheet")}
       >
         <div className="row">
@@ -713,11 +782,13 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                   </label>
                 </div>
                 <div className="col-md-8">
-
-                  <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_code_id}</span>
+                  <span className="text-muted">
+                    {jobTimeData &&
+                      jobTimeData[0] &&
+                      jobTimeData[0].job_code_id}
+                  </span>
                 </div>
               </div>
-
             </div>
           </div>
           <div className="col-md-12 ">
@@ -734,8 +805,11 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                           <div className="hours-div w-100">
                             <input
                               type="text"
-                              className={error1['TotalHours'] ? "error-field form-control" : "form-control"}
-
+                              className={
+                                error1["TotalHours"]
+                                  ? "error-field form-control"
+                                  : "form-control"
+                              }
                               aria-label="Recipient's username"
                               aria-describedby="basic-addon2"
                               id="TotalHours"
@@ -744,7 +818,10 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                               value={TotalTime.hours}
                               placeholder="Hours"
                             />
-                            <span className="input-group-text" id="basic-addon2">
+                            <span
+                              className="input-group-text"
+                              id="basic-addon2"
+                            >
                               H
                             </span>
                           </div>
@@ -755,8 +832,11 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                           <div className="hours-div w-100">
                             <input
                               type="text"
-                              className={error1['TotalMinutes'] ? "error-field form-control" : "form-control"}
-
+                              className={
+                                error1["TotalMinutes"]
+                                  ? "error-field form-control"
+                                  : "form-control"
+                              }
                               aria-label="Recipient's username"
                               aria-describedby="basic-addon2"
                               placeholder="Minutes"
@@ -765,15 +845,24 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                               onChange={(e) => handleChangeTimeSheet(e)}
                               value={TotalTime.minutes}
                             />
-                            <span className="input-group-text" id="basic-addon2">
+                            <span
+                              className="input-group-text"
+                              id="basic-addon2"
+                            >
                               M
                             </span>
                           </div>
                         </div>
                       </div>
-                      {error1['TotalHours'] ? <div className="error-text ps-3">{error1['TotalHours']}</div> :
-                        <div className="error-text ps-2">{error1['TotalMinutes']}</div>
-                      }
+                      {error1["TotalHours"] ? (
+                        <div className="error-text ps-3">
+                          {error1["TotalHours"]}
+                        </div>
+                      ) : (
+                        <div className="error-text ps-2">
+                          {error1["TotalMinutes"]}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="col-md-12">
@@ -782,34 +871,36 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
                         Task Status
                       </label>
                       <select
-
-                        className={error1['status'] ? "error-field form-select" : "form-select"}
-
+                        className={
+                          error1["status"]
+                            ? "error-field form-select"
+                            : "form-select"
+                        }
                         data-trigger=""
                         name="status"
                         id="status"
                         onChange={(e) => handleChangeTimeSheet(e)}
                         value={TaskStatus}
                       >
-
                         <option value=""> Select Status</option>
-                        {getMasterStatusArr && getMasterStatusArr.map((item) => {
-                          return (
-                            <option value={item.id} key={item.id}>
-                              {item.name}
-                            </option>
-                          );
-                        })}
-
+                        {getMasterStatusArr &&
+                          getMasterStatusArr.map((item) => {
+                            return (
+                              <option value={item.id} key={item.id}>
+                                {item.name}
+                              </option>
+                            );
+                          })}
                       </select>
-                      {error1['status'] && <div className="error-text">{error1['status']}</div>}
+                      {error1["status"] && (
+                        <div className="error-text">{error1["status"]}</div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </CommonModal>
     </>

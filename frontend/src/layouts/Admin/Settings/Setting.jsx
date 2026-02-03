@@ -34,7 +34,7 @@ const Setting = () => {
   const [StaffRoleDAta, setStaffRoleData] = useState([]);
 
   const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
+    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data,
   );
   const [HourMinut, setHourMinut] = useState({ hours: "00", minutes: "00" });
 
@@ -49,22 +49,22 @@ const Setting = () => {
         accessData.map((item) => {
           if (item.permission_name === "setting") {
             const settingInsert = item.items.find(
-              (item) => item.type === "insert"
+              (item) => item.type === "insert",
             );
             setShowSettingInsertTab(
-              settingInsert && settingInsert.is_assigned == 1
+              settingInsert && settingInsert.is_assigned == 1,
             );
             const settingUpdate = item.items.find(
-              (item) => item.type === "update"
+              (item) => item.type === "update",
             );
             setShowSettingUpdateTab(
-              settingUpdate && settingUpdate.is_assigned == 1
+              settingUpdate && settingUpdate.is_assigned == 1,
             );
             const settingDelete = item.items.find(
-              (item) => item.type === "delete"
+              (item) => item.type === "delete",
             );
             setSettingDeleteTab(
-              settingDelete && settingDelete.is_assigned == 1
+              settingDelete && settingDelete.is_assigned == 1,
             );
           }
         });
@@ -113,7 +113,7 @@ const Setting = () => {
 
   const accessDataSetting =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "setting"
+      (item) => item.permission_name === "setting",
     )?.items || [];
 
   useEffect(() => {
@@ -166,7 +166,7 @@ const Setting = () => {
                   .split(",")
                   .map((id) => {
                     let matchedItem = Array.find(
-                      (item) => item.id === Number(id)
+                      (item) => item.id === Number(id),
                     );
                     return matchedItem ? matchedItem.name : null;
                   })
@@ -1420,9 +1420,7 @@ const Setting = () => {
                   <i className="ti-eye" />
                 </button>
 
-                {getAccessDataSetting.update === 1 ||
-                
-                role === "SUPERADMIN" ? (
+                {getAccessDataSetting.update === 1 || role === "SUPERADMIN" ? (
                   <button
                     className="edit-icon dropdown-item w-auto mb-2"
                     onClick={() =>
@@ -1438,9 +1436,7 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 ) : null}
-                {getAccessDataSetting.delete === 1 ||
-                
-                role === "SUPERADMIN" ? (
+                {getAccessDataSetting.delete === 1 || role === "SUPERADMIN" ? (
                   <button
                     className="delete-icon dropdown-item w-auto mb-2"
                     onClick={() => ChecklistDelete(row)}
@@ -1463,9 +1459,7 @@ const Setting = () => {
               <i className="ti-eye" />
             </button>
 
-            {getAccessDataSetting.update === 1 ||
-            
-            role === "SUPERADMIN" ? (
+            {getAccessDataSetting.update === 1 || role === "SUPERADMIN" ? (
               <button
                 className="edit-icon"
                 onClick={() =>
@@ -1481,9 +1475,7 @@ const Setting = () => {
                 <i className="ti-pencil" />
               </button>
             ) : null}
-            {getAccessDataSetting.delete === 1 ||
-            
-            role === "SUPERADMIN" ? (
+            {getAccessDataSetting.delete === 1 || role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"
                 onClick={() => ChecklistDelete(row)}
@@ -2204,8 +2196,8 @@ const Setting = () => {
       tabStatus == "1"
         ? data.role_name
         : tabStatus == "2"
-        ? data.type
-        : data.name;
+          ? data.type
+          : data.name;
 
     sweatalert
       .fire({
@@ -2287,7 +2279,7 @@ const Setting = () => {
       const req = { action: "get", role_id: deleteStatus?.id };
       const data = { req: req, authToken: token };
       const res = await dispatch(GetStaffByRole(data)).unwrap();
-      
+
       if (res.status) {
         setStaffRoleData(res.data.data);
       } else {
@@ -2300,11 +2292,14 @@ const Setting = () => {
 
   const roledeleteUpdatestaff = async () => {
     try {
+      let data = {
+        req: {
+          action: "delete",
+          id: deleteStatus?.id,
+          replace_id: replaceStatue,
+        },
 
-      let data = { 
-        req: { action: "delete", id: deleteStatus?.id ,replace_id:replaceStatue},
-
-        authToken: token 
+        authToken: token,
       };
       const response = await dispatch(GetStaffByRole(data)).unwrap();
       if (response.status) {
@@ -2324,17 +2319,13 @@ const Setting = () => {
       } else {
         sweatalert.fire({
           title: response.message,
-         
+
           icon: "error",
           timer: 2000,
         });
       }
-      
-    } catch (error) {
-      
-    }
-  }
-
+    } catch (error) {}
+  };
 
   return (
     <>
@@ -2405,18 +2396,18 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={roleDataAll?.data?.map((data) => {
-                      return {
+                  {roleDataAll?.data && roleDataAll.data.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={roleDataAll.data.map((data) => ({
                         id: data.id,
                         role_name: data.role_name,
                         hourminute: data.hourminute,
                         status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Role Data`}
-                  />
+                      }))}
+                      fileName={`Role Data`}
+                    />
+                  )}
                 </div>
 
                 <div className=" col-lg-12 datatable-wrapper">
@@ -2453,17 +2444,20 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={personRoleDataAll?.data?.map((data) => {
-                      return {
-                        id: data.id,
-                        name: data.name,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Customer Contact Person Role Data`}
-                  />
+                  {personRoleDataAll?.data &&
+                    personRoleDataAll.data.length > 0 && (
+                      <ExportToExcel
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        apiData={personRoleDataAll?.data?.map((data) => {
+                          return {
+                            id: data.id,
+                            name: data.name,
+                            status: data.status == 1 ? "Active" : "Inactive",
+                          };
+                        })}
+                        fileName={`Customer Contact Person Role Data`}
+                      />
+                    )}
                 </div>
                 <div className="datatable-wrapper">
                   <Datatable
@@ -2498,17 +2492,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={statusTypeDataAll?.data?.map((data) => {
-                      return {
+                  {statusTypeDataAll?.data?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={statusTypeDataAll.data.map((data) => ({
                         id: data.id,
                         type: data.type,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Status Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Status Data"
+                    />
+                  )}
                 </div>
                 <div className=" col-lg-12 datatable-wrapper">
                   <Datatable
@@ -2543,17 +2537,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={serviceDataAll?.data?.map((data) => {
-                      return {
+                  {serviceDataAll?.data?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={serviceDataAll.data.map((data) => ({
                         id: data.id,
                         name: data.name,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Service Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Service Data"
+                    />
+                  )}
                 </div>
                 <div className=" col-lg-12 datatable-wrapper">
                   <Datatable
@@ -2588,17 +2582,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={clientIndustryDataAll?.data?.map((data) => {
-                      return {
+                  {clientIndustryDataAll?.data?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={clientIndustryDataAll.data.map((data) => ({
                         id: data.id,
                         name: data.business_type,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Client Industry Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Client Industry Data"
+                    />
+                  )}
                 </div>
                 <div className="col-lg-12 datatable-wrapper">
                   <Datatable
@@ -2633,19 +2627,19 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={countryDataAll?.data?.map((data) => {
-                      return {
+                  {countryDataAll?.data?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={countryDataAll.data.map((data) => ({
                         id: data.id,
                         name: data.name,
                         code: data.code,
                         currency: data.currency,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Country Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Country Data"
+                    />
+                  )}
                 </div>
                 <div className="col-lg-12 datatable-wrapper">
                   <Datatable
@@ -2680,17 +2674,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={incorporationDataAll?.map((data) => {
-                      return {
+                  {incorporationDataAll?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={incorporationDataAll.map((data) => ({
                         id: data.id,
                         name: data.name,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Incorporation Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Incorporation Data"
+                    />
+                  )}
                 </div>
                 <div className="datatable-wrapper col-lg-12">
                   <Datatable
@@ -2725,17 +2719,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={customerSourceDataDataAll?.map((data) => {
-                      return {
+                  {customerSourceDataDataAll?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={customerSourceDataDataAll.map((data) => ({
                         id: data.id,
                         name: data.name,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Customer Source Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Customer Source Data"
+                    />
+                  )}
                 </div>
                 <div className="datatable-wrapper col-lg-12">
                   <Datatable
@@ -2770,17 +2764,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={getCheckList?.map((data) => {
-                      return {
+                  {getCheckList?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={getCheckList.map((data) => ({
                         id: data.checklists_id,
                         name: data.checklist_name,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`CheckList Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="CheckList Data"
+                    />
+                  )}
                 </div>
                 <div className="datatable-wrapper col-lg-12">
                   <Datatable
@@ -2815,17 +2809,17 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={InternalAllData?.map((data) => {
-                      return {
+                  {InternalAllData?.length > 0 && (
+                    <ExportToExcel
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      apiData={InternalAllData.map((data) => ({
                         id: data.id,
                         name: data.name,
-                        status: data.status == 1 ? "Active" : "Inactive",
-                      };
-                    })}
-                    fileName={`Internal Job/Project Data`}
-                  />
+                        status: data.status === 1 ? "Active" : "Inactive",
+                      }))}
+                      fileName="Internal Job/Project Data"
+                    />
+                  )}
                 </div>
                 <div className="datatable-wrapper col-lg-12">
                   <Datatable
@@ -2918,109 +2912,114 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
-       <CommonModal
-  isOpen={deleteStatus}
-  backdrop="static"
-  size="md"
-  title="Delete Role"
-  hideBtn={true}
-  handleClose={() => setDeleteStatus(false)}
->
-  <div className="modal-body">
-    {/* Heading */}
-    <div className="text-start mb-4 border-bottom pb-2">
-      <h5 className="text-danger fw-bold d-flex align-items-center">
-        <i className="bi bi-trash3 me-2"></i>
-        Delete Role: <span className="text-dark ms-2">{deleteStatus?.role_name}</span>
-      </h5>
-    </div>
-
-    {StaffRoleDAta.length > 0 ? (
-      <>
-        {/* Replacement Dropdown */}
-        <div className="mb-4">
-          <label htmlFor="staff-select" className="form-label fw-semibold">
-            Select Role to Replace
-          </label>
-          <select
-            id="staff-select"
-            value={replaceStatue || ""}
-            onChange={(e) => setReplaceStatue(e.target.value)}
-            className="form-select"
-          >
-            <option value="" disabled>
-              Choose Role
-            </option>
-            {roleDataAll.data
-              .filter(
-                (staff) =>
-                  staff.id !== deleteStatus?.id &&
-                  staff.role !== "ADMIN" &&
-                  staff.role !== "SUPERADMIN"
-              )
-              .map((staff) => (
-                <option key={staff.id} value={staff.id}>
-                  {staff.role_name}
-                </option>
-              ))}
-          </select>
-        </div>
-
-        {/* Staff List */}
-        <div className="mb-4">
-          <h6 className="fw-bold text-primary d-flex align-items-center">
-            <i className="bi bi-people me-2"></i> Staff Assigned
-          </h6>
-          <ul className="list-group mt-2">
-            {StaffRoleDAta.map((customer, index) => (
-              <li
-                key={index}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                <span className="text-dark">
-                  {`${customer?.first_name} ${customer.last_name}`}
+        <CommonModal
+          isOpen={deleteStatus}
+          backdrop="static"
+          size="md"
+          title="Delete Role"
+          hideBtn={true}
+          handleClose={() => setDeleteStatus(false)}
+        >
+          <div className="modal-body">
+            {/* Heading */}
+            <div className="text-start mb-4 border-bottom pb-2">
+              <h5 className="text-danger fw-bold d-flex align-items-center">
+                <i className="bi bi-trash3 me-2"></i>
+                Delete Role:{" "}
+                <span className="text-dark ms-2">
+                  {deleteStatus?.role_name}
                 </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+              </h5>
+            </div>
 
-        {/* Buttons */}
-        <div className="d-flex gap-2">
-          <button
-            disabled={!replaceStatue}
-            onClick={roledeleteUpdatestaff}
-            className="btn btn-danger w-100"
-          >
-            Delete
-          </button>
-          <button
-            onClick={() => setDeleteStatus(false)}
-            className="btn btn-secondary w-100"
-          >
-            Cancel
-          </button>
-        </div>
-      </>
-    ) : (
-      <div className="d-flex gap-2">
-        <button
-          onClick={roledeleteUpdatestaff}
-          className="btn btn-danger w-100 rounded-pill"
-        >
-          Delete
-        </button>
-        <button
-          onClick={() => setDeleteStatus(false)}
-          className="btn btn-info w-100"
-        >
-          Cancel
-        </button>
-      </div>
-    )}
-  </div>
-</CommonModal>
+            {StaffRoleDAta.length > 0 ? (
+              <>
+                {/* Replacement Dropdown */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="staff-select"
+                    className="form-label fw-semibold"
+                  >
+                    Select Role to Replace
+                  </label>
+                  <select
+                    id="staff-select"
+                    value={replaceStatue || ""}
+                    onChange={(e) => setReplaceStatue(e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="" disabled>
+                      Choose Role
+                    </option>
+                    {roleDataAll.data
+                      .filter(
+                        (staff) =>
+                          staff.id !== deleteStatus?.id &&
+                          staff.role !== "ADMIN" &&
+                          staff.role !== "SUPERADMIN",
+                      )
+                      .map((staff) => (
+                        <option key={staff.id} value={staff.id}>
+                          {staff.role_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
 
+                {/* Staff List */}
+                <div className="mb-4">
+                  <h6 className="fw-bold text-primary d-flex align-items-center">
+                    <i className="bi bi-people me-2"></i> Staff Assigned
+                  </h6>
+                  <ul className="list-group mt-2">
+                    {StaffRoleDAta.map((customer, index) => (
+                      <li
+                        key={index}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span className="text-dark">
+                          {`${customer?.first_name} ${customer.last_name}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Buttons */}
+                <div className="d-flex gap-2">
+                  <button
+                    disabled={!replaceStatue}
+                    onClick={roledeleteUpdatestaff}
+                    className="btn btn-danger w-100"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setDeleteStatus(false)}
+                    className="btn btn-secondary w-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="d-flex gap-2">
+                <button
+                  onClick={roledeleteUpdatestaff}
+                  className="btn btn-danger w-100 rounded-pill"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => setDeleteStatus(false)}
+                  className="btn btn-info w-100"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </CommonModal>
       </div>
     </>
   );

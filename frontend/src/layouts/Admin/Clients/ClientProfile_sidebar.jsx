@@ -372,8 +372,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-            getAccessDataJob.all_jobs == 1 ||
-            role === "SUPERADMIN" ? (
+          getAccessDataJob.all_jobs == 1 ||
+          role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -552,13 +552,13 @@ const ClientList = () => {
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
-              </button>
-            )
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
             : ""}
         </div>
       ),
@@ -886,7 +886,6 @@ const ClientList = () => {
   );
 
   const handleExport = async () => {
-
     setLoading(true);
     const req = {
       action: "getByCustomer",
@@ -925,7 +924,8 @@ const ClientList = () => {
         item.outbooks_acount_manager_first_name +
         " " +
         item.outbooks_acount_manager_last_name,
-      "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
+      "Allocated To":
+        item.allocated_first_name + " " + item.allocated_last_name,
       Invoiced: item.invoiced == "1" ? "YES" : "NO",
       "Created By": item.job_created_by,
       "Created At": item.created_at,
@@ -961,7 +961,6 @@ const ClientList = () => {
 
   return (
     <div className="container-fluid">
-
       {loading && (
         <div className="overlay">
           <div className="loader"></div>
@@ -1093,8 +1092,9 @@ const ClientList = () => {
                           key={tab.id}
                         >
                           <button
-                            className={`nav-link ${activeTab === tab.id ? "active" : ""
-                              }`}
+                            className={`nav-link ${
+                              activeTab === tab.id ? "active" : ""
+                            }`}
                             id={`${tab.id}-tab`}
                             data-bs-toggle="pill"
                             data-bs-target={`#${tab.id}`}
@@ -1155,8 +1155,9 @@ const ClientList = () => {
         <div className="mt-2">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab == "NoOfJobs" ? "show active" : ""
+              }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1182,19 +1183,32 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                    <div className="col-md-2">
-                      {/* <ExportToExcel
+                    {/* <div className="col-md-2">
+                      <ExportToExcel
                         className="btn btn-outline-info fw-bold float-end border-3 "
                         apiData={exportData}
                         fileName={`Job Details`}
-                      /> */}
+                      />
                       <button
-                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                         onClick={handleExport}
                       >
-                        Export Excel
+                        <i className="fa fa-download" aria-hidden="true"></i>
+                        <span>Export Excel</span>
                       </button>
-                    </div>
+                    </div> */}
+
+                    {customerData && customerData.length > 0 && (
+                      <div className="col-md-2">
+                        <button
+                          className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                          onClick={handleExport}
+                        >
+                          <i className="fa fa-download" aria-hidden="true"></i>
+                          <span>Export Excel</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div
@@ -1303,8 +1317,8 @@ const ClientList = () => {
                             {(clientInformationData &&
                               clientInformationData.phone &&
                               clientInformationData.phone_code +
-                              " " +
-                              clientInformationData.phone) ||
+                                " " +
+                                clientInformationData.phone) ||
                               "NA"}
                           </li>
                           <li className="mt-2">
@@ -1475,7 +1489,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>

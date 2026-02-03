@@ -1840,8 +1840,10 @@ const Timesheet = () => {
                   className="btn btn-info "
                   onClick={() => exportToCSV(timeSheetRows)}
                 >
-                  Export Timesheet Data
-                  <i className="fa fa-download ms-2" />
+                   <i className="fa fa-download" aria-hidden="true"/>
+    <span> Export Timesheet Data</span>
+                 
+                  {/* <i className="fa fa-download ms-2" /> */}
                 </button>
               </div>
             ) : (

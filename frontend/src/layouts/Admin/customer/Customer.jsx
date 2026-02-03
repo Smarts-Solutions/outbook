@@ -711,12 +711,29 @@ const Customer = () => {
                               fileName={"Customer Details"}
                             /> */}
 
-                            <button
-                              className="btn btn-outline-info fw-bold float-end border-3 "
+                            {/* <button
+                              className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                               onClick={handleExport}
                             >
-                              Export Excel
-                            </button>
+                              <i
+                                className="fa fa-download"
+                                aria-hidden="true"
+                              ></i>
+                              <span>Export Excel</span>
+                            </button> */}
+
+                            {filteredData1  && filteredData1 .length > 0 && (
+                              <button
+                                className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
+                                onClick={handleExport}
+                              >
+                                <i
+                                  className="fa fa-download"
+                                  aria-hidden="true"
+                                ></i>
+                                <span>Export Excel</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                         {/* <div className="overlay">

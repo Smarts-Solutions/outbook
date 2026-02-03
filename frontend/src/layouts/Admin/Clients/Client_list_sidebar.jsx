@@ -1427,16 +1427,19 @@ const ClientLists = () => {
                   <div className="tab-title">
                     <h3 className="mt-0">{tab?.title}</h3>
                   </div>
-                  {(activeTab === "client" || activeTab === "job") && (
-                    <div className="col-md-2">
-                      <button
-                        className="btn btn-outline-info fw-bold float-end border-3"
-                        onClick={handleExport}
-                      >
-                        Export Excel
-                      </button>
-                    </div>
-                  )}
+                  {(activeTab === "client" || activeTab === "job") &&
+                    tab.data &&
+                    tab.data.length > 0 && (
+                      <div className="col-md-2">
+                        <button
+                          className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                          onClick={handleExport}
+                        >
+                          <i className="fa fa-download" aria-hidden="true"></i>
+                          <span>Export Excel</span>
+                        </button>
+                      </div>
+                    )}
                 </div>
 
                 {(activeTab === "client" || activeTab === "job") && (

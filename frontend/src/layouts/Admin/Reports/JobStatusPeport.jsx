@@ -341,14 +341,17 @@ const JobStatus = () => {
               apiData={exportData}
               fileName={`Job Status Report`}
             /> */}
-            <div className="col-md-8 d-flex justify-content-end">
-              <button
-                className="btn btn-outline-info fw-bold float-end border-3 "
-                onClick={handleExport}
-              >
-                Export Excel
-              </button>
-            </div>
+            {JobStatusData && JobStatusData.length > 0 && (
+              <div className="col-md-8 d-flex justify-content-end">
+                <button
+                  className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
+                  onClick={handleExport}
+                >
+                  <i className="fa fa-download" aria-hidden="true"></i>
+                  <span>Export Excel</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="row mb-3 mt-3">
