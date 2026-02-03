@@ -579,7 +579,8 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_sent_on"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_sent_on}
-                min={new Date().toISOString().split("T")[0]}
+                // min={new Date().toISOString().split("T")[0]}
+                min={minDateRecivedOn||""}
               />
               {errors1["missing_log_sent_on"] && (
                 <div className="error-text">
@@ -811,6 +812,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 name="missing_log_sent_on"
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log_sent_on}
+                min={minDateRecivedOn||""}
               />
               {errors1["missing_log_sent_on"] && (
                 <div className="error-text">
