@@ -603,7 +603,8 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="QuerySentDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
-                  min={new Date().toISOString().split("T")[0]}
+                  // min={new Date().toISOString().split("T")[0]}
+                  min={minDateRecivedOn||""}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">
@@ -849,6 +850,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="QuerySentDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
+                  min={minDateRecivedOn||""}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">
