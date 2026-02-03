@@ -34,7 +34,7 @@ const Status = () => {
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "status"
+      (item) => item.permission_name === "status",
     )?.items || [];
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const Status = () => {
           {row.is_disable == "0" && (
             <button
               className="delete-icon"
-             onClick={() => confirmDeleteStatus(row)} 
+              onClick={() => confirmDeleteStatus(row)}
             >
               <i className="ti-trash text-danger" />
             </button>
@@ -132,8 +132,8 @@ const Status = () => {
     console.log("row", row);
     setEditItem(row);
     setStatsAdd({
-      statusname: row.name,  
-      statustype: row.status_type_id, 
+      statusname: row.name,
+      statustype: row.status_type_id,
     });
 
     // Show the modal
@@ -189,7 +189,6 @@ const Status = () => {
   };
 
   const handleDelete = async (row) => {
-
     const data = {
       req: {
         action: "delete",
@@ -244,43 +243,43 @@ const Status = () => {
         return;
       });
   };
-const confirmDeleteStatus = async (row) => {
-  Swal.fire({
-    title: `Delete Status: ${row?.name}?`,
-    // text: "This action cannot be undone!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: "Yes, Delete",
-    cancelButtonText: "Cancel",
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        const data = {
-          req: {
-            action: "delete",
-            id: row.id,
-            replace_id: replaceStatue, 
-          },
-          authToken: token,
-        };
+  const confirmDeleteStatus = async (row) => {
+    Swal.fire({
+      title: `Delete Status: ${row?.name}?`,
+      // text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const data = {
+            req: {
+              action: "delete",
+              id: row.id,
+              replace_id: replaceStatue,
+            },
+            authToken: token,
+          };
 
-        const response = await dispatch(MasterStatusData(data)).unwrap();
+          const response = await dispatch(MasterStatusData(data)).unwrap();
 
-        if (response.status) {
-          Swal.fire("Deleted!", "Status has been deleted.", "success");
-          GetStatus();
-          setReplaceStatue(null);
-        } else {
-          Swal.fire("Error", response.message, "error");
+          if (response.status) {
+            Swal.fire("Deleted!", "Status has been deleted.", "success");
+            GetStatus();
+            setReplaceStatue(null);
+          } else {
+            Swal.fire("Error", response.message, "error");
+          }
+        } catch (error) {
+          Swal.fire("Error", "Something went wrong!", "error");
         }
-      } catch (error) {
-        Swal.fire("Error", "Something went wrong!", "error");
       }
-    }
-  });
-};
+    });
+  };
 
   const createTask = async () => {
     if (!getStatsAdd.statusname?.trim() || !getStatsAdd.statustype?.trim()) {
@@ -358,7 +357,6 @@ const confirmDeleteStatus = async (row) => {
     await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
-
         console.log("JobData -- ", response);
         if (response.status) {
           setJobData(response.data);
@@ -389,9 +387,7 @@ const confirmDeleteStatus = async (row) => {
               <div className="col-12 col-sm-6">
                 <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                   <div>
-                    {getAccessData.insert === 1 ||
-                      
-                      role === "SUPERADMIN" ? (
+                    {getAccessData.insert === 1 || role === "SUPERADMIN" ? (
                       <button
                         type="button"
                         className="btn btn-info text-white float-md-end  "
@@ -417,11 +413,13 @@ const confirmDeleteStatus = async (row) => {
         </div>
         <div className="report-data mt-4 ">
           <div className="d-flex justify-content-end">
-            <ExportToExcel
-              className="btn btn-outline-info fw-bold float-end border-3 "
-              apiData={exportData}
-              fileName={`Stauts`}
-            />
+            {exportData && exportData.length > 0 && (
+              <ExportToExcel
+                className="btn btn-outline-info fw-bold float-end border-3"
+                apiData={exportData}
+                fileName={`Status`}
+              />
+            )}
           </div>
 
           <div className="datatable-wrapper  ">
@@ -509,93 +507,81 @@ const confirmDeleteStatus = async (row) => {
               </h5>
             </div>
 
-
-            {
-              JobData.length > 0 ?
-                <>
-                  <div className="mb-3">
-                    <label htmlFor="staff-select" className="form-label">
-                      Select Status to Replace:
-                    </label>
-                    <select
-                      id="staff-select"
-                      value={replaceStatue || ""}
-                      onChange={(e) => setReplaceStatue(e.target.value)}
-                      className="form-select"
-                      
-                    >
-                      <option value="" disabled>
-                        Choose Status
-                      </option>
-                      {statusDataAll
-                        .filter((staff) => staff.id !== DeleteStatus?.id)
-                        .map((staff) => (
-                          <option key={staff.id} value={staff.id}>
-                            {staff.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  {replaceStatue && (
-                    <button
-                      onClick={handleDelete}
-                      className="btn btn-danger w-100 mt-3"
-                    >
-                      Delete
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => setDeleteStatus(false)}
-                    className="btn btn-secondary w-100 mt-2"
+            {JobData.length > 0 ? (
+              <>
+                <div className="mb-3">
+                  <label htmlFor="staff-select" className="form-label">
+                    Select Status to Replace:
+                  </label>
+                  <select
+                    id="staff-select"
+                    value={replaceStatue || ""}
+                    onChange={(e) => setReplaceStatue(e.target.value)}
+                    className="form-select"
                   >
-                    Cancel
-                  </button>
+                    <option value="" disabled>
+                      Choose Status
+                    </option>
+                    {statusDataAll
+                      .filter((staff) => staff.id !== DeleteStatus?.id)
+                      .map((staff) => (
+                        <option key={staff.id} value={staff.id}>
+                          {staff.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
 
-                  {JobData.length > 0 && (
-                    <div className="mb-4">
-                      <h6 className="fw-bold text-primary">
-                        <i className="bi bi-people"></i> Job Assigned:
-                      </h6>
-                      <ul className="list-group">
-                        <label className="">Job ID</label>
-                        {JobData.map((customer) => (
-                          <li
-                            key={customer.job_id}
-                            className="list-group-item d-flex justify-content-between align-items-center"
-                          >
-                            {/* <span className="text-dark">Customer : {customer?.customer_name} , Client : {customer?.client_name} , Job Code : {customer?.job_code_id}</span> */}
-                            <div className="pop-boxx1 d-flex justify-content-between align-items-center"><span>{customer?.customer_name}</span> <span>{customer?.client_name}</span> <span>{customer?.job_code_id}</span></div>
-
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                </>
-                :
-
-                <>
+                {replaceStatue && (
                   <button
                     onClick={handleDelete}
                     className="btn btn-danger w-100 mt-3"
                   >
                     Delete
                   </button>
-                </>
+                )}
 
+                <button
+                  onClick={() => setDeleteStatus(false)}
+                  className="btn btn-secondary w-100 mt-2"
+                >
+                  Cancel
+                </button>
 
-            }
-
-
-
-
-
-
-
-
+                {JobData.length > 0 && (
+                  <div className="mb-4">
+                    <h6 className="fw-bold text-primary">
+                      <i className="bi bi-people"></i> Job Assigned:
+                    </h6>
+                    <ul className="list-group">
+                      <label className="">Job ID</label>
+                      {JobData.map((customer) => (
+                        <li
+                          key={customer.job_id}
+                          className="list-group-item d-flex justify-content-between align-items-center"
+                        >
+                          {/* <span className="text-dark">Customer : {customer?.customer_name} , Client : {customer?.client_name} , Job Code : {customer?.job_code_id}</span> */}
+                          <div className="pop-boxx1 d-flex justify-content-between align-items-center">
+                            <span>{customer?.customer_name}</span>{" "}
+                            <span>{customer?.client_name}</span>{" "}
+                            <span>{customer?.job_code_id}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleDelete}
+                  className="btn btn-danger w-100 mt-3"
+                >
+                  Delete
+                </button>
+              </>
+            )}
           </div>
         </CommanModal>
       </div>

@@ -463,11 +463,19 @@ const Dashboard = () => {
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
                 <div className="col-md-2">
-                  <ExportToExcel
+                  {/* <ExportToExcel
                     className="btn btn-outline-info fw-bold float-end border-3 "
                     apiData={exportData}
                     fileName={"Logs Details"}
-                  />
+                  /> */}
+                  {exportData && exportData.length > 0 && (
+  <ExportToExcel
+    className="btn btn-outline-info fw-bold float-end border-3"
+    apiData={exportData}
+    fileName={"Logs Details"}
+  />
+)}
+
                 </div>
               </div>
             </div>

@@ -39,7 +39,6 @@ function JobCustomReport() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
-
   ////////////////////////
 
   const [accountManagerAllData, setAccountManagerAllData] = useState([]);
@@ -60,7 +59,6 @@ function JobCustomReport() {
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
 
   const [getAllFilterData, setGetAllFilterData] = useState([]);
-
 
   // set filter id
   const [filterId, setFilterId] = useState(null);
@@ -182,63 +180,75 @@ function JobCustomReport() {
             )}]<br/>
             
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
-            ${item.customer_name
+            ${
+              item.customer_name
                 ? `⮞ Customer : ${item.customer_name}<br/>`
                 : ""
-              }
+            }
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.account_manager_name
+            ${
+              item.account_manager_name
                 ? `⮞ Account Manager Name : ${item.account_manager_name}<br/>`
                 : ""
-              }
-            ${item.allocated_to_name
+            }
+            ${
+              item.allocated_to_name
                 ? `⮞ Allocated To : ${item.allocated_to_name}<br/>`
                 : ""
-              }
-            ${item.reviewer_name
+            }
+            ${
+              item.reviewer_name
                 ? `⮞ Reviewer : ${item.reviewer_name}<br/>`
                 : ""
-              }
-            ${item.allocated_to_other_name
+            }
+            ${
+              item.allocated_to_other_name
                 ? `⮞ Allocated To (Other) : ${item.allocated_to_other_name}<br/>`
                 : ""
-              }
-            ${item.service_name
+            }
+            ${
+              item.service_name
                 ? `⮞ Service Type : ${item.service_name}<br/>`
                 : ""
-              }
-            ${item.job_type_name
+            }
+            ${
+              item.job_type_name
                 ? `⮞ Job Type : ${item.job_type_name}<br/>`
                 : ""
-              }
-            ${item.status_type_name
+            }
+            ${
+              item.status_type_name
                 ? `⮞ Status : ${item.status_type_name}<br/>`
                 : ""
-              }
+            }
 
-            ${item.timePeriod
+            ${
+              item.timePeriod
                 ? `⮞ Time Period : ${formatStringToTitleCase(
-                  item.timePeriod,
-                )}<br/>`
+                    item.timePeriod,
+                  )}<br/>`
                 : ""
-              }
-            ${item.displayBy
+            }
+            ${
+              item.displayBy
                 ? `⮞ Display By : ${formatStringToTitleCase(
-                  item.displayBy,
-                )}<br/>`
+                    item.displayBy,
+                  )}<br/>`
                 : ""
-              }
-            ${!["", null, "null", undefined].includes(item.fromDate)
+            }
+            ${
+              !["", null, "null", undefined].includes(item.fromDate)
                 ? `⮞ From Date : ${formatStringToTitleCase(
-                  item.fromDate,
-                  "date",
-                )}<br/>`
+                    item.fromDate,
+                    "date",
+                  )}<br/>`
                 : ""
-              }
-            ${!["", null, "null", undefined].includes(item.toDate)
+            }
+            ${
+              !["", null, "null", undefined].includes(item.toDate)
                 ? `⮞ To Date : ${formatStringToTitleCase(item.toDate, "date")}`
                 : ""
-              }
+            }
           `,
 
             filters: item.filter_record,
@@ -1000,14 +1010,14 @@ function JobCustomReport() {
       filters: filters,
       role: role,
       page: currentPage,
-      limit: pageSize
+      limit: pageSize,
     };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-       // console.log("filter response ", response);
+        // console.log("filter response ", response);
         if (response.status) {
           setLoading(false);
           setShowData(response.data);
@@ -1035,7 +1045,6 @@ function JobCustomReport() {
     setPageSize(newSize);
     setCurrentPage(1);
     callFilterApi(1, newSize, searchTerm);
-
   };
 
   useEffect(() => {
@@ -1275,7 +1284,7 @@ function JobCustomReport() {
       try {
         parsedFilters = JSON.parse(selectedFilter.filters);
 
-       // console.log("parsedFilters ", parsedFilters?.job_id);
+        // console.log("parsedFilters ", parsedFilters?.job_id);
 
         if (parsedFilters?.groupBy?.includes("job_id")) {
           await GetAllJobs();
@@ -1453,7 +1462,6 @@ function JobCustomReport() {
 
   return (
     <div className="container-fluid pb-3">
-
       {loading && (
         <div className="overlay">
           <div className="loader"></div>
@@ -1489,8 +1497,8 @@ function JobCustomReport() {
                     value={
                       getAllFilterData && getAllFilterData.length > 0
                         ? getAllFilterData.find(
-                          (opt) => Number(opt.value) === Number(filterId),
-                        ) || null
+                            (opt) => Number(opt.value) === Number(filterId),
+                          ) || null
                         : null
                     }
                     onChange={handleFilterSelect}
@@ -1514,17 +1522,33 @@ function JobCustomReport() {
 
             {/* end get filters Dropdown */}
 
-            <div className="col-12 col-sm-5">
+            {/* <div className="col-12 col-sm-5">
               <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                 <button
-                  className="btn btn-info"
+                  className="btn btn-info d-inline-flex align-items-center gap-2 lh-1"
                   id="btn-export"
                   onClick={() => exportToCSV(showData)}
                 >
-                  Export Data
+                  <i className="fa fa-download" aria-hidden="true"></i>
+                  <span>Export Data</span>
                 </button>
               </div>
-            </div>
+            </div> */}
+
+            {showData && showData.rows && showData.rows.length > 0 && (
+              <div className="col-12 col-sm-5">
+                <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
+                  <button
+                    className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2"
+                    id="btn-export"
+                    onClick={() => exportToCSV(showData)}
+                  >
+                    <i className="fa fa-download" aria-hidden="true"></i>
+                    <span>Export Data</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1576,7 +1600,7 @@ function JobCustomReport() {
               //console.log("Action Meta:", actionMeta);
 
               if (actionMeta.action === "remove-value") {
-               // console.log("Removed value:", actionMeta.removedValue.value);
+                // console.log("Removed value:", actionMeta.removedValue.value);
                 addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
               }
               if (actionMeta.action === "select-option") {
@@ -1617,8 +1641,8 @@ function JobCustomReport() {
               value={
                 jobAllData && jobAllData.length > 0
                   ? jobAllData.find(
-                    (opt) => Number(opt.value) === Number(filters.job_id),
-                  ) || null
+                      (opt) => Number(opt.value) === Number(filters.job_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1645,9 +1669,9 @@ function JobCustomReport() {
               value={
                 customerAllData && customerAllData.length > 0
                   ? customerAllData.find(
-                    (opt) =>
-                      Number(opt.value) === Number(filters.customer_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) === Number(filters.customer_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1674,8 +1698,8 @@ function JobCustomReport() {
               value={
                 clientAllData && clientAllData.length > 0
                   ? clientAllData.find(
-                    (opt) => Number(opt.value) === Number(filters.client_id),
-                  ) || null
+                      (opt) => Number(opt.value) === Number(filters.client_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1705,8 +1729,8 @@ function JobCustomReport() {
               value={
                 employeeNumberAllData && employeeNumberAllData.length > 0
                   ? employeeNumberAllData.find(
-                    (opt) => opt.value === filters.employee_number,
-                  ) || null
+                      (opt) => opt.value === filters.employee_number,
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1737,10 +1761,10 @@ function JobCustomReport() {
               value={
                 accountManagerAllData && accountManagerAllData.length > 0
                   ? accountManagerAllData.find(
-                    (opt) =>
-                      Number(opt.value) ===
-                      Number(filters.account_manager_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) ===
+                        Number(filters.account_manager_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1771,9 +1795,9 @@ function JobCustomReport() {
               value={
                 allocatedToAllData && allocatedToAllData?.length > 0
                   ? allocatedToAllData?.find(
-                    (opt) =>
-                      Number(opt.value) === Number(filters.allocated_to_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) === Number(filters.allocated_to_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1801,9 +1825,9 @@ function JobCustomReport() {
               value={
                 reviewerAllData && reviewerAllData?.length > 0
                   ? reviewerAllData?.find(
-                    (opt) =>
-                      Number(opt.value) === Number(filters.reviewer_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) === Number(filters.reviewer_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1834,10 +1858,10 @@ function JobCustomReport() {
               value={
                 otherStaffAllData && otherStaffAllData?.length > 0
                   ? otherStaffAllData?.find(
-                    (opt) =>
-                      Number(opt.value) ===
-                      Number(filters.allocated_to_other_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) ===
+                        Number(filters.allocated_to_other_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1865,8 +1889,8 @@ function JobCustomReport() {
               value={
                 serviceAllData && serviceAllData?.length > 0
                   ? serviceAllData?.find(
-                    (opt) => Number(opt.value) === Number(filters.service_id),
-                  ) || null
+                      (opt) => Number(opt.value) === Number(filters.service_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1894,9 +1918,9 @@ function JobCustomReport() {
               value={
                 jobTypeAllData && jobTypeAllData?.length > 0
                   ? jobTypeAllData?.find(
-                    (opt) =>
-                      Number(opt.value) === Number(filters.job_type_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) === Number(filters.job_type_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1923,9 +1947,9 @@ function JobCustomReport() {
               value={
                 statusAllData && statusAllData?.length > 0
                   ? statusAllData?.find(
-                    (opt) =>
-                      Number(opt.value) === Number(filters.status_type_id),
-                  ) || null
+                      (opt) =>
+                        Number(opt.value) === Number(filters.status_type_id),
+                    ) || null
                   : null
               }
               onChange={(selected) =>
@@ -2066,18 +2090,17 @@ function JobCustomReport() {
             <p className="fs-16">There are no records to display</p>
           </div>
         ) : (
-
           <>
             <div className="table-responsive fixed-table-header">
               <table
                 className="table rdt_Table"
-              // className="table table-bordered"
-              // style={{
-              //   fontSize: "14px",
-              //   width: "100%",
-              //   overflowX: "auto",
-              //   display: "block",
-              // }}
+                // className="table table-bordered"
+                // style={{
+                //   fontSize: "14px",
+                //   width: "100%",
+                //   overflowX: "auto",
+                //   display: "block",
+                // }}
               >
                 <thead
                 // className="rdt_TableHead"
@@ -2128,7 +2151,6 @@ function JobCustomReport() {
               </table>
             </div>
 
-
             <ReactPaginate
               previousLabel={"Previous"}
               nextLabel={"Next"}
@@ -2155,10 +2177,7 @@ function JobCustomReport() {
               <option value={500}>500</option>
               {/* <option value={100000}>All</option> */}
             </select>
-
           </>
-
-
         )}
       </div>
     </div>

@@ -1195,14 +1195,17 @@ const StaffPage = () => {
                 onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
-            <div className="col-md-8 d-flex justify-content-end">
-              <button
-                className="btn btn-outline-info fw-bold border-3"
-                onClick={handleExport}
-              >
-                Export Excel
-              </button>
-            </div>
+            {staffDataAll?.data && staffDataAll.data.length > 0 && (
+              <div className="col-md-8 d-flex justify-content-end">
+                <button
+                  className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
+                  onClick={handleExport}
+                >
+                  <i className="fa fa-download" aria-hidden="true" />
+                  <span>Export Excel</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {tabs?.map((tab) => (

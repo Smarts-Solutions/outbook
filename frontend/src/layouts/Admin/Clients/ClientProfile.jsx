@@ -1029,12 +1029,11 @@ const ClientList = () => {
         </div>
       )}
 
-       {loading && (
+      {loading && (
         <div className="overlay">
           <div className="loader"></div>
         </div>
       )}
-
 
       <div className="container-fluid">
         <div className="col-sm-12">
@@ -1180,14 +1179,15 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                  {customerData && customerData.length > 0 && (
-      <button
-        className="btn btn-outline-info fw-bold float-end border-3"
-        onClick={handleExport}
-      >
-        Export Excel
-      </button>
-    )}
+                    {customerData && customerData.length > 0 && (
+                      <button
+                        className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                        onClick={handleExport}
+                      >
+                        <i className="fa fa-download" aria-hidden="true"></i>
+                        <span>Export Excel</span>
+                      </button>
+                    )}
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div

@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import Datatable from '../../../Components/ExtraComponents/Datatable';
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import {
+  DraftAction,
+  AddDraft,
+  EditDraft,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
-import sweatalert from 'sweetalert2';
-import { convertDate, validate } from '../../../Utils/Comman_function';
+import sweatalert from "sweetalert2";
+import { convertDate, validate } from "../../../Utils/Comman_function";
 
 const Drafts = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const location = useLocation()
+  const location = useLocation();
   const dispatch = useDispatch();
   const [adddraft, setAdddraft] = useState(false);
   const [viewdraft, setViewdraft] = useState(false);
@@ -21,25 +25,24 @@ const Drafts = ({ getAccessDataJob, goto }) => {
   const [EditData, setEditData] = useState([]);
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: new Date().toISOString().substr(0, 10),
-    feedback_received: '0',
-    updated_amendments: '1',
+    feedback_received: "0",
+    updated_amendments: "1",
     final_draft_sent_on: new Date().toISOString().substr(0, 10),
-    was_it_complete: '0',
+    was_it_complete: "0",
     enter_feedback: null,
-    id: null
+    id: null,
   });
 
   const resetForm = () => {
     setAllDraftInputdata({
       ...AllDraftInputdata,
       draft_sent_on: new Date().toISOString().substr(0, 10),
-      feedback_received: '0',
-      updated_amendments: '1',
+      feedback_received: "0",
+      updated_amendments: "1",
       final_draft_sent_on: new Date().toISOString().substr(0, 10),
-      was_it_complete: '0',
+      was_it_complete: "0",
       enter_feedback: null,
-      id: null
-
+      id: null,
     });
   };
 
@@ -50,10 +53,13 @@ const Drafts = ({ getAccessDataJob, goto }) => {
         draft_sent_on: EditData.draft_sent_on,
         feedback_received: EditData.feedback_received,
         updated_amendments: EditData.updated_amendment,
-        final_draft_sent_on: EditData.final_draft_sent_on == null ? new Date().toISOString().substr(0, 10) : EditData.final_draft_sent_on,
+        final_draft_sent_on:
+          EditData.final_draft_sent_on == null
+            ? new Date().toISOString().substr(0, 10)
+            : EditData.final_draft_sent_on,
         was_it_complete: EditData.was_it_complete,
         enter_feedback: EditData.feedback,
-        id: EditData.id
+        id: EditData.id,
       });
     }
   }, [EditData, showEditModal]);
@@ -63,46 +69,43 @@ const Drafts = ({ getAccessDataJob, goto }) => {
   }, []);
 
   const GetAllDraftList = async () => {
-    const req = { action: "get", job_id: location.state.job_id }
-    const data = { req: req, authToken: token }
+    const req = { action: "get", job_id: location.state.job_id };
+    const data = { req: req, authToken: token };
     await dispatch(DraftAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setDraftListData(response.data || [])
-        }
-        else {
-          setDraftListData([])
+          setDraftListData(response.data || []);
+        } else {
+          setDraftListData([]);
         }
       })
       .catch((error) => {
         return;
-      })
-  }
+      });
+  };
 
   const HandleDraftView = async (row) => {
-    const req = { action: "getSingleView", id: row.id }
-    const data = { req: req, authToken: token }
+    const req = { action: "getSingleView", id: row.id };
+    const data = { req: req, authToken: token };
     await dispatch(DraftAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
           setSingleDraftData(response.data[0]);
-        }
-        else {
+        } else {
           setSingleDraftData([]);
         }
       })
       .catch((err) => {
         return;
-      })
-  }
+      });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     validate(name, value);
     setAllDraftInputdata({ ...AllDraftInputdata, [name]: value });
-
   };
 
   const validate = (name, value) => {
@@ -115,154 +118,211 @@ const Drafts = ({ getAccessDataJob, goto }) => {
       }
     }
     setErrors({ ...error });
-  }
-
+  };
 
   const HandleSubmitDraft = async () => {
-
-    if ((AllDraftInputdata.enter_feedback == null || AllDraftInputdata.enter_feedback == "") && AllDraftInputdata.feedback_received == 1) {
+    if (
+      (AllDraftInputdata.enter_feedback == null ||
+        AllDraftInputdata.enter_feedback == "") &&
+      AllDraftInputdata.feedback_received == 1
+    ) {
       setErrors({ enter_feedback: "Enter Feedback is required" });
       return;
     }
     const req = {
       job_id: location.state.job_id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
-      final_draft_sent_on: AllDraftInputdata.was_it_complete == 0 ? null : AllDraftInputdata.final_draft_sent_on,
+      final_draft_sent_on:
+        AllDraftInputdata.was_it_complete == 0
+          ? null
+          : AllDraftInputdata.final_draft_sent_on,
       feedback_received: AllDraftInputdata.feedback_received,
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
       was_it_complete: AllDraftInputdata.was_it_complete,
-    }
-    const data = { req: req, authToken: token }
+    };
+    const data = { req: req, authToken: token };
 
     await dispatch(AddDraft(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setAdddraft(false)
-          GetAllDraftList()
-          resetForm()
+          setAdddraft(false);
+          GetAllDraftList();
+          resetForm();
           sweatalert.fire({
-            icon: 'success',
+            icon: "success",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 3000
+            timer: 3000,
           });
           setTimeout(() => {
             // window.location.reload();
           }, 3000);
-        }
-        else {
-          response.data == "W" ?
-            sweatalert.fire({
-              icon: 'warning',
-              title: response.message,
-              timerProgressBar: true,
-              showConfirmButton: true,
-              timer: 3000
-            }) :
-            sweatalert.fire({
-              icon: 'error',
-              title: response.message,
-              timerProgressBar: true,
-              showConfirmButton: true,
-              timer: 3000
-            });
+        } else {
+          response.data == "W"
+            ? sweatalert.fire({
+                icon: "warning",
+                title: response.message,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                timer: 3000,
+              })
+            : sweatalert.fire({
+                icon: "error",
+                title: response.message,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                timer: 3000,
+              });
         }
       })
       .catch((error) => {
         return;
-      })
-
-  }
+      });
+  };
 
   const HandleSubmitEditDraft = async () => {
-    if ((AllDraftInputdata.enter_feedback == null || AllDraftInputdata.enter_feedback == "") && AllDraftInputdata.feedback_received == 1) {
+    if (
+      (AllDraftInputdata.enter_feedback == null ||
+        AllDraftInputdata.enter_feedback == "") &&
+      AllDraftInputdata.feedback_received == 1
+    ) {
       setErrors({ enter_feedback: "Enter Feedback is required" });
 
       return;
     }
 
-
     const req = {
       id: AllDraftInputdata.id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
-      final_draft_sent_on: AllDraftInputdata.was_it_complete == 0 ? null : AllDraftInputdata.final_draft_sent_on,
+      final_draft_sent_on:
+        AllDraftInputdata.was_it_complete == 0
+          ? null
+          : AllDraftInputdata.final_draft_sent_on,
       feedback_received: AllDraftInputdata.feedback_received,
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
       was_it_complete: AllDraftInputdata.was_it_complete,
-    }
-    const data = { req: req, authToken: token }
+    };
+    const data = { req: req, authToken: token };
     await dispatch(EditDraft(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setShowEditModal(false)
-          GetAllDraftList()
-          resetForm()
-
+          setShowEditModal(false);
+          GetAllDraftList();
+          resetForm();
 
           sweatalert.fire({
-            icon: 'success',
+            icon: "success",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 3000
+            timer: 3000,
           });
           setTimeout(() => {
             window.location.reload();
           }, 3000);
-        }
-        else {
-
-          response.data == "W" ?
-            sweatalert.fire({
-              icon: 'warning',
-              title: response.message,
-              timerProgressBar: true,
-              showConfirmButton: true,
-              timer: 3000
-            }) :
-            sweatalert.fire({
-              icon: 'error',
-              title: response.message,
-              timerProgressBar: true,
-              showConfirmButton: true,
-              timer: 3000
-            });
+        } else {
+          response.data == "W"
+            ? sweatalert.fire({
+                icon: "warning",
+                title: response.message,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                timer: 3000,
+              })
+            : sweatalert.fire({
+                icon: "error",
+                title: response.message,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                timer: 3000,
+              });
         }
       })
       .catch((error) => {
         return;
-      })
-
-  }
+      });
+  };
 
   const columns = [
-    { name: 'Draft Title', selector: row => row.title, sortable: true, reorder: false, },
-    { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on), reorder: false, sortable: true },
-    { name: 'Final Draft Sent On', selector: row => convertDate(row.final_draft_sent_on), reorder: false, sortable: true },
-    { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", reorder: false, sortable: true },
-    { name: 'Updated/Amendments', selector: row =>  row.feedback_received == 1 ? row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None"
-      :""
-      , reorder: false, sortable: true },
-    { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", reorder: false, sortable: true },
+    {
+      name: "Draft Title",
+      selector: (row) => row.title,
+      sortable: true,
+      reorder: false,
+    },
+    {
+      name: "Draft Sent On",
+      selector: (row) => convertDate(row.draft_sent_on),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Final Draft Sent On",
+      selector: (row) => convertDate(row.final_draft_sent_on),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Feedback Received",
+      selector: (row) => (row.feedback_received == 1 ? "Yes" : "No"),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Updated/Amendments",
+      selector: (row) =>
+        row.feedback_received == 1
+          ? row.updated_amendment == 1
+            ? "Amendment"
+            : row.updated_amendment == 2
+              ? "Update"
+              : row.updated_amendment == 3
+                ? "Both"
+                : "None"
+          : "",
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Was Draft Completed",
+      selector: (row) => (row.was_it_complete == 1 ? "Yes" : "No"),
+      reorder: false,
+      sortable: true,
+    },
     {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          <button className="view-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
+          <button
+            className="view-icon"
+            onClick={() => {
+              HandleDraftView(row);
+              setViewdraft(true);
+            }}
+          >
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
-          {
-            row.was_it_complete == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?
-              <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
-                <i className="ti-pencil" />
-              </button> : ""
-          }
-
+          {row.was_it_complete == 1 ? (
+            ""
+          ) : goto != "report" &&
+            (getAccessDataJob.update === 1 || role === "SUPERADMIN") ? (
+            <button
+              className="edit-icon"
+              onClick={() => {
+                setShowEditModal(true);
+                setEditData(row);
+              }}
+            >
+              <i className="ti-pencil" />
+            </button>
+          ) : (
+            ""
+          )}
         </div>
       ),
       ignoreRowClick: true,
@@ -275,37 +335,137 @@ const Drafts = ({ getAccessDataJob, goto }) => {
   useEffect(() => {
     setAllDraftInputdata({
       ...AllDraftInputdata,
-      was_it_complete: AllDraftInputdata.updated_amendments != 4 ? "0" : "1"
+      was_it_complete: AllDraftInputdata.updated_amendments != 4 ? "0" : "1",
     });
-
   }, [AllDraftInputdata.updated_amendments]);
 
   const minDateRecivedOn = location.state?.data?.job?.date_received_on;
 
+  const handleExport = async () => {
+    const req = {
+      action: "get",
+      page: 1,
+      limit: 100000,
+      search: "",
+      job_id: location.state.job_id,
+    };
+    const data = { req, authToken: token };
+    const response = await dispatch(DraftAction(data)).unwrap();
+
+    if (!response.status || !response?.data || response?.data?.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
+    const exportData = response?.data?.map((item) => ({
+      "Draft Title": item.title || "-",
+      "Draft Sent On": item.draft_sent_on || "-",
+      "Final Draft Sent On": item.final_draft_sent_on || "-",
+      "Feedback Received": item.feedback_received == 1 ? "Yes" : "No",
+      "Updated/Amendments":
+        item.feedback_received == 1
+          ? item.updated_amendment == 1
+            ? "Amendment"
+            : item.updated_amendment == 2
+              ? "Update"
+              : item.updated_amendment == 3
+                ? "Both"
+                : "None"
+          : "",
+      "Was Draft Completed": item.was_it_complete == 1 ? "Yes" : "No" || "-",
+    }));
+
+    downloadCSV(exportData, "Draft Details.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
   return (
-    <div className=''>
-      <div className='row'>
-        <div className='col-md-8'>
-          <div className='tab-title'>
+    <div className="">
+      {/* <div className="row">
+        <div className="col-md-8">
+          <div className="tab-title">
             <h3>Drafts</h3>
           </div>
         </div>
-        <div className='col-md-4'>
-          {
-            goto != "report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") ? <div>
-              <button type="button" className="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>
-                <i className="fa-regular fa-plus pe-1"></i> Add Drafts</button>
-            </div> : ""
-          }
+        <div className="col-md-4">
+          <button
+            className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
+            onClick={handleExport}
+          >
+            <i className="fa fa-download" aria-hidden="true" />
+            <span>Export Excel</span>
+          </button>
+          {goto != "report" &&
+          (getAccessDataJob.insert === 1 || role === "SUPERADMIN") ? (
+            <button
+              type="button"
+              className="btn btn-info text-white float-end "
+              onClick={() => setAdddraft(true)}
+            >
+              <i className="fa-regular fa-plus pe-1"></i> Add Drafts
+            </button>
+          ) : (
+            ""
+          )}
+        </div>
+      </div> */}
 
+      <div className="row align-items-center">
+        {/* LEFT */}
+        <div className="tab-title col-md-8">
+          <h3 className="mb-0">Drafts</h3>
+        </div>
 
+        {/* RIGHT */}
+        <div className="col-md-4 text-end">
+          {DraftListData && DraftListData.length > 0 && (
+            <button
+              className="btn btn-outline-info fw-bold border-3 me-2"
+              onClick={handleExport}
+            >
+              <i className="fa fa-download me-1" />
+              Export Excel
+            </button>
+          )}
+
+          {goto !== "report" &&
+            (getAccessDataJob.insert === 1 || role === "SUPERADMIN") && (
+              <button
+                type="button"
+                className="btn btn-info text-white"
+                onClick={() => setAdddraft(true)}
+              >
+                <i className="fa fa-plus me-1"></i>
+                Add Drafts
+              </button>
+            )}
         </div>
       </div>
-      <div className='datatable-wrapper '>
 
+      <div className="datatable-wrapper ">
         <Datatable
           filter={true}
-          columns={columns} data={DraftListData && DraftListData} />
+          columns={columns}
+          data={DraftListData && DraftListData}
+        />
       </div>
 
       <CommonModal
@@ -321,10 +481,13 @@ const Drafts = ({ getAccessDataJob, goto }) => {
           setAdddraft(false);
           resetForm();
           setErrors({});
-
         }}
         Submit_Function={() => HandleSubmitDraft()}
-        Submit_Cancel_Function={() => { setAdddraft(false); resetForm(); setErrors({}); }}
+        Submit_Cancel_Function={() => {
+          setAdddraft(false);
+          resetForm();
+          setErrors({});
+        }}
       >
         <>
           <div className="row">
@@ -342,12 +505,10 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
-                  min={minDateRecivedOn||""}
+                  min={minDateRecivedOn || ""}
                 />
                 {errors["draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["draft_sent_on"]}
-                  </div>
+                  <div className="error-text">{errors["draft_sent_on"]}</div>
                 )}
               </div>
             </div>
@@ -358,7 +519,6 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   Feedback Received
                 </label>
                 <select
-
                   className="form-select"
                   aria-label="Default select example"
                   style={{ color: "#8a8c8e !important" }}
@@ -378,7 +538,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               </div>
             </div>
 
-            {AllDraftInputdata.feedback_received == 1 ?
+            {AllDraftInputdata.feedback_received == 1 ? (
               <div className="col-lg-6">
                 <div className="mb-3">
                   <label htmlFor="firstNameinput" className="form-label">
@@ -404,110 +564,118 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     </div>
                   )}
                 </div>
-              </div> : ""}
-            {
-              AllDraftInputdata.feedback_received == 1 ?
-                <div className="col-lg-6">
-                  <div className="mb-3">
-                    <label htmlFor="was_it_complete mx-1" className="form-label">
-                      Draft Completed
-                    </label>
-                    <div className="row mt-2 mx-1">
-                      <div className=" col-lg-6 form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="was_it_complete"
-                          id="was_it_complete_yes"
-                          value="1"
-
-                          checked={AllDraftInputdata.was_it_complete === "1"}
-                          onChange={(e) => handleInputChange(e)}
-                        />
-                        <label className="form-check-label" htmlFor="was_it_complete_yes">
-                          Yes
-                        </label>
-                      </div>
-                      <div className="col-lg-6 form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="was_it_complete"
-                          id="was_it_complete_no"
-                          value="0"
-
-                          checked={AllDraftInputdata.was_it_complete === "0"}
-                          onChange={(e) => handleInputChange(e)}
-                        />
-                        <label className="form-check-label" htmlFor="was_it_complete_no">
-                          No
-                        </label>
-                      </div>
-                    </div>
-                    {errors["was_it_complete"] && (
-                      <div className="error-text">{errors["was_it_complete"]}</div>
-                    )}
-                  </div>
-                </div>
-                : ""
-            }
-
-            {AllDraftInputdata?.was_it_complete == 1 && AllDraftInputdata.feedback_received == 1 ? <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Final Draft Sent On
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  placeholder=""
-                  name="final_draft_sent_on"
-                  id="final_draft_sent_on"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.final_draft_sent_on}
-                  min={minDateRecivedOn||""}
-                />
-                {errors["final_draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["final_draft_sent_on"]}
-                  </div>
-                )}
               </div>
-            </div> : ""}
-
-            {
-              AllDraftInputdata.feedback_received == 1 ?
-                <div className="col-lg-6">
-                  <div className="mb-3">
-                    <label htmlFor="firstNameinput" className="form-label">
-                      Enter Feedback
-                    </label>
-                    <textarea
-                      type="text"
-                      rows={4}
-                      className="form-control"
-                      placeholder="Enter Feedback"
-                      name="enter_feedback"
-                      id="enter_feedback"
-                      onChange={(e) => handleInputChange(e)}
-                      value={AllDraftInputdata.enter_feedback}
-                      defaultValue={""}
-                    />
-                    {errors["enter_feedback"] && (
-                      <div className="error-text">
-                        {errors["enter_feedback"]}
-                      </div>
-                    )}
+            ) : (
+              ""
+            )}
+            {AllDraftInputdata.feedback_received == 1 ? (
+              <div className="col-lg-6">
+                <div className="mb-3">
+                  <label htmlFor="was_it_complete mx-1" className="form-label">
+                    Draft Completed
+                  </label>
+                  <div className="row mt-2 mx-1">
+                    <div className=" col-lg-6 form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="was_it_complete"
+                        id="was_it_complete_yes"
+                        value="1"
+                        checked={AllDraftInputdata.was_it_complete === "1"}
+                        onChange={(e) => handleInputChange(e)}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="was_it_complete_yes"
+                      >
+                        Yes
+                      </label>
+                    </div>
+                    <div className="col-lg-6 form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="was_it_complete"
+                        id="was_it_complete_no"
+                        value="0"
+                        checked={AllDraftInputdata.was_it_complete === "0"}
+                        onChange={(e) => handleInputChange(e)}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="was_it_complete_no"
+                      >
+                        No
+                      </label>
+                    </div>
                   </div>
-                </div> : ""
+                  {errors["was_it_complete"] && (
+                    <div className="error-text">
+                      {errors["was_it_complete"]}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
 
-            }
+            {AllDraftInputdata?.was_it_complete == 1 &&
+            AllDraftInputdata.feedback_received == 1 ? (
+              <div className="col-lg-6">
+                <div className="mb-3">
+                  <label htmlFor="firstNameinput" className="form-label">
+                    Final Draft Sent On
+                  </label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    placeholder=""
+                    name="final_draft_sent_on"
+                    id="final_draft_sent_on"
+                    onChange={(e) => handleInputChange(e)}
+                    value={AllDraftInputdata.final_draft_sent_on}
+                    min={minDateRecivedOn || ""}
+                  />
+                  {errors["final_draft_sent_on"] && (
+                    <div className="error-text">
+                      {errors["final_draft_sent_on"]}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
 
-
-
+            {AllDraftInputdata.feedback_received == 1 ? (
+              <div className="col-lg-6">
+                <div className="mb-3">
+                  <label htmlFor="firstNameinput" className="form-label">
+                    Enter Feedback
+                  </label>
+                  <textarea
+                    type="text"
+                    rows={4}
+                    className="form-control"
+                    placeholder="Enter Feedback"
+                    name="enter_feedback"
+                    id="enter_feedback"
+                    onChange={(e) => handleInputChange(e)}
+                    value={AllDraftInputdata.enter_feedback}
+                    defaultValue={""}
+                  />
+                  {errors["enter_feedback"] && (
+                    <div className="error-text">{errors["enter_feedback"]}</div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         </>
-
       </CommonModal>
 
       <CommonModal
@@ -522,10 +690,12 @@ const Drafts = ({ getAccessDataJob, goto }) => {
         handleClose={() => {
           setShowEditModal(false);
           resetForm();
-
         }}
         Submit_Function={() => HandleSubmitEditDraft()}
-        Submit_Cancel_Function={() => { setShowEditModal(false); resetForm(); }}
+        Submit_Cancel_Function={() => {
+          setShowEditModal(false);
+          resetForm();
+        }}
       >
         <>
           <div className="row">
@@ -543,12 +713,10 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
-                  min={minDateRecivedOn||""}
+                  min={minDateRecivedOn || ""}
                 />
                 {errors["draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["draft_sent_on"]}
-                  </div>
+                  <div className="error-text">{errors["draft_sent_on"]}</div>
                 )}
               </div>
             </div>
@@ -559,7 +727,6 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   Feedback Received
                 </label>
                 <select
-
                   className="form-select"
                   aria-label="Default select example"
                   style={{ color: "#8a8c8e !important" }}
@@ -579,7 +746,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               </div>
             </div>
 
-            {AllDraftInputdata.feedback_received == 1 ?
+            {AllDraftInputdata.feedback_received == 1 ? (
               <div className="col-lg-6">
                 <div className="mb-3">
                   <label htmlFor="firstNameinput" className="form-label">
@@ -594,7 +761,6 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.updated_amendments}
                   >
-
                     <option value="1">Amendment</option>
                     <option value="2">Update</option>
                     <option value="3">Both</option>
@@ -606,9 +772,12 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     </div>
                   )}
                 </div>
-              </div> : ""}
+              </div>
+            ) : (
+              ""
+            )}
 
-            {AllDraftInputdata.feedback_received == 1 ?
+            {AllDraftInputdata.feedback_received == 1 ? (
               <div className="col-lg-6">
                 {/* <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -647,11 +816,13 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                           name="was_it_complete"
                           id="was_it_complete_yes"
                           value="1"
-
                           checked={AllDraftInputdata.was_it_complete === "1"}
                           onChange={(e) => handleInputChange(e)}
                         />
-                        <label className="form-check-label" htmlFor="was_it_complete_yes">
+                        <label
+                          className="form-check-label"
+                          htmlFor="was_it_complete_yes"
+                        >
                           Yes
                         </label>
                       </div>
@@ -662,45 +833,56 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                           name="was_it_complete"
                           id="was_it_complete_no"
                           value="0"
-
                           checked={AllDraftInputdata.was_it_complete === "0"}
                           onChange={(e) => handleInputChange(e)}
                         />
-                        <label className="form-check-label" htmlFor="was_it_complete_no">
+                        <label
+                          className="form-check-label"
+                          htmlFor="was_it_complete_no"
+                        >
                           No
                         </label>
                       </div>
                     </div>
                     {errors["was_it_complete"] && (
-                      <div className="error-text">{errors["was_it_complete"]}</div>
+                      <div className="error-text">
+                        {errors["was_it_complete"]}
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
-              : ""}
+            ) : (
+              ""
+            )}
 
-            {AllDraftInputdata?.was_it_complete == 1 && AllDraftInputdata.feedback_received == 1 ? <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Final Draft Sent On
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  placeholder=""
-                  name="final_draft_sent_on"
-                  id="final_draft_sent_on"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.final_draft_sent_on}
-                  min={minDateRecivedOn||""}
-                />
-                {errors["final_draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["final_draft_sent_on"]}
-                  </div>
-                )}
+            {AllDraftInputdata?.was_it_complete == 1 &&
+            AllDraftInputdata.feedback_received == 1 ? (
+              <div className="col-lg-6">
+                <div className="mb-3">
+                  <label htmlFor="firstNameinput" className="form-label">
+                    Final Draft Sent On
+                  </label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    placeholder=""
+                    name="final_draft_sent_on"
+                    id="final_draft_sent_on"
+                    onChange={(e) => handleInputChange(e)}
+                    value={AllDraftInputdata.final_draft_sent_on}
+                    min={minDateRecivedOn || ""}
+                  />
+                  {errors["final_draft_sent_on"] && (
+                    <div className="error-text">
+                      {errors["final_draft_sent_on"]}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div> : ""}
+            ) : (
+              ""
+            )}
 
             <div className="col-lg-6">
               <div className="mb-3">
@@ -719,15 +901,12 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   defaultValue={""}
                 />
                 {errors["enter_feedback"] && (
-                  <div className="error-text">
-                    {errors["enter_feedback"]}
-                  </div>
+                  <div className="error-text">{errors["enter_feedback"]}</div>
                 )}
               </div>
             </div>
           </div>
         </>
-
       </CommonModal>
 
       <CommonModal
@@ -741,9 +920,10 @@ const Drafts = ({ getAccessDataJob, goto }) => {
         handleClose={() => {
           setViewdraft(false);
         }}
-        Submit_Cancel_Function={() => { setViewdraft(false); }}
+        Submit_Cancel_Function={() => {
+          setViewdraft(false);
+        }}
         Submit_Function={() => setViewdraft(false)}
-
       >
         <div className="av ">
           <div className="row">
@@ -753,7 +933,9 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">{SingleDraftData && SingleDraftData.draft_sent_on}</span>
+              <span className="text-muted">
+                {SingleDraftData && SingleDraftData.draft_sent_on}
+              </span>
             </div>
           </div>
           {/* <div className="row">
@@ -773,7 +955,11 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">{SingleDraftData && SingleDraftData.feedback_received == 1 ? "Yes" : "No"}</span>
+              <span className="text-muted">
+                {SingleDraftData && SingleDraftData.feedback_received == 1
+                  ? "Yes"
+                  : "No"}
+              </span>
             </div>
           </div>
           <div className="row">
@@ -783,14 +969,15 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">{SingleDraftData && SingleDraftData.feedback}</span>
+              <span className="text-muted">
+                {SingleDraftData && SingleDraftData.feedback}
+              </span>
             </div>
           </div>
         </div>
-
       </CommonModal>
     </div>
-  )
-}
+  );
+};
 
-export default Drafts
+export default Drafts;
