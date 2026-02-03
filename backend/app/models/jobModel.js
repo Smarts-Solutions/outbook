@@ -9,6 +9,9 @@ const {
 
 const getAddJobData = async (job) => {
   const { customer_id, StaffUserId } = job;
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const roleData = await QueryRoleHelperFunction(StaffUserId);
   // customer Client
   try {
     const queryCustomerWithClient = `
@@ -26,7 +29,7 @@ const getAddJobData = async (job) => {
 
     FROM 
         customers
-   JOIN 
+    JOIN 
         clients ON customers.id = clients.customer_id
    LEFT JOIN
        client_company_information ON clients.id = client_company_information.client_id     
@@ -35,6 +38,42 @@ const getAddJobData = async (job) => {
     clients.trading_name ASC;
   `;
     const [rows] = await pool.execute(queryCustomerWithClient, [customer_id]);
+
+
+    const [clientData] = await pool.execute(
+      `
+      SELECT  
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        customers.account_manager_id  AS customer_account_manager_id,
+
+        clients.id AS client_id,
+        clients.trading_name AS client_trading_name,
+        clients.client_type AS client_client_type,
+        clients.company_number AS company_number,
+
+        client_company_information.company_number AS client_company_number
+
+      FROM 
+      clients
+      JOIN 
+      customers ON customers.id = clients.customer_id
+      LEFT JOIN
+      client_company_information ON clients.id = client_company_information.client_id  
+      LEFT JOIN 
+      assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id 
+        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      WHERE 
+        (clients.staff_created_id IN (${LineManageStaffId})
+        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        AND clients.customer_id = ?
+      GROUP BY clients.id
+      ORDER BY clients.trading_name ASC
+      `,
+      [customer_id]
+    );
+
+
 
     let customer = [];
     let client = [];
@@ -45,13 +84,29 @@ const getAddJobData = async (job) => {
         customer_account_manager_id: rows[0].customer_account_manager_id,
       };
 
-      client = rows.map((row) => ({
-        client_id: row.client_id,
-        client_trading_name: row.client_trading_name,
-        client_client_type: row.client_client_type,
-        client_company_number: row.client_company_number,
-        company_number: row.company_number,
-      }));
+       const [RoleAccess] = await pool.execute(
+      "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
+      [roleData[0].role_id, 34]
+    );
+
+      if (roleData.length > 0 && (roleData[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
+        client = rows.map((row) => ({
+          client_id: row.client_id,
+          client_trading_name: row.client_trading_name,
+          client_client_type: row.client_client_type,
+          client_company_number: row.client_company_number,
+          company_number: row.company_number,
+        }));
+
+      } else {
+        client = clientData.map((row) => ({
+          client_id: row.client_id,
+          client_trading_name: row.client_trading_name,
+          client_client_type: row.client_client_type,
+          client_company_number: row.client_company_number,
+          company_number: row.company_number,
+        }));
+      }
     }
 
     const queryCustomerDetails = `
@@ -1194,7 +1249,7 @@ const getJobByCustomer = async (job) => {
   //   const likeSearch = `%${search}%`;
   //   searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
   // }
-    const jobCodeExpr = `
+  const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1203,7 +1258,7 @@ const getJobByCustomer = async (job) => {
     )
   `;
 
-   if (search) {
+  if (search) {
     searchCondition = `
       AND (
         customers.trading_name LIKE ?
@@ -1214,7 +1269,7 @@ const getJobByCustomer = async (job) => {
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch,likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
   }
 
   // Line Manager
@@ -1482,8 +1537,8 @@ async function getAllJobsSidebar(
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
   let searchParams = [];
-  
-  
+
+
 
   // if (search) {
   //   searchCondition = `
@@ -1498,7 +1553,7 @@ async function getAllJobsSidebar(
   //   searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
   // }
 
-   const jobCodeExpr = `
+  const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -1507,7 +1562,7 @@ async function getAllJobsSidebar(
     )
   `;
 
-   if (search) {
+  if (search) {
     searchCondition = `
       AND (
         customers.trading_name LIKE ?
@@ -1518,7 +1573,7 @@ async function getAllJobsSidebar(
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch,likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
   }
 
   try {
@@ -1548,7 +1603,7 @@ async function getAllJobsSidebar(
         [...searchParams]
       );
       total = countResult[0].total || 0;
-      
+
 
       // 🔹 DATA
       const query = `
@@ -1625,7 +1680,7 @@ async function getAllJobsSidebar(
         },
       };
     }
-    
+
 
     // ================= OTHER ROLE =================
     const placeholders = LineManageStaffId?.map(() => '?').join(',');
