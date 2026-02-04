@@ -801,6 +801,10 @@ const getTimesheetTaskType = async (Timesheet) => {
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
         (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
         GROUP BY 
         jobs.id 
         ORDER BY 
