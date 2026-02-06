@@ -74,16 +74,8 @@ const StaffPage = () => {
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
 
-<<<<<<< HEAD
-  const [staffDataAllRecords, setStaffDataAllRecords] = useState({
-    loading: true,
-    data: [],
-  });
-  console.log("staffDataAllRecords --- ", staffDataAllRecords);
-=======
   const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
 
->>>>>>> cfbd22d1c188c733e6c080adb6fb8d311a1fc583
   console.log("staffDataAll --- ", staffDataAll);
 
   const [loading, setLoading] = useState(false);
@@ -105,19 +97,10 @@ const StaffPage = () => {
       .then(async (response) => {
         if (response.status) {
           console.log("response", response);
-<<<<<<< HEAD
-          setStaffDataAllRecords({
-            loading: false,
-            data: response?.data?.data,
-          });
-        } else {
-          setStaffDataAllRecords({ loading: false, data: [] });
-=======
           setStaffDataAllRecords({ loading: false, data: response?.data?.data });
         } else {
           setStaffDataAllRecords({ loading: false, data: [] });
 
->>>>>>> cfbd22d1c188c733e6c080adb6fb8d311a1fc583
         }
       })
       .catch((error) => {

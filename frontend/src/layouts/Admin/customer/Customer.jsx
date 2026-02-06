@@ -771,11 +771,7 @@ const Customer = () => {
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                         <option value={100}>100</option>
-<<<<<<< HEAD
-                        <option value={500}>500</option>
-=======
                             <option value={500}>500</option>
->>>>>>> cfbd22d1c188c733e6c080adb6fb8d311a1fc583
                         {/* <option value={100000}>All</option> */}
                       </select>
                     </div>
