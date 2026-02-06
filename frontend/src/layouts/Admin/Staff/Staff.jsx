@@ -74,11 +74,16 @@ const StaffPage = () => {
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
 
+<<<<<<< HEAD
   const [staffDataAllRecords, setStaffDataAllRecords] = useState({
     loading: true,
     data: [],
   });
   console.log("staffDataAllRecords --- ", staffDataAllRecords);
+=======
+  const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+
+>>>>>>> cfbd22d1c188c733e6c080adb6fb8d311a1fc583
   console.log("staffDataAll --- ", staffDataAll);
 
   const [loading, setLoading] = useState(false);
@@ -100,12 +105,19 @@ const StaffPage = () => {
       .then(async (response) => {
         if (response.status) {
           console.log("response", response);
+<<<<<<< HEAD
           setStaffDataAllRecords({
             loading: false,
             data: response?.data?.data,
           });
         } else {
           setStaffDataAllRecords({ loading: false, data: [] });
+=======
+          setStaffDataAllRecords({ loading: false, data: response?.data?.data });
+        } else {
+          setStaffDataAllRecords({ loading: false, data: [] });
+
+>>>>>>> cfbd22d1c188c733e6c080adb6fb8d311a1fc583
         }
       })
       .catch((error) => {
@@ -451,9 +463,8 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -470,23 +481,23 @@ const StaffPage = () => {
             <div className="px-2">
               {showStaffDeleteTab == true
                 ? row?.is_disable == 0 &&
-                  (row.is_customer_exist == 1 ? (
-                    <button
-                      className="delete-icon dropdown-item  w-auto mb-2"
-                      onClick={() => setDeleteStaff(row)}
-                    >
-                      {" "}
-                      <i className="ti-trash text-danger" />
-                    </button>
-                  ) : (
-                    <button
-                      className="delete-icon dropdown-item  w-auto mb-2"
-                      onClick={() => handleDeleteIsNotExistCustomer(row)}
-                    >
-                      {" "}
-                      <i className="ti-trash text-danger" />
-                    </button>
-                  ))
+                (row.is_customer_exist == 1 ? (
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => setDeleteStaff(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                ) : (
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => handleDeleteIsNotExistCustomer(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                ))
                 : ""}
             </div>
 
@@ -652,9 +663,8 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${
-          budgetedHours.minutes || "00"
-        }`,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
+          }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -809,7 +819,7 @@ const StaffPage = () => {
           (data) =>
             data.role !== "ADMIN" &&
             data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id,
+            data.id !== editStaffData.id
         )
         .map((data) => {
           if (formik.values.staff_to == data.id) {
@@ -1211,9 +1221,8 @@ const StaffPage = () => {
           {tabs?.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
               id={tab.id}
               role="tabpanel"
             >

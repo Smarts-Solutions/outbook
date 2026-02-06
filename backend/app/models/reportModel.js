@@ -3786,10 +3786,12 @@ const getJobCustomReport = async (Report) => {
 
         let where = [`work_date BETWEEN ? AND ?`];
 
-
-
+        //let job_id = [1,6]
+ 
         if (!["", null, undefined].includes(job_id)) {
             where.push(`raw.job_id = ${job_id}`);
+            // where.push(`raw.job_id IN (${job_id.join(",")})`);
+
         }
         if (!["", null, undefined].includes(customer_id)) {
             where.push(`raw.customer_id = ${customer_id}`);
