@@ -1575,7 +1575,7 @@ const StaffPage = () => {
             </h5>
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label htmlFor="staff-select" className="form-label fw-semibold">
               <i className="bi bi-person-fill"></i> Select Staff to Replace:
             </label>
@@ -1626,8 +1626,61 @@ const StaffPage = () => {
                     ))}
                 </ul>
               )}
-            </div>
+            </div> */}
+
+          <div className="mb-4">
+            <label className="form-label fw-semibold">
+              <i className="bi bi-person-fill"></i> Select Staff to Replace:
+            </label>
+
+            <Select
+              isSearchable
+              className="shadow-sm select-staff "
+              classNamePrefix="select"
+              placeholder="Choose Staff"
+              options={staffDataAll?.data
+                ?.filter((staff) => {
+                  if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
+                    return (
+                      staff.role?.toUpperCase() === "MANAGER" &&
+                      staff.id !== deleteStaff?.id &&
+                      staff.id !== 1 &&
+                      staff.id !== 2
+                    );
+                  }
+                  return (
+                    staff.id !== deleteStaff?.id &&
+                    staff.id !== 1 &&
+                    staff.id !== 2
+                  );
+                })
+                .map((staff) => ({
+                  value: staff.id,
+                  label: `${staff.first_name} ${staff.last_name}`,
+                  staffData: staff, // 👈 pura staff object store
+                }))}
+              value={
+                selectedStaff
+                  ? {
+                      value: selectedStaff.id,
+                      label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                    }
+                  : null
+              }
+              onChange={(selectedOption) => {
+                setSelectedStaff(selectedOption?.staffData || null);
+              }}
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999,
+                }),
+              }}
+            />
           </div>
+
+          {/* </div> */}
 
           <div className="d-grid gap-2">
             {selectedStaff && (
@@ -1646,7 +1699,7 @@ const StaffPage = () => {
             </button>
           </div>
 
-          {deleteStaffCustomer.length > 0 && (
+          {/* {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
                 <i className="bi bi-people"></i> Customers Assigned:
@@ -1665,6 +1718,40 @@ const StaffPage = () => {
                     </span>
                   </li>
                 ))}
+              </ul>
+            </div>
+          )} */}
+
+          {deleteStaffCustomer.length > 0 && (
+            <div className="mb-4">
+              <h6 className="fw-bold text-primary">
+                <i className="bi bi-people"></i> Customers Assigned:
+              </h6>
+
+              <ul className="list-group">
+                {[...deleteStaffCustomer]
+                  .sort((a, b) =>
+                    (a?.trading_name || "").localeCompare(
+                      b?.trading_name || "",
+                      "en",
+                      {
+                        sensitivity: "base",
+                      },
+                    ),
+                  )
+                  .map((customer) => (
+                    <li
+                      key={customer.id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span className="text-dark">
+                        {customer?.trading_name}
+                        <span className="badge bg-secondary ms-2">
+                          {customer?.customer_code}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
               </ul>
             </div>
           )}
