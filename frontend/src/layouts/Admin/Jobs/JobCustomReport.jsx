@@ -77,8 +77,8 @@ function JobCustomReport() {
       "status_type_id",
     ],
     additionalField: [],
-    job_id: null,
-    customer_id: null,
+    job_id: [],
+    customer_id: [],
     client_id: null,
     account_manager_id: null,
     allocated_to_id: null,
@@ -1636,7 +1636,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("job_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Job Name</label>
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...jobAllData]}
               value={
                 jobAllData && jobAllData.length > 0
@@ -1656,6 +1656,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={jobAllData}
+              value={jobAllData.filter((opt) =>
+                filters.job_id.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "job_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1664,7 +1685,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("customer_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Customer Name</label>
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...customerAllData]}
               value={
                 customerAllData && customerAllData.length > 0
@@ -1685,6 +1706,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={customerAllData}
+              value={customerAllData.filter((opt) =>
+                filters?.customer_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "customer_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1693,7 +1735,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("client_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Client Name</label>
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...clientAllData]}
               value={
                 clientAllData && clientAllData.length > 0
@@ -1713,6 +1755,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={clientAllData}
+              value={clientAllData.filter((opt) =>
+                filters?.client_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "client_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1721,7 +1784,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("employee_number") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Employee ID</label>
-            <Select
+            {/* <Select
               options={[
                 { value: "", label: "Select..." },
                 ...employeeNumberAllData,
@@ -1744,6 +1807,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={employeeNumberAllData}
+              value={employeeNumberAllData.filter((opt) =>
+                filters?.employee_number?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "employee_number",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1753,7 +1837,7 @@ function JobCustomReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Account Manager Name</label>
 
-            <Select
+            {/* <Select
               options={[
                 { value: "", label: "Select..." },
                 ...accountManagerAllData,
@@ -1778,6 +1862,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={accountManagerAllData}
+              value={accountManagerAllData.filter((opt) =>
+                filters?.account_manager_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "account_manager_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1787,7 +1892,7 @@ function JobCustomReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Allocated To</label>
 
-            <Select
+            {/* <Select
               options={[
                 { value: "", label: "Select..." },
                 ...allocatedToAllData,
@@ -1811,6 +1916,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={allocatedToAllData}
+              value={allocatedToAllData.filter((opt) =>
+                filters?.allocated_to_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "allocated_to_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1820,7 +1946,7 @@ function JobCustomReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Reviewer</label>
 
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...reviewerAllData]}
               value={
                 reviewerAllData && reviewerAllData?.length > 0
@@ -1841,6 +1967,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={reviewerAllData}
+              value={reviewerAllData.filter((opt) =>
+                filters?.reviewer_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "reviewer_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1850,7 +1997,7 @@ function JobCustomReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Allocated To (Other)</label>
 
-            <Select
+            {/* <Select
               options={[
                 { value: "", label: "Select..." },
                 ...otherStaffAllData,
@@ -1875,6 +2022,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={otherStaffAllData}
+              value={otherStaffAllData.filter((opt) =>
+                filters?.allocated_to_other_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "allocated_to_other_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1884,7 +2052,7 @@ function JobCustomReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Service Type</label>
 
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...serviceAllData]}
               value={
                 serviceAllData && serviceAllData?.length > 0
@@ -1904,6 +2072,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={serviceAllData}
+              value={serviceAllData.filter((opt) =>
+                filters?.service_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "service_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1913,7 +2102,7 @@ function JobCustomReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Job Type</label>
 
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...jobTypeAllData]}
               value={
                 jobTypeAllData && jobTypeAllData?.length > 0
@@ -1934,6 +2123,27 @@ function JobCustomReport() {
               }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={jobTypeAllData}
+              value={jobTypeAllData.filter((opt) =>
+                filters?.job_type_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "job_type_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
             />
           </div>
         )}
@@ -1942,7 +2152,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("status_type_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Job Status</label>
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...statusAllData]}
               value={
                 statusAllData && statusAllData?.length > 0
@@ -1958,6 +2168,27 @@ function JobCustomReport() {
                     key: "status_type_id",
                     value: selected.value,
                     label: selected.label,
+                  },
+                })
+              }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            /> */}
+
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={statusAllData}
+              value={statusAllData.filter((opt) =>
+                filters?.status_type_id?.includes(opt.value),
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "status_type_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
                   },
                 })
               }
