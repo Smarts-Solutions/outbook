@@ -20,6 +20,8 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
+import Select from "react-select";
+
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -197,6 +199,7 @@ const Setting = () => {
         if (req.action == "getAll") {
           if (response.status) {
             setRoleDataAll({ loading: false, data: response.data });
+            console.log("Role Data", response);
           } else {
             setRoleDataAll({ loading: false, data: [] });
           }
@@ -2327,6 +2330,19 @@ const Setting = () => {
     } catch (error) {}
   };
 
+  const roleOptions = roleDataAll?.data
+    ?.filter(
+      (staff) =>
+        staff.id !== deleteStatus?.id &&
+        staff.role !== "ADMIN" &&
+        staff.role !== "SUPERADMIN",
+    )
+    ?.sort((a, b) => a.role_name.localeCompare(b.role_name))
+    ?.map((staff) => ({
+      value: staff.id,
+      label: staff.role_name,
+    }));
+
   return (
     <>
       <div>
@@ -2920,16 +2936,14 @@ const Setting = () => {
           hideBtn={true}
           handleClose={() => setDeleteStatus(false)}
         >
-          <div className="modal-body">
+          <div className="">
             {/* Heading */}
             <div className="text-start mb-4 border-bottom pb-2">
-              <h5 className="text-danger fw-bold d-flex align-items-center">
+              <h6 className=" fw-bold d-flex align-items-center  alert alert-warning">
                 <i className="bi bi-trash3 me-2"></i>
                 Delete Role:{" "}
-                <span className="text-dark ms-2">
-                  {deleteStatus?.role_name}
-                </span>
-              </h5>
+                <span className=" ms-2">{deleteStatus?.role_name}</span>
+              </h6>
             </div>
 
             {StaffRoleDAta.length > 0 ? (
@@ -2942,40 +2956,75 @@ const Setting = () => {
                   >
                     Select Role to Replace
                   </label>
-                  <select
-                    id="staff-select"
-                    value={replaceStatue || ""}
-                    onChange={(e) => setReplaceStatue(e.target.value)}
-                    className="form-select"
-                  >
-                    <option value="" disabled>
-                      Choose Role
-                    </option>
-                    {roleDataAll.data
-                      .filter(
-                        (staff) =>
-                          staff.id !== deleteStatus?.id &&
-                          staff.role !== "ADMIN" &&
-                          staff.role !== "SUPERADMIN",
-                      )
-                      .map((staff) => (
-                        <option key={staff.id} value={staff.id}>
-                          {staff.role_name}
-                        </option>
-                      ))}
-                  </select>
+                  {/* <select
+                      id="staff-select"
+                      value={replaceStatue || ""}
+                      onChange={(e) => setReplaceStatue(e.target.value)}
+                      className="form-select"
+                    >
+                      <option value="" disabled>
+                        Choose Role
+                      </option>
+                      {roleDataAll.data
+                        .filter(
+                          (staff) =>
+                            staff.id !== deleteStatus?.id &&
+                            staff.role !== "ADMIN" &&
+                            staff.role !== "SUPERADMIN",
+                        )
+                        .map((staff) => (
+                          <option key={staff.id} value={staff.id}>
+                            {staff.role_name}
+                          </option>
+                        ))}
+
+                        {roleDataAll.data
+    .filter(
+      (staff) =>
+        staff.id !== deleteStatus?.id &&
+        staff.role !== "ADMIN" &&
+        staff.role !== "SUPERADMIN"
+    )
+    .sort((a, b) =>
+      a.role_name.localeCompare(b.role_name)
+    )
+    .map((staff) => (
+      <option key={staff.id} value={staff.id}>
+        {staff.role_name}
+      </option>
+    ))}
+
+                    </select> */}
+                  <Select
+                    options={roleOptions}
+                    value={
+                      roleOptions?.find((opt) => opt.value === replaceStatue) ||
+                      null
+                    }
+                    onChange={(selected) => setReplaceStatue(selected?.value)}
+                    isSearchable
+                    placeholder="Choose Role"
+                    className="shadow-sm"
+                    classNamePrefix="select"
+                    /* 🔥 IMPORTANT FIX */
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
                 </div>
 
                 {/* Staff List */}
                 <div className="mb-4">
-                  <h6 className="fw-bold text-primary d-flex align-items-center">
+                  <label className=" form-label fw-semibold d-flex align-items-center">
                     <i className="bi bi-people me-2"></i> Staff Assigned
-                  </h6>
+                  </label>
                   <ul className="list-group mt-2">
                     {StaffRoleDAta.map((customer, index) => (
                       <li
                         key={index}
-                        className="list-group-item d-flex justify-content-between align-items-center"
+                        className="list-group-item d-flex justify-content-between align-items-center rounded-pill"
                       >
                         <span className="text-dark">
                           {`${customer?.first_name} ${customer.last_name}`}
@@ -2990,13 +3039,17 @@ const Setting = () => {
                   <button
                     disabled={!replaceStatue}
                     onClick={roledeleteUpdatestaff}
-                    className="btn btn-danger w-100"
+                    className="btn btn-secondary w-100"
                   >
                     Delete
                   </button>
                   <button
+                    style={{
+                      color: "#333547 ",
+                      border: "2px solid #333547 ",
+                    }}
                     onClick={() => setDeleteStatus(false)}
-                    className="btn btn-secondary w-100"
+                    className="btn   rounded-pill    w-100"
                   >
                     Cancel
                   </button>
