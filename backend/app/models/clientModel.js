@@ -298,7 +298,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             : detail.phone_code;
         let alternate_phone_code =
           detail.alternate_phone_code == undefined ||
-          detail.alternate_phone_code == ""
+            detail.alternate_phone_code == ""
             ? ""
             : detail.alternate_phone_code;
         let phone = detail.phone;
@@ -371,7 +371,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -417,7 +417,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -464,7 +464,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -511,7 +511,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -557,7 +557,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               : detail.phone_code;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let phone = detail.phone;
@@ -1058,6 +1058,8 @@ const getClientFilter = async (client) => {
   let { customer_id, StaffUserId, filters } = client;
   let { job_id } = filters;
 
+  console.log("getClientFilter filters", customer_id);
+
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
@@ -1175,6 +1177,14 @@ async function getAllClientsSidebarFilter(
   job_id,
   LineManageStaffId
 ) {
+
+
+  if (Array.isArray(job_id)) {
+    job_id = job_id;
+  } else if (!["", null, undefined].includes(job_id)) {
+    job_id = [job_id];
+  }
+
   try {
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
@@ -1213,7 +1223,7 @@ JOIN
 JOIN 
     jobs ON clients.id = jobs.client_id
 WHERE
-    jobs.id = ${job_id}
+    jobs.id IN (${job_id})
 GROUP BY
     clients.id    
 ORDER BY 
@@ -1258,7 +1268,7 @@ ORDER BY
       JOIN 
           jobs ON clients.id = jobs.client_id
       WHERE 
-        jobs.id = ${job_id}
+        jobs.id IN (${job_id})
       GROUP BY
           clients.id    
       ORDER BY 
@@ -2666,8 +2676,8 @@ const clientUpdate = async (client) => {
 
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -2739,8 +2749,8 @@ const clientUpdate = async (client) => {
         const msgLog =
           model_name.length > 1
             ? model_name.slice(0, -1).join(", ") +
-              " and " +
-              model_name.slice(-1)
+            " and " +
+            model_name.slice(-1)
             : model_name[0];
 
         const currentDate = new Date();
@@ -2780,8 +2790,8 @@ const clientUpdate = async (client) => {
       for (const detail of contactDetails) {
         let customer_contact_person_role_id =
           detail.customer_contact_person_role_id == null ||
-          detail.customer_contact_person_role_id == "" ||
-          detail.customer_contact_person_role_id == undefined
+            detail.customer_contact_person_role_id == "" ||
+            detail.customer_contact_person_role_id == undefined
             ? 0
             : detail.customer_contact_person_role_id;
 
@@ -2796,7 +2806,7 @@ const clientUpdate = async (client) => {
         let phone = detail.phone;
         let alternate_phone_code =
           detail.alternate_phone_code == undefined ||
-          detail.alternate_phone_code == ""
+            detail.alternate_phone_code == ""
             ? ""
             : detail.alternate_phone_code;
         let alternate_phone = detail.alternate_phone;
@@ -2870,8 +2880,8 @@ const clientUpdate = async (client) => {
         const msgLog =
           model_name.length > 1
             ? model_name.slice(0, -1).join(", ") +
-              " and " +
-              model_name.slice(-1)
+            " and " +
+            model_name.slice(-1)
             : model_name[0];
 
         const currentDate = new Date();
@@ -2969,8 +2979,8 @@ const clientUpdate = async (client) => {
         for (const detail of member_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -2985,7 +2995,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3063,8 +3073,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3105,8 +3115,8 @@ const clientUpdate = async (client) => {
         for (const detail of trustee_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3121,7 +3131,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3199,8 +3209,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3242,8 +3252,8 @@ const clientUpdate = async (client) => {
         for (const detail of member_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3258,7 +3268,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3336,8 +3346,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3380,8 +3390,8 @@ const clientUpdate = async (client) => {
         for (const detail of beneficiaries_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3396,7 +3406,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3474,8 +3484,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();
@@ -3516,8 +3526,8 @@ const clientUpdate = async (client) => {
         for (const detail of trustee_details) {
           let customer_contact_person_role_id =
             detail.customer_contact_person_role_id == null ||
-            detail.customer_contact_person_role_id == "" ||
-            detail.customer_contact_person_role_id == undefined
+              detail.customer_contact_person_role_id == "" ||
+              detail.customer_contact_person_role_id == undefined
               ? 0
               : detail.customer_contact_person_role_id;
 
@@ -3532,7 +3542,7 @@ const clientUpdate = async (client) => {
           let phone = detail.phone;
           let alternate_phone_code =
             detail.alternate_phone_code == undefined ||
-            detail.alternate_phone_code == ""
+              detail.alternate_phone_code == ""
               ? ""
               : detail.alternate_phone_code;
           let alternate_phone = detail.alternate_phone;
@@ -3610,8 +3620,8 @@ const clientUpdate = async (client) => {
           const msgLog =
             model_name.length > 1
               ? model_name.slice(0, -1).join(", ") +
-                " and " +
-                model_name.slice(-1)
+              " and " +
+              model_name.slice(-1)
               : model_name[0];
 
           const currentDate = new Date();

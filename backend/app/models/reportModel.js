@@ -3537,8 +3537,8 @@ const getJobCustomReport = async (Report) => {
     let role_user = data?.role?.toUpperCase() || '';
 
 
-    console.log("page ---- --- ", page);
-    console.log("limit ---- --- ", limit);
+  //  console.log("page ---- --- ", page);
+   // console.log("limit ---- --- ", limit);
 
     const offset = (page - 1) * limit;
 

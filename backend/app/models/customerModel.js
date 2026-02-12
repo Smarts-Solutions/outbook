@@ -820,8 +820,8 @@ const getAllCustomersFilter = async (customer) => {
     const { StaffUserId, filters } = customer;
     let { job_id , client_id } = filters;
 
-    console.log("job_id", job_id);
-    console.log("client_id", client_id);
+    // console.log("job_id", job_id);
+    // console.log("client_id", client_id);
 
     if (Array.isArray(job_id)) {
         job_id = job_id;
