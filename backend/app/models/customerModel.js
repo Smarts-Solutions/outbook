@@ -821,17 +821,17 @@ const getAllCustomersFilter = async (customer) => {
     let { job_id , client_id } = filters;
 
     console.log("job_id", job_id);
-    console.log("filters?.client_id", filters?.client_id);
+    console.log("client_id", client_id);
 
     if (Array.isArray(job_id)) {
         job_id = job_id;
-    } else if (job_id !== undefined && job_id !== null && job_id !== "") {
+    } else if (!["",null,undefined].includes(job_id)) {
         job_id = [job_id];
     }
 
     if (Array.isArray(client_id)) {
         client_id = client_id;
-    } else if (client_id !== undefined && client_id !== null && client_id !== "") {
+    } else if (!["",null,undefined].includes(client_id)) {
         client_id = [client_id];
     }
 
