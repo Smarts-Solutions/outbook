@@ -3357,6 +3357,8 @@ const getAllService = async (Report) => {
     let { data } = Report;
     let job_id = data?.filters?.job_id;
 
+    
+
     if (['', null, undefined].includes(job_id)) {
         const query = `
     SELECT  
