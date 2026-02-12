@@ -4141,14 +4141,14 @@ const getJobCustomReport = async (Report) => {
             ${GROUPBY} ) AS count_table
         `;
 
-        console.log("fromDate", fromDate);
-        console.log("toDate", toDate);
-        console.log("Total Count Query ---- ", unpivotSQLCount);
+        // console.log("fromDate", fromDate);
+        // console.log("toDate", toDate);
+        // console.log("Total Count Query ---- ", unpivotSQLCount);
         // Get Total Count
         const [countResult] = await pool.execute(unpivotSQLCount, [fromDate, toDate]);
         const totalCount = countResult[0]?.total_count || 0;
 
-        console.log("Total Count ---- ", totalCount);
+        //console.log("Total Count ---- ", totalCount);
 
 
         // ===== Final Query =====
@@ -4593,7 +4593,7 @@ const getJobCustomReport = async (Report) => {
             outRows.push(row);
         }
 
-        console.log("outRows --->>>", outRows.length);
+        //console.log("outRows --->>>", outRows.length);
         // console.log("displayBy --->>>", displayBy);
         let total_count = [];
         let weeks = [];
@@ -4642,7 +4642,7 @@ const getJobCustomReport = async (Report) => {
         };
 
     } catch (err) {
-        console.error(err);
+       // console.error(err);
         return { status: false, message: err.message || 'server error', data: [] };
     }
 };

@@ -818,9 +818,27 @@ trading_name ASC;`;
 
 const getAllCustomersFilter = async (customer) => {
     const { StaffUserId, filters } = customer;
-    let { job_id } = filters;
+    let { job_id , client_id } = filters;
 
-    if (!['', null, undefined].includes(filters?.client_id)) {
+    console.log("job_id", job_id);
+    console.log("filters?.client_id", filters?.client_id);
+
+    if (Array.isArray(job_id)) {
+        job_id = job_id;
+    } else if (job_id !== undefined && job_id !== null && job_id !== "") {
+        job_id = [job_id];
+    }
+
+    if (Array.isArray(client_id)) {
+        client_id = client_id;
+    } else if (client_id !== undefined && client_id !== null && client_id !== "") {
+        client_id = [client_id];
+    }
+
+
+
+    // if (!['', null, undefined].includes(filters?.client_id)) {
+    if (client_id?.length > 0) {
         const query = `
             SELECT  
             customers.id AS id,
@@ -837,7 +855,7 @@ const getAllCustomersFilter = async (customer) => {
         JOIN
             clients ON clients.customer_id = customers.id
         WHERE
-            clients.id = ${filters?.client_id}
+            clients.id IN (${client_id})
         ORDER BY 
         trading_name ASC;`;
 
@@ -870,7 +888,7 @@ const getAllCustomersFilter = async (customer) => {
         JOIN
             jobs ON jobs.customer_id = customers.id
         WHERE
-            jobs.id = ${job_id}
+            jobs.id IN (${job_id})
         ORDER BY 
         trading_name ASC;`;
 
@@ -919,7 +937,7 @@ const getAllCustomersFilter = async (customer) => {
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-           jobs.id = ${job_id}
+           jobs.id IN (${job_id})
            GROUP BY customers.id
            ORDER BY customers.trading_name ASC
 
