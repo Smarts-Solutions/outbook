@@ -798,7 +798,7 @@ const StaffPage = () => {
       col_size: 6,
       disable: false,
       options: staffDataAllRecords?.data
-        .filter(
+        ?.filter(
           (data) =>
             data.role !== "ADMIN" &&
             data.role !== "SUPERADMIN" &&
@@ -909,7 +909,7 @@ const StaffPage = () => {
     return `${monthDay} (${time.toUpperCase()})`;
   };
 
-  const exportData = staffDataAll.data.map((item) => ({
+  const exportData = staffDataAll?.data?.map((item) => ({
     "First Name": item.first_name,
     "Last Name": item.last_name,
     Email: item.email,
