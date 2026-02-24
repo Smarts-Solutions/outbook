@@ -119,17 +119,17 @@ const getDashboardData = async (dashboard) => {
   try {
     const [RoleAccessCustomer] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
-      [rowRoles[0].role_id, 33]
+      [rowRoles[0].role_id, 33],
     );
 
     const [RoleAccessClient] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
-      [rowRoles[0].role_id, 34]
+      [rowRoles[0].role_id, 34],
     );
 
     const [RoleAccessJob] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
-      [rowRoles[0].role_id, 35]
+      [rowRoles[0].role_id, 35],
     );
 
     // console.log("rows startDate ", startDate);
@@ -325,7 +325,7 @@ const getDashboardData = async (dashboard) => {
       JobResult = JobData;
     } else {
       // const JobQuery = `
-      //   SELECT 
+      //   SELECT
       //   jobs.id AS id,
       //   jobs.status_type AS status_type,
 
@@ -333,49 +333,49 @@ const getDashboardData = async (dashboard) => {
       //   assigned_jobs_staff_view.service_id_assign AS service_id_assign,
       //   jobs.service_id AS job_service_id
 
-      //   FROM 
+      //   FROM
       //   jobs
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //     assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-      //   JOIN 
+      //   JOIN
       //   services ON jobs.service_id = services.id
       //   JOIN
       //   customer_services ON customer_services.service_id = jobs.service_id
       //   JOIN
       //   customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   clients ON jobs.client_id = clients.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   customers ON jobs.customer_id = customers.id AND customers.status = '1'
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   staff_portfolio ON staff_portfolio.customer_id = customers.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   job_types ON jobs.job_type_id = job_types.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   staffs ON jobs.allocated_to = staffs.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   staffs AS staffs2 ON jobs.reviewer = staffs2.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-      //   LEFT JOIN 
+      //   LEFT JOIN
       //   master_status ON master_status.id = jobs.status_type
       //    LEFT JOIN
       //    timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
       //   WHERE
-      //   (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) 
-      //   OR jobs.staff_created_id IN(${LineManageStaffId}) 
+      //   (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId})
+      //   OR jobs.staff_created_id IN(${LineManageStaffId})
       //   OR clients.staff_created_id IN(${LineManageStaffId}))
       //   AND jobs.created_at BETWEEN ? AND ?
-      //   GROUP BY 
-      //   jobs.id 
-      //   ORDER BY 
+      //   GROUP BY
+      //   jobs.id
+      //   ORDER BY
       //   jobs.id DESC;
       //   `;
 
-      startDate = startDate + " 00:00:00"
-      endDate = endDate + " 00:00:00"
+      startDate = startDate + " 00:00:00";
+      endDate = endDate + " 00:00:00";
 
       const JobQuery = `
         SELECT 
@@ -417,16 +417,16 @@ const getDashboardData = async (dashboard) => {
 
       //////-----START Assign Customer Service Data START----////////
       let isExistAssignCustomer = JobData?.find(
-        (item) => item?.assigned_source === "assign_customer_service"
+        (item) => item?.assigned_source === "assign_customer_service",
       );
       if (isExistAssignCustomer != undefined) {
         let matched = JobData?.filter(
           (item) =>
             item?.assigned_source === "assign_customer_service" &&
-            Number(item?.service_id_assign) === Number(item?.job_service_id)
+            Number(item?.service_id_assign) === Number(item?.job_service_id),
         );
         let matched2 = JobData?.filter(
-          (item) => item?.assigned_source !== "assign_customer_service"
+          (item) => item?.assigned_source !== "assign_customer_service",
         );
         const resultAssignCustomer = [...matched, ...matched2];
         JobResult = resultAssignCustomer;
@@ -568,6 +568,37 @@ const getDashboardActivityLog = async (dashboard) => {
           }
           break;
         }
+
+        // ✅ This Quarter
+        case "this_quarter": {
+          const quarter = Math.floor(today.getMonth() / 3);
+          startDate = new Date(today.getFullYear(), quarter * 3, 1);
+          endDate = today;
+          break;
+        }
+
+        // ✅ Last Quarter
+        case "last_quarter": {
+          const quarter = Math.floor(today.getMonth() / 3);
+          startDate = new Date(today.getFullYear(), quarter * 3 - 3, 1);
+          endDate = new Date(today.getFullYear(), quarter * 3, 0);
+          break;
+        }
+
+        // ✅ This 6 Months
+        case "this_six_month": {
+          startDate = new Date(today);
+          startDate.setMonth(today.getMonth() - 5);
+          endDate = today;
+          break;
+        }
+
+        // ✅ This Year
+        case "this_year": {
+          startDate = new Date(today.getFullYear(), 0, 1);
+          endDate = today;
+          break;
+        }
       }
 
       const format = (d) => d.toISOString().slice(0, 10);
@@ -587,26 +618,27 @@ const getDashboardActivityLog = async (dashboard) => {
 
     // Add staff filter for non-superadmin
     if (!isSuperAdmin) {
-      whereConditions.push('staff_logs.staff_id = ?');
+      whereConditions.push("staff_logs.staff_id = ?");
       queryParams.push(staff_id);
     }
 
     // Add staff filter if specified
     if (filter_staff_id) {
-      whereConditions.push('staff_logs.staff_id = ?');
+      whereConditions.push("staff_logs.staff_id = ?");
       queryParams.push(filter_staff_id);
     }
 
     // Add date range filter
     if (startDate && endDate) {
-      whereConditions.push('staff_logs.date BETWEEN ? AND ?');
+      whereConditions.push("staff_logs.date BETWEEN ? AND ?");
       queryParams.push(startDate, endDate);
     }
 
     // Build WHERE clause
-    const whereClause = whereConditions.length > 0
-      ? `WHERE ${whereConditions.join(' AND ')}`
-      : '';
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(" AND ")}`
+        : "";
 
     // Add limit and offset to params
     queryParams.push(limit, offset);
