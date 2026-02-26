@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import Datatable from '../../../Components/ExtraComponents/Datatable';
-import { linkedData } from '../../../ReduxStore/Slice/Dashboard/DashboardSlice'
-import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
+import { linkedData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 const JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -15,7 +15,6 @@ const JobStatus = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
-
 
   useEffect(() => {
     GetLinkedData();
@@ -31,49 +30,58 @@ const JobStatus = () => {
     all_customers: 0,
     all_clients: 0,
     all_jobs: 0,
-    staff: 0
+    staff: 0,
   });
-
-
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "customer"
+      (item) => item.permission_name === "customer",
     )?.items || [];
 
   const accessData1 =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "client"
+      (item) => item.permission_name === "client",
     )?.items || [];
 
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job"
+      (item) => item.permission_name === "job",
     )?.items || [];
 
   const accessDataAllCustomer =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_customers"
+      (item) => item.permission_name === "all_customers",
     )?.items || [];
 
   const accessDataAllJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs"
+      (item) => item.permission_name === "all_jobs",
     )?.items || [];
 
   const accessDataClients =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_clients"
+      (item) => item.permission_name === "all_clients",
     )?.items || [];
 
   const accessDataStaff =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "staff"
+      (item) => item.permission_name === "staff",
     )?.items || [];
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0, client: 0, job: 0, all_customers: 0, all_clients: 0, all_jobs: 0, staff: 0 };
+    const updatedAccess = {
+      insert: 0,
+      update: 0,
+      delete: 0,
+      view: 0,
+      client: 0,
+      job: 0,
+      all_customers: 0,
+      all_clients: 0,
+      all_jobs: 0,
+      staff: 0,
+    };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
@@ -104,7 +112,6 @@ const JobStatus = () => {
     setAccessData(updatedAccess);
   }, []);
 
-
   console.log("getAccessData", getAccessData);
 
   const GetLinkedData = async () => {
@@ -112,24 +119,23 @@ const JobStatus = () => {
       req: {
         staff_id: location?.state?.req?.staff_id,
         key: location?.state?.req?.key,
-        ids: location?.state?.req?.ids
-      }, authToken: token
+        ids: location?.state?.req?.ids,
+      },
+      authToken: token,
     };
     await dispatch(linkedData(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
           setAllLinkedData(res.data);
-        }
-        else {
+        } else {
           setAllLinkedData([]);
         }
       })
       .catch((err) => {
         console.log(err);
       });
-  }
-
+  };
 
   const HandleClientView = (row) => {
     if (row.form_process == "4") {
@@ -143,7 +149,6 @@ const JobStatus = () => {
       });
     }
   };
-
 
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
@@ -159,7 +164,9 @@ const JobStatus = () => {
       if (result.isConfirmed) {
         try {
           const req = { customer_id: row.id, status: newStatus };
-          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
+          const res = await dispatch(
+            Update_Customer_Status({ req, authToken: token }),
+          ).unwrap();
 
           if (res.status) {
             Swal.fire({
@@ -227,19 +234,27 @@ const JobStatus = () => {
     {
       name: "Job Type",
       cell: (row) => (
-        <div title={row.job_type_name || "-"}>
-          {row.job_type_name || "-"}
-        </div>
+        <div title={row.job_type_name || "-"}>{row.job_type_name || "-"}</div>
       ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
     {
+      name: "Job Status",
+      cell: (row) => <div title={row.status || "-"}>{row.status || "-"}</div>,
+      selector: (row) => row.status || "-",
+      sortable: true,
+    },
+    {
       name: "Client Contact Person",
       cell: (row) => (
-        <div title={row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-"}>
+        <div
+          title={
+            row.account_manager_officer_first_name +
+              " " +
+              row.account_manager_officer_last_name || "-"
+          }
+        >
           {row.account_manager_officer_first_name +
             " " +
             row.account_manager_officer_last_name || "-"}
@@ -247,8 +262,8 @@ const JobStatus = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name || "-",
+          " " +
+          row.account_manager_officer_last_name || "-",
       sortable: true,
     },
     {
@@ -264,9 +279,13 @@ const JobStatus = () => {
     {
       name: "Outbook Account Manager",
       cell: (row) => (
-        <div title={row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-"}>
+        <div
+          title={
+            row.outbooks_acount_manager_first_name +
+              " " +
+              row.outbooks_acount_manager_last_name || "-"
+          }
+        >
           {row.outbooks_acount_manager_first_name +
             " " +
             row.outbooks_acount_manager_last_name || "-"}
@@ -275,45 +294,61 @@ const JobStatus = () => {
 
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-        " " +
-        row.outbooks_acount_manager_last_name || "-",
+          " " +
+          row.outbooks_acount_manager_last_name || "-",
       sortable: true,
     },
     {
       name: "Allocated To",
       cell: (row) => (
-        // <div title={row.allocated_first_name == null ? "-" : 
+        // <div title={row.allocated_first_name == null ? "-" :
         //  row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}>
         //   {row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
         // </div>
 
         <div>
-          {
-          row?.allocated_first_name != null ?
-          row?.allocated_first_name +" " +row?.allocated_last_name
-           : "-"}
-        </div>
-      ),
-
-      selector: (row) =>
-        row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
-      sortable: true,
-    },
-    {
-      name: "Timesheet",
-      cell: (row) => (
-        <div title={row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "-"}>
-          {row.total_hours_status == "1" && row.total_hours != null ?
-            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          {row?.allocated_first_name != null
+            ? row?.allocated_first_name + " " + row?.allocated_last_name
             : "-"}
         </div>
       ),
 
       selector: (row) =>
-        row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+        row.allocated_first_name == null
+          ? "-"
+          : row.allocated_first_name + " " + row.allocated_last_name == null
+            ? "-"
+            : row.allocated_last_name,
+      sortable: true,
+    },
+    {
+      name: "Timesheet",
+      cell: (row) => (
+        <div
+          title={
+            row.total_hours_status == "1" && row.total_hours != null
+              ? row.total_hours.split(":")[0] +
+                "h " +
+                row.total_hours.split(":")[1] +
+                "m"
+              : "-"
+          }
+        >
+          {row.total_hours_status == "1" && row.total_hours != null
+            ? row.total_hours.split(":")[0] +
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
+            : "-"}
+        </div>
+      ),
+
+      selector: (row) =>
+        row.total_hours_status == "1" && row.total_hours != null
+          ? row.total_hours.split(":")[0] +
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
           : "-",
       sortable: true,
     },
@@ -322,7 +357,6 @@ const JobStatus = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
-
   ];
 
   const columnsCustomer = [
@@ -336,7 +370,15 @@ const JobStatus = () => {
             whiteSpace: "nowrap",
           }}
         >
-          {(role === "SUPERADMIN") && row.status == 1 ? (
+          {role === "SUPERADMIN" && row.status == 1 ? (
+            <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a>
+          ) : getAccessData.client == 1 && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -345,55 +387,51 @@ const JobStatus = () => {
               {row.trading_name}
             </a>
           ) : (
-            getAccessData.client == 1 && row.status == 1 ? <a
-              onClick={() => HandleClientView(row)}
-              style={{ cursor: "pointer", color: "#26bdf0" }}
-              title={row.trading_name}
-            >
-              {row.trading_name}
-            </a> : row.trading_name
+            row.trading_name
           )}
         </div>
       ),
       selector: (row) => row.trading_name,
       sortable: true,
-
     },
     {
       name: "Customer Code",
-      cell: (row) => (
-        <div title={row.customer_code}  >
-          {row.customer_code}
-        </div>
-      ),
+      cell: (row) => <div title={row.customer_code}>{row.customer_code}</div>,
       selector: (row) => row.customer_code,
       sortable: true,
-
     },
 
     {
       name: "Type",
       selector: (row) =>
-        row.customer_type === '1'
+        row.customer_type === "1"
           ? "Sole Trader"
-          : row.customer_type === '2'
+          : row.customer_type === "2"
             ? "Company"
-            : row.customer_type === '3'
+            : row.customer_type === "3"
               ? "Partnership"
               : "-",
       sortable: true,
-
     },
     {
       name: "Client Contact Person",
-      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
+      selector: (row) =>
+        row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
-      cell: row => (
+      cell: (row) => (
         <div
-          title={row.account_manager_firstname + " " + row.account_manager_lastname}
+          title={
+            row.account_manager_firstname + " " + row.account_manager_lastname
+          }
           className="data-table-cell"
-          data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
-          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          data-fulltext={
+            row.account_manager_firstname + " " + row.account_manager_lastname
+          }
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
         >
           {row.account_manager_firstname + " " + row.account_manager_lastname}
         </div>
@@ -404,22 +442,26 @@ const JobStatus = () => {
       cell: (row) => (
         <div>
           <div>
-            {row.form_process === "4" ?
+            {row.form_process === "4" ? (
               <select
                 className="form-select form-control"
                 value={row.status}
                 onChange={(e) => handleChangeStatus(e, row)}
               >
-                <option value="0" className="text-danger">Inactive</option>
-                <option value="1" className="text-success">Active</option>
+                <option value="0" className="text-danger">
+                  Inactive
+                </option>
+                <option value="1" className="text-success">
+                  Active
+                </option>
               </select>
-              : (
-                <span className="text-warning">Inprogress</span>
-              )}
+            ) : (
+              <span className="text-warning">Inprogress</span>
+            )}
           </div>
         </div>
       ),
-      selector: (row) => row.status == "1" ? 1 : 0,
+      selector: (row) => (row.status == "1" ? 1 : 0),
       sortable: true,
     },
   ];
@@ -448,9 +490,7 @@ const JobStatus = () => {
     {
       name: "Client Name",
       cell: (row) => (
-        <div title={row.client_name || "-"}>
-          {row.client_name || "-"}
-        </div>
+        <div title={row.client_name || "-"}>{row.client_name || "-"}</div>
       ),
       selector: (row) => row.client_name || "-",
       sortable: true,
@@ -459,9 +499,7 @@ const JobStatus = () => {
     {
       name: "Client Code",
       cell: (row) => (
-        <div title={row.client_code || "-"}>
-          {row.client_code || "-"}
-        </div>
+        <div title={row.client_code || "-"}>{row.client_code || "-"}</div>
       ),
       selector: (row) => row.client_code || "-",
       sortable: true,
@@ -481,18 +519,20 @@ const JobStatus = () => {
     {
       name: "Status",
 
-      selector: (row) => (<div>
-        <span
-          className={` ${row.status === "1" ? "text-success" : "text-danger"
+      selector: (row) => (
+        <div>
+          <span
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
-        >
-          {row.status === "1" ? "Active" : "Deactive"}
-        </span>
-      </div>),
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
       sortable: true,
-      width: '130px'
+      width: "130px",
     },
-
   ];
 
   const columnsStaff = [
@@ -509,11 +549,7 @@ const JobStatus = () => {
     },
     {
       name: "Email Address",
-      cell: (row) => (
-        <div title={row.email}>
-          {row.email}
-        </div>
-      ),
+      cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
       // width: "250px",
@@ -521,21 +557,26 @@ const JobStatus = () => {
     {
       name: "Phone",
       cell: (row) => (
-        <div title={row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
-          {row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
+        <div
+          title={
+            row.phone && row.phone_code
+              ? row.phone_code + "-" + row.phone
+              : " - "
+          }
+        >
+          {row.phone && row.phone_code
+            ? row.phone_code + "-" + row.phone
+            : " - "}
         </div>
       ),
-      selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
+      selector: (row) =>
+        row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
       // width: "250px",
     },
     {
       name: "Role",
-      cell: (row) => (
-        <div title={row.role_name}>
-          {row.role_name}
-        </div>
-      ),
+      cell: (row) => <div title={row.role_name}>{row.role_name}</div>,
       selector: (row) => row.role_name,
       sortable: true,
       // width: "250px",
@@ -545,8 +586,9 @@ const JobStatus = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -554,31 +596,33 @@ const JobStatus = () => {
       ),
       // width: "250px",
     },
-
-
-  ]
-
+  ];
 
   console.log("allLinkedData", allLinkedData);
   console.log("location", location?.state?.req?.key);
 
   return (
     <div>
-      <div className='report-data mt-5'>
-        <div className='row '>
-          <div className='col-md-12'>
-            <div className='' >
-              <div className=' row mb-5'>
-                <div className='tab-title col-lg-6 '>
+      <div className="report-data mt-5">
+        <div className="row ">
+          <div className="col-md-12">
+            <div className="">
+              <div className=" row mb-5">
+                <div className="tab-title col-lg-6 ">
                   <h3>{location?.state?.req?.heading}</h3>
                 </div>
-                <div className='col-lg-6  d-flex justify-content-end'>
-                  <div className="btn btn-info text-white blue-btn"
-                    onClick={() => { window.history.back() }}
+                <div className="col-lg-6  d-flex justify-content-end">
+                  <div
+                    className="btn btn-info text-white blue-btn"
+                    onClick={() => {
+                      window.history.back();
+                    }}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
-                  {(role === "SUPERADMIN" || (getAccessData.insert === 1 && getAccessData.view === 1)) && location?.state?.req?.heading == "Customers" ? (
+                  {(role === "SUPERADMIN" ||
+                    (getAccessData.insert === 1 && getAccessData.view === 1)) &&
+                  location?.state?.req?.heading == "Customers" ? (
                     <div className="ms-2">
                       <Link
                         to="/admin/addcustomer"
@@ -589,34 +633,32 @@ const JobStatus = () => {
                     </div>
                   ) : (
                     ""
-                  )
-
-                  }
+                  )}
                 </div>
-
               </div>
             </div>
-
-
           </div>
         </div>
-        <div className='datatable-wrapper mt-minus'>
-
-          {
-            role === "SUPERADMIN" ? (
-              <Datatable
-                filter={true}
-                columns={
-                  location?.state?.req?.key === "client" ? ClientListColumns :
-                    location?.state?.req?.key === "customer" ? columnsCustomer :
-                      location?.state?.req?.key === "staff" ? columnsStaff :
-                        JobColumns
-                }
-                data={allLinkedData || []}
-              />
-            ) : (
-              <>
-                {((getAccessData.view === 1 || getAccessData.all_customers === 1) && location?.state?.req?.key === "customer") && (
+        <div className="datatable-wrapper mt-minus">
+          {role === "SUPERADMIN" ? (
+            <Datatable
+              filter={true}
+              columns={
+                location?.state?.req?.key === "client"
+                  ? ClientListColumns
+                  : location?.state?.req?.key === "customer"
+                    ? columnsCustomer
+                    : location?.state?.req?.key === "staff"
+                      ? columnsStaff
+                      : JobColumns
+              }
+              data={allLinkedData || []}
+            />
+          ) : (
+            <>
+              {(getAccessData.view === 1 ||
+                getAccessData.all_customers === 1) &&
+                location?.state?.req?.key === "customer" && (
                   <Datatable
                     filter={true}
                     columns={columnsCustomer}
@@ -624,7 +666,9 @@ const JobStatus = () => {
                   />
                 )}
 
-                {((getAccessData.client === 1 || getAccessData.all_clients === 1) && location?.state?.req?.key === "client") && (
+              {(getAccessData.client === 1 ||
+                getAccessData.all_clients === 1) &&
+                location?.state?.req?.key === "client" && (
                   <Datatable
                     filter={true}
                     columns={ClientListColumns}
@@ -632,7 +676,8 @@ const JobStatus = () => {
                   />
                 )}
 
-                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "job") && (
+              {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
+                location?.state?.req?.key === "job" && (
                   <Datatable
                     filter={true}
                     columns={JobColumns}
@@ -640,7 +685,8 @@ const JobStatus = () => {
                   />
                 )}
 
-                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "pending_job") && (
+              {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
+                location?.state?.req?.key === "pending_job" && (
                   <Datatable
                     filter={true}
                     columns={JobColumns}
@@ -648,7 +694,8 @@ const JobStatus = () => {
                   />
                 )}
 
-                {((getAccessData.job === 1 || getAccessData.all_jobs === 1) && location?.state?.req?.key === "completed_job") && (
+              {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
+                location?.state?.req?.key === "completed_job" && (
                   <Datatable
                     filter={true}
                     columns={JobColumns}
@@ -656,21 +703,20 @@ const JobStatus = () => {
                   />
                 )}
 
-                {((getAccessData.staff === 1) && location?.state?.req?.key === "staff") && (
+              {getAccessData.staff === 1 &&
+                location?.state?.req?.key === "staff" && (
                   <Datatable
                     filter={true}
                     columns={columnsStaff}
                     data={allLinkedData || []}
                   />
                 )}
-              </>
-            )
-          }
-
+            </>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default JobStatus
+export default JobStatus;

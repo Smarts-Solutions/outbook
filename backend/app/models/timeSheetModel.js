@@ -887,8 +887,9 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 const saveTimesheet = async (Timesheet) => {
   try {
-    const { staff_id, data, deleteRows } = Timesheet;
+    const { staff_id, data, deleteRows , ip } = Timesheet;
 
+  
     //  for (let index = 0; index < data.length; index++) {
     //   const element = data[index];
     //   console.log("element", element)
@@ -1118,7 +1119,7 @@ const saveTimesheet = async (Timesheet) => {
       await SatffLogUpdateOperation(
         {
           staff_id: staff_id,
-          ip: "0.0.0.0",
+          ip: ip,
           date: currentDate.toISOString().split('T')[0],
           module_name: 'timesheet',
           log_message: `${msgLog}`,

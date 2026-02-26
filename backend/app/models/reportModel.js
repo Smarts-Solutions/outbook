@@ -3397,6 +3397,7 @@ const getAllJobType = async (Report) => {
 
     let { data } = Report;
     let job_id = data?.filters?.job_id;
+
     if (['', null, undefined].includes(job_id)) {
         const query = `
     SELECT  
@@ -3791,41 +3792,41 @@ const getJobCustomReport = async (Report) => {
         //let job_id = [1,6]
  
         if (!["", null, undefined].includes(job_id)) {
-            //where.push(`raw.job_id = ${job_id}`);
-             where.push(`raw.job_id IN (${job_id.join(",")})`);
+            where.push(`raw.job_id = ${job_id}`);
+            // where.push(`raw.job_id IN (${job_id.join(",")})`);
 
         }
 
-        // if (!["", null, undefined].includes(customer_id)) {
-        //     where.push(`raw.customer_id = ${customer_id}`);
-        // }
-        // if (!["", null, undefined].includes(client_id)) {
-        //     where.push(`raw.client_id = ${client_id}`);
-        // }
-        // if (!["", null, undefined].includes(account_manager_id)) {
-        //     where.push(`raw.account_manager_id = ${account_manager_id}`);
-        // }
-        // if (!["", null, undefined].includes(allocated_to_id)) {
-        //     where.push(`raw.allocated_to_id = ${allocated_to_id}`);
-        // }
-        // if (!["", null, undefined].includes(reviewer_id)) {
-        //     where.push(`raw.reviewer_id = ${reviewer_id}`);
-        // }
-        // if (!["", null, undefined].includes(allocated_to_other_id)) {
-        //     where.push(`ato.id = ${allocated_to_other_id}`);
-        // }
-        // if (!["", null, undefined].includes(service_id)) {
-        //     where.push(`raw.service_id = ${service_id}`);
-        // }
-        // if (!["", null, undefined].includes(job_type_id)) {
-        //     where.push(`raw.job_type_id = ${job_type_id}`);
-        // }
-        // if (!["", null, undefined].includes(status_type_id)) {
-        //     where.push(`raw.status_type_id = ${status_type_id}`);
-        // }
-        // if (!["", null, undefined].includes(employee_number)) {
-        //     where.push(`sf.employee_number = '${employee_number}'`);
-        // }
+        if (!["", null, undefined].includes(customer_id)) {
+            where.push(`raw.customer_id = ${customer_id}`);
+        }
+        if (!["", null, undefined].includes(client_id)) {
+            where.push(`raw.client_id = ${client_id}`);
+        }
+        if (!["", null, undefined].includes(account_manager_id)) {
+            where.push(`raw.account_manager_id = ${account_manager_id}`);
+        }
+        if (!["", null, undefined].includes(allocated_to_id)) {
+            where.push(`raw.allocated_to_id = ${allocated_to_id}`);
+        }
+        if (!["", null, undefined].includes(reviewer_id)) {
+            where.push(`raw.reviewer_id = ${reviewer_id}`);
+        }
+        if (!["", null, undefined].includes(allocated_to_other_id)) {
+            where.push(`ato.id = ${allocated_to_other_id}`);
+        }
+        if (!["", null, undefined].includes(service_id)) {
+            where.push(`raw.service_id = ${service_id}`);
+        }
+        if (!["", null, undefined].includes(job_type_id)) {
+            where.push(`raw.job_type_id = ${job_type_id}`);
+        }
+        if (!["", null, undefined].includes(status_type_id)) {
+            where.push(`raw.status_type_id = ${status_type_id}`);
+        }
+        if (!["", null, undefined].includes(employee_number)) {
+            where.push(`sf.employee_number = '${employee_number}'`);
+        }
 
 
 
