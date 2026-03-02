@@ -3218,7 +3218,6 @@ const staffRoleChangeUpdate = async (Report) => {
 /////////////---- START JOB CUSTOM REPORTS ----//////////////////////
 const getStaffWithRole = async (Report) => {
 
-
     const { data } = Report;
     const { role_id } = data;
     let job_id = data?.filters?.job_id;
@@ -3439,6 +3438,7 @@ const getAllJobType = async (Report) => {
 const getAllStatus = async (Report) => {
     let { data } = Report;
     let job_id = data?.filters?.job_id;
+
     if (['', null, undefined].includes(job_id)) {
         const query = `
     SELECT  
@@ -3453,6 +3453,11 @@ const getAllStatus = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
+      // Ensure job_id is always array
+    if (!Array.isArray(job_id)) {
+        job_id = [job_id];
+    }
+
     const query = `
     SELECT
     master_status.id,
@@ -3461,7 +3466,8 @@ const getAllStatus = async (Report) => {
     master_status
     JOIN
     jobs ON jobs.status_type = master_status.id
-    WHERE master_status.status = '1' AND jobs.id = ${job_id}
+    WHERE master_status.status = '1' AND jobs.id IN (${job_id})
+    GROUP BY master_status.id
     ORDER BY master_status.name ASC;
     `
     const [result] = await pool.execute(query);
