@@ -3355,9 +3355,8 @@ const getStaffWithRole = async (Report) => {
 
 const getAllService = async (Report) => {
     let { data } = Report;
-    let job_id = data?.filters?.job_id;
 
-    
+    let job_id = data?.filters?.job_id;
 
     if (['', null, undefined].includes(job_id)) {
         const query = `
@@ -3373,6 +3372,11 @@ const getAllService = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
+     // Ensure job_id is always array
+    if (!Array.isArray(job_id)) {
+        job_id = [job_id];
+    }
+
 
     const query = `
     SELECT  
@@ -3382,14 +3386,12 @@ const getAllService = async (Report) => {
     services
     JOIN
     jobs ON jobs.service_id = services.id
-    WHERE services.status = '1' AND jobs.id = ${job_id}
+    WHERE services.status = '1' AND jobs.id IN (${job_id})
+    GROUP BY services.id
     ORDER BY services.name ASC;
     `
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
-
-
-
 
 }
 
@@ -3412,6 +3414,11 @@ const getAllJobType = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
+     // Ensure job_id is always array
+    if (!Array.isArray(job_id)) {
+        job_id = [job_id];
+    }
+
     const query = `
     SELECT
     job_types.id,
@@ -3420,9 +3427,11 @@ const getAllJobType = async (Report) => {
     job_types
     JOIN
     jobs ON jobs.job_type_id = job_types.id
-    WHERE job_types.status = '1' AND jobs.id = ${job_id}
+    WHERE job_types.status = '1' AND jobs.id IN (${job_id})
+    GROUP BY job_types.id
     ORDER BY job_types.type ASC;
     `
+    console.log("Get All Job Type Query:", query);
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
