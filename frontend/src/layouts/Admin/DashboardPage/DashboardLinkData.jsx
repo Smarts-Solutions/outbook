@@ -16,6 +16,13 @@ const JobStatus = () => {
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
 
+
+  const [hararchyData, setHararchyData] = useState({
+      customer: {},
+      client: {},
+      job: {},
+    });
+
   useEffect(() => {
     GetLinkedData();
   }, []);
@@ -205,16 +212,38 @@ const JobStatus = () => {
   };
 
   const JobColumns = [
+    // {
+    //   name: "Job ID (CustName+ClientName+UniqueNo)",
+    //   cell: (row) => (
+    //     <div>
+    //       {/* <a
+    //         onClick={() => HandleJobView(row)}
+    //         style={{ cursor: "pointer", color: "#26bdf0" }}
+    //       > */}
+    //       {row.job_code_id}
+    //       {/* </a> */}
+    //     </div>
+    //   ),
+    //   selector: (row) => row.job_code_id,
+    //   sortable: true,
+    // },
+
     {
-      name: "Job ID (CustName+ClientName+UniqueNo)",
+      name: "Job ID",
       cell: (row) => (
-        <div>
-          {/* <a
-            onClick={() => HandleJobView(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          > */}
-          {row.job_code_id}
-          {/* </a> */}
+        <div title={row.job_code_id}>
+          {getAccessData.view == 1 ||
+          getAccessData.all_jobs == 1 ||
+          role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleJob(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.job_code_id}
+            </a>
+          ) : (
+            <a>{row.job_code_id}</a>
+          )}
         </div>
       ),
       selector: (row) => row.job_code_id,
@@ -597,6 +626,26 @@ const JobStatus = () => {
       // width: "250px",
     },
   ];
+
+
+    const HandleJob = (row) => {
+    setHararchyData((prevState) => {
+      const updatedData = {
+        ...prevState,
+        job: row,
+      };
+      navigate("/admin/job/logs", {
+        state: {
+          job_id: row?.job_id,
+          timesheet_job_id: row?.timesheet_job_id,
+          data: updatedData,
+          goto: "client",
+          activeTab: location?.state?.activeTab,
+        },
+      });
+      return updatedData;
+    });
+  };
 
   console.log("allLinkedData", allLinkedData);
   console.log("location", location?.state?.req?.key);
