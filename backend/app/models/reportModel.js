@@ -3221,9 +3221,8 @@ const getStaffWithRole = async (Report) => {
     const { data } = Report;
     const { role_id } = data;
     let job_id = data?.filters?.job_id;
-
     // console.log("Get Staff With Role ID: ===>", role_id);
-    // console.log("Get Staff With Role ID: ===>", job_id);
+ 
     if (['', null, undefined].includes(job_id)) {
         if (role_id == "other") {
             const query = `
