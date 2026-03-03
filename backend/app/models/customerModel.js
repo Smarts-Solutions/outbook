@@ -818,51 +818,28 @@ trading_name ASC;`;
 
 const getAllCustomersFilter = async (customer) => {
     const { StaffUserId, filters } = customer;
-    let { job_id , client_id } = filters;
+    let { job_id, client_id } = filters;
 
     // console.log("job_id", job_id);
     // console.log("client_id", client_id);
 
     if (Array.isArray(job_id)) {
         job_id = job_id;
-    } else if (!["",null,undefined].includes(job_id)) {
+    } else if (!["", null, undefined].includes(job_id)) {
         job_id = [job_id];
     }
 
     if (Array.isArray(client_id)) {
         client_id = client_id;
-    } else if (!["",null,undefined].includes(client_id)) {
+    } else if (!["", null, undefined].includes(client_id)) {
         client_id = [client_id];
     }
 
 
 
     // if (!['', null, undefined].includes(filters?.client_id)) {
-    if (client_id?.length > 0) {
-        const query = `
-            SELECT  
-            customers.id AS id,
-            customers.status AS status,
-            customers.form_process AS form_process,
-            customers.trading_name AS trading_name,
-            CONCAT(
-            'cust_', 
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
-        FROM
-            customers
-        JOIN
-            clients ON clients.customer_id = customers.id
-        WHERE
-            clients.id IN (${client_id})
-        ORDER BY 
-        trading_name ASC;`;
-
-        const [result] = await pool.execute(query);
-
-        return { status: true, message: 'Success..', data: result };
-
+    if (client_id?.length > 0 && job_id?.length === 0) {
+        return await getAllCustomerClientIdFilter(client_id);
     }
 
     // Get Role
@@ -950,6 +927,33 @@ const getAllCustomersFilter = async (customer) => {
         return { status: false, message: 'Error executing query', data: err };
     }
 
+}
+
+async function getAllCustomerClientIdFilter(client_id) {
+    const query = `
+            SELECT  
+            customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM
+            customers
+        JOIN
+            clients ON clients.customer_id = customers.id
+        WHERE
+            clients.id IN (${client_id})
+        GROUP BY customers.id    
+        ORDER BY 
+        trading_name ASC;`;
+
+    const [result] = await pool.execute(query);
+
+    return { status: true, message: 'Success..', data: result };
 }
 
 const getCustomer_dropdown_delete = async (customer) => {
