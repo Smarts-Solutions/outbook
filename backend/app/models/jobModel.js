@@ -1229,8 +1229,7 @@ VALUES (
 const getJobByCustomer = async (job) => {
   let { customer_id, StaffUserId, page, limit, search } = job;
 
- console.log("getJobByCustomer", job);
-  
+ //console.log("getJobByCustomer", job);
 
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
