@@ -838,18 +838,17 @@ const getAllCustomersFilter = async (customer) => {
 
 
     // if (!['', null, undefined].includes(filters?.client_id)) {
+    const rows = await QueryRoleHelperFunction(StaffUserId)
     if (client_id?.length > 0 && job_id?.length === 0) {
         return await getAllCustomerByClientIdFilter(client_id);
     }
-     
-    // Get Role
-    const rows = await QueryRoleHelperFunction(StaffUserId)
-    if (client_id?.length === 0 && job_id?.length > 0) {
+    else if (client_id?.length === 0 && job_id?.length > 0) {
         return await getAllCustomerByJobIdFilter(rows, job_id);
     }
-
-    if (client_id?.length > 0 && job_id?.length > 0) {
+    else if (client_id?.length > 0 && job_id?.length > 0) {
         return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
+    }else{
+        return { status: true, message: 'Success..', data: [] };
     }
 
 

@@ -2154,6 +2154,8 @@ const get_jobs_filter = async (job) => {
     return await getJobByCustomerId({ StaffUserId, customer_id });
   } else if (client_id.length > 0 && customer_id.length > 0) {
     return await getJobByClientIdAndCustomerId({ StaffUserId, customer_id , client_id });
+  }else{
+    return { status: true, message: "Success.", data: [] };
   }
  
 }
