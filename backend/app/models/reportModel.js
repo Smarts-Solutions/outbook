@@ -3433,7 +3433,7 @@ const getAllJobType = async (Report) => {
     GROUP BY job_types.id
     ORDER BY job_types.type ASC;
     `
-    console.log("Get All Job Type Query:", query);
+   // console.log("Get All Job Type Query:", query);
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
