@@ -1005,7 +1005,7 @@ const getByAllPendingJob = async (dashboard) => {
                    jobs.invoiced AS invoiced,
                    jobs.total_hours AS total_hours,
                    jobs.total_hours_status AS total_hours_status,
-                 
+                 jobs.job_priority AS job_priority,
                    staffs.id AS allocated_id,
                    staffs.first_name AS allocated_first_name,
                    staffs.last_name AS allocated_last_name,
@@ -1017,7 +1017,8 @@ const getByAllPendingJob = async (dashboard) => {
                    staffs3.id AS outbooks_acount_manager_id,
                    staffs3.first_name AS outbooks_acount_manager_first_name,
                    staffs3.last_name AS outbooks_acount_manager_last_name,
-                 
+                  CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
                    master_status.name AS status,
                    CONCAT(
                              SUBSTRING(customers.trading_name, 1, 3), '_',
