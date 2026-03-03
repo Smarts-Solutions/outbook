@@ -3221,7 +3221,7 @@ const getStaffWithRole = async (Report) => {
     let job_id = data?.filters?.job_id;
     // console.log("Get Staff With Role ID: ===>", role_id);
 
-    if (['', null, undefined].includes(job_id)) {
+    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
         if (role_id == "other") {
             const query = `
         SELECT 
@@ -3360,7 +3360,9 @@ const getAllService = async (Report) => {
 
     let job_id = data?.filters?.job_id;
 
-    if (['', null, undefined].includes(job_id)) {
+    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
+
+        console.log("getAllService job_id --->>>>", job_id);
         const query = `
     SELECT  
     id,
@@ -3402,7 +3404,7 @@ const getAllJobType = async (Report) => {
     let { data } = Report;
     let job_id = data?.filters?.job_id;
 
-    if (['', null, undefined].includes(job_id)) {
+    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
         const query = `
     SELECT  
     id,
@@ -3442,7 +3444,7 @@ const getAllStatus = async (Report) => {
     let { data } = Report;
     let job_id = data?.filters?.job_id;
 
-    if (['', null, undefined].includes(job_id)) {
+    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
         const query = `
     SELECT  
     id,

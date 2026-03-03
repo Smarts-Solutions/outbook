@@ -905,6 +905,7 @@ async function getAllCustomerByJobIdFilter(rows,job_id) {
             jobs ON jobs.customer_id = customers.id
         WHERE
             jobs.id IN (${job_id})
+        GROUP BY customers.id    
         ORDER BY 
         trading_name ASC;`;
 
@@ -991,6 +992,7 @@ async function getAllCustomerByClientIdAndJobIdFilter(rows,client_id,job_id) {
             clients ON clients.customer_id = customers.id    
         WHERE
             jobs.id IN (${job_id}) OR clients.id IN (${client_id})
+        GROUP BY customers.id
         ORDER BY 
         trading_name ASC;`;
 

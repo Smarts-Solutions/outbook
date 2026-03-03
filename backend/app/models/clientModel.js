@@ -1079,7 +1079,7 @@ const getClientFilter = async (client) => {
   }
 
 
-  if (customer_id.length > 0 && job_id.length === 0) {
+  else if (customer_id.length > 0 && job_id.length === 0) {
     return await getAllClientByCustomerIdFilter(
       StaffUserId,
       rows,
@@ -1089,7 +1089,7 @@ const getClientFilter = async (client) => {
   }
 
 
-  if (customer_id.length > 0 && job_id.length > 0) {
+  else if (customer_id.length > 0 && job_id.length > 0) {
     return await getAllClientByCustomerIdAndJobIdFilter(
       StaffUserId,
       rows,
@@ -1097,6 +1097,10 @@ const getClientFilter = async (client) => {
       job_id,
       LineManageStaffId
     );
+  }
+
+  else {
+     return { status: true, message: "success.", data: [] }; 
   }
 
  
