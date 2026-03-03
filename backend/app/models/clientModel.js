@@ -1058,6 +1058,7 @@ const getClientFilter = async (client) => {
   let { customer_id, StaffUserId, filters } = client;
   let { job_id } = filters;
 
+  console.log("getClientFilter job_id", job_id);
   console.log("getClientFilter filters", customer_id);
 
   // Line Manager
