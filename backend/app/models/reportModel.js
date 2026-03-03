@@ -3551,7 +3551,7 @@ const getJobCustomReport = async (Report) => {
 
     } = data.filters;
 
-    console.log("data.filters: ", data.filters);
+   // console.log("data.filters: ", data.filters);
 
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
