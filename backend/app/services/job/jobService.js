@@ -29,8 +29,11 @@ const jobAction = async (job) => {
   else if(action === "delete"){
     return jobModel.deleteJobById(job);
   }
-  if(action === "getByStatus"){
+  else if(action === "getByStatus"){
     return jobModel.GetJobStatus(job);
+  }
+  else if(action === "get_jobs_filter"){
+    return jobModel.get_jobs_filter(job);
   }
   else{
     return { status: false, message: 'Error getting job.' };

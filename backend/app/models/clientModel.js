@@ -1122,7 +1122,7 @@ async function getAllClientByJobIdFilter(
   try {
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
-      [rows[0].role_id, 35]
+      [rows[0].role_id, 34]
     );
 
     // Condition with Admin And SuperAdmin
@@ -1231,7 +1231,7 @@ async function getAllClientByCustomerIdFilter(
    try {
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
-      [rows[0].role_id, 33]
+      [rows[0].role_id, 34]
     );
     // Condition with Admin And SuperAdmin
     if (
@@ -1340,8 +1340,8 @@ async function getAllClientByCustomerIdAndJobIdFilter(
 
    try {
     const [RoleAccess] = await pool.execute(
-      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ? AND permission_id = ?",
-      [rows[0].role_id, 33 , 35]
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 34]
     );
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN") || RoleAccess.length > 0) {
