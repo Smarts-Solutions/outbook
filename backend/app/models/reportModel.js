@@ -3795,8 +3795,8 @@ const getJobCustomReport = async (Report) => {
     }
 
     try {
-        console.log("fromDate ---- ", fromDate);
-        console.log("toDate ---- ", toDate);
+       // console.log("fromDate ---- ", fromDate);
+       // console.log("toDate ---- ", toDate);
         // compute date range
         let range;
         try {
@@ -4178,7 +4178,7 @@ const getJobCustomReport = async (Report) => {
 
         //console.log("fromDate", fromDate);
         // console.log("toDate", toDate);
-        console.log("Total Count Query ---- ", unpivotSQLCount);
+        //console.log("Total Count Query ---- ", unpivotSQLCount);
         // Get Total Count
         const [countResult] = await pool.execute(unpivotSQLCount, [fromDate, toDate]);
         const totalCount = countResult[0]?.total_count || 0;
