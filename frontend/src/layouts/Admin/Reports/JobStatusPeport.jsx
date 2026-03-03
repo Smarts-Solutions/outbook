@@ -347,34 +347,7 @@ const JobStatus = () => {
     },
   ];
 
-  const exportData = JobStatusData?.map((item) => {
-    return {
-      "Job Id": item.job_code_id,
-      "Job Received On": convertDate(item.job_received_on),
-      "Job Priority": item.job_priority
-        ? item.job_priority.charAt(0).toUpperCase() +
-        item.job_priority.slice(1).toLowerCase()
-        : "-",
-      "Customer Name": item.customer_trading_name,
-      "Account Manager": item.account_manager_name,
-      Clients: item.client_trading_name,
-      "Service Type": item.service_name,
-      "Job Type": item.job_type_name,
-      Status: item.status,
-      "Allocated To": item.allocated_name,
-      "Allocated to (Other)": item.multiple_staff_names,
-      "Reviewer Name": item.reviewer_name,
-      "Companies House Due Date": convertDate(item.filing_Companies_date),
-      "Internal Deadline": convertDate(item.internal_deadline_date),
-      "Customer Deadline": convertDate(item.customer_deadline_date),
-      "Initial Query Sent Date": convertDate(item.query_sent_date),
-      "Final Query Response Received Date": convertDate(
-        item.final_query_response_received_date,
-      ),
-      "First Draft Sent": convertDate(item.draft_sent_on),
-      "Final Draft Sent": convertDate(item.final_draft_sent_on),
-    };
-  });
+
 
   const handleExport = async () => {
     const data = {
@@ -395,29 +368,143 @@ const JobStatus = () => {
     const exportData = response?.data?.rows?.map((item) => {
       return {
         "Job Id": item.job_code_id,
-        "Job Received On": convertDate(item.job_received_on),
+
+        "Job Received On": item.job_received_on
+          ? convertDate(item.job_received_on)
+          : "-",
+
         "Job Priority": item.job_priority
           ? item.job_priority.charAt(0).toUpperCase() +
           item.job_priority.slice(1).toLowerCase()
           : "-",
-        "Customer Name": item.customer_trading_name,
-        "Account Manager": item.account_manager_name,
-        Clients: item.client_trading_name,
-        "Service Type": item.service_name,
-        "Job Type": item.job_type_name,
-        Status: item.status,
-        "Allocated To": item.allocated_name,
-        "Allocated to (Other)": item.multiple_staff_names,
-        "Reviewer Name": item.reviewer_name,
-        "Companies House Due Date": convertDate(item.filing_Companies_date),
-        "Internal Deadline": convertDate(item.internal_deadline_date),
-        "Customer Deadline": convertDate(item.customer_deadline_date),
-        "Initial Query Sent Date": convertDate(item.query_sent_date),
-        "Final Query Response Received Date": convertDate(
-          item.final_query_response_received_date,
-        ),
-        "First Draft Sent": convertDate(item.draft_sent_on),
-        "Final Draft Sent": convertDate(item.final_draft_sent_on),
+
+        "Customer Name": item.customer_trading_name || "-",
+
+        "Account Manager": item.account_manager_name || "-",
+
+        "Clients": item.client_trading_name || "-",
+
+        "Service Type": item.service_name || "-",
+
+        "Job Type": item.job_type_name || "-",
+
+        "Year Ending": item.Year_Ending_id_1
+          ? convertDate(item.Year_Ending_id_1)
+          : "-",
+
+        "Tax Year": item.Tax_Year_id_4 || "-",
+
+        "Payroll Frequency": item.Payroll_Frequency_id_3 || "-",
+
+        // Payroll Year Logic
+        "Payroll Year":
+          item.Payroll_Frequency_id_3 === "Weekly"
+            ? item.Payroll_Week_Year_id_3 || "-"
+            : item.Payroll_Frequency_id_3 === "Monthly"
+              ? item.Payroll_Month_Year_id_3 || "-"
+              : item.Payroll_Frequency_id_3 === "Fortnightly"
+                ? item.Payroll_Fortnight_Year_id_3 || "-"
+                : item.Payroll_Frequency_id_3 === "Quarterly"
+                  ? item.Payroll_Quarter_Year_id_3 || "-"
+                  : item.Payroll_Frequency_id_3 === "Yearly"
+                    ? item.Payroll_Year_id_3 || "-"
+                    : "-",
+
+        // Payroll Month Logic
+        "Payroll Month":
+          item.Payroll_Frequency_id_3 === "Weekly"
+            ? item.Payroll_Week_Month_id_3 || "-"
+            : item.Payroll_Frequency_id_3 === "Monthly"
+              ? item.Payroll_Month_id_3 || "-"
+              : item.Payroll_Frequency_id_3 === "Fortnightly"
+                ? item.Payroll_Fortnight_Month_id_3 || "-"
+                : "-",
+
+        "Payroll Week": item.Payroll_Week_id_3 || "-",
+
+        "Bookkeeping Frequency": item.Bookkeeping_Frequency_id_2 || "-",
+
+        "Date": item.Day_Date_id_2
+          ? convertDate(item.Day_Date_id_2)
+          : "-",
+
+        // Bookkeeping Year Logic
+        "Year":
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_Year_id_2 || "-"
+            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+              ? item.Fortnight_Year_id_2 || "-"
+              : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                ? item.Month_Year_id_2 || "-"
+                : item.Bookkeeping_Frequency_id_2 === "Quarterly"
+                  ? item.Quarter_Year_id_2 || "-"
+                  : item.Bookkeeping_Frequency_id_2 === "Yearly"
+                    ? item.Year_id_2 || "-"
+                    : "-",
+
+        // Bookkeeping Month Logic
+        "Month":
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_Month_id_2 || "-"
+            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+              ? item.Fortnight_Month_id_2 || "-"
+              : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                ? item.Month_id_2 || "-"
+                : "-",
+
+        "Week":
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_id_2 || "-"
+            : "-",
+
+        "Fortnight": item.Fortnight_id_2 || "-",
+
+        "Quarter": item.Quarter_id_2 || "-",
+
+        "FromDate": item.Other_FromDate_id_2
+          ? convertDate(item.Other_FromDate_id_2)
+          : "-",
+
+        "ToDate": item.Other_ToDate_id_2
+          ? convertDate(item.Other_ToDate_id_2)
+          : "-",
+
+        "Status": item.status || "-",
+
+        "Allocated To": item.allocated_name || "-",
+
+        "Allocated to (Other)": item.multiple_staff_names || "-",
+
+        "Reviewer Name": item.reviewer_name || "-",
+
+        "Companies House Due Date": item.filing_Companies_date
+          ? convertDate(item.filing_Companies_date)
+          : "-",
+
+        "Internal Deadline": item.internal_deadline_date
+          ? convertDate(item.internal_deadline_date)
+          : "-",
+
+        "Customer Deadline": item.customer_deadline_date
+          ? convertDate(item.customer_deadline_date)
+          : "-",
+
+        "Initial Query Sent Date": item.query_sent_date
+          ? convertDate(item.query_sent_date)
+          : "-",
+
+        "Final Query Response Received Date":
+          item.final_query_response_received_date
+            ? convertDate(item.final_query_response_received_date)
+            : "-",
+
+        "First Draft Sent": item.draft_sent_on
+          ? convertDate(item.draft_sent_on)
+          : "-",
+
+        "Final Draft Sent": item.final_draft_sent_on
+          ? convertDate(item.final_draft_sent_on)
+          : "-",
       };
     });
 
