@@ -3551,6 +3551,8 @@ const getJobCustomReport = async (Report) => {
 
     } = data.filters;
 
+    console.log("data.filters: ", data.filters);
+
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
     let { page = 1, limit = 10, search = '' } = data
@@ -3807,43 +3809,55 @@ const getJobCustomReport = async (Report) => {
 
         let where = [`work_date BETWEEN ? AND ?`];
 
-        //let job_id = [1,6]
+        //let job_id = [1, 6]
 
-        if (!["", null, undefined].includes(job_id)) {
-            where.push(`raw.job_id = ${job_id}`);
-            // where.push(`raw.job_id IN (${job_id.join(",")})`);
+
+        if (!["", null, undefined].includes(job_id) && !(Array.isArray(job_id) && job_id.length === 0)) {
+            //where.push(`raw.job_id = ${job_id}`);
+            where.push(`raw.job_id IN (${job_id.join(",")})`);
 
         }
 
-        if (!["", null, undefined].includes(customer_id)) {
-            where.push(`raw.customer_id = ${customer_id}`);
+        if (!["", null, undefined].includes(customer_id) && !(Array.isArray(customer_id) && customer_id.length === 0)) {
+            // where.push(`raw.customer_id = ${customer_id}`);
+            where.push(`raw.customer_id IN (${customer_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(client_id)) {
-            where.push(`raw.client_id = ${client_id}`);
+
+        if (!["", null, undefined].includes(client_id) && !(Array.isArray(client_id) && client_id.length === 0)) {
+            //where.push(`raw.client_id = ${client_id}`);
+            where.push(`raw.client_id IN (${client_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(account_manager_id)) {
-            where.push(`raw.account_manager_id = ${account_manager_id}`);
+        if (!["", null, undefined].includes(account_manager_id) && !(Array.isArray(account_manager_id) && account_manager_id.length === 0)) {
+            //where.push(`raw.account_manager_id = ${account_manager_id}`);
+            where.push(`raw.account_manager_id IN (${account_manager_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(allocated_to_id)) {
-            where.push(`raw.allocated_to_id = ${allocated_to_id}`);
+        if (!["", null, undefined].includes(allocated_to_id) && !(Array.isArray(allocated_to_id) && allocated_to_id.length === 0)) {
+            //where.push(`raw.allocated_to_id = ${allocated_to_id}`);
+            where.push(`raw.allocated_to_id IN (${allocated_to_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(reviewer_id)) {
-            where.push(`raw.reviewer_id = ${reviewer_id}`);
+        if (!["", null, undefined].includes(reviewer_id) && !(Array.isArray(reviewer_id) && reviewer_id.length === 0)) {
+            //where.push(`raw.reviewer_id = ${reviewer_id}`);
+            where.push(`raw.reviewer_id IN (${reviewer_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(allocated_to_other_id)) {
-            where.push(`ato.id = ${allocated_to_other_id}`);
+        if (!["", null, undefined].includes(allocated_to_other_id) && !(Array.isArray(allocated_to_other_id) && allocated_to_other_id.length === 0)) {
+            //where.push(`ato.id = ${allocated_to_other_id}`);
+            where.push(`ato.id IN (${allocated_to_other_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(service_id)) {
-            where.push(`raw.service_id = ${service_id}`);
+        if (!["", null, undefined].includes(service_id) && !(Array.isArray(service_id) && service_id.length === 0)) {
+            //where.push(`raw.service_id = ${service_id}`);
+            where.push(`raw.service_id IN (${service_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(job_type_id)) {
-            where.push(`raw.job_type_id = ${job_type_id}`);
+        if (!["", null, undefined].includes(job_type_id) && !(Array.isArray(job_type_id) && job_type_id.length === 0)) {
+            //where.push(`raw.job_type_id = ${job_type_id}`);
+            where.push(`raw.job_type_id IN (${job_type_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(status_type_id)) {
-            where.push(`raw.status_type_id = ${status_type_id}`);
+        if (!["", null, undefined].includes(status_type_id) && !(Array.isArray(status_type_id) && status_type_id.length === 0)) {
+            //where.push(`raw.status_type_id = ${status_type_id}`);
+            where.push(`raw.status_type_id IN (${status_type_id.join(",")})`);
         }
-        if (!["", null, undefined].includes(employee_number)) {
-            where.push(`sf.employee_number = '${employee_number}'`);
+        if (!["", null, undefined].includes(employee_number) && !(Array.isArray(employee_number) && employee_number.length === 0)) {
+           // where.push(`sf.employee_number = '${employee_number}'`);
+            where.push(`sf.employee_number IN (${employee_number.join(",")})`);
         }
 
 
@@ -4162,9 +4176,9 @@ const getJobCustomReport = async (Report) => {
             ${GROUPBY} ) AS count_table
         `;
 
-        // console.log("fromDate", fromDate);
+        //console.log("fromDate", fromDate);
         // console.log("toDate", toDate);
-        // console.log("Total Count Query ---- ", unpivotSQLCount);
+        console.log("Total Count Query ---- ", unpivotSQLCount);
         // Get Total Count
         const [countResult] = await pool.execute(unpivotSQLCount, [fromDate, toDate]);
         const totalCount = countResult[0]?.total_count || 0;
