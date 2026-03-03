@@ -3220,7 +3220,7 @@ const getStaffWithRole = async (Report) => {
     const { role_id } = data;
     let job_id = data?.filters?.job_id;
     // console.log("Get Staff With Role ID: ===>", role_id);
- 
+
     if (['', null, undefined].includes(job_id)) {
         if (role_id == "other") {
             const query = `
@@ -3277,6 +3277,12 @@ const getStaffWithRole = async (Report) => {
 
         }
     } else {
+
+        // Ensure job_id is always array
+        if (!Array.isArray(job_id)) {
+            job_id = [job_id];
+        }
+
         if (role_id == "other") {
             const query = `
         SELECT 
@@ -3287,7 +3293,7 @@ const getStaffWithRole = async (Report) => {
         FROM
         job_allowed_staffs
         JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
-        WHERE job_allowed_staffs.job_id = ${job_id}
+        WHERE job_allowed_staffs.job_id IN (${job_id})
         GROUP BY job_allowed_staffs.staff_id
         ORDER BY staffs.first_name ASC;
         `
@@ -3306,7 +3312,7 @@ const getStaffWithRole = async (Report) => {
         FROM
         staffs
         JOIN jobs ON jobs.allocated_to = staffs.id OR jobs.reviewer = staffs.id
-        WHERE jobs.id = ${job_id}
+        WHERE jobs.id IN (${job_id})
         GROUP BY staffs.employee_number
         ORDER BY staffs.employee_number ASC;
         `
@@ -3319,14 +3325,14 @@ const getStaffWithRole = async (Report) => {
                 where = `(staffs.role_id = ${role_id} || staffs.role_id = 4) AND staffs.status = '1'`;
             }
             let condition = `JOIN jobs ON jobs.account_manager_id = staffs.id
-        WHERE ${where} AND jobs.id = ${job_id}`;
+        WHERE ${where} AND jobs.id IN (${job_id})`;
             if (role_id == 3) {
                 condition = `JOIN jobs ON jobs.allocated_to = staffs.id
-        WHERE ${where} AND jobs.id = ${job_id}`;
+        WHERE ${where} AND jobs.id IN (${job_id})`;
             }
             else if (role_id == 6) {
                 condition = `JOIN jobs ON jobs.reviewer = staffs.id
-        WHERE ${where} AND jobs.id = ${job_id}`;
+        WHERE ${where} AND jobs.id IN (${job_id})`;
             }
 
             const query = `
@@ -3368,7 +3374,7 @@ const getAllService = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
-     // Ensure job_id is always array
+    // Ensure job_id is always array
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
@@ -3410,7 +3416,7 @@ const getAllJobType = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
-     // Ensure job_id is always array
+    // Ensure job_id is always array
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
@@ -3450,7 +3456,7 @@ const getAllStatus = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
-      // Ensure job_id is always array
+    // Ensure job_id is always array
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
@@ -3552,8 +3558,8 @@ const getJobCustomReport = async (Report) => {
     let role_user = data?.role?.toUpperCase() || '';
 
 
-  //  console.log("page ---- --- ", page);
-   // console.log("limit ---- --- ", limit);
+    //  console.log("page ---- --- ", page);
+    // console.log("limit ---- --- ", limit);
 
     const offset = (page - 1) * limit;
 
@@ -3802,7 +3808,7 @@ const getJobCustomReport = async (Report) => {
         let where = [`work_date BETWEEN ? AND ?`];
 
         //let job_id = [1,6]
- 
+
         if (!["", null, undefined].includes(job_id)) {
             where.push(`raw.job_id = ${job_id}`);
             // where.push(`raw.job_id IN (${job_id.join(",")})`);
@@ -4657,7 +4663,7 @@ const getJobCustomReport = async (Report) => {
         };
 
     } catch (err) {
-       // console.error(err);
+        // console.error(err);
         return { status: false, message: err.message || 'server error', data: [] };
     }
 };
