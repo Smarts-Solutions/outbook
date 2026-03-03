@@ -139,6 +139,125 @@ const JobStatus = () => {
       sortable: true,
     },
     {
+      name: "Year Ending",
+      cell: (row) => <div title={row.Year_Ending_id_1}>{row.Year_Ending_id_1 ? convertDate(row.Year_Ending_id_1) : "-"}</div>,
+      selector: (row) => row.Year_Ending_id_1,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Tax Year",
+      cell: (row) => <div title={row.Tax_Year_id_4}>{row.Tax_Year_id_4 ? row.Tax_Year_id_4 : "-"}</div>,
+      selector: (row) => row.Tax_Year_id_4,
+      reorder: false,
+      sortable: true,
+    },
+
+    {
+      name: "Payroll Frequency",
+      cell: (row) => <div title={row.Payroll_Frequency_id_3}>{row.Payroll_Frequency_id_3 ? row.Payroll_Frequency_id_3 : "-"}</div>,
+      selector: (row) => row.Payroll_Frequency_id_3,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Payroll Year",
+      cell: (row) => <>
+        {row.Payroll_Frequency_id_3 == "Weekly" ? <div title={row.Payroll_Week_Year_id_3}>{row.Payroll_Week_Year_id_3 ? row.Payroll_Week_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Monthly" ? <div title={row.Payroll_Month_Year_id_3}>{row.Payroll_Month_Year_id_3 ? row.Payroll_Month_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Fortnightly" ? <div title={row.Payroll_Fortnight_Year_id_3}>{row.Payroll_Fortnight_Year_id_3 ? row.Payroll_Fortnight_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Quarterly" ? <div title={row.Payroll_Quarter_Year_id_3}>{row.Payroll_Quarter_Year_id_3 ? row.Payroll_Quarter_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Yearly" ? <div title={row.Payroll_Year_id_3}>{row.Payroll_Year_id_3 ? row.Payroll_Year_id_3 : "-"}</div> : "-"}
+
+      </>,
+      selector: (row) => row.Payroll_Week_Year_id_3,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Payroll Month",
+      cell: (row) => <>
+        {row.Payroll_Frequency_id_3 == "Weekly" ? <div title={row.Payroll_Week_Month_id_3}>{row.Payroll_Week_Month_id_3 ? row.Payroll_Week_Month_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Monthly" ? <div title={row.Payroll_Month_id_3}>{row.Payroll_Month_id_3 ? row.Payroll_Month_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Fortnightly" ? <div title={row.Payroll_Fortnight_Month_id_3}>{row.Payroll_Fortnight_Month_id_3 ? row.Payroll_Fortnight_Month_id_3 : "-"}</div> : "-"}
+
+      </>,
+      selector: (row) => row.Payroll_Week_Month_id_3,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Payroll Week",
+      cell: (row) => <div title={row.Payroll_Week_id_3}>{row.Payroll_Week_id_3 ? row.Payroll_Week_id_3 : "-"}</div>,
+      selector: (row) => row.Payroll_Week_id_3,
+      reorder: false,
+      sortable: true,
+    },
+
+    {
+      name: "Bookkeeping Frequency",
+      cell: (row) => <div title={row.Bookkeeping_Frequency_id_2}>{row.Bookkeeping_Frequency_id_2 ? row.Bookkeeping_Frequency_id_2 : "-"}</div>,
+      selector: (row) => row.Bookkeeping_Frequency_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      cell: (row) => <div title={row.Day_Date_id_2}>{row.Day_Date_id_2 ? convertDate(row.Day_Date_id_2) : "-"}</div>,
+      selector: (row) => row.Day_Date_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Year",
+      cell: (row) => <>
+        {row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_Year_id_2}>{row.Week_Year_id_2 ? row.Week_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_Year_id_2}>{row.Fortnight_Year_id_2 ? row.Fortnight_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Monthly" ? <div title={row.Month_Year_id_2}>{row.Month_Year_id_2 ? row.Month_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Quarterly" ? <div title={row.Quarter_Year_id_2}>{row.Quarter_Year_id_2 ? row.Quarter_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Yearly" ? <div title={row.Year_id_2}>{row.Year_id_2 ? row.Year_id_2 : "-"}</div> : "-"}
+      </>,
+      selector: (row) => row.Week_Year_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Month",
+      cell: (row) => <>
+        {row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_Month_id_2}>{row.Week_Month_id_2 ? row.Week_Month_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_Month_id_2}>{row.Fortnight_Month_id_2 ? row.Fortnight_Month_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Monthly" ? <div title={row.Month_id_2}>{row.Month_id_2 ? row.Month_id_2 : "-"}</div> : "-"}
+      </>,
+      selector: (row) => row.Week_Month_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Week",
+      cell: (row) => <>
+        {row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_id_2}>{row.Week_id_2 ? row.Week_id_2 : "-"}</div> : "-"}
+      </>,
+      selector: (row) => row.Week_Month_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Fortnight",
+      cell: (row) => <div title={row.Fortnight_id_2}>{row.Fortnight_id_2 ? row.Fortnight_id_2 : "-"}</div>,
+      selector: (row) => row.Fortnight_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Quarter",
+      cell: (row) => <div title={row.Quarter_id_2}>{row.Quarter_id_2 ? row.Quarter_id_2 : "-"}</div>,
+      selector: (row) => row.Quarter_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "FromDate",
+      cell: (row) => <div title={row.Other_FromDate_id_2}>{row.Other_FromDate_id_2 ? convertDate(row.Other_FromDate_id_2) : "-"}</div>,
+      selector: (row) => row.Other_FromDate_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "ToDate",
+      cell: (row) => <div title={row.Other_ToDate_id_2}>{row.Other_ToDate_id_2 ? convertDate(row.Other_ToDate_id_2) : "-"}</div>,
+      selector: (row) => row.Other_ToDate_id_2,
+      reorder: false,
+      sortable: true,
+    },
+    {
       name: "Status",
       cell: (row) => <div title={row.status}>{row.status}</div>,
       selector: (row) => row.status,
@@ -228,34 +347,7 @@ const JobStatus = () => {
     },
   ];
 
-  const exportData = JobStatusData?.map((item) => {
-    return {
-      "Job Id": item.job_code_id,
-      "Job Received On": convertDate(item.job_received_on),
-      "Job Priority": item.job_priority
-        ? item.job_priority.charAt(0).toUpperCase() +
-          item.job_priority.slice(1).toLowerCase()
-        : "-",
-      "Customer Name": item.customer_trading_name,
-      "Account Manager": item.account_manager_name,
-      Clients: item.client_trading_name,
-      "Service Type": item.service_name,
-      "Job Type": item.job_type_name,
-      Status: item.status,
-      "Allocated To": item.allocated_name,
-      "Allocated to (Other)": item.multiple_staff_names,
-      "Reviewer Name": item.reviewer_name,
-      "Companies House Due Date": convertDate(item.filing_Companies_date),
-      "Internal Deadline": convertDate(item.internal_deadline_date),
-      "Customer Deadline": convertDate(item.customer_deadline_date),
-      "Initial Query Sent Date": convertDate(item.query_sent_date),
-      "Final Query Response Received Date": convertDate(
-        item.final_query_response_received_date,
-      ),
-      "First Draft Sent": convertDate(item.draft_sent_on),
-      "Final Draft Sent": convertDate(item.final_draft_sent_on),
-    };
-  });
+
 
   const handleExport = async () => {
     const data = {
@@ -276,29 +368,143 @@ const JobStatus = () => {
     const exportData = response?.data?.rows?.map((item) => {
       return {
         "Job Id": item.job_code_id,
-        "Job Received On": convertDate(item.job_received_on),
+
+        "Job Received On": item.job_received_on
+          ? convertDate(item.job_received_on)
+          : "-",
+
         "Job Priority": item.job_priority
           ? item.job_priority.charAt(0).toUpperCase() +
-            item.job_priority.slice(1).toLowerCase()
+          item.job_priority.slice(1).toLowerCase()
           : "-",
-        "Customer Name": item.customer_trading_name,
-        "Account Manager": item.account_manager_name,
-        Clients: item.client_trading_name,
-        "Service Type": item.service_name,
-        "Job Type": item.job_type_name,
-        Status: item.status,
-        "Allocated To": item.allocated_name,
-        "Allocated to (Other)": item.multiple_staff_names,
-        "Reviewer Name": item.reviewer_name,
-        "Companies House Due Date": convertDate(item.filing_Companies_date),
-        "Internal Deadline": convertDate(item.internal_deadline_date),
-        "Customer Deadline": convertDate(item.customer_deadline_date),
-        "Initial Query Sent Date": convertDate(item.query_sent_date),
-        "Final Query Response Received Date": convertDate(
-          item.final_query_response_received_date,
-        ),
-        "First Draft Sent": convertDate(item.draft_sent_on),
-        "Final Draft Sent": convertDate(item.final_draft_sent_on),
+
+        "Customer Name": item.customer_trading_name || "-",
+
+        "Account Manager": item.account_manager_name || "-",
+
+        "Clients": item.client_trading_name || "-",
+
+        "Service Type": item.service_name || "-",
+
+        "Job Type": item.job_type_name || "-",
+
+        "Year Ending": item.Year_Ending_id_1
+          ? convertDate(item.Year_Ending_id_1)
+          : "-",
+
+        "Tax Year": item.Tax_Year_id_4 || "-",
+
+        "Payroll Frequency": item.Payroll_Frequency_id_3 || "-",
+
+        // Payroll Year Logic
+        "Payroll Year":
+          item.Payroll_Frequency_id_3 === "Weekly"
+            ? item.Payroll_Week_Year_id_3 || "-"
+            : item.Payroll_Frequency_id_3 === "Monthly"
+              ? item.Payroll_Month_Year_id_3 || "-"
+              : item.Payroll_Frequency_id_3 === "Fortnightly"
+                ? item.Payroll_Fortnight_Year_id_3 || "-"
+                : item.Payroll_Frequency_id_3 === "Quarterly"
+                  ? item.Payroll_Quarter_Year_id_3 || "-"
+                  : item.Payroll_Frequency_id_3 === "Yearly"
+                    ? item.Payroll_Year_id_3 || "-"
+                    : "-",
+
+        // Payroll Month Logic
+        "Payroll Month":
+          item.Payroll_Frequency_id_3 === "Weekly"
+            ? item.Payroll_Week_Month_id_3 || "-"
+            : item.Payroll_Frequency_id_3 === "Monthly"
+              ? item.Payroll_Month_id_3 || "-"
+              : item.Payroll_Frequency_id_3 === "Fortnightly"
+                ? item.Payroll_Fortnight_Month_id_3 || "-"
+                : "-",
+
+        "Payroll Week": item.Payroll_Week_id_3 || "-",
+
+        "Bookkeeping Frequency": item.Bookkeeping_Frequency_id_2 || "-",
+
+        "Date": item.Day_Date_id_2
+          ? convertDate(item.Day_Date_id_2)
+          : "-",
+
+        // Bookkeeping Year Logic
+        "Year":
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_Year_id_2 || "-"
+            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+              ? item.Fortnight_Year_id_2 || "-"
+              : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                ? item.Month_Year_id_2 || "-"
+                : item.Bookkeeping_Frequency_id_2 === "Quarterly"
+                  ? item.Quarter_Year_id_2 || "-"
+                  : item.Bookkeeping_Frequency_id_2 === "Yearly"
+                    ? item.Year_id_2 || "-"
+                    : "-",
+
+        // Bookkeeping Month Logic
+        "Month":
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_Month_id_2 || "-"
+            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+              ? item.Fortnight_Month_id_2 || "-"
+              : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                ? item.Month_id_2 || "-"
+                : "-",
+
+        "Week":
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_id_2 || "-"
+            : "-",
+
+        "Fortnight": item.Fortnight_id_2 || "-",
+
+        "Quarter": item.Quarter_id_2 || "-",
+
+        "FromDate": item.Other_FromDate_id_2
+          ? convertDate(item.Other_FromDate_id_2)
+          : "-",
+
+        "ToDate": item.Other_ToDate_id_2
+          ? convertDate(item.Other_ToDate_id_2)
+          : "-",
+
+        "Status": item.status || "-",
+
+        "Allocated To": item.allocated_name || "-",
+
+        "Allocated to (Other)": item.multiple_staff_names || "-",
+
+        "Reviewer Name": item.reviewer_name || "-",
+
+        "Companies House Due Date": item.filing_Companies_date
+          ? convertDate(item.filing_Companies_date)
+          : "-",
+
+        "Internal Deadline": item.internal_deadline_date
+          ? convertDate(item.internal_deadline_date)
+          : "-",
+
+        "Customer Deadline": item.customer_deadline_date
+          ? convertDate(item.customer_deadline_date)
+          : "-",
+
+        "Initial Query Sent Date": item.query_sent_date
+          ? convertDate(item.query_sent_date)
+          : "-",
+
+        "Final Query Response Received Date":
+          item.final_query_response_received_date
+            ? convertDate(item.final_query_response_received_date)
+            : "-",
+
+        "First Draft Sent": item.draft_sent_on
+          ? convertDate(item.draft_sent_on)
+          : "-",
+
+        "Final Draft Sent": item.final_draft_sent_on
+          ? convertDate(item.final_draft_sent_on)
+          : "-",
       };
     });
 
@@ -324,6 +530,7 @@ const JobStatus = () => {
     a.click();
   };
 
+
   return (
     <div>
       <div className="report-data">
@@ -336,11 +543,7 @@ const JobStatus = () => {
         </div>
         <div className="datatable-wrapper mt-minus">
           <div className="d-flex justify-content-end mb-3">
-            {/* <ExportToExcel
-              className="btn btn-outline-info fw-bold float-end border-3 "
-              apiData={exportData}
-              fileName={`Job Status Report`}
-            /> */}
+
             {JobStatusData && JobStatusData.length > 0 && (
               <div className="col-md-8 d-flex justify-content-end">
                 <button
@@ -402,7 +605,7 @@ const JobStatus = () => {
             <option value={20}>20</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
-                            <option value={500}>500</option>
+            <option value={500}>500</option>
             {/* <option value={100000}>All</option> */}
           </select>
         </div>
