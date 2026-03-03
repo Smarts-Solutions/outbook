@@ -952,7 +952,6 @@ async function getAllCustomerClientIdFilter(client_id) {
         trading_name ASC;`;
 
     const [result] = await pool.execute(query);
-
     return { status: true, message: 'Success..', data: result };
 }
 
