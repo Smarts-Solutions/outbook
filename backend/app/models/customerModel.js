@@ -839,13 +839,52 @@ const getAllCustomersFilter = async (customer) => {
 
     // if (!['', null, undefined].includes(filters?.client_id)) {
     if (client_id?.length > 0 && job_id?.length === 0) {
-        return await getAllCustomerClientIdFilter(client_id);
+        return await getAllCustomerByClientIdFilter(client_id);
     }
-
+     
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
+    if (client_id?.length === 0 && job_id?.length > 0) {
+        return await getAllCustomerByJobIdFilter(rows, job_id);
+    }
 
-    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+    if (client_id?.length > 0 && job_id?.length > 0) {
+        return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
+    }
+
+
+
+
+}
+
+async function getAllCustomerByClientIdFilter(client_id) {
+    const query = `
+            SELECT  
+            customers.id AS id,
+            customers.status AS status,
+            customers.form_process AS form_process,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM
+            customers
+        JOIN
+            clients ON clients.customer_id = customers.id
+        WHERE
+            clients.id IN (${client_id})
+        GROUP BY customers.id    
+        ORDER BY 
+        trading_name ASC;`;
+
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'Success..', data: result };
+}
+
+async function getAllCustomerByJobIdFilter(row,job_id) {
+   const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -926,11 +965,14 @@ const getAllCustomersFilter = async (customer) => {
         console.error('Error executing query getCustomer_dropdown:', err);
         return { status: false, message: 'Error executing query', data: err };
     }
-
 }
 
-async function getAllCustomerClientIdFilter(client_id) {
-    const query = `
+async function getAllCustomerByClientIdAndJobIdFilter(row,client_id,job_id) {
+   const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+        const query = `
             SELECT  
             customers.id AS id,
             customers.status AS status,
@@ -944,15 +986,69 @@ async function getAllCustomerClientIdFilter(client_id) {
         FROM
             customers
         JOIN
-            clients ON clients.customer_id = customers.id
+            jobs ON jobs.customer_id = customers.id
         WHERE
-            clients.id IN (${client_id})
-        GROUP BY customers.id    
+            jobs.id IN (${job_id})
         ORDER BY 
         trading_name ASC;`;
 
-    const [result] = await pool.execute(query);
-    return { status: true, message: 'Success..', data: result };
+        const [result] = await pool.execute(query);
+
+        return { status: true, message: 'Success..', data: result };
+    }
+
+    // other Role Data
+    let query = `
+    SELECT  
+        customers.id AS id,
+        customers.customer_type AS customer_type,
+        customers.staff_id AS staff_id,
+        customers.account_manager_id AS account_manager_id,
+        customers.trading_name AS trading_name,
+        customers.trading_address AS trading_address,
+        customers.vat_registered AS vat_registered,
+        customers.vat_number AS vat_number,
+        customers.website AS website,
+        customers.form_process AS form_process,
+        customers.created_at AS created_at,
+        customers.updated_at AS updated_at,
+        customers.status AS status,
+        staff2.first_name AS account_manager_firstname, 
+        staff2.last_name AS account_manager_lastname,
+        customer_company_information.company_name AS company_name,
+        customer_company_information.company_number AS company_number,
+        CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+        ) AS customer_code,
+        CASE
+        WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+        THEN 1 ELSE 0
+        END AS is_client
+        FROM 
+            customers
+        JOIN
+            jobs ON jobs.customer_id = customers.id    
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN
+            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        LEFT JOIN
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE
+           jobs.id IN (${job_id})
+           GROUP BY customers.id
+           ORDER BY customers.trading_name ASC
+
+         `;
+    try {
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success..', data: result };
+    } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+    }
 }
 
 const getCustomer_dropdown_delete = async (customer) => {
