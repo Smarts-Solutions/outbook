@@ -883,7 +883,7 @@ async function getAllCustomerByClientIdFilter(client_id) {
     return { status: true, message: 'Success..', data: result };
 }
 
-async function getAllCustomerByJobIdFilter(row,job_id) {
+async function getAllCustomerByJobIdFilter(rows,job_id) {
    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
     // Condition with Admin And SuperAdmin
@@ -987,8 +987,10 @@ async function getAllCustomerByClientIdAndJobIdFilter(rows,client_id,job_id) {
             customers
         JOIN
             jobs ON jobs.customer_id = customers.id
+        LEFT JOIN
+            clients ON clients.customer_id = customers.id    
         WHERE
-            jobs.id IN (${job_id})
+            jobs.id IN (${job_id}) OR clients.id IN (${client_id})
         ORDER BY 
         trading_name ASC;`;
 
@@ -1029,7 +1031,9 @@ async function getAllCustomerByClientIdAndJobIdFilter(rows,client_id,job_id) {
         FROM 
             customers
         JOIN
-            jobs ON jobs.customer_id = customers.id    
+            jobs ON jobs.customer_id = customers.id
+        LEFT JOIN
+            clients ON clients.customer_id = customers.id        
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN
@@ -1037,7 +1041,7 @@ async function getAllCustomerByClientIdAndJobIdFilter(rows,client_id,job_id) {
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-           jobs.id IN (${job_id})
+           jobs.id IN (${job_id}) OR clients.id IN (${client_id})
            GROUP BY customers.id
            ORDER BY customers.trading_name ASC
 
