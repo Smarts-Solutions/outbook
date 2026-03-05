@@ -20,7 +20,7 @@ const clientAction = async (client) => {
     return clientModel.deleteClient(client);
   }
   else if(action === "get_clients_filter"){
-    return clientModel.getClientFilter(client);
+    return clientModel.get_clients_filter(client);
   }
   else{
    return
