@@ -1100,6 +1100,12 @@ const getClientFilter = async (client) => {
   }
 
   else {
+      return await getAllClientsSidebar(StaffUserId, LineManageStaffId, rows, {
+      page : 1,
+      limit : 100000,
+      offset : 0,
+      search : '',
+    });
      return { status: true, message: "success.", data: [] }; 
   }
 
