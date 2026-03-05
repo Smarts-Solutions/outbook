@@ -683,7 +683,7 @@ const ClientList = () => {
         <div className="row">
 
           <div className="form-group col-md-4 mb-0">
-            <label className="form-label mb-2">Select Customer</label>
+            <label className="form-label mb-2">Customer</label>
             {/* <select
               name="staff_id"
               className="form-select"
