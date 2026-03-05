@@ -115,35 +115,38 @@ function JobCustomReport() {
   // Get All Jobs
   const GetAllJobs = async (type, filter) => {
     // External get All jobs
-    let req = {
-      action: "getByCustomer",
-      customer_id: "",
-      page: 1,
-      limit: 100000,
-    };
-    if (type == "customer") {
-      req = {
-        action: "getByCustomer",
-        customer_id: filter?.customer_id,
-        page: 1,
-        limit: 100000,
-      };
-    } else if (type == "client") {
-      req = {
-        action: "getByClient",
-        client_id: filter?.client_id,
-        page: 1,
-        limit: 100000,
-      };
-    } else {
-      req = {
-        action: "getByCustomer",
-        customer_id: "",
-        page: 1,
-        limit: 100000,
-      };
-    }
+    // let req = {
+    //   action: "getByCustomer",
+    //   customer_id: "",
+    //   page: 1,
+    //   limit: 100000,
+    // };
+    // if (type == "customer") {
+    //   req = {
+    //     action: "getByCustomer",
+    //     customer_id: filter?.customer_id,
+    //     page: 1,
+    //     limit: 100000,
+    //   };
+    // } else if (type == "client") {
+    //   req = {
+    //     action: "getByClient",
+    //     client_id: filter?.client_id,
+    //     page: 1,
+    //     limit: 100000,
+    //   };
+    // } else {
+    //   req = {
+    //     action: "getByCustomer",
+    //     customer_id: "",
+    //     page: 1,
+    //     limit: 100000,
+    //   };
+    // }
+   
 
+    if (type == "all") {
+    const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000 };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -162,6 +165,28 @@ function JobCustomReport() {
         return;
       });
     return;
+    }else{
+    
+    const req = { action: "get_jobs_filter", filters: filter };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.job_id,
+            label: item.job_code_id,
+          }));
+          setJobAllData(data);
+        } else {
+          setJobAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    return;
+    }
   };
 
   const getAllFilters = async () => {
@@ -264,7 +289,7 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-    GetAllJobs();
+    GetAllJobs("all");
     GetAllCustomer("all");
     GetAllClient("all");
     GetAllService("all");
@@ -343,7 +368,8 @@ function JobCustomReport() {
         .catch((error) => {
           return;
         });
-    } else {
+    } 
+    else {
       const req = { action: "get_clients_filter", filters: type };
       const data = { req: req, authToken: token };
       await dispatch(ClientAction(data))
@@ -837,7 +863,7 @@ function JobCustomReport() {
       } else if (key == "customer_id") {
         if ([null, "", "null", undefined].includes(value)) {
           GetAllClient("all");
-          GetAllJobs();
+          GetAllJobs("");
         } else {
           GetAllClient(newFilters);
           GetAllJobs("customer", newFilters);

@@ -55,41 +55,6 @@ const jobStatusReports = async (Report) => {
         jobs.id AS id,
         jobs.service_id AS job_service_id,
         jobs.job_priority AS job_priority,
-
-        jobs.Year_Ending_id_1 AS Year_Ending_id_1,
-        jobs.Tax_Year_id_4 AS Tax_Year_id_4,
-        jobs.Payroll_Frequency_id_3 AS Payroll_Frequency_id_3,
-        jobs.Payroll_Week_Year_id_3 AS Payroll_Week_Year_id_3,
-        jobs.Payroll_Week_Month_id_3 AS Payroll_Week_Month_id_3,
-        jobs.Payroll_Week_id_3 AS Payroll_Week_id_3,
-        jobs.Payroll_Month_Year_id_3 AS Payroll_Month_Year_id_3,
-        jobs.Payroll_Month_id_3 AS Payroll_Month_id_3,
-        jobs.Payroll_Fortnight_Year_id_3 AS Payroll_Fortnight_Year_id_3,
-        jobs.Payroll_Fortnight_Month_id_3 AS Payroll_Fortnight_Month_id_3,
-        jobs.Payroll_Fortnight_id_3 AS Payroll_Fortnight_id_3,
-        jobs.Payroll_Quarter_Year_id_3 AS Payroll_Quarter_Year_id_3,
-        jobs.Payroll_Quarter_id_3 AS Payroll_Quarter_id_3,
-        jobs.Payroll_Year_id_3 AS Payroll_Year_id_3,
-       
-        jobs.Bookkeeping_Frequency_id_2 AS Bookkeeping_Frequency_id_2,
-        jobs.Day_Date_id_2 AS Day_Date_id_2,
-        jobs.Week_Year_id_2 AS Week_Year_id_2,
-        jobs.Week_Month_id_2 AS Week_Month_id_2,
-        jobs.Week_id_2 AS Week_id_2,
-        jobs.Fortnight_Year_id_2 AS Fortnight_Year_id_2,
-        jobs.Fortnight_Month_id_2 AS Fortnight_Month_id_2,
-        jobs.Fortnight_id_2 AS Fortnight_id_2,
-        jobs.Month_Year_id_2 AS Month_Year_id_2,
-        jobs.Month_id_2 AS Month_id_2,
-        jobs.Quarter_Year_id_2 AS Quarter_Year_id_2,
-        jobs.Quarter_id_2 AS Quarter_id_2,
-        jobs.Year_id_2 AS Year_id_2,
-        jobs.Other_FromDate_id_2 AS Other_FromDate_id_2,
-        jobs.Other_ToDate_id_2 AS Other_ToDate_id_2,
-        
-
-
-
         ${jobCodeExpr} AS job_code_id,
         customers.id AS customer_id,
         customers.trading_name AS customer_trading_name,
@@ -3255,8 +3220,8 @@ const getStaffWithRole = async (Report) => {
     const { role_id } = data;
     let job_id = data?.filters?.job_id;
     // console.log("Get Staff With Role ID: ===>", role_id);
-
-    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
+ 
+    if (['', null, undefined].includes(job_id)) {
         if (role_id == "other") {
             const query = `
         SELECT 
@@ -3312,12 +3277,6 @@ const getStaffWithRole = async (Report) => {
 
         }
     } else {
-
-        // Ensure job_id is always array
-        if (!Array.isArray(job_id)) {
-            job_id = [job_id];
-        }
-
         if (role_id == "other") {
             const query = `
         SELECT 
@@ -3328,7 +3287,7 @@ const getStaffWithRole = async (Report) => {
         FROM
         job_allowed_staffs
         JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
-        WHERE job_allowed_staffs.job_id IN (${job_id})
+        WHERE job_allowed_staffs.job_id = ${job_id}
         GROUP BY job_allowed_staffs.staff_id
         ORDER BY staffs.first_name ASC;
         `
@@ -3347,7 +3306,7 @@ const getStaffWithRole = async (Report) => {
         FROM
         staffs
         JOIN jobs ON jobs.allocated_to = staffs.id OR jobs.reviewer = staffs.id
-        WHERE jobs.id IN (${job_id})
+        WHERE jobs.id = ${job_id}
         GROUP BY staffs.employee_number
         ORDER BY staffs.employee_number ASC;
         `
@@ -3360,14 +3319,14 @@ const getStaffWithRole = async (Report) => {
                 where = `(staffs.role_id = ${role_id} || staffs.role_id = 4) AND staffs.status = '1'`;
             }
             let condition = `JOIN jobs ON jobs.account_manager_id = staffs.id
-        WHERE ${where} AND jobs.id IN (${job_id})`;
+        WHERE ${where} AND jobs.id = ${job_id}`;
             if (role_id == 3) {
                 condition = `JOIN jobs ON jobs.allocated_to = staffs.id
-        WHERE ${where} AND jobs.id IN (${job_id})`;
+        WHERE ${where} AND jobs.id = ${job_id}`;
             }
             else if (role_id == 6) {
                 condition = `JOIN jobs ON jobs.reviewer = staffs.id
-        WHERE ${where} AND jobs.id IN (${job_id})`;
+        WHERE ${where} AND jobs.id = ${job_id}`;
             }
 
             const query = `
@@ -3395,9 +3354,7 @@ const getAllService = async (Report) => {
 
     let job_id = data?.filters?.job_id;
 
-    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
-
-        console.log("getAllService job_id --->>>>", job_id);
+    if (['', null, undefined].includes(job_id)) {
         const query = `
     SELECT  
     id,
@@ -3411,7 +3368,7 @@ const getAllService = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
-    // Ensure job_id is always array
+     // Ensure job_id is always array
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
@@ -3439,7 +3396,7 @@ const getAllJobType = async (Report) => {
     let { data } = Report;
     let job_id = data?.filters?.job_id;
 
-    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
+    if (['', null, undefined].includes(job_id)) {
         const query = `
     SELECT  
     id,
@@ -3453,7 +3410,7 @@ const getAllJobType = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
-    // Ensure job_id is always array
+     // Ensure job_id is always array
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
@@ -3470,7 +3427,7 @@ const getAllJobType = async (Report) => {
     GROUP BY job_types.id
     ORDER BY job_types.type ASC;
     `
-   // console.log("Get All Job Type Query:", query);
+    console.log("Get All Job Type Query:", query);
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
@@ -3479,7 +3436,7 @@ const getAllStatus = async (Report) => {
     let { data } = Report;
     let job_id = data?.filters?.job_id;
 
-    if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
+    if (['', null, undefined].includes(job_id)) {
         const query = `
     SELECT  
     id,
@@ -3493,7 +3450,7 @@ const getAllStatus = async (Report) => {
         return { status: true, message: 'Success.', data: result };
     }
 
-    // Ensure job_id is always array
+      // Ensure job_id is always array
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
@@ -3588,8 +3545,6 @@ const getJobCustomReport = async (Report) => {
 
     } = data.filters;
 
-   // console.log("data.filters: ", data.filters);
-
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
     let { page = 1, limit = 10, search = '' } = data
@@ -3597,8 +3552,8 @@ const getJobCustomReport = async (Report) => {
     let role_user = data?.role?.toUpperCase() || '';
 
 
-    //  console.log("page ---- --- ", page);
-    // console.log("limit ---- --- ", limit);
+  //  console.log("page ---- --- ", page);
+   // console.log("limit ---- --- ", limit);
 
     const offset = (page - 1) * limit;
 
@@ -3832,8 +3787,8 @@ const getJobCustomReport = async (Report) => {
     }
 
     try {
-       // console.log("fromDate ---- ", fromDate);
-       // console.log("toDate ---- ", toDate);
+        console.log("fromDate ---- ", fromDate);
+        console.log("toDate ---- ", toDate);
         // compute date range
         let range;
         try {
@@ -3846,55 +3801,43 @@ const getJobCustomReport = async (Report) => {
 
         let where = [`work_date BETWEEN ? AND ?`];
 
-        //let job_id = [1, 6]
+        //let job_id = [1,6]
+ 
+        if (!["", null, undefined].includes(job_id)) {
+            where.push(`raw.job_id = ${job_id}`);
+            // where.push(`raw.job_id IN (${job_id.join(",")})`);
 
-
-        if (!["", null, undefined].includes(job_id) && !(Array.isArray(job_id) && job_id.length === 0)) {
-            //where.push(`raw.job_id = ${job_id}`);
-            where.push(`raw.job_id IN (${job_id.join(",")})`);
-
-        }
-
-        if (!["", null, undefined].includes(customer_id) && !(Array.isArray(customer_id) && customer_id.length === 0)) {
-            // where.push(`raw.customer_id = ${customer_id}`);
-            where.push(`raw.customer_id IN (${customer_id.join(",")})`);
         }
 
-        if (!["", null, undefined].includes(client_id) && !(Array.isArray(client_id) && client_id.length === 0)) {
-            //where.push(`raw.client_id = ${client_id}`);
-            where.push(`raw.client_id IN (${client_id.join(",")})`);
+        if (!["", null, undefined].includes(customer_id)) {
+            where.push(`raw.customer_id = ${customer_id}`);
         }
-        if (!["", null, undefined].includes(account_manager_id) && !(Array.isArray(account_manager_id) && account_manager_id.length === 0)) {
-            //where.push(`raw.account_manager_id = ${account_manager_id}`);
-            where.push(`raw.account_manager_id IN (${account_manager_id.join(",")})`);
+        if (!["", null, undefined].includes(client_id)) {
+            where.push(`raw.client_id = ${client_id}`);
         }
-        if (!["", null, undefined].includes(allocated_to_id) && !(Array.isArray(allocated_to_id) && allocated_to_id.length === 0)) {
-            //where.push(`raw.allocated_to_id = ${allocated_to_id}`);
-            where.push(`raw.allocated_to_id IN (${allocated_to_id.join(",")})`);
+        if (!["", null, undefined].includes(account_manager_id)) {
+            where.push(`raw.account_manager_id = ${account_manager_id}`);
         }
-        if (!["", null, undefined].includes(reviewer_id) && !(Array.isArray(reviewer_id) && reviewer_id.length === 0)) {
-            //where.push(`raw.reviewer_id = ${reviewer_id}`);
-            where.push(`raw.reviewer_id IN (${reviewer_id.join(",")})`);
+        if (!["", null, undefined].includes(allocated_to_id)) {
+            where.push(`raw.allocated_to_id = ${allocated_to_id}`);
         }
-        if (!["", null, undefined].includes(allocated_to_other_id) && !(Array.isArray(allocated_to_other_id) && allocated_to_other_id.length === 0)) {
-            //where.push(`ato.id = ${allocated_to_other_id}`);
-            where.push(`ato.id IN (${allocated_to_other_id.join(",")})`);
+        if (!["", null, undefined].includes(reviewer_id)) {
+            where.push(`raw.reviewer_id = ${reviewer_id}`);
         }
-        if (!["", null, undefined].includes(service_id) && !(Array.isArray(service_id) && service_id.length === 0)) {
-            //where.push(`raw.service_id = ${service_id}`);
-            where.push(`raw.service_id IN (${service_id.join(",")})`);
+        if (!["", null, undefined].includes(allocated_to_other_id)) {
+            where.push(`ato.id = ${allocated_to_other_id}`);
         }
-        if (!["", null, undefined].includes(job_type_id) && !(Array.isArray(job_type_id) && job_type_id.length === 0)) {
-            //where.push(`raw.job_type_id = ${job_type_id}`);
-            where.push(`raw.job_type_id IN (${job_type_id.join(",")})`);
+        if (!["", null, undefined].includes(service_id)) {
+            where.push(`raw.service_id = ${service_id}`);
         }
-        if (!["", null, undefined].includes(status_type_id) && !(Array.isArray(status_type_id) && status_type_id.length === 0)) {
-            //where.push(`raw.status_type_id = ${status_type_id}`);
-            where.push(`raw.status_type_id IN (${status_type_id.join(",")})`);
+        if (!["", null, undefined].includes(job_type_id)) {
+            where.push(`raw.job_type_id = ${job_type_id}`);
         }
-        if (!["", null, undefined].includes(employee_number) && !(Array.isArray(employee_number) && employee_number.length === 0)) {
-           // where.push(`sf.employee_number = '${employee_number}'`);
-            where.push(`sf.employee_number IN (${employee_number.join(",")})`);
+        if (!["", null, undefined].includes(status_type_id)) {
+            where.push(`raw.status_type_id = ${status_type_id}`);
+        }
+        if (!["", null, undefined].includes(employee_number)) {
+            where.push(`sf.employee_number = '${employee_number}'`);
         }
 
 
@@ -4213,9 +4156,9 @@ const getJobCustomReport = async (Report) => {
             ${GROUPBY} ) AS count_table
         `;
 
-        //console.log("fromDate", fromDate);
+        // console.log("fromDate", fromDate);
         // console.log("toDate", toDate);
-        //console.log("Total Count Query ---- ", unpivotSQLCount);
+        // console.log("Total Count Query ---- ", unpivotSQLCount);
         // Get Total Count
         const [countResult] = await pool.execute(unpivotSQLCount, [fromDate, toDate]);
         const totalCount = countResult[0]?.total_count || 0;
@@ -4714,7 +4657,7 @@ const getJobCustomReport = async (Report) => {
         };
 
     } catch (err) {
-        // console.error(err);
+       // console.error(err);
         return { status: false, message: err.message || 'server error', data: [] };
     }
 };

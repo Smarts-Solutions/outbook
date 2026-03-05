@@ -1228,6 +1228,9 @@ VALUES (
 
 const getJobByCustomer = async (job) => {
   let { customer_id, StaffUserId, page, limit, search } = job;
+
+ //console.log("getJobByCustomer", job);
+
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
   const offset = (page - 1) * limit;
@@ -1271,12 +1274,13 @@ const getJobByCustomer = async (job) => {
     const likeSearch = `%${search}%`;
     searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
   }
-
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
+  if (Array.isArray(customer_id)) {
+    return await getAllJobsBYCustomerfilter({ StaffUserId, customer_id, rows ,LineManageStaffId }); 
+  }
 
   try {
     // If no customer_id, use sidebar function
@@ -1858,14 +1862,12 @@ async function getAllJobsSidebar(
 
 const getJobByClient = async (job) => {
   const { client_id, StaffUserId } = job;
-  //console.log("getJobByClient ----->", job);
+  console.log("getJobByClient ----->", job);
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
-
   try {
     // console.log("LineManageStaffId", LineManageStaffId);
     const [RoleAccess] = await pool.execute(
@@ -2056,6 +2058,637 @@ const getJobByClient = async (job) => {
     return { status: false, message: "Error getting job. BY Client" };
   }
 };
+
+const getAllJobsBYCustomerfilter = async (job) => {
+  const { StaffUserId, customer_id, rows ,LineManageStaffId} = job;
+  try {
+     const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+     const placeholders = LineManageStaffId?.map(() => '?').join(',');
+     const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE (
+          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+          OR jobs.staff_created_id IN (${LineManageStaffId})
+          OR clients.staff_created_id IN (${LineManageStaffId})
+        )
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )  
+        AND jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+      `;
+    const [result] = await pool.execute(query);
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job." };
+  }
+
+}
+
+const get_jobs_filter = async (job) => {
+  const { StaffUserId, filters} = job;
+  const {client_id, customer_id} = filters;
+
+  if (client_id.length > 0 && customer_id.length === 0) {
+    return await getJobByClientId({ StaffUserId, client_id });
+  } else if (customer_id.length > 0 && client_id.length === 0) {
+    return await getJobByCustomerId({ StaffUserId, customer_id });
+  } else if (client_id.length > 0 && customer_id.length > 0) {
+    return await getJobByClientIdAndCustomerId({ StaffUserId, customer_id , client_id });
+  }else{
+    return { status: true, message: "Success.", data: [] };
+  }
+ 
+}
+
+async function getJobByClientId(data) {
+  const { StaffUserId, client_id } = data;
+   // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+    // console.log("LineManageStaffId", LineManageStaffId);
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.client_id IN (${client_id})
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+      const [rows] = await pool.execute(query);
+      return { status: true, message: "Success.", data: rows };
+    }
+
+    // Other Role Data
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+         LEFT JOIN
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id IN (${client_id})
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
+        GROUP BY 
+        jobs.id 
+        ORDER BY 
+        jobs.id DESC;
+        `;
+    const [result] = await pool.execute(query);
+
+  
+
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. BY Client" };
+  }
+
+}
+
+async function getJobByCustomerId(data) {
+  const { StaffUserId, customer_id } = data;
+  
+   const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+
+  
+    // Check role access
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+    // SUPERADMIN or permission access
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      //  DATA
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id     
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+      `;
+      [result] = await pool.execute(query);
+    } else {
+      // 🔹 OTHER ROLE
+
+      const placeholders = LineManageStaffId?.map(() => '?').join(',');
+      // DATA
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE (
+          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+          OR jobs.staff_created_id IN (${LineManageStaffId})
+          OR clients.staff_created_id IN (${LineManageStaffId})
+        )
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )  
+        AND jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+      `;
+      [result] = await pool.execute(query);
+    }
+
+    return {
+      status: true,
+      message: "Success.",
+      data: result
+    };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job by filter customer." };
+  }
+   
+  
+}
+
+async function getJobByClientIdAndCustomerId(data) {
+  const { StaffUserId, customer_id, client_id } = data;
+
+    // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+    // console.log("LineManageStaffId", LineManageStaffId);
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.client_id IN (${client_id}) OR jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+      const [rows] = await pool.execute(query);
+      return { status: true, message: "Success.", data: rows };
+    }
+
+    // Other Role Data
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+         LEFT JOIN
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND (jobs.client_id IN (${client_id}) OR jobs.customer_id IN (${customer_id}))
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
+        GROUP BY 
+        jobs.id 
+        ORDER BY 
+        jobs.id DESC;
+        `;
+    const [result] = await pool.execute(query);
+
+  
+
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. BY Client" };
+  }
+
+  
+}
 
 const getByJobStaffId = async (job) => {
   const { Staff_id } = job;
@@ -3749,4 +4382,5 @@ module.exports = {
   getJobTimeLine,
   updateJobStatus,
   GetJobStatus,
+  get_jobs_filter,
 };

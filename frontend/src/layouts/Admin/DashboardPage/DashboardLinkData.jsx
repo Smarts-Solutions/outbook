@@ -4,9 +4,14 @@ import { linkedData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  Update_Customer_Status,
+  Update_Status,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
+import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+
 const JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -15,16 +20,17 @@ const JobStatus = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
-
+  const [statusDataAll, setStatusDataAll] = useState([]);
 
   const [hararchyData, setHararchyData] = useState({
-      customer: {},
-      client: {},
-      job: {},
-    });
+    customer: {},
+    client: {},
+    job: {},
+  });
 
   useEffect(() => {
     GetLinkedData();
+    GetStatus();
   }, []);
 
   const [getAccessData, setAccessData] = useState({
@@ -121,6 +127,22 @@ const JobStatus = () => {
 
   console.log("getAccessData", getAccessData);
 
+  const GetStatus = async () => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(MasterStatusData(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setStatusDataAll(response.data);
+        } else {
+          setStatusDataAll([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
   const GetLinkedData = async () => {
     const data = {
       req: {
@@ -211,6 +233,74 @@ const JobStatus = () => {
     });
   };
 
+  const handleStatusChange = (e, row) => {
+    const Id = e.target.value;
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { job_id: row.job_id, status_type: Number(Id) };
+          const res = await dispatch(
+            Update_Status({ req, authToken: token }),
+          ).unwrap();
+
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetLinkedData();
+          } else if (res.data === "W") {
+            Swal.fire({
+              title: "Warning",
+              text: res.message,
+              icon: "warning",
+              confirmButtonText: "Ok",
+              timer: 3000,
+              timerProgressBar: true,
+            });
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+              timer: 1000,
+              timerProgressBar: true,
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while updating the status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+      }
+    });
+  };
+
   const JobColumns = [
     // {
     //   name: "Job ID (CustName+ClientName+UniqueNo)",
@@ -249,7 +339,22 @@ const JobStatus = () => {
       selector: (row) => row.job_code_id,
       sortable: true,
     },
-
+    {
+      name: "Job Priority",
+      cell: (row) => {
+        const v = row.job_priority || "-";
+        const cap = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        return <div title={cap}>{cap}</div>;
+      },
+      selector: (row) => {
+        if (!row.job_priority) return "-";
+        return (
+          row.job_priority.charAt(0).toUpperCase() +
+          row.job_priority.slice(1).toLowerCase()
+        );
+      },
+      sortable: true,
+    },
     {
       name: "Client Name",
       cell: (row) => (
@@ -268,12 +373,41 @@ const JobStatus = () => {
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
+    // {
+    //   name: "Job Status",
+    //   cell: (row) => <div title={row.status || "-"}>{row.status || "-"}</div>,
+    //   selector: (row) => row.status || "-",
+    //   sortable: true,
+    // },
+
     {
-      name: "Job Status",
-      cell: (row) => <div title={row.status || "-"}>{row.status || "-"}</div>,
-      selector: (row) => row.status || "-",
+      name: "Status",
+      selector: (row) => {
+        const status = statusDataAll.find(
+          (s) => Number(s.id) === Number(row.status_type),
+        );
+        return status ? status.name.toLowerCase() : "-";
+      },
       sortable: true,
+      cell: (row) => (
+        <div>
+          <select
+            className="form-select form-control"
+            value={row.status_type}
+            onChange={(e) => handleStatusChange(e, row)}
+            disabled={!(getAccessData.update === 1 || role === "SUPERADMIN")}
+          >
+            {statusDataAll.map((status) => (
+              <option key={status.id} value={status.id}>
+                {status.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      ),
+      width: "325px",
     },
+
     {
       name: "Client Contact Person",
       cell: (row) => (
@@ -384,6 +518,23 @@ const JobStatus = () => {
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
+      sortable: true,
+    },
+    {
+      name: "Created By",
+      cell: (row) => (
+        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
+      ),
+      selector: (row) => row.job_created_by || "-",
+      sortable: true,
+    },
+
+    {
+      name: "Created At",
+      cell: (row) => (
+        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
+      ),
+      selector: (row) => row.created_at || "-",
       sortable: true,
     },
   ];
@@ -627,8 +778,7 @@ const JobStatus = () => {
     },
   ];
 
-
-    const HandleJob = (row) => {
+  const HandleJob = (row) => {
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
