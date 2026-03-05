@@ -816,7 +816,7 @@ trading_name ASC;`;
 
 }
 
-const getAllCustomersFilter = async (customer) => {
+const get_customers_filter = async (customer) => {
     const { StaffUserId, filters } = customer;
     let { job_id, client_id } = filters;
 
@@ -849,7 +849,6 @@ const getAllCustomersFilter = async (customer) => {
         return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
     }else{
         return await getCustomer_dropdown({StaffUserId});
-        return { status: true, message: 'Success..', data: [] };
     }
 
 
@@ -3869,7 +3868,7 @@ module.exports = {
     getcustomerschecklist,
     getCustomer_dropdown_delete,
     getAllAccountManager,
-    getAllCustomersFilter
+    get_customers_filter
 
 
 };

@@ -1058,8 +1058,8 @@ const get_clients_filter = async (client) => {
   let { StaffUserId, filters } = client;
   let { job_id , customer_id} = filters;
 
-  console.log("get_clients_filter job_id", job_id);
-  console.log("get_clients_filter customer_id", customer_id);
+ // console.log("get_clients_filter job_id", job_id);
+ // console.log("get_clients_filter customer_id", customer_id);
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
