@@ -464,7 +464,7 @@ const Service = () => {
         <div className="details__wrapper service__wrapper">
           <div className="card pricing-box m-2 mt-0">
             <div className="card-header step-header-blue">
-              <h4 className="card-title mb-0">Select Services</h4>
+              <h4 className="card-title mb-0">Services</h4>
             </div>
             <div className="row card-body">
               <div className="table-responsive table-card mb-1">

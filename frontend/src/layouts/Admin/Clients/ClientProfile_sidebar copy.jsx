@@ -737,7 +737,7 @@ const ClientList = () => {
 
 
                 <div className="form-group col-md-4 mb-0">
-                  <label className="form-label mb-2">Select Client</label>
+                  <label className="form-label mb-2"> Client</label>
                   {
                     clientData.length == 0 ?
                       <input type="text" className="form-select" disabled value={"The customer's client is not available."} />
