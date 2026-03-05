@@ -1015,8 +1015,8 @@ function TimesheetReport() {
                     value={
                       getAllFilterData && getAllFilterData.length > 0
                         ? getAllFilterData.find(
-                            (opt) => Number(opt.value) === Number(filterId),
-                          ) || null
+                          (opt) => Number(opt.value) === Number(filterId),
+                        ) || null
                         : null
                     }
                     onChange={handleFilterSelect}
@@ -1168,15 +1168,15 @@ function TimesheetReport() {
         {/* Field To Display Staff */}
         {filters?.groupBy?.includes("staff_id") && (
           <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">Select Staff</label>
+            <label className="form-label fw-medium">Staff</label>
 
             <Select
               options={[{ value: "", label: "Select..." }, ...staffAllData]}
               value={
                 staffAllData && staffAllData.length > 0
                   ? staffAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.staff_id),
-                    ) || null
+                    (opt) => Number(opt.value) === Number(filters.staff_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1206,8 +1206,8 @@ function TimesheetReport() {
               value={
                 employeeNumberAllData && employeeNumberAllData?.length > 0
                   ? employeeNumberAllData?.find(
-                      (opt) => opt.value === filters.employee_number,
-                    ) || null
+                    (opt) => opt.value === filters.employee_number,
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1234,9 +1234,9 @@ function TimesheetReport() {
               value={
                 customerAllData && customerAllData.length > 0
                   ? customerAllData.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.customer_id),
-                    ) || null
+                    (opt) =>
+                      Number(opt.value) === Number(filters.customer_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1257,14 +1257,14 @@ function TimesheetReport() {
         {/* Field To Display Client */}
         {filters?.groupBy?.includes("client_id") && (
           <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">Select Client</label>
+            <label className="form-label fw-medium">Client</label>
             <Select
               options={[{ value: "", label: "Select..." }, ...clientAllData]}
               value={
                 clientAllData && clientAllData.length > 0
                   ? clientAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.client_id),
-                    ) || null
+                    (opt) => Number(opt.value) === Number(filters.client_id),
+                  ) || null
                   : null
               }
               onChange={(selected) =>
@@ -1286,14 +1286,14 @@ function TimesheetReport() {
         {filters?.groupBy?.includes("job_id") &&
           filters.internal_external != "1" && (
             <div className="col-lg-4 col-md-6">
-              <label className="form-label fw-medium">Select Job</label>
+              <label className="form-label fw-medium">Job</label>
               <Select
                 options={[{ value: "", label: "Select..." }, ...jobAllData]}
                 value={
                   jobAllData && jobAllData.length > 0
                     ? jobAllData.find(
-                        (opt) => Number(opt.value) === Number(filters.job_id),
-                      ) || null
+                      (opt) => Number(opt.value) === Number(filters.job_id),
+                    ) || null
                     : null
                 }
                 onChange={(selected) =>
@@ -1315,14 +1315,14 @@ function TimesheetReport() {
         {filters?.groupBy?.includes("task_id") &&
           filters.internal_external != "1" && (
             <div className="col-lg-4 col-md-6">
-              <label className="form-label fw-medium">Select Task</label>
+              <label className="form-label fw-medium">Task</label>
               <Select
                 options={[{ value: "", label: "Select..." }, ...taskAllData]}
                 value={
                   taskAllData && taskAllData.length > 0
                     ? taskAllData.find(
-                        (opt) => Number(opt.value) === Number(filters.task_id),
-                      ) || null
+                      (opt) => Number(opt.value) === Number(filters.task_id),
+                    ) || null
                     : null
                 }
                 onChange={(selected) =>
@@ -1355,9 +1355,9 @@ function TimesheetReport() {
                 value={
                   internalJobAllData && internalJobAllData.length > 0
                     ? internalJobAllData.find(
-                        (opt) =>
-                          Number(opt.value) === Number(filters.internal_job_id),
-                      ) || null
+                      (opt) =>
+                        Number(opt.value) === Number(filters.internal_job_id),
+                    ) || null
                     : null
                 }
                 onChange={(selected) =>
@@ -1390,10 +1390,10 @@ function TimesheetReport() {
                 value={
                   internalTaskAllData && internalTaskAllData.length > 0
                     ? internalTaskAllData.find(
-                        (opt) =>
-                          Number(opt.value) ===
-                          Number(filters.internal_task_id),
-                      ) || null
+                      (opt) =>
+                        Number(opt.value) ===
+                        Number(filters.internal_task_id),
+                    ) || null
                     : null
                 }
                 onChange={(selected) =>
@@ -1566,13 +1566,13 @@ function TimesheetReport() {
           <div className="table-responsive fixed-table-header">
             <table
               className="table rdt_Table"
-              // className="table table-bordered"
-              // style={{
-              //   fontSize: "14px",
-              //   width: "100%",
-              //   overflowX: "auto",
-              //   display: "block",
-              // }}
+            // className="table table-bordered"
+            // style={{
+            //   fontSize: "14px",
+            //   width: "100%",
+            //   overflowX: "auto",
+            //   display: "block",
+            // }}
             >
               <thead
               // className="rdt_TableHead"

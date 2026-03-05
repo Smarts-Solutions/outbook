@@ -1846,7 +1846,7 @@ const Timesheet = () => {
           <div className="row ">
             {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
               <div className="form-group col-md-4">
-                <label className="form-label mb-2">Select Staff</label>
+                <label className="form-label mb-2">Staff</label>
 
                 <Select
                   id="tabSelect"
@@ -1871,7 +1871,7 @@ const Timesheet = () => {
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
                 <div className="form-group col-md-4   pe-0">
-                  <label className="form-label mb-2">Select Date</label>
+                  <label className="form-label mb-2">Date</label>
                   <Select
                     id="tabSelect"
                     name="week"
@@ -1898,7 +1898,7 @@ const Timesheet = () => {
               {isExistStaffDataWeekDataAll?.data &&
                 isExistStaffDataWeekDataAll?.data.length > 0 && staffDataWeekDataAll?.data.length === 0 ? (
                 <div className="form-group col-md-4 pe-0">
-                  <label className="form-label mb-2">Select Date</label>
+                  <label className="form-label mb-2">Date</label>
                   <Select
                     id="tabSelect"
                     name="week"
