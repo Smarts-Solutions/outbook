@@ -667,15 +667,35 @@ const JobStatus = () => {
     //   selector: (row) => row.trading_name,
     //   sortable: true,
     // },
-    {
+    // {
+    //   name: "Client Name",
+    //   cell: (row) => (
+    //     <div title={row.client_name || "-"}>{row.client_name || "-"}</div>
+    //   ),
+    //   selector: (row) => row.client_name || "-",
+    //   sortable: true,
+    // },
+  {
       name: "Client Name",
       cell: (row) => (
-        <div title={row.client_name || "-"}>{row.client_name || "-"}</div>
+        <div>
+          {getAccessData.job === 1 ||
+          getAccessData.all_jobs == 1 ||
+          role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleClientProfileView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.client_name}
+            </a>
+          ) : (
+            row.client_name
+          )}
+        </div>
       ),
-      selector: (row) => row.client_name || "-",
+      selector: (row) => row.client_name,
       sortable: true,
     },
-
     {
       name: "Client Code",
       cell: (row) => (
@@ -683,6 +703,15 @@ const JobStatus = () => {
       ),
       selector: (row) => row.client_code || "-",
       sortable: true,
+    },
+     {
+      name: "Customer Name",
+      cell: (row) => (
+        <div title={row.customer_name || "-"}>{row.customer_name || "-"}</div>
+      ),
+      selector: (row) => row.customer_name || "-",
+      sortable: true,
+      reorder: false,
     },
     {
       name: "Client Type",
@@ -695,6 +724,26 @@ const JobStatus = () => {
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "150px",
+    },
+     {
+      name: "Created By",
+      cell: (row) => (
+        <div title={row.client_created_by || "-"}>
+          {row.client_created_by || "-"}
+        </div>
+      ),
+      selector: (row) => row.client_created_by || "-",
+      sortable: true,
+      reorder: false,
+    },
+    {
+      name: "Created At",
+      cell: (row) => (
+        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
+      ),
+      selector: (row) => row.created_at || "-",
+      sortable: true,
+      reorder: false,
     },
     {
       name: "Status",
@@ -796,9 +845,144 @@ const JobStatus = () => {
       return updatedData;
     });
   };
+  
 
   console.log("allLinkedData", allLinkedData);
   console.log("location", location?.state?.req?.key);
+
+  const downloadCSV = (data, filename) => {
+    if (!data || data.length === 0) {
+      Swal.fire({
+        title: "No Data",
+        text: "Export ke liye koi data nahi hai.",
+        icon: "info",
+      });
+      return;
+    }
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+    data.forEach((row) => {
+      const values = headers.map(
+        (h) => `"${(row[h] ?? "").toString().replace(/"/g, '""')}"`,
+      );
+      csvRows.push(values.join(","));
+    });
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExport = () => {
+    const key = location?.state?.req?.key;
+
+    if (key === "customer") {
+      const data = allLinkedData.map((item) => ({
+        "Trading Name": item.trading_name || "-",
+        "Customer Code": item.customer_code || "-",
+        Type:
+          item.customer_type === "1"
+            ? "Sole Trader"
+            : item.customer_type === "2"
+              ? "Company"
+              : item.customer_type === "3"
+                ? "Partnership"
+                : "-",
+        "Client Contact Person":
+          (item.account_manager_firstname || "") +
+          " " +
+          (item.account_manager_lastname || ""),
+        Status:
+          item.form_process === "4"
+            ? item.status == "1"
+              ? "Active"
+              : "Inactive"
+            : "Inprogress",
+      }));
+      downloadCSV(data, "Customers.csv");
+    } else if (key === "client") {
+      const data = allLinkedData.map((item) => ({
+        "Client Name": item.client_name || "-",
+        "Client Code": item.client_code || "-",
+        "Customer Name": item.customer_name || "-",
+        "Client Type": item.client_type_name || "-",
+        "Created By": item.client_created_by || "-",
+        "Created At": item.created_at || "-",
+        Status: item.status === "1" ? "Active" : "Deactive",
+      }));
+      downloadCSV(data, "Clients.csv");
+    } else if (key === "staff") {
+      const data = allLinkedData.map((item) => ({
+        "Full Name": (item.first_name || "") + " " + (item.last_name || ""),
+        Email: item.email || "-",
+        Phone:
+          item.phone && item.phone_code
+            ? item.phone_code + "-" + item.phone
+            : "-",
+        Role: item.role_name || "-",
+        Status: item.status === "1" ? "Active" : "Inactive",
+      }));
+      downloadCSV(data, "Staff.csv");
+    } else {
+      // job, pending_job, completed_job — sab ke liye same columns
+      const data = allLinkedData.map((item) => {
+        const status = statusDataAll.find(
+          (s) => Number(s.id) === Number(item.status_type),
+        );
+        return {
+          "Job ID": item.job_code_id || "-",
+          "Job Priority": item.job_priority
+            ? item.job_priority.charAt(0).toUpperCase() +
+              item.job_priority.slice(1).toLowerCase()
+            : "-",
+          "Client Name": item.client_trading_name || "-",
+          "Job Type": item.job_type_name || "-",
+          Status: status ? status.name : "-",
+          "Client Contact Person":
+            (item.account_manager_officer_first_name || "") +
+            " " +
+            (item.account_manager_officer_last_name || ""),
+          "Client Job Code": item.client_job_code || "-",
+          "Outbook Account Manager":
+            (item.outbooks_acount_manager_first_name || "") +
+            " " +
+            (item.outbooks_acount_manager_last_name || ""),
+          "Allocated To": item.allocated_first_name
+            ? item.allocated_first_name + " " + item.allocated_last_name
+            : "-",
+          Timesheet:
+            item.total_hours_status == "1" && item.total_hours
+              ? item.total_hours.split(":")[0] +
+                "h " +
+                item.total_hours.split(":")[1] +
+                "m"
+              : "-",
+          Invoicing: item.invoiced == "1" ? "YES" : "NO",
+          "Created By": item.job_created_by || "-",
+          "Created At": item.created_at || "-",
+        };
+      });
+      downloadCSV(data, `Jobs_${key || "all"}.csv`);
+    }
+  };
+
+
+   const HandleClientProfileView = (row) => {
+    setHararchyData((prevState) => {
+      const updatedData = {
+        ...prevState,
+        client: row,
+      };
+      navigate("/admin/client/profile", {
+        state: { Client_id: row.id, data: updatedData },
+      });
+      return updatedData;
+    });
+  };
 
   return (
     <div>
@@ -819,6 +1003,7 @@ const JobStatus = () => {
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
+
                   {(role === "SUPERADMIN" ||
                     (getAccessData.insert === 1 && getAccessData.view === 1)) &&
                   location?.state?.req?.heading == "Customers" ? (
@@ -832,6 +1017,18 @@ const JobStatus = () => {
                     </div>
                   ) : (
                     ""
+                  )}
+
+                  {allLinkedData && allLinkedData.length > 0 && (
+                    <div className="ms-2">
+                      <button
+                        className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
+                        onClick={handleExport}
+                      >
+                        <i className="fa fa-download" aria-hidden="true"></i>
+                        <span>Export Excel</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
