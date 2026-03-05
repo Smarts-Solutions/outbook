@@ -110,7 +110,8 @@ function JobCustomReport() {
       .replace(/\b\w/g, (char) => char.toUpperCase()) // capitalize first letter of each word
       .trim();
   }
-  //  console.log("lastGroupValue ", lastGroupValue);
+
+  
 
   // Get All Jobs
   const GetAllJobs = async (type, filter) => {
@@ -132,6 +133,7 @@ function JobCustomReport() {
       .catch((error) => {
         return;
       });
+
     return;
     // if (type == "all") {
     // const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000 };
