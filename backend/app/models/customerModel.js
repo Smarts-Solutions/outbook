@@ -848,6 +848,9 @@ const getAllCustomersFilter = async (customer) => {
     else if (client_id?.length > 0 && job_id?.length > 0) {
         return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
     }else{
+        
+        return await getCustomer_dropdown({StaffUserId});
+
         return { status: true, message: 'Success..', data: [] };
     }
 

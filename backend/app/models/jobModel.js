@@ -84,10 +84,10 @@ const getAddJobData = async (job) => {
         customer_account_manager_id: rows[0].customer_account_manager_id,
       };
 
-       const [RoleAccess] = await pool.execute(
-      "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
-      [roleData[0].role_id, 34]
-    );
+      const [RoleAccess] = await pool.execute(
+        "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
+        [roleData[0].role_id, 34]
+      );
 
       if (roleData.length > 0 && (roleData[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
         client = rows.map((row) => ({
@@ -1229,7 +1229,7 @@ VALUES (
 const getJobByCustomer = async (job) => {
   let { customer_id, StaffUserId, page, limit, search } = job;
 
- //console.log("getJobByCustomer", job);
+  //console.log("getJobByCustomer", job);
 
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
@@ -1279,7 +1279,7 @@ const getJobByCustomer = async (job) => {
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
   if (Array.isArray(customer_id)) {
-    return await getAllJobsBYCustomerfilter({ StaffUserId, customer_id, rows ,LineManageStaffId }); 
+    return await getAllJobsBYCustomerfilter({ StaffUserId, customer_id, rows, LineManageStaffId });
   }
 
   try {
@@ -2060,9 +2060,9 @@ const getJobByClient = async (job) => {
 };
 
 const getAllJobsBYCustomerfilter = async (job) => {
-  const { StaffUserId, customer_id, rows ,LineManageStaffId} = job;
+  const { StaffUserId, customer_id, rows, LineManageStaffId } = job;
   try {
-     const jobCodeExpr = `
+    const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -2070,8 +2070,8 @@ const getAllJobsBYCustomerfilter = async (job) => {
       SUBSTRING(jobs.job_id, 1, 15)
     )
   `;
-     const placeholders = LineManageStaffId?.map(() => '?').join(',');
-     const query = `
+    const placeholders = LineManageStaffId?.map(() => '?').join(',');
+    const query = `
         SELECT 
         jobs.id AS job_id,
         timesheet.job_id AS timesheet_job_id,
@@ -2145,24 +2145,34 @@ const getAllJobsBYCustomerfilter = async (job) => {
 }
 
 const get_jobs_filter = async (job) => {
-  const { StaffUserId, filters} = job;
-  const {client_id, customer_id} = filters;
+  const { StaffUserId, filters } = job;
+  const { client_id, customer_id } = filters;
 
   if (client_id.length > 0 && customer_id.length === 0) {
     return await getJobByClientId({ StaffUserId, client_id });
   } else if (customer_id.length > 0 && client_id.length === 0) {
     return await getJobByCustomerId({ StaffUserId, customer_id });
   } else if (client_id.length > 0 && customer_id.length > 0) {
-    return await getJobByClientIdAndCustomerId({ StaffUserId, customer_id , client_id });
-  }else{
+    return await getJobByClientIdAndCustomerId({ StaffUserId, customer_id, client_id });
+  } else {
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId);
+    return await getAllJobsSidebar(StaffUserId, LineManageStaffId, rows, {
+      page : 1,
+      limit : 100000,
+      offset : 0,
+      search : '',
+    });
     return { status: true, message: "Success.", data: [] };
   }
- 
+
 }
 
 async function getJobByClientId(data) {
   const { StaffUserId, client_id } = data;
-   // Line Manager
+  // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
@@ -2332,7 +2342,7 @@ async function getJobByClientId(data) {
         `;
     const [result] = await pool.execute(query);
 
-  
+
 
     return { status: true, message: "Success.", data: result };
   } catch (error) {
@@ -2344,8 +2354,8 @@ async function getJobByClientId(data) {
 
 async function getJobByCustomerId(data) {
   const { StaffUserId, customer_id } = data;
-  
-   const jobCodeExpr = `
+
+  const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
       SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -2359,7 +2369,7 @@ async function getJobByCustomerId(data) {
   const rows = await QueryRoleHelperFunction(StaffUserId);
   try {
 
-  
+
     // Check role access
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
@@ -2502,14 +2512,14 @@ async function getJobByCustomerId(data) {
     console.log("err -", error);
     return { status: false, message: "Error getting job by filter customer." };
   }
-   
-  
+
+
 }
 
 async function getJobByClientIdAndCustomerId(data) {
   const { StaffUserId, customer_id, client_id } = data;
 
-    // Line Manager
+  // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
@@ -2679,7 +2689,7 @@ async function getJobByClientIdAndCustomerId(data) {
         `;
     const [result] = await pool.execute(query);
 
-  
+
 
     return { status: true, message: "Success.", data: result };
   } catch (error) {
@@ -2687,7 +2697,7 @@ async function getJobByClientIdAndCustomerId(data) {
     return { status: false, message: "Error getting job. BY Client" };
   }
 
-  
+
 }
 
 const getByJobStaffId = async (job) => {

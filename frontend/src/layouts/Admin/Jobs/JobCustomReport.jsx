@@ -771,6 +771,11 @@ function JobCustomReport() {
   };
 
   const handleFilterChange = (e, type) => {
+
+    console.log("handleFilterChange", e);
+    console.log("type", type);
+
+
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
       let additionalFieldArray = sortByReference(values);
@@ -885,6 +890,7 @@ function JobCustomReport() {
         }
       }
     }
+
   };
 
   const addAndRemoveGroupBy = (value, type) => {
@@ -1025,7 +1031,7 @@ function JobCustomReport() {
     }
   };
 
-  // console.log("filters ", filters);
+   console.log("filters ", filters);
 
   const callFilterApi = async (currentPage, pageSize, searchTerm) => {
     setLoading(true);
@@ -1683,6 +1689,7 @@ function JobCustomReport() {
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             /> */}
+          {console.log("jobAllData -->",jobAllData)}
 
             <Select
               isMulti
