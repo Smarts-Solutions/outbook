@@ -1117,10 +1117,7 @@ async function getAllClientsSidebarFilter(
     );
 
     // ================= ADMIN / SUPERADMIN =================
-    if (
-      rows.length > 0 &&
-      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
-    ) {
+    if (rows.length > 0 &&(rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
       
       const [data] = await pool.execute(
         `
