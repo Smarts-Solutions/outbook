@@ -1780,7 +1780,11 @@ const get_jobs_filter = async (job) => {
   console.log("get_jobs_filter client_id", client_id);
   console.log("get_jobs_filter customer_id", customer_id);
   if(client_id === undefined && customer_id === undefined) {
-    return await getAllJobsSidebarFilter(StaffUserId);
+     // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId);
+   return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows);
   }
   else if (client_id.length > 0 && customer_id.length === 0) {
     return await getJobByClientId({ StaffUserId, client_id });
