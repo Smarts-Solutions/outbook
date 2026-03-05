@@ -140,14 +140,14 @@ const JobStatus = () => {
     },
     {
       name: "Year Ending",
-      cell: (row) => <div title={row.Year_Ending_id_1}>{row.Year_Ending_id_1 ? convertDate(row.Year_Ending_id_1) : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Accounts Production" ? <div title={row.Year_Ending_id_1}>{row.Year_Ending_id_1 ? convertDate(row.Year_Ending_id_1) : "-"}</div> : "-"}</>,
       selector: (row) => row.Year_Ending_id_1,
       reorder: false,
       sortable: true,
     },
     {
       name: "Tax Year",
-      cell: (row) => <div title={row.Tax_Year_id_4}>{row.Tax_Year_id_4 ? row.Tax_Year_id_4 : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Personal Tax Return" ? <div title={row.Tax_Year_id_4}>{row.Tax_Year_id_4 ? row.Tax_Year_id_4 : "-"}</div> : "-"}</>,
       selector: (row) => row.Tax_Year_id_4,
       reorder: false,
       sortable: true,
@@ -155,17 +155,17 @@ const JobStatus = () => {
 
     {
       name: "Payroll Frequency",
-      cell: (row) => <div title={row.Payroll_Frequency_id_3}>{row.Payroll_Frequency_id_3 ? row.Payroll_Frequency_id_3 : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Payroll" ? <div title={row.Payroll_Frequency_id_3}>{row.Payroll_Frequency_id_3 ? row.Payroll_Frequency_id_3 : "-"}</div> : "-"}</>,
       selector: (row) => row.Payroll_Frequency_id_3,
       reorder: false,
       sortable: true,
     },
     {
       name: "Payroll Year",
-      cell: (row) => <>
-        {row.Payroll_Frequency_id_3 == "Weekly" ? <div title={row.Payroll_Week_Year_id_3}>{row.Payroll_Week_Year_id_3 ? row.Payroll_Week_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Monthly" ? <div title={row.Payroll_Month_Year_id_3}>{row.Payroll_Month_Year_id_3 ? row.Payroll_Month_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Fortnightly" ? <div title={row.Payroll_Fortnight_Year_id_3}>{row.Payroll_Fortnight_Year_id_3 ? row.Payroll_Fortnight_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Quarterly" ? <div title={row.Payroll_Quarter_Year_id_3}>{row.Payroll_Quarter_Year_id_3 ? row.Payroll_Quarter_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Yearly" ? <div title={row.Payroll_Year_id_3}>{row.Payroll_Year_id_3 ? row.Payroll_Year_id_3 : "-"}</div> : "-"}
+      cell: (row) =>
+        <> {row.service_name == "Payroll" ? row.Payroll_Frequency_id_3 == "Weekly" ? <div title={row.Payroll_Week_Year_id_3}>{row.Payroll_Week_Year_id_3 ? row.Payroll_Week_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Monthly" ? <div title={row.Payroll_Month_Year_id_3}>{row.Payroll_Month_Year_id_3 ? row.Payroll_Month_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Fortnightly" ? <div title={row.Payroll_Fortnight_Year_id_3}>{row.Payroll_Fortnight_Year_id_3 ? row.Payroll_Fortnight_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Quarterly" ? <div title={row.Payroll_Quarter_Year_id_3}>{row.Payroll_Quarter_Year_id_3 ? row.Payroll_Quarter_Year_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Yearly" ? <div title={row.Payroll_Year_id_3}>{row.Payroll_Year_id_3 ? row.Payroll_Year_id_3 : "-"}</div> : "-" : "-"}
 
-      </>,
+        </>,
       selector: (row) => row.Payroll_Week_Year_id_3,
       reorder: false,
       sortable: true,
@@ -173,8 +173,7 @@ const JobStatus = () => {
     {
       name: "Payroll Month",
       cell: (row) => <>
-        {row.Payroll_Frequency_id_3 == "Weekly" ? <div title={row.Payroll_Week_Month_id_3}>{row.Payroll_Week_Month_id_3 ? row.Payroll_Week_Month_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Monthly" ? <div title={row.Payroll_Month_id_3}>{row.Payroll_Month_id_3 ? row.Payroll_Month_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Fortnightly" ? <div title={row.Payroll_Fortnight_Month_id_3}>{row.Payroll_Fortnight_Month_id_3 ? row.Payroll_Fortnight_Month_id_3 : "-"}</div> : "-"}
-
+        {row.service_name == "Payroll" ? row.Payroll_Frequency_id_3 == "Weekly" ? <div title={row.Payroll_Week_Month_id_3}>{row.Payroll_Week_Month_id_3 ? row.Payroll_Week_Month_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Monthly" ? <div title={row.Payroll_Month_id_3}>{row.Payroll_Month_id_3 ? row.Payroll_Month_id_3 : "-"}</div> : row.Payroll_Frequency_id_3 == "Fortnightly" ? <div title={row.Payroll_Fortnight_Month_id_3}>{row.Payroll_Fortnight_Month_id_3 ? row.Payroll_Fortnight_Month_id_3 : "-"}</div> : "-" : "-"}
       </>,
       selector: (row) => row.Payroll_Week_Month_id_3,
       reorder: false,
@@ -182,7 +181,7 @@ const JobStatus = () => {
     },
     {
       name: "Payroll Week",
-      cell: (row) => <div title={row.Payroll_Week_id_3}>{row.Payroll_Week_id_3 ? row.Payroll_Week_id_3 : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Payroll" ? <div title={row.Payroll_Week_id_3}>{row.Payroll_Week_id_3 ? row.Payroll_Week_id_3 : "-"}</div> : "-"}</>,
       selector: (row) => row.Payroll_Week_id_3,
       reorder: false,
       sortable: true,
@@ -190,69 +189,63 @@ const JobStatus = () => {
 
     {
       name: "Bookkeeping Frequency",
-      cell: (row) => <div title={row.Bookkeeping_Frequency_id_2}>{row.Bookkeeping_Frequency_id_2 ? row.Bookkeeping_Frequency_id_2 : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? <div title={row.Bookkeeping_Frequency_id_2}>{row.Bookkeeping_Frequency_id_2 ? row.Bookkeeping_Frequency_id_2 : "-"}</div> : "-"}</>,
       selector: (row) => row.Bookkeeping_Frequency_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "Date",
-      cell: (row) => <div title={row.Day_Date_id_2}>{row.Day_Date_id_2 ? convertDate(row.Day_Date_id_2) : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? <div title={row.Day_Date_id_2}>{row.Day_Date_id_2 ? convertDate(row.Day_Date_id_2) : "-"}</div> : "-"}</>,
       selector: (row) => row.Day_Date_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "Year",
-      cell: (row) => <>
-        {row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_Year_id_2}>{row.Week_Year_id_2 ? row.Week_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_Year_id_2}>{row.Fortnight_Year_id_2 ? row.Fortnight_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Monthly" ? <div title={row.Month_Year_id_2}>{row.Month_Year_id_2 ? row.Month_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Quarterly" ? <div title={row.Quarter_Year_id_2}>{row.Quarter_Year_id_2 ? row.Quarter_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Yearly" ? <div title={row.Year_id_2}>{row.Year_id_2 ? row.Year_id_2 : "-"}</div> : "-"}
-      </>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_Year_id_2}>{row.Week_Year_id_2 ? row.Week_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_Year_id_2}>{row.Fortnight_Year_id_2 ? row.Fortnight_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Monthly" ? <div title={row.Month_Year_id_2}>{row.Month_Year_id_2 ? row.Month_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Quarterly" ? <div title={row.Quarter_Year_id_2}>{row.Quarter_Year_id_2 ? row.Quarter_Year_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Yearly" ? <div title={row.Year_id_2}>{row.Year_id_2 ? row.Year_id_2 : "-"}</div> : "-" : "-"}</>,
       selector: (row) => row.Week_Year_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "Month",
-      cell: (row) => <>
-        {row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_Month_id_2}>{row.Week_Month_id_2 ? row.Week_Month_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_Month_id_2}>{row.Fortnight_Month_id_2 ? row.Fortnight_Month_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Monthly" ? <div title={row.Month_id_2}>{row.Month_id_2 ? row.Month_id_2 : "-"}</div> : "-"}
-      </>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_Month_id_2}>{row.Week_Month_id_2 ? row.Week_Month_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_Month_id_2}>{row.Fortnight_Month_id_2 ? row.Fortnight_Month_id_2 : "-"}</div> : row.Bookkeeping_Frequency_id_2 == "Monthly" ? <div title={row.Month_id_2}>{row.Month_id_2 ? row.Month_id_2 : "-"}</div> : "-" : "-"}</>,
       selector: (row) => row.Week_Month_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "Week",
-      cell: (row) => <>
-        {row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_id_2}>{row.Week_id_2 ? row.Week_id_2 : "-"}</div> : "-"}
-      </>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? row.Bookkeeping_Frequency_id_2 == "Weekly" ? <div title={row.Week_id_2}>{row.Week_id_2 ? row.Week_id_2 : "-"}</div> : "-" : "-"}</>,
       selector: (row) => row.Week_Month_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "Fortnight",
-      cell: (row) => <div title={row.Fortnight_id_2}>{row.Fortnight_id_2 ? row.Fortnight_id_2 : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? row.Bookkeeping_Frequency_id_2 == "Fortnightly" ? <div title={row.Fortnight_id_2}>{row.Fortnight_id_2 ? row.Fortnight_id_2 : "-"}</div> : "-" : "-"}</>,
       selector: (row) => row.Fortnight_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "Quarter",
-      cell: (row) => <div title={row.Quarter_id_2}>{row.Quarter_id_2 ? row.Quarter_id_2 : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? row.Bookkeeping_Frequency_id_2 == "Quarterly" ? <div title={row.Quarter_id_2}>{row.Quarter_id_2 ? row.Quarter_id_2 : "-"}</div> : "-" : "-"}</>,
       selector: (row) => row.Quarter_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "FromDate",
-      cell: (row) => <div title={row.Other_FromDate_id_2}>{row.Other_FromDate_id_2 ? convertDate(row.Other_FromDate_id_2) : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? <div title={row.Other_FromDate_id_2}>{row.Other_FromDate_id_2 ? convertDate(row.Other_FromDate_id_2) : "-"}</div> : "-"}</>,
       selector: (row) => row.Other_FromDate_id_2,
       reorder: false,
       sortable: true,
     },
     {
       name: "ToDate",
-      cell: (row) => <div title={row.Other_ToDate_id_2}>{row.Other_ToDate_id_2 ? convertDate(row.Other_ToDate_id_2) : "-"}</div>,
+      cell: (row) => <> {row.service_name == "Bookkeeping" ? <div title={row.Other_ToDate_id_2}>{row.Other_ToDate_id_2 ? convertDate(row.Other_ToDate_id_2) : "-"}</div> : "-"}</>,
       selector: (row) => row.Other_ToDate_id_2,
       reorder: false,
       sortable: true,
