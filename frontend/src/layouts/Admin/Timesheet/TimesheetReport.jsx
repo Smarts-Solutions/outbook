@@ -1228,7 +1228,7 @@ function TimesheetReport() {
         {/* Field To Display Customer */}
         {filters?.groupBy?.includes("customer_id") && (
           <div className="col-lg-4 col-md-6">
-            <label className="form-label fw-medium">Select Customer</label>
+            <label className="form-label fw-medium">Customer</label>
             <Select
               options={[{ value: "", label: "Select..." }, ...customerAllData]}
               value={

@@ -1107,7 +1107,7 @@ const Engagement = () => {
                     )}
                   </div>
                   <div className="col-lg-4 mb-3">
-                    <label className="form-label">Select Customer Source</label>
+                    <label className="form-label">Customer Source</label>
                     <select
 
                       className={formErrors.customerSource ? "error-field form-select" : "form-select"}
