@@ -706,54 +706,122 @@ const getDashboardActivityLog = async (dashboard) => {
 
 const getByAllClient = async (dashboard) => {
   try {
-    const { staff_id, ids } = dashboard;
+    let { staff_id, ids, page, limit, search } = dashboard;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
     const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    // const query = `SELECT id
-    //                FROM clients
-    //                WHERE id IN (`+ cleane_ids + `)`;
-    const query =
+
+    const clientCodeExpr = `
+      CONCAT(
+        'cli_',
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+      )
+    `;
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      searchCondition = `
+        AND (
+          clients.trading_name LIKE ?
+          OR customers.trading_name LIKE ?
+          OR client_types.type LIKE ?
+          OR client_contact_details.email LIKE ?
+          OR ${clientCodeExpr} LIKE ?
+          OR ? LIKE CONCAT('%', ${clientCodeExpr}, '%')
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        search,
+      ];
+    }
+
+    const [countResult] = await pool.execute(
       `
-                   SELECT  
-                       clients.id AS id,
-                       clients.trading_name AS client_name,
-                        customers.trading_name AS customer_name,
-                       clients.status AS status,
-                       client_types.type AS client_type_name,
-                       client_contact_details.email AS email,
-                       client_contact_details.phone_code AS phone_code,
-                       client_contact_details.phone AS phone,
-                       CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
-                         DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
-                       CONCAT(
-                           'cli_', 
-                           SUBSTRING(customers.trading_name, 1, 3), '_',
-                           SUBSTRING(clients.trading_name, 1, 3), '_',
-                           SUBSTRING(clients.client_code, 1, 15)
-                           ) AS client_code
-                   FROM 
-                       clients
-                   JOIN 
-                      customers ON customers.id = clients.customer_id    
-                   JOIN 
-                       client_types ON client_types.id = clients.client_type
-                       JOIN staffs ON clients.staff_created_id = staffs.id
-                   LEFT JOIN 
-                       client_contact_details ON client_contact_details.id = (
-                           SELECT MIN(cd.id)
-                           FROM client_contact_details cd
-                           WHERE cd.client_id = clients.id
-                       )
-                   WHERE clients.id IN (` +
-      cleane_ids +
-      `)
-                   ORDER BY 
-                   clients.id DESC;
-                   `;
-    const [result] = await pool.execute(query);
+      SELECT COUNT(DISTINCT clients.id) AS total
+      FROM clients
+      JOIN customers ON customers.id = clients.customer_id
+      JOIN client_types ON client_types.id = clients.client_type
+      JOIN staffs ON clients.staff_created_id = staffs.id
+      LEFT JOIN client_contact_details ON client_contact_details.id = (
+          SELECT MIN(cd.id)
+          FROM client_contact_details cd
+          WHERE cd.client_id = clients.id
+      )
+      WHERE clients.id IN (${cleane_ids})
+      ${searchCondition}
+      `,
+      [...searchParams],
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT  
+          clients.id AS id,
+          clients.trading_name AS client_name,
+          customers.trading_name AS customer_name,
+          clients.status AS status,
+          client_types.type AS client_type_name,
+          client_contact_details.email AS email,
+          client_contact_details.phone_code AS phone_code,
+          client_contact_details.phone AS phone,
+          CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+          DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+          ${clientCodeExpr} AS client_code
+      FROM clients
+      JOIN customers ON customers.id = clients.customer_id    
+      JOIN client_types ON client_types.id = clients.client_type
+      JOIN staffs ON clients.staff_created_id = staffs.id
+      LEFT JOIN client_contact_details ON client_contact_details.id = (
+          SELECT MIN(cd.id)
+          FROM client_contact_details cd
+          WHERE cd.client_id = clients.id
+      )
+      WHERE clients.id IN (${cleane_ids})
+      ${searchCondition}
+      ORDER BY clients.id DESC
+      LIMIT ? OFFSET ?;
+    `;
+
+    const [result] = await pool.execute(query, [
+      ...searchParams,
+      limit,
+      offset,
+    ]);
+
     if (result.length > 0) {
-      return { status: true, message: "success.", data: result };
+      return {
+        status: true,
+        message: "success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
     } else {
-      return { status: false, message: "No client found.", data: [] };
+      return {
+        status: false,
+        message: "No client found.",
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0, search },
+      };
     }
   } catch (error) {
     return {
@@ -766,57 +834,111 @@ const getByAllClient = async (dashboard) => {
 
 const getByAllCustomer = async (dashboard) => {
   try {
-    const { staff_id, ids } = dashboard;
+    let { staff_id, ids, page, limit, search } = dashboard;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
     const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    // const query = `SELECT id
-    //                FROM customers
-    //                WHERE id IN (`+ cleane_ids + `)`;
-    const query =
+
+    const customerCodeExpr = `
+      CONCAT(
+        'cust_',
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(customers.customer_code, 1, 15)
+      )
+    `;
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      searchCondition = `
+        AND (
+          customers.trading_name LIKE ?
+          OR customer_company_information.company_name LIKE ?
+          OR ${customerCodeExpr} LIKE ?
+          OR ? LIKE CONCAT('%', ${customerCodeExpr}, '%')
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [likeSearch, likeSearch, likeSearch, search];
+    }
+
+    const [countResult] = await pool.execute(
       `
-                   SELECT  
-                   customers.id AS id,
-                   customers.customer_type AS customer_type,
-                   customers.staff_id AS staff_id,
-                   customers.account_manager_id AS account_manager_id,
-                   customers.trading_name AS trading_name,
-                   customers.trading_address AS trading_address,
-                   customers.vat_registered AS vat_registered,
-                   customers.vat_number AS vat_number,
-                   customers.website AS website,
-                   customers.form_process AS form_process,
-                   customers.created_at AS created_at,
-                   customers.updated_at AS updated_at,
-                   customers.status AS status,
-                   staff1.first_name AS staff_firstname, 
-                   staff1.last_name AS staff_lastname,
-                   staff2.first_name AS account_manager_firstname, 
-                   staff2.last_name AS account_manager_lastname,
-                   customer_company_information.company_name AS company_name,
-                   customer_company_information.company_number AS company_number,
-                   CONCAT(
-                   'cust_', 
-                   SUBSTRING(customers.trading_name, 1, 3), '_',
-                   SUBSTRING(customers.customer_code, 1, 15)
-                   ) AS customer_code
-               FROM 
-                   customers
-               JOIN 
-                   staffs AS staff1 ON customers.staff_id = staff1.id
-               JOIN 
-                   staffs AS staff2 ON customers.account_manager_id = staff2.id
-               LEFT JOIN 
-                   customer_company_information ON customers.id = customer_company_information.customer_id
-               WHERE customers.id IN (` +
-      cleane_ids +
-      `)   
-               ORDER BY 
-                   customers.id DESC;
-                   `;
-    const [result] = await pool.execute(query);
+      SELECT COUNT(DISTINCT customers.id) AS total
+      FROM customers
+      JOIN staffs AS staff1 ON customers.staff_id = staff1.id
+      JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+      LEFT JOIN customer_company_information ON customers.id = customer_company_information.customer_id
+      WHERE customers.id IN (${cleane_ids})
+      ${searchCondition}
+      `,
+      [...searchParams],
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT  
+        customers.id AS id,
+        customers.customer_type AS customer_type,
+        customers.staff_id AS staff_id,
+        customers.account_manager_id AS account_manager_id,
+        customers.trading_name AS trading_name,
+        customers.trading_address AS trading_address,
+        customers.vat_registered AS vat_registered,
+        customers.vat_number AS vat_number,
+        customers.website AS website,
+        customers.form_process AS form_process,
+        customers.created_at AS created_at,
+        customers.updated_at AS updated_at,
+        customers.status AS status,
+        staff1.first_name AS staff_firstname, 
+        staff1.last_name AS staff_lastname,
+        staff2.first_name AS account_manager_firstname, 
+        staff2.last_name AS account_manager_lastname,
+        customer_company_information.company_name AS company_name,
+        customer_company_information.company_number AS company_number,
+        ${customerCodeExpr} AS customer_code
+      FROM customers
+      JOIN staffs AS staff1 ON customers.staff_id = staff1.id
+      JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+      LEFT JOIN customer_company_information ON customers.id = customer_company_information.customer_id
+      WHERE customers.id IN (${cleane_ids})
+      ${searchCondition}
+      ORDER BY customers.id DESC
+      LIMIT ? OFFSET ?;
+    `;
+
+    const [result] = await pool.execute(query, [
+      ...searchParams,
+      limit,
+      offset,
+    ]);
+
     if (result.length > 0) {
-      return { status: true, message: "success.", data: result };
+      return {
+        status: true,
+        message: "success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
     } else {
-      return { status: false, message: "No customer found.", data: [] };
+      return {
+        status: false,
+        message: "No customer found.",
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0, search },
+      };
     }
   } catch (error) {
     return {
@@ -829,77 +951,131 @@ const getByAllCustomer = async (dashboard) => {
 
 const getByAllJob = async (dashboard) => {
   try {
-    const { staff_id, ids } = dashboard;
+    let { staff_id, ids, page, limit, search } = dashboard;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
     const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    const query =
+
+    const jobCodeExpr = `
+      CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      )
+    `;
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      searchCondition = `
+        AND (
+          clients.trading_name LIKE ?
+          OR customers.trading_name LIKE ?
+          OR job_types.type LIKE ?
+          OR jobs.client_job_code LIKE ?
+          OR ${jobCodeExpr} LIKE ?
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+      ];
+    }
+
+    const [countResult] = await pool.execute(
       `
-                   SELECT 
-                   jobs.id AS job_id,
-                   job_types.type AS job_type_name,
-                   jobs.status_type AS status_type,
-                   customer_contact_details.id AS account_manager_officer_id,
-                   customer_contact_details.first_name AS account_manager_officer_first_name,
-                   customer_contact_details.last_name AS account_manager_officer_last_name,
-                   clients.trading_name AS client_trading_name,
-                   jobs.client_job_code AS client_job_code,
-                   jobs.invoiced AS invoiced,
-                   jobs.total_hours AS total_hours,
-                   jobs.total_hours_status AS total_hours_status,
-                  jobs.job_priority AS job_priority,
-                   staffs.id AS allocated_id,
-                   staffs.first_name AS allocated_first_name,
-                   staffs.last_name AS allocated_last_name,
-                 
-                   staffs2.id AS reviewer_id,
-                   staffs2.first_name AS reviewer_first_name,
-                   staffs2.last_name AS reviewer_last_name,
-                 
-                   staffs3.id AS outbooks_acount_manager_id,
-                   staffs3.first_name AS outbooks_acount_manager_first_name,
-                   staffs3.last_name AS outbooks_acount_manager_last_name,
-                   CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+      SELECT COUNT(DISTINCT jobs.id) AS total
+      FROM jobs
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      WHERE jobs.id IN (${cleane_ids})
+      ${searchCondition}
+      `,
+      [...searchParams],
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        jobs.id AS job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        jobs.job_priority AS job_priority,
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-                   master_status.name AS status,
-                   CONCAT(
-                             SUBSTRING(customers.trading_name, 1, 3), '_',
-                             SUBSTRING(clients.trading_name, 1, 3), '_',
-                              SUBSTRING(job_types.type, 1, 4), '_',
-                             SUBSTRING(jobs.job_id, 1, 15)
-                             ) AS job_code_id
-                 
-                   FROM 
-                   jobs
-                   LEFT JOIN 
-                   customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-                   LEFT JOIN 
-                   clients ON jobs.client_id = clients.id
-                   LEFT JOIN 
-                   customers ON jobs.customer_id = customers.id
-                   LEFT JOIN 
-                   job_types ON jobs.job_type_id = job_types.id
-                   LEFT JOIN 
-                   services ON jobs.service_id = services.id
-                   LEFT JOIN 
-                   staffs ON jobs.allocated_to = staffs.id
-                   LEFT JOIN 
-                   staffs AS staffs2 ON jobs.reviewer = staffs2.id
-                   LEFT JOIN 
-                   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-                   LEFT JOIN 
-                   staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-                   LEFT JOIN
-                   master_status ON master_status.id = jobs.status_type
-                   WHERE jobs.id IN (` +
-      cleane_ids +
-      `) 
-                   ORDER BY
-                   jobs.id DESC
-                   `;
-    const [result] = await pool.execute(query);
+        master_status.name AS status,
+        ${jobCodeExpr} AS job_code_id
+      FROM jobs
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN services ON jobs.service_id = services.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      WHERE jobs.id IN (${cleane_ids})
+      ${searchCondition}
+      ORDER BY jobs.id DESC
+      LIMIT ? OFFSET ?;
+    `;
+
+    const [result] = await pool.execute(query, [
+      ...searchParams,
+      limit,
+      offset,
+    ]);
+
     if (result.length > 0) {
-      return { status: true, message: "success.", data: result };
+      return {
+        status: true,
+        message: "success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
     } else {
-      return { status: false, message: "No customer found.", data: [] };
+      return {
+        status: false,
+        message: "No customer found.",
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0, search },
+      };
     }
   } catch (error) {
     return {
@@ -912,77 +1088,131 @@ const getByAllJob = async (dashboard) => {
 
 const getByAllCompletedJob = async (dashboard) => {
   try {
-    const { staff_id, ids } = dashboard;
+    let { staff_id, ids, page, limit, search } = dashboard;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
     const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    const query =
+
+    const jobCodeExpr = `
+      CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      )
+    `;
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      searchCondition = `
+        AND (
+          clients.trading_name LIKE ?
+          OR customers.trading_name LIKE ?
+          OR job_types.type LIKE ?
+          OR jobs.client_job_code LIKE ?
+          OR ${jobCodeExpr} LIKE ?
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+      ];
+    }
+
+    const [countResult] = await pool.execute(
       `
-                   SELECT 
-                   jobs.id AS job_id,
-                   job_types.type AS job_type_name,
-                   jobs.status_type AS status_type,
-                   customer_contact_details.id AS account_manager_officer_id,
-                   customer_contact_details.first_name AS account_manager_officer_first_name,
-                   customer_contact_details.last_name AS account_manager_officer_last_name,
-                   clients.trading_name AS client_trading_name,
-                   jobs.client_job_code AS client_job_code,
-                   jobs.invoiced AS invoiced,
-                   jobs.total_hours AS total_hours,
-                   jobs.total_hours_status AS total_hours_status,
-                  jobs.job_priority AS job_priority,
-                   staffs.id AS allocated_id,
-                   staffs.first_name AS allocated_first_name,
-                   staffs.last_name AS allocated_last_name,
-                 
-                   staffs2.id AS reviewer_id,
-                   staffs2.first_name AS reviewer_first_name,
-                   staffs2.last_name AS reviewer_last_name,
-                 
-                   staffs3.id AS outbooks_acount_manager_id,
-                   staffs3.first_name AS outbooks_acount_manager_first_name,
-                   staffs3.last_name AS outbooks_acount_manager_last_name,
-                   CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+      SELECT COUNT(DISTINCT jobs.id) AS total
+      FROM jobs
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      WHERE jobs.id IN (${cleane_ids})
+      ${searchCondition}
+      `,
+      [...searchParams],
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        jobs.id AS job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        jobs.job_priority AS job_priority,
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-                   master_status.name AS status,
-                   CONCAT(
-                             SUBSTRING(customers.trading_name, 1, 3), '_',
-                             SUBSTRING(clients.trading_name, 1, 3), '_',
-                              SUBSTRING(job_types.type, 1, 4), '_',
-                             SUBSTRING(jobs.job_id, 1, 15)
-                             ) AS job_code_id
-                 
-                   FROM 
-                   jobs
-                   LEFT JOIN 
-                   customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-                   LEFT JOIN 
-                   clients ON jobs.client_id = clients.id
-                   LEFT JOIN 
-                   customers ON jobs.customer_id = customers.id
-                   LEFT JOIN 
-                   job_types ON jobs.job_type_id = job_types.id
-                   LEFT JOIN 
-                   services ON jobs.service_id = services.id
-                   LEFT JOIN 
-                   staffs ON jobs.allocated_to = staffs.id
-                   LEFT JOIN 
-                   staffs AS staffs2 ON jobs.reviewer = staffs2.id
-                   LEFT JOIN 
-                   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-                   LEFT JOIN 
-                   staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-                   LEFT JOIN
-                   master_status ON master_status.id = jobs.status_type
-                   WHERE jobs.id IN (` +
-      cleane_ids +
-      `) 
-                   ORDER BY
-                   jobs.id DESC
-                   `;
-    const [result] = await pool.execute(query);
+        master_status.name AS status,
+        ${jobCodeExpr} AS job_code_id
+      FROM jobs
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN services ON jobs.service_id = services.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      WHERE jobs.id IN (${cleane_ids})
+      ${searchCondition}
+      ORDER BY jobs.id DESC
+      LIMIT ? OFFSET ?;
+    `;
+
+    const [result] = await pool.execute(query, [
+      ...searchParams,
+      limit,
+      offset,
+    ]);
+
     if (result.length > 0) {
-      return { status: true, message: "success.", data: result };
+      return {
+        status: true,
+        message: "success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
     } else {
-      return { status: false, message: "No customer found.", data: [] };
+      return {
+        status: false,
+        message: "No customer found.",
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0, search },
+      };
     }
   } catch (error) {
     return {
@@ -995,77 +1225,131 @@ const getByAllCompletedJob = async (dashboard) => {
 
 const getByAllPendingJob = async (dashboard) => {
   try {
-    const { staff_id, ids } = dashboard;
+    let { staff_id, ids, page, limit, search } = dashboard;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
     const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    const query =
+
+    const jobCodeExpr = `
+      CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      )
+    `;
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      searchCondition = `
+        AND (
+          clients.trading_name LIKE ?
+          OR customers.trading_name LIKE ?
+          OR job_types.type LIKE ?
+          OR jobs.client_job_code LIKE ?
+          OR ${jobCodeExpr} LIKE ?
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+      ];
+    }
+
+    const [countResult] = await pool.execute(
       `
-                   SELECT 
-                   jobs.id AS job_id,
-                   job_types.type AS job_type_name,
-                   jobs.status_type AS status_type,
-                   customer_contact_details.id AS account_manager_officer_id,
-                   customer_contact_details.first_name AS account_manager_officer_first_name,
-                   customer_contact_details.last_name AS account_manager_officer_last_name,
-                   clients.trading_name AS client_trading_name,
-                   jobs.client_job_code AS client_job_code,
-                   jobs.invoiced AS invoiced,
-                   jobs.total_hours AS total_hours,
-                   jobs.total_hours_status AS total_hours_status,
-                 jobs.job_priority AS job_priority,
-                   staffs.id AS allocated_id,
-                   staffs.first_name AS allocated_first_name,
-                   staffs.last_name AS allocated_last_name,
-                 
-                   staffs2.id AS reviewer_id,
-                   staffs2.first_name AS reviewer_first_name,
-                   staffs2.last_name AS reviewer_last_name,
-                 
-                   staffs3.id AS outbooks_acount_manager_id,
-                   staffs3.first_name AS outbooks_acount_manager_first_name,
-                   staffs3.last_name AS outbooks_acount_manager_last_name,
-                  CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+      SELECT COUNT(DISTINCT jobs.id) AS total
+      FROM jobs
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      WHERE jobs.id IN (${cleane_ids})
+      ${searchCondition}
+      `,
+      [...searchParams],
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        jobs.id AS job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        jobs.job_priority AS job_priority,
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-                   master_status.name AS status,
-                   CONCAT(
-                             SUBSTRING(customers.trading_name, 1, 3), '_',
-                             SUBSTRING(clients.trading_name, 1, 3), '_',
-                              SUBSTRING(job_types.type, 1, 4), '_',
-                             SUBSTRING(jobs.job_id, 1, 15)
-                             ) AS job_code_id
-                 
-                   FROM 
-                   jobs
-                   LEFT JOIN 
-                   customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-                   LEFT JOIN 
-                   clients ON jobs.client_id = clients.id
-                   LEFT JOIN 
-                   customers ON jobs.customer_id = customers.id
-                   LEFT JOIN 
-                   job_types ON jobs.job_type_id = job_types.id
-                   LEFT JOIN 
-                   services ON jobs.service_id = services.id
-                   LEFT JOIN 
-                   staffs ON jobs.allocated_to = staffs.id
-                   LEFT JOIN 
-                   staffs AS staffs2 ON jobs.reviewer = staffs2.id
-                   LEFT JOIN 
-                   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-                   LEFT JOIN 
-                   staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-                   LEFT JOIN
-                   master_status ON master_status.id = jobs.status_type
-                   WHERE jobs.id IN (` +
-      cleane_ids +
-      `) 
-                   ORDER BY
-                   jobs.id DESC
-                   `;
-    const [result] = await pool.execute(query);
+        master_status.name AS status,
+        ${jobCodeExpr} AS job_code_id
+      FROM jobs
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN services ON jobs.service_id = services.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      WHERE jobs.id IN (${cleane_ids})
+      ${searchCondition}
+      ORDER BY jobs.id DESC
+      LIMIT ? OFFSET ?;
+    `;
+
+    const [result] = await pool.execute(query, [
+      ...searchParams,
+      limit,
+      offset,
+    ]);
+
     if (result.length > 0) {
-      return { status: true, message: "success.", data: result };
+      return {
+        status: true,
+        message: "success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
     } else {
-      return { status: false, message: "No customer found.", data: [] };
+      return {
+        status: false,
+        message: "No customer found.",
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0, search },
+      };
     }
   } catch (error) {
     return {
@@ -1078,35 +1362,100 @@ const getByAllPendingJob = async (dashboard) => {
 
 const getByAllStaff = async (dashboard) => {
   try {
-    const { staff_id, ids } = dashboard;
+    let { staff_id, ids, page, limit, search } = dashboard;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
     const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    const query =
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      searchCondition = `
+        AND (
+          staffs.first_name LIKE ?
+          OR staffs.last_name LIKE ?
+          OR staffs.email LIKE ?
+          OR roles.role_name LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR ? LIKE CONCAT('%', staffs.first_name, ' ', staffs.last_name, '%')
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        search,
+      ];
+    }
+
+    const [countResult] = await pool.execute(
       `
-             SELECT 
-             staffs.id, 
-             staffs.role_id,
-             staffs.first_name,
-             staffs.last_name,
-             staffs.email,
-             staffs.phone_code,
-             staffs.phone,
-             staffs.status,
-             staffs.created_at,
-             staffs.hourminute,
-             roles.role_name,
-             roles.role 
-             FROM staffs 
-             JOIN roles ON staffs.role_id = roles.id
-             WHERE staffs.id IN (` +
-      cleane_ids +
-      `)
-             ORDER BY staffs.id DESC
-                   `;
-    const [result] = await pool.execute(query);
+      SELECT COUNT(DISTINCT staffs.id) AS total
+      FROM staffs
+      JOIN roles ON staffs.role_id = roles.id
+      WHERE staffs.id IN (${cleane_ids})
+      ${searchCondition}
+      `,
+      [...searchParams],
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        staffs.id, 
+        staffs.role_id,
+        staffs.first_name,
+        staffs.last_name,
+        staffs.email,
+        staffs.phone_code,
+        staffs.phone,
+        staffs.status,
+        staffs.created_at,
+        staffs.hourminute,
+        roles.role_name,
+        roles.role 
+      FROM staffs 
+      JOIN roles ON staffs.role_id = roles.id
+      WHERE staffs.id IN (${cleane_ids})
+      ${searchCondition}
+      ORDER BY staffs.id DESC
+      LIMIT ? OFFSET ?;
+    `;
+
+    const [result] = await pool.execute(query, [
+      ...searchParams,
+      limit,
+      offset,
+    ]);
+
     if (result.length > 0) {
-      return { status: true, message: "success.", data: result };
+      return {
+        status: true,
+        message: "success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
     } else {
-      return { status: false, message: "No customer found.", data: [] };
+      return {
+        status: false,
+        message: "No customer found.",
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0, search },
+      };
     }
   } catch (error) {
     return {

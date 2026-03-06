@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useRef} from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { linkedData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import { useDispatch } from "react-redux";
@@ -11,6 +11,7 @@ import {
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import ReactPaginate from "react-paginate";
 
 const JobStatus = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,39 @@ const JobStatus = () => {
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+const debounceRef = useRef(null);
+
+  const handlePageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    GetLinkedData(newPage, pageSize, "");
+  };
+
+  const handlePageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    GetLinkedData(1, newSize, "");
+  };
+
+ const handleSearchChange = (term) => {
+  setSearchTerm(term);
+  setCurrentPage(1);
+
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+  }
+
+  debounceRef.current = setTimeout(() => {
+    GetLinkedData(1, pageSize, term);
+  }, 500); 
+};
 
   const [hararchyData, setHararchyData] = useState({
     customer: {},
@@ -128,6 +162,7 @@ const JobStatus = () => {
   console.log("getAccessData", getAccessData);
 
   const GetStatus = async () => {
+    setLoading(true);
     const data = { req: { action: "get" }, authToken: token };
     await dispatch(MasterStatusData(data))
       .unwrap()
@@ -140,15 +175,22 @@ const JobStatus = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
-  const GetLinkedData = async () => {
+  const GetLinkedData = async (page = 1, limit = 10, term) => {
+    setLoading(true);
     const data = {
       req: {
         staff_id: location?.state?.req?.staff_id,
         key: location?.state?.req?.key,
         ids: location?.state?.req?.ids,
+        page,
+        limit,
+        search: term,
       },
       authToken: token,
     };
@@ -157,12 +199,16 @@ const JobStatus = () => {
       .then((res) => {
         if (res.status) {
           setAllLinkedData(res.data);
+          setTotalRecords(res.pagination.total);
         } else {
           setAllLinkedData([]);
         }
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -675,7 +721,7 @@ const JobStatus = () => {
     //   selector: (row) => row.client_name || "-",
     //   sortable: true,
     // },
-  {
+    {
       name: "Client Name",
       cell: (row) => (
         <div>
@@ -704,7 +750,7 @@ const JobStatus = () => {
       selector: (row) => row.client_code || "-",
       sortable: true,
     },
-     {
+    {
       name: "Customer Name",
       cell: (row) => (
         <div title={row.customer_name || "-"}>{row.customer_name || "-"}</div>
@@ -725,7 +771,7 @@ const JobStatus = () => {
       sortable: true,
       width: "150px",
     },
-     {
+    {
       name: "Created By",
       cell: (row) => (
         <div title={row.client_created_by || "-"}>
@@ -845,7 +891,6 @@ const JobStatus = () => {
       return updatedData;
     });
   };
-  
 
   console.log("allLinkedData", allLinkedData);
   console.log("location", location?.state?.req?.key);
@@ -970,8 +1015,7 @@ const JobStatus = () => {
     }
   };
 
-
-   const HandleClientProfileView = (row) => {
+  const HandleClientProfileView = (row) => {
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
@@ -987,37 +1031,33 @@ const JobStatus = () => {
   return (
     <div>
       <div className="report-data mt-5">
-        <div className="row ">
+        <div className="row">
           <div className="col-md-12">
             <div className="">
-              <div className=" row mb-5">
-                <div className="tab-title col-lg-6 ">
+              <div className="row mb-5">
+                <div className="tab-title col-lg-6">
                   <h3>{location?.state?.req?.heading}</h3>
                 </div>
-                <div className="col-lg-6  d-flex justify-content-end">
+                <div className="col-lg-6 d-flex justify-content-end">
                   <div
                     className="btn btn-info text-white blue-btn"
-                    onClick={() => {
-                      window.history.back();
-                    }}
+                    onClick={() => window.history.back()}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
 
                   {(role === "SUPERADMIN" ||
                     (getAccessData.insert === 1 && getAccessData.view === 1)) &&
-                  location?.state?.req?.heading == "Customers" ? (
-                    <div className="ms-2">
-                      <Link
-                        to="/admin/addcustomer"
-                        className="btn btn-outline-info  fw-bold float-end border-3"
-                      >
-                        <i className="fa fa-plus" /> Add Customer
-                      </Link>
-                    </div>
-                  ) : (
-                    ""
-                  )}
+                    location?.state?.req?.heading == "Customers" && (
+                      <div className="ms-2">
+                        <Link
+                          to="/admin/addcustomer"
+                          className="btn btn-outline-info fw-bold float-end border-3"
+                        >
+                          <i className="fa fa-plus" /> Add Customer
+                        </Link>
+                      </div>
+                    )}
 
                   {allLinkedData && allLinkedData.length > 0 && (
                     <div className="ms-2">
@@ -1032,13 +1072,35 @@ const JobStatus = () => {
                   )}
                 </div>
               </div>
+
+              {/* Search Row */}
+              <div className="row mb-4">
+                <div className="col-md-4">
+                  <input
+                    type="text"
+                    placeholder={`Search ${location?.state?.req?.heading || ""}`}
+                    className="form-control"
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
+
         <div className="datatable-wrapper mt-minus">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
+
           {role === "SUPERADMIN" ? (
             <Datatable
-              filter={true}
+              filter={false}
+              pagination={false}
               columns={
                 location?.state?.req?.key === "client"
                   ? ClientListColumns
@@ -1052,21 +1114,21 @@ const JobStatus = () => {
             />
           ) : (
             <>
-              {(getAccessData.view === 1 ||
-                getAccessData.all_customers === 1) &&
+              {(getAccessData.view === 1 || getAccessData.all_customers === 1) &&
                 location?.state?.req?.key === "customer" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={columnsCustomer}
                     data={allLinkedData || []}
                   />
                 )}
 
-              {(getAccessData.client === 1 ||
-                getAccessData.all_clients === 1) &&
+              {(getAccessData.client === 1 || getAccessData.all_clients === 1) &&
                 location?.state?.req?.key === "client" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={ClientListColumns}
                     data={allLinkedData || []}
                   />
@@ -1075,7 +1137,8 @@ const JobStatus = () => {
               {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
                 location?.state?.req?.key === "job" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
@@ -1084,7 +1147,8 @@ const JobStatus = () => {
               {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
                 location?.state?.req?.key === "pending_job" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
@@ -1093,7 +1157,8 @@ const JobStatus = () => {
               {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
                 location?.state?.req?.key === "completed_job" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
@@ -1102,13 +1167,40 @@ const JobStatus = () => {
               {getAccessData.staff === 1 &&
                 location?.state?.req?.key === "staff" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={columnsStaff}
                     data={allLinkedData || []}
                   />
                 )}
             </>
           )}
+
+          {/* Pagination */}
+          <ReactPaginate
+            previousLabel={"Previous"}
+            nextLabel={"Next"}
+            breakLabel={"..."}
+            pageCount={Math.ceil(totalRecords / pageSize)}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageChange}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+          />
+
+          <select
+            className="perpage-select"
+            value={pageSize}
+            onChange={handlePageSizeChange}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={500}>500</option>
+          </select>
         </div>
       </div>
     </div>
