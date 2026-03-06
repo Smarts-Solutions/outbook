@@ -95,7 +95,6 @@ const Timesheet = () => {
     });
   }, [weekOffset]);
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
@@ -822,6 +821,10 @@ const Timesheet = () => {
   };
 
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
+    if (checkDuplicateRow(item, index, e.target.name)) {
+      return;
+    }
+
     let value = e.target.value;
     let name = e.target.name;
 
@@ -1723,34 +1726,102 @@ const Timesheet = () => {
   ];
 
 
-  const checkDuplicateRow = (item, index) => {
-    console.log("item", item, index, timeSheetRows)
+  const checkDuplicateRow = (item, index, fieldName) => {
 
-    // Check item some  column match or alredy exist in timeSheetRows 
-    const isDuplicate = timeSheetRows.some((row) => {
-      return (
+    const seen = new Set();
+    let firstDuplicateIndex = -1;
+
+    const filteredRows = timeSheetRows.filter((row, i) => {
+      const key =
+        row.customer_id +
+        "_" +
+        row.client_id +
+        "_" +
+        row.job_id +
+        "_" +
+        row.task_id +
+        "_" +
+        row.task_type;
+
+      if (seen.has(key)) {
+        if (firstDuplicateIndex === -1) {
+          firstDuplicateIndex = i;
+        }
+        return false; // remove duplicate
+      }
+
+      seen.add(key);
+      return true;
+    });
+
+    if (filteredRows.length !== timeSheetRows.length) {
+
+      const existingRow = filteredRows.find((row) =>
         row.customer_id === item.customer_id &&
         row.client_id === item.client_id &&
         row.job_id === item.job_id &&
         row.task_id === item.task_id &&
         row.task_type === item.task_type
       );
-    });
 
-    if (isDuplicate) {
-      //  If find duplicat then navigate show popup or remove current row from timeSheetRows
-      setTimeSheetRows((prev) => prev.filter((_, i) => i !== index));
+      const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+      let focusFieldName = "monday_hours";
+      let focusDay = "monday";
+
+      if (existingRow) {
+        for (const day of days) {
+          const hKey = day + "_hours";
+          const val = existingRow[hKey];
+
+          if (val === "0" || val === 0 || val === "" || val === null || val === undefined) {
+            focusFieldName = hKey;
+            focusDay = day;
+            break;
+          }
+        }
+      }
+
+      setTimeSheetRows(filteredRows);
+
       sweatalert.fire({
         icon: "error",
         title: "Duplicate Row Found",
-        text: "Please remove the duplicate row",
+        text: "Duplicate rows removed. Redirecting to existing row.",
       }).then(() => {
-        // redirect same dupilcate row on week dat input field 
-        setActiveIndex(index);
-      })
+
+        if (focusDay !== "monday") {
+          setIsExpanded(true);
+        }
+
+        setTimeout(() => {
+
+          const targetIndex = filteredRows.findIndex((row) =>
+            row.customer_id === item.customer_id &&
+            row.client_id === item.client_id &&
+            row.job_id === item.job_id &&
+            row.task_id === item.task_id &&
+            row.task_type === item.task_type
+          );
+
+          const inputs = document.getElementsByName(focusFieldName);
+
+          if (inputs[targetIndex]) {
+            inputs[targetIndex].focus();
+            setActiveIndex(targetIndex);
+            setActiveField(focusDay);
+          }
+
+        }, 300);
+      });
+
+      return true;
     }
 
-  }
+    return false;
+  };
+
+
 
 
   return (
@@ -2445,7 +2516,6 @@ const Timesheet = () => {
                                             style={{ width: "80px" }}
                                             name="monday_hours"
                                             onChange={(e) => {
-                                              checkDuplicateRow(item, index)
                                               handleHoursInput(
                                                 e,
                                                 index,
@@ -2763,7 +2833,7 @@ const Timesheet = () => {
                                           style={{ width: "80px" }}
                                           name="monday_hours"
                                           onChange={(e) => {
-                                            checkDuplicateRow(item, index)
+
 
                                             handleHoursInput(
                                               e,
@@ -2888,7 +2958,7 @@ const Timesheet = () => {
                                 className="dropdwnCol5"
                                 data-field="phone"
                               ></th>
-                              <th className="pe-0 week-data">
+                              {/* <th className="pe-0 week-data">
                                 <div className="d-flex  ms-3">
                                   <input
                                     className="form-control cursor-pointer border-radius-end"
@@ -2901,8 +2971,8 @@ const Timesheet = () => {
                                       width: 80,
                                       border: "1px solid #00afef",
                                     }}
-                                  />
-                                  {isExpanded && (
+                                  /> */}
+                              {/* {isExpanded && (
                                     <div className="d-flex  ms-3">
                                       <input
                                         className="form-control cursor-pointer ms-2"
@@ -2975,9 +3045,9 @@ const Timesheet = () => {
                                         }}
                                       />
                                     </div>
-                                  )}
-                                </div>
-                              </th>
+                                  )} */}
+                              {/* </div> */}
+                              {/* </th> */}
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
