@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
@@ -36,6 +36,7 @@ const ClientList = () => {
   const [loading, setLoading] = useState(false);
 
   const [jobLoading, setJobLoading] = useState(false);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     GetAllJobListByCustomer("");
@@ -696,11 +697,17 @@ const ClientList = () => {
     setSearchTerm(value);
     setCurrentPage(1);
 
-    if (clientDetailSingle.id) {
-      GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
-    } else {
-      GetAllJobListByCustomer(customerDetails.id, 1, pageSize, value);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
+
+    debounceRef.current = setTimeout(() => {
+      if (clientDetailSingle.id) {
+        GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
+      } else {
+        GetAllJobListByCustomer(customerDetails.id, 1, pageSize, value);
+      }
+    }, 500);
   };
 
   const handleCreateJob = (row) => {
@@ -1286,7 +1293,7 @@ const ClientList = () => {
                               <b className="">VAT Number :</b>{" "}
                               {informationData.vat_number || "NA"}
                             </li>
-                          </ul> 
+                          </ul>
                         </div>
                       </div>
                     </div>

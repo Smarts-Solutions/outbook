@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Staff, Competency } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { Role } from "../../../ReduxStore/Slice/Settings/settingSlice";
@@ -51,6 +51,7 @@ const StaffPage = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const debounceRef = useRef(null);
 
   const dispatch = useDispatch();
   const [addStaff, setAddStaff] = useState(false);
@@ -74,7 +75,10 @@ const StaffPage = () => {
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
 
-  const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+  const [staffDataAllRecords, setStaffDataAllRecords] = useState({
+    loading: true,
+    data: [],
+  });
 
   console.log("staffDataAll --- ", staffDataAll);
 
@@ -96,10 +100,12 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setStaffDataAllRecords({ loading: false, data: response?.data?.data });
+          setStaffDataAllRecords({
+            loading: false,
+            data: response?.data?.data,
+          });
         } else {
           setStaffDataAllRecords({ loading: false, data: [] });
-
         }
       })
       .catch((error) => {
@@ -132,7 +138,14 @@ const StaffPage = () => {
   const handleSearchChange = (term) => {
     setSearchTerm(term);
     setCurrentPage(1);
-    staffData(1, pageSize, term);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      staffData(1, pageSize, term);
+    }, 500);
   };
 
   const staffData = async (page = 1, limit = 10, search = "") => {
@@ -444,8 +457,9 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -462,23 +476,23 @@ const StaffPage = () => {
             <div className="px-2">
               {showStaffDeleteTab == true
                 ? row?.is_disable == 0 &&
-                (row.is_customer_exist == 1 ? (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => setDeleteStaff(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ) : (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => handleDeleteIsNotExistCustomer(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ))
+                  (row.is_customer_exist == 1 ? (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => setDeleteStaff(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ) : (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => handleDeleteIsNotExistCustomer(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ))
                 : ""}
             </div>
 
@@ -644,8 +658,9 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -800,7 +815,7 @@ const StaffPage = () => {
           (data) =>
             data.role !== "ADMIN" &&
             data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id
+            data.id !== editStaffData.id,
         )
         .map((data) => {
           if (formik.values.staff_to == data.id) {
@@ -1202,8 +1217,9 @@ const StaffPage = () => {
           {tabs?.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
             >

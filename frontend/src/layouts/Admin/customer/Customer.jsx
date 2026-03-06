@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
@@ -37,6 +37,7 @@ const Customer = () => {
   });
 
   const [loading, setLoading] = useState(false);
+const debounceRef = useRef(null);
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -427,11 +428,17 @@ const Customer = () => {
   };
 
   const handleSearchChange = (term) => {
-    console.log("term ", term);
-    setSearchTerm(term);
-    setCurrentPage(1);
+  setSearchTerm(term);
+  setCurrentPage(1);
+
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+  }
+
+  debounceRef.current = setTimeout(() => {
     GetAllCustomerData(1, pageSize, term);
-  };
+  }, 500); 
+};
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
     setLoading(true);
