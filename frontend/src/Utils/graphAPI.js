@@ -33,7 +33,6 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
           },
         });
 
-        console.log("Folder Response:", folderResponse.data);
 
         // const folder_ID = folderResponse.data.value.find(
         //   (item) => item.name === "jobsdocument"
@@ -108,7 +107,7 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
 
     const itemId = response.data.id;
     const publicUrl = await generateShareableLink(drive_ID, itemId, accessToken);
-    console.log("File uploaded successfully publicUrl:", publicUrl);
+ 
     return publicUrl
     return { webUrl: response.data.webUrl, publicUrl };
   } catch (err) {
@@ -133,7 +132,6 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
 //       },
 //     });
 
-//     console.log("Shareable link generated:", response.data);
 //     return response.data?.link?.webUrl;
 //   } catch (err) {
 //     console.error("Error generating shareable link:", err);

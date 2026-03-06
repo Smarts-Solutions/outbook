@@ -393,7 +393,7 @@ const CreateCheckList = () => {
               <div className="col-lg-4 ">
                 <div className="row">
                   <div className="col-lg-12">
-                    <label className="form-label">Select Client Type</label>
+                    <label className="form-label">Client Type</label>
                     <DropdownMultiselect
                       options={options}
                       name="client_type_id"

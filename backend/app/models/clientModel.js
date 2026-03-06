@@ -1053,23 +1053,25 @@ async function getAllClientsSidebar(
   }
 }
 
-const getClientFilter = async (client) => {
+const get_clients_filter = async (client) => {
   //  console.log("getClient client", client);
   let { StaffUserId, filters } = client;
   let { job_id , customer_id} = filters;
 
-  console.log("getClientFilter job_id", job_id);
- // console.log(" -- client --", client);
-  console.log("getClientFilter customer_id", customer_id);
+ // console.log("get_clients_filter job_id", job_id);
+ // console.log("get_clients_filter customer_id", customer_id);
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
-  //console.log("getClientFilter filters", filters?.customer_id);
+  //console.log("get_clients_filter filters", filters?.customer_id);
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
 
-  if (customer_id.length === 0 && job_id.length > 0) {
+  if (customer_id == undefined && job_id == undefined) {
+    return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows);
+  }
+  else if (customer_id.length === 0 && job_id.length > 0) {
     return await getAllClientByJobIdFilter(
       StaffUserId,
       rows,
@@ -1077,8 +1079,6 @@ const getClientFilter = async (client) => {
       LineManageStaffId
     );
   }
-
-
   else if (customer_id.length > 0 && job_id.length === 0) {
     return await getAllClientByCustomerIdFilter(
       StaffUserId,
@@ -1087,8 +1087,6 @@ const getClientFilter = async (client) => {
       LineManageStaffId
     );
   }
-
-
   else if (customer_id.length > 0 && job_id.length > 0) {
     return await getAllClientByCustomerIdAndJobIdFilter(
       StaffUserId,
@@ -1098,15 +1096,115 @@ const getClientFilter = async (client) => {
       LineManageStaffId
     );
   }
-
+  
   else {
-     return { status: true, message: "success.", data: [] }; 
+      return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows);
+     
   }
 
- 
-
-
 };
+
+async function getAllClientsSidebarFilter(
+  StaffUserId,
+  LineManageStaffId,
+  rows,
+) {
+ 
+  try {
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 34]
+    );
+
+    // ================= ADMIN / SUPERADMIN =================
+    if (rows.length > 0 &&(rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
+      
+      const [data] = await pool.execute(
+        `
+        SELECT  
+          clients.id AS id,
+          clients.trading_name AS client_name,
+          customers.trading_name AS customer_name,
+          clients.status AS status,
+          client_types.type AS client_type_name,
+          jobs.id AS Delete_Status,
+          CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+          DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+          DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+          CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+          ) AS client_code
+        FROM clients
+        JOIN staffs ON clients.staff_created_id = staffs.id
+        JOIN customers ON customers.id = clients.customer_id    
+        JOIN client_types ON client_types.id = clients.client_type
+        LEFT JOIN jobs ON clients.id = jobs.client_id
+        WHERE 1=1
+        GROUP BY clients.id
+        ORDER BY clients.trading_name ASC
+        `
+      );
+
+      return {
+        status: true,
+        message: "success",
+        data,
+      };
+    }
+  } catch (err) {
+    console.error("❌ Sidebar Client Error:", err);
+    return { status: false, message: "Err Client Get" };
+  }
+
+  // ================= OTHER ROLES =================
+  try {
+    
+    const [data] = await pool.execute(
+      `
+      SELECT  
+        clients.id AS id,
+        clients.trading_name AS client_name,
+        customers.trading_name AS customer_name,
+        clients.status AS status,
+        client_types.type AS client_type_name,
+        jobs.id AS Delete_Status,
+        CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+        DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+        CONCAT(
+          'cli_', 
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(clients.client_code, 1, 15)
+        ) AS client_code
+      FROM clients
+      JOIN staffs ON clients.staff_created_id = staffs.id
+      JOIN customers ON customers.id = clients.customer_id    
+      JOIN client_types ON client_types.id = clients.client_type
+      LEFT JOIN jobs ON clients.id = jobs.client_id
+      LEFT JOIN assigned_jobs_staff_view 
+        ON assigned_jobs_staff_view.client_id = clients.id
+        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      WHERE 
+        (clients.staff_created_id IN (${LineManageStaffId})
+        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+      GROUP BY clients.id
+      ORDER BY clients.trading_name ASC
+      `,
+    );
+
+    return {
+      status: true,
+      message: "success",
+      data,
+    };
+  } catch (err) {
+    return { status: false, message: "Error in sidebar pagination" };
+  }
+}
 
 
 async function getAllClientByJobIdFilter(
@@ -3881,5 +3979,5 @@ module.exports = {
   clientUpdate,
   addClientDocument,
   deleteClientFile,
-  getClientFilter,
+  get_clients_filter,
 };

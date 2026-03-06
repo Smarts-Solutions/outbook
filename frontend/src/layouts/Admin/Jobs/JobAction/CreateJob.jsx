@@ -369,7 +369,6 @@ const CreateJob = () => {
           if (response.status) {
             if (response.data.length > 0) {
 
-              console.log("response.data", response.data)
               setAllChecklistData({
                 loading: true,
                 data: response.data,

@@ -322,7 +322,7 @@ const ClientLists = () => {
       reorder: false,
     },
 
-     {
+    {
       name: "Created By",
       cell: (row) => (
         <div title={row.client_created_by || "-"}>{row.client_created_by || "-"}</div>
@@ -585,7 +585,7 @@ const ClientLists = () => {
       reorder: false,
     },
 
-     {
+    {
       name: "Created By",
       cell: (row) => (
         <div title={row.job_created_by || "-"}>
@@ -596,7 +596,7 @@ const ClientLists = () => {
       sortable: true,
     },
 
-     {
+    {
       name: "Created At",
       cell: (row) => (
         <div title={row.created_at || "-"}>
@@ -1110,36 +1110,8 @@ const ClientLists = () => {
         <div className="row ">
           <div className="col-sm-12">
             <div className="form-group col-md-4 mb-0">
-              <label className="form-label mb-2">Select Customer</label>
-                      {/* <select
-                name="staff_id"
-                className="form-select"
-                id="tabSelect"
-                defaultValue={customerId}
-                // onChange={(e) => selectCustomerId(e)}
-                onChange={(e) => {
-                  const selectedId = e.target.value;
-                  const selectedCustomer = CustomerData.find(
-                    (customer) => customer.id == selectedId
-                  );
-                  selectCustomerId(selectedId, selectedCustomer?.trading_name);
-                }}
-              >
-                <option value="">Select Customer</option>
-                {CustomerData &&
-                  CustomerData.map((val, index) =>
-                    Number(val.status) === 1 &&
-                    Number(val.form_process) === 4 ? (
-                      <option
-                        key={index}
-                        value={val.id}
-                        selected={Number(customerId) === Number(val.id)}
-                      >
-                        {val.trading_name}
-                      </option>
-                    ) : null
-                  )}
-              </select> */}
+              <label className="form-label mb-2">Customer</label>
+
               <Select
                 id="tabSelect"
                 name="staff_id"

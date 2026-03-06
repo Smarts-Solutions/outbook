@@ -160,7 +160,6 @@ const Dashboard = () => {
     
     axios.request(config)
     .then((response) => {
-      console.log("response - ",response);
     })
     .catch((error) => {
       console.log(error);

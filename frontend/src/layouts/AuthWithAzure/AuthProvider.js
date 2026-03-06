@@ -59,7 +59,6 @@ export const azureLogin = async () => {
     try {
         const accounts = pca.getAllAccounts();
 
-       console.log(" azureLogin Accounts:", accounts);
 
         // If user is already signed in, try silent token acquisition
         if (accounts.length > 0) {

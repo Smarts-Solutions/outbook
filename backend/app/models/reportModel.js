@@ -3392,7 +3392,6 @@ const getStaffWithRole = async (Report) => {
 
 const getAllService = async (Report) => {
     let { data } = Report;
-
     let job_id = data?.filters?.job_id;
 
     if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
@@ -3415,7 +3414,6 @@ const getAllService = async (Report) => {
     if (!Array.isArray(job_id)) {
         job_id = [job_id];
     }
-
 
     const query = `
     SELECT  

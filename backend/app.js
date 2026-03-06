@@ -33,7 +33,6 @@ require("./app/routes")(app);
 
 // app.get('/callback', async (req, res) => {
 
-//   console.log("✅ Callback received with query:", req.query); 
 //  const code = req.query.code;
 //  const client_secret = "peL8Q~lVqVTHX6oWbrS.Hh-XPI9dcgXQV6PJTbWc";
 //  const redirect_url = "https://jobs.outbooks.com/backend/callback";
@@ -62,7 +61,6 @@ require("./app/routes")(app);
 //     });
 
 //     const tokenData = response.data;
-//     console.log("✅ Token Data:", tokenData);
 
 //     res.send(`
 //       <h3>Access Token:</h3><pre>${tokenData.access_token}</pre>
