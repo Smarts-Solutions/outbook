@@ -1063,6 +1063,7 @@ const get_clients_filter = async (client) => {
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
 
   //console.log("get_clients_filter filters", filters?.customer_id);
   // Get Role

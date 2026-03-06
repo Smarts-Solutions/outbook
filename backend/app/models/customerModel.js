@@ -935,6 +935,9 @@ const get_customers_filter = async (customer) => {
 
     // if (!['', null, undefined].includes(filters?.client_id)) {
     const rows = await QueryRoleHelperFunction(StaffUserId)
+    return await getCustomer_dropdown_filter({ StaffUserId, pagination });
+
+
     if (client_id?.length > 0 && job_id?.length === 0) {
         return await getAllCustomerByClientIdFilter(client_id);
     }

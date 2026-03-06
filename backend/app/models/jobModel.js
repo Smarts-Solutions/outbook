@@ -1776,6 +1776,12 @@ const getAllJobsBYCustomerfilter = async (job) => {
 
 const get_jobs_filter = async (job) => {
   const { StaffUserId, filters , pagination } = job;
+
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId);
+   return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows ,pagination);
   
   const { client_id, customer_id } = filters;
   if(client_id === undefined && customer_id === undefined) {
