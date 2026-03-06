@@ -3139,11 +3139,7 @@ const getAllFilters = async (Report) => {
         ${where}
         ORDER BY timesheet_filter.id DESC
         `;
-
         // console.log("Get All Filters Query:", query);
-
-
-
         const [result] = await pool.execute(query, [StaffUserId]);
         return { status: true, message: 'Success.', data: result };
     }

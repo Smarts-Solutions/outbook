@@ -1775,7 +1775,6 @@ const getAllJobsBYCustomerfilter = async (job) => {
 }
 
 const get_jobs_filter = async (job) => {
-  console.log("job get_jobs_filter -", job);
   const { StaffUserId, filters , pagination } = job;
   
   const { client_id, customer_id } = filters;
