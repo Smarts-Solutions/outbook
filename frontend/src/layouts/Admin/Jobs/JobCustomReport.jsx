@@ -226,9 +226,11 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-    GetAllJobs("all");
-    GetAllCustomer("all");
-    GetAllClient("all");
+    GetAllJobs({ searchValue: "", pageNo: 1 });
+    GetAllCustomer({ searchValue: "", pageNo: 1 });
+    GetAllClient({ searchValue: "", pageNo: 1 });
+   
+
     GetAllService("all");
     GetAllJobType("all");
     GetAllStatus("all");
@@ -661,9 +663,7 @@ function JobCustomReport() {
 
   const handleFilterChange = (e, type) => {
 
-    console.log("handleFilterChange", e);
-    console.log("type", type);
-
+   
 
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
@@ -732,52 +732,52 @@ function JobCustomReport() {
         ...filters,
         [key]: value,
       };
-      if (key == "job_id") {
-        if ([null, "", "null", undefined].includes(value)) {
-          GetAllCustomer("all");
-          GetAllClient("all");
-          GetAllService("all");
-          GetAllJobType("all");
-          GetAllStatus("all");
-          staffData(4);
-          staffData(3);
-          staffData(6);
-          staffData("other");
-        } else {
-          GetAllCustomer(newFilters);
-          GetAllClient(newFilters);
-          GetAllService(newFilters);
-          GetAllJobType(newFilters);
-          GetAllStatus(newFilters);
-          staffData(4, newFilters);
-          staffData(3, newFilters);
-          staffData(6, newFilters);
-          staffData("other", newFilters);
-        }
-      } else if (key == "customer_id") {
-        if ([null, "", "null", undefined].includes(value)) {
-          GetAllClient("all");
-          GetAllJobs("all");
-        } else {
-          GetAllClient(newFilters);
-          GetAllJobs(newFilters);
-        }
-      } else if (key == "client_id") {
-        if ([null, "", "null", undefined].includes(value)) {
-          if ([null, "", "null", undefined].includes(filters.job_id)) {
-            GetAllCustomer("all");
-          }
+      // if (key == "job_id") {
+      //   if ([null, "", "null", undefined].includes(value)) {
+      //     GetAllCustomer("all");
+      //     GetAllClient("all");
+      //     GetAllService("all");
+      //     GetAllJobType("all");
+      //     GetAllStatus("all");
+      //     staffData(4);
+      //     staffData(3);
+      //     staffData(6);
+      //     staffData("other");
+      //   } else {
+      //     GetAllCustomer(newFilters);
+      //     GetAllClient(newFilters);
+      //     GetAllService(newFilters);
+      //     GetAllJobType(newFilters);
+      //     GetAllStatus(newFilters);
+      //     staffData(4, newFilters);
+      //     staffData(3, newFilters);
+      //     staffData(6, newFilters);
+      //     staffData("other", newFilters);
+      //   }
+      // } else if (key == "customer_id") {
+      //   if ([null, "", "null", undefined].includes(value)) {
+      //     GetAllClient("all");
+      //     GetAllJobs("all");
+      //   } else {
+      //     GetAllClient(newFilters);
+      //     GetAllJobs(newFilters);
+      //   }
+      // } else if (key == "client_id") {
+      //   if ([null, "", "null", undefined].includes(value)) {
+      //     if ([null, "", "null", undefined].includes(filters.job_id)) {
+      //       GetAllCustomer("all");
+      //     }
 
-          if (![null, "", "null", undefined].includes(filters.customer_id)) {
-            GetAllJobs("all");
-          } else {
-            GetAllJobs(newFilters);
-          }
-        } else {
-          GetAllJobs(newFilters);
-          GetAllCustomer(newFilters);
-        }
-      }
+      //     if (![null, "", "null", undefined].includes(filters.customer_id)) {
+      //       GetAllJobs("all");
+      //     } else {
+      //       GetAllJobs(newFilters);
+      //     }
+      //   } else {
+      //     GetAllJobs(newFilters);
+      //     GetAllCustomer(newFilters);
+      //   }
+      // }
     }
 
   };
@@ -1613,6 +1613,8 @@ function JobCustomReport() {
       });
     }, 500);
   };
+
+  /////////////////---- FOR CLIENT SERACH  END-----//////////////
 
 
 
