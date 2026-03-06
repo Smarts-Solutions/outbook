@@ -1700,8 +1700,6 @@ const Timesheet = () => {
   };
 
 
-  console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
-  console.log("weekOptions ", weekOptions);
 
   const convertDateFormatForCopy = (dateString) => {
     const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
@@ -1778,7 +1776,6 @@ const Timesheet = () => {
   }
 
 
-  //  console.log("timeSheetRows -- > ", timeSheetRows);
 
   // Example usage
   return (

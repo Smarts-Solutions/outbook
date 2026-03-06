@@ -116,7 +116,6 @@ const Paper = () => {
     await dispatch(GET_CUSTOMER_DATA(data1))
       .unwrap()
       .then((response) => {
-        console.log("response", response);
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
           console.log("existingFiles", existingFiles);
@@ -312,7 +311,6 @@ const Paper = () => {
         }
       });
 
-      console.log("response", response);
 
       // Check if the response is OK
       if (!response.ok) {

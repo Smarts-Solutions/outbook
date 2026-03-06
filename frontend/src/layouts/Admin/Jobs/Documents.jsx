@@ -378,7 +378,6 @@ const Documents = ({ getAccessDataJob }) => {
         }
       });
 
-      console.log("response", response);
 
       // Check if the response is OK
       if (!response.ok) {

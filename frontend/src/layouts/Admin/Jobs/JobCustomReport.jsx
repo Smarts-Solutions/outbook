@@ -428,7 +428,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -467,7 +466,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -506,7 +504,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -545,7 +542,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -580,7 +576,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data
                 ?.filter(
                   (item) =>

@@ -25,7 +25,6 @@ const Login = () => {
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
 
- console.log("base_url", base_url);
 
   const handleSubmitLogin = async () => {
     if (Email == "") {
@@ -107,10 +106,7 @@ const Login = () => {
   };
 
   const handleAzureLogin = async () => {
-    console.log("Azure Login");
     const accounts = await azureLogin();
-    console.log("Azure Accounts", accounts);
-//    console.log("Azure Accounts", accounts);
     if (accounts.length > 0) {
       const req = { email: accounts[0].username };
 

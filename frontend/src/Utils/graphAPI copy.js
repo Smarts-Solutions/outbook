@@ -12,12 +12,10 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
     });
 
 
-  //  console.log("Site Response:", response.data);
 
     if (response.data.id) {
       const parts = response.data.id.split(",");
       const site_ID = parts[1];
-      console.log("Site ID:", site_ID);
 
       // Fetch Drive ID
       const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives`;
@@ -28,7 +26,6 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
         },
       });
 
-     // console.log("Drive Response:", driveResponse.data);
 
       if (driveResponse.data.value?.length) {
         const drive_ID = driveResponse.data.value[0].id;
@@ -45,7 +42,6 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
           },
         });
 
-        console.log("Folder Response:", folderResponse.data);
 
         const folder_ID = folderResponse.data.value.find(
           (item) => item.name === "jobsdocument"
@@ -82,7 +78,6 @@ async function getOrCreateFolder(drive_ID, accessToken) {
   );
 
   if (existingFolder) {
-    console.log('Folder already exists:', existingFolder.id);
     return existingFolder.id;
   }
 
@@ -102,7 +97,6 @@ async function getOrCreateFolder(drive_ID, accessToken) {
     },
   });
 
-  console.log('Folder created:', createResponse.data.id);
   return createResponse.data.id;
 }
 
@@ -210,7 +204,7 @@ export const SiteUrlFolderPath = async () => {
   let folderPath = "/OutBook"
   let sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const TokenExpire = await SharePointTokenExpire(sharepoint_token);
-  // console.log("TokenExpire",TokenExpire);
+
   if (TokenExpire) {
     const newSharePointToken = await ActivityLogData();
     if (newSharePointToken == "error") {
@@ -238,7 +232,6 @@ const ActivityLogData = async () => {
     })
     .catch((error) => {
       Token = "error";
-      // console.log(error);
     });
 
   return Token;
@@ -249,10 +242,9 @@ const SharePointTokenExpire = async (token) => {
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Math.floor(Date.now() / 1000);
     if (decodedToken.exp && decodedToken.exp < currentTime) {
-      //console.log("Token Expired");
+      
       return true;
     } else {
-      //console.log("Token Not Expired");
       return false;
     }
   } else {
