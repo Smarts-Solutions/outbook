@@ -43,7 +43,6 @@ const Setting = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log("response.data", response.data);
           setTaskData({ loading: false, data: response.data });
         } else {
           setTaskData({ loading: false, data: [] });

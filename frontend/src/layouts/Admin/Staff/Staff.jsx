@@ -96,7 +96,6 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log("response", response);
           setStaffDataAllRecords({ loading: false, data: response?.data?.data });
         } else {
           setStaffDataAllRecords({ loading: false, data: [] });
@@ -148,7 +147,6 @@ const StaffPage = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log("response", response);
           setStaffDataAll({ loading: false, data: response?.data?.data });
           setTotalRecords(response?.data?.pagination?.total || 0);
         } else {

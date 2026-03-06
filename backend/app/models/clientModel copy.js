@@ -581,7 +581,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
-//  console.log("getClient client", client);
   let { customer_id, StaffUserId } = client;
 
    // Line Manager
@@ -594,8 +593,6 @@ const getClient = async (client) => {
   if(customer_id == undefined || customer_id == null || customer_id == ''){
     return await getAllClientsSidebar(StaffUserId , LineManageStaffId , rows);
   }
-
-  // console.log("getClient customer_id", customer_id);
 
    try {
    
@@ -778,7 +775,6 @@ ORDER BY
       ORDER BY 
           clients.trading_name ASC;
     `;
-     //console.log("Client Query:", query);
   
       const [result] = await pool.execute(query);
       return { status: true, message: "success.", data: result };
@@ -787,14 +783,12 @@ ORDER BY
 
 
 const getClientFilter = async (client) => {
-//  console.log("getClient client", client);
   let { customer_id, StaffUserId , filters } = client;
   let { job_id } = filters;
 
   // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
   
-    //console.log("getClientFilter filters", filters?.customer_id);
     customer_id = filters?.customer_id;
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
