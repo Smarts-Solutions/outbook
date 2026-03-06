@@ -140,9 +140,9 @@ const ClientLists = () => {
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob &&
-                (getAccessDataJob.job == 1 ||
-                  getAccessDataJob.all_jobs == 1)) ||
-              role === "SUPERADMIN"
+            (getAccessDataJob.job == 1 ||
+              getAccessDataJob.all_jobs == 1)) ||
+            role === "SUPERADMIN"
             ? "job"
             : "documents",
       );
@@ -286,8 +286,8 @@ const ClientLists = () => {
       cell: (row) => (
         <div>
           {getAccessDataJob.job === 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -353,9 +353,8 @@ const ClientLists = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -490,8 +489,8 @@ const ClientLists = () => {
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -501,8 +500,8 @@ const ClientLists = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -523,8 +522,8 @@ const ClientLists = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -534,8 +533,8 @@ const ClientLists = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -554,26 +553,26 @@ const ClientLists = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -1210,9 +1209,9 @@ const ClientLists = () => {
         Timesheet:
           item.total_hours_status == 1 && item.total_hours != null
             ? item.total_hours?.split(":")[0] +
-              "h " +
-              item.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            item.total_hours.split(":")[1] +
+            "m"
             : "-",
         Invoicing: item.invoiced == 1 ? "YES" : "NO",
         "Created By": item.job_created_by,
@@ -1254,7 +1253,7 @@ const ClientLists = () => {
         <div className="row ">
           <div className="col-sm-12">
             <div className="form-group col-md-4 mb-0">
-              <label className="form-label mb-2">Select Customer</label>
+              <label className="form-label mb-2"> Customer</label>
               <Select
                 id="tabSelect"
                 name="staff_id"
@@ -1287,9 +1286,8 @@ const ClientLists = () => {
                     {tabs.map((tab) => (
                       <li className="nav-item" role="presentation" key={tab.id}>
                         <button
-                          className={`nav-link ${
-                            activeTab === tab.id ? "active" : ""
-                          }`}
+                          className={`nav-link ${activeTab === tab.id ? "active" : ""
+                            }`}
                           id={`${tab.id}-tab`}
                           data-bs-toggle="pill"
                           data-bs-target={`#${tab.id}`}
@@ -1308,14 +1306,14 @@ const ClientLists = () => {
                 </div>
                 <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                   {activeTab === "client" ||
-                  activeTab === "checklist" ||
-                  activeTab === "" ||
-                  activeTab === "job" ? (
+                    activeTab === "checklist" ||
+                    activeTab === "" ||
+                    activeTab === "job" ? (
                     <>
                       {(getAccessDataClient.insert === 1 ||
                         role === "SUPERADMIN") &&
-                      activeTab === "client" &&
-                      customerId != "" ? (
+                        activeTab === "client" &&
+                        customerId != "" ? (
                         <>
                           <div
                             className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
@@ -1349,7 +1347,7 @@ const ClientLists = () => {
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
-                          role === "SUPERADMIN") &&
+                        role === "SUPERADMIN") &&
                         activeTab === "checklist" ? (
                         <>
                           <div
@@ -1415,9 +1413,8 @@ const ClientLists = () => {
           {tabs1.map((tab) => (
             <div
               key={tab.key}
-              className={`tab-pane fade ${
-                activeTab == tab.key ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+                }`}
               id={tab.key}
               role="tabpanel"
               aria-labelledby={`${tab.key}-tab`}

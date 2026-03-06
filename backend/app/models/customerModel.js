@@ -477,6 +477,8 @@ const getCustomer = async (customer) => {
     const offset = (page - 1) * limit;
     const search = customer.search || "";
 
+    console.log("------>>>>",customer)
+
     // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
 
@@ -537,7 +539,7 @@ ORDER BY
     customers.id DESC
         LIMIT ? OFFSET ?`;
 
-
+       
             const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
 
             return {
@@ -816,7 +818,7 @@ trading_name ASC;`;
 
 }
 
-const getAllCustomersFilter = async (customer) => {
+const get_customers_filter = async (customer) => {
     const { StaffUserId, filters } = customer;
     let { job_id, client_id } = filters;
 
@@ -848,7 +850,7 @@ const getAllCustomersFilter = async (customer) => {
     else if (client_id?.length > 0 && job_id?.length > 0) {
         return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
     }else{
-        return { status: true, message: 'Success..', data: [] };
+        return await getCustomer_dropdown({StaffUserId});
     }
 
 
@@ -3868,7 +3870,7 @@ module.exports = {
     getcustomerschecklist,
     getCustomer_dropdown_delete,
     getAllAccountManager,
-    getAllCustomersFilter
+    get_customers_filter
 
 
 };

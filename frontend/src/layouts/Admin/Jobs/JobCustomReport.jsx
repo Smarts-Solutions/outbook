@@ -110,83 +110,73 @@ function JobCustomReport() {
       .replace(/\b\w/g, (char) => char.toUpperCase()) // capitalize first letter of each word
       .trim();
   }
-  //  console.log("lastGroupValue ", lastGroupValue);
+
+  
 
   // Get All Jobs
   const GetAllJobs = async (type, filter) => {
-    // External get All jobs
-    // let req = {
-    //   action: "getByCustomer",
-    //   customer_id: "",
-    //   page: 1,
-    //   limit: 100000,
-    // };
-    // if (type == "customer") {
-    //   req = {
-    //     action: "getByCustomer",
-    //     customer_id: filter?.customer_id,
-    //     page: 1,
-    //     limit: 100000,
-    //   };
-    // } else if (type == "client") {
-    //   req = {
-    //     action: "getByClient",
-    //     client_id: filter?.client_id,
-    //     page: 1,
-    //     limit: 100000,
-    //   };
-    // } else {
-    //   req = {
-    //     action: "getByCustomer",
-    //     customer_id: "",
-    //     page: 1,
-    //     limit: 100000,
-    //   };
-    // }
-   
+    const req = { action: "get_jobs_filter", filters: type };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const data = response?.data?.map((item) => ({
+            value: item.job_id,
+            label: item.job_code_id,
+          }));
+          setJobAllData(data);
+        } else {
+          setJobAllData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
 
-    if (type == "all") {
-    const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000 };
-    const data = { req: req, authToken: token };
-    await dispatch(JobAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const data = response?.data?.map((item) => ({
-            value: item.job_id,
-            label: item.job_code_id,
-          }));
-          setJobAllData(data);
-        } else {
-          setJobAllData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
     return;
-    }else{
+    // if (type == "all") {
+    // const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000 };
+    // const data = { req: req, authToken: token };
+    // await dispatch(JobAction(data))
+    //   .unwrap()
+    //   .then(async (response) => {
+    //     if (response.status) {
+    //       const data = response?.data?.map((item) => ({
+    //         value: item.job_id,
+    //         label: item.job_code_id,
+    //       }));
+    //       setJobAllData(data);
+    //     } else {
+    //       setJobAllData([]);
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     return;
+    //   });
+    // return;
+    // }else{
     
-    const req = { action: "get_jobs_filter", filters: filter };
-    const data = { req: req, authToken: token };
-    await dispatch(JobAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const data = response?.data?.map((item) => ({
-            value: item.job_id,
-            label: item.job_code_id,
-          }));
-          setJobAllData(data);
-        } else {
-          setJobAllData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-    return;
-    }
+    // const req = { action: "get_jobs_filter", filters: filter };
+    // const data = { req: req, authToken: token };
+    // await dispatch(JobAction(data))
+    //   .unwrap()
+    //   .then(async (response) => {
+    //     if (response.status) {
+    //       const data = response?.data?.map((item) => ({
+    //         value: item.job_id,
+    //         label: item.job_code_id,
+    //       }));
+    //       setJobAllData(data);
+    //     } else {
+    //       setJobAllData([]);
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     return;
+    //   });
+    // return;
+    // }
   };
 
   const getAllFilters = async () => {
@@ -305,29 +295,7 @@ function JobCustomReport() {
 
   // Get All Customers
   const GetAllCustomer = async (type) => {
-    if (type == "all") {
-      const req = { action: "get_dropdown", page: 1, limit: 100000 };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllCustomerDropDown(data))
-        .unwrap()
-        .then(async (response) => {
-          console.log("customer response ", response);
-
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.trading_name,
-            }));
-            setCustomerAllData(data);
-          } else {
-            setCustomerAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    } else {
-      const req = { action: "get_customers_filter", filters: type };
+     const req = { action: "get_customers_filter", filters: type };
       const data = { req: req, authToken: token };
       await dispatch(getAllCustomerDropDown(data))
         .unwrap()
@@ -344,33 +312,51 @@ function JobCustomReport() {
             setCustomerAllData([]);
           }
         });
-    }
+    // if (type == "all") {
+    //   const req = { action: "get_dropdown", page: 1, limit: 100000 };
+    //   const data = { req: req, authToken: token };
+    //   await dispatch(getAllCustomerDropDown(data))
+    //     .unwrap()
+    //     .then(async (response) => {
+    //       console.log("customer response ", response);
+
+    //       if (response.status) {
+    //         const data = response?.data?.map((item) => ({
+    //           value: item.id,
+    //           label: item.trading_name,
+    //         }));
+    //         setCustomerAllData(data);
+    //       } else {
+    //         setCustomerAllData([]);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       return;
+    //     });
+    // } else {
+    //   const req = { action: "get_customers_filter", filters: type };
+    //   const data = { req: req, authToken: token };
+    //   await dispatch(getAllCustomerDropDown(data))
+    //     .unwrap()
+    //     .then(async (response) => {
+    //       // console.log("customer filter ---  ", response);
+
+    //       if (response.status) {
+    //         const data = response?.data?.map((item) => ({
+    //           value: item.id,
+    //           label: item.trading_name,
+    //         }));
+    //         setCustomerAllData(data);
+    //       } else {
+    //         setCustomerAllData([]);
+    //       }
+    //     });
+    // }
   };
 
   // Get All Clients
   const GetAllClient = async (type) => {
-    if (type == "all") {
-      const req = { action: "get", customer_id: "", page: 1, limit: 100000 };
-      const data = { req: req, authToken: token };
-      await dispatch(ClientAction(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.client_name + " (" + item.client_code + ")",
-            }));
-            setClientAllData(data);
-          } else {
-            setClientAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    } 
-    else {
-      const req = { action: "get_clients_filter", filters: type };
+    const req = { action: "get_clients_filter", filters: type };
       const data = { req: req, authToken: token };
       await dispatch(ClientAction(data))
         .unwrap()
@@ -385,7 +371,43 @@ function JobCustomReport() {
             setClientAllData([]);
           }
         });
-    }
+    // if (type == "all") {
+    //   const req = { action: "get", customer_id: "", page: 1, limit: 100000 };
+    //   const data = { req: req, authToken: token };
+    //   await dispatch(ClientAction(data))
+    //     .unwrap()
+    //     .then(async (response) => {
+    //       if (response.status) {
+    //         const data = response?.data?.map((item) => ({
+    //           value: item.id,
+    //           label: item.client_name + " (" + item.client_code + ")",
+    //         }));
+    //         setClientAllData(data);
+    //       } else {
+    //         setClientAllData([]);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       return;
+    //     });
+    // } 
+    // else {
+    //   const req = { action: "get_clients_filter", filters: type };
+    //   const data = { req: req, authToken: token };
+    //   await dispatch(ClientAction(data))
+    //     .unwrap()
+    //     .then(async (response) => {
+    //       if (response.status) {
+    //         const data = response?.data?.map((item) => ({
+    //           value: item.id,
+    //           label: item.client_name + " (" + item.client_code + ")",
+    //         }));
+    //         setClientAllData(data);
+    //       } else {
+    //         setClientAllData([]);
+    //       }
+    //     });
+    // }
   };
 
   // All Type Staff Get
@@ -406,7 +428,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -445,7 +466,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -484,7 +504,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -523,7 +542,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -558,7 +576,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data
                 ?.filter(
                   (item) =>
@@ -771,6 +788,11 @@ function JobCustomReport() {
   };
 
   const handleFilterChange = (e, type) => {
+
+    console.log("handleFilterChange", e);
+    console.log("type", type);
+
+
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
       let additionalFieldArray = sortByReference(values);
@@ -885,6 +907,7 @@ function JobCustomReport() {
         }
       }
     }
+
   };
 
   const addAndRemoveGroupBy = (value, type) => {
@@ -1025,7 +1048,7 @@ function JobCustomReport() {
     }
   };
 
-  // console.log("filters ", filters);
+   console.log("filters ", filters);
 
   const callFilterApi = async (currentPage, pageSize, searchTerm) => {
     setLoading(true);
@@ -1683,6 +1706,7 @@ function JobCustomReport() {
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             /> */}
+          {console.log("jobAllData -->",jobAllData)}
 
             <Select
               isMulti

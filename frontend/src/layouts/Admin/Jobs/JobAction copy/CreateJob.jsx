@@ -201,7 +201,6 @@ const CreateJob = () => {
           if (response.status) {
             if (response.data.length > 0) {
 
-              console.log("response.data",response.data)
 
               const isIncluded = response.data[0].client_type_id
                 .split(",")

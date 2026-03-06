@@ -95,7 +95,6 @@ const Timesheet = () => {
     });
   }, [weekOffset]);
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
@@ -141,7 +140,6 @@ const Timesheet = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log(`response`, response);
           setLineMangerData(response.data);
         } else {
           setLineMangerData([]);
@@ -356,7 +354,6 @@ const Timesheet = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-  // console.log(`timeSheetRows`, timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -824,6 +821,10 @@ const Timesheet = () => {
   };
 
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
+    if (checkDuplicateRow(item, index, e.target.name)) {
+      return;
+    }
+
     let value = e.target.value;
     let name = e.target.name;
 
@@ -839,7 +840,6 @@ const Timesheet = () => {
       // final_value = `${intPart}.${multiplied}`;
     }
 
-    // console.log(`final_value`, final_value);
 
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
@@ -864,17 +864,7 @@ const Timesheet = () => {
       return;
     }
 
-    // const [integerPart, fractionalPart] = value.split(".");
-    // if (fractionalPart && parseInt(fractionalPart) > 59) {
-    //   sweatalert.fire({
-    //     icon: "warning",
-    //     title: "Minutes cannot exceed 59 ",
-    //     timerProgressBar: true,
-    //     showConfirmButton: true,
-    //     timer: 1500,
-    //   });
-    //   return;
-    // }
+
 
     const [integerPart, fractionalPartRaw] = final_value.split(".");
     let fractionalPart = fractionalPartRaw || "0";
@@ -1022,25 +1012,7 @@ const Timesheet = () => {
   }
 
   const totalHoursMinute = () => {
-    // const converted = timeSheetRows && timeSheetRows?.map(item => {
-    //   return {
-    //     original: item.total_hours,
-    //     totalweeklyHours: totalWeeklyHoursMinutes(item)
-    //   };
-    // });
-    // const total = converted.reduce((acc, item) => {
-    //   const val = parseFloat(item.totalweeklyHours || 0);
-    //   const hrs = Math.floor(val);
-    //   const mins = Math.round((val - hrs) * 100);
 
-    //   acc.totalMinutes += hrs * 60 + mins;
-    //   return acc;
-    // }, { totalMinutes: 0 });
-
-    // const totalHours = Math.floor(total.totalMinutes / 60);
-    // const totalMins = total.totalMinutes % 60;
-    // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-    // return finalTotalHours;
 
     const total =
       timeSheetRows &&
@@ -1091,8 +1063,7 @@ const Timesheet = () => {
 
       let staff_hourminute =
         parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5 || null;
-      //console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
-      //console.log(`staff_hourminute`, staff_hourminute);
+
       if (staff_hourminute != null) {
         const converted =
           updatedTimeSheetRows &&
@@ -1120,7 +1091,6 @@ const Timesheet = () => {
         const finalTotalHours = `${totalHours}.${totalMins
           .toString()
           .padStart(2, "0")}`;
-        // console.log(`finalTotalHours`, finalTotalHours);
 
         // if (staff_hourminute > parseFloat(finalTotalHours)) {
         //   sweatalert.fire({
@@ -1250,7 +1220,6 @@ const Timesheet = () => {
       let staff_hourminute =
         updatedTimeSheetRows1?.[0]?.staffs_hourminute || null;
 
-      //  console.log(`staff_hourminute 111 `, staff_hourminute);
 
       if (staff_hourminute != null && staff_hourminute?.includes(":")) {
         const [hours, minutes] = staff_hourminute.split(":").map(Number);
@@ -1280,7 +1249,7 @@ const Timesheet = () => {
         // const totalHours = Math.floor(total.totalMinutes / 60);
         // const totalMins = total.totalMinutes % 60;
         // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-        // console.log(`finalTotalHours`, finalTotalHours);
+
 
         const totalHours =
           timeSheetRows &&
@@ -1291,8 +1260,6 @@ const Timesheet = () => {
 
         let finalTotalHours = await convertHoursMinutes(totalHours);
 
-        // console.log(`finalTotalHours`, finalTotalHours);
-        // console.log(`staff_hourminute`, staff_hourminute);
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
@@ -1383,7 +1350,7 @@ const Timesheet = () => {
       // const totalHours = Math.floor(total.totalMinutes / 60);
       // const totalMins = total.totalMinutes % 60;
       // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-      // console.log(`finalTotalHours`, finalTotalHours);
+
 
       const totalHours =
         timeSheetRows &&
@@ -1394,8 +1361,6 @@ const Timesheet = () => {
 
       let finalTotalHours = await convertHoursMinutes(totalHours);
 
-      // console.log(`finalTotalHours 1 `, finalTotalHours);
-      // console.log(`staff_hourminute 1 `, staff_hourminute);
 
       if (staff_hourminute > parseFloat(finalTotalHours)) {
         sweatalert.fire({
@@ -1436,32 +1401,18 @@ const Timesheet = () => {
     }
   };
 
-  // const dayMonthFormatDate = (dateString) => {
-
-  //   const parts = dateString.split(", ");
-  //   const dayOfWeek = parts[0];
-  //   const dateParts = parts[1].split("/");
-  //   const day = dateParts[0];
-  //   const monthIndex = dateParts[1] - 1;
-  //   const year = dateParts[2];
-  //   const date = new Date(year, monthIndex, day);
-  //   const options = { month: "short" };
-  //   const month = date.toLocaleDateString("en-US", options).toLowerCase();
-  //   // Return formatted string
-  //   return `${dayOfWeek} ${day} ${month}`;
-  // };
 
   const dayMonthFormatDate = (dateString) => {
 
-  const parts = dateString.split(", ");
-  const dateParts = parts[1].split("/");
+    const parts = dateString.split(", ");
+    const dateParts = parts[1].split("/");
 
-  const day = String(dateParts[0]).padStart(2, "0");
-  const month = String(dateParts[1]).padStart(2, "0");
-  const year = String(dateParts[2]).slice(-2); // last 2 digit
+    const day = String(dateParts[0]).padStart(2, "0");
+    const month = String(dateParts[1]).padStart(2, "0");
+    const year = String(dateParts[2]).slice(-2); // last 2 digit
 
-  return `${day}/${month}/${year}`;
-};
+    return `${day}/${month}/${year}`;
+  };
 
 
   const exportToCSV = (timeSheetRows) => {
@@ -1470,24 +1421,7 @@ const Timesheet = () => {
       return;
     }
 
-    // const headers = [
-    //   "Index",
-    //   "Task Type",
-    //   "Customer Name",
-    //   "Client Name",
-    //   "Job Name",
-    //   "Job Type",
-    //   "Task Name",
-    //   weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
-    //   //"Monday Hours",
-    //   "Monday Note",
-    //   "Tuesday Hours",
-    //   "Wednesday Hours",
-    //   "Thursday Hours",
-    //   "Friday Hours",
-    //   "Saturday Hours",
-    //   "Remark"
-    // ];
+
 
     const headers = [
       "Index",
@@ -1623,8 +1557,6 @@ const Timesheet = () => {
   // SELECT OPTIONS FOR WEEK END //
 
   const handleSaveNote = (e) => {
-    // console.log("modalText ",modalText);
-    // console.log("activeField ",activeField);
     const updatedRows = [...timeSheetRows];
     let key = activeField + "_note";
     updatedRows[selectedRowIndex][key] = modalText;
@@ -1674,7 +1606,7 @@ const Timesheet = () => {
   ];
 
   const selectLineManager = async (e) => {
-    // console.log("e ", e);
+
     let name = e.target.name;
     let value = e.target.value;
 
@@ -1689,8 +1621,6 @@ const Timesheet = () => {
     }
   };
 
-  console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
-  console.log("weekOptions ", weekOptions);
 
   const convertDateFormatForCopy = (dateString) => {
     const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
@@ -1763,7 +1693,6 @@ const Timesheet = () => {
     setIsCopyModalOpen(false);
   };
 
-  //  console.log("timeSheetRows -- > ", timeSheetRows);
 
   // External Customer DropDown
 
@@ -1796,7 +1725,104 @@ const Timesheet = () => {
     { value: "2", label: "External" },
   ];
 
-  console.log("timeSheetRows", timeSheetRows);
+
+  const checkDuplicateRow = (item, index, fieldName) => {
+
+    const seen = new Set();
+    let firstDuplicateIndex = -1;
+
+    const filteredRows = timeSheetRows.filter((row, i) => {
+      const key =
+        row.customer_id +
+        "_" +
+        row.client_id +
+        "_" +
+        row.job_id +
+        "_" +
+        row.task_id +
+        "_" +
+        row.task_type;
+
+      if (seen.has(key)) {
+        if (firstDuplicateIndex === -1) {
+          firstDuplicateIndex = i;
+        }
+        return false; // remove duplicate
+      }
+
+      seen.add(key);
+      return true;
+    });
+
+    if (filteredRows.length !== timeSheetRows.length) {
+
+      const existingRow = filteredRows.find((row) =>
+        row.customer_id === item.customer_id &&
+        row.client_id === item.client_id &&
+        row.job_id === item.job_id &&
+        row.task_id === item.task_id &&
+        row.task_type === item.task_type
+      );
+
+      const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+      let focusFieldName = "monday_hours";
+      let focusDay = "monday";
+
+      if (existingRow) {
+        for (const day of days) {
+          const hKey = day + "_hours";
+          const val = existingRow[hKey];
+
+          if (val === "0" || val === 0 || val === "" || val === null || val === undefined) {
+            focusFieldName = hKey;
+            focusDay = day;
+            break;
+          }
+        }
+      }
+
+      setTimeSheetRows(filteredRows);
+
+      sweatalert.fire({
+        icon: "error",
+        title: "Duplicate Row Found",
+        text: "Duplicate rows removed. Redirecting to existing row.",
+      }).then(() => {
+
+        if (focusDay !== "monday") {
+          setIsExpanded(true);
+        }
+
+        setTimeout(() => {
+
+          const targetIndex = filteredRows.findIndex((row) =>
+            row.customer_id === item.customer_id &&
+            row.client_id === item.client_id &&
+            row.job_id === item.job_id &&
+            row.task_id === item.task_id &&
+            row.task_type === item.task_type
+          );
+
+          const inputs = document.getElementsByName(focusFieldName);
+
+          if (inputs[targetIndex]) {
+            inputs[targetIndex].focus();
+            setActiveIndex(targetIndex);
+            setActiveField(focusDay);
+          }
+
+        }, 300);
+      });
+
+      return true;
+    }
+
+    return false;
+  };
+
+
+
 
   return (
     <div className="container-fluid">
@@ -1840,9 +1866,9 @@ const Timesheet = () => {
                   className="btn btn-info "
                   onClick={() => exportToCSV(timeSheetRows)}
                 >
-                   <i className="fa fa-download" aria-hidden="true"/>
-    <span> Export Timesheet Data</span>
-                 
+                  <i className="fa fa-download" aria-hidden="true" />
+                  <span> Export Timesheet Data</span>
+
                   {/* <i className="fa fa-download ms-2" /> */}
                 </button>
               </div>
@@ -1858,7 +1884,7 @@ const Timesheet = () => {
           <div className="row ">
             {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
               <div className="form-group col-md-4">
-                <label className="form-label mb-2">Select Staff</label>
+                <label className="form-label mb-2">Staff</label>
 
                 <Select
                   id="tabSelect"
@@ -1884,9 +1910,9 @@ const Timesheet = () => {
             )}
 
             {staffDataWeekDataAll.data &&
-            staffDataWeekDataAll.data.length > 0 ? (
+              staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4   pe-0">
-                <label className="form-label mb-2">Select Date</label>
+                <label className="form-label mb-2">Date</label>
                 <Select
                   id="tabSelect"
                   name="week"
@@ -1913,10 +1939,10 @@ const Timesheet = () => {
             )}
 
             {isExistStaffDataWeekDataAll?.data &&
-            isExistStaffDataWeekDataAll?.data.length > 0 &&
-            staffDataWeekDataAll?.data.length === 0 ? (
+              isExistStaffDataWeekDataAll?.data.length > 0 &&
+              staffDataWeekDataAll?.data.length === 0 ? (
               <div className="form-group col-md-4 pe-0">
-                <label className="form-label mb-2">Select Date</label>
+                <label className="form-label mb-2">Date</label>
                 <Select
                   id="tabSelect"
                   name="week"
@@ -1973,8 +1999,8 @@ const Timesheet = () => {
             )}
 
             {selectedLineManager != "" &&
-            staffDataWeekDataAll.data &&
-            staffDataWeekDataAll.data.length > 0 ? (
+              staffDataWeekDataAll.data &&
+              staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4  pe-0">
                 <label className="form-label mb-2">
                   Line Manager Select Week
@@ -2041,10 +2067,9 @@ const Timesheet = () => {
                             </th>
 
                             <th
-                              className={`pe-0 week-data ${
-                                isExpanded ? "expanded" : ""
-                              }`}
-                              // style={{ width: isExpanded ? "50%" : "100px" }}
+                              className={`pe-0 week-data ${isExpanded ? "expanded" : ""
+                                }`}
+                            // style={{ width: isExpanded ? "50%" : "100px" }}
                             >
                               <div className="d-flex align-items-center">
                                 <ChevronLeft
@@ -2086,9 +2111,8 @@ const Timesheet = () => {
                                   className="px-0 btn btn-sm btn-link text-decoration-none"
                                 >
                                   <i
-                                    className={`fa ${
-                                      isExpanded ? "fa-minus" : "fa-plus"
-                                    }`}
+                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"
+                                      }`}
                                     aria-hidden="true"
                                   ></i>
                                 </button>
@@ -2136,17 +2160,7 @@ const Timesheet = () => {
 
                                 <td className="ps-0">
                                   {item.newRow === 1 ? (
-                                    // <select
-                                    //   className="form-select form-control"
-                                    //   style={{ width: "100px" }}
-                                    //   value={item.task_type}
-                                    //   onChange={(e) =>
-                                    //     handleChangeTaskType(e, item, index)
-                                    //   }
-                                    // >
-                                    //   <option value="1">Internal</option>
-                                    //   <option value="2">External</option>
-                                    // </select>
+
                                     <Select
                                       className="basic-multi-select"
                                       menuPortalTarget={document.body}
@@ -2195,7 +2209,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "100px" }}
@@ -2261,7 +2275,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "90px" }}
@@ -2303,7 +2317,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.clientData ||
-                                        item.clientData.length === 0
+                                          item.clientData.length === 0
                                           ? "No Client"
                                           : "Client"
                                       }
@@ -2374,7 +2388,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.jobData ||
-                                        item.jobData.length === 0
+                                          item.jobData.length === 0
                                           ? "No Job"
                                           : "Job"
                                       }
@@ -2386,7 +2400,7 @@ const Timesheet = () => {
                                             value: selectedOption?.value || "",
                                           },
                                         };
-
+                                        console.log("selectedOption");
                                         selectJobData(e, item.task_type, index);
                                       }}
                                     />
@@ -2414,7 +2428,7 @@ const Timesheet = () => {
                                       );
                                       return matchedJob &&
                                         matchedJob.job_type_name !==
-                                          undefined ? (
+                                        undefined ? (
                                         <div style={{ width: "100px" }}>
                                           {matchedJob.job_type_name}
                                         </div>
@@ -2434,22 +2448,11 @@ const Timesheet = () => {
                                 {/* Task Selection */}
                                 <td>
                                   {item.newRow === 1 ? (
-                                    // <select
-                                    //   className="form-select"
-                                    //   style={{ width: "100px" }}
-                                    //   defaultValue={item.task_id || ""}
-                                    //   onChange={(e) => selectTaskData(e, index)}
-                                    // >
-                                    //   {item.taskData?.map((task) => (
-                                    //     <option key={task.id} value={task.id}>
-                                    //       {task.name}
-                                    //     </option>
-                                    //   ))}
-                                    // </select>
+
                                     <Select
                                       className="basic-multi-select"
-                                            menuPortalTarget={document.body}
-                                         menuPosition="fixed"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2470,7 +2473,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.taskData ||
-                                        item.taskData.length === 0
+                                          item.taskData.length === 0
                                           ? "No Task"
                                           : "Task"
                                       }
@@ -2482,6 +2485,7 @@ const Timesheet = () => {
                                             value: selectedOption?.value || "",
                                           },
                                         };
+                                        console.log("okk");
 
                                         selectTaskData(e, index);
                                       }}
@@ -2511,7 +2515,7 @@ const Timesheet = () => {
                                             type="text"
                                             style={{ width: "80px" }}
                                             name="monday_hours"
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                               handleHoursInput(
                                                 e,
                                                 index,
@@ -2520,28 +2524,26 @@ const Timesheet = () => {
                                                 item
                                               )
                                             }
+                                            }
                                             value={
                                               item.monday_hours == null
                                                 ? "0"
                                                 : item.monday_hours
                                             }
-                                            // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
+                                            // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : false}
                                             disabled={
                                               staffDetails.id !=
-                                              multipleFilter.staff_id
+                                                multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                                  ? true
+                                                  : false
                                             }
                                             onFocus={() => {
                                               setActiveIndex(index);
                                               setActiveField("monday");
                                             }}
-                                            // onBlur={() => {
-                                            //   setActiveIndex(null);
-                                            //   setActiveField(null);
-                                            // }}
+
                                           />
                                         </span>
 
@@ -2583,20 +2585,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("tuesday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "tuesday" && (
@@ -2636,20 +2638,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("wednesday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "wednesday" && (
@@ -2689,20 +2691,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "thursday" && (
@@ -2742,20 +2744,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("friday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "friday" && (
@@ -2795,20 +2797,17 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("saturday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+
                                         />
                                         {activeIndex === index &&
                                           activeField === "saturday" && (
@@ -2833,7 +2832,9 @@ const Timesheet = () => {
                                           type="text"
                                           style={{ width: "80px" }}
                                           name="monday_hours"
-                                          onChange={(e) =>
+                                          onChange={(e) => {
+
+
                                             handleHoursInput(
                                               e,
                                               index,
@@ -2842,6 +2843,8 @@ const Timesheet = () => {
                                               item
                                             )
                                           }
+                                          }
+
                                           value={
                                             item.monday_hours == null
                                               ? "0"
@@ -2850,11 +2853,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
@@ -2880,26 +2883,7 @@ const Timesheet = () => {
                                   </div>
                                 </td>
 
-                                {/*Sunday Input*/}
-                                {/* 
-                               <td>
-                                <input
-                                  className="form-control cursor-pointer"
-                                  type="text"
-                                  name="sunday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday ,item )}
-                                  value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
-                                />
 
-                              </td>
-                              
-                              */}
-                                {/* <td>
-                                  {console.log("item.weekly_hours", item)}
-                                  <span className="fs-6 text-dark"> {totalWeeklyHoursMinutes(item)}</span>
-
-                                </td> */}
 
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
@@ -2974,7 +2958,7 @@ const Timesheet = () => {
                                 className="dropdwnCol5"
                                 data-field="phone"
                               ></th>
-                              <th className="pe-0 week-data">
+                              {/* <th className="pe-0 week-data">
                                 <div className="d-flex  ms-3">
                                   <input
                                     className="form-control cursor-pointer border-radius-end"
@@ -2987,8 +2971,8 @@ const Timesheet = () => {
                                       width: 80,
                                       border: "1px solid #00afef",
                                     }}
-                                  />
-                                  {isExpanded && (
+                                  /> */}
+                              {/* {isExpanded && (
                                     <div className="d-flex  ms-3">
                                       <input
                                         className="form-control cursor-pointer ms-2"
@@ -3061,9 +3045,9 @@ const Timesheet = () => {
                                         }}
                                       />
                                     </div>
-                                  )}
-                                </div>
-                              </th>
+                                  )} */}
+                              {/* </div> */}
+                              {/* </th> */}
                               <th
                                 className="dropdwnCol5"
                                 data-field="phone"
@@ -3285,14 +3269,14 @@ const Timesheet = () => {
                     <p>
                       {remarkSingleIndex != null && timeSheetRows.length > 0
                         ? ["", null, undefined].includes(
-                            timeSheetRows[remarkSingleIndex]
-                          )
+                          timeSheetRows[remarkSingleIndex]
+                        )
                           ? "No Remark Found"
                           : !["", null, undefined].includes(
-                              timeSheetRows[remarkSingleIndex].remark
-                            )
-                          ? timeSheetRows[remarkSingleIndex].remark
-                          : "No Remark Found"
+                            timeSheetRows[remarkSingleIndex].remark
+                          )
+                            ? timeSheetRows[remarkSingleIndex].remark
+                            : "No Remark Found"
                         : "No Remark Found"}
                     </p>
                   ) : (
@@ -3314,8 +3298,8 @@ const Timesheet = () => {
                         value={
                           remarkSingleIndex != null && timeSheetRows.length > 0
                             ? ["", null, undefined].includes(
-                                timeSheetRows[remarkSingleIndex]
-                              )
+                              timeSheetRows[remarkSingleIndex]
+                            )
                               ? ""
                               : timeSheetRows[remarkSingleIndex].remark
                             : ""

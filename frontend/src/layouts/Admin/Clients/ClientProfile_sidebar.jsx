@@ -58,6 +58,7 @@ const ClientList = () => {
     }
   }, []);
 
+  // CHANGED: sidebar se aane par bhi specific client select rehta hai (ye flow same rakhte hain)
   const getAllClientData1 = async (
     customer_id,
     customer_name,
@@ -89,17 +90,6 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerDataAll(response.data);
-          // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-
-          //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
-          //   if(FilterCustomer.length > 0){
-          //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
-          //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
-          //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   }
-
-          // }
         } else {
           setCustomerDataAll(response.data);
         }
@@ -114,9 +104,10 @@ const ClientList = () => {
     id: cli_id_sidebar || "",
     client_name: "",
   });
-  const GetAllClientData = async (id, name) => {
-    // const req = { action: "get", customer_id: id };
 
+  // CHANGED: Customer select hone par ab first client auto-select nahi hoga
+  // Instead: saare clients ki list load hogi aur customer ki saari jobs by default dikhegi
+  const GetAllClientData = async (id, name) => {
     const req = {
       action: "get",
       customer_id: id,
@@ -131,41 +122,17 @@ const ClientList = () => {
         if (response.status) {
           setClientData(response.data);
 
-          if (
-            response?.data[0]?.id != undefined &&
-            response?.data[0]?.id != ""
-          ) {
-            sessionStorage.setItem("cli_id_sidebar", response?.data[0]?.id);
-            sessionStorage.setItem(
-              "cli_id_sidebar_name",
-              response?.data[0]?.client_name,
-            );
-
-            setClientDetailSingle({
-              id: response?.data[0]?.id,
-              client_name: response?.data[0]?.client_name,
-            });
-            setHararchyData({
-              customer: { id: id, trading_name: name },
-              client: {
-                id: response?.data[0]?.id,
-                client_name: response?.data[0]?.client_name,
-              },
-            });
-            GetAllJobList(response?.data[0]?.id);
-            GetClientDetails(response?.data[0]?.id);
-            setActiveTab("NoOfJobs");
-          }
-          if (response.data.length == 0) {
-            sessionStorage.remove("cli_id_sidebar");
-            setClientDetailSingle({ id: "", client_name: "" });
-            setHararchyData({
-              customer: { id: id, trading_name: name },
-              client: { id: "", client_name: "" },
-            });
-            GetAllJobList("");
-            GetClientDetails("");
-          }
+          // CHANGED: Client auto-select hataya, "All" by default
+          // Client dropdown mein "All" selected hoga aur customer ki saari jobs dikhegi
+          sessionStorage.removeItem("cli_id_sidebar");
+          setClientDetailSingle({ id: "", client_name: "" });
+          setHararchyData({
+            customer: { id: id, trading_name: name },
+            client: { id: "", client_name: "" },
+          });
+          // Customer ki saari jobs fetch karo (All clients)
+          GetAllJobListByCustomer(id, 1, pageSize, searchTerm);
+          setActiveTab("NoOfJobs");
         } else {
           setClientData([]);
           setClientDetailSingle({ id: "", client_name: "" });
@@ -189,7 +156,6 @@ const ClientList = () => {
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
-  // const [hararchyData, setHararchyData] = useState(location.state.data);
   const [hararchyData, setHararchyData] = useState({
     customer: {},
     client: {},
@@ -264,18 +230,11 @@ const ClientList = () => {
       });
   };
 
-  // const tabs = [
-  //   { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-  //   { id: "view client",label: "View Client", icon: "fa-solid fa-user" },
-  //   //{ id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-  // ];
-
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
     ...(clientDetailSingle.id !== ""
       ? [{ id: "view client", label: "View Client", icon: "fa-solid fa-user" }]
       : []),
-    // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
 
   const GetStatus = async () => {
@@ -323,7 +282,22 @@ const ClientList = () => {
               });
 
               setStatusId(Id);
-              GetAllJobListByCustomer("");
+
+              if (clientDetailSingle.id) {
+                GetAllJobList(
+                  clientDetailSingle.id,
+                  currentPage,
+                  pageSize,
+                  searchTerm,
+                );
+              } else {
+                GetAllJobListByCustomer(
+                  customerDetails.id || "",
+                  currentPage,
+                  pageSize,
+                  searchTerm,
+                );
+              }
             } else if (res.data === "W") {
               sweatalert.fire({
                 title: "Warning",
@@ -471,16 +445,6 @@ const ClientList = () => {
         row.account_manager_officer_last_name,
       sortable: true,
     },
-    // {
-    //   name: "Client",
-    //   cell: (row) => (
-    //     <div title={row.client_trading_name}>
-    //       {row.client_trading_name}
-    //     </div>
-    //   ),
-    //   selector: (row) => row.client_trading_name,
-    //   sortable: true,
-    // },
     {
       name: "Outbook Account Manager",
       cell: (row) => (
@@ -516,7 +480,6 @@ const ClientList = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
       sortFunction: (a, b) => {
-        // Sort YES before NO
         const aVal = a.invoiced == "1" ? "YES" : "NO";
         const bVal = b.invoiced == "1" ? "YES" : "NO";
         return aVal.localeCompare(bVal);
@@ -632,40 +595,6 @@ const ClientList = () => {
         return;
       });
   };
-
-  // const GetAllJobList = async (client_id) => {
-  //   const req = { action: "getByClient", client_id: client_id };
-  //   const data = { req: req, authToken: token };
-  //   await dispatch(JobAction(data))
-  //     .unwrap()
-  //     .then(async (response) => {
-  //       if (response.status) {
-  //         setCustomerData(response.data);
-  //       } else {
-  //         setCustomerData([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       return;
-  //     });
-  // };
-
-  // const GetAllJobListByCustomer = async (customer_id) => {
-  //   const req = { action: "getByCustomer", customer_id: customer_id };
-  //   const data = { req: req, authToken: token };
-  //   await dispatch(JobAction(data))
-  //     .unwrap()
-  //     .then(async (response) => {
-  //       if (response.status) {
-  //         setCustomerData(response.data);
-  //       } else {
-  //         setCustomerData([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       return;
-  //     });
-  // };
 
   const GetAllJobList = async (
     client_id,
@@ -799,9 +728,10 @@ const ClientList = () => {
       });
       setClientDetailSingle({ id: "", client_name: "" });
       setActiveTab("NoOfJobs");
+      // CHANGED: GetAllClientData ab client auto-select nahi karega
+      // Sirf client list load karega aur customer ki saari jobs dikhayega
       GetAllClientData(id, name);
     } else {
-      // sessionStorage.remove('cust_id_sidebar');
       GetAllJobListByCustomer("");
       setCustomerData([]);
       setClientData([]);
@@ -817,8 +747,10 @@ const ClientList = () => {
     }
   };
 
+  // CHANGED: "All" option (id="") select karne par customer ki saari jobs dikhao
   const selectClientId = (id, name) => {
     if (id != "") {
+      // Specific client selected
       sessionStorage.setItem("cli_id_sidebar", id);
       sessionStorage.setItem("cli_id_sidebar_name", name);
       GetAllJobList(id);
@@ -830,7 +762,8 @@ const ClientList = () => {
       });
       setActiveTab("NoOfJobs");
     } else {
-      sessionStorage.remove("cli_id_sidebar");
+      // CHANGED: "All" selected - customer ki saari jobs dikhao
+      sessionStorage.removeItem("cli_id_sidebar");
       setClientDetailSingle({ id: "", client_name: "" });
       setHararchyData({
         customer: customerDetails,
@@ -840,6 +773,10 @@ const ClientList = () => {
       informationSetData([]);
       setClientInformationData([]);
       setCompanyDetails([]);
+      // CHANGED: Customer ki saari jobs fetch karo
+      GetAllJobListByCustomer(customerDetails.id, 1, pageSize, searchTerm);
+      setCurrentPage(1);
+      setActiveTab("NoOfJobs");
     }
   };
 
@@ -875,21 +812,28 @@ const ClientList = () => {
     (opt) => Number(opt.value) === Number(customerDetails.id),
   );
 
-  // Prepare client options for the select dropdown
-  const clientOptions = (clientData || []).map((client) => ({
-    value: client.id,
-    label: client.client_name,
-  }));
+  // CHANGED: Client options mein "All" option sabse pehle add kiya
+  const clientOptions = [
+    { value: "", label: "All" },
+    ...(clientData || []).map((client) => ({
+      value: client.id,
+      label: client.client_name,
+    })),
+  ];
 
-  const selectedOptionClient = clientOptions.find(
-    (opt) => Number(opt.value) === Number(clientDetailSingle.id),
-  );
+  // CHANGED: "All" select hone par selectedOptionClient = { value: "", label: "All" }
+  const selectedOptionClient =
+    clientDetailSingle.id === ""
+      ? { value: "", label: "All" }
+      : clientOptions.find(
+          (opt) => Number(opt.value) === Number(clientDetailSingle.id),
+        );
 
   const handleExport = async () => {
     setLoading(true);
     const req = {
       action: "getByCustomer",
-      customer_id: "",
+      customer_id: customerDetails.id || "",
       page: 1,
       limit: 100000,
       search: "",
@@ -910,7 +854,6 @@ const ClientList = () => {
       return;
     }
 
-    // export format
     const exportData = apiData?.map((item) => ({
       "Job Code Id": item.job_code_id,
       "Job Priority": item.job_priority,
@@ -936,14 +879,13 @@ const ClientList = () => {
 
     downloadCSV(exportData, "Job Details.csv");
   };
+
   const downloadCSV = (data, filename) => {
     const csvRows = [];
 
-    // headers
     const headers = Object.keys(data[0]);
     csvRows.push(headers.join(","));
 
-    // rows
     data.forEach((row) => {
       const values = headers.map((h) => `"${row[h] || ""}"`);
       csvRows.push(values.join(","));
@@ -969,36 +911,7 @@ const ClientList = () => {
       <div className="content-title">
         <div className="row">
           <div className="form-group col-md-4 mb-0">
-            <label className="form-label mb-2">Select Customer</label>
-            {/* <select
-              name="staff_id"
-              className="form-select"
-              id="tabSelect"
-              defaultValue={customerDetails.id}
-              // onChange={(e) => selectCustomerId(e)}
-              onChange={(e) => {
-                const selectedId = e.target.value;
-                const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
-                selectCustomerId(selectedId, selectedCustomer?.trading_name);
-              }}
-            >
-              <option value="">Select Customer</option>
-              {customerDataAll &&
-                customerDataAll.map((val, index) =>
-                  Number(val.status) === 1 && Number(val.form_process) === 4 ?
-                    (
-                      <option
-                        key={index}
-                        value={val.id}
-                        selected={Number(customerDetails.id) == Number(val.id)}
-                      >
-                        {val.trading_name}
-                      </option>
-                    )
-                    : null
-
-                )}
-            </select> */}
+            <label className="form-label mb-2">Customer</label>
             <Select
               id="tabSelect"
               name="staff_id"
@@ -1023,7 +936,7 @@ const ClientList = () => {
           {customerDetails.id != "" ? (
             <>
               <div className="form-group col-md-4 mb-0">
-                <label className="form-label mb-2">Select Client</label>
+                <label className="form-label mb-2">Client</label>
                 {clientData.length == 0 ? (
                   <input
                     type="text"
@@ -1032,29 +945,7 @@ const ClientList = () => {
                     value={"The customer's client is not available."}
                   />
                 ) : (
-                  // <select
-                  //   name="staff_id"
-                  //   className="form-select"
-                  //   id="tabSelect"
-                  //   defaultValue={clientDetailSingle.id}
-                  //   // onChange={(e) => selectCustomerId(e)}
-                  //   onChange={(e) => {
-                  //     const selectedId = e.target.value;
-                  //     const selectedClient = clientData.find(client => client.id == selectedId);
-                  //     selectClientId(selectedId, selectedClient?.client_name);
-                  //   }}
-                  // >
-                  //   {clientData &&
-                  //     clientData.map((val, index) => (
-                  //       <option
-                  //         key={index}
-                  //         value={val.id}
-                  //         selected={clientDetailSingle.id == val.id}
-                  //       >
-                  //         {val.client_name}
-                  //       </option>
-                  //     ))}
-                  // </select>
+                  // CHANGED: "All" option add kiya, aur value="" ho to "All" show karo
                   <Select
                     id="tabSelect"
                     name="staff_id"
@@ -1064,13 +955,18 @@ const ClientList = () => {
                     options={clientOptions}
                     value={selectedOptionClient}
                     onChange={(selected) => {
-                      const selectedClient = clientData.find(
-                        (client) => client.id == selected.value,
-                      );
-                      selectClientId(
-                        selected.value,
-                        selectedClient?.client_name,
-                      );
+                      if (selected.value === "") {
+                        // "All" selected
+                        selectClientId("", "");
+                      } else {
+                        const selectedClient = clientData.find(
+                          (client) => client.id == selected.value,
+                        );
+                        selectClientId(
+                          selected.value,
+                          selectedClient?.client_name,
+                        );
+                      }
                     }}
                     placeholder="Select Client"
                   />
@@ -1114,8 +1010,10 @@ const ClientList = () => {
                   {activeTab == "NoOfJobs" && (
                     <>
                       <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+                        {/* CHANGED: Create Job button sirf tab dikhega jab specific client select ho */}
                         {(getAccessDataJob.insert == 1 ||
                           role === "SUPERADMIN") &&
+                          clientDetailSingle.id !== "" &&
                           clientData.length > 0 && (
                             <div
                               className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
@@ -1182,21 +1080,6 @@ const ClientList = () => {
                         </button>
                       </li>
                     </ul>
-
-                    {/* <div className="col-md-2">
-                      <ExportToExcel
-                        className="btn btn-outline-info fw-bold float-end border-3 "
-                        apiData={exportData}
-                        fileName={`Job Details`}
-                      />
-                      <button
-                        className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
-                        onClick={handleExport}
-                      >
-                        <i className="fa fa-download" aria-hidden="true"></i>
-                        <span>Export Excel</span>
-                      </button>
-                    </div> */}
 
                     {customerData && customerData.length > 0 && (
                       <div className="col-md-2">
@@ -1266,8 +1149,7 @@ const ClientList = () => {
                               <option value={20}>20</option>
                               <option value={50}>50</option>
                               <option value={100}>100</option>
-                            <option value={500}>500</option>
-                              {/* <option value={100000}>All</option> */}
+                              <option value={500}>500</option>
                             </select>
                           </>
                         )}
@@ -1371,21 +1253,6 @@ const ClientList = () => {
                               : ""}
                       </h4>
                     </div>
-                    {/* <div className="col-4">
-                <div className="float-end">
-                  <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
-                    <i className="fa-regular fa-pencil me-2" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-0 btn btn-danger text-white float-end fw-bold ms-1"
-                  >
-                    <i className="fa-regular fa-trash me-2" />
-                    Delete
-                  </button>
-                </div>  
-              </div> */}
                   </div>
 
                   {informationData.client_type == 1 ? (
@@ -1396,26 +1263,16 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b>Trading Name :</b>{" "}
                               {informationData.trading_name || "NA"}
-                              {/* <p className="font-14  ml-3">
-                            {informationData.trading_name}
-                          </p> */}
                             </li>
                             <li className="mb-4">
                               <b className="">VAT Registered : </b>
                               {informationData.vat_registered == 0
                                 ? "No"
                                 : "Yes"}
-                              {/* <p className="font-14  ml-3">
-                            {" "}
-                            
-                          </p> */}
                             </li>
                             <li className="mb-4">
                               <b className="">Website : </b>
                               {informationData.website || "NA"}
-                              {/* <p className="font-14  ml-3">
-                            
-                          </p> */}
                             </li>
                           </ul>
                         </div>
@@ -1424,20 +1281,12 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">Trading Address :</b>{" "}
                               {informationData.trading_address || "NA"}
-                              {/* <p className="font-14  ml-3">
-                            {" "}
-                            {informationData.trading_address}
-                          </p> */}
                             </li>
                             <li className="mb-4">
                               <b className="">VAT Number :</b>{" "}
                               {informationData.vat_number || "NA"}
-                              {/* <p className="font-14  ml-3">
-                            {" "}
-                            {informationData.vat_number}
-                          </p> */}
                             </li>
-                          </ul>
+                          </ul> 
                         </div>
                       </div>
                     </div>
