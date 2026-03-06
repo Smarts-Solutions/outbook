@@ -1777,8 +1777,6 @@ const getAllJobsBYCustomerfilter = async (job) => {
 const get_jobs_filter = async (job) => {
   const { StaffUserId, filters } = job;
   const { client_id, customer_id } = filters;
-  console.log("get_jobs_filter client_id", client_id);
-  console.log("get_jobs_filter customer_id", customer_id);
   if(client_id === undefined && customer_id === undefined) {
      // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);

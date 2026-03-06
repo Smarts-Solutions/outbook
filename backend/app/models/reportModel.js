@@ -3396,7 +3396,7 @@ const getAllService = async (Report) => {
 
     if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
 
-        console.log("getAllService job_id --->>>>", job_id);
+       // console.log("getAllService job_id --->>>>", job_id);
         const query = `
     SELECT  
     id,

@@ -114,7 +114,7 @@ function JobCustomReport() {
   
 
   // Get All Jobs
-  const GetAllJobs = async (type, filter) => {
+  const GetAllJobs = async (filter) => {
     const req = { action: "get_jobs_filter", filters: filter };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
@@ -768,10 +768,10 @@ function JobCustomReport() {
       } else if (key == "customer_id") {
         if ([null, "", "null", undefined].includes(value)) {
           GetAllClient("all");
-          GetAllJobs("");
+          GetAllJobs("all");
         } else {
           GetAllClient(newFilters);
-          GetAllJobs("customer", newFilters);
+          GetAllJobs(newFilters);
         }
       } else if (key == "client_id") {
         if ([null, "", "null", undefined].includes(value)) {
@@ -780,12 +780,12 @@ function JobCustomReport() {
           }
 
           if (![null, "", "null", undefined].includes(filters.customer_id)) {
-            GetAllJobs();
+            GetAllJobs("all");
           } else {
-            GetAllJobs("customer", newFilters);
+            GetAllJobs(newFilters);
           }
         } else {
-          GetAllJobs("client", newFilters);
+          GetAllJobs(newFilters);
           GetAllCustomer(newFilters);
         }
       }
@@ -796,7 +796,7 @@ function JobCustomReport() {
   const addAndRemoveGroupBy = (value, type) => {
     if (type == "add") {
       if (value == "job_id") {
-        GetAllJobs();
+        GetAllJobs("all");
       } else if (value == "customer_id") {
         if (["", null, undefined].includes(filters.job_id)) {
           GetAllCustomer("all"); // fetch all customers
@@ -1219,7 +1219,7 @@ function JobCustomReport() {
         // console.log("parsedFilters ", parsedFilters?.job_id);
 
         if (parsedFilters?.groupBy?.includes("job_id")) {
-          await GetAllJobs();
+          await GetAllJobs("all");
         }
         if (parsedFilters?.groupBy?.includes("customer_id")) {
           if (["", null, undefined].includes(parsedFilters?.job_id)) {
