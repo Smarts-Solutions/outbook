@@ -115,7 +115,7 @@ function JobCustomReport() {
 
   // Get All Jobs
   const GetAllJobs = async (type, filter) => {
-    const req = { action: "get_jobs_filter", filters: type };
+    const req = { action: "get_jobs_filter", filters: filter };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
