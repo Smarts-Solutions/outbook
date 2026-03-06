@@ -1061,13 +1061,14 @@ const get_clients_filter = async (client) => {
   // console.log("get_clients_filter job_id", job_id);
   // console.log("get_clients_filter customer_id", customer_id);
 
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
 
   //console.log("get_clients_filter filters", filters?.customer_id);
-  // Get Role
-  const rows = await QueryRoleHelperFunction(StaffUserId);
+ 
 
   if (customer_id == undefined && job_id == undefined) {
     return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
