@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 27, 2026 at 11:11 AM
+-- Generation Time: Mar 06, 2026 at 12:08 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -1764,7 +1764,7 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `expected_delivery_date_old`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Year_Ending_id_1`, `Bookkeeping_Frequency_id_2`, `Day_Date_id_2`, `Week_Year_id_2`, `Week_Month_id_2`, `Week_id_2`, `Fortnight_Year_id_2`, `Fortnight_Month_id_2`, `Fortnight_id_2`, `Month_Year_id_2`, `Month_id_2`, `Quarter_Year_id_2`, `Quarter_id_2`, `Year_id_2`, `Other_FromDate_id_2`, `Other_ToDate_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Payroll_Week_Year_id_3`, `Payroll_Week_Month_id_3`, `Payroll_Week_id_3`, `Payroll_Fortnight_Year_id_3`, `Payroll_Fortnight_Month_id_3`, `Payroll_Fortnight_id_3`, `Payroll_Month_Year_id_3`, `Payroll_Month_id_3`, `Payroll_Quarter_Year_id_3`, `Payroll_Quarter_id_3`, `Payroll_Year_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Tax_Year_id_4`, `Management_Accounts_Frequency_id_6`, `Management_Accounts_FromDate_id_6`, `Management_Accounts_ToDate_id_6`, `Year_id_33`, `Period_id_32`, `Day_Date_id_32`, `Week_Year_id_32`, `Week_Month_id_32`, `Week_id_32`, `Fortnight_Year_id_32`, `Fortnight_Month_id_32`, `Fortnight_id_32`, `Month_Year_id_32`, `Month_id_32`, `Quarter_Year_id_32`, `Quarter_id_32`, `Year_id_32`, `Other_FromDate_id_32`, `Other_ToDate_id_32`, `Payroll_Frequency_id_31`, `Payroll_Week_Year_id_31`, `Payroll_Week_Month_id_31`, `Payroll_Week_id_31`, `Payroll_Fortnight_Year_id_31`, `Payroll_Fortnight_Month_id_31`, `Payroll_Fortnight_id_31`, `Payroll_Month_Year_id_31`, `Payroll_Month_id_31`, `Payroll_Quarter_Year_id_31`, `Payroll_Quarter_id_31`, `Payroll_Year_id_31`, `Audit_Year_Ending_id_27`, `Filing_Frequency_id_8`, `Period_Ending_Date_id_8`, `Filing_Date_id_8`, `Year_id_28`, `job_priority`, `status_updation_date`, `created_at`, `updated_at`) VALUES
 (45, 1, '000045', 13, 10, 13, '', 44, 33, 9, '01:01', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:02:11', '2025-12-01 05:32:11', '2025-12-01 05:32:24'),
 (46, 1, '000046', 13, 10, 14, '', 44, 1, 11, '01:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2025-12-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:12:41', '2025-12-01 05:42:41', '2025-12-01 05:42:41'),
-(47, 1, '000047', 13, 6, 17, '', 40, 2, 4, '01:00', 0, '0', '2026-01-29', '2026-01-25', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 8, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-02-12 13:07:12', '2026-01-29 09:47:45', '2026-02-12 07:37:12');
+(47, 1, '000047', 13, 6, 17, '', 40, 2, 4, '01:00', 0, '0', '2026-01-29', '2026-01-25', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 15, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-03 14:45:58', '2026-01-29 09:47:45', '2026-03-03 09:15:58');
 
 -- --------------------------------------------------------
 
@@ -1932,48 +1932,6 @@ INSERT INTO `master_status` (`id`, `name`, `status_type_id`, `status`, `is_disab
 (19, 'Completed - Filed with Companies House', 2, '1', '1', '2024-11-10 22:53:35', '2025-11-11 12:45:02'),
 (20, 'Completed - Filed with HMRC', 2, '1', '1', '2024-11-10 22:53:48', '2025-11-11 12:45:05'),
 (21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '1', '2025-02-01 12:10:19', '2025-02-06 13:17:37');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `master_status1`
---
-
-DROP TABLE IF EXISTS `master_status1`;
-CREATE TABLE IF NOT EXISTS `master_status1` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `status_type_id` int(11) NOT NULL,
-  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
-  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `status_type_id` (`status_type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `master_status1`
---
-
-INSERT INTO `master_status1` (`id`, `name`, `status_type_id`, `status`, `is_disable`, `created_at`, `updated_at`) VALUES
-(1, 'To Be Started - Not Yet Allocated Internally', 1, '1', '1', '2024-08-27 11:42:24', '2025-02-06 08:43:02'),
-(2, 'WIP – Missing Paperwork', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:07'),
-(3, 'WIP – Processing', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:11'),
-(4, 'WIP – In Queries', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:15'),
-(5, 'WIP – To Be Reviewed', 1, '1', '1', '2024-08-27 11:53:06', '2025-02-06 08:43:19'),
-(6, 'Complete', 2, '1', '1', '2024-09-24 13:07:54', '2025-02-06 08:43:24'),
-(7, 'Draft Sent', 3, '1', '1', '2024-11-10 22:47:22', '2025-02-10 07:08:36'),
-(8, 'Duplicate', 3, '1', '0', '2024-11-10 22:48:56', '2025-02-06 08:42:56'),
-(9, 'Awaiting Paperwork/Accounts/VAT', 7, '1', '0', '2024-11-10 22:49:22', '2025-02-06 08:42:56'),
-(10, 'Client Not Responding', 7, '1', '0', '2024-11-10 22:49:41', '2025-02-06 08:42:56'),
-(11, 'Waiting for Credentials', 7, '1', '0', '2024-11-10 22:49:57', '2025-02-06 08:42:56'),
-(12, 'Bookkeeping Not Completed', 7, '1', '0', '2024-11-10 22:50:12', '2025-02-06 08:42:56'),
-(13, 'To Be Reviewed', 1, '1', '0', '2024-11-10 22:51:55', '2025-02-06 08:42:56'),
-(14, 'Customer Reviewed & To be Updated', 1, '1', '0', '2024-11-10 22:52:10', '2025-02-06 08:42:56'),
-(17, 'Update Sent', 2, '1', '0', '2024-11-10 22:53:06', '2025-02-06 08:42:56'),
-(21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '1', '2025-02-01 11:28:00', '2025-02-06 08:43:32');
 
 -- --------------------------------------------------------
 
@@ -2418,7 +2376,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-02-26 04:56:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3MjA4MTc2NCwiZXhwIjoxNzcyMTE3NzY0fQ.9scZ8jQoSSIOhWhE1wVDWetLXdFfFOecNg7KLFuhWh8'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-03-06 04:38:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Mjc3MTg4NCwiZXhwIjoxNzcyODA3ODg0fQ.sa2KsYiG31Yh4hTku5dS65x4X1hnHBdgpO3zF4QUjgA'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2475,7 +2433,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1325 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1332 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3811,7 +3769,14 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1321, 1, '2026-02-20', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-02-20 04:45:32', '2026-02-20 04:45:32'),
 (1322, 1, '2026-02-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-26 04:56:04', '2026-02-26 04:56:04'),
 (1323, 12, '2026-02-26', '-', 0, ' Logged In', 'Reviewer BBBBBB 7 hv  Logged In ', '-', NULL, '2026-02-26 04:56:49', '2026-02-26 04:56:49'),
-(1324, 12, '2026-02-26', '-', 0, ' Logged Out', 'Reviewer BBBBBB 7 hv  Logged Out ', '-', '122.168.114.106', '2026-02-26 04:57:22', '2026-02-26 04:57:22');
+(1324, 12, '2026-02-26', '-', 0, ' Logged Out', 'Reviewer BBBBBB 7 hv  Logged Out ', '-', '122.168.114.106', '2026-02-26 04:57:22', '2026-02-26 04:57:22'),
+(1325, 1, '2026-03-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-02 11:35:53', '2026-03-02 11:35:53'),
+(1326, 1, '2026-03-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-03 04:50:20', '2026-03-03 04:50:20'),
+(1327, 1, '2026-03-03', 'job', 47, 'updated the job status from Not Progressing - Duplicate to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from Not Progressing - Duplicate to To Be Started - Not Yet Allocated Internally. job code: DDD_AFR_V4_000047', 'updated', '122.168.114.106', '2026-03-03 09:15:06', '2026-03-03 09:15:06'),
+(1328, 1, '2026-03-03', 'job', 47, 'updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Customer Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Customer Processing. job code: DDD_AFR_V4_000047', 'updated', '122.168.114.106', '2026-03-03 09:15:58', '2026-03-03 09:15:58'),
+(1329, 1, '2026-03-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-05 08:35:08', '2026-03-05 08:35:08'),
+(1330, 1, '2026-03-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-06 04:38:04', '2026-03-06 04:38:04'),
+(1331, 1, '2026-03-06', 'status types', 5, 'deleted status types To Be Started', 'Super Admin System Super Super Admin deleted status types To Be Started ', 'deleted', '122.168.114.106', '2026-03-06 05:04:14', '2026-03-06 05:04:14');
 
 -- --------------------------------------------------------
 
@@ -3896,16 +3861,17 @@ CREATE TABLE IF NOT EXISTS `status_types1` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `status_types1`
 --
 
 INSERT INTO `status_types1` (`id`, `type`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'pending', '1', '2024-06-28 12:52:45', '2024-06-28 12:52:45'),
-(2, 'completed', '1', '2024-06-28 12:53:10', '2024-06-28 12:53:10'),
-(3, 'rejected', '1', '2024-06-28 12:53:26', '2024-09-10 11:25:24');
+(1, 'WIP', '1', '2024-06-28 12:52:45', '2024-10-22 22:01:38'),
+(2, 'Completed', '1', '2024-06-28 12:53:10', '2024-10-22 22:01:31'),
+(3, 'Not Progressing', '1', '2024-06-28 12:53:26', '2024-10-22 22:01:14'),
+(4, 'On Hold', '1', '2025-01-30 08:52:20', '2025-01-30 08:52:20');
 
 -- --------------------------------------------------------
 
