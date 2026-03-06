@@ -3839,9 +3839,9 @@ const getJobCustomReport = async (Report) => {
         var { fromDate, toDate } = range;
 
         let where = [`work_date BETWEEN ? AND ?`];
+        
 
         //let job_id = [1, 6]
-
 
         if (!["", null, undefined].includes(job_id) && !(Array.isArray(job_id) && job_id.length === 0)) {
             //where.push(`raw.job_id = ${job_id}`);
@@ -3890,10 +3890,6 @@ const getJobCustomReport = async (Report) => {
            // where.push(`sf.employee_number = '${employee_number}'`);
             where.push(`sf.employee_number IN (${employee_number.join(",")})`);
         }
-
-
-
-
         if (!["", null, undefined].includes(date_received_on)) {
             where.push(`raw.date_received_on = '${date_received_on}'`);
         }
@@ -4023,6 +4019,8 @@ const getJobCustomReport = async (Report) => {
             where.push(`jobcreatestaff.status = '${staff_status}'`);
         }
 
+        
+
 
         if (!['SUPERADMIN', 'ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
             //where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
@@ -4042,11 +4040,10 @@ const getJobCustomReport = async (Report) => {
             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR raw.service_id = assigned_jobs_staff_view.service_id_assign
           )`)
-
-
-
+   
 
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
 
         // console.log("where", where);
 
@@ -4375,8 +4372,8 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-        // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-        //  console.log("unpivotSQL", unpivotSQL);
+         console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+         console.log("unpivotSQL", unpivotSQL);
 
         //  console.log("GROUPBY ---->> ", GROUPBY);
 
