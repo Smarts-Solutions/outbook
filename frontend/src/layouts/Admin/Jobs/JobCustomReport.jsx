@@ -663,6 +663,7 @@ function JobCustomReport() {
 
   const handleFilterChange = (e, type) => {
 
+    console.log("e --", e);
 
 
     if (type == "additionalField") {
@@ -1664,7 +1665,7 @@ function JobCustomReport() {
           );
           return unique;
         });
-        
+
         setClientHasMore(response.data.length === 20);
         setClientPage(pageNo);
 
@@ -1856,7 +1857,7 @@ function JobCustomReport() {
         </div> */}
 
         {/* Field To Display Job */}
-        {console.log("jobOptions -- ", jobOptions)}
+        {/* {console.log("jobOptions -- ", jobOptions)} */}
         {filters?.groupBy?.includes("job_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Job Name</label>
@@ -1866,16 +1867,37 @@ function JobCustomReport() {
               value={jobOptions.filter(opt =>
                 filters.job_id.includes(opt.value)
               )}
-              onChange={(selectedOptions) =>
+              // onChange={(selectedOptions) =>
+              //   handleFilterChange({
+              //     target: {
+              //       key: "job_id",
+              //       value: selectedOptions
+              //         ? selectedOptions.map(opt => opt.value)
+              //         : []
+              //     }
+              //   })
+              // }
+              onChange={(selectedOptions) => {
+                const values = selectedOptions
+                  ? selectedOptions.map(opt => opt.value)
+                  : [];
                 handleFilterChange({
                   target: {
                     key: "job_id",
-                    value: selectedOptions
-                      ? selectedOptions.map(opt => opt.value)
-                      : []
+                    value: values
                   }
-                })
-              }
+                });
+                // Call API only when empty
+                if (values.length === 0) {
+                  setHasMore(true);
+                  setPage(1);
+                  setSearch("");
+                  setJobOptions([]);
+                  setJobAllData([]);
+                  cacheRef.current = {};
+                  GetAllJobs({ searchValue: "", pageNo: 1 });
+                }
+              }}
               onInputChange={(value) => handleSearch(value)}
               onMenuScrollToBottom={() => {
                 if (hasMore) {
@@ -1918,16 +1940,36 @@ function JobCustomReport() {
               value={customerAllData.filter((opt) =>
                 filters?.customer_id?.includes(opt.value)
               )}
-              onChange={(selectedOptions) =>
+              // onChange={(selectedOptions) =>
+              //   handleFilterChange({
+              //     target: {
+              //       key: "customer_id",
+              //       value: selectedOptions
+              //         ? selectedOptions.map((opt) => opt.value)
+              //         : [],
+              //     },
+              //   })
+              // }
+              onChange={(selectedOptions) => {
+                const values = selectedOptions
+                  ? selectedOptions.map(opt => opt.value)
+                  : [];
                 handleFilterChange({
                   target: {
                     key: "customer_id",
-                    value: selectedOptions
-                      ? selectedOptions.map((opt) => opt.value)
-                      : [],
-                  },
-                })
-              }
+                    value: values
+                  }
+                });
+                // Call API only when empty
+                if (values.length === 0) {
+                  setCustomerHasMore(true);
+                  setCustomerPage(1);
+                  setCustomerSearch("");
+                  setCustomerAllData([]);
+                  customerCache.current = {};
+                  GetAllCustomer({ searchValue: "", pageNo: 1 });
+                }
+              }}
               onInputChange={(value) => handleCustomerSearch(value)}
               onMenuScrollToBottom={() => {
                 if (customerHasMore) {
@@ -1964,16 +2006,36 @@ function JobCustomReport() {
               value={clientAllData.filter((opt) =>
                 filters?.client_id?.includes(opt.value)
               )}
-              onChange={(selectedOptions) =>
+              // onChange={(selectedOptions) =>
+              //   handleFilterChange({
+              //     target: {
+              //       key: "client_id",
+              //       value: selectedOptions
+              //         ? selectedOptions.map((opt) => opt.value)
+              //         : [],
+              //     },
+              //   })
+              // }
+              onChange={(selectedOptions) => {
+                const values = selectedOptions
+                  ? selectedOptions.map(opt => opt.value)
+                  : [];
                 handleFilterChange({
                   target: {
                     key: "client_id",
-                    value: selectedOptions
-                      ? selectedOptions.map((opt) => opt.value)
-                      : [],
-                  },
-                })
-              }
+                    value: values
+                  }
+                });
+                // Call API only when empty
+                if (values.length === 0) {
+                  setClientHasMore(true);
+                  setClientPage(1);
+                  setClientSearch("");
+                  setClientAllData([]);
+                  clientCache.current = {};
+                  GetAllClient({ searchValue: "", pageNo: 1 });
+                }
+              }}
               onInputChange={(value) => handleClientSearch(value)}
               onMenuScrollToBottom={() => {
                 if (clientHasMore) {
