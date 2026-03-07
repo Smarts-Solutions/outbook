@@ -381,86 +381,127 @@ const JobStatus = () => {
 
         "Job Type": item.job_type_name || "-",
 
-        "Year Ending": item.Year_Ending_id_1
-          ? convertDate(item.Year_Ending_id_1)
-          : "-",
+        // Accounts Production
+        "Year Ending":
+          item.service_name === "Accounts Production"
+            ? item.Year_Ending_id_1
+              ? convertDate(item.Year_Ending_id_1)
+              : ""
+            : "",
 
-        "Tax Year": item.Tax_Year_id_4 || "-",
+        // Personal Tax
+        "Tax Year":
+          item.service_name === "Personal Tax Return"
+            ? item.Tax_Year_id_4 || ""
+            : "",
 
-        "Payroll Frequency": item.Payroll_Frequency_id_3 || "-",
+        // Payroll
+        "Payroll Frequency":
+          item.service_name === "Payroll"
+            ? item.Payroll_Frequency_id_3 || ""
+            : "",
 
-        // Payroll Year Logic
         "Payroll Year":
-          item.Payroll_Frequency_id_3 === "Weekly"
-            ? item.Payroll_Week_Year_id_3 || "-"
-            : item.Payroll_Frequency_id_3 === "Monthly"
-              ? item.Payroll_Month_Year_id_3 || "-"
-              : item.Payroll_Frequency_id_3 === "Fortnightly"
-                ? item.Payroll_Fortnight_Year_id_3 || "-"
-                : item.Payroll_Frequency_id_3 === "Quarterly"
-                  ? item.Payroll_Quarter_Year_id_3 || "-"
-                  : item.Payroll_Frequency_id_3 === "Yearly"
-                    ? item.Payroll_Year_id_3 || "-"
-                    : "-",
+          item.service_name === "Payroll"
+            ? item.Payroll_Frequency_id_3 === "Weekly"
+              ? item.Payroll_Week_Year_id_3 || ""
+              : item.Payroll_Frequency_id_3 === "Monthly"
+                ? item.Payroll_Month_Year_id_3 || ""
+                : item.Payroll_Frequency_id_3 === "Fortnightly"
+                  ? item.Payroll_Fortnight_Year_id_3 || ""
+                  : item.Payroll_Frequency_id_3 === "Quarterly"
+                    ? item.Payroll_Quarter_Year_id_3 || ""
+                    : item.Payroll_Frequency_id_3 === "Yearly"
+                      ? item.Payroll_Year_id_3 || ""
+                      : ""
+            : "",
 
-        // Payroll Month Logic
         "Payroll Month":
-          item.Payroll_Frequency_id_3 === "Weekly"
-            ? item.Payroll_Week_Month_id_3 || "-"
-            : item.Payroll_Frequency_id_3 === "Monthly"
-              ? item.Payroll_Month_id_3 || "-"
-              : item.Payroll_Frequency_id_3 === "Fortnightly"
-                ? item.Payroll_Fortnight_Month_id_3 || "-"
-                : "-",
+          item.service_name === "Payroll"
+            ? item.Payroll_Frequency_id_3 === "Weekly"
+              ? item.Payroll_Week_Month_id_3 || ""
+              : item.Payroll_Frequency_id_3 === "Monthly"
+                ? item.Payroll_Month_id_3 || ""
+                : item.Payroll_Frequency_id_3 === "Fortnightly"
+                  ? item.Payroll_Fortnight_Month_id_3 || ""
+                  : ""
+            : "",
 
-        "Payroll Week": item.Payroll_Week_id_3 || "-",
+        "Payroll Week":
+          item.service_name === "Payroll"
+            ? item.Payroll_Week_id_3 || ""
+            : "",
 
-        "Bookkeeping Frequency": item.Bookkeeping_Frequency_id_2 || "-",
+        // Bookkeeping
+        "Bookkeeping Frequency":
+          item.service_name === "Bookkeeping"
+            ? item.Bookkeeping_Frequency_id_2 || ""
+            : "",
 
-        "Date": item.Day_Date_id_2
-          ? convertDate(item.Day_Date_id_2)
-          : "-",
+        "Date":
+          item.service_name === "Bookkeeping"
+            ? item.Day_Date_id_2
+              ? convertDate(item.Day_Date_id_2)
+              : ""
+            : "",
 
-        // Bookkeeping Year Logic
         "Year":
-          item.Bookkeeping_Frequency_id_2 === "Weekly"
-            ? item.Week_Year_id_2 || "-"
-            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
-              ? item.Fortnight_Year_id_2 || "-"
-              : item.Bookkeeping_Frequency_id_2 === "Monthly"
-                ? item.Month_Year_id_2 || "-"
-                : item.Bookkeeping_Frequency_id_2 === "Quarterly"
-                  ? item.Quarter_Year_id_2 || "-"
-                  : item.Bookkeeping_Frequency_id_2 === "Yearly"
-                    ? item.Year_id_2 || "-"
-                    : "-",
+          item.service_name === "Bookkeeping"
+            ? item.Bookkeeping_Frequency_id_2 === "Weekly"
+              ? item.Week_Year_id_2 || ""
+              : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+                ? item.Fortnight_Year_id_2 || ""
+                : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                  ? item.Month_Year_id_2 || ""
+                  : item.Bookkeeping_Frequency_id_2 === "Quarterly"
+                    ? item.Quarter_Year_id_2 || ""
+                    : item.Bookkeeping_Frequency_id_2 === "Yearly"
+                      ? item.Year_id_2 || ""
+                      : ""
+            : "",
 
-        // Bookkeeping Month Logic
         "Month":
-          item.Bookkeeping_Frequency_id_2 === "Weekly"
-            ? item.Week_Month_id_2 || "-"
-            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
-              ? item.Fortnight_Month_id_2 || "-"
-              : item.Bookkeeping_Frequency_id_2 === "Monthly"
-                ? item.Month_id_2 || "-"
-                : "-",
+          item.service_name === "Bookkeeping"
+            ? item.Bookkeeping_Frequency_id_2 === "Weekly"
+              ? item.Week_Month_id_2 || ""
+              : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+                ? item.Fortnight_Month_id_2 || ""
+                : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                  ? item.Month_id_2 || ""
+                  : ""
+            : "",
 
         "Week":
-          item.Bookkeeping_Frequency_id_2 === "Weekly"
-            ? item.Week_id_2 || "-"
-            : "-",
+          item.service_name === "Bookkeeping" &&
+            item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_id_2 || ""
+            : "",
 
-        "Fortnight": item.Fortnight_id_2 || "-",
+        "Fortnight":
+          item.service_name === "Bookkeeping" &&
+            item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+            ? item.Fortnight_id_2 || ""
+            : "",
 
-        "Quarter": item.Quarter_id_2 || "-",
+        "Quarter":
+          item.service_name === "Bookkeeping" &&
+            item.Bookkeeping_Frequency_id_2 === "Quarterly"
+            ? item.Quarter_id_2 || ""
+            : "",
 
-        "FromDate": item.Other_FromDate_id_2
-          ? convertDate(item.Other_FromDate_id_2)
-          : "-",
+        "FromDate":
+          item.service_name === "Bookkeeping"
+            ? item.Other_FromDate_id_2
+              ? convertDate(item.Other_FromDate_id_2)
+              : ""
+            : "",
 
-        "ToDate": item.Other_ToDate_id_2
-          ? convertDate(item.Other_ToDate_id_2)
-          : "-",
+        "ToDate":
+          item.service_name === "Bookkeeping"
+            ? item.Other_ToDate_id_2
+              ? convertDate(item.Other_ToDate_id_2)
+              : ""
+            : "",
 
         "Status": item.status || "-",
 

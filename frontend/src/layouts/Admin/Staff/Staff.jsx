@@ -1565,62 +1565,10 @@ const StaffPage = () => {
             </h5>
           </div>
 
-          {/* <div className="mb-4">
-            <label htmlFor="staff-select" className="form-label fw-semibold">
-              <i className="bi bi-person-fill"></i> Select Staff to Replace:
-            </label>
-
-            <div className="dropdown">
-              <button
-                className="btn btn-info dropdown-toggle w-100"
-                type="button"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                Choose Staff{" "}
-                {selectedStaff ? `: ${selectedStaff.first_name}` : ""}
-              </button>
-
-              {dropdownOpen && (
-                <ul
-                  className="dropdown-menu show w-100"
-                  style={{ maxHeight: "200px", overflowY: "auto" }}
-                >
-                  {staffDataAll?.data
-                    ?.filter((staff) => {
-                      if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
-                        return (
-                          staff.role?.toUpperCase() === "MANAGER" &&
-                          staff.id !== deleteStaff?.id &&
-                          staff.id !== 1 &&
-                          staff.id !== 2
-                        );
-                      }
-                      return (
-                        staff.id !== deleteStaff?.id &&
-                        staff.id !== 1 &&
-                        staff.id !== 2
-                      );
-                    })
-                    .map((staff) => (
-                      <li key={staff.id}>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => {
-                            setSelectedStaff(staff);
-                            setDropdownOpen(!dropdownOpen);
-                          }}
-                        >
-                          {staff.first_name + " " + staff.last_name}
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div> */}
 
           <div className="mb-4">
             <label className="form-label fw-semibold">
-              <i className="bi bi-person-fill"></i> Select Staff to Replace:
+              <i className="bi bi-person-fill"></i>Staff to Replace:
             </label>
 
             <Select
@@ -1652,9 +1600,9 @@ const StaffPage = () => {
               value={
                 selectedStaff
                   ? {
-                      value: selectedStaff.id,
-                      label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
-                    }
+                    value: selectedStaff.id,
+                    label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                  }
                   : null
               }
               onChange={(selectedOption) => {
@@ -1764,7 +1712,7 @@ const StaffPage = () => {
         <div className="modal-body">
           <div className="mb-4">
             <label htmlFor="staff-select" className="form-label fw-semibold">
-              <i className="bi bi-person-fill me-2"></i> Select Staff to Replace
+              <i className="bi bi-person-fill me-2"></i>Staff to Replace
             </label>
 
             <div className="dropdown w-100">

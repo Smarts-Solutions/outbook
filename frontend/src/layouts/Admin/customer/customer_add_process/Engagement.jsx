@@ -4,7 +4,7 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType, customerSourceApi, customerSubSourceApi, } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
-import { ADD_SERVICES_CUSTOMERS, Get_Service , GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ADD_SERVICES_CUSTOMERS, Get_Service, GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
 
@@ -21,7 +21,7 @@ const Engagement = () => {
   const [getAllServices, setAllServices] = useState([]);
   const [coustomerSource, setCoustomerSource] = useState([]);
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
-  const [customerDetails, setCustomerDetails] = useState({loading: true,data: []});
+  const [customerDetails, setCustomerDetails] = useState({ loading: true, data: [] });
   const [formState1, setFormState1] = useState({
     customerJoiningDate: new Date().toISOString().split('T')[0]
   });
@@ -79,7 +79,7 @@ const Engagement = () => {
     GetAllServicesApi();
     GetCustomerData();
   }, []);
-  
+
   const GetCustomerData = async () => {
     const req = { customer_id: Number(newCustomerId), pageStatus: "3" };
     const data = { req: req, authToken: token };
@@ -252,13 +252,13 @@ const Engagement = () => {
     const newErrors = { ...errors3 };
     if (isSubmitting) {
       for (const key in AdhocPAYGHourlyErrorMessages) {
-        if (formValues3[key]==null || formValues3[key]==undefined || formValues3[key] === "" || formValues3[key] < 7 || formValues3[key] > 25) {
+        if (formValues3[key] == null || formValues3[key] == undefined || formValues3[key] === "" || formValues3[key] < 7 || formValues3[key] > 25) {
 
           newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
         }
       }
     } else {
-      if (value==null || value==undefined || value=="" || value < 7 || value > 25) {
+      if (value == null || value == undefined || value == "" || value < 7 || value > 25) {
         if (AdhocPAYGHourlyErrorMessages[name]) {
           newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
         }
@@ -562,8 +562,8 @@ const Engagement = () => {
       .then(async (response) => {
         if (response.status) {
           setCoustomerSource(response.data);
-          if(response.data.length > 0){
-           await customerSubSourceData(response.data[0].id);
+          if (response.data.length > 0) {
+            await customerSubSourceData(response.data[0].id);
           }
         }
       })
@@ -572,7 +572,7 @@ const Engagement = () => {
       });
   };
 
- 
+
   // useEffect(() => {
   //   if (formState1.customerSource) {
   //     customerSubSourceData();
@@ -592,8 +592,8 @@ const Engagement = () => {
         if (response.status) {
           setCoustomerSubSource(response.data);
 
-          if(response.data.length > 0){
-            setFormState1({ ...formState1, customerSubSource : (response.data[0].id).toString() ,customerSource : customerSource.toString() });
+          if (response.data.length > 0) {
+            setFormState1({ ...formState1, customerSubSource: (response.data[0].id).toString(), customerSource: customerSource.toString() });
           }
         } else {
           setCoustomerSubSource([]);
@@ -613,7 +613,7 @@ const Engagement = () => {
 
     if (name === "customerSource") {
       customerSubSourceData(value);
-      }
+    }
 
     setFormErrors((prevErrors) => ({
       ...prevErrors,
@@ -1115,7 +1115,7 @@ const Engagement = () => {
                       value={formState1.customerSource}
                       onChange={handleInputChange}
                     >
-                      <option value="">Select Customer Source</option>
+                      <option value="">Customer Source</option>
                       {coustomerSource &&
                         coustomerSource.map((data) => (
                           <option key={data.id} value={data.id}>
@@ -1131,7 +1131,7 @@ const Engagement = () => {
                   </div>
                   <div className="col-lg-4 mb-3">
                     <label className="form-label">
-                      Select Customer Sub-Source
+                      Customer Sub-Source
                     </label>
                     <select
 

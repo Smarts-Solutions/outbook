@@ -107,7 +107,6 @@ const Login1 = () => {
 
   const handleAzureLogin = async () => {
     const accounts = await azureLogin();
-    console.log("Azure Accounts", accounts);
     if (accounts.length > 0) {
       const req = { email: accounts[0].username };
 

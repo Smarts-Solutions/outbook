@@ -573,7 +573,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.customer &&
-                                      dashboard.customer.count,
+                                    dashboard.customer.count,
                                   )}
                                 </h3>
                                 <img
@@ -712,7 +712,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.pending_job &&
-                                      dashboard.pending_job.count,
+                                    dashboard.pending_job.count,
                                   )}
                                 </h3>
                                 <img
@@ -750,7 +750,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.completed_job &&
-                                      dashboard.completed_job.count,
+                                    dashboard.completed_job.count,
                                   )}
                                 </h3>
                                 <img
@@ -770,167 +770,7 @@ const Dashboard = () => {
             </>
           </div>
 
-          {/* <div className="col-lg-4 col-md-4 mt-2">
-            <div className="card activity-card">
-              <div className="card-header border-bottom-0">
-                <div className="row align-items-center">
-                  <div className="col">
-                    <h4 className="card-title">Activity</h4>
-                  </div>
-                </div>
-              </div>
 
-              <div className="card-body">
-                {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
-                  <>
-                    <div className="row dashboard-date-filter">
-                      <div className="col-lg-5 col-md-4 px-1">
-                        <label>
-                          <b>Select Staff</b>
-                        </label>
-                        <Select
-                          id="tabSelect"
-                          name="staff"
-                          className="basic-multi-select"
-                          options={staffOptionPlaceholder}
-                          value={staffOptionPlaceholder.find(
-                            (obj) =>
-                              Number(obj.value) === Number(selectedStaff),
-                          )}
-                          placeholder="-- Select --"
-                          onChange={(selectedOption) => {
-                            const e = {
-                              target: {
-                                name: "staff",
-                                value: selectedOption.value,
-                              },
-                            };
-                            selectFilterValue(e);
-                          }}
-                          classNamePrefix="react-select"
-                          isSearchable
-                        />
-                      </div>
-
-                      <div className="col-lg-5 col-md-4 px-1">
-                        <label>
-                          <b>Select Time Period</b>
-                        </label>
-                        <select
-                          className="form-select"
-                          value={activityRange}
-                          onChange={(e) => {
-                            setActivityRange(e.target.value);
-                            setSelectedFromDate("");
-                            setSelectedToDate("");
-                          }}
-                        >
-                          <option value="this_week">This Week</option>
-                          <option value="last_week">Last Week</option>
-                          <option value="this_month">This Month</option>
-                          <option value="last_month">Last Month</option>
-                          <option value="last_six_month">Last 6 Months</option>
-                          <option value="last_year">Last Year</option>
-                          <option value="this_week">This Week</option>
-                          <option value="last_week">Last Week</option>
-                          <option value="this_month">This Month</option>
-                          <option value="last_month">Last Month</option>
-                          <option value="this_quarter">This Quarter</option>
-                          <option value="last_quarter">Last Quarter</option>
-                          <option value="this_six_month">This 6 Months</option>
-                          <option value="last_six_month">Last 6 Months</option>
-                          <option value="this_year">This Year</option>
-                          <option value="last_year">Last Year</option>
-                          <option value="custom">Custom</option>
-                        </select>
-                      </div>
-
-                      <div className="col-lg-4 col-md-4 px-1"></div>
-                    </div>
-
-                    {activityRange === "custom" && (
-                      <div className="row dashboard-date-filter mt-2">
-                        <div className="col-lg-6 col-md-6 px-1">
-                          <label>
-                            <b>From Date</b>
-                          </label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            value={selectedFromDate}
-                            name="fromDate"
-                            onChange={(e) => selectFilterValue(e)}
-                            max={selectedToDate || undefined}
-                          />
-                        </div>
-
-                        <div className="col-lg-6 col-md-6 px-1">
-                          <label>
-                            <b>To Date</b>
-                          </label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            value={selectedToDate}
-                            name="toDate"
-                            onChange={(e) => selectFilterValue(e)}
-                            min={selectedFromDate || undefined}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : null}
-
-                <div className="analytic-dash-activity" data-simplebar="init">
-                  <div className="simplebar-mask1">
-                    <div className="simplebar-content" style={{ padding: 0 }}>
-                      <div className="activity">
-                        {getActiviyLog && getActiviyLog.length > 0 ? (
-                          getActiviyLog?.map((item, index) => (
-                            <div className="activity-info" key={index}>
-                              <div className="icon-info-activity">
-                                <i className="fa-solid fa-circle"></i>
-                              </div>
-                              <div className="activity-info-text">
-                                <small>{formatDate(item?.created_at)}</small>
-                                <p>{item?.log_message}</p>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="no-data-found">
-                            <img
-                              src="/assets/images/No-data-amico.png"
-                              alt="No data found"
-                              style={{ maxWidth: "100%", height: "auto" }}
-                            />
-                            <p className="text-center">
-                              {activityRange === "custom" &&
-                              (!selectedFromDate || !selectedToDate)
-                                ? "Please select both From Date and To Date to view activity logs"
-                                : "No Activity Logs Found"}
-                            </p>
-                          </div>
-                        )}
-
-                        {hasMore && getActiviyLog.length > 0 && (
-                          <div className="text-center mt-3">
-                            <button
-                              className="btn btn-info w-75"
-                              onClick={loadMoreLogs}
-                            >
-                              Load More
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
 
           <div className="col-lg-4 col-md-4 mt-2">
             <div className="card activity-card">
@@ -948,7 +788,7 @@ const Dashboard = () => {
                   {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) && (
                     <div className="col-lg-5 col-md-4 px-1">
                       <label>
-                        <b>Select Staff</b>
+                        <b>Staff</b>
                       </label>
                       <Select
                         id="tabSelect"
@@ -977,7 +817,7 @@ const Dashboard = () => {
                   {/* ✅ Select Time Period – for ALL roles */}
                   <div className="col-lg-5 col-md-4 px-1">
                     <label>
-                      <b>Select Time Period</b>
+                      <b>Time Period</b>
                     </label>
                     <select
                       className="form-select"
@@ -1062,7 +902,7 @@ const Dashboard = () => {
                             />
                             <p className="text-center">
                               {activityRange === "custom" &&
-                              (!selectedFromDate || !selectedToDate)
+                                (!selectedFromDate || !selectedToDate)
                                 ? "Please select both From Date and To Date to view activity logs"
                                 : "No Activity Logs Found"}
                             </p>

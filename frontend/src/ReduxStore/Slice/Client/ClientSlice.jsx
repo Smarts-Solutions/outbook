@@ -51,7 +51,7 @@ export const addClientDocument = createAsyncThunk("addClientDocument", async (re
   try { 
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
-    console.log("updatedReq", updatedReq)
+  
     const res = await add_Client_Document(updatedReq, authToken);
 
     return await res;

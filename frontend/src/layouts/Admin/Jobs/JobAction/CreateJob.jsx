@@ -2791,32 +2791,7 @@ const CreateJob = () => {
                                     <label className="form-label">
                                       Allocated To
                                     </label>
-                                    {/* <select
-                                      className={
-                                        errors["AllocatedTo"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
-                                      name="AllocatedTo"
-                                      onChange={HandleChange}
-                                      value={jobData.AllocatedTo}
-                                    // disabled={ role === "SUPERADMIN" ? false : true}
-                                    >
-                                      <option value=""> Select Staff</option>
-                                      {(AllJobData?.data?.allocated || []).map(
-                                        (staff) => (
-                                          <option
-                                            value={staff.allocated_id}
-                                            key={staff.allocated_id}
-                                          >
-                                            {staff.allocated_name +
-                                              " (" +
-                                              staff?.allocated_email +
-                                              ")"}
-                                          </option>
-                                        )
-                                      )}
-                                    </select> */}
+                                  
                                     <Select
                                       name="AllocatedTo"
                                       id="AllocatedTo"
