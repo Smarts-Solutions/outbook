@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { linkedData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import { useDispatch } from "react-redux";
@@ -11,6 +11,7 @@ import {
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import ReactPaginate from "react-paginate";
 
 const JobStatus = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,39 @@ const JobStatus = () => {
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debounceRef = useRef(null);
+
+  const handlePageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    GetLinkedData(newPage, pageSize, "");
+  };
+
+  const handlePageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    GetLinkedData(1, newSize, "");
+  };
+
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      GetLinkedData(1, pageSize, term);
+    }, 500);
+  };
 
   const [hararchyData, setHararchyData] = useState({
     customer: {},
@@ -128,6 +162,7 @@ const JobStatus = () => {
   console.log("getAccessData", getAccessData);
 
   const GetStatus = async () => {
+    setLoading(true);
     const data = { req: { action: "get" }, authToken: token };
     await dispatch(MasterStatusData(data))
       .unwrap()
@@ -140,15 +175,22 @@ const JobStatus = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
-  const GetLinkedData = async () => {
+  const GetLinkedData = async (page = 1, limit = 10, term) => {
+    setLoading(true);
     const data = {
       req: {
         staff_id: location?.state?.req?.staff_id,
         key: location?.state?.req?.key,
         ids: location?.state?.req?.ids,
+        page,
+        limit,
+        search: term,
       },
       authToken: token,
     };
@@ -157,12 +199,16 @@ const JobStatus = () => {
       .then((res) => {
         if (res.status) {
           setAllLinkedData(res.data);
+          setTotalRecords(res.pagination.total);
         } else {
           setAllLinkedData([]);
         }
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -594,7 +640,7 @@ const JobStatus = () => {
       sortable: true,
     },
     {
-      name: "Client Contact Person",
+      name: "Account Manager",
       selector: (row) =>
         row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
@@ -617,6 +663,46 @@ const JobStatus = () => {
         </div>
       ),
     },
+
+    {
+      name: "Created by",
+      selector: (row) => row.customer_created_by,
+      cell: (row) => (
+        <div title={row.customer_created_by}>{row.customer_created_by}</div>
+      ),
+      sortable: true,
+    },
+
+    {
+      name: "Created At",
+      selector: (row) => row.created_at,
+      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
+      sortable: true,
+    },
+    // {
+    //   name: "Client Contact Person",
+    //   selector: (row) =>
+    //     row.account_manager_firstname + " " + row.account_manager_lastname,
+    //   sortable: true,
+    //   cell: (row) => (
+    //     <div
+    //       title={
+    //         row.account_manager_firstname + " " + row.account_manager_lastname
+    //       }
+    //       className="data-table-cell"
+    //       data-fulltext={
+    //         row.account_manager_firstname + " " + row.account_manager_lastname
+    //       }
+    //       style={{
+    //         whiteSpace: "nowrap",
+    //         overflow: "hidden",
+    //         textOverflow: "ellipsis",
+    //       }}
+    //     >
+    //       {row.account_manager_firstname + " " + row.account_manager_lastname}
+    //     </div>
+    //   ),
+    // },
     {
       name: "Status",
       cell: (row) => (
@@ -675,7 +761,7 @@ const JobStatus = () => {
     //   selector: (row) => row.client_name || "-",
     //   sortable: true,
     // },
-  {
+    {
       name: "Client Name",
       cell: (row) => (
         <div>
@@ -704,7 +790,7 @@ const JobStatus = () => {
       selector: (row) => row.client_code || "-",
       sortable: true,
     },
-     {
+    {
       name: "Customer Name",
       cell: (row) => (
         <div title={row.customer_name || "-"}>{row.customer_name || "-"}</div>
@@ -725,7 +811,7 @@ const JobStatus = () => {
       sortable: true,
       width: "150px",
     },
-     {
+    {
       name: "Created By",
       cell: (row) => (
         <div title={row.client_created_by || "-"}>
@@ -774,14 +860,14 @@ const JobStatus = () => {
       ),
       selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
-      // width: "250px",
+      width: "200px",
     },
     {
       name: "Email Address",
       cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
-      // width: "250px",
+      width: "165px",
     },
     {
       name: "Phone",
@@ -801,14 +887,28 @@ const JobStatus = () => {
       selector: (row) =>
         row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
-      // width: "250px",
+      width: "150px",
     },
     {
       name: "Role",
       cell: (row) => <div title={row.role_name}>{row.role_name}</div>,
       selector: (row) => row.role_name,
       sortable: true,
-      // width: "250px",
+      width: "150px",
+    },
+    {
+      name: "Line Manager",
+      selector: (row) => row.line_manager_name || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
+      name: "Employee ID",
+      selector: (row) => row.employee_number || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
     },
     {
       name: "Status",
@@ -845,7 +945,6 @@ const JobStatus = () => {
       return updatedData;
     });
   };
-  
 
   console.log("allLinkedData", allLinkedData);
   console.log("location", location?.state?.req?.key);
@@ -877,101 +976,140 @@ const JobStatus = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const key = location?.state?.req?.key;
 
-    if (key === "customer") {
-      const data = allLinkedData.map((item) => ({
-        "Trading Name": item.trading_name || "-",
-        "Customer Code": item.customer_code || "-",
-        Type:
-          item.customer_type === "1"
-            ? "Sole Trader"
-            : item.customer_type === "2"
-              ? "Company"
-              : item.customer_type === "3"
-                ? "Partnership"
-                : "-",
-        "Client Contact Person":
-          (item.account_manager_firstname || "") +
-          " " +
-          (item.account_manager_lastname || ""),
-        Status:
-          item.form_process === "4"
-            ? item.status == "1"
-              ? "Active"
-              : "Inactive"
-            : "Inprogress",
-      }));
-      downloadCSV(data, "Customers.csv");
-    } else if (key === "client") {
-      const data = allLinkedData.map((item) => ({
-        "Client Name": item.client_name || "-",
-        "Client Code": item.client_code || "-",
-        "Customer Name": item.customer_name || "-",
-        "Client Type": item.client_type_name || "-",
-        "Created By": item.client_created_by || "-",
-        "Created At": item.created_at || "-",
-        Status: item.status === "1" ? "Active" : "Deactive",
-      }));
-      downloadCSV(data, "Clients.csv");
-    } else if (key === "staff") {
-      const data = allLinkedData.map((item) => ({
-        "Full Name": (item.first_name || "") + " " + (item.last_name || ""),
-        Email: item.email || "-",
-        Phone:
-          item.phone && item.phone_code
-            ? item.phone_code + "-" + item.phone
-            : "-",
-        Role: item.role_name || "-",
-        Status: item.status === "1" ? "Active" : "Inactive",
-      }));
-      downloadCSV(data, "Staff.csv");
-    } else {
-      // job, pending_job, completed_job — sab ke liye same columns
-      const data = allLinkedData.map((item) => {
-        const status = statusDataAll.find(
-          (s) => Number(s.id) === Number(item.status_type),
-        );
-        return {
-          "Job ID": item.job_code_id || "-",
-          "Job Priority": item.job_priority
-            ? item.job_priority.charAt(0).toUpperCase() +
-              item.job_priority.slice(1).toLowerCase()
-            : "-",
-          "Client Name": item.client_trading_name || "-",
-          "Job Type": item.job_type_name || "-",
-          Status: status ? status.name : "-",
-          "Client Contact Person":
-            (item.account_manager_officer_first_name || "") +
+    Swal.fire({
+      title: "Exporting...",
+      text: "Please wait while we fetch all data.",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      const exportPayload = {
+        req: {
+          staff_id: location?.state?.req?.staff_id,
+          key: location?.state?.req?.key,
+          ids: location?.state?.req?.ids,
+          page: 1,
+          limit: 100000,
+          search: searchTerm,
+        },
+        authToken: token,
+      };
+
+      const res = await dispatch(linkedData(exportPayload)).unwrap();
+
+      if (!res.status || !res.data || res.data.length === 0) {
+        Swal.fire({
+          title: "No Data",
+          text: "Export ke liye koi data nahi hai.",
+          icon: "info",
+        });
+        return;
+      }
+
+      const allData = res.data;
+      Swal.close();
+
+      if (key === "customer") {
+        const data = allData.map((item) => ({
+          "Trading Name": item.trading_name || "-",
+          "Customer Code": item.customer_code || "-",
+          Type:
+            item.customer_type === "1"
+              ? "Sole Trader"
+              : item.customer_type === "2"
+                ? "Company"
+                : item.customer_type === "3"
+                  ? "Partnership"
+                  : "-",
+          "Account Manager":
+            (item.account_manager_firstname || "") +
             " " +
-            (item.account_manager_officer_last_name || ""),
-          "Client Job Code": item.client_job_code || "-",
-          "Outbook Account Manager":
-            (item.outbooks_acount_manager_first_name || "") +
-            " " +
-            (item.outbooks_acount_manager_last_name || ""),
-          "Allocated To": item.allocated_first_name
-            ? item.allocated_first_name + " " + item.allocated_last_name
-            : "-",
-          Timesheet:
-            item.total_hours_status == "1" && item.total_hours
-              ? item.total_hours.split(":")[0] +
-                "h " +
-                item.total_hours.split(":")[1] +
-                "m"
-              : "-",
-          Invoicing: item.invoiced == "1" ? "YES" : "NO",
-          "Created By": item.job_created_by || "-",
+            (item.account_manager_lastname || ""),
+          "Created by": item.customer_created_by || "",
+          "Created At": item.created_at || "",
+          Status:
+            item.form_process === "4"
+              ? item.status == "1"
+                ? "Active"
+                : "Inactive"
+              : "Inprogress",
+        }));
+        downloadCSV(data, "Customers.csv");
+      } else if (key === "client") {
+        const data = allData.map((item) => ({
+          "Client Name": item.client_name || "-",
+          "Client Code": item.client_code || "-",
+          "Customer Name": item.customer_name || "-",
+          "Client Type": item.client_type_name || "-",
+          "Created By": item.client_created_by || "-",
           "Created At": item.created_at || "-",
-        };
-      });
-      downloadCSV(data, `Jobs_${key || "all"}.csv`);
+          Status: item.status === "1" ? "Active" : "Deactive",
+        }));
+        downloadCSV(data, "Clients.csv");
+      } else if (key === "staff") {
+        const data = allData.map((item) => ({
+          "Full Name": (item.first_name || "") + " " + (item.last_name || ""),
+          Email: item.email || "-",
+
+          Phone: item.phone
+            ? ` ${item.phone_code ? item.phone_code + "-" + item.phone : item.phone}`
+            : "-",
+          Role: item.role_name || "-",
+          "Line Manager": item.line_manager_name || "-",
+          "Employee ID": item.employee_number || "-",
+          Status: item.status === "1" ? "Active" : "Inactive",
+        }));
+        downloadCSV(data, "Staff.csv");
+      } else {
+        const data = allData.map((item) => {
+          const status = statusDataAll.find(
+            (s) => Number(s.id) === Number(item.status_type),
+          );
+          return {
+            "Job ID": item.job_code_id || "-",
+            "Job Priority": item.job_priority
+              ? item.job_priority.charAt(0).toUpperCase() +
+                item.job_priority.slice(1).toLowerCase()
+              : "-",
+            "Client Name": item.client_trading_name || "-",
+            "Job Type": item.job_type_name || "-",
+            Status: status ? status.name : "-",
+            "Client Contact Person":
+              (item.account_manager_officer_first_name || "") +
+              " " +
+              (item.account_manager_officer_last_name || ""),
+            "Client Job Code": item.client_job_code || "-",
+            "Outbook Account Manager":
+              (item.outbooks_acount_manager_first_name || "") +
+              " " +
+              (item.outbooks_acount_manager_last_name || ""),
+            "Allocated To": item.allocated_first_name
+              ? item.allocated_first_name + " " + item.allocated_last_name
+              : "-",
+            Timesheet:
+              item.total_hours_status == "1" && item.total_hours
+                ? item.total_hours.split(":")[0] +
+                  "h " +
+                  item.total_hours.split(":")[1] +
+                  "m"
+                : "-",
+            Invoicing: item.invoiced == "1" ? "YES" : "NO",
+            "Created By": item.job_created_by || "-",
+            "Created At": item.created_at || "-",
+          };
+        });
+        downloadCSV(data, `Jobs_${key || "all"}.csv`);
+      }
+    } catch (error) {
+      Swal.fire({ title: "Error", text: "Export failed.", icon: "error" });
     }
   };
 
-
-   const HandleClientProfileView = (row) => {
+  const HandleClientProfileView = (row) => {
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
@@ -987,37 +1125,33 @@ const JobStatus = () => {
   return (
     <div>
       <div className="report-data mt-5">
-        <div className="row ">
+        <div className="row">
           <div className="col-md-12">
             <div className="">
-              <div className=" row mb-5">
-                <div className="tab-title col-lg-6 ">
+              <div className="row mb-5">
+                <div className="tab-title col-lg-6">
                   <h3>{location?.state?.req?.heading}</h3>
                 </div>
-                <div className="col-lg-6  d-flex justify-content-end">
+                <div className="col-lg-6 d-flex justify-content-end">
                   <div
                     className="btn btn-info text-white blue-btn"
-                    onClick={() => {
-                      window.history.back();
-                    }}
+                    onClick={() => window.history.back()}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
 
                   {(role === "SUPERADMIN" ||
                     (getAccessData.insert === 1 && getAccessData.view === 1)) &&
-                  location?.state?.req?.heading == "Customers" ? (
-                    <div className="ms-2">
-                      <Link
-                        to="/admin/addcustomer"
-                        className="btn btn-outline-info  fw-bold float-end border-3"
-                      >
-                        <i className="fa fa-plus" /> Add Customer
-                      </Link>
-                    </div>
-                  ) : (
-                    ""
-                  )}
+                    location?.state?.req?.heading == "Customers" && (
+                      <div className="ms-2">
+                        <Link
+                          to="/admin/addcustomer"
+                          className="btn btn-outline-info fw-bold float-end border-3"
+                        >
+                          <i className="fa fa-plus" /> Add Customer
+                        </Link>
+                      </div>
+                    )}
 
                   {allLinkedData && allLinkedData.length > 0 && (
                     <div className="ms-2">
@@ -1032,13 +1166,34 @@ const JobStatus = () => {
                   )}
                 </div>
               </div>
+
+              {/* Search Row */}
+              <div className="row mb-4">
+                <div className="col-md-4">
+                  <input
+                    type="text"
+                    placeholder={`Search ${location?.state?.req?.heading || ""}`}
+                    className="form-control"
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
         <div className="datatable-wrapper mt-minus">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
+
           {role === "SUPERADMIN" ? (
             <Datatable
-              filter={true}
+              filter={false}
+              pagination={false}
               columns={
                 location?.state?.req?.key === "client"
                   ? ClientListColumns
@@ -1056,7 +1211,8 @@ const JobStatus = () => {
                 getAccessData.all_customers === 1) &&
                 location?.state?.req?.key === "customer" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={columnsCustomer}
                     data={allLinkedData || []}
                   />
@@ -1066,7 +1222,8 @@ const JobStatus = () => {
                 getAccessData.all_clients === 1) &&
                 location?.state?.req?.key === "client" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={ClientListColumns}
                     data={allLinkedData || []}
                   />
@@ -1075,7 +1232,8 @@ const JobStatus = () => {
               {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
                 location?.state?.req?.key === "job" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
@@ -1084,7 +1242,8 @@ const JobStatus = () => {
               {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
                 location?.state?.req?.key === "pending_job" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
@@ -1093,7 +1252,8 @@ const JobStatus = () => {
               {(getAccessData.job === 1 || getAccessData.all_jobs === 1) &&
                 location?.state?.req?.key === "completed_job" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={JobColumns}
                     data={allLinkedData || []}
                   />
@@ -1102,13 +1262,40 @@ const JobStatus = () => {
               {getAccessData.staff === 1 &&
                 location?.state?.req?.key === "staff" && (
                   <Datatable
-                    filter={true}
+                    filter={false}
+                    pagination={false}
                     columns={columnsStaff}
                     data={allLinkedData || []}
                   />
                 )}
             </>
           )}
+
+          {/* Pagination */}
+          <ReactPaginate
+            previousLabel={"Previous"}
+            nextLabel={"Next"}
+            breakLabel={"..."}
+            pageCount={Math.ceil(totalRecords / pageSize)}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageChange}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+          />
+
+          <select
+            className="perpage-select"
+            value={pageSize}
+            onChange={handlePageSizeChange}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={500}>500</option>
+          </select>
         </div>
       </div>
     </div>
