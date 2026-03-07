@@ -1042,6 +1042,39 @@ const Timesheet = () => {
         alert("Please select the Task");
         return;
       }
+
+      // check duplicate rows
+      const seen = new Set();
+      let duplicateItem = null;
+      let duplicateIndex = -1;
+
+      for (let i = 0; i < timeSheetRows.length; i++) {
+        const row = timeSheetRows[i];
+        const key =
+          row.customer_id +
+          "_" +
+          row.client_id +
+          "_" +
+          row.job_id +
+          "_" +
+          row.task_id +
+          "_" +
+          row.task_type;
+
+        if (seen.has(key)) {
+          duplicateItem = row;
+          duplicateIndex = i;
+          break;
+        }
+        seen.add(key);
+      }
+
+      if (duplicateItem) {
+        let fieldName = `${currentDay}_hours`;
+        if (checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)) {
+          return;
+        }
+      }
     }
 
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
@@ -1756,6 +1789,7 @@ const Timesheet = () => {
 
     if (filteredRows.length !== timeSheetRows.length) {
 
+
       const existingRow = filteredRows.find((row) =>
         row.customer_id === item.customer_id &&
         row.client_id === item.client_id &&
@@ -1772,7 +1806,16 @@ const Timesheet = () => {
       if (existingRow) {
         for (const day of days) {
           const hKey = day + "_hours";
-          const val = existingRow[hKey];
+          let val = existingRow[hKey];
+
+          if (hKey === "sunday_hours") {
+            focusDay = currentDay || "monday";
+            focusFieldName = `${focusDay}_hours`;
+            val = existingRow[fieldName];
+
+          }
+
+
 
           if (val === "0" || val === 0 || val === "" || val === null || val === undefined) {
             focusFieldName = hKey;
@@ -1786,8 +1829,8 @@ const Timesheet = () => {
 
       sweatalert.fire({
         icon: "error",
-        title: "Duplicate Row Found",
-        text: "Duplicate rows removed. Redirecting to existing row.",
+        title: "Entry already exists",
+        text: "Entry already exists. Redirecting to the original record.",
       }).then(() => {
 
         if (focusDay !== "monday") {
@@ -1821,7 +1864,164 @@ const Timesheet = () => {
     return false;
   };
 
+  const checkDuplicateRowForSave = (item, index, fieldName) => {
+    const uniqueRowsMap = new Map();
+    const duplicateIds = [];
 
+    // Helper to sum two time strings (HH.MM)
+    const sumTime = (val1, val2) => {
+      const v1 = parseFloat(val1) || 0;
+      const v2 = parseFloat(val2) || 0;
+      const h1 = Math.floor(v1);
+      const m1 = Math.round((v1 - h1) * 100);
+      const h2 = Math.floor(v2);
+      const m2 = Math.round((v2 - h2) * 100);
+      let totalMins = (h1 * 60 + m1) + (h2 * 60 + m2);
+      const finalHours = Math.floor(totalMins / 60);
+      const finalMinutes = totalMins % 60;
+      return `${finalHours}.${finalMinutes.toString().padStart(2, "0")}`;
+    };
+
+    timeSheetRows.forEach((row) => {
+      const key =
+        row.customer_id +
+        "_" +
+        row.client_id +
+        "_" +
+        row.job_id +
+        "_" +
+        row.task_id +
+        "_" +
+        row.task_type;
+
+      if (!uniqueRowsMap.has(key)) {
+        uniqueRowsMap.set(key, { ...row });
+      } else {
+        // This is a duplicate. Sum hours into the first occurrence.
+        const firstRow = uniqueRowsMap.get(key);
+        const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+        days.forEach(day => {
+          const hKey = day + "_hours";
+          const v2 = parseFloat(row[hKey]) || 0;
+          if (v2 > 0) {
+            firstRow[hKey] = sumTime(firstRow[hKey], row[hKey]);
+            if (!firstRow[day + "_date"] && row[day + "_date"]) {
+              firstRow[day + "_date"] = row[day + "_date"];
+            }
+          }
+        });
+
+        // Recalculate total_hours for the firstRow
+        let totalMinsAll = 0;
+        days.forEach(day => {
+          const v = parseFloat(firstRow[day + "_hours"]) || 0;
+          const h = Math.floor(v);
+          const m = Math.round((v - h) * 100);
+          totalMinsAll += (h * 60 + m);
+        });
+        const finalH = Math.floor(totalMinsAll / 60);
+        const finalM = totalMinsAll % 60;
+        firstRow.total_hours = `${finalH}.${finalM.toString().padStart(2, "0")}`;
+
+        if (row.id) {
+          duplicateIds.push(row.id);
+        }
+        console.log("Duplicate row merged into original:", row);
+      }
+    });
+
+    const filteredRows = Array.from(uniqueRowsMap.values());
+
+    if (filteredRows.length !== timeSheetRows.length) {
+      // Duplicates were merged.
+
+      // Update deleteRows state if any merged rows had IDs
+      if (duplicateIds.length > 0) {
+        setDeleteRows(prev => [...new Set([...prev, ...duplicateIds])]);
+      }
+
+      // Ensure the merged results are ready to be saved
+      filteredRows.forEach(row => {
+        if (row.id) {
+          const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+          days.forEach(day => {
+            const hKey = day + "_hours";
+            updateRecordSheet(row.id, hKey, row[hKey]);
+          });
+          updateRecordSheet(row.id, "total_hours", row.total_hours);
+        }
+      });
+
+      const existingRow = filteredRows.find((row) =>
+        row.customer_id === item.customer_id &&
+        row.client_id === item.client_id &&
+        row.job_id === item.job_id &&
+        row.task_id === item.task_id &&
+        row.task_type === item.task_type
+      );
+
+      const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+      let focusFieldName = "monday_hours";
+      let focusDay = "monday";
+
+      if (existingRow) {
+        for (const day of days) {
+          const hKey = day + "_hours";
+          let val = existingRow[hKey];
+
+          if (hKey === "sunday_hours") {
+            focusDay = currentDay || "monday";
+            focusFieldName = `${focusDay}_hours`;
+            val = existingRow[focusFieldName];
+          }
+
+          if (val === "0" || val === 0 || val === "" || val === null || val === undefined) {
+            focusFieldName = hKey;
+            focusDay = day;
+            break;
+          }
+        }
+      }
+
+      setTimeSheetRows(filteredRows);
+
+      sweatalert.fire({
+        icon: "warning",
+        title: "Duplicates Merged",
+        text: "Duplicate entries found. Their hours have been merged into the original record. Redirecting to the original record.",
+      }).then(() => {
+
+        if (focusDay !== "monday") {
+          setIsExpanded(true);
+        }
+
+        setTimeout(() => {
+
+          const targetIndex = filteredRows.findIndex((row) =>
+            row.customer_id === item.customer_id &&
+            row.client_id === item.client_id &&
+            row.job_id === item.job_id &&
+            row.task_id === item.task_id &&
+            row.task_type === item.task_type
+          );
+
+          const inputs = document.getElementsByName(focusFieldName);
+
+          if (inputs[targetIndex]) {
+            inputs[targetIndex].focus();
+            setActiveIndex(targetIndex);
+            setActiveField(focusDay);
+          }
+
+        }, 300);
+      });
+
+      return true;
+    }
+
+    return false;
+  };
 
 
   return (
@@ -3363,7 +3563,7 @@ const Timesheet = () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  <h5>Select Week to Copy Timesheet From</h5>
+                  <h5>Week to Copy Timesheet From</h5>
                   <Select
                     id="tabSelect"
                     name="week"

@@ -1499,7 +1499,7 @@ function JobCustomReport() {
 
               <div className="w-50 mt-2">
                 <label className="form-label fw-medium mt-2 mb-1">
-                  Select Saved Filters
+                   Saved Filters
                 </label>
 
                 <div className="d-flex align-items-center gap-2">

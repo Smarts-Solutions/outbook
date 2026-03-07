@@ -1950,7 +1950,7 @@ const Timesheet = () => {
               {selectedLineManager != "" && staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
                 <div className="form-group col-md-4  pe-0">
-                  <label className="form-label mb-2">Line Manager Select Week</label>
+                  <label className="form-label mb-2">Line Manager Week</label>
                   <Select
                     id="tabSelect"
                     name="week"
@@ -3178,7 +3178,7 @@ const Timesheet = () => {
             <div className="modal-body">
               <div className="row">
                 <div className="col-lg-12">
-                  <h5>Select Week to Copy Timesheet From</h5>
+                  <h5>Week to Copy Timesheet From</h5>
                   <Select
                     id="tabSelect"
                     name="week"

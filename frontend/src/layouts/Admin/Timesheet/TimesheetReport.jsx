@@ -952,53 +952,17 @@ function TimesheetReport() {
                 <h3 className="mt-0">Timesheet Reports</h3>
               </div>
 
-              {/* <div className='w-50 mt-2'>
-                <label className="form-label fw-medium form-label fw-medium mt-2 mb-1">
-                  Select Saved Filters
-                </label>
-                <Select
-                  options={[
-                    { value: "", label: "Select..." },
-                    ...getAllFilterData,
-                  ]}
-                  value={
-                    getAllFilterData && getAllFilterData.length > 0
-                      ? getAllFilterData.find(
-                        (opt) => Number(opt.value) === Number(filterId)
-                      ) || null
-                      : null
-                  }
-                  onChange={handleFilterSelect}
-                  isSearchable
-                  className="shadow-sm select-staff rounded-pill"
-                />
 
 
-                {
-                  !['', null, undefined].includes(filterId) ?
 
-                    <i className="fa fa-trash"
-                      title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
-
-                    : ""
-                }
-
-
-              </div> */}
               <div className="w-50 mt-2">
                 <label className="form-label fw-medium mt-2 mb-1">
-                  Select Saved Filters
+                   Saved Filters
                 </label>
 
                 <div className="d-flex align-items-center gap-2">
                   <Select
-                    // options={[
-                    //   { value: "", label: "Select..." },
-                    //   ...getAllFilterData,
-                    // ]}
+
                     options={[
                       { value: "", label: "Select..." },
                       ...getAllFilterData.map((opt) => ({

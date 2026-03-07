@@ -1194,7 +1194,7 @@ const Engagement = () => {
                   {/* Select Customer Source */}
                   <div className="col-lg-4 mb-3">
                     <label className="form-label">
-                      Select Customer Source
+                      Customer Source
                     </label>
                     <select
                       className={formErrors.customerSource ? "error-field form-select" : "form-select"}
@@ -1220,7 +1220,7 @@ const Engagement = () => {
                   {/* Select Customer Sub-Source */}
                   <div className="col-lg-4 mb-3">
                     <label className="form-label">
-                      Select Customer Sub-Source
+                       Customer Sub-Source
                     </label>
                     <select
                       className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
