@@ -893,9 +893,10 @@ const getByAllCustomer = async (dashboard) => {
         customers.vat_number AS vat_number,
         customers.website AS website,
         customers.form_process AS form_process,
-        customers.created_at AS created_at,
         customers.updated_at AS updated_at,
         customers.status AS status,
+        DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at,
+        CONCAT(staffs.first_name, ' ', staffs.last_name) AS customer_created_by,
         staff1.first_name AS staff_firstname, 
         staff1.last_name AS staff_lastname,
         staff2.first_name AS account_manager_firstname, 
@@ -906,6 +907,8 @@ const getByAllCustomer = async (dashboard) => {
       FROM customers
       JOIN staffs AS staff1 ON customers.staff_id = staff1.id
       JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+      LEFT JOIN 
+    staffs ON customers.staff_id = staffs.id
       LEFT JOIN customer_company_information ON customers.id = customer_company_information.customer_id
       WHERE customers.id IN (${cleane_ids})
       ${searchCondition}
@@ -1420,10 +1423,15 @@ const getByAllStaff = async (dashboard) => {
         staffs.status,
         staffs.created_at,
         staffs.hourminute,
+         staffs.employee_number,
         roles.role_name,
+                CONCAT(manager.first_name, ' ', manager.last_name) AS line_manager_name,
         roles.role 
       FROM staffs 
       JOIN roles ON staffs.role_id = roles.id
+      LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
+      LEFT JOIN staffs manager ON manager.id = lm.staff_to
+
       WHERE staffs.id IN (${cleane_ids})
       ${searchCondition}
       ORDER BY staffs.id DESC

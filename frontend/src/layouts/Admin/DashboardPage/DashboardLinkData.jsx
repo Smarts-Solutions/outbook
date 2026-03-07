@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { linkedData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import { useDispatch } from "react-redux";
@@ -28,7 +28,7 @@ const JobStatus = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-const debounceRef = useRef(null);
+  const debounceRef = useRef(null);
 
   const handlePageChange = (selected) => {
     const newPage = selected.selected + 1;
@@ -43,18 +43,18 @@ const debounceRef = useRef(null);
     GetLinkedData(1, newSize, "");
   };
 
- const handleSearchChange = (term) => {
-  setSearchTerm(term);
-  setCurrentPage(1);
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
 
-  if (debounceRef.current) {
-    clearTimeout(debounceRef.current);
-  }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
-  debounceRef.current = setTimeout(() => {
-    GetLinkedData(1, pageSize, term);
-  }, 500); 
-};
+    debounceRef.current = setTimeout(() => {
+      GetLinkedData(1, pageSize, term);
+    }, 500);
+  };
 
   const [hararchyData, setHararchyData] = useState({
     customer: {},
@@ -640,7 +640,7 @@ const debounceRef = useRef(null);
       sortable: true,
     },
     {
-      name: "Client Contact Person",
+      name: "Account Manager",
       selector: (row) =>
         row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
@@ -663,6 +663,46 @@ const debounceRef = useRef(null);
         </div>
       ),
     },
+
+    {
+      name: "Created by",
+      selector: (row) => row.customer_created_by,
+      cell: (row) => (
+        <div title={row.customer_created_by}>{row.customer_created_by}</div>
+      ),
+      sortable: true,
+    },
+
+    {
+      name: "Created At",
+      selector: (row) => row.created_at,
+      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
+      sortable: true,
+    },
+    // {
+    //   name: "Client Contact Person",
+    //   selector: (row) =>
+    //     row.account_manager_firstname + " " + row.account_manager_lastname,
+    //   sortable: true,
+    //   cell: (row) => (
+    //     <div
+    //       title={
+    //         row.account_manager_firstname + " " + row.account_manager_lastname
+    //       }
+    //       className="data-table-cell"
+    //       data-fulltext={
+    //         row.account_manager_firstname + " " + row.account_manager_lastname
+    //       }
+    //       style={{
+    //         whiteSpace: "nowrap",
+    //         overflow: "hidden",
+    //         textOverflow: "ellipsis",
+    //       }}
+    //     >
+    //       {row.account_manager_firstname + " " + row.account_manager_lastname}
+    //     </div>
+    //   ),
+    // },
     {
       name: "Status",
       cell: (row) => (
@@ -820,14 +860,14 @@ const debounceRef = useRef(null);
       ),
       selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
-      // width: "250px",
+      width: "200px",
     },
     {
       name: "Email Address",
       cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
-      // width: "250px",
+      width: "165px",
     },
     {
       name: "Phone",
@@ -847,14 +887,28 @@ const debounceRef = useRef(null);
       selector: (row) =>
         row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
-      // width: "250px",
+      width: "150px",
     },
     {
       name: "Role",
       cell: (row) => <div title={row.role_name}>{row.role_name}</div>,
       selector: (row) => row.role_name,
       sortable: true,
-      // width: "250px",
+      width: "150px",
+    },
+    {
+      name: "Line Manager",
+      selector: (row) => row.line_manager_name || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
+      name: "Employee ID",
+      selector: (row) => row.employee_number || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
     },
     {
       name: "Status",
@@ -922,96 +976,136 @@ const debounceRef = useRef(null);
     window.URL.revokeObjectURL(url);
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const key = location?.state?.req?.key;
 
-    if (key === "customer") {
-      const data = allLinkedData.map((item) => ({
-        "Trading Name": item.trading_name || "-",
-        "Customer Code": item.customer_code || "-",
-        Type:
-          item.customer_type === "1"
-            ? "Sole Trader"
-            : item.customer_type === "2"
-              ? "Company"
-              : item.customer_type === "3"
-                ? "Partnership"
-                : "-",
-        "Client Contact Person":
-          (item.account_manager_firstname || "") +
-          " " +
-          (item.account_manager_lastname || ""),
-        Status:
-          item.form_process === "4"
-            ? item.status == "1"
-              ? "Active"
-              : "Inactive"
-            : "Inprogress",
-      }));
-      downloadCSV(data, "Customers.csv");
-    } else if (key === "client") {
-      const data = allLinkedData.map((item) => ({
-        "Client Name": item.client_name || "-",
-        "Client Code": item.client_code || "-",
-        "Customer Name": item.customer_name || "-",
-        "Client Type": item.client_type_name || "-",
-        "Created By": item.client_created_by || "-",
-        "Created At": item.created_at || "-",
-        Status: item.status === "1" ? "Active" : "Deactive",
-      }));
-      downloadCSV(data, "Clients.csv");
-    } else if (key === "staff") {
-      const data = allLinkedData.map((item) => ({
-        "Full Name": (item.first_name || "") + " " + (item.last_name || ""),
-        Email: item.email || "-",
-        Phone:
-          item.phone && item.phone_code
-            ? item.phone_code + "-" + item.phone
-            : "-",
-        Role: item.role_name || "-",
-        Status: item.status === "1" ? "Active" : "Inactive",
-      }));
-      downloadCSV(data, "Staff.csv");
-    } else {
-      // job, pending_job, completed_job — sab ke liye same columns
-      const data = allLinkedData.map((item) => {
-        const status = statusDataAll.find(
-          (s) => Number(s.id) === Number(item.status_type),
-        );
-        return {
-          "Job ID": item.job_code_id || "-",
-          "Job Priority": item.job_priority
-            ? item.job_priority.charAt(0).toUpperCase() +
-              item.job_priority.slice(1).toLowerCase()
-            : "-",
-          "Client Name": item.client_trading_name || "-",
-          "Job Type": item.job_type_name || "-",
-          Status: status ? status.name : "-",
-          "Client Contact Person":
-            (item.account_manager_officer_first_name || "") +
+    Swal.fire({
+      title: "Exporting...",
+      text: "Please wait while we fetch all data.",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      const exportPayload = {
+        req: {
+          staff_id: location?.state?.req?.staff_id,
+          key: location?.state?.req?.key,
+          ids: location?.state?.req?.ids,
+          page: 1,
+          limit: 100000,
+          search: searchTerm,
+        },
+        authToken: token,
+      };
+
+      const res = await dispatch(linkedData(exportPayload)).unwrap();
+
+      if (!res.status || !res.data || res.data.length === 0) {
+        Swal.fire({
+          title: "No Data",
+          text: "Export ke liye koi data nahi hai.",
+          icon: "info",
+        });
+        return;
+      }
+
+      const allData = res.data;
+      Swal.close();
+
+      if (key === "customer") {
+        const data = allData.map((item) => ({
+          "Trading Name": item.trading_name || "-",
+          "Customer Code": item.customer_code || "-",
+          Type:
+            item.customer_type === "1"
+              ? "Sole Trader"
+              : item.customer_type === "2"
+                ? "Company"
+                : item.customer_type === "3"
+                  ? "Partnership"
+                  : "-",
+          "Account Manager":
+            (item.account_manager_firstname || "") +
             " " +
-            (item.account_manager_officer_last_name || ""),
-          "Client Job Code": item.client_job_code || "-",
-          "Outbook Account Manager":
-            (item.outbooks_acount_manager_first_name || "") +
-            " " +
-            (item.outbooks_acount_manager_last_name || ""),
-          "Allocated To": item.allocated_first_name
-            ? item.allocated_first_name + " " + item.allocated_last_name
-            : "-",
-          Timesheet:
-            item.total_hours_status == "1" && item.total_hours
-              ? item.total_hours.split(":")[0] +
-                "h " +
-                item.total_hours.split(":")[1] +
-                "m"
-              : "-",
-          Invoicing: item.invoiced == "1" ? "YES" : "NO",
-          "Created By": item.job_created_by || "-",
+            (item.account_manager_lastname || ""),
+          "Created by": item.customer_created_by || "",
+          "Created At": item.created_at || "",
+          Status:
+            item.form_process === "4"
+              ? item.status == "1"
+                ? "Active"
+                : "Inactive"
+              : "Inprogress",
+        }));
+        downloadCSV(data, "Customers.csv");
+      } else if (key === "client") {
+        const data = allData.map((item) => ({
+          "Client Name": item.client_name || "-",
+          "Client Code": item.client_code || "-",
+          "Customer Name": item.customer_name || "-",
+          "Client Type": item.client_type_name || "-",
+          "Created By": item.client_created_by || "-",
           "Created At": item.created_at || "-",
-        };
-      });
-      downloadCSV(data, `Jobs_${key || "all"}.csv`);
+          Status: item.status === "1" ? "Active" : "Deactive",
+        }));
+        downloadCSV(data, "Clients.csv");
+      } else if (key === "staff") {
+        const data = allData.map((item) => ({
+          "Full Name": (item.first_name || "") + " " + (item.last_name || ""),
+          Email: item.email || "-",
+
+          Phone: item.phone
+            ? ` ${item.phone_code ? item.phone_code + "-" + item.phone : item.phone}`
+            : "-",
+          Role: item.role_name || "-",
+          "Line Manager": item.line_manager_name || "-",
+          "Employee ID": item.employee_number || "-",
+          Status: item.status === "1" ? "Active" : "Inactive",
+        }));
+        downloadCSV(data, "Staff.csv");
+      } else {
+        const data = allData.map((item) => {
+          const status = statusDataAll.find(
+            (s) => Number(s.id) === Number(item.status_type),
+          );
+          return {
+            "Job ID": item.job_code_id || "-",
+            "Job Priority": item.job_priority
+              ? item.job_priority.charAt(0).toUpperCase() +
+                item.job_priority.slice(1).toLowerCase()
+              : "-",
+            "Client Name": item.client_trading_name || "-",
+            "Job Type": item.job_type_name || "-",
+            Status: status ? status.name : "-",
+            "Client Contact Person":
+              (item.account_manager_officer_first_name || "") +
+              " " +
+              (item.account_manager_officer_last_name || ""),
+            "Client Job Code": item.client_job_code || "-",
+            "Outbook Account Manager":
+              (item.outbooks_acount_manager_first_name || "") +
+              " " +
+              (item.outbooks_acount_manager_last_name || ""),
+            "Allocated To": item.allocated_first_name
+              ? item.allocated_first_name + " " + item.allocated_last_name
+              : "-",
+            Timesheet:
+              item.total_hours_status == "1" && item.total_hours
+                ? item.total_hours.split(":")[0] +
+                  "h " +
+                  item.total_hours.split(":")[1] +
+                  "m"
+                : "-",
+            Invoicing: item.invoiced == "1" ? "YES" : "NO",
+            "Created By": item.job_created_by || "-",
+            "Created At": item.created_at || "-",
+          };
+        });
+        downloadCSV(data, `Jobs_${key || "all"}.csv`);
+      }
+    } catch (error) {
+      Swal.fire({ title: "Error", text: "Export failed.", icon: "error" });
     }
   };
 
@@ -1085,7 +1179,6 @@ const debounceRef = useRef(null);
                   />
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -1114,7 +1207,8 @@ const debounceRef = useRef(null);
             />
           ) : (
             <>
-              {(getAccessData.view === 1 || getAccessData.all_customers === 1) &&
+              {(getAccessData.view === 1 ||
+                getAccessData.all_customers === 1) &&
                 location?.state?.req?.key === "customer" && (
                   <Datatable
                     filter={false}
@@ -1124,7 +1218,8 @@ const debounceRef = useRef(null);
                   />
                 )}
 
-              {(getAccessData.client === 1 || getAccessData.all_clients === 1) &&
+              {(getAccessData.client === 1 ||
+                getAccessData.all_clients === 1) &&
                 location?.state?.req?.key === "client" && (
                   <Datatable
                     filter={false}
