@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import {
   getAllCustomerDropDown,
@@ -17,6 +17,7 @@ import { TextSelect } from "lucide-react";
 import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 import { useNavigate } from "react-router-dom";
 import ReactPaginate from "react-paginate";
+import { AsyncPaginate } from "react-select-async-paginate";
 
 function JobCustomReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -111,73 +112,31 @@ function JobCustomReport() {
       .trim();
   }
 
-  
+
 
   // Get All Jobs
-  const GetAllJobs = async (type, filter) => {
-    const req = { action: "get_jobs_filter", filters: type };
-    const data = { req: req, authToken: token };
-    await dispatch(JobAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const data = response?.data?.map((item) => ({
-            value: item.job_id,
-            label: item.job_code_id,
-          }));
-          setJobAllData(data);
-        } else {
-          setJobAllData([]);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
+  // const GetAllJobs = async (filter) => {
+  //   const req = { action: "get_jobs_filter", filters: filter };
+  //   const data = { req: req, authToken: token };
+  //   await dispatch(JobAction(data))
+  //     .unwrap()
+  //     .then(async (response) => {
+  //       if (response.status) {
+  //         const data = response?.data?.map((item) => ({
+  //           value: item.job_id,
+  //           label: item.job_code_id,
+  //         }));
+  //         setJobAllData(data);
+  //       } else {
+  //         setJobAllData([]);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       return;
+  //     });
+  //   return;
 
-    return;
-    // if (type == "all") {
-    // const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000 };
-    // const data = { req: req, authToken: token };
-    // await dispatch(JobAction(data))
-    //   .unwrap()
-    //   .then(async (response) => {
-    //     if (response.status) {
-    //       const data = response?.data?.map((item) => ({
-    //         value: item.job_id,
-    //         label: item.job_code_id,
-    //       }));
-    //       setJobAllData(data);
-    //     } else {
-    //       setJobAllData([]);
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     return;
-    //   });
-    // return;
-    // }else{
-    
-    // const req = { action: "get_jobs_filter", filters: filter };
-    // const data = { req: req, authToken: token };
-    // await dispatch(JobAction(data))
-    //   .unwrap()
-    //   .then(async (response) => {
-    //     if (response.status) {
-    //       const data = response?.data?.map((item) => ({
-    //         value: item.job_id,
-    //         label: item.job_code_id,
-    //       }));
-    //       setJobAllData(data);
-    //     } else {
-    //       setJobAllData([]);
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     return;
-    //   });
-    // return;
-    // }
-  };
+  // };
 
   const getAllFilters = async () => {
     var req = { action: "getAllFilters", type: "job_custom_report" };
@@ -195,75 +154,63 @@ function JobCustomReport() {
             )}]<br/>
             
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
-            ${
-              item.customer_name
+            ${item.customer_name
                 ? `⮞ Customer : ${item.customer_name}<br/>`
                 : ""
-            }
+              }
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${
-              item.account_manager_name
+            ${item.account_manager_name
                 ? `⮞ Account Manager Name : ${item.account_manager_name}<br/>`
                 : ""
-            }
-            ${
-              item.allocated_to_name
+              }
+            ${item.allocated_to_name
                 ? `⮞ Allocated To : ${item.allocated_to_name}<br/>`
                 : ""
-            }
-            ${
-              item.reviewer_name
+              }
+            ${item.reviewer_name
                 ? `⮞ Reviewer : ${item.reviewer_name}<br/>`
                 : ""
-            }
-            ${
-              item.allocated_to_other_name
+              }
+            ${item.allocated_to_other_name
                 ? `⮞ Allocated To (Other) : ${item.allocated_to_other_name}<br/>`
                 : ""
-            }
-            ${
-              item.service_name
+              }
+            ${item.service_name
                 ? `⮞ Service Type : ${item.service_name}<br/>`
                 : ""
-            }
-            ${
-              item.job_type_name
+              }
+            ${item.job_type_name
                 ? `⮞ Job Type : ${item.job_type_name}<br/>`
                 : ""
-            }
-            ${
-              item.status_type_name
+              }
+            ${item.status_type_name
                 ? `⮞ Status : ${item.status_type_name}<br/>`
                 : ""
-            }
+              }
 
-            ${
-              item.timePeriod
+            ${item.timePeriod
                 ? `⮞ Time Period : ${formatStringToTitleCase(
-                    item.timePeriod,
-                  )}<br/>`
+                  item.timePeriod,
+                )}<br/>`
                 : ""
-            }
-            ${
-              item.displayBy
+              }
+            ${item.displayBy
                 ? `⮞ Display By : ${formatStringToTitleCase(
-                    item.displayBy,
-                  )}<br/>`
+                  item.displayBy,
+                )}<br/>`
                 : ""
-            }
-            ${
-              !["", null, "null", undefined].includes(item.fromDate)
+              }
+            ${!["", null, "null", undefined].includes(item.fromDate)
                 ? `⮞ From Date : ${formatStringToTitleCase(
-                    item.fromDate,
-                    "date",
-                  )}<br/>`
+                  item.fromDate,
+                  "date",
+                )}<br/>`
                 : ""
-            }
-            ${
-              !["", null, "null", undefined].includes(item.toDate)
+              }
+            ${!["", null, "null", undefined].includes(item.toDate)
                 ? `⮞ To Date : ${formatStringToTitleCase(item.toDate, "date")}`
                 : ""
-            }
+              }
           `,
 
             filters: item.filter_record,
@@ -279,9 +226,11 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-    GetAllJobs("all");
-    GetAllCustomer("all");
-    GetAllClient("all");
+    GetAllJobs({ searchValue: "", pageNo: 1 });
+    GetAllCustomer({ searchValue: "", pageNo: 1 });
+    GetAllClient({ searchValue: "", pageNo: 1 });
+   
+
     GetAllService("all");
     GetAllJobType("all");
     GetAllStatus("all");
@@ -294,121 +243,46 @@ function JobCustomReport() {
   }, []);
 
   // Get All Customers
-  const GetAllCustomer = async (type) => {
-     const req = { action: "get_customers_filter", filters: type };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllCustomerDropDown(data))
-        .unwrap()
-        .then(async (response) => {
-          // console.log("customer filter ---  ", response);
+  // const GetAllCustomer = async (type) => {
+  //   const req = { action: "get_customers_filter", filters: type };
+  //   const data = { req: req, authToken: token };
+  //   await dispatch(getAllCustomerDropDown(data))
+  //     .unwrap()
+  //     .then(async (response) => {
+  //       // console.log("customer filter ---  ", response);
 
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.trading_name,
-            }));
-            setCustomerAllData(data);
-          } else {
-            setCustomerAllData([]);
-          }
-        });
-    // if (type == "all") {
-    //   const req = { action: "get_dropdown", page: 1, limit: 100000 };
-    //   const data = { req: req, authToken: token };
-    //   await dispatch(getAllCustomerDropDown(data))
-    //     .unwrap()
-    //     .then(async (response) => {
-    //       console.log("customer response ", response);
-
-    //       if (response.status) {
-    //         const data = response?.data?.map((item) => ({
-    //           value: item.id,
-    //           label: item.trading_name,
-    //         }));
-    //         setCustomerAllData(data);
-    //       } else {
-    //         setCustomerAllData([]);
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       return;
-    //     });
-    // } else {
-    //   const req = { action: "get_customers_filter", filters: type };
-    //   const data = { req: req, authToken: token };
-    //   await dispatch(getAllCustomerDropDown(data))
-    //     .unwrap()
-    //     .then(async (response) => {
-    //       // console.log("customer filter ---  ", response);
-
-    //       if (response.status) {
-    //         const data = response?.data?.map((item) => ({
-    //           value: item.id,
-    //           label: item.trading_name,
-    //         }));
-    //         setCustomerAllData(data);
-    //       } else {
-    //         setCustomerAllData([]);
-    //       }
-    //     });
-    // }
-  };
+  //       if (response.status) {
+  //         const data = response?.data?.map((item) => ({
+  //           value: item.id,
+  //           label: item.trading_name,
+  //         }));
+  //         setCustomerAllData(data);
+  //       } else {
+  //         setCustomerAllData([]);
+  //       }
+  //     });
+  //   return
+  // };
 
   // Get All Clients
-  const GetAllClient = async (type) => {
-    const req = { action: "get_clients_filter", filters: type };
-      const data = { req: req, authToken: token };
-      await dispatch(ClientAction(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.client_name + " (" + item.client_code + ")",
-            }));
-            setClientAllData(data);
-          } else {
-            setClientAllData([]);
-          }
-        });
-    // if (type == "all") {
-    //   const req = { action: "get", customer_id: "", page: 1, limit: 100000 };
-    //   const data = { req: req, authToken: token };
-    //   await dispatch(ClientAction(data))
-    //     .unwrap()
-    //     .then(async (response) => {
-    //       if (response.status) {
-    //         const data = response?.data?.map((item) => ({
-    //           value: item.id,
-    //           label: item.client_name + " (" + item.client_code + ")",
-    //         }));
-    //         setClientAllData(data);
-    //       } else {
-    //         setClientAllData([]);
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       return;
-    //     });
-    // } 
-    // else {
-    //   const req = { action: "get_clients_filter", filters: type };
-    //   const data = { req: req, authToken: token };
-    //   await dispatch(ClientAction(data))
-    //     .unwrap()
-    //     .then(async (response) => {
-    //       if (response.status) {
-    //         const data = response?.data?.map((item) => ({
-    //           value: item.id,
-    //           label: item.client_name + " (" + item.client_code + ")",
-    //         }));
-    //         setClientAllData(data);
-    //       } else {
-    //         setClientAllData([]);
-    //       }
-    //     });
-    // }
-  };
+  // const GetAllClient = async (type) => {
+  //   const req = { action: "get_clients_filter", filters: type };
+  //   const data = { req: req, authToken: token };
+  //   await dispatch(ClientAction(data))
+  //     .unwrap()
+  //     .then(async (response) => {
+  //       if (response.status) {
+  //         const data = response?.data?.map((item) => ({
+  //           value: item.id,
+  //           label: item.client_name + " (" + item.client_code + ")",
+  //         }));
+  //         setClientAllData(data);
+  //       } else {
+  //         setClientAllData([]);
+  //       }
+  //     });
+  //   return
+  // };
 
   // All Type Staff Get
   const staffData = async (role_id, type) => {
@@ -789,9 +663,7 @@ function JobCustomReport() {
 
   const handleFilterChange = (e, type) => {
 
-    console.log("handleFilterChange", e);
-    console.log("type", type);
-
+   
 
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
@@ -860,52 +732,52 @@ function JobCustomReport() {
         ...filters,
         [key]: value,
       };
-      if (key == "job_id") {
-        if ([null, "", "null", undefined].includes(value)) {
-          GetAllCustomer("all");
-          GetAllClient("all");
-          GetAllService("all");
-          GetAllJobType("all");
-          GetAllStatus("all");
-          staffData(4);
-          staffData(3);
-          staffData(6);
-          staffData("other");
-        } else {
-          GetAllCustomer(newFilters);
-          GetAllClient(newFilters);
-          GetAllService(newFilters);
-          GetAllJobType(newFilters);
-          GetAllStatus(newFilters);
-          staffData(4, newFilters);
-          staffData(3, newFilters);
-          staffData(6, newFilters);
-          staffData("other", newFilters);
-        }
-      } else if (key == "customer_id") {
-        if ([null, "", "null", undefined].includes(value)) {
-          GetAllClient("all");
-          GetAllJobs("");
-        } else {
-          GetAllClient(newFilters);
-          GetAllJobs("customer", newFilters);
-        }
-      } else if (key == "client_id") {
-        if ([null, "", "null", undefined].includes(value)) {
-          if ([null, "", "null", undefined].includes(filters.job_id)) {
-            GetAllCustomer("all");
-          }
+      // if (key == "job_id") {
+      //   if ([null, "", "null", undefined].includes(value)) {
+      //     GetAllCustomer("all");
+      //     GetAllClient("all");
+      //     GetAllService("all");
+      //     GetAllJobType("all");
+      //     GetAllStatus("all");
+      //     staffData(4);
+      //     staffData(3);
+      //     staffData(6);
+      //     staffData("other");
+      //   } else {
+      //     GetAllCustomer(newFilters);
+      //     GetAllClient(newFilters);
+      //     GetAllService(newFilters);
+      //     GetAllJobType(newFilters);
+      //     GetAllStatus(newFilters);
+      //     staffData(4, newFilters);
+      //     staffData(3, newFilters);
+      //     staffData(6, newFilters);
+      //     staffData("other", newFilters);
+      //   }
+      // } else if (key == "customer_id") {
+      //   if ([null, "", "null", undefined].includes(value)) {
+      //     GetAllClient("all");
+      //     GetAllJobs("all");
+      //   } else {
+      //     GetAllClient(newFilters);
+      //     GetAllJobs(newFilters);
+      //   }
+      // } else if (key == "client_id") {
+      //   if ([null, "", "null", undefined].includes(value)) {
+      //     if ([null, "", "null", undefined].includes(filters.job_id)) {
+      //       GetAllCustomer("all");
+      //     }
 
-          if (![null, "", "null", undefined].includes(filters.customer_id)) {
-            GetAllJobs();
-          } else {
-            GetAllJobs("customer", newFilters);
-          }
-        } else {
-          GetAllJobs("client", newFilters);
-          GetAllCustomer(newFilters);
-        }
-      }
+      //     if (![null, "", "null", undefined].includes(filters.customer_id)) {
+      //       GetAllJobs("all");
+      //     } else {
+      //       GetAllJobs(newFilters);
+      //     }
+      //   } else {
+      //     GetAllJobs(newFilters);
+      //     GetAllCustomer(newFilters);
+      //   }
+      // }
     }
 
   };
@@ -913,7 +785,7 @@ function JobCustomReport() {
   const addAndRemoveGroupBy = (value, type) => {
     if (type == "add") {
       if (value == "job_id") {
-        GetAllJobs();
+        GetAllJobs("all");
       } else if (value == "customer_id") {
         if (["", null, undefined].includes(filters.job_id)) {
           GetAllCustomer("all"); // fetch all customers
@@ -1048,7 +920,7 @@ function JobCustomReport() {
     }
   };
 
-   console.log("filters ", filters);
+  console.log("filters ", filters);
 
   const callFilterApi = async (currentPage, pageSize, searchTerm) => {
     setLoading(true);
@@ -1336,7 +1208,7 @@ function JobCustomReport() {
         // console.log("parsedFilters ", parsedFilters?.job_id);
 
         if (parsedFilters?.groupBy?.includes("job_id")) {
-          await GetAllJobs();
+          await GetAllJobs("all");
         }
         if (parsedFilters?.groupBy?.includes("customer_id")) {
           if (["", null, undefined].includes(parsedFilters?.job_id)) {
@@ -1509,6 +1381,244 @@ function JobCustomReport() {
 
   //  { job_id: row?.job_id, timesheet_job_id: row?.timesheet_job_id, data: updatedData, goto: "client", activeTab: location?.state?.activeTab }
 
+
+  useEffect(() => {
+    GetAllJobs({ searchValue: "", pageNo: 1 });
+    GetAllCustomer({ searchValue: "", pageNo: 1 });
+    GetAllClient({ searchValue: "", pageNo: 1 });
+  }, []);
+
+  ///////////////---- FOR JOB SERACH  START-----//////////////
+  const [jobOptions, setJobOptions] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [search, setSearch] = useState("");
+  const cacheRef = useRef({});
+
+  const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false }) => {
+
+    if (loading) return;
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (cacheRef.current[cacheKey]) {
+      const cached = cacheRef.current[cacheKey];
+      setJobOptions(prev =>
+        append ? [...prev, ...cached] : cached
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    const req = {
+      action: "get_jobs_filter",
+      filters: filters,
+      pagination: {
+        search: searchValue,
+        page: pageNo,
+        limit: 20
+      }
+    };
+
+    const data = { req, authToken: token };
+
+    try {
+
+      const response = await dispatch(JobAction(data)).unwrap();
+
+      if (response.status) {
+        const formatted = response.data.map(item => ({
+          value: item.job_id,
+          label: item.job_code_id
+        }));
+        cacheRef.current[cacheKey] = formatted;
+        setJobOptions(prev =>
+          append ? [...prev, ...formatted] : formatted
+        );
+        setHasMore(response.data.length === 20);
+        setPage(pageNo);
+      }
+    } catch (err) { }
+    setLoading(false);
+
+  };
+  const debounceTimeout = useRef(null);
+  const handleSearch = (value) => {
+    clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      setSearch(value);
+      setPage(1);
+      GetAllJobs({ searchValue: value, pageNo: 1 });
+    }, 500);
+
+  };
+
+
+  ///////////////---- FOR JOB SERACH  END-----//////////////
+
+
+
+  ///////////////---- FOR CUSTOMER SERACH  START-----//////////////
+  const [customerPage, setCustomerPage] = useState(1);
+  const [customerHasMore, setCustomerHasMore] = useState(true);
+  const [customerLoading, setCustomerLoading] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+
+  const customerCache = useRef({});
+  const debounceRef = useRef(null);
+
+  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
+
+    if (customerLoading) return;
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (customerCache.current[cacheKey]) {
+      const cached = customerCache.current[cacheKey];
+      setCustomerAllData(prev =>
+        append ? [...prev, ...cached] : cached
+      );
+      return;
+    }
+    setCustomerLoading(true);
+    const req = {
+      action: "get_customers_filter",
+      filters: filters,
+      pagination: {
+        search: searchValue,
+        page: pageNo,
+        limit: 20
+      }
+    };
+
+    const data = { req: req, authToken: token };
+    try {
+
+      const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+      if (response.status) {
+
+        const formatted = response.data.map((item) => ({
+          value: item.id,
+          label: item.trading_name
+        }));
+
+        customerCache.current[cacheKey] = formatted;
+
+        setCustomerAllData(prev =>
+          append ? [...prev, ...formatted] : formatted
+        );
+
+        setCustomerHasMore(response.data.length === 20);
+        setCustomerPage(pageNo);
+
+      } else {
+
+        if (!append) setCustomerAllData([]);
+
+      }
+
+    } catch (error) { }
+    setCustomerLoading(false);
+  };
+
+  const handleCustomerSearch = (value) => {
+
+    clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(() => {
+
+      setCustomerSearch(value);
+
+      GetAllCustomer({
+        searchValue: value,
+        pageNo: 1
+      });
+
+    }, 500);
+
+  };
+
+  ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
+
+
+
+  /////////////////---- FOR CLIENT SERACH  START-----//////////////
+  const [clientPage, setClientPage] = useState(1);
+  const [clientHasMore, setClientHasMore] = useState(true);
+  const [clientLoading, setClientLoading] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
+
+  const clientCache = useRef({});
+  const clientDebounceRef = useRef(null);
+
+  const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false }) => {
+
+    if (clientLoading) return;
+    const cacheKey = `${searchValue}_${pageNo}`;
+    // Cache check
+    if (clientCache.current[cacheKey]) {
+      const cached = clientCache.current[cacheKey];
+      setClientAllData(prev =>
+        append ? [...prev, ...cached] : cached
+      );
+
+      return;
+    }
+
+    setClientLoading(true);
+
+    const req = {
+      action: "get_clients_filter",
+      filters: filters,
+      pagination: {
+        search: searchValue,
+        page: pageNo,
+        limit: 20
+      }
+    };
+
+    const data = { req, authToken: token };
+
+    try {
+
+      const response = await dispatch(ClientAction(data)).unwrap();
+      if (response.status) {
+        const formatted = response.data.map((item) => ({
+          value: item.id,
+          label: `${item.client_name} (${item.client_code})`
+        }));
+
+        // Cache store
+        clientCache.current[cacheKey] = formatted;
+        setClientAllData(prev =>
+          append ? [...prev, ...formatted] : formatted
+        );
+        setClientHasMore(response.data.length === 20);
+        setClientPage(pageNo);
+
+      } else {
+        if (!append) setClientAllData([]);
+      }
+
+    } catch (error) { }
+
+    setClientLoading(false);
+
+  };
+
+  const handleClientSearch = (value) => {
+    clearTimeout(clientDebounceRef.current);
+    clientDebounceRef.current = setTimeout(() => {
+      setClientSearch(value);
+      GetAllClient({
+        searchValue: value,
+        pageNo: 1
+      });
+    }, 500);
+  };
+
+  /////////////////---- FOR CLIENT SERACH  END-----//////////////
+
+
+
+
   return (
     <div className="container-fluid pb-3">
       {loading && (
@@ -1546,8 +1656,8 @@ function JobCustomReport() {
                     value={
                       getAllFilterData && getAllFilterData.length > 0
                         ? getAllFilterData.find(
-                            (opt) => Number(opt.value) === Number(filterId),
-                          ) || null
+                          (opt) => Number(opt.value) === Number(filterId),
+                        ) || null
                         : null
                     }
                     onChange={handleFilterSelect}
@@ -1568,21 +1678,6 @@ function JobCustomReport() {
             </div>
 
             {/* get filters Dropdown */}
-
-            {/* end get filters Dropdown */}
-
-            {/* <div className="col-12 col-sm-5">
-              <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
-                <button
-                  className="btn btn-info d-inline-flex align-items-center gap-2 lh-1"
-                  id="btn-export"
-                  onClick={() => exportToCSV(showData)}
-                >
-                  <i className="fa fa-download" aria-hidden="true"></i>
-                  <span>Export Data</span>
-                </button>
-              </div>
-            </div> */}
 
             {showData && showData.rows && showData.rows.length > 0 && (
               <div className="col-12 col-sm-5">
@@ -1685,47 +1780,42 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("job_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Job Name</label>
-            {/* <Select
-              options={[{ value: "", label: "Select..." }, ...jobAllData]}
-              value={
-                jobAllData && jobAllData.length > 0
-                  ? jobAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.job_id),
-                    ) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: {
-                    key: "job_id",
-                    value: selected.value,
-                    label: selected.label,
-                  },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            /> */}
-          {console.log("jobAllData -->",jobAllData)}
-
             <Select
               isMulti
-              closeMenuOnSelect={false}
-              options={jobAllData}
-              value={jobAllData.filter((opt) =>
-                filters.job_id.includes(opt.value),
+              options={jobOptions}
+              value={jobOptions.filter(opt =>
+                filters.job_id.includes(opt.value)
               )}
               onChange={(selectedOptions) =>
                 handleFilterChange({
                   target: {
                     key: "job_id",
                     value: selectedOptions
-                      ? selectedOptions.map((opt) => opt.value)
-                      : [],
-                  },
+                      ? selectedOptions.map(opt => opt.value)
+                      : []
+                  }
                 })
               }
+              onInputChange={(value) => handleSearch(value)}
+              onMenuScrollToBottom={() => {
+                if (hasMore) {
+                  GetAllJobs({
+                    searchValue: search,
+                    pageNo: page + 1,
+                    append: true
+                  });
+                }
+              }}
               isSearchable
+              onBlur={() => {
+                setHasMore(true);
+                setPage(1);
+                setSearch("");
+                setJobOptions([]);
+                setJobAllData([]);
+                cacheRef.current = {};
+                GetAllJobs({ searchValue: "", pageNo: 1 });
+              }}
               className="shadow-sm select-staff rounded-pill"
             />
           </div>
@@ -1735,35 +1825,12 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("customer_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Customer Name</label>
-            {/* <Select
-              options={[{ value: "", label: "Select..." }, ...customerAllData]}
-              value={
-                customerAllData && customerAllData.length > 0
-                  ? customerAllData.find(
-                      (opt) =>
-                        Number(opt.value) === Number(filters.customer_id),
-                    ) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: {
-                    key: "customer_id",
-                    value: selected.value,
-                    label: selected.label,
-                  },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            /> */}
-
             <Select
               isMulti
               closeMenuOnSelect={false}
               options={customerAllData}
               value={customerAllData.filter((opt) =>
-                filters?.customer_id?.includes(opt.value),
+                filters?.customer_id?.includes(opt.value)
               )}
               onChange={(selectedOptions) =>
                 handleFilterChange({
@@ -1775,7 +1842,25 @@ function JobCustomReport() {
                   },
                 })
               }
+              onInputChange={(value) => handleCustomerSearch(value)}
+              onMenuScrollToBottom={() => {
+                if (customerHasMore) {
+                  GetAllCustomer({
+                    searchValue: customerSearch,
+                    pageNo: customerPage + 1,
+                    append: true
+                  });
+                }
+              }}
               isSearchable
+              onBlur={() => {
+                setCustomerHasMore(true);
+                setCustomerPage(1);
+                setCustomerSearch("");
+                setCustomerAllData([]);
+                customerCache.current = {};
+                GetAllCustomer({ searchValue: "", pageNo: 1 });
+              }}
               className="shadow-sm select-staff rounded-pill"
             />
           </div>
@@ -1785,28 +1870,7 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("client_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Client Name</label>
-            {/* <Select
-              options={[{ value: "", label: "Select..." }, ...clientAllData]}
-              value={
-                clientAllData && clientAllData.length > 0
-                  ? clientAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.client_id),
-                    ) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: {
-                    key: "client_id",
-                    value: selected.value,
-                    label: selected.label,
-                  },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            /> */}
-
+            {/*            
             <Select
               isMulti
               closeMenuOnSelect={false}
@@ -1825,6 +1889,44 @@ function JobCustomReport() {
                 })
               }
               isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            /> */}
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={clientAllData}
+              value={clientAllData.filter((opt) =>
+                filters?.client_id?.includes(opt.value)
+              )}
+              onChange={(selectedOptions) =>
+                handleFilterChange({
+                  target: {
+                    key: "client_id",
+                    value: selectedOptions
+                      ? selectedOptions.map((opt) => opt.value)
+                      : [],
+                  },
+                })
+              }
+              onInputChange={(value) => handleClientSearch(value)}
+              onMenuScrollToBottom={() => {
+                if (clientHasMore) {
+                  GetAllClient({
+                    searchValue: clientSearch,
+                    pageNo: clientPage + 1,
+                    append: true
+                  });
+                }
+              }}
+              isSearchable
+              onBlur={() => {
+                setClientHasMore(true);
+                setClientPage(1);
+                setClientSearch("");
+                setClientAllData([]);
+                clientCache.current = {};
+                GetAllClient({ searchValue: "", pageNo: 1 });
+              }}
               className="shadow-sm select-staff rounded-pill"
             />
           </div>
@@ -2375,13 +2477,13 @@ function JobCustomReport() {
             <div className="table-responsive fixed-table-header">
               <table
                 className="table rdt_Table"
-                // className="table table-bordered"
-                // style={{
-                //   fontSize: "14px",
-                //   width: "100%",
-                //   overflowX: "auto",
-                //   display: "block",
-                // }}
+              // className="table table-bordered"
+              // style={{
+              //   fontSize: "14px",
+              //   width: "100%",
+              //   overflowX: "auto",
+              //   display: "block",
+              // }}
               >
                 <thead
                 // className="rdt_TableHead"

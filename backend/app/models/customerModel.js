@@ -477,7 +477,7 @@ const getCustomer = async (customer) => {
     const offset = (page - 1) * limit;
     const search = customer.search || "";
 
-    console.log("------>>>>",customer)
+    console.log("------>>>>", customer)
 
     // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
@@ -539,7 +539,7 @@ ORDER BY
     customers.id DESC
         LIMIT ? OFFSET ?`;
 
-       
+
             const [result] = await pool.execute(query, [`%${search}%`, limit, offset]);
 
             return {
@@ -817,9 +817,103 @@ trading_name ASC;`;
     }
 
 }
+const getCustomer_dropdown_filter = async (customer) => {
+    const { StaffUserId, pagination } = customer;
+
+    const page = Number(pagination.page) || 1;
+    const limit = Number(pagination.limit) || 20;
+    const search = pagination.search || "";
+
+    const offset = (page - 1) * limit;
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId)
+
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+        const query = `
+    SELECT  
+    customers.id AS id,
+    customers.status AS status,
+    customers.form_process AS form_process,
+    customers.trading_name AS trading_name,
+    CONCAT(
+    'cust_', 
+    SUBSTRING(customers.trading_name, 1, 3), '_',
+    SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+WHERE customers.trading_name LIKE '%${search}%'        
+ORDER BY 
+trading_name ASC
+LIMIT ? OFFSET ?;`;
+
+        const [result] = await pool.execute(query , [limit, offset]);
+
+        return { status: true, message: 'Success..', data: result };
+    }
+
+    // other Role Data
+    let query = `
+    SELECT  
+        customers.id AS id,
+        customers.customer_type AS customer_type,
+        customers.staff_id AS staff_id,
+        customers.account_manager_id AS account_manager_id,
+        customers.trading_name AS trading_name,
+        customers.trading_address AS trading_address,
+        customers.vat_registered AS vat_registered,
+        customers.vat_number AS vat_number,
+        customers.website AS website,
+        customers.form_process AS form_process,
+        customers.created_at AS created_at,
+        customers.updated_at AS updated_at,
+        customers.status AS status,
+        staff2.first_name AS account_manager_firstname, 
+        staff2.last_name AS account_manager_lastname,
+        customer_company_information.company_name AS company_name,
+        customer_company_information.company_number AS company_number,
+        CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+        ) AS customer_code,
+        CASE
+        WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+        THEN 1 ELSE 0
+        END AS is_client
+        FROM 
+            customers
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN
+            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        LEFT JOIN
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE
+             customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+           AND customers.trading_name LIKE '%${search}%'
+           GROUP BY customers.id
+           ORDER BY customers.trading_name ASC
+           LIMIT ? OFFSET ?
+         `;
+    try {
+        const [result] = await pool.execute(query , [limit, offset]);
+        return { status: true, message: 'Success..', data: result };
+    } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+    }
+
+}
 
 const get_customers_filter = async (customer) => {
-    const { StaffUserId, filters } = customer;
+    const { StaffUserId, filters, pagination } = customer;
     let { job_id, client_id } = filters;
 
     // console.log("job_id", job_id);
@@ -841,6 +935,9 @@ const get_customers_filter = async (customer) => {
 
     // if (!['', null, undefined].includes(filters?.client_id)) {
     const rows = await QueryRoleHelperFunction(StaffUserId)
+    return await getCustomer_dropdown_filter({ StaffUserId, pagination });
+
+
     if (client_id?.length > 0 && job_id?.length === 0) {
         return await getAllCustomerByClientIdFilter(client_id);
     }
@@ -849,8 +946,8 @@ const get_customers_filter = async (customer) => {
     }
     else if (client_id?.length > 0 && job_id?.length > 0) {
         return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
-    }else{
-        return await getCustomer_dropdown({StaffUserId});
+    } else {
+        return await getCustomer_dropdown_filter({ StaffUserId, pagination });
     }
 
 
@@ -884,8 +981,8 @@ async function getAllCustomerByClientIdFilter(client_id) {
     return { status: true, message: 'Success..', data: result };
 }
 
-async function getAllCustomerByJobIdFilter(rows,job_id) {
-   const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+async function getAllCustomerByJobIdFilter(rows, job_id) {
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
@@ -969,8 +1066,8 @@ async function getAllCustomerByJobIdFilter(rows,job_id) {
     }
 }
 
-async function getAllCustomerByClientIdAndJobIdFilter(rows,client_id,job_id) {
-   const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
+async function getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id) {
+    const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 33]);
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {

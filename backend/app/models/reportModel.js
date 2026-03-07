@@ -3139,11 +3139,7 @@ const getAllFilters = async (Report) => {
         ${where}
         ORDER BY timesheet_filter.id DESC
         `;
-
         // console.log("Get All Filters Query:", query);
-
-
-
         const [result] = await pool.execute(query, [StaffUserId]);
         return { status: true, message: 'Success.', data: result };
     }
@@ -3396,7 +3392,7 @@ const getAllService = async (Report) => {
 
     if (['', null, undefined].includes(job_id) || (Array.isArray(job_id) && job_id.length === 0)) {
 
-        console.log("getAllService job_id --->>>>", job_id);
+        // console.log("getAllService job_id --->>>>", job_id);
         const query = `
     SELECT  
     id,
@@ -3468,7 +3464,7 @@ const getAllJobType = async (Report) => {
     GROUP BY job_types.id
     ORDER BY job_types.type ASC;
     `
-   // console.log("Get All Job Type Query:", query);
+    // console.log("Get All Job Type Query:", query);
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
@@ -3586,7 +3582,7 @@ const getJobCustomReport = async (Report) => {
 
     } = data.filters;
 
-   // console.log("data.filters: ", data.filters);
+    // console.log("data.filters: ", data.filters);
 
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
@@ -3830,8 +3826,8 @@ const getJobCustomReport = async (Report) => {
     }
 
     try {
-       // console.log("fromDate ---- ", fromDate);
-       // console.log("toDate ---- ", toDate);
+        // console.log("fromDate ---- ", fromDate);
+        // console.log("toDate ---- ", toDate);
         // compute date range
         let range;
         try {
@@ -3844,188 +3840,192 @@ const getJobCustomReport = async (Report) => {
 
         let where = [`work_date BETWEEN ? AND ?`];
 
+
         //let job_id = [1, 6]
 
+        let orWhere = [];
 
         if (!["", null, undefined].includes(job_id) && !(Array.isArray(job_id) && job_id.length === 0)) {
             //where.push(`raw.job_id = ${job_id}`);
-            where.push(`raw.job_id IN (${job_id.join(",")})`);
-
+            orWhere.push(`raw.job_id IN (${job_id.join(",")})`);
         }
 
         if (!["", null, undefined].includes(customer_id) && !(Array.isArray(customer_id) && customer_id.length === 0)) {
-            // where.push(`raw.customer_id = ${customer_id}`);
-            where.push(`raw.customer_id IN (${customer_id.join(",")})`);
+            // orWhere.push(`raw.customer_id = ${customer_id}`);
+            orWhere.push(`raw.customer_id IN (${customer_id.join(",")})`);
         }
 
         if (!["", null, undefined].includes(client_id) && !(Array.isArray(client_id) && client_id.length === 0)) {
-            //where.push(`raw.client_id = ${client_id}`);
-            where.push(`raw.client_id IN (${client_id.join(",")})`);
+            //orWhere.push(`raw.client_id = ${client_id}`);
+            orWhere.push(`raw.client_id IN (${client_id.join(",")})`);
         }
+        
         if (!["", null, undefined].includes(account_manager_id) && !(Array.isArray(account_manager_id) && account_manager_id.length === 0)) {
-            //where.push(`raw.account_manager_id = ${account_manager_id}`);
-            where.push(`raw.account_manager_id IN (${account_manager_id.join(",")})`);
+            //orWhere.push(`raw.account_manager_id = ${account_manager_id}`);
+            orWhere.push(`raw.account_manager_id IN (${account_manager_id.join(",")})`);
         }
         if (!["", null, undefined].includes(allocated_to_id) && !(Array.isArray(allocated_to_id) && allocated_to_id.length === 0)) {
-            //where.push(`raw.allocated_to_id = ${allocated_to_id}`);
-            where.push(`raw.allocated_to_id IN (${allocated_to_id.join(",")})`);
+            //orWhere.push(`raw.allocated_to_id = ${allocated_to_id}`);
+            orWhere.push(`raw.allocated_to_id IN (${allocated_to_id.join(",")})`);
         }
         if (!["", null, undefined].includes(reviewer_id) && !(Array.isArray(reviewer_id) && reviewer_id.length === 0)) {
-            //where.push(`raw.reviewer_id = ${reviewer_id}`);
-            where.push(`raw.reviewer_id IN (${reviewer_id.join(",")})`);
+            //orWhere.push(`raw.reviewer_id = ${reviewer_id}`);
+            orWhere.push(`raw.reviewer_id IN (${reviewer_id.join(",")})`);
         }
         if (!["", null, undefined].includes(allocated_to_other_id) && !(Array.isArray(allocated_to_other_id) && allocated_to_other_id.length === 0)) {
-            //where.push(`ato.id = ${allocated_to_other_id}`);
-            where.push(`ato.id IN (${allocated_to_other_id.join(",")})`);
+            //orWhere.push(`ato.id = ${allocated_to_other_id}`);
+            orWhere.push(`ato.id IN (${allocated_to_other_id.join(",")})`);
         }
         if (!["", null, undefined].includes(service_id) && !(Array.isArray(service_id) && service_id.length === 0)) {
-            //where.push(`raw.service_id = ${service_id}`);
-            where.push(`raw.service_id IN (${service_id.join(",")})`);
+            //orWhere.push(`raw.service_id = ${service_id}`);
+            orWhere.push(`raw.service_id IN (${service_id.join(",")})`);
         }
         if (!["", null, undefined].includes(job_type_id) && !(Array.isArray(job_type_id) && job_type_id.length === 0)) {
-            //where.push(`raw.job_type_id = ${job_type_id}`);
-            where.push(`raw.job_type_id IN (${job_type_id.join(",")})`);
+            //orWhere.push(`raw.job_type_id = ${job_type_id}`);
+            orWhere.push(`raw.job_type_id IN (${job_type_id.join(",")})`);
         }
         if (!["", null, undefined].includes(status_type_id) && !(Array.isArray(status_type_id) && status_type_id.length === 0)) {
-            //where.push(`raw.status_type_id = ${status_type_id}`);
-            where.push(`raw.status_type_id IN (${status_type_id.join(",")})`);
+            //orWhere.push(`raw.status_type_id = ${status_type_id}`);
+            orWhere.push(`raw.status_type_id IN (${status_type_id.join(",")})`);
         }
         if (!["", null, undefined].includes(employee_number) && !(Array.isArray(employee_number) && employee_number.length === 0)) {
-           // where.push(`sf.employee_number = '${employee_number}'`);
-            where.push(`sf.employee_number IN (${employee_number.join(",")})`);
+            // orWhere.push(`sf.employee_number = '${employee_number}'`);
+            orWhere.push(`sf.employee_number IN (${employee_number.join(",")})`);
         }
-
-
-
-
         if (!["", null, undefined].includes(date_received_on)) {
-            where.push(`raw.date_received_on = '${date_received_on}'`);
+            orWhere.push(`raw.date_received_on = '${date_received_on}'`);
         }
         if (!["", null, undefined].includes(allocated_on)) {
-            where.push(`raw.allocated_on = '${allocated_on}'`);
+            orWhere.push(`raw.allocated_on = '${allocated_on}'`);
         }
         if (!["", null, undefined].includes(job_priority)) {
-            where.push(`raw.job_priority = '${job_priority}'`);
+            orWhere.push(`raw.job_priority = '${job_priority}'`);
         }
         if (!["", null, undefined].includes(engagement_model)) {
-            where.push(`raw.engagement_model = '${engagement_model}'`);
+            orWhere.push(`raw.engagement_model = '${engagement_model}'`);
         }
         if (!["", null, undefined].includes(customer_account_manager_officer)) {
-            where.push(`ccd.id = ${customer_account_manager_officer}`);
+            orWhere.push(`ccd.id = ${customer_account_manager_officer}`);
         }
         if (!["", null, undefined].includes(status_updation_date)) {
-            where.push(`raw.status_updation_date = '${status_updation_date}'`);
+            orWhere.push(`raw.status_updation_date = '${status_updation_date}'`);
         }
         if (!["", null, undefined].includes(Transactions_Posting_id_2)) {
-            where.push(`raw.Transactions_Posting_id_2 = ${Transactions_Posting_id_2}`);
+            orWhere.push(`raw.Transactions_Posting_id_2 = ${Transactions_Posting_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Bank_Transactions_id_2)) {
-            where.push(`raw.Number_of_Bank_Transactions_id_2 = ${Number_of_Bank_Transactions_id_2}`);
+            orWhere.push(`raw.Number_of_Bank_Transactions_id_2 = ${Number_of_Bank_Transactions_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Journal_Entries_id_2)) {
-            where.push(`raw.Number_of_Journal_Entries_id_2 = ${Number_of_Journal_Entries_id_2}`);
+            orWhere.push(`raw.Number_of_Journal_Entries_id_2 = ${Number_of_Journal_Entries_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Other_Transactions_id_2)) {
-            where.push(`raw.Number_of_Other_Transactions_id_2 = ${Number_of_Other_Transactions_id_2}`);
+            orWhere.push(`raw.Number_of_Other_Transactions_id_2 = ${Number_of_Other_Transactions_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Petty_Cash_Transactions_id_2)) {
-            where.push(`raw.Number_of_Petty_Cash_Transactions_id_2 = ${Number_of_Petty_Cash_Transactions_id_2}`);
+            orWhere.push(`raw.Number_of_Petty_Cash_Transactions_id_2 = ${Number_of_Petty_Cash_Transactions_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Purchase_Invoices_id_2)) {
-            where.push(`raw.Number_of_Purchase_Invoices_id_2 = ${Number_of_Purchase_Invoices_id_2}`);
+            orWhere.push(`raw.Number_of_Purchase_Invoices_id_2 = ${Number_of_Purchase_Invoices_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Sales_Invoices_id_2)) {
-            where.push(`raw.Number_of_Sales_Invoices_id_2 = ${Number_of_Sales_Invoices_id_2}`);
+            orWhere.push(`raw.Number_of_Sales_Invoices_id_2 = ${Number_of_Sales_Invoices_id_2}`);
         }
         if (!["", null, undefined].includes(Number_of_Total_Transactions_id_2)) {
-            where.push(`raw.Number_of_Total_Transactions_id_2 = ${Number_of_Total_Transactions_id_2}`);
+            orWhere.push(`raw.Number_of_Total_Transactions_id_2 = ${Number_of_Total_Transactions_id_2}`);
         }
         if (!["", null, undefined].includes(submission_deadline)) {
-            where.push(`raw.submission_deadline = '${submission_deadline}'`);
+            orWhere.push(`raw.submission_deadline = '${submission_deadline}'`);
         }
         if (!["", null, undefined].includes(Tax_Year_id_4)) {
-            where.push(`raw.Tax_Year_id_4 = ${Tax_Year_id_4}`);
+            orWhere.push(`raw.Tax_Year_id_4 = ${Tax_Year_id_4}`);
         }
         if (!["", null, undefined].includes(If_Sole_Trader_Who_is_doing_Bookkeeping_id_4)) {
-            where.push(`raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 = ${If_Sole_Trader_Who_is_doing_Bookkeeping_id_4}`);
+            orWhere.push(`raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 = ${If_Sole_Trader_Who_is_doing_Bookkeeping_id_4}`);
         }
         if (!["", null, undefined].includes(Whose_Tax_Return_is_it_id_4)) {
-            where.push(`raw.Whose_Tax_Return_is_it_id_4 = ${Whose_Tax_Return_is_it_id_4}`);
+            orWhere.push(`raw.Whose_Tax_Return_is_it_id_4 = ${Whose_Tax_Return_is_it_id_4}`);
         }
         if (!["", null, undefined].includes(Type_of_Payslip_id_3)) {
-            where.push(`raw.Type_of_Payslip_id_3 = ${Type_of_Payslip_id_3}`);
+            orWhere.push(`raw.Type_of_Payslip_id_3 = ${Type_of_Payslip_id_3}`);
         }
         if (!["", null, undefined].includes(Year_Ending_id_1)) {
-            where.push(`raw.Year_Ending_id_1 = ${Year_Ending_id_1}`);
+            orWhere.push(`raw.Year_Ending_id_1 = ${Year_Ending_id_1}`);
         }
         if (!["", null, undefined].includes(Bookkeeping_Frequency_id_2)) {
-            where.push(`raw.Bookkeeping_Frequency_id_2 = ${Bookkeeping_Frequency_id_2}`);
+            orWhere.push(`raw.Bookkeeping_Frequency_id_2 = ${Bookkeeping_Frequency_id_2}`);
         }
         if (!["", null, undefined].includes(CIS_Frequency_id_3)) {
-            where.push(`raw.CIS_Frequency_id_3 = ${CIS_Frequency_id_3}`);
+            orWhere.push(`raw.CIS_Frequency_id_3 = ${CIS_Frequency_id_3}`);
         }
         if (!["", null, undefined].includes(Filing_Frequency_id_8)) {
-            where.push(`raw.Filing_Frequency_id_8 = ${Filing_Frequency_id_8}`);
+            orWhere.push(`raw.Filing_Frequency_id_8 = ${Filing_Frequency_id_8}`);
         }
         if (!["", null, undefined].includes(Management_Accounts_Frequency_id_6)) {
-            where.push(`raw.Management_Accounts_Frequency_id_6 = ${Management_Accounts_Frequency_id_6}`);
+            orWhere.push(`raw.Management_Accounts_Frequency_id_6 = ${Management_Accounts_Frequency_id_6}`);
         }
         if (!["", null, undefined].includes(Payroll_Frequency_id_3)) {
-            where.push(`raw.Payroll_Frequency_id_3 = ${Payroll_Frequency_id_3}`);
+            orWhere.push(`raw.Payroll_Frequency_id_3 = ${Payroll_Frequency_id_3}`);
         }
         if (!["", null, undefined].includes(budgeted_hours)) {
-            where.push(`raw.budgeted_hours = ${budgeted_hours}`);
+            orWhere.push(`raw.budgeted_hours = ${budgeted_hours}`);
         }
         if (!["", null, undefined].includes(feedback_incorporation_time)) {
-            where.push(`raw.feedback_incorporation_time = '${feedback_incorporation_time}'`);
+            orWhere.push(`raw.feedback_incorporation_time = '${feedback_incorporation_time}'`);
         }
         if (!["", null, undefined].includes(review_time)) {
-            where.push(`raw.review_time = '${review_time}'`);
+            orWhere.push(`raw.review_time = '${review_time}'`);
         }
         if (!["", null, undefined].includes(total_preparation_time)) {
-            where.push(`raw.total_preparation_time = '${total_preparation_time}'`);
+            orWhere.push(`raw.total_preparation_time = '${total_preparation_time}'`);
         }
         if (!["", null, undefined].includes(total_time)) {
-            where.push(`raw.total_time = '${total_time}'`);
+            orWhere.push(`raw.total_time = '${total_time}'`);
         }
         if (!["", null, undefined].includes(due_on)) {
-            where.push(`raw.due_on = '${due_on}'`);
+            orWhere.push(`raw.due_on = '${due_on}'`);
         }
         if (!["", null, undefined].includes(customer_deadline_date)) {
-            where.push(`raw.customer_deadline_date = '${customer_deadline_date}'`);
+            orWhere.push(`raw.customer_deadline_date = '${customer_deadline_date}'`);
         }
         if (!["", null, undefined].includes(expected_delivery_date)) {
-            where.push(`raw.expected_delivery_date = '${expected_delivery_date}'`);
+            orWhere.push(`raw.expected_delivery_date = '${expected_delivery_date}'`);
         }
         if (!["", null, undefined].includes(internal_deadline_date)) {
-            where.push(`raw.internal_deadline_date = '${internal_deadline_date}'`);
+            orWhere.push(`raw.internal_deadline_date = '${internal_deadline_date}'`);
         }
         if (!["", null, undefined].includes(sla_deadline_date)) {
-            where.push(`raw.sla_deadline_date = '${sla_deadline_date}'`);
+            orWhere.push(`raw.sla_deadline_date = '${sla_deadline_date}'`);
         }
         if (!["", null, undefined].includes(Management_Accounts_FromDate_id_6)) {
-            where.push(`raw.Management_Accounts_FromDate_id_6 = '${Management_Accounts_FromDate_id_6}'`);
+            orWhere.push(`raw.Management_Accounts_FromDate_id_6 = '${Management_Accounts_FromDate_id_6}'`);
         }
         if (!["", null, undefined].includes(Management_Accounts_ToDate_id_6)) {
-            where.push(`raw.Management_Accounts_ToDate_id_6 = '${Management_Accounts_ToDate_id_6}'`);
+            orWhere.push(`raw.Management_Accounts_ToDate_id_6 = '${Management_Accounts_ToDate_id_6}'`);
         }
 
         // // Staff Fields
         if (!["", null, undefined].includes(staff_full_name)) {
-            where.push(`CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) LIKE '%${staff_full_name}%'`);
+            orWhere.push(`CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) LIKE '%${staff_full_name}%'`);
         }
         if (!["", null, undefined].includes(role)) {
-            where.push(`staffrole.role = '${role}'`);
+            orWhere.push(`staffrole.role = '${role}'`);
         }
         if (!["", null, undefined].includes(staff_email)) {
-            where.push(`jobcreatestaff.email = '${staff_email}'`);
+            orWhere.push(`jobcreatestaff.email = '${staff_email}'`);
         }
         if (!["", null, undefined].includes(line_manager)) {
-            where.push(`CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) LIKE '%${line_manager}%'`);
+            orWhere.push(`CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) LIKE '%${line_manager}%'`);
         }
         if (!["", null, undefined].includes(staff_status)) {
-            where.push(`jobcreatestaff.status = '${staff_status}'`);
+            orWhere.push(`jobcreatestaff.status = '${staff_status}'`);
         }
+
+        if (orWhere.length) {
+            where.push(`(${orWhere.join(" OR ")})`);
+        }
+
+
 
 
         if (!['SUPERADMIN', 'ADMIN'].includes(role_user) && !["", null, undefined].includes(StaffUserId)) {
@@ -4048,9 +4048,8 @@ const getJobCustomReport = async (Report) => {
           )`)
 
 
-
-
         where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
 
         // console.log("where", where);
 
@@ -4379,8 +4378,8 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-        // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-        //  console.log("unpivotSQL", unpivotSQL);
+        console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+        console.log("unpivotSQL", unpivotSQL);
 
         //  console.log("GROUPBY ---->> ", GROUPBY);
 

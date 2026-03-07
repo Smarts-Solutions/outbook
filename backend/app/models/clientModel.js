@@ -1055,21 +1055,20 @@ async function getAllClientsSidebar(
 
 const get_clients_filter = async (client) => {
   //  console.log("getClient client", client);
-  let { StaffUserId, filters } = client;
-  let { job_id , customer_id} = filters;
+  let { StaffUserId, filters, pagination } = client;
+  let { job_id, customer_id } = filters;
 
- // console.log("get_clients_filter job_id", job_id);
- // console.log("get_clients_filter customer_id", customer_id);
-
-  // Line Manager
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-
-  //console.log("get_clients_filter filters", filters?.customer_id);
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
+
+  //console.log("get_clients_filter filters", filters?.customer_id);
+ 
 
   if (customer_id == undefined && job_id == undefined) {
-    return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows);
+    return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
   }
   else if (customer_id.length === 0 && job_id.length > 0) {
     return await getAllClientByJobIdFilter(
@@ -1096,10 +1095,9 @@ const get_clients_filter = async (client) => {
       LineManageStaffId
     );
   }
-  
+
   else {
-      return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows);
-     
+    return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
   }
 
 };
@@ -1108,8 +1106,15 @@ async function getAllClientsSidebarFilter(
   StaffUserId,
   LineManageStaffId,
   rows,
+  pagination
 ) {
- 
+
+  const page = Number(pagination.page) || 1;
+  const limit = Number(pagination.limit) || 20;
+  const search = pagination.search || "";
+
+  const offset = (page - 1) * limit;
+
   try {
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
@@ -1117,8 +1122,8 @@ async function getAllClientsSidebarFilter(
     );
 
     // ================= ADMIN / SUPERADMIN =================
-    if (rows.length > 0 &&(rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
-      
+    if (rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
+
       const [data] = await pool.execute(
         `
         SELECT  
@@ -1142,11 +1147,11 @@ async function getAllClientsSidebarFilter(
         JOIN customers ON customers.id = clients.customer_id    
         JOIN client_types ON client_types.id = clients.client_type
         LEFT JOIN jobs ON clients.id = jobs.client_id
-        WHERE 1=1
+        WHERE 1=1 
+        ${search.length > 0 ? `AND clients.trading_name LIKE '%${search}%'` : ""}
         GROUP BY clients.id
         ORDER BY clients.trading_name ASC
-        `
-      );
+        LIMIT ? OFFSET ?` , [limit, offset]);
 
       return {
         status: true,
@@ -1161,10 +1166,9 @@ async function getAllClientsSidebarFilter(
 
   // ================= OTHER ROLES =================
   try {
-    
+
     const [data] = await pool.execute(
-      `
-      SELECT  
+      `SELECT  
         clients.id AS id,
         clients.trading_name AS client_name,
         customers.trading_name AS customer_name,
@@ -1191,10 +1195,10 @@ async function getAllClientsSidebarFilter(
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
         OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+      ${search.length > 0 ? `AND clients.trading_name LIKE '%${search}%'` : ""}
       GROUP BY clients.id
       ORDER BY clients.trading_name ASC
-      `,
-    );
+      LIMIT ? OFFSET ? `, [limit, offset]);
 
     return {
       status: true,
@@ -1330,7 +1334,7 @@ async function getAllClientByCustomerIdFilter(
     customer_id = [customer_id];
   }
 
-   try {
+  try {
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
       [rows[0].role_id, 34]
@@ -1376,10 +1380,10 @@ ORDER BY
       const [result] = await pool.execute(query);
       return { status: true, message: "success.", data: result };
     }
- 
 
-  // Other role Get data
-  const query = `
+
+    // Other role Get data
+    const query = `
    SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
@@ -1412,9 +1416,9 @@ ORDER BY
       ORDER BY 
           clients.trading_name ASC;
     `;
-  const [result] = await pool.execute(query);
-  return { status: true, message: "success.", data: result };
-   } catch (err) {
+    const [result] = await pool.execute(query);
+    return { status: true, message: "success.", data: result };
+  } catch (err) {
     return { status: false, message: "Err Client Get Filter" };
   }
 
@@ -1427,7 +1431,7 @@ async function getAllClientByCustomerIdAndJobIdFilter(
   customer_id,
   job_id,
   LineManageStaffId
-){
+) {
   if (Array.isArray(customer_id)) {
     customer_id = customer_id;
   } else if (!["", null, undefined].includes(customer_id)) {
@@ -1440,7 +1444,7 @@ async function getAllClientByCustomerIdAndJobIdFilter(
     job_id = [job_id];
   }
 
-   try {
+  try {
     const [RoleAccess] = await pool.execute(
       "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
       [rows[0].role_id, 34]
@@ -1483,10 +1487,10 @@ ORDER BY
       const [result] = await pool.execute(query);
       return { status: true, message: "success.", data: result };
     }
- 
 
-  // Other role Get data
-  const query = `
+
+    // Other role Get data
+    const query = `
    SELECT  
     clients.id AS id,
     clients.trading_name AS client_name,
@@ -1519,14 +1523,14 @@ ORDER BY
       ORDER BY 
           clients.trading_name ASC;
     `;
-  const [result] = await pool.execute(query);
-  return { status: true, message: "success.", data: result };
-   } catch (err) {
+    const [result] = await pool.execute(query);
+    return { status: true, message: "success.", data: result };
+  } catch (err) {
     return { status: false, message: "Err Client Get Filter" };
   }
 
 
-  
+
 
 
 }
