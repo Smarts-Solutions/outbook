@@ -152,6 +152,7 @@ const CustomerUsers = () => {
   //   searchValue: "",
   //   pageNo: 1
   // });
+  
     CustomerPersonRoleData();
   }, []);
 
