@@ -152,7 +152,7 @@ const CustomerUsers = () => {
   //   searchValue: "",
   //   pageNo: 1
   // });
-  
+
     CustomerPersonRoleData();
   }, []);
 
@@ -692,7 +692,7 @@ const CustomerUsers = () => {
         isOpen={showAddCustomerModal}
         backdrop="static"
         size="ms-7"
-        title={type === "edit" ? "Edit Customer User" : "Add Customer User"}
+        title={type === "edit" ? "Update Customer User" : "Add Customer User"}
         hideBtn={true}
         handleClose={() => {
           setShowAddCustomerModal(false);
@@ -705,7 +705,7 @@ const CustomerUsers = () => {
             (field) => !field.showWhen || field.showWhen(formik.values)
           )}
           formik={formik}
-          btn_name={type === "edit" ? "Edit Customer User" : "Add Customer User"}
+          btn_name={type === "edit" ? "Update" : "Add"}
           closeBtn={(e) => {
             formik.resetForm();
             setShowAddCustomerModal(false);
