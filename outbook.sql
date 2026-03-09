@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 06, 2026 at 12:08 PM
+-- Generation Time: Mar 09, 2026 at 11:39 AM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -1411,6 +1411,9 @@ CREATE TABLE IF NOT EXISTS `customer_users` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `login_auth_token` text,
+  `is_password_changed` int(1) NOT NULL DEFAULT '0',
+  `mfa_enabled` int(1) NOT NULL DEFAULT '0',
+  `mfa_secret` text,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
@@ -1418,9 +1421,9 @@ CREATE TABLE IF NOT EXISTS `customer_users` (
 -- Dumping data for table `customer_users`
 --
 
-INSERT INTO `customer_users` (`id`, `customer_contact_person_role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `status`, `is_disable`, `staff_id`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 2, 'shk', 'shk', 'shk@gmail.com', '91', '9999999999', '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '1', '0', 1, '145DD55', '2025-11-26 13:24:37', '2025-11-26 13:24:37', NULL),
-(2, 1, 'wdsdsd', 'sdsdd', 's@gmail.com', '+44', '', '$2a$10$PuIOj/dJKB26gkHmE/zy3eER1jy4DcxeGH.X/RM/4poMGXwX1/N3u', '1', '0', 1, NULL, '2025-12-02 11:36:49', '2025-12-02 11:36:49', NULL);
+INSERT INTO `customer_users` (`id`, `customer_contact_person_role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `status`, `is_disable`, `staff_id`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`, `is_password_changed`, `mfa_enabled`, `mfa_secret`) VALUES
+(1, 2, 'shk', 'shk', 'shk@gmail.com', '91', '9999999999', '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '1', '0', 1, '145DD55', '2025-11-26 13:24:37', '2025-11-26 13:24:37', NULL, 0, 0, NULL),
+(2, 1, 'wdsdsd', 'sdsdd', 's@gmail.com', '+44', '', '$2a$10$PuIOj/dJKB26gkHmE/zy3eER1jy4DcxeGH.X/RM/4poMGXwX1/N3u', '1', '0', 1, NULL, '2025-12-02 11:36:49', '2025-12-02 11:36:49', NULL, 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -2376,7 +2379,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-03-06 04:38:04', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Mjc3MTg4NCwiZXhwIjoxNzcyODA3ODg0fQ.sa2KsYiG31Yh4hTku5dS65x4X1hnHBdgpO3zF4QUjgA'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-03-09 08:33:13', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3MzA0NTE5MywiZXhwIjoxNzczMDgxMTkzfQ.VipqcBMG_8hgYxDvXjJ5znBk7zYs_-YqirEewNdDv7E'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2433,7 +2436,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1332 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1334 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3776,7 +3779,9 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1328, 1, '2026-03-03', 'job', 47, 'updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Customer Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Customer Processing. job code: DDD_AFR_V4_000047', 'updated', '122.168.114.106', '2026-03-03 09:15:58', '2026-03-03 09:15:58'),
 (1329, 1, '2026-03-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-05 08:35:08', '2026-03-05 08:35:08'),
 (1330, 1, '2026-03-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-06 04:38:04', '2026-03-06 04:38:04'),
-(1331, 1, '2026-03-06', 'status types', 5, 'deleted status types To Be Started', 'Super Admin System Super Super Admin deleted status types To Be Started ', 'deleted', '122.168.114.106', '2026-03-06 05:04:14', '2026-03-06 05:04:14');
+(1331, 1, '2026-03-06', 'status types', 5, 'deleted status types To Be Started', 'Super Admin System Super Super Admin deleted status types To Be Started ', 'deleted', '122.168.114.106', '2026-03-06 05:04:14', '2026-03-06 05:04:14'),
+(1332, 1, '2026-03-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-07 09:37:27', '2026-03-07 09:37:27'),
+(1333, 1, '2026-03-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-09 08:33:13', '2026-03-09 08:33:13');
 
 -- --------------------------------------------------------
 
