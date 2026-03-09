@@ -2,15 +2,24 @@ import React, { useState, useEffect } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
-import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
-import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import { convertDate } from "../../../Utils/Comman_function";
 import ReactPaginate from "react-paginate";
+import { useNavigate } from "react-router-dom";
 
 const JobStatus = () => {
+  const navigate = useNavigate();
+  const role = JSON.parse(localStorage.getItem("role"));
+
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [JobStatusData, setJobStatusData] = useState([]);
-
+  const [getAccessDataJob, setAccessDataJob] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    view: 0,
+    all_jobs: 0,
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -49,7 +58,6 @@ const JobStatus = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          console.log("Job Status Data:", res.data);
           setJobStatusData(res.data.rows);
           setTotalRecords(res.data.total || 0);
         } else {
@@ -100,15 +108,94 @@ const JobStatus = () => {
     ]
   );
 
+  const HandleJob = (row) => {
+
+    const updatedData = {
+
+      job: row,
+    };
+   
+
+
+    // return
+    navigate("/admin/job/logs", {
+      state: {
+        job_id: row?.id,
+        timesheet_job_id: null,
+        data: updatedData,
+        goto: "client",
+        activeTab: undefined
+      },
+    });
+
+  };
+
+
+
+
+  const accessDataJob =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "job",
+    )?.items || [];
+
+  const accessDataJobAll =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_jobs",
+    )?.items || [];
+
+  useEffect(() => {
+    if (accessDataJob.length === 0) return;
+    const updatedAccess = {
+      insert: 0,
+      update: 0,
+      delete: 0,
+      view: 0,
+      all_jobs: 0,
+    };
+    accessDataJob.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.view = item.is_assigned;
+    });
+
+    accessDataJobAll.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
+    });
+
+    setAccessDataJob(updatedAccess);
+  }, []);
+
   const columns = [
+    // {
+    //   name: "Job Id",
+    //   cell: (row) => <div title={row.job_code_id}>{row.job_code_id}</div>,
+    //   selector: (row) => row.job_code_id,
+    //   reorder: false,
+    //   sortable: true,
+    // },
+
     {
-      name: "Job Id",
-      cell: (row) => <div title={row.job_code_id}>{row.job_code_id}</div>,
+      name: "Job ID",
+      cell: (row) => (
+        <div title={row.job_code_id}>
+          {getAccessDataJob.view == 1 ||
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleJob(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.job_code_id}
+            </a>
+          ) : (
+            <a>{row.job_code_id}</a>
+          )}
+        </div>
+      ),
       selector: (row) => row.job_code_id,
-      reorder: false,
       sortable: true,
     },
-
     {
       name: "Job Received On",
       selector: (row) => convertDate(row.job_received_on),
