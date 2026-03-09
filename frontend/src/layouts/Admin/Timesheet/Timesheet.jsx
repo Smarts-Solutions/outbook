@@ -1212,6 +1212,39 @@ const Timesheet = () => {
         alert("Please select the Task");
         return;
       }
+
+      // check duplicate rows
+      const seen = new Set();
+      let duplicateItem = null;
+      let duplicateIndex = -1;
+
+      for (let i = 0; i < timeSheetRows.length; i++) {
+        const row = timeSheetRows[i];
+        const key =
+          row.customer_id +
+          "_" +
+          row.client_id +
+          "_" +
+          row.job_id +
+          "_" +
+          row.task_id +
+          "_" +
+          row.task_type;
+
+        if (seen.has(key)) {
+          duplicateItem = row;
+          duplicateIndex = i;
+          break;
+        }
+        seen.add(key);
+      }
+
+      if (duplicateItem) {
+        let fieldName = `${currentDay}_hours`;
+        if (checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)) {
+          return;
+        }
+      }
     }
 
     setSubmitStatus(1);

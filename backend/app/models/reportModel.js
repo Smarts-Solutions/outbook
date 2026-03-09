@@ -150,11 +150,19 @@ const jobStatusReports = async (Report) => {
         LIMIT ? OFFSET ?
       `;
 
-            const [rowsData] = await pool.execute(dataQuery, [
+            let [rowsData] = await pool.execute(dataQuery, [
                 ...searchValues,
                 Number(limit),
                 Number(offset),
             ]);
+
+            // console.log("rowsData", rowsData[0])
+
+
+
+
+
+
 
             const countQuery = `
         SELECT COUNT(DISTINCT jobs.id) AS total
@@ -169,6 +177,44 @@ const jobStatusReports = async (Report) => {
       `;
 
             const [[{ total }]] = await pool.execute(countQuery, searchValues);
+
+
+            if (rowsData && rowsData.length > 0) {
+
+                rowsData = await Promise.all(
+                    rowsData.map(async (element, index) => {
+
+                        const Get_account_manger_id = `SELECT 
+    s.id,
+    CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+    s.employee_number
+FROM staffs s
+JOIN customer_service_account_managers csam 
+    ON s.id = csam.account_manager_id
+JOIN customer_services cs 
+    ON csam.customer_service_id = cs.id
+WHERE cs.customer_id = ?
+AND cs.service_id = ?
+            `;
+
+                        const [rowsAccountManager] = await pool.execute(
+                            Get_account_manger_id,
+                            [element.customer_id, element.service_id]
+                        );
+                        console.log("rowsAccountManager", element.id, element.customer_id, element.service_id, rowsAccountManager)
+
+                        return {
+                            ...element,
+                            [`account_managers`]: rowsAccountManager
+                        };
+
+                    })
+                );
+
+            }
+
+            // console.log("rowsAccountManager", rowsData[0])
+
 
             return {
                 status: true,
@@ -3470,7 +3516,7 @@ const getAllJobType = async (Report) => {
     GROUP BY job_types.id
     ORDER BY job_types.type ASC;
     `
-   // console.log("Get All Job Type Query:", query);
+    // console.log("Get All Job Type Query:", query);
     const [result] = await pool.execute(query);
     return { status: true, message: 'Success.', data: result };
 }
@@ -3588,7 +3634,7 @@ const getJobCustomReport = async (Report) => {
 
     } = data.filters;
 
-   // console.log("data.filters: ", data.filters);
+    // console.log("data.filters: ", data.filters);
 
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
@@ -3832,8 +3878,8 @@ const getJobCustomReport = async (Report) => {
     }
 
     try {
-       // console.log("fromDate ---- ", fromDate);
-       // console.log("toDate ---- ", toDate);
+        // console.log("fromDate ---- ", fromDate);
+        // console.log("toDate ---- ", toDate);
         // compute date range
         let range;
         try {
@@ -3893,7 +3939,7 @@ const getJobCustomReport = async (Report) => {
             where.push(`raw.status_type_id IN (${status_type_id.join(",")})`);
         }
         if (!["", null, undefined].includes(employee_number) && !(Array.isArray(employee_number) && employee_number.length === 0)) {
-           // where.push(`sf.employee_number = '${employee_number}'`);
+            // where.push(`sf.employee_number = '${employee_number}'`);
             where.push(`sf.employee_number IN (${employee_number.join(",")})`);
         }
 

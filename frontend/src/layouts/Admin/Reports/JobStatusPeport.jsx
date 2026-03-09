@@ -64,6 +64,42 @@ const JobStatus = () => {
       });
   };
 
+
+  const maxManagers = Math.max(
+    ...JobStatusData.map((row) => (row.account_managers || []).length)
+  );
+
+  const dynamicManagerColumns = Array.from({ length: maxManagers }).flatMap(
+    (_, index) => [
+      {
+        name: `Individual Account Manager`,
+        cell: (row) => {
+          const manager = row.account_managers?.[index];
+          return (
+            <div title={manager?.full_name || "-"}>
+              {manager?.full_name || "-"}
+            </div>
+          );
+        },
+        selector: (row) => row.account_managers?.[index]?.full_name || "-",
+        sortable: true,
+      },
+      {
+        name: `Employee Id`,
+        cell: (row) => {
+          const manager = row.account_managers?.[index];
+          return (
+            <div title={manager?.employee_number || "-"}>
+              {manager?.employee_number || "-"}
+            </div>
+          );
+        },
+        selector: (row) => row.account_managers?.[index]?.employee_number || "-",
+        sortable: true,
+      }
+    ]
+  );
+
   const columns = [
     {
       name: "Job Id",
@@ -115,6 +151,14 @@ const JobStatus = () => {
       reorder: false,
       sortable: true,
     },
+
+    ...dynamicManagerColumns,
+
+
+
+
+
+
     {
       name: "Clients",
       cell: (row) => (
@@ -347,6 +391,7 @@ const JobStatus = () => {
       req: { page: 1, limit: 1000000, search: "" },
       authToken: token,
     };
+
     const response = await dispatch(JobStatusReport(data)).unwrap();
 
     if (
@@ -358,8 +403,15 @@ const JobStatus = () => {
       return;
     }
 
-    const exportData = response?.data?.rows?.map((item) => {
-      return {
+    const rows = response?.data?.rows || [];
+
+    // ✅ Find maximum account managers
+    const maxManagers = Math.max(
+      ...rows.map((row) => (row.account_managers || []).length)
+    );
+
+    const exportData = rows.map((item) => {
+      let rowData = {
         "Job Id": item.job_code_id,
 
         "Job Received On": item.job_received_on
@@ -380,166 +432,121 @@ const JobStatus = () => {
         "Service Type": item.service_name || "-",
 
         "Job Type": item.job_type_name || "-",
-
-        // Accounts Production
-        "Year Ending":
-          item.service_name === "Accounts Production"
-            ? item.Year_Ending_id_1
-              ? convertDate(item.Year_Ending_id_1)
-              : ""
-            : "",
-
-        // Personal Tax
-        "Tax Year":
-          item.service_name === "Personal Tax Return"
-            ? item.Tax_Year_id_4 || ""
-            : "",
-
-        // Payroll
-        "Payroll Frequency":
-          item.service_name === "Payroll"
-            ? item.Payroll_Frequency_id_3 || ""
-            : "",
-
-        "Payroll Year":
-          item.service_name === "Payroll"
-            ? item.Payroll_Frequency_id_3 === "Weekly"
-              ? item.Payroll_Week_Year_id_3 || ""
-              : item.Payroll_Frequency_id_3 === "Monthly"
-                ? item.Payroll_Month_Year_id_3 || ""
-                : item.Payroll_Frequency_id_3 === "Fortnightly"
-                  ? item.Payroll_Fortnight_Year_id_3 || ""
-                  : item.Payroll_Frequency_id_3 === "Quarterly"
-                    ? item.Payroll_Quarter_Year_id_3 || ""
-                    : item.Payroll_Frequency_id_3 === "Yearly"
-                      ? item.Payroll_Year_id_3 || ""
-                      : ""
-            : "",
-
-        "Payroll Month":
-          item.service_name === "Payroll"
-            ? item.Payroll_Frequency_id_3 === "Weekly"
-              ? item.Payroll_Week_Month_id_3 || ""
-              : item.Payroll_Frequency_id_3 === "Monthly"
-                ? item.Payroll_Month_id_3 || ""
-                : item.Payroll_Frequency_id_3 === "Fortnightly"
-                  ? item.Payroll_Fortnight_Month_id_3 || ""
-                  : ""
-            : "",
-
-        "Payroll Week":
-          item.service_name === "Payroll"
-            ? item.Payroll_Week_id_3 || ""
-            : "",
-
-        // Bookkeeping
-        "Bookkeeping Frequency":
-          item.service_name === "Bookkeeping"
-            ? item.Bookkeeping_Frequency_id_2 || ""
-            : "",
-
-        "Date":
-          item.service_name === "Bookkeeping"
-            ? item.Day_Date_id_2
-              ? convertDate(item.Day_Date_id_2)
-              : ""
-            : "",
-
-        "Year":
-          item.service_name === "Bookkeeping"
-            ? item.Bookkeeping_Frequency_id_2 === "Weekly"
-              ? item.Week_Year_id_2 || ""
-              : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
-                ? item.Fortnight_Year_id_2 || ""
-                : item.Bookkeeping_Frequency_id_2 === "Monthly"
-                  ? item.Month_Year_id_2 || ""
-                  : item.Bookkeeping_Frequency_id_2 === "Quarterly"
-                    ? item.Quarter_Year_id_2 || ""
-                    : item.Bookkeeping_Frequency_id_2 === "Yearly"
-                      ? item.Year_id_2 || ""
-                      : ""
-            : "",
-
-        "Month":
-          item.service_name === "Bookkeeping"
-            ? item.Bookkeeping_Frequency_id_2 === "Weekly"
-              ? item.Week_Month_id_2 || ""
-              : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
-                ? item.Fortnight_Month_id_2 || ""
-                : item.Bookkeeping_Frequency_id_2 === "Monthly"
-                  ? item.Month_id_2 || ""
-                  : ""
-            : "",
-
-        "Week":
-          item.service_name === "Bookkeeping" &&
-            item.Bookkeeping_Frequency_id_2 === "Weekly"
-            ? item.Week_id_2 || ""
-            : "",
-
-        "Fortnight":
-          item.service_name === "Bookkeeping" &&
-            item.Bookkeeping_Frequency_id_2 === "Fortnightly"
-            ? item.Fortnight_id_2 || ""
-            : "",
-
-        "Quarter":
-          item.service_name === "Bookkeeping" &&
-            item.Bookkeeping_Frequency_id_2 === "Quarterly"
-            ? item.Quarter_id_2 || ""
-            : "",
-
-        "FromDate":
-          item.service_name === "Bookkeeping"
-            ? item.Other_FromDate_id_2
-              ? convertDate(item.Other_FromDate_id_2)
-              : ""
-            : "",
-
-        "ToDate":
-          item.service_name === "Bookkeeping"
-            ? item.Other_ToDate_id_2
-              ? convertDate(item.Other_ToDate_id_2)
-              : ""
-            : "",
-
-        "Status": item.status || "-",
-
-        "Allocated To": item.allocated_name || "-",
-
-        "Allocated to (Other)": item.multiple_staff_names || "-",
-
-        "Reviewer Name": item.reviewer_name || "-",
-
-        "Companies House Due Date": item.filing_Companies_date
-          ? convertDate(item.filing_Companies_date)
-          : "-",
-
-        "Internal Deadline": item.internal_deadline_date
-          ? convertDate(item.internal_deadline_date)
-          : "-",
-
-        "Customer Deadline": item.customer_deadline_date
-          ? convertDate(item.customer_deadline_date)
-          : "-",
-
-        "Initial Query Sent Date": item.query_sent_date
-          ? convertDate(item.query_sent_date)
-          : "-",
-
-        "Final Query Response Received Date":
-          item.final_query_response_received_date
-            ? convertDate(item.final_query_response_received_date)
-            : "-",
-
-        "First Draft Sent": item.draft_sent_on
-          ? convertDate(item.draft_sent_on)
-          : "-",
-
-        "Final Draft Sent": item.final_draft_sent_on
-          ? convertDate(item.final_draft_sent_on)
-          : "-",
       };
+
+      // ✅ Dynamic account manager columns
+      for (let i = 0; i < maxManagers; i++) {
+        const manager = item.account_managers?.[i];
+
+        rowData[`Individual Account Manager`] =
+          manager?.full_name || "-";
+
+        rowData[`Employee Id`] =
+          manager?.employee_number || "-";
+      }
+
+      // Accounts Production
+      rowData["Year Ending"] =
+        item.service_name === "Accounts Production"
+          ? item.Year_Ending_id_1
+            ? convertDate(item.Year_Ending_id_1)
+            : ""
+          : "";
+
+      // Personal Tax
+      rowData["Tax Year"] =
+        item.service_name === "Personal Tax Return"
+          ? item.Tax_Year_id_4 || ""
+          : "";
+
+      // Payroll
+      rowData["Payroll Frequency"] =
+        item.service_name === "Payroll"
+          ? item.Payroll_Frequency_id_3 || ""
+          : "";
+
+      rowData["Payroll Year"] =
+        item.service_name === "Payroll"
+          ? item.Payroll_Frequency_id_3 === "Weekly"
+            ? item.Payroll_Week_Year_id_3 || ""
+            : item.Payroll_Frequency_id_3 === "Monthly"
+              ? item.Payroll_Month_Year_id_3 || ""
+              : item.Payroll_Frequency_id_3 === "Fortnightly"
+                ? item.Payroll_Fortnight_Year_id_3 || ""
+                : item.Payroll_Frequency_id_3 === "Quarterly"
+                  ? item.Payroll_Quarter_Year_id_3 || ""
+                  : item.Payroll_Frequency_id_3 === "Yearly"
+                    ? item.Payroll_Year_id_3 || ""
+                    : ""
+          : "";
+
+      rowData["Payroll Month"] =
+        item.service_name === "Payroll"
+          ? item.Payroll_Frequency_id_3 === "Weekly"
+            ? item.Payroll_Week_Month_id_3 || ""
+            : item.Payroll_Frequency_id_3 === "Monthly"
+              ? item.Payroll_Month_id_3 || ""
+              : item.Payroll_Frequency_id_3 === "Fortnightly"
+                ? item.Payroll_Fortnight_Month_id_3 || ""
+                : ""
+          : "";
+
+      rowData["Payroll Week"] =
+        item.service_name === "Payroll"
+          ? item.Payroll_Week_id_3 || ""
+          : "";
+
+      // Bookkeeping
+      rowData["Bookkeeping Frequency"] =
+        item.service_name === "Bookkeeping"
+          ? item.Bookkeeping_Frequency_id_2 || ""
+          : "";
+
+      rowData["Date"] =
+        item.service_name === "Bookkeeping"
+          ? item.Day_Date_id_2
+            ? convertDate(item.Day_Date_id_2)
+            : ""
+          : "";
+
+      rowData["Status"] = item.status || "-";
+
+      rowData["Allocated To"] = item.allocated_name || "-";
+
+      rowData["Allocated to (Other)"] = item.multiple_staff_names || "-";
+
+      rowData["Reviewer Name"] = item.reviewer_name || "-";
+
+      rowData["Companies House Due Date"] = item.filing_Companies_date
+        ? convertDate(item.filing_Companies_date)
+        : "-";
+
+      rowData["Internal Deadline"] = item.internal_deadline_date
+        ? convertDate(item.internal_deadline_date)
+        : "-";
+
+      rowData["Customer Deadline"] = item.customer_deadline_date
+        ? convertDate(item.customer_deadline_date)
+        : "-";
+
+      rowData["Initial Query Sent Date"] = item.query_sent_date
+        ? convertDate(item.query_sent_date)
+        : "-";
+
+      rowData["Final Query Response Received Date"] =
+        item.final_query_response_received_date
+          ? convertDate(item.final_query_response_received_date)
+          : "-";
+
+      rowData["First Draft Sent"] = item.draft_sent_on
+        ? convertDate(item.draft_sent_on)
+        : "-";
+
+      rowData["Final Draft Sent"] = item.final_draft_sent_on
+        ? convertDate(item.final_draft_sent_on)
+        : "-";
+
+      return rowData;
     });
 
     downloadCSV(exportData, "Job Status Report.csv");
