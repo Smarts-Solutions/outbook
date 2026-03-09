@@ -1263,25 +1263,7 @@ const Timesheet = () => {
       }
 
       if (staff_hourminute != null) {
-        // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-        //   return {
-        //     original: item.total_hours,
-        //     totalweeklyHours: totalWeeklyHoursMinutes(item)
-        //   };
-        // });
 
-        //  const total = converted.reduce((acc, item) => {
-        //   const val = parseFloat(item.totalweeklyHours || 0);
-        //   const hrs = Math.floor(val);
-        //   const mins = Math.round((val - hrs) * 100);
-
-        //   acc.totalMinutes += hrs * 60 + mins;
-        //   return acc;
-        // }, { totalMinutes: 0 });
-
-        // const totalHours = Math.floor(total.totalMinutes / 60);
-        // const totalMins = total.totalMinutes % 60;
-        // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
 
 
         const totalHours =
@@ -1364,25 +1346,6 @@ const Timesheet = () => {
     }
 
     if (staff_hourminute != null) {
-      // const converted = updatedTimeSheetRows1 && updatedTimeSheetRows1?.map(item => {
-      //   return {
-      //     original: item.total_hours,
-      //     totalweeklyHours: totalWeeklyHoursMinutes(item)
-      //   };
-      // });
-
-      //  const total = converted.reduce((acc, item) => {
-      //   const val = parseFloat(item.totalweeklyHours || 0);
-      //   const hrs = Math.floor(val);
-      //   const mins = Math.round((val - hrs) * 100);
-
-      //   acc.totalMinutes += hrs * 60 + mins;
-      //   return acc;
-      // }, { totalMinutes: 0 });
-
-      // const totalHours = Math.floor(total.totalMinutes / 60);
-      // const totalMins = total.totalMinutes % 60;
-      // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
 
 
       const totalHours =
@@ -1728,7 +1691,6 @@ const Timesheet = () => {
 
 
   // External Customer DropDown
-
   const getCustomerOptions = (item) =>
     item.customerData?.map((customer) => ({
       value: customer.id,
@@ -1927,7 +1889,6 @@ const Timesheet = () => {
         if (row.id) {
           duplicateIds.push(row.id);
         }
-        console.log("Duplicate row merged into original:", row);
       }
     });
 
@@ -1987,9 +1948,9 @@ const Timesheet = () => {
       setTimeSheetRows(filteredRows);
 
       sweatalert.fire({
-        icon: "warning",
-        title: "Duplicates Merged",
-        text: "Duplicate entries found. Their hours have been merged into the original record. Redirecting to the original record.",
+        icon: "error",
+        title: "Entry already exists",
+        text: "Entry already exists. Redirecting to the original record.",
       }).then(() => {
 
         if (focusDay !== "monday") {
