@@ -184,8 +184,7 @@ const jobStatusReports = async (Report) => {
                 rowsData = await Promise.all(
                     rowsData.map(async (element, index) => {
 
-                        const Get_account_manger_id = `SELECT 
-    s.id,
+                        const Get_account_manger_id = `SELECT s.id,
     CONCAT(s.first_name, ' ', s.last_name) AS full_name,
     s.employee_number
 FROM staffs s
