@@ -97,6 +97,7 @@ const createStaff = async (staff) => {
 
 const getStaff = async (data) => {
   
+ 
   let { page, limit, search } = data;
 
   page = parseInt(page) || 1;

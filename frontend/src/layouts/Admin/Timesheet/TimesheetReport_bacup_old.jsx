@@ -290,7 +290,7 @@ function TimesheetReport() {
      let gropByArray = sortByReference(values)
 
      let lastIndexValue = gropByArray[gropByArray.length - 1];
-      console.log("lastIndexValue ", lastIndexValue);
+   
 
      if (lastIndexValue == "employee") {
         staffData()
@@ -345,7 +345,6 @@ function TimesheetReport() {
 
 
     const { key, value, label } = e.target;
-     console.log("Filter changed: ", key, value, label);
 
     if (key === "groupBy") {
       setOptions([])
@@ -405,7 +404,6 @@ function TimesheetReport() {
       let lastIndexValue = filters.groupBy[filters.groupBy.length - 1];
       if (lastIndexValue == 'job') {
         setOptions([])
-        console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value)
       } else if (lastIndexValue == 'task') {
         setOptions([])
@@ -452,7 +450,6 @@ function TimesheetReport() {
 
   const callFilterApi = async () => {
     // Call your filter API here
-    // console.log("Calling filter API with filters: ", filters);
     const req = { action: "get", filters: filters };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
@@ -481,7 +478,6 @@ function TimesheetReport() {
 
 
 
-  // console.log("filters ", filters);
 
   const resetFunction = () => {
     setFilters({
@@ -516,7 +512,6 @@ function TimesheetReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
-  console.log("Filters after reset: ", filters);
 
 
 

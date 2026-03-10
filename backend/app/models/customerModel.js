@@ -477,8 +477,6 @@ const getCustomer = async (customer) => {
     const offset = (page - 1) * limit;
     const search = customer.search || "";
 
-    console.log("------>>>>", customer)
-
     // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id)
 

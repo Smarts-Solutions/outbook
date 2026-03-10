@@ -150,11 +150,19 @@ const jobStatusReports = async (Report) => {
         LIMIT ? OFFSET ?
       `;
 
-            const [rowsData] = await pool.execute(dataQuery, [
+            let [rowsData] = await pool.execute(dataQuery, [
                 ...searchValues,
                 Number(limit),
                 Number(offset),
             ]);
+
+            // console.log("rowsData", rowsData[0])
+
+
+
+
+
+
 
             const countQuery = `
         SELECT COUNT(DISTINCT jobs.id) AS total
@@ -170,6 +178,41 @@ const jobStatusReports = async (Report) => {
 
             const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
+
+            if (rowsData && rowsData.length > 0) {
+
+                rowsData = await Promise.all(
+                    rowsData.map(async (element, index) => {
+
+                        const Get_account_manger_id = `SELECT s.id,
+    CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+    s.employee_number
+FROM staffs s
+JOIN customer_service_account_managers csam 
+    ON s.id = csam.account_manager_id
+JOIN customer_services cs 
+    ON csam.customer_service_id = cs.id
+WHERE cs.customer_id = ?
+AND cs.service_id = ?
+            `;
+
+                        const [rowsAccountManager] = await pool.execute(
+                            Get_account_manger_id,
+                            [element.customer_id, element.service_id]
+                        );
+                        
+
+                        return {
+                            ...element,
+                            [`account_managers`]: rowsAccountManager
+                        };
+
+                    })
+                );
+
+            }
+
+          
             return {
                 status: true,
                 message: "Success.",
@@ -1746,8 +1789,7 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
             end = startOfDay(today);
             start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
     }
-    console.log("start", start);
-    console.log("end", end);
+   
     return { fromDate: toYMD(start), toDate: toYMD(end) };
 }
 /** Helper: format Date -> YYYY-MM-DD */
@@ -4379,6 +4421,8 @@ const getJobCustomReport = async (Report) => {
         `;
 
        
+        // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+        // console.log("unpivotSQL", unpivotSQL);
 
         //  console.log("GROUPBY ---->> ", GROUPBY);
 

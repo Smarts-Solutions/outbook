@@ -24,7 +24,6 @@ function TimesheetReport() {
   const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
 
-  //console.log("showData ", showData);
 
   const [staffAllData, setStaffAllData] = useState([]);
   const [customerAllData, setCustomerAllData] = useState([]);
@@ -40,8 +39,6 @@ function TimesheetReport() {
   // set filter id
   const [filterId, setFilterId] = useState(null);
 
-  console.log("filterId -------  ", filterId);
-  // console.log("getAllFilterData ", getAllFilterData);
 
   const [filters, setFilters] = useState({
     groupBy: ["staff_id"],
@@ -64,10 +61,8 @@ function TimesheetReport() {
 
   let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
 
-  //  console.log("lastGroupValue ", lastGroupValue);
 
   const staffData = async () => {
-    //  console.log("role ", role);
     if (role?.toUpperCase() === "SUPERADMIN") {
       await dispatch(Staff({ req: { action: "get" }, authToken: token }))
         .unwrap()
@@ -169,7 +164,6 @@ function TimesheetReport() {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log("getAllFilters response ", response.data);
           const data = response?.data?.map((item) => ({
             value: item.id,
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
@@ -258,7 +252,6 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("Internal jobs response: ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -300,7 +293,6 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("Internal jobs response: ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -347,7 +339,6 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("Internal tasks response: ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -388,7 +379,6 @@ function TimesheetReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("Internal tasks response: ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -474,7 +464,6 @@ function TimesheetReport() {
       // this case is for multi-select (Group By)
       const values = e.map((opt) => opt.value);
       const labels = e.map((opt) => opt.label);
-      //console.log("Filter changed (multi): ", "groupBy", values, labels);
       setOptions([]);
       let gropByArray = sortByReference(values);
       setFilters((prev) => ({
@@ -554,7 +543,6 @@ function TimesheetReport() {
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == "job_id") {
         setOptions([]);
-        // console.log("Internal/External changed, calling GetAllJobs with: ", value);
         GetAllJobs(value);
       } else if (lastIndexValue == "task_id") {
         setOptions([]);
@@ -609,7 +597,6 @@ function TimesheetReport() {
         employeeData();
       }
     } else if (type == "remove") {
-      // console.log("Removed value: ---------------- ", value);
       if (value == "staff_id") {
         setStaffAllData([]);
         setFilters((prev) => ({
@@ -684,7 +671,6 @@ function TimesheetReport() {
 
   const callFilterApi = async () => {
     // Call your filter API here
-    // console.log("Calling filter API with filters: ", filters);
     const req = { action: "get", filters: filters, role: role };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
@@ -723,7 +709,6 @@ function TimesheetReport() {
     filters.employee_number,
   ]);
 
-  //console.log("filters ", filters);
 
   const resetFunction = () => {
     setFilters({
@@ -789,7 +774,6 @@ function TimesheetReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
-  //  console.log("Filters: ", filters);
 
   const saveFilterFunction = async () => {
     if (filters?.groupBy?.length == 0) {
@@ -838,12 +822,10 @@ function TimesheetReport() {
   const handleFilterSelect = async (selected) => {
     setFilterId(selected.value);
     // set filters from selected
-    // console.log("selected  1 --", selected);
     let selectedFilter = getAllFilterData?.find(
       (opt) => Number(opt?.value) === Number(selected?.value),
     );
 
-    //console.log("selectedFilter  2 --", selectedFilter);
     if (selectedFilter != undefined && selectedFilter.filters) {
       let parsedFilters = {};
       try {
@@ -865,7 +847,6 @@ function TimesheetReport() {
           await GetAllTask(parsedFilters?.internal_external);
         }
 
-        //console.log("Parsed Filters: 4  ", parsedFilters);
         setFilters(parsedFilters);
         callFilterApi();
       } catch (e) {
@@ -939,7 +920,6 @@ function TimesheetReport() {
     }
   };
 
-  console.log("setFilterId -----  ", filterId);
 
   return (
     <div className="container-fluid pb-3">
@@ -1054,15 +1034,12 @@ function TimesheetReport() {
               filters.groupBy.includes(opt.value),
             )}
             onChange={(selectedOptions, actionMeta) => {
-              // console.log("Selected Options:", selectedOptions);
-              //console.log("Action Meta:", actionMeta);
+           
 
               if (actionMeta.action === "remove-value") {
-                console.log("Removed value:", actionMeta.removedValue.value);
                 addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
               }
               if (actionMeta.action === "select-option") {
-                console.log("Added value:", actionMeta.option.value);
                 addAndRemoveGroupBy(actionMeta.option.value, "add");
               }
               handleFilterChange(selectedOptions);
@@ -1511,10 +1488,7 @@ function TimesheetReport() {
 
       {/* Filtered Data Display */}
       <div className="datatable-container">
-        {/* <h6>Filtered Data:</h6> */}
-        {
-          //console.log("showData?.rows ", showData?.rows)
-        }
+     
         {showData?.rows == undefined || showData?.rows?.length === 0 ? (
           <div className="text-center">
             <img
@@ -1528,17 +1502,9 @@ function TimesheetReport() {
           <div className="table-responsive fixed-table-header">
             <table
               className="table rdt_Table"
-            // className="table table-bordered"
-            // style={{
-            //   fontSize: "14px",
-            //   width: "100%",
-            //   overflowX: "auto",
-            //   display: "block",
-            // }}
+         
             >
-              <thead
-              // className="rdt_TableHead"
-              >
+              <thead >
                 <tr className="rdt_TableHeadRow">
                   {showData?.columns?.map((col, idx) => (
                     <th
