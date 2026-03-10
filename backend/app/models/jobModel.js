@@ -1661,6 +1661,9 @@ const getJobByClient = async (job) => {
         ORDER BY 
         jobs.id DESC;
         `;
+
+    //console.log("query -", query);
+
     const [result] = await pool.execute(query);
 
     //////-----START Assign Customer Service Data START----////////
