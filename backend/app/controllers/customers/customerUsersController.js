@@ -1,10 +1,17 @@
 const customerService = require('../../services/customers/customerService');
 const pool = require('../../config/database');
 const bcrypt = require("bcryptjs");
+const { commonEmail } = require("../../utils/commonEmail");
+const e = require('cors');
 
 
 
 const getAllCustomerUsers = async (req, res) => {
+
+
+
+
+
   try {
     console.log("Inside getAllCustomerUsers Controller");
     const { ...customerUsers } = req.body;
@@ -107,6 +114,22 @@ const getAllCustomerUsers = async (req, res) => {
           await pool.execute(accessInsertQuery, [newCustomerUserId, customerId]);
         }
       }
+
+      let loginUrl = `${req.protocol}://${req.get("host")}`;
+      if (loginUrl.includes("localhost")) {
+        loginUrl = `http://localhost:3001/#/customer/login`;
+      } else {
+        loginUrl = loginUrl + "/#/customer/login";
+      }
+
+      let subject = "Customer Login Details";
+      let html = `
+        Your account has been created
+        User ID : ${email}
+        Password : ${password}
+        Login URL : ${loginUrl}
+      `
+      await commonEmail(email, subject, html);
 
       return res.status(200).json({ status: true, message: "Customer User added successfully." });
 
