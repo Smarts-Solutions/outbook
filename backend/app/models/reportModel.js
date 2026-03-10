@@ -213,8 +213,6 @@ AND cs.service_id = ?
             }
 
           
-
-
             return {
                 status: true,
                 message: "Success.",
