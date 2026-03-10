@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
@@ -36,6 +36,7 @@ const ClientList = () => {
   const [loading, setLoading] = useState(false);
 
   const [jobLoading, setJobLoading] = useState(false);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     GetAllJobListByCustomer("");
@@ -696,11 +697,17 @@ const ClientList = () => {
     setSearchTerm(value);
     setCurrentPage(1);
 
-    if (clientDetailSingle.id) {
-      GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
-    } else {
-      GetAllJobListByCustomer(customerDetails.id, 1, pageSize, value);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
+
+    debounceRef.current = setTimeout(() => {
+      if (clientDetailSingle.id) {
+        GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
+      } else {
+        GetAllJobListByCustomer(customerDetails.id, 1, pageSize, value);
+      }
+    }, 500);
   };
 
   const handleCreateJob = (row) => {
@@ -855,24 +862,26 @@ const ClientList = () => {
     }
 
     const exportData = apiData?.map((item) => ({
-      "Job Code Id": item.job_code_id,
-      "Job Priority": item.job_priority,
-      "Client Trading Name": item.client_trading_name,
-      "Job Type Name": item.job_type_name,
+      "Job Code Id": item.job_code_id||"-",
+      "Job Priority": item.job_priority||"-",
+      "Client Trading Name": item.client_trading_name||"-",
+      "Job Type Name": item.job_type_name||"-",
       "Account Manager":
         item.account_manager_officer_first_name +
         " " +
-        item.account_manager_officer_last_name,
+        item.account_manager_officer_last_name||"-",
       "Outbooks Account Manager":
         item.outbooks_acount_manager_first_name +
         " " +
-        item.outbooks_acount_manager_last_name,
+        item.outbooks_acount_manager_last_name||"-",
       "Allocated To":
-        item.allocated_first_name + " " + item.allocated_last_name,
-      Invoiced: item.invoiced == "1" ? "YES" : "NO",
-      "Created By": item.job_created_by,
-      "Created At": item.created_at,
-      Status: item.status,
+  item.allocated_id != null
+    ? item.allocated_first_name + " " + item.allocated_last_name
+    : "-",
+      Invoiced: item.invoiced == "1" ? "YES" : "NO"||"-",
+      "Created By": item.job_created_by||"-",
+      "Created At": item.created_at||"-",
+      Status: item.status||"-",
     }));
 
     setLoading(false);
@@ -1040,7 +1049,7 @@ const ClientList = () => {
                 active={2}
                 data={hararchyData}
                 NumberOfActive={
-                  activeTab == "NoOfJobs" ? customerData.length : ""
+                  activeTab == "NoOfJobs" ? totalRecords  : ""
                 }
               />
             </>

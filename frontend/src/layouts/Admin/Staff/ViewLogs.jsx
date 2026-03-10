@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import Swal from "sweetalert2";
 
 const ViewLogs = () => {
   const location = useLocation();
@@ -44,6 +45,60 @@ const ViewLogs = () => {
 
   const chunkedSpouseArray = chunkArray(getActiviyLog, 3);
 
+
+const downloadCSV = (data, filename) => {
+  if (!data || data.length === 0) {
+    Swal.fire({ title: "No Data", text: "Export ke liye koi data nahi hai.", icon: "info" });
+    return;
+  }
+  const csvRows = [];
+  const headers = Object.keys(data[0]);
+  csvRows.push(headers.join(","));
+  data.forEach((row) => {
+    const values = headers.map(
+      (h) => `"${(row[h] ?? "").toString().replace(/"/g, '""')}"`
+    );
+    csvRows.push(values.join(","));
+  });
+  const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
+
+
+
+const handleExport = () => {
+
+  const flatData = [];
+
+  getActiviyLog.forEach((item) => {
+    item.allContain.forEach((log) => {
+      const date = new Date(item.date);
+      const formattedDate = 
+        String(date.getDate()).padStart(2, "0") + "/" +
+        String(date.getMonth() + 1).padStart(2, "0") + "/" +
+        date.getFullYear();
+
+      const logTime = new Date(log.created_at).toLocaleTimeString();
+
+      flatData.push({
+        "Date": formattedDate,
+        "Time": logTime,
+        "Activity": log.log_message,
+      });
+    });
+  });
+
+  downloadCSV(flatData, "Activity_Logs.csv");
+};
+
+
+
+
   return (
     <div className="container-fluid mt-5">
       <div className="content-title">
@@ -52,6 +107,15 @@ const ViewLogs = () => {
             <h3 className="mt-0">View Logs</h3>
           </div>
           <div className="col-auto ms-auto">
+             {getActiviyLog && getActiviyLog.length > 0 && (
+    <button
+      className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2 me-2 float-end"
+      onClick={handleExport}
+    >
+      <i className="fa fa-download" aria-hidden="true"></i>
+      <span>Export Excel</span>
+    </button>
+  )}
             <div
               className="btn btn-info text-white float-end blue-btn me-2"
               onClick={() => {

@@ -96,14 +96,9 @@ const createStaff = async (staff) => {
 };
 
 const getStaff = async (data) => {
-  console.log("data in model", data);
+  
+ 
   let { page, limit, search } = data;
-
-  console.log("page", page);
-  console.log("limit", limit);
-  console.log("search", search);
-
-
 
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
