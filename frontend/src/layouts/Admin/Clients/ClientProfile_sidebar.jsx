@@ -866,10 +866,16 @@ const ClientList = () => {
       "Job Priority": item.job_priority||"-",
       "Client Trading Name": item.client_trading_name||"-",
       "Job Type Name": item.job_type_name||"-",
-      "Account Manager":
-        item.account_manager_officer_first_name +
-        " " +
-        item.account_manager_officer_last_name||"-",
+      // "Account Manager":
+      //   item.account_manager_officer_first_name +
+      //   " " +
+      //   item.account_manager_officer_last_name||"-",
+        "Client Contact Person":
+  item.account_manager_officer_first_name && item.account_manager_officer_last_name
+    ? item.account_manager_officer_first_name +
+      " " +
+      item.account_manager_officer_last_name
+    : "-",
       "Outbooks Account Manager":
         item.outbooks_acount_manager_first_name +
         " " +

@@ -345,8 +345,8 @@ const Status = () => {
   }, []);
 
   const exportData = statusDataAll.map((item) => ({
-    "Status Name": item.name,
-    "Status Type": item.status_type,
+    "Detailed Status": item.name,
+    "Status": item.status_type,
     "Created Date": convertDate(item.created_at),
     "Last Update On": convertDate(item.updated_at),
   }));
