@@ -937,7 +937,7 @@ function TimesheetReport() {
 
               <div className="w-50 mt-2">
                 <label className="form-label fw-medium mt-2 mb-1">
-                   Saved Filters
+                  Saved Filters
                 </label>
 
                 <div className="d-flex align-items-center gap-2">
@@ -1023,10 +1023,7 @@ function TimesheetReport() {
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
-          {console.log(
-            "optionGroupBy --- ",
-            optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value)),
-          )}
+
           <Select
             isMulti
             options={optionGroupBy}
@@ -1034,7 +1031,7 @@ function TimesheetReport() {
               filters.groupBy.includes(opt.value),
             )}
             onChange={(selectedOptions, actionMeta) => {
-           
+
 
               if (actionMeta.action === "remove-value") {
                 addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
@@ -1488,7 +1485,7 @@ function TimesheetReport() {
 
       {/* Filtered Data Display */}
       <div className="datatable-container">
-     
+
         {showData?.rows == undefined || showData?.rows?.length === 0 ? (
           <div className="text-center">
             <img
@@ -1502,7 +1499,7 @@ function TimesheetReport() {
           <div className="table-responsive fixed-table-header">
             <table
               className="table rdt_Table"
-         
+
             >
               <thead >
                 <tr className="rdt_TableHeadRow">

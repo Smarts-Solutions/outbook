@@ -1271,7 +1271,7 @@ const ClientLists = () => {
                     selectedCustomer?.trading_name,
                   );
                 }}
-                placeholder="Select Customer"
+                placeholder="All"
               />
             </div>
 
