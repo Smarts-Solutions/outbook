@@ -1789,8 +1789,7 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
             end = startOfDay(today);
             start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
     }
-    console.log("start", start);
-    console.log("end", end);
+   
     return { fromDate: toYMD(start), toDate: toYMD(end) };
 }
 /** Helper: format Date -> YYYY-MM-DD */
@@ -4421,8 +4420,8 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-        console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-        console.log("unpivotSQL", unpivotSQL);
+        // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+        // console.log("unpivotSQL", unpivotSQL);
 
         //  console.log("GROUPBY ---->> ", GROUPBY);
 
