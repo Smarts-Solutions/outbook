@@ -200,7 +200,7 @@ AND cs.service_id = ?
                             Get_account_manger_id,
                             [element.customer_id, element.service_id]
                         );
-                        console.log("rowsAccountManager", element.id, element.customer_id, element.service_id, rowsAccountManager)
+                        
 
                         return {
                             ...element,
@@ -212,7 +212,7 @@ AND cs.service_id = ?
 
             }
 
-            // console.log("rowsAccountManager", rowsData[0])
+          
 
 
             return {
