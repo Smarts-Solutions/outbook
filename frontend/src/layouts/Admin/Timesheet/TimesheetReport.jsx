@@ -32,6 +32,8 @@ function TimesheetReport() {
   const [jobAllData, setJobAllData] = useState([]);
   const [taskAllData, setTaskAllData] = useState([]);
 
+  console.log("clientAllData",clientAllData)
+
   const [internalJobAllData, setInternalJobAllData] = useState([]);
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
   const [employeeNumberAllData, setEmployeeNumberAllData] = useState([]);
@@ -304,6 +306,8 @@ function TimesheetReport() {
 
   ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
 
+
+
   // Get All Clients
   // const GetAllClient = async () => {
   //   const req = { action: "get", customer_id: "" };
@@ -354,7 +358,7 @@ function TimesheetReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20
+        limit: 5
       }
     };
     const data = { req, authToken: token };
@@ -378,7 +382,7 @@ function TimesheetReport() {
           );
           return unique;
         });
-        setClientHasMore(response.data.length === 20);
+        setClientHasMore(response.data.length === 5);
         setClientPage(pageNo);
 
       } else {
@@ -713,6 +717,9 @@ function TimesheetReport() {
 
     const { key, value, label } = e.target;
 
+    alert(key)
+    alert(value)
+
     if (
       key === "staff_id" ||
       key === "customer_id" ||
@@ -857,6 +864,7 @@ function TimesheetReport() {
       } else if (value == "job_id") {
         if (filters.internal_external == "0") {
           setJobAllData([]);
+          setJobOptions([]);
           setInternalJobAllData([]);
           setFilters((prev) => ({
             ...prev,
@@ -871,6 +879,7 @@ function TimesheetReport() {
           }));
         } else if (filters.internal_external == "2") {
           setJobAllData([]);
+          setJobOptions([]);
           setFilters((prev) => ({
             ...prev,
             job_id: null,
@@ -974,6 +983,7 @@ function TimesheetReport() {
     setCustomerAllData([]);
     setClientAllData([]);
     setJobAllData([]);
+    setJobOptions([]);
     setTaskAllData([]);
     setInternalJobAllData([]);
     setInternalTaskAllData([]);
@@ -1441,27 +1451,6 @@ function TimesheetReport() {
                   ) || null
                   : null
               }
-
-              // onChange={(selectedOptions) => {
-              //   const values = selectedOptions
-              //     ? selectedOptions.map(opt => opt.value)
-              //     : [];
-              //   handleFilterChange({
-              //     target: {
-              //       key: "customer_id",
-              //       value: values
-              //     }
-              //   });
-              //   // Call API only when empty
-              //   if (values.length === 0) {
-              //     setCustomerHasMore(true);
-              //     setCustomerPage(1);
-              //     setCustomerSearch("");
-              //     setCustomerAllData([]);
-              //     customerCache.current = {};
-              //     GetAllCustomer({ searchValue: "", pageNo: 1 });
-              //   }
-              // }}
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
@@ -1512,8 +1501,8 @@ function TimesheetReport() {
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             /> */}
+           
             <Select
-              isMulti
               closeMenuOnSelect={false}
               options={clientAllData}
               value={
@@ -1532,25 +1521,6 @@ function TimesheetReport() {
                   },
                 })
               }
-              // onChange={(selectedOptions) => {
-              //   const values = selectedOptions
-              //     ? selectedOptions.map(opt => opt.value)
-              //     : [];
-              //   handleFilterChange({
-              //     target: {
-              //       key: "client_id",
-              //       value: values
-              //     }
-              //   });
-              //   if (values.length === 0) {
-              //     setClientHasMore(true);
-              //     setClientPage(1);
-              //     setClientSearch("");
-              //     setClientAllData([]);
-              //     clientCache.current = {};
-              //     GetAllClient({ searchValue: "", pageNo: 1 });
-              //   }
-              // }}
               onInputChange={(value) => handleClientSearch(value)}
               onMenuScrollToBottom={() => {
                 if (clientHasMore) {
@@ -1568,6 +1538,7 @@ function TimesheetReport() {
         )}
 
         {/* Field To Display Job */}
+       
         {filters?.groupBy?.includes("job_id") &&
           filters.internal_external != "1" && (
             <div className="col-lg-4 col-md-6">
@@ -1593,37 +1564,17 @@ function TimesheetReport() {
                 isSearchable
                 className="shadow-sm select-staff rounded-pill"
               /> */}
+              {console.log("jobOptions",jobOptions)}
               <Select
-                
                 closeMenuOnSelect={false}
                 options={jobOptions}
                 value={
-                  jobAllData && jobAllData.length > 0
-                    ? jobAllData.find(
+                  jobOptions && jobOptions.length > 0
+                    ? jobOptions.find(
                       (opt) => Number(opt.value) === Number(filters.job_id),
                     ) || null
                     : null
-                }
-                // onChange={(selectedOptions) => {
-                //   const values = selectedOptions
-                //     ? selectedOptions.map(opt => opt.value)
-                //     : [];
-                //   handleFilterChange({
-                //     target: {
-                //       key: "job_id",
-                //       value: values
-                //     }
-                //   });
-                //   if (values.length === 0) {
-                //     setHasMore(true);
-                //     setPage(1);
-                //     setSearch("");
-                //     setJobOptions([]);
-                //     setJobAllData([]);
-                //     cacheRef.current = {};
-                //     GetAllJobs({ searchValue: "", pageNo: 1 });
-                //   }
-                // }}
+                } 
                 onChange={(selected) =>
                   handleFilterChange({
                     target: {
