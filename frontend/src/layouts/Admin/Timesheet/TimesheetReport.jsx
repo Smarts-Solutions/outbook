@@ -139,27 +139,19 @@ function TimesheetReport() {
           }));
 
           staffCache.current[cacheKey] = formatted;
-
           setStaffAllData(prev => {
-
             const combined = append ? [...prev, ...formatted] : formatted;
-
             const unique = Array.from(
               new Map(combined.map(item => [item.value, item])).values()
             );
-
             return unique;
           });
 
           setStaffHasMore(response.data.data.length === 20);
           setStaffPage(pageNo);
-
         } else {
-
           if (!append) setStaffAllData([]);
-
         }
-
       } catch (error) { }
       setLoading(false);
 
