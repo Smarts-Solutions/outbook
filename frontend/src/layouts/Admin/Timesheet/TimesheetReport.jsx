@@ -69,12 +69,12 @@ function TimesheetReport() {
   const staffData = async () => {
     //  console.log("role ", role);
     if (role?.toUpperCase() === "SUPERADMIN") {
-      await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+      await dispatch(Staff({ req: { action: "get", page : 1, limit : 10000, search : "" }, authToken: token }))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            // console.log("response.data ", response.data);
-            const data = response?.data?.map((item) => ({
+             console.log("response.data ", response.data);
+            const data = response?.data?.data?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`
             }));
@@ -222,7 +222,7 @@ function TimesheetReport() {
 
   // Get All Clients
   const GetAllClient = async () => {
-    const req = { action: "get", customer_id: "" };
+    const req = { action: "get", customer_id: "" ,page: 1,limit: 100000,search: ""};
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -268,7 +268,7 @@ function TimesheetReport() {
 
 
       // External get All jobs
-      var req = { action: "getByCustomer", customer_id: "" };
+      var req = { action: "getByCustomer", customer_id: "" ,page: 1,limit: 100000,search: "" };
       var data = { req: req, authToken: token };
       await dispatch(JobAction(data))
         .unwrap()
@@ -317,7 +317,7 @@ function TimesheetReport() {
 
     else if (internal_external == "2") {
       // External get All jobs
-      const req = { action: "getByCustomer", customer_id: "" };
+      const req = { action: "getByCustomer", customer_id: "" ,page: 1,limit: 100000,search: ""};
       const data = { req: req, authToken: token };
       await dispatch(JobAction(data))
         .unwrap()
