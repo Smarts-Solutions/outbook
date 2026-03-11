@@ -219,7 +219,6 @@ function TimesheetReport() {
         return;
       });
   };
-
   // Get All Clients
   const GetAllClient = async () => {
     const req = { action: "get", customer_id: "" ,page: 1,limit: 100000,search: ""};
@@ -241,7 +240,6 @@ function TimesheetReport() {
         return;
       });
   };
-
   // Get All Jobs
   const GetAllJobs = async (internal_external) => {
     if (internal_external == "0") {
