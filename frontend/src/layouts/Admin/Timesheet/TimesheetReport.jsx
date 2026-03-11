@@ -105,71 +105,78 @@ function TimesheetReport() {
   const staffDebounceRef = useRef(null);
 
   const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false }) => {
-    if (loading) return;
-    const cacheKey = `${searchValue}_${pageNo}`;
+    if (role?.toUpperCase() === "SUPERADMIN") {
+      if (loading) return;
+      const cacheKey = `${searchValue}_${pageNo}`;
+      if (staffCache.current[cacheKey]) {
 
-    if (staffCache.current[cacheKey]) {
-
-      const cached = staffCache.current[cacheKey];
-
-      setStaffAllData(prev => {
-        const combined = [...prev, ...cached];
-        const unique = Array.from(
-          new Map(combined.map(item => [item.value, item])).values()
-        );
-        return unique;
-      });
-
-      return;
-    }
-
-    setLoading(true);
-
-    const req = {
-      action: "get",
-      page: pageNo,
-      limit: 5,
-      search: searchValue
-    };
-
-    const data = { req: req, authToken: token };
-
-    try {
-
-      const response = await dispatch(Staff(data)).unwrap();
-
-      if (response.status) {
-
-        const formatted = response.data.data.map((item) => ({
-          value: item.id,
-          label: `${item.first_name} ${item.last_name} (${item.email})`
-        }));
-
-        staffCache.current[cacheKey] = formatted;
+        const cached = staffCache.current[cacheKey];
 
         setStaffAllData(prev => {
-
-          const combined = append ? [...prev, ...formatted] : formatted;
-
+          const combined = [...prev, ...cached];
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
-
           return unique;
         });
 
-        setStaffHasMore(response.data.data.length === 5);
-        setStaffPage(pageNo);
-
-      } else {
-
-        if (!append) setStaffAllData([]);
-
+        return;
       }
+      setLoading(true);
+      const req = {
+        action: "get",
+        page: pageNo,
+        limit: 20,
+        search: searchValue
+      };
+      const data = { req: req, authToken: token };
+      try {
+        const response = await dispatch(Staff(data)).unwrap();
+        if (response.status) {
+          const formatted = response.data.data.map((item) => ({
+            value: item.id,
+            label: `${item.first_name} ${item.last_name} (${item.email})`
+          }));
 
-    } catch (error) { }
+          staffCache.current[cacheKey] = formatted;
 
-    setLoading(false);
+          setStaffAllData(prev => {
+
+            const combined = append ? [...prev, ...formatted] : formatted;
+
+            const unique = Array.from(
+              new Map(combined.map(item => [item.value, item])).values()
+            );
+
+            return unique;
+          });
+
+          setStaffHasMore(response.data.data.length === 20);
+          setStaffPage(pageNo);
+
+        } else {
+
+          if (!append) setStaffAllData([]);
+
+        }
+
+      } catch (error) { }
+      setLoading(false);
+
+    } else {
+      let data = [
+        {
+          id: staffDetails?.id,
+          email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
+        },
+      ];
+
+      data = data?.map((item) => ({
+        value: item.id,
+        label: item.email,
+      }));
+      setStaffAllData(data);
+    }
 
   };
 
@@ -452,7 +459,7 @@ function TimesheetReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 5
+        limit: 20
       }
     };
     const data = { req, authToken: token };
@@ -476,7 +483,7 @@ function TimesheetReport() {
           );
           return unique;
         });
-        setClientHasMore(response.data.length === 5);
+        setClientHasMore(response.data.length === 20);
         setClientPage(pageNo);
 
       } else {
