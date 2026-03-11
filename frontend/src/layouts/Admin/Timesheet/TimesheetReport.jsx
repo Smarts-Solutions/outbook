@@ -1265,10 +1265,7 @@ function TimesheetReport() {
         {/* Group By */}
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Group By</label>
-          {console.log(
-            "optionGroupBy --- ",
-            optionGroupBy.filter((opt) => filters.groupBy.includes(opt.value)),
-          )}
+
           <Select
             isMulti
             options={optionGroupBy}
