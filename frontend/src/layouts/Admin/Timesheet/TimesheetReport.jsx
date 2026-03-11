@@ -339,7 +339,6 @@ function TimesheetReport() {
     }
 
   };
-
   // Get All task
   const GetAllTask = async (internal_external) => {
     if (internal_external == "0") {
