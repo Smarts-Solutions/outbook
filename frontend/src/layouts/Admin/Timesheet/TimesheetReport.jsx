@@ -32,8 +32,6 @@ function TimesheetReport() {
   const [jobAllData, setJobAllData] = useState([]);
   const [taskAllData, setTaskAllData] = useState([]);
 
-  console.log("clientAllData",clientAllData)
-
   const [internalJobAllData, setInternalJobAllData] = useState([]);
   const [internalTaskAllData, setInternalTaskAllData] = useState([]);
   const [employeeNumberAllData, setEmployeeNumberAllData] = useState([]);
@@ -65,38 +63,129 @@ function TimesheetReport() {
   let lastGroupValue = filters?.groupBy[filters?.groupBy?.length - 1];
 
 
-  const staffData = async () => {
-    if (role?.toUpperCase() === "SUPERADMIN") {
-      await dispatch(Staff({ req: { action: "get" }, authToken: token }))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: `${item.first_name} ${item.last_name} (${item.email})`,
-            }));
-            setStaffAllData(data);
-          } else {
-            setStaffAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    } else {
-      let data = [
-        {
-          id: staffDetails?.id,
-          email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
-        },
-      ];
+  // const staffData = async () => {
+  //   if (role?.toUpperCase() === "SUPERADMIN") {
+  //     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+  //       .unwrap()
+  //       .then(async (response) => {
+  //         if (response.status) {
+  //           const data = response?.data?.map((item) => ({
+  //             value: item.id,
+  //             label: `${item.first_name} ${item.last_name} (${item.email})`,
+  //           }));
+  //           setStaffAllData(data);
+  //         } else {
+  //           setStaffAllData([]);
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         return;
+  //       });
+  //   } else {
+  //     let data = [
+  //       {
+  //         id: staffDetails?.id,
+  //         email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
+  //       },
+  //     ];
 
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email,
-      }));
-      setStaffAllData(data);
+  //     data = data?.map((item) => ({
+  //       value: item.id,
+  //       label: item.email,
+  //     }));
+  //     setStaffAllData(data);
+  //   }
+  // };
+
+  const [staffPage, setStaffPage] = useState(1);
+  const [staffHasMore, setStaffHasMore] = useState(true);
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [staffSearch, setStaffSearch] = useState("");
+  const staffCache = useRef({});
+  const staffDebounceRef = useRef(null);
+
+  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false }) => {
+    if (loading) return;
+    const cacheKey = `${searchValue}_${pageNo}`;
+
+    if (staffCache.current[cacheKey]) {
+
+      const cached = staffCache.current[cacheKey];
+
+      setStaffAllData(prev => {
+        const combined = [...prev, ...cached];
+        const unique = Array.from(
+          new Map(combined.map(item => [item.value, item])).values()
+        );
+        return unique;
+      });
+
+      return;
     }
+
+    setLoading(true);
+
+    const req = {
+      action: "get",
+      page: pageNo,
+      limit: 5,
+      search: searchValue
+    };
+
+    const data = { req: req, authToken: token };
+
+    try {
+
+      const response = await dispatch(Staff(data)).unwrap();
+
+      if (response.status) {
+
+        const formatted = response.data.data.map((item) => ({
+          value: item.id,
+          label: `${item.first_name} ${item.last_name} (${item.email})`
+        }));
+
+        staffCache.current[cacheKey] = formatted;
+
+        setStaffAllData(prev => {
+
+          const combined = append ? [...prev, ...formatted] : formatted;
+
+          const unique = Array.from(
+            new Map(combined.map(item => [item.value, item])).values()
+          );
+
+          return unique;
+        });
+
+        setStaffHasMore(response.data.data.length === 5);
+        setStaffPage(pageNo);
+
+      } else {
+
+        if (!append) setStaffAllData([]);
+
+      }
+
+    } catch (error) { }
+
+    setLoading(false);
+
+  };
+
+  const handleStaffSearch = (value) => {
+
+    if (value === "") return;
+    clearTimeout(staffDebounceRef.current);
+    staffDebounceRef.current = setTimeout(() => {
+      setStaffSearch(value);
+      GetAllStaff({
+        searchValue: value,
+        pageNo: 1
+      });
+
+    }, 500);
+
   };
 
   // All Employee Number Data
@@ -198,7 +287,12 @@ function TimesheetReport() {
   };
 
   useEffect(() => {
-    staffData();
+    // staffData();
+    // staffData({ searchValue: "", pageNo: 1 });
+    GetAllStaff({
+      searchValue: "",
+      pageNo: 1
+    });
     getAllFilters();
   }, []);
 
@@ -717,9 +811,6 @@ function TimesheetReport() {
 
     const { key, value, label } = e.target;
 
-    alert(key)
-    alert(value)
-
     if (
       key === "staff_id" ||
       key === "customer_id" ||
@@ -731,6 +822,40 @@ function TimesheetReport() {
       key === "employee_number"
     ) {
       if ([null, undefined, ""].includes(value)) {
+        if (key === "staff_id") {
+          setStaffPage(1)
+          setStaffHasMore(true)
+          setStaffSearch("")
+          staffCache.current = {}
+          staffDebounceRef.current = null
+          GetAllStaff({ searchValue: "", pageNo: 1 });
+        }
+        else if (key === "customer_id") {
+          setCustomerPage(1)
+          setCustomerHasMore(true)
+          setCustomerSearch("")
+          customerCache.current = {}
+          debounceRef.current = null
+          GetAllCustomer({ searchValue: "", pageNo: 1 });
+        }
+        else if (key === "client_id") {
+          setClientPage(1)
+          setClientHasMore(true)
+          setClientSearch("")
+          clientCache.current = {}
+          clientDebounceRef.current = null
+          GetAllClient({ searchValue: "", pageNo: 1 });
+        }
+        else if (key === "job_id") {
+          setPage(1)
+          setHasMore(true)
+          setSearch("")
+          cacheRef.current = {}
+          debounceTimeout.current = null
+          GetAllJobs({ searchValue: "", pageNo: 1 });
+        }
+
+
         setFilters((prev) => ({
           ...prev,
           [key]: null,
@@ -763,7 +888,12 @@ function TimesheetReport() {
           } else {
             fieldsToDisplayId = filters.fieldsToDisplayId;
           }
-          staffData();
+          // staffData();
+          // staffData({ searchValue: "", pageNo: 1 });
+          GetAllStaff({
+            searchValue: "",
+            pageNo: 1
+          });
         } else {
           fieldsToDisplayId = null;
         }
@@ -792,7 +922,12 @@ function TimesheetReport() {
         GetAllTask(value);
       } else if (lastIndexValue == "staff_id") {
         setOptions([]);
-        staffData();
+        // staffData();
+        // staffData({ searchValue: "", pageNo: 1 });
+        GetAllStaff({
+          searchValue: "",
+          pageNo: 1
+        });
       } else if (lastIndexValue == "employee_number") {
         setOptions([]);
         employeeData();
@@ -827,7 +962,12 @@ function TimesheetReport() {
   const addAndRemoveGroupBy = (value, type) => {
     if (type == "add") {
       if (value == "staff_id") {
-        staffData();
+        // staffData();
+        // staffData({ searchValue: "", pageNo: 1 });
+        GetAllStaff({
+          searchValue: "",
+          pageNo: 1
+        });
       } else if (value == "customer_id") {
         // GetAllCustomer();
         GetAllCustomer({ searchValue: "", pageNo: 1 });
@@ -1081,7 +1221,12 @@ function TimesheetReport() {
         parsedFilters = JSON.parse(selectedFilter?.filters);
 
         if (parsedFilters?.groupBy?.includes("staff_id")) {
-          await staffData();
+          //await staffData();
+          // staffData({ searchValue: "", pageNo: 1 });
+          GetAllStaff({
+            searchValue: "",
+            pageNo: 1
+          });
         }
         if (parsedFilters?.groupBy?.includes("customer_id")) {
           // await GetAllCustomer();
@@ -1358,7 +1503,7 @@ function TimesheetReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Staff</label>
 
-            <Select
+            {/* <Select
               options={[{ value: "", label: "Select..." }, ...staffAllData]}
               value={
                 staffAllData && staffAllData.length > 0
@@ -1376,6 +1521,44 @@ function TimesheetReport() {
                   },
                 })
               }
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            /> */}
+            <Select
+              closeMenuOnSelect={false}
+              // options={staffAllData}
+              options={[{ value: "", label: "Select..." }, ...staffAllData]}
+
+              value={
+                staffAllData && staffAllData.length > 0
+                  ? staffAllData.find(
+                    (opt) => Number(opt.value) === Number(filters.staff_id)
+                  ) || null
+                  : null
+              }
+
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: {
+                    key: "staff_id",
+                    value: selected.value,
+                    label: selected.label,
+                  },
+                })
+              }
+
+              onInputChange={(value) => handleStaffSearch(value)}
+
+              onMenuScrollToBottom={() => {
+                if (staffHasMore) {
+                  GetAllStaff({
+                    searchValue: staffSearch,
+                    pageNo: staffPage + 1,
+                    append: true
+                  });
+                }
+              }}
+
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             />
@@ -1440,9 +1623,9 @@ function TimesheetReport() {
               className="shadow-sm select-staff rounded-pill"
             /> */}
             <Select
-
               closeMenuOnSelect={false}
-              options={customerAllData}
+              // options={customerAllData}
+              options={[{ value: "", label: "Select..." }, ...customerAllData]}
               value={
                 customerAllData && customerAllData.length > 0
                   ? customerAllData.find(
@@ -1501,10 +1684,11 @@ function TimesheetReport() {
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             /> */}
-           
+
             <Select
               closeMenuOnSelect={false}
-              options={clientAllData}
+              // options={clientAllData}
+              options={[{ value: "", label: "Select..." }, ...clientAllData]}
               value={
                 clientAllData && clientAllData.length > 0
                   ? clientAllData.find(
@@ -1538,7 +1722,7 @@ function TimesheetReport() {
         )}
 
         {/* Field To Display Job */}
-       
+
         {filters?.groupBy?.includes("job_id") &&
           filters.internal_external != "1" && (
             <div className="col-lg-4 col-md-6">
@@ -1564,17 +1748,18 @@ function TimesheetReport() {
                 isSearchable
                 className="shadow-sm select-staff rounded-pill"
               /> */}
-              {console.log("jobOptions",jobOptions)}
+              {console.log("jobOptions", jobOptions)}
               <Select
                 closeMenuOnSelect={false}
-                options={jobOptions}
+                // options={jobOptions}
+                options={[{ value: "", label: "Select..." }, ...jobOptions]}
                 value={
                   jobOptions && jobOptions.length > 0
                     ? jobOptions.find(
                       (opt) => Number(opt.value) === Number(filters.job_id),
                     ) || null
                     : null
-                } 
+                }
                 onChange={(selected) =>
                   handleFilterChange({
                     target: {
