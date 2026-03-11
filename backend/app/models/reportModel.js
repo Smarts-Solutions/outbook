@@ -97,6 +97,7 @@ const jobStatusReports = async (Report) => {
         clients.trading_name AS client_trading_name,
         staffs3.id AS account_manager_id,
         CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+          staffs3.employee_number AS account_manager_employee_number,
         services.id AS service_id,
         services.name AS service_name,
         job_types.id AS job_type_id,
@@ -200,7 +201,7 @@ AND cs.service_id = ?
                             Get_account_manger_id,
                             [element.customer_id, element.service_id]
                         );
-                        
+
 
                         return {
                             ...element,
@@ -212,7 +213,7 @@ AND cs.service_id = ?
 
             }
 
-          
+
             return {
                 status: true,
                 message: "Success.",
@@ -1679,7 +1680,7 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
             end = startOfDay(today);
             start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
     }
-   
+
     return { fromDate: toYMD(start), toDate: toYMD(end) };
 }
 /** Helper: format Date -> YYYY-MM-DD */
@@ -3791,7 +3792,7 @@ const getJobCustomReport = async (Report) => {
             //orWhere.push(`raw.client_id = ${client_id}`);
             orWhere.push(`raw.client_id IN (${client_id.join(",")})`);
         }
-        
+
         if (!["", null, undefined].includes(account_manager_id) && !(Array.isArray(account_manager_id) && account_manager_id.length === 0)) {
             //orWhere.push(`raw.account_manager_id = ${account_manager_id}`);
             orWhere.push(`raw.account_manager_id IN (${account_manager_id.join(",")})`);
@@ -4310,7 +4311,7 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-       
+
         // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
         // console.log("unpivotSQL", unpivotSQL);
 
