@@ -157,7 +157,7 @@ const jobStatusReports = async (Report) => {
                 Number(offset),
             ]);
 
-            // console.log("rowsData", rowsData[0])
+            // console.log("rowsData", rowsData[0]) 
 
 
 
@@ -185,27 +185,29 @@ const jobStatusReports = async (Report) => {
                 rowsData = await Promise.all(
                     rowsData.map(async (element, index) => {
 
-                        const Get_account_manger_id = `SELECT s.id,
-    CONCAT(s.first_name, ' ', s.last_name) AS full_name,
-    s.employee_number
-FROM staffs s
-JOIN customer_service_account_managers csam 
-    ON s.id = csam.account_manager_id
-JOIN customer_services cs 
-    ON csam.customer_service_id = cs.id
-WHERE cs.customer_id = ?
-AND cs.service_id = ?
-            `;
+
+                        const Get_account_manger_id = `
+      SELECT s.id,
+             CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+             s.employee_number
+      FROM staffs s
+      JOIN customer_service_account_managers csam 
+        ON s.id = csam.account_manager_id
+      JOIN customer_services cs 
+        ON csam.customer_service_id = cs.id
+      WHERE cs.customer_id = ?
+      AND cs.service_id = ?
+      AND s.id != ?
+    `;
 
                         const [rowsAccountManager] = await pool.execute(
                             Get_account_manger_id,
-                            [element.customer_id, element.service_id]
+                            [element.customer_id, element.service_id, element.account_manager_id]
                         );
-
 
                         return {
                             ...element,
-                            [`account_managers`]: rowsAccountManager
+                            account_managers: rowsAccountManager
                         };
 
                     })
