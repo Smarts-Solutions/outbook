@@ -3,6 +3,7 @@ const pool = require('../../config/database');
 const bcrypt = require("bcryptjs");
 const { commonEmail } = require("../../utils/commonEmail");
 const e = require('cors');
+const jwt = require("jsonwebtoken");
 
 
 
@@ -114,13 +115,35 @@ const getAllCustomerUsers = async (req, res) => {
           await pool.execute(accessInsertQuery, [newCustomerUserId, customerId]);
         }
       }
+       
+      // Encoding Method
+      // const encodedUid = Buffer.from(String(newCustomerUserId)).toString("base64");
+      // React get code
+      // const params = new URLSearchParams(location.search);
+      // const uid = params.get("uid");
+      // const userId = atob(uid);
+      // let loginUrl = `${req.protocol}://${req.get("host")}`;
+      // if (loginUrl.includes("localhost")) {
+      //   loginUrl = `http://localhost:3001/#/customer/login?uid=${encodedUid}`;
+      // } else {
+      //   loginUrl = loginUrl + `/#/customer/login?uid=${encodedUid}`;
+      // }
+
+
+       // Secure Method
+
+      const token = jwt.sign({ uid: newCustomerUserId },"ABC-D",{ expiresIn: "7d" });
 
       let loginUrl = `${req.protocol}://${req.get("host")}`;
       if (loginUrl.includes("localhost")) {
-        loginUrl = `http://localhost:3001/#/customer/login`;
+        loginUrl = `http://localhost:3001/#/customer/login?token=${token}`;
       } else {
-        loginUrl = loginUrl + "/#/customer/login";
+        loginUrl = loginUrl + `/#/customer/login?token=${token}`;
       }
+  
+      // verify on backend
+      // const decoded = jwt.verify(token, "ABC-D");
+      // const userId = decoded.uid;
 
 
       let subject = "Customer Login Details";
@@ -170,12 +193,12 @@ const getAllCustomerUsers = async (req, res) => {
                   </td>
                 </tr>
 
-                <tr>
+                <!--<tr>
                   <td style="padding: 16px 20px;">
                     <span style="font-size:11px; font-weight:600; color:#6b7a99; text-transform:uppercase; letter-spacing:0.8px;">Login URL</span><br/>
                     <a href="${loginUrl}" style="font-size:14px; color:#1a73e8; margin-top:4px; display:block; text-decoration:none; word-break:break-all;">${loginUrl}</a>
                   </td>
-                </tr>
+                </tr> -->
 
               </table>
 
