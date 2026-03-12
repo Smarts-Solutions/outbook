@@ -140,7 +140,7 @@ const getAllCustomerUsers = async (req, res) => {
           
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); padding: 36px 40px; text-align:center;">
+            <td style="background: #00afef; padding: 36px 40px; text-align:center;">
               <div style="width:56px; height:56px; background:rgba(255,255,255,0.2); border-radius:50%; margin: 0 auto 16px; display:flex; align-items:center; justify-content:center;">
                 <span style="font-size:28px;">✓</span>
               </div>
@@ -183,7 +183,7 @@ const getAllCustomerUsers = async (req, res) => {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
                 <tr>
                   <td align="center">
-                    <a href="${loginUrl}" style="display:inline-block; background: linear-gradient(135deg, #1a73e8, #0d47a1); color:#ffffff; text-decoration:none; padding:13px 36px; border-radius:8px; font-size:15px; font-weight:600; letter-spacing:0.3px;">Login to Your Account →</a>
+                    <a href="${loginUrl}" style="display:inline-block; background: #00afef; color:#ffffff; text-decoration:none; padding:13px 36px; border-radius:8px; font-size:15px; font-weight:600; letter-spacing:0.3px;">Login to Your Account →</a>
                   </td>
                 </tr>
               </table>
