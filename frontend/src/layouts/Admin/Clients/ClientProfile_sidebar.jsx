@@ -605,7 +605,6 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-    
     sweatalert
       .fire({
         title: "Are you sure?",
