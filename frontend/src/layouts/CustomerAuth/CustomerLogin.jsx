@@ -258,9 +258,14 @@ const CustomerLogin = () => {
   }
 
   const handleUpdatePassword = async (e) => {
-    if (newPassword == "") {
-      setErrorNewPassword("Please enter new password");
-      return
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(newPassword)) {
+      setErrorNewPassword(
+        "Password must contain 1 uppercase, 1 lowercase, 1 number and 1 special character"
+      );
+      return;
     }
     if (!confirmPassword) {
       setErrorConfirmPassword("Please confirm your password");
@@ -402,15 +407,17 @@ const CustomerLogin = () => {
                                 name="new_password"
                                 id="new_password"
                                 placeholder="New Password"
-                                onChange={(e) => { setNewPassword(e.target.value) }}
+                                onChange={(e) => {
+                                  setNewPassword(e.target.value);
+                                  setErrorNewPassword("");
+                                }}
                                 value={newPassword}
                                 onKeyPress={handleKeyPress1}
+                                className={errorNewPassword ? "error-field form-control" : "form-control"}
                               />
                             </div>
-                            {newPassword === "" ? (
+                            {errorNewPassword && (
                               <span className="error-text">{errorNewPassword}</span>
-                            ) : (
-                              ""
                             )}
                           </div>
                           <div className="form-group">
@@ -421,7 +428,6 @@ const CustomerLogin = () => {
                                 name="confirm_password"
                                 id="confirm_password"
                                 placeholder="Confirm Password"
-                                //onChange={(e) => setConfirmPassword(e.target.value)}
                                 onChange={(e) => {
                                   setConfirmPassword(e.target.value);
                                   setErrorConfirmPassword("");
