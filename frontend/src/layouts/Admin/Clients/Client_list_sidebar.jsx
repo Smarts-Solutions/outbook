@@ -1198,6 +1198,7 @@ const ClientLists = () => {
 
       exportData = response.data.map((item) => ({
         "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
+        "Job Priority":item.job_priority||"-",
         "Client Name": item.client_trading_name,
         "Job Type": item.job_type_name,
         Status: item.status,
@@ -1279,7 +1280,7 @@ const ClientLists = () => {
                     selectedCustomer?.trading_name,
                   );
                 }}
-                placeholder="Select Customer"
+                placeholder="All"
               />
             </div>
 
@@ -1408,9 +1409,9 @@ const ClientLists = () => {
             data={hararchyData}
             NumberOfActive={
               activeTab == "client"
-                ? ClientData?.length
+                ? totalRecords
                 : activeTab == "job"
-                  ? getJobDetails?.length
+                  ? totalRecords
                   : ""
             }
           />

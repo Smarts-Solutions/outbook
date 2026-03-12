@@ -2,15 +2,24 @@ import React, { useState, useEffect } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
-import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
-import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import { convertDate } from "../../../Utils/Comman_function";
 import ReactPaginate from "react-paginate";
+import { useNavigate } from "react-router-dom";
 
 const JobStatus = () => {
+  const navigate = useNavigate();
+  const role = JSON.parse(localStorage.getItem("role"));
+
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [JobStatusData, setJobStatusData] = useState([]);
-
+  const [getAccessDataJob, setAccessDataJob] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    view: 0,
+    all_jobs: 0,
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -49,7 +58,6 @@ const JobStatus = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          console.log("Job Status Data:", res.data);
           setJobStatusData(res.data.rows);
           setTotalRecords(res.data.total || 0);
         } else {
@@ -68,6 +76,8 @@ const JobStatus = () => {
   const maxManagers = Math.max(
     ...JobStatusData.map((row) => (row.account_managers || []).length)
   );
+
+  console.log("maxManagers", maxManagers)
 
   const dynamicManagerColumns = Array.from({ length: maxManagers }).flatMap(
     (_, index) => [
@@ -100,15 +110,88 @@ const JobStatus = () => {
     ]
   );
 
+  const HandleJob = (row) => {
+
+    const updatedData = {
+
+      job: row,
+    };
+
+
+
+    // return
+    navigate("/admin/job/logs", {
+      state: {
+        job_id: row?.id,
+        timesheet_job_id: null,
+        data: updatedData,
+        goto: "client",
+        activeTab: undefined
+      },
+    });
+
+  };
+
+
+
+
+  const accessDataJob =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "job",
+    )?.items || [];
+
+  const accessDataJobAll =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "all_jobs",
+    )?.items || [];
+
+  useEffect(() => {
+    if (accessDataJob.length === 0) return;
+    const updatedAccess = {
+      insert: 0,
+      update: 0,
+      delete: 0,
+      view: 0,
+      all_jobs: 0,
+    };
+    accessDataJob.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.view = item.is_assigned;
+    });
+
+    accessDataJobAll.forEach((item) => {
+      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
+    });
+
+    setAccessDataJob(updatedAccess);
+  }, []);
+
   const columns = [
+
+
     {
-      name: "Job Id",
-      cell: (row) => <div title={row.job_code_id}>{row.job_code_id}</div>,
+      name: "Job ID",
+      cell: (row) => (
+        <div title={row.job_code_id}>
+          {getAccessDataJob.view == 1 ||
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleJob(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.job_code_id}
+            </a>
+          ) : (
+            <a>{row.job_code_id}</a>
+          )}
+        </div>
+      ),
       selector: (row) => row.job_code_id,
-      reorder: false,
       sortable: true,
     },
-
     {
       name: "Job Received On",
       selector: (row) => convertDate(row.job_received_on),
@@ -148,6 +231,15 @@ const JobStatus = () => {
         <div title={row.account_manager_name}>{row.account_manager_name}</div>
       ),
       selector: (row) => row.account_manager_name,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Employee ID",
+      cell: (row) => (
+        <div title={row.account_manager_employee_number}>{row.account_manager_employee_number}</div>
+      ),
+      selector: (row) => row.account_manager_employee_number,
       reorder: false,
       sortable: true,
     },
@@ -406,142 +498,228 @@ const JobStatus = () => {
     const rows = response?.data?.rows || [];
 
     // ✅ Find maximum account managers
-    const maxManagers = Math.max(
-      ...rows.map((row) => (row.account_managers || []).length)
-    );
 
+    console.log("maxManagers", maxManagers)
     const exportData = rows.map((item) => {
-      let rowData = {
-        "Job Id": item.job_code_id,
+      // ✅ Build rowData in EXACT same order as columns array
+      const rowData = {};
 
-        "Job Received On": item.job_received_on
-          ? convertDate(item.job_received_on)
-          : "-",
+      // 1. Job ID
+      rowData["Job Id"] = item.job_code_id || "-";
 
-        "Job Priority": item.job_priority
-          ? item.job_priority.charAt(0).toUpperCase() +
-          item.job_priority.slice(1).toLowerCase()
-          : "-",
+      // 2. Job Received On
+      rowData["Job Received On"] = item.job_received_on
+        ? convertDate(item.job_received_on)
+        : "-";
 
-        "Customer Name": item.customer_trading_name || "-",
+      // 3. Job Priority
+      rowData["Job Priority"] = item.job_priority
+        ? item.job_priority.charAt(0).toUpperCase() +
+        item.job_priority.slice(1).toLowerCase()
+        : "-";
 
-        "Account Manager": item.account_manager_name || "-",
+      // 4. Customer Name
+      rowData["Customer Name"] = item.customer_trading_name || "-";
 
-        "Clients": item.client_trading_name || "-",
+      // 5. Account Manager
+      rowData["Account Manager"] = item.account_manager_name || "-";
 
-        "Service Type": item.service_name || "-",
+      // 6. Employee ID
+      rowData["Employee ID"] = item.account_manager_employee_number || "-";
 
-        "Job Type": item.job_type_name || "-",
-      };
-
-      // ✅ Dynamic account manager columns
+      // 7. Dynamic Manager Columns (...dynamicManagerColumns)
       for (let i = 0; i < maxManagers; i++) {
         const manager = item.account_managers?.[i];
-
-        rowData[`Individual Account Manager`] =
-          manager?.full_name || "-";
-
-        rowData[`Employee Id`] =
-          manager?.employee_number || "-";
+        rowData[`Individual Account Manager ${i + 1}`] = manager?.full_name || "-";
+        rowData[`Employee Id ${i + 1}`] = manager?.employee_number || "-";
       }
 
-      // Accounts Production
+      // 8. Clients
+      rowData["Clients"] = item.client_trading_name || "-";
+
+      // 9. Service Type
+      rowData["Service Type"] = item.service_name || "-";
+
+      // 10. Job Type
+      rowData["Job Type"] = item.job_type_name || "-";
+
+      // 11. Year Ending
       rowData["Year Ending"] =
         item.service_name === "Accounts Production"
           ? item.Year_Ending_id_1
             ? convertDate(item.Year_Ending_id_1)
-            : ""
-          : "";
+            : "-"
+          : "-";
 
-      // Personal Tax
+      // 12. Tax Year
       rowData["Tax Year"] =
         item.service_name === "Personal Tax Return"
-          ? item.Tax_Year_id_4 || ""
-          : "";
+          ? item.Tax_Year_id_4 || "-"
+          : "-";
 
-      // Payroll
+      // 13. Payroll Frequency
       rowData["Payroll Frequency"] =
         item.service_name === "Payroll"
-          ? item.Payroll_Frequency_id_3 || ""
-          : "";
+          ? item.Payroll_Frequency_id_3 || "-"
+          : "-";
 
+      // 14. Payroll Year
       rowData["Payroll Year"] =
         item.service_name === "Payroll"
           ? item.Payroll_Frequency_id_3 === "Weekly"
-            ? item.Payroll_Week_Year_id_3 || ""
+            ? item.Payroll_Week_Year_id_3 || "-"
             : item.Payroll_Frequency_id_3 === "Monthly"
-              ? item.Payroll_Month_Year_id_3 || ""
+              ? item.Payroll_Month_Year_id_3 || "-"
               : item.Payroll_Frequency_id_3 === "Fortnightly"
-                ? item.Payroll_Fortnight_Year_id_3 || ""
+                ? item.Payroll_Fortnight_Year_id_3 || "-"
                 : item.Payroll_Frequency_id_3 === "Quarterly"
-                  ? item.Payroll_Quarter_Year_id_3 || ""
+                  ? item.Payroll_Quarter_Year_id_3 || "-"
                   : item.Payroll_Frequency_id_3 === "Yearly"
-                    ? item.Payroll_Year_id_3 || ""
-                    : ""
-          : "";
+                    ? item.Payroll_Year_id_3 || "-"
+                    : "-"
+          : "-";
 
+      // 15. Payroll Month
       rowData["Payroll Month"] =
         item.service_name === "Payroll"
           ? item.Payroll_Frequency_id_3 === "Weekly"
-            ? item.Payroll_Week_Month_id_3 || ""
+            ? item.Payroll_Week_Month_id_3 || "-"
             : item.Payroll_Frequency_id_3 === "Monthly"
-              ? item.Payroll_Month_id_3 || ""
+              ? item.Payroll_Month_id_3 || "-"
               : item.Payroll_Frequency_id_3 === "Fortnightly"
-                ? item.Payroll_Fortnight_Month_id_3 || ""
-                : ""
-          : "";
+                ? item.Payroll_Fortnight_Month_id_3 || "-"
+                : "-"
+          : "-";
 
+      // 16. Payroll Week
       rowData["Payroll Week"] =
         item.service_name === "Payroll"
-          ? item.Payroll_Week_id_3 || ""
-          : "";
+          ? item.Payroll_Week_id_3 || "-"
+          : "-";
 
-      // Bookkeeping
+      // 17. Bookkeeping Frequency
       rowData["Bookkeeping Frequency"] =
         item.service_name === "Bookkeeping"
-          ? item.Bookkeeping_Frequency_id_2 || ""
-          : "";
+          ? item.Bookkeeping_Frequency_id_2 || "-"
+          : "-";
 
+      // 18. Date
       rowData["Date"] =
         item.service_name === "Bookkeeping"
           ? item.Day_Date_id_2
             ? convertDate(item.Day_Date_id_2)
-            : ""
-          : "";
+            : "-"
+          : "-";
 
+      // 19. Year
+      rowData["Year"] =
+        item.service_name === "Bookkeeping"
+          ? item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_Year_id_2 || "-"
+            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+              ? item.Fortnight_Year_id_2 || "-"
+              : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                ? item.Month_Year_id_2 || "-"
+                : item.Bookkeeping_Frequency_id_2 === "Quarterly"
+                  ? item.Quarter_Year_id_2 || "-"
+                  : item.Bookkeeping_Frequency_id_2 === "Yearly"
+                    ? item.Year_id_2 || "-"
+                    : "-"
+          : "-";
+
+      // 20. Month
+      rowData["Month"] =
+        item.service_name === "Bookkeeping"
+          ? item.Bookkeeping_Frequency_id_2 === "Weekly"
+            ? item.Week_Month_id_2 || "-"
+            : item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+              ? item.Fortnight_Month_id_2 || "-"
+              : item.Bookkeeping_Frequency_id_2 === "Monthly"
+                ? item.Month_id_2 || "-"
+                : "-"
+          : "-";
+
+      // 21. Week
+      rowData["Week"] =
+        item.service_name === "Bookkeeping" &&
+          item.Bookkeeping_Frequency_id_2 === "Weekly"
+          ? item.Week_id_2 || "-"
+          : "-";
+
+      // 22. Fortnight
+      rowData["Fortnight"] =
+        item.service_name === "Bookkeeping" &&
+          item.Bookkeeping_Frequency_id_2 === "Fortnightly"
+          ? item.Fortnight_id_2 || "-"
+          : "-";
+
+      // 23. Quarter
+      rowData["Quarter"] =
+        item.service_name === "Bookkeeping" &&
+          item.Bookkeeping_Frequency_id_2 === "Quarterly"
+          ? item.Quarter_id_2 || "-"
+          : "-";
+
+      // 24. FromDate
+      rowData["FromDate"] =
+        item.service_name === "Bookkeeping"
+          ? item.Other_FromDate_id_2
+            ? convertDate(item.Other_FromDate_id_2)
+            : "-"
+          : "-";
+
+      // 25. ToDate
+      rowData["ToDate"] =
+        item.service_name === "Bookkeeping"
+          ? item.Other_ToDate_id_2
+            ? convertDate(item.Other_ToDate_id_2)
+            : "-"
+          : "-";
+
+      // 26. Status
       rowData["Status"] = item.status || "-";
 
+      // 27. Allocated To
       rowData["Allocated To"] = item.allocated_name || "-";
 
+      // 28. Allocated to (Other)
       rowData["Allocated to (Other)"] = item.multiple_staff_names || "-";
 
+      // 29. Reviewer Name
       rowData["Reviewer Name"] = item.reviewer_name || "-";
 
+      // 30. Companies House Due Date
       rowData["Companies House Due Date"] = item.filing_Companies_date
         ? convertDate(item.filing_Companies_date)
         : "-";
 
+      // 31. Internal Deadline
       rowData["Internal Deadline"] = item.internal_deadline_date
         ? convertDate(item.internal_deadline_date)
         : "-";
 
+      // 32. Customer Deadline
       rowData["Customer Deadline"] = item.customer_deadline_date
         ? convertDate(item.customer_deadline_date)
         : "-";
 
+      // 33. Initial Query Sent Date
       rowData["Initial Query Sent Date"] = item.query_sent_date
         ? convertDate(item.query_sent_date)
         : "-";
 
+      // 34. Final Query Response Received Date
       rowData["Final Query Response Received Date"] =
         item.final_query_response_received_date
           ? convertDate(item.final_query_response_received_date)
           : "-";
 
+      // 35. First Draft Sent
       rowData["First Draft Sent"] = item.draft_sent_on
         ? convertDate(item.draft_sent_on)
         : "-";
 
+      // 36. Final Draft Sent
       rowData["Final Draft Sent"] = item.final_draft_sent_on
         ? convertDate(item.final_draft_sent_on)
         : "-";

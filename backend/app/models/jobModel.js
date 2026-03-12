@@ -1661,6 +1661,10 @@ const getJobByClient = async (job) => {
         ORDER BY 
         jobs.id DESC;
         `;
+
+    //console.log("query -", query);
+
+    console.log("query", query)
     const [result] = await pool.execute(query);
 
     //////-----START Assign Customer Service Data START----////////
@@ -1774,21 +1778,21 @@ const getAllJobsBYCustomerfilter = async (job) => {
 }
 
 const get_jobs_filter = async (job) => {
-  const { StaffUserId, filters , pagination } = job;
+  const { StaffUserId, filters, pagination } = job;
 
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
+
+  const { client_id, customer_id } = filters;
+  if (client_id === undefined && customer_id === undefined) {
     // Line Manager
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId);
-   return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows ,pagination);
-  
-  const { client_id, customer_id } = filters;
-  if(client_id === undefined && customer_id === undefined) {
-     // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-    // Get Role
-    const rows = await QueryRoleHelperFunction(StaffUserId);
-   return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows ,pagination);
+    return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
   }
   else if (client_id.length > 0 && customer_id.length === 0) {
     return await getJobByClientId({ StaffUserId, client_id });
@@ -1801,7 +1805,7 @@ const get_jobs_filter = async (job) => {
     const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId);
-    return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows ,pagination);
+    return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
   }
 
 }
@@ -1821,7 +1825,7 @@ async function getAllJobsSidebarFilter(
 
   let searchCondition = "";
   let searchParams = [];
- 
+
   const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1858,7 +1862,7 @@ async function getAllJobsSidebarFilter(
       rows.length > 0 &&
       (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
     ) {
-     
+
       // 🔹 DATA
       const query = `
          SELECT 
@@ -1915,7 +1919,7 @@ async function getAllJobsSidebarFilter(
         LIMIT ? OFFSET ?
       `;
 
-      const [result] = await pool.execute(query , [...searchParams,limit, offset]);
+      const [result] = await pool.execute(query, [...searchParams, limit, offset]);
 
       return {
         status: true,

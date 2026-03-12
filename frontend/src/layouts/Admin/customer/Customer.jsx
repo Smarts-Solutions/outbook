@@ -193,7 +193,7 @@ const debounceRef = useRef(null);
                 onChange={(e) => handleChangeStatus(e, row)}
               >
                 <option value="0" className="text-danger">
-                  Deactive
+                  Inactive
                 </option>
                 <option value="1" className="text-success">
                   Active
