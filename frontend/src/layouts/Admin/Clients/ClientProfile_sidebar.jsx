@@ -628,7 +628,7 @@ const ClientList = () => {
             .then(async (response) => {
               if (response.status) {
                 sweatalert.fire({
-                  title: "Copied",
+                  title: "Job copied successfully",
                   icon: "success",
                   showCancelButton: false,
                   showConfirmButton: false,
@@ -640,6 +640,7 @@ const ClientList = () => {
                   icon: "error",
                   showCancelButton: false,
                   showConfirmButton: false,
+                  message: response.message,
                   timer: 1500,
                 });
               }
