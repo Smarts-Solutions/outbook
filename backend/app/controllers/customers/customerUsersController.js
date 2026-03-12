@@ -308,10 +308,6 @@ const getAllCustomerUsers = async (req, res) => {
   }
 }
 
-
-
-
-
 module.exports = {
   getAllCustomerUsers
 };

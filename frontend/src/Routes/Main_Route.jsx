@@ -13,6 +13,11 @@ import { jwtDecode } from "jwt-decode";
 import Admin_Route from "./Admin_Route";
 import ForgetPassword from "../layouts/Auth/ForgetPassword";
 
+
+// Coutomer Auth
+import CustomerLogin from "../layouts/CustomerAuth/CustomerLogin";
+
+
 const Main_Route = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,12 +30,17 @@ const Main_Route = () => {
     //   navigate("/login");
     //   return;
     // }
+    if (location.pathname.startsWith("/customer/login")) {
+      navigate("/customer/login");
+      return;
+    }
+
     if (role == null || token == null || staffDetails == null) {
-  if (location.pathname !== "/login1") {
-    navigate("/login");
-  }
-  return;
-}
+      if (location.pathname !== "/login1") {
+        navigate("/login");
+      }
+      return;
+    }
 
 
     if (location.pathname.startsWith("/updatepassword")) {
@@ -97,10 +107,13 @@ const Main_Route = () => {
   return (
     <div>
       <Routes>
-        <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
-        <Route path="/login" element={<Login />} />
+         <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
+         <Route path="/login" element={<Login />} />
          <Route path="/login1" element={<Login1 />} />
-        <Route path="/forgetpassword" element={<ForgetPassword />} />
+         <Route path="/forgetpassword" element={<ForgetPassword />} />
+
+         <Route path="/customer/login" element={<CustomerLogin />} />
+
       </Routes>
     </div>
   );
