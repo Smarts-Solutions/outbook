@@ -504,7 +504,6 @@ const ClientList = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-
     {
       name: "Actions",
       cell: (row) => (
