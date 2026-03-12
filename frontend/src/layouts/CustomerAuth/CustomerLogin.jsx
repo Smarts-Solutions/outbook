@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   SignIn,
   LoginAuthToken,
-  SignInWithAzure,
 } from "../../ReduxStore/Slice/Auth/authSlice";
+import { SIGN_IN_CUSTOMER } from "../../Services/CustomerUser/customerUserService";
 import { useDispatch } from "react-redux";
 import { azureLogin } from "../AuthWithAzure/AuthProvider";
 import { Email_regex, Mobile_regex } from "../../Utils/Common_regex";
@@ -17,13 +17,26 @@ import {
 import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 import sweatalert from "sweetalert2";
 
-const Login1 = () => {
+const CustomerLogin = () => {
+
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [Email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
+
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [errorNewPassword, setErrorNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
+
+  let isExpirytoken = location?.state?.isExpirytoken;
+
+
+  console.log("isExpirytoken", isExpirytoken);
 
 
   const handleSubmitLogin = async () => {
@@ -33,6 +46,8 @@ const Login1 = () => {
     } else if (!Email_regex(Email)) {
       setErrorEmail(INVALID_EMAIL_ERROR);
       return;
+    } else {
+      setErrorEmail("");
     }
 
     if (password == "") {
@@ -40,129 +55,87 @@ const Login1 = () => {
       return;
     }
 
-    const req = { email: Email, password: password };
+    const req = { email: Email, password: password, isExpirytoken: isExpirytoken };
+    const response = await SIGN_IN_CUSTOMER(req);
 
-    await dispatch(SignIn(req))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          await accessDataFetch(response.data.staffDetails, response.data.token);
-          localStorage.setItem(
-            "staffDetails",
-            JSON.stringify(response.data.staffDetails)
-          );
-          localStorage.setItem("token", JSON.stringify(response.data.token));
-          localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
-          localStorage.setItem(
-            "role",
-            JSON.stringify(response.data.staffDetails.role)
-          );
-
-          // sweet alert
-          sweatalert.fire({
-            title: "Login Successfully",
-            icon: "success",
-            timer: 1000,
-            showConfirmButton: false,
-            timerProgressBar: true,
-          });
-
-
-          const req_auth_token = {
-            id: response.data.staffDetails.id,
-            login_auth_token: response.data.token,
-          };
-          await dispatch(LoginAuthToken(req_auth_token))
-            .unwrap()
-            .then(async (response) => { })
-            .catch((error) => {
-              return;
-            });
-          setTimeout(() => {
-            navigate("/admin/dashboard");
-            window.location.reload();
-          }, 1000);
-
-        } else {
-          localStorage.removeItem("staffDetails");
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
-          localStorage.removeItem("accessData");
-          localStorage.removeItem("updatedShowTab");
-          sessionStorage.clear();
-          sweatalert.fire({
-            title: response.message,
-            icon: "error",
-            timer: 1000,
-            showConfirmButton: true,
-            timerProgressBar: true,
-          });
-        }
-        //continue....
+    console.log("response customer login", response);
+    if (response.status) {
+      if (response.step === "CHANGE_PASSWORD") {
+        setIsFlipped(true);
+      }
+    } else {
+      sweatalert.fire({
+        title: response.message,
+        icon: "error",
+        timer: 2000,
+        showConfirmButton: false,
       })
-      .catch((error) => {
-        return;
-      });
-  };
-
-  const handleAzureLogin = async () => {
-    const accounts = await azureLogin();
-    if (accounts.length > 0) {
-      const req = { email: accounts[0].username };
-
-      await dispatch(SignInWithAzure(req))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-
-            await accessDataFetch(response.data.staffDetails, response.data.token);
-            
-            localStorage.setItem(
-              "staffDetails",
-              JSON.stringify(response.data.staffDetails)
-            );
-            localStorage.setItem("token", JSON.stringify(response.data.token));
-            localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
-            localStorage.setItem(
-              "role",
-              JSON.stringify(response.data.staffDetails.role)
-            );
-
-            //Update Auth Token
-            const req_auth_token = {
-              id: response.data.staffDetails.id,
-              login_auth_token: response.data.token,
-            };
-            await dispatch(LoginAuthToken(req_auth_token))
-              .unwrap()
-              .then(async (response) => { })
-              .catch((error) => {
-                return;
-              });
-
-            navigate("/admin/dashboard");
-            window.location.reload();
-          } else {
-            sweatalert.fire({
-              title: response.message,
-              icon: "error",
-              timer: 1000,
-              showConfirmButton: true,
-              timerProgressBar: true,
-            });
-
-            localStorage.removeItem("staffDetails");
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            sessionStorage.clear();
-            
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+      return
     }
+
+    // await dispatch(SignIn(req))
+    //   .unwrap()
+    //   .then(async (response) => {
+    //     if (response.status) {
+    //       await accessDataFetch(response.data.staffDetails, response.data.token);
+    //       localStorage.setItem(
+    //         "staffDetails",
+    //         JSON.stringify(response.data.staffDetails)
+    //       );
+    //       localStorage.setItem("token", JSON.stringify(response.data.token));
+    //       localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
+    //       localStorage.setItem(
+    //         "role",
+    //         JSON.stringify(response.data.staffDetails.role)
+    //       );
+
+    //       // sweet alert
+    //       sweatalert.fire({
+    //         title: "Login Successfully",
+    //         icon: "success",
+    //         timer: 1000,
+    //         showConfirmButton: false,
+    //         timerProgressBar: true,
+    //       });
+
+
+    //       const req_auth_token = {
+    //         id: response.data.staffDetails.id,
+    //         login_auth_token: response.data.token,
+    //       };
+    //       await dispatch(LoginAuthToken(req_auth_token))
+    //         .unwrap()
+    //         .then(async (response) => { })
+    //         .catch((error) => {
+    //           return;
+    //         });
+    //       setTimeout(() => {
+    //         navigate("/admin/dashboard");
+    //         window.location.reload();
+    //       }, 1000);
+
+    //     } else {
+    //       localStorage.removeItem("staffDetails");
+    //       localStorage.removeItem("token");
+    //       localStorage.removeItem("role");
+    //       localStorage.removeItem("accessData");
+    //       localStorage.removeItem("updatedShowTab");
+    //       sessionStorage.clear();
+    //       sweatalert.fire({
+    //         title: response.message,
+    //         icon: "error",
+    //         timer: 1000,
+    //         showConfirmButton: true,
+    //         timerProgressBar: true,
+    //       });
+    //     }
+    //     //continue....
+    //   })
+    //   .catch((error) => {
+    //     return;
+    //   });
   };
+
 
   const accessDataFetch = async (data, token) => {
     try {
@@ -215,7 +188,7 @@ const Login1 = () => {
               );
               updatedShowTab.status =
                 statusView && statusView.is_assigned === 1;
-            }else if (item.permission_name === "timesheet") {
+            } else if (item.permission_name === "timesheet") {
               const timesheetView = item.items.find(
                 (item) => item.type === "view"
               );
@@ -237,9 +210,9 @@ const Login1 = () => {
                 (item) => item.type === "view"
               );
               updatedShowTab.report =
-              reportView && reportView.is_assigned === 1;
+                reportView && reportView.is_assigned === 1;
             }
-              
+
             else if (item.permission_name === "all_customers") {
               const allCustomerView = item.items.find(
                 (item) => item.type === "view"
@@ -262,8 +235,8 @@ const Login1 = () => {
                 allJobsView && allJobsView.is_assigned === 1;
             }
           });
-          
-          localStorage.setItem("updatedShowTab",JSON.stringify(updatedShowTab));
+
+          localStorage.setItem("updatedShowTab", JSON.stringify(updatedShowTab));
         });
       }
     } catch (error) {
@@ -278,13 +251,38 @@ const Login1 = () => {
     }
   }
 
+  const handleKeyPress1 = (e) => {
+    if (e.key === 'Enter') {
+      handleUpdatePassword();
+    }
+  }
+
+  const handleUpdatePassword = async (e) => {
+    if (newPassword == "") {
+      setErrorNewPassword("Please enter new password");
+      return
+    }
+    if (!confirmPassword) {
+      setErrorConfirmPassword("Please confirm your password");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setErrorConfirmPassword("Passwords do not match");
+      return;
+    }
+
+
+    alert("Password updated successfully");
+  }
+
   return (
     <div className="account-body accountbg">
       <div className="container">
         <div className="row  d-flex justify-content-center vh-100">
 
-         {/*  Login  with Email and Password*/}
-        <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
+          {/*  Login  with Email and Password*/}
+          <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
             <div className="row ">
               <div className="col-md-6 ps-0">
                 <div className="card-body p-0 auth-header-box h-100 d-flex align-items-center justify-content-center">
@@ -303,89 +301,177 @@ const Login1 = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-md-6">
-                <div className="py-5 px-3">
-                  <div className="card-header text-center">
-                    <h1 className="">Cutomer Login</h1>
-                  </div>
-                  <div className="card-body">
-                    <div
-                      className="form-horizontal auth-form my-4"
-                      action="https://mannatthemes.com/dastyle/default/index.html"
-                    >
-                      <div className="form-group mb-2">
-                   
 
-                        <div className="input-group ">
-                          <input
-                            type="email"
-                            className={errorEmail ? "error-field form-control" : "form-control"}
-                            name="username"
-                            id="username"
-                            placeholder="Enter Email Id"
-                            onChange={(e) => setEmail(e.target.value)}
-                            value={Email}
-                            onKeyPress={handleKeyPress}
-                          />
-                        </div>
-                        {errorEmail ? (
-                          <span className="error-text">{errorEmail}</span>
-                        ) : (
-                          ""
-                        )}
-                      </div>
-                      <div className="form-group">
-                      
-                        <div className="input-group ">
-                          <input
-                            type="password"
-                            className={errorPassword ?  "error-field form-control" : "form-control"}
 
-                            name="password"
-                            id="userpassword"
-                            placeholder="Enter password"
-                            onChange={(e) => setPassword(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                          />
-                        </div>
-                        {errorPassword ? (
-                          <span className="error-text"> {errorPassword}</span>
-                        ) : (
-                          ""
-                        )}
+              {
+                !isFlipped ?
+                  <div className="col-md-6">
+                    <div className="py-5 px-3">
+                      <div className="card-header text-center">
+                        <h1 className="">Cutomer Login</h1>
                       </div>
-                      <div className="form-group row my-2 text-center">
-                        <div className="col-sm-12 ">
-                        
+                      <div className="card-body">
+                        <div
+                          className="form-horizontal auth-form my-4"
+                          action="https://mannatthemes.com/dastyle/default/index.html"
+                        >
+                          <div className="form-group mb-2">
+
+
+                            <div className="input-group ">
+                              <input
+                                type="email"
+                                className={errorEmail ? "error-field form-control" : "form-control"}
+                                name="username"
+                                id="username"
+                                placeholder="Enter Email Id"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={Email}
+                                onKeyPress={handleKeyPress}
+                              />
+                            </div>
+                            {errorEmail ? (
+                              <span className="error-text">{errorEmail}</span>
+                            ) : (
+                              ""
+                            )}
+                          </div>
+                          <div className="form-group">
+
+                            <div className="input-group ">
+                              <input
+                                type="password"
+
+                                name="password"
+                                id="userpassword"
+                                placeholder="Enter password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                              />
+                            </div>
+                            {password == "" ? (
+                              <span className="error-text"> {errorPassword}</span>
+                            ) : (
+                              ""
+                            )}
+                          </div>
+                          <div className="form-group row my-2 text-center">
+                            <div className="col-sm-12 ">
+
+                            </div>
+
+                          </div>
+                          <div className="form-group mb-0 row text-center">
+                            <div className="col-12 mt-2">
+                              <button
+                                className="w-100 btn btn-info fw-normal text-white "
+                                type="button"
+                                onClick={() => handleSubmitLogin()}
+                                onKeyPress={handleKeyPress}
+                              >
+                                Sign In <i className="fas fa-sign-in-alt ml-1" />
+                              </button>
+                            </div>
+
+                          </div>
                         </div>
-                      
-                      </div>
-                      <div className="form-group mb-0 row text-center">
-                        <div className="col-12 mt-2">
-                          <button
-                            className="w-100 btn btn-info fw-normal text-white "
-                            type="button"
-                            onClick={() => handleSubmitLogin()}
-                            onKeyPress={handleKeyPress}
-                          >
-                            Sign In <i className="fas fa-sign-in-alt ml-1" />
-                          </button>
-                        </div>
-                     
+
+
                       </div>
                     </div>
-                  
-                   
                   </div>
-                </div>
-              </div>
-            
+                  :
+
+                  <div className={`col-md-6`}>
+                    <div className="py-5 px-3">
+                      <div className="card-header text-center">
+                        <h4>Set Your New Password</h4>
+                        <p className="text-muted">For security reasons, please create a new password before continuing.</p>
+                      </div>
+                      <div className="card-body">
+                        <div
+                          className="form-horizontal auth-form my-4"
+                          action="https://mannatthemes.com/dastyle/default/index.html"
+                        >
+                          <div className="form-group mb-2">
+
+
+                            <div className="input-group ">
+                              <input
+                                type="password"
+                                name="new_password"
+                                id="new_password"
+                                placeholder="New Password"
+                                onChange={(e) => { setNewPassword(e.target.value) }}
+                                value={newPassword}
+                                onKeyPress={handleKeyPress1}
+                              />
+                            </div>
+                            {newPassword === "" ? (
+                              <span className="error-text">{errorNewPassword}</span>
+                            ) : (
+                              ""
+                            )}
+                          </div>
+                          <div className="form-group">
+
+                            <div className="input-group ">
+                              <input
+                                type="password"
+                                name="confirm_password"
+                                id="confirm_password"
+                                placeholder="Confirm Password"
+                                //onChange={(e) => setConfirmPassword(e.target.value)}
+                                onChange={(e) => {
+                                  setConfirmPassword(e.target.value);
+                                  setErrorConfirmPassword("");
+                                }}
+                                value={confirmPassword}
+                                onKeyPress={handleKeyPress1}
+                                className={errorConfirmPassword ? "error-field form-control" : "form-control"}
+                              />
+                            </div>
+                            {errorConfirmPassword && (
+                              <span className="error-text">{errorConfirmPassword}</span>
+                            )}
+                          </div>
+                          <div className="form-group row my-2 text-center">
+                            <div className="col-sm-12 ">
+
+                            </div>
+
+                          </div>
+                          <div className="form-group mb-0 row text-center">
+                            <div className="col-12 mt-2">
+                              <button
+                                className="w-100 btn btn-info fw-normal text-white "
+                                type="button"
+                                onClick={() => handleUpdatePassword()}
+                                onKeyPress={handleKeyPress1}
+                              >
+                                Update Password <i className="fas fa-sign-in-alt ml-1" />
+                              </button>
+                            </div>
+
+                          </div>
+                        </div>
+
+
+                      </div>
+                    </div>
+                  </div>
+
+              }
+
+
+
+
             </div>
-            
-          </div>  
+
+          </div>
 
 
-         
+
         </div>
       </div>
       {/* <div className="container" id="container">
@@ -437,9 +523,9 @@ const Login1 = () => {
       </div>
     </div>
   </div> */}
-  
+
     </div>
   );
 };
 
-export default Login1;
+export default CustomerLogin;

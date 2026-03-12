@@ -31,7 +31,9 @@ const Main_Route = () => {
     //   return;
     // }
     if (location.pathname.startsWith("/customer/login")) {
-      navigate("/customer/login");
+      const params = new URLSearchParams(location.search);
+      const isExpirytoken = params.get("token");
+      navigate("/customer/login", {state: {isExpirytoken:isExpirytoken}});
       return;
     }
 
