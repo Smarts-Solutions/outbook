@@ -246,8 +246,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -418,19 +418,25 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
+            <>
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
+              </button>
+
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            </>
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "job")}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-              )
+              <button
+                className="delete-icon"
+                onClick={() => handleDelete(row, "job")}
+              >
+                <i className="ti-trash text-danger" />
+              </button>
+            )
             : ""}
         </div>
       ),
@@ -925,6 +931,57 @@ const ClientList = () => {
       });
   };
 
+  const copyRow = async (row) => {
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "You want to copy this job ?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          const req = {
+            action: "copy_job",
+            row: row,
+          };
+          const data = { req: req, authToken: token };
+          await dispatch(JobAction(data))
+            .unwrap()
+            .then(async (response) => {
+              if (response.status) {
+                sweatalert.fire({
+                  title: "Job copied successfully",
+                  icon: "success",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+              } else {
+                sweatalert.fire({
+                  title: "Failed",
+                  icon: "error",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  message: response.message,
+                  timer: 1500,
+                });
+              }
+            })
+            .catch((error) => {
+              return;
+            });
+        } else {
+          return
+        }
+      });
+
+
+  };
+
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.Client_id };
     const data = { req: req, authToken: token };
@@ -1047,9 +1104,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1084,13 +1140,13 @@ const ClientList = () => {
                     </button>
                     {(getAccessDataJob.insert == 1 ||
                       role === "SUPERADMIN") && (
-                      <div
-                        className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
-                        onClick={handleCreateJob}
-                      >
-                        <i className="fa fa-plus pe-1" /> Create Job
-                      </div>
-                    )}
+                        <div
+                          className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                          onClick={handleCreateJob}
+                        >
+                          <i className="fa fa-plus pe-1" /> Create Job
+                        </div>
+                      )}
                   </div>
                 </>
               )}
@@ -1150,9 +1206,8 @@ const ClientList = () => {
         <div className="mt-4">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${
-                activeTab == "NoOfJobs" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
+                }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1236,22 +1291,22 @@ const ClientList = () => {
                             <h5 className="dastyle-user-name">
                               {getClientDetails?.data?.client?.client_type ==
                                 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
+                                getClientDetails?.data?.client?.client_type == 6
                                 ? getClientDetails?.data?.member_details?.[0]
-                                    .first_name +
-                                  " " +
-                                  getClientDetails?.data?.member_details?.[0]
-                                    .last_name
+                                  .first_name +
+                                " " +
+                                getClientDetails?.data?.member_details?.[0]
+                                  .last_name
                                 : getClientDetails?.data?.client?.client_type ==
-                                    7
+                                  7
                                   ? getClientDetails?.data
-                                      ?.beneficiaries_details?.[0].first_name +
-                                    " " +
-                                    getClientDetails?.data
-                                      ?.beneficiaries_details?.[0].last_name
+                                    ?.beneficiaries_details?.[0].first_name +
+                                  " " +
+                                  getClientDetails?.data
+                                    ?.beneficiaries_details?.[0].last_name
                                   : clientInformationData.first_name +
-                                    " " +
-                                    clientInformationData.last_name}
+                                  " " +
+                                  clientInformationData.last_name}
                             </h5>
                             <p className="mb-0 dastyle-user-name-post">
                               Client Code: {informationData.client_code}
@@ -1265,32 +1320,32 @@ const ClientList = () => {
                             <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
                             <b>Phone : </b>
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                            getClientDetails?.data?.client?.client_type == 6
+                              getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                  .phone_code +
-                                  " " +
-                                  getClientDetails?.data?.member_details?.[0]
-                                    .phone || "NA"
+                                .phone_code +
+                              " " +
+                              getClientDetails?.data?.member_details?.[0]
+                                .phone || "NA"
                               : getClientDetails?.data?.client?.client_type == 7
                                 ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].phone_code +
-                                    " " +
-                                    getClientDetails?.data
-                                      ?.beneficiaries_details?.[0].phone || "NA"
+                                  ?.beneficiaries_details?.[0].phone_code +
+                                " " +
+                                getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].phone || "NA"
                                 : clientInformationData.phone_code +
-                                    " " +
-                                    clientInformationData.phone || "NA"}
+                                " " +
+                                clientInformationData.phone || "NA"}
                           </li>
                           <li className="mt-2">
                             <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
                             <b>Email : </b>{" "}
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                            getClientDetails?.data?.client?.client_type == 6
+                              getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                  .email || "NA"
+                                .email || "NA"
                               : getClientDetails?.data?.client?.client_type == 7
                                 ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].email || "NA"
+                                  ?.beneficiaries_details?.[0].email || "NA"
                                 : clientInformationData.email || "NA"}
                           </li>
                         </ul>
@@ -1336,10 +1391,10 @@ const ClientList = () => {
                               : getClientDetails?.data?.client?.client_type == 5
                                 ? "Charity Incorporated Organisation Information"
                                 : getClientDetails?.data?.client?.client_type ==
-                                    6
+                                  6
                                   ? "Charity Unincorporated Association Information"
                                   : getClientDetails?.data?.client
-                                        ?.client_type == 7
+                                    ?.client_type == 7
                                     ? "Trust"
                                     : ""}
                       </h4>
@@ -1447,7 +1502,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1491,7 +1546,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1535,7 +1590,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1579,7 +1634,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1623,7 +1678,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1662,9 +1717,8 @@ const ClientList = () => {
 
           {activeTab == "documents" && (
             <div
-              className={`tab-pane fade ${
-                activeTab == "documents" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == "documents" ? "show active" : ""
+                }`}
               id={"documents"}
               role="tabpanel"
               aria-labelledby={`documents-tab`}
@@ -1790,7 +1844,7 @@ const ClientList = () => {
                                                               <img
                                                                 src={
                                                                   previews[
-                                                                    index
+                                                                  index
                                                                   ]
                                                                 }
                                                                 alt="preview"
@@ -1830,19 +1884,19 @@ const ClientList = () => {
                                                           </td>
                                                           <td className="size">
                                                             {file.size <
-                                                            1024 * 1024
+                                                              1024 * 1024
                                                               ? `${(
-                                                                  file.size /
-                                                                  1024
-                                                                ).toFixed(
-                                                                  2,
-                                                                )} KB`
+                                                                file.size /
+                                                                1024
+                                                              ).toFixed(
+                                                                2,
+                                                              )} KB`
                                                               : `${(
-                                                                  file.size /
-                                                                  (1024 * 1024)
-                                                                ).toFixed(
-                                                                  2,
-                                                                )} MB`}
+                                                                file.size /
+                                                                (1024 * 1024)
+                                                              ).toFixed(
+                                                                2,
+                                                              )} MB`}
                                                           </td>
 
                                                           <td className="action">

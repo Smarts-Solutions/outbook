@@ -4264,6 +4264,7 @@ const copy_job = async (job) => {
   data.created_at = new Date();
   data.updated_at = new Date();
   data.date_received_on = new Date();
+  data.allocated_on = new Date();
   data.status_type = 1 ;
   data.job_id = job_id ;
   data.status_updation_date = null ;
