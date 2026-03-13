@@ -3568,8 +3568,6 @@ const jobUpdate = async (job) => {
 
     if (result.affectedRows > 0) {
       if (tasks.task.length > 0) {
-
-      
         // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
         // console.log("ExistJob?.job_type_id ",job_type_id)
         if(Number(ExistJob?.job_type_id) != Number(job_type_id)){
