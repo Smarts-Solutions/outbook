@@ -1109,8 +1109,10 @@ const StaffPage = () => {
     }
 
     const exportData = response?.data?.data?.map((item) => ({
-      "First Name": item.first_name,
-      "Last Name": item.last_name,
+      "Full Name":
+        item.first_name && item.last_name
+          ? item.first_name + " " + item.last_name
+          : item.first_name || item.last_name || "-",
       Email: item.email,
       Phone: item.phone,
       Role: item.role_name,
@@ -1581,7 +1583,6 @@ const StaffPage = () => {
             </h5>
           </div>
 
-
           <div className="mb-4">
             <label className="form-label fw-semibold">
               <i className="bi bi-person-fill"></i>Staff to Replace:
@@ -1616,9 +1617,9 @@ const StaffPage = () => {
               value={
                 selectedStaff
                   ? {
-                    value: selectedStaff.id,
-                    label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
-                  }
+                      value: selectedStaff.id,
+                      label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                    }
                   : null
               }
               onChange={(selectedOption) => {

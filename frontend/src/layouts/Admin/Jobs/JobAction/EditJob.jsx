@@ -782,100 +782,219 @@ const EditJob = () => {
     GetJobType();
   }, [jobData.Service]);
 
-  const HandleChange = async (e) => {
-    const { name, value } = e.target;
+  // const HandleChange = async (e) => {
+  //   const { name, value } = e.target;
 
-    if (name === "JobType") {
-      if (!["", undefined, null].includes(value) && Number(existJobTypeId) === (Number(value))) {
-        setAddTaskArr(existAddTaskArr);
-      } else {
-        setAddTaskArr([]);
-      }
-    }
+  //   if (name === "JobType") {
+  //     if (!["", undefined, null].includes(value) && Number(existJobTypeId) === (Number(value))) {
+  //       setAddTaskArr(existAddTaskArr);
+  //     } else {
+  //       setAddTaskArr([]);
+  //     }
+  //   }
 
-    const date = new Date();
-    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
-      if (value == 1) {
+  //   const date = new Date();
+  //   if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+  //     if (value == 1) {
 
-        const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
-        if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-          await get_information_company_number(clientInfo.client_company_number);
-        }
-        else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-          await get_information_company_number(clientInfo.company_number);
-        }
-        else {
-          await dueOn_date_set(clientType, value);
-        }
+  //       const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
+  //       if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+  //         await get_information_company_number(clientInfo.client_company_number);
+  //       }
+  //       else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+  //         await get_information_company_number(clientInfo.company_number);
+  //       }
+  //       else {
+  //         await dueOn_date_set(clientType, value);
+  //       }
 
 
-        date.setDate(date.getDate() + 28);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 4) {
-        dueOn_date_set(clientType, value);
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 3) {
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 8) {
-        dueOn_date_set(clientType, value);
-        date.setDate(date.getDate() + 10);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      }
-    }
-    if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+  //       date.setDate(date.getDate() + 28);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == 4) {
+  //       dueOn_date_set(clientType, value);
+  //       date.setDate(date.getDate() + 5);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == 3) {
+  //       date.setDate(date.getDate() + 5);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == 8) {
+  //       dueOn_date_set(clientType, value);
+  //       date.setDate(date.getDate() + 10);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     }
+  //   }
+  //   if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
 
-      if (value == "Daily") {
-        date.setDate(date.getDate() + 1);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == "Weekly") {
-        date.setDate(date.getDate() + 3);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == "Monthly") {
-        date.setDate(date.getDate() + 10);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == "Quarterly") {
-        date.setDate(date.getDate() + 15);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == "Yearly") {
-        date.setDate(date.getDate() + 30);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      }
-    }
+  //     if (value == "Daily") {
+  //       date.setDate(date.getDate() + 1);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == "Weekly") {
+  //       date.setDate(date.getDate() + 3);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == "Monthly") {
+  //       date.setDate(date.getDate() + 10);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == "Quarterly") {
+  //       date.setDate(date.getDate() + 15);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     } else if (value == "Yearly") {
+  //       date.setDate(date.getDate() + 30);
+  //       setJobData((prevState) => ({
+  //         ...prevState,
+  //         SLADeadlineDate: date.toISOString().split("T")[0],
+  //       }));
+  //     }
+  //   }
+  //   setJobData((prevState) => ({
+  //     ...prevState,
+  //     [name]: value,
+  //   }));
+  //   validate(name, value);
+  // };
+
+
+const HandleChange = async (e) => {
+  const { name, value } = e.target;
+
+  // ✅ Service change hone par - other-data fields null + JobType reset + Tasks clear
+  if (name === "Service") {
+    const allServiceFieldKeys = serviceFields.flatMap((sf) =>
+      sf.fields.map((f) => f.key)
+    );
+    const nulledFields = allServiceFieldKeys.reduce((acc, key) => {
+      acc[key] = null;
+      return acc;
+    }, {});
+
     setJobData((prevState) => ({
       ...prevState,
-      [name]: value,
+      ...nulledFields,
+      JobType: "",   // ✅ JobType reset
     }));
-    validate(name, value);
-  };
+
+    setAddTaskArr([]);        // ✅ Tasks clear
+    setTempTaskArr([]);       // ✅ Temp tasks clear
+    setChecklistId("");       // ✅ Checklist reset
+    setTempChecklistId("");   // ✅ Temp checklist reset
+  }
+
+  // ✅ JobType change hone par
+  if (name === "JobType") {
+    if (!["", undefined, null].includes(value) && Number(existJobTypeId) === Number(value)) {
+      setAddTaskArr(existAddTaskArr);
+    } else {
+      setAddTaskArr([]);
+    }
+  }
+
+  const date = new Date();
+  if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+    if (value == 1) {
+      const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
+      if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+        await get_information_company_number(clientInfo.client_company_number);
+      }
+      else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+        await get_information_company_number(clientInfo.company_number);
+      }
+      else {
+        await dueOn_date_set(clientType, value);
+      }
+
+      date.setDate(date.getDate() + 28);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == 4) {
+      dueOn_date_set(clientType, value);
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == 3) {
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == 8) {
+      dueOn_date_set(clientType, value);
+      date.setDate(date.getDate() + 10);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+  }
+
+  if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+    if (value == "Daily") {
+      date.setDate(date.getDate() + 1);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == "Weekly") {
+      date.setDate(date.getDate() + 3);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == "Monthly") {
+      date.setDate(date.getDate() + 10);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == "Quarterly") {
+      date.setDate(date.getDate() + 15);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else if (value == "Yearly") {
+      date.setDate(date.getDate() + 30);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+  }
+
+  setJobData((prevState) => ({
+    ...prevState,
+    [name]: value,
+  }));
+  validate(name, value);
+};
+
 
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
@@ -1262,11 +1381,24 @@ const EditJob = () => {
     setTaskName("");
   };
 
-  const HandleReset1 = () => {
-    // setAddTaskArr(tempTaskArr);
-    setChecklistId(tempChecklistId);
-  };
+  // const HandleReset1 = () => {
+  //   // setAddTaskArr(tempTaskArr);
+  //   setChecklistId(tempChecklistId);
+  // };
 
+  
+  const HandleReset1 = () => {
+  if (Number(existJobTypeId) === Number(jobData.JobType)) {
+    setAddTaskArr(existAddTaskArr);
+    setChecklistId(tempChecklistId);
+  } else {
+    setAddTaskArr(tempTaskArr);
+    setChecklistId(tempChecklistId);
+  }
+};
+  
+  
+  
   const totalHours =
     Number(PreparationTimne.hours) * 60 +
     Number(PreparationTimne.minutes) +
