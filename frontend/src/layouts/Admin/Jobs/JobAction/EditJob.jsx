@@ -14,6 +14,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from 'react-select';
+import Swal from "sweetalert2";
 
 const EditJob = () => {
   const location = useLocation();
@@ -95,6 +96,7 @@ const EditJob = () => {
 
 
   const [jobData, setJobData] = useState({
+    timesheet_job_id: null,
     AccountManager: "",
     Customer: "",
     Client: "",
@@ -142,6 +144,9 @@ const EditJob = () => {
     status_type: null,
     notes: "",
   });
+
+
+  console.log("jobData?.timesheet_job_id ", jobData?.timesheet_job_id)
 
   useEffect(() => {
     console.log("UPDATE ALL DEFAULT FEILDS");
@@ -333,6 +338,7 @@ const EditJob = () => {
 
             setJobData((prevState) => ({
               ...prevState,
+              timesheet_job_id: response.data.timesheet_job_id ?? null,
               AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
                 } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
               Customer: response.data.customer_trading_name ?? "",
@@ -878,122 +884,149 @@ const EditJob = () => {
   // };
 
 
-const HandleChange = async (e) => {
-  const { name, value } = e.target;
+  const HandleChange = async (e) => {
+    const { name, value } = e.target;
 
-  // ✅ Service change hone par - other-data fields null + JobType reset + Tasks clear
-  if (name === "Service") {
-    const allServiceFieldKeys = serviceFields.flatMap((sf) =>
-      sf.fields.map((f) => f.key)
-    );
-    const nulledFields = allServiceFieldKeys.reduce((acc, key) => {
-      acc[key] = null;
-      return acc;
-    }, {});
+    // ✅ Service change hone par - other-data fields null + JobType reset + Tasks clear
+    if (name === "Service") {
+
+      if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: `this job already assign timesheet.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+        return
+      }
+
+
+
+      const allServiceFieldKeys = serviceFields.flatMap((sf) =>
+        sf.fields.map((f) => f.key)
+      );
+      const nulledFields = allServiceFieldKeys.reduce((acc, key) => {
+        acc[key] = null;
+        return acc;
+      }, {});
+
+      setJobData((prevState) => ({
+        ...prevState,
+        ...nulledFields,
+        JobType: "",   // ✅ JobType reset
+      }));
+
+      setAddTaskArr([]);        // ✅ Tasks clear
+      setTempTaskArr([]);       // ✅ Temp tasks clear
+      setChecklistId("");       // ✅ Checklist reset
+      setTempChecklistId("");   // ✅ Temp checklist reset
+    }
+
+    // ✅ JobType change 
+    if (name === "JobType") {
+      
+      if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: `this job already assign timesheet.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+        return
+      }
+
+
+      if (!["", undefined, null].includes(value) && Number(existJobTypeId) === Number(value)) {
+        setAddTaskArr(existAddTaskArr);
+      } else {
+        setAddTaskArr([]);
+      }
+    }
+
+    const date = new Date();
+    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+      if (value == 1) {
+        const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
+        if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+          await get_information_company_number(clientInfo.client_company_number);
+        }
+        else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+          await get_information_company_number(clientInfo.company_number);
+        }
+        else {
+          await dueOn_date_set(clientType, value);
+        }
+
+        date.setDate(date.getDate() + 28);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 4) {
+        dueOn_date_set(clientType, value);
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 3) {
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == 8) {
+        dueOn_date_set(clientType, value);
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
+
+    if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+      if (value == "Daily") {
+        date.setDate(date.getDate() + 1);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Weekly") {
+        date.setDate(date.getDate() + 3);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Monthly") {
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Quarterly") {
+        date.setDate(date.getDate() + 15);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Yearly") {
+        date.setDate(date.getDate() + 30);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
 
     setJobData((prevState) => ({
       ...prevState,
-      ...nulledFields,
-      JobType: "",   // ✅ JobType reset
+      [name]: value,
     }));
-
-    setAddTaskArr([]);        // ✅ Tasks clear
-    setTempTaskArr([]);       // ✅ Temp tasks clear
-    setChecklistId("");       // ✅ Checklist reset
-    setTempChecklistId("");   // ✅ Temp checklist reset
-  }
-
-  // ✅ JobType change hone par
-  if (name === "JobType") {
-    if (!["", undefined, null].includes(value) && Number(existJobTypeId) === Number(value)) {
-      setAddTaskArr(existAddTaskArr);
-    } else {
-      setAddTaskArr([]);
-    }
-  }
-
-  const date = new Date();
-  if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
-    if (value == 1) {
-      const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
-      if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-        await get_information_company_number(clientInfo.client_company_number);
-      }
-      else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-        await get_information_company_number(clientInfo.company_number);
-      }
-      else {
-        await dueOn_date_set(clientType, value);
-      }
-
-      date.setDate(date.getDate() + 28);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == 4) {
-      dueOn_date_set(clientType, value);
-      date.setDate(date.getDate() + 5);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == 3) {
-      date.setDate(date.getDate() + 5);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == 8) {
-      dueOn_date_set(clientType, value);
-      date.setDate(date.getDate() + 10);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    }
-  }
-
-  if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
-    if (value == "Daily") {
-      date.setDate(date.getDate() + 1);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == "Weekly") {
-      date.setDate(date.getDate() + 3);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == "Monthly") {
-      date.setDate(date.getDate() + 10);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == "Quarterly") {
-      date.setDate(date.getDate() + 15);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (value == "Yearly") {
-      date.setDate(date.getDate() + 30);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    }
-  }
-
-  setJobData((prevState) => ({
-    ...prevState,
-    [name]: value,
-  }));
-  validate(name, value);
-};
+    validate(name, value);
+  };
 
 
   const validate = (name, value, isSubmitting = false) => {
@@ -1280,6 +1313,12 @@ const HandleChange = async (e) => {
     : {};
 
   const openJobModal = (e) => {
+
+    if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
+        return
+    }
+
+
     if (e.target.value != "") {
       jobModalSetStatus(true);
     }
@@ -1386,19 +1425,19 @@ const HandleChange = async (e) => {
   //   setChecklistId(tempChecklistId);
   // };
 
-  
+
   const HandleReset1 = () => {
-  if (Number(existJobTypeId) === Number(jobData.JobType)) {
-    setAddTaskArr(existAddTaskArr);
-    setChecklistId(tempChecklistId);
-  } else {
-    setAddTaskArr(tempTaskArr);
-    setChecklistId(tempChecklistId);
-  }
-};
-  
-  
-  
+    if (Number(existJobTypeId) === Number(jobData.JobType)) {
+      setAddTaskArr(existAddTaskArr);
+      setChecklistId(tempChecklistId);
+    } else {
+      setAddTaskArr(tempTaskArr);
+      setChecklistId(tempChecklistId);
+    }
+  };
+
+
+
   const totalHours =
     Number(PreparationTimne.hours) * 60 +
     Number(PreparationTimne.minutes) +
@@ -2572,8 +2611,8 @@ const HandleChange = async (e) => {
   };
 
 
-  const minDateRecivedOn=jobData?.DateReceivedOn;
-  const minDateAllocatedOn=jobData?.AllocatedOn;
+  const minDateRecivedOn = jobData?.DateReceivedOn;
+  const minDateAllocatedOn = jobData?.AllocatedOn;
 
 
   return (
@@ -3145,13 +3184,13 @@ const HandleChange = async (e) => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
-                                                                              min={minDateAllocatedOn}  
+                                      min={minDateAllocatedOn}
 
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
-                                      // max={
-                                      //   new Date().toISOString().split("T")[0]
-                                      // }
+                                    // max={
+                                    //   new Date().toISOString().split("T")[0]
+                                    // }
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -3170,13 +3209,13 @@ const HandleChange = async (e) => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
-                                                                              min={minDateRecivedOn}  
+                                      min={minDateRecivedOn}
 
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn}
-                                      // max={
-                                      //   new Date().toISOString().split("T")[0]
-                                      // }
+                                    // max={
+                                    //   new Date().toISOString().split("T")[0]
+                                    // }
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
@@ -3613,7 +3652,7 @@ const HandleChange = async (e) => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
 
                                         onChange={HandleChange}
                                         value={jobData.ExpectedDeliveryDate}
@@ -3651,7 +3690,7 @@ const HandleChange = async (e) => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
 
                                         onChange={HandleChange}
                                         value={jobData.SubmissionDeadline}
@@ -3671,7 +3710,7 @@ const HandleChange = async (e) => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
 
                                         onChange={HandleChange}
                                         value={jobData.CustomerDeadlineDate}
@@ -3709,7 +3748,7 @@ const HandleChange = async (e) => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
-                                          min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
                                         onChange={HandleChange}
                                         value={jobData.InternalDeadlineDate}
                                       />
