@@ -2443,8 +2443,6 @@ const EditJob = () => {
   const minDateRecivedOn=jobData?.DateReceivedOn;
   const minDateAllocatedOn=jobData?.AllocatedOn;
 
-console.log("minDateRecivedOn",minDateRecivedOn)
-console.log("minDateAllocatedOn",minDateAllocatedOn)
 
   return (
     <div>
