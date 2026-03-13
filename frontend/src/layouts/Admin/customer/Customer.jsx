@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
@@ -11,6 +11,7 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
+import { convertDate } from "../../../Utils/Comman_function";
 
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 
@@ -37,7 +38,7 @@ const Customer = () => {
   });
 
   const [loading, setLoading] = useState(false);
-const debounceRef = useRef(null);
+  const debounceRef = useRef(null);
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -176,7 +177,7 @@ const debounceRef = useRef(null);
     {
       name: "Created At",
       selector: (row) => row.created_at,
-      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
+      cell: (row) => <div title={row.created_at}>{convertDate(row.created_at)}</div>,
       sortable: true,
     },
 
@@ -428,17 +429,17 @@ const debounceRef = useRef(null);
   };
 
   const handleSearchChange = (term) => {
-  setSearchTerm(term);
-  setCurrentPage(1);
+    setSearchTerm(term);
+    setCurrentPage(1);
 
-  if (debounceRef.current) {
-    clearTimeout(debounceRef.current);
-  }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
-  debounceRef.current = setTimeout(() => {
-    GetAllCustomerData(1, pageSize, term);
-  }, 500); 
-};
+    debounceRef.current = setTimeout(() => {
+      GetAllCustomerData(1, pageSize, term);
+    }, 500);
+  };
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
     setLoading(true);
@@ -456,11 +457,7 @@ const debounceRef = useRef(null);
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
       if (response.status) {
-        // const filteredData = response.data.data.filter((item) => {
-        //   const itemDate = new Date(item.created_at);
-        //   const { startDate, endDate } = getDateRange(selectedTab);
-        //   return itemDate >= startDate && itemDate <= endDate;
-        // });
+
 
         setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
@@ -729,7 +726,7 @@ const debounceRef = useRef(null);
                               <span>Export Excel</span>
                             </button> */}
 
-                            {filteredData1  && filteredData1 .length > 0 && (
+                            {filteredData1 && filteredData1.length > 0 && (
                               <button
                                 className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                                 onClick={handleExport}
@@ -778,7 +775,7 @@ const debounceRef = useRef(null);
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                         <option value={100}>100</option>
-                            <option value={500}>500</option>
+                        <option value={500}>500</option>
                         {/* <option value={100000}>All</option> */}
                       </select>
                     </div>

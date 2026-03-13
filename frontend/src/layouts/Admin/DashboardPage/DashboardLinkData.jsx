@@ -348,29 +348,15 @@ const JobStatus = () => {
   };
 
   const JobColumns = [
-    // {
-    //   name: "Job ID (CustName+ClientName+UniqueNo)",
-    //   cell: (row) => (
-    //     <div>
-    //       {/* <a
-    //         onClick={() => HandleJobView(row)}
-    //         style={{ cursor: "pointer", color: "#26bdf0" }}
-    //       > */}
-    //       {row.job_code_id}
-    //       {/* </a> */}
-    //     </div>
-    //   ),
-    //   selector: (row) => row.job_code_id,
-    //   sortable: true,
-    // },
+
 
     {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessData.view == 1 ||
-          getAccessData.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessData.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -460,8 +446,8 @@ const JobStatus = () => {
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -471,8 +457,8 @@ const JobStatus = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
     },
     {
@@ -491,8 +477,8 @@ const JobStatus = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -503,8 +489,8 @@ const JobStatus = () => {
 
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
     },
     {
@@ -537,17 +523,17 @@ const JobStatus = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
@@ -555,9 +541,9 @@ const JobStatus = () => {
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
     },
@@ -663,7 +649,14 @@ const JobStatus = () => {
         </div>
       ),
     },
-
+    {
+      name: "Emloyee ID",
+      selector: (row) => row.employee_number,
+      cell: (row) => (
+        <div title={row.employee_number}>{row.employee_number}</div>
+      ),
+      sortable: true,
+    },
     {
       name: "Created by",
       selector: (row) => row.customer_created_by,
@@ -679,30 +672,7 @@ const JobStatus = () => {
       cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
       sortable: true,
     },
-    // {
-    //   name: "Client Contact Person",
-    //   selector: (row) =>
-    //     row.account_manager_firstname + " " + row.account_manager_lastname,
-    //   sortable: true,
-    //   cell: (row) => (
-    //     <div
-    //       title={
-    //         row.account_manager_firstname + " " + row.account_manager_lastname
-    //       }
-    //       className="data-table-cell"
-    //       data-fulltext={
-    //         row.account_manager_firstname + " " + row.account_manager_lastname
-    //       }
-    //       style={{
-    //         whiteSpace: "nowrap",
-    //         overflow: "hidden",
-    //         textOverflow: "ellipsis",
-    //       }}
-    //     >
-    //       {row.account_manager_firstname + " " + row.account_manager_lastname}
-    //     </div>
-    //   ),
-    // },
+
     {
       name: "Status",
       cell: (row) => (
@@ -733,41 +703,14 @@ const JobStatus = () => {
   ];
 
   const ClientListColumns = [
-    // {
-    //   name: "Client Name",
-    //   cell: (row) => (
-    //     <div>
-    //       {
-    //         role === "SUPERADMIN" ? (
-    //           <a
-    //             // onClick={() => HandleClientView(row)}
-    //             style={{ cursor: "pointer", color: "#26bdf0" }}
-    //           >
-    //             {row.client_name}
-    //           </a>
-    //         ) : row.client_name
-    //       }
 
-    //     </div>
-    //   ),
-    //   selector: (row) => row.trading_name,
-    //   sortable: true,
-    // },
-    // {
-    //   name: "Client Name",
-    //   cell: (row) => (
-    //     <div title={row.client_name || "-"}>{row.client_name || "-"}</div>
-    //   ),
-    //   selector: (row) => row.client_name || "-",
-    //   sortable: true,
-    // },
     {
       name: "Client Name",
       cell: (row) => (
         <div>
           {getAccessData.job === 1 ||
-          getAccessData.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessData.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientProfileView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -837,9 +780,8 @@ const JobStatus = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -915,9 +857,8 @@ const JobStatus = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -946,8 +887,6 @@ const JobStatus = () => {
     });
   };
 
-  console.log("allLinkedData", allLinkedData);
-  console.log("location", location?.state?.req?.key);
 
   const downloadCSV = (data, filename) => {
     if (!data || data.length === 0) {
@@ -1029,6 +968,7 @@ const JobStatus = () => {
             (item.account_manager_firstname || "") +
             " " +
             (item.account_manager_lastname || ""),
+          "Employee ID": item.employee_number || "-",
           "Created by": item.customer_created_by || "",
           "Created At": item.created_at || "",
           Status:
@@ -1073,7 +1013,7 @@ const JobStatus = () => {
             "Job ID": item.job_code_id || "-",
             "Job Priority": item.job_priority
               ? item.job_priority.charAt(0).toUpperCase() +
-                item.job_priority.slice(1).toLowerCase()
+              item.job_priority.slice(1).toLowerCase()
               : "-",
             "Client Name": item.client_trading_name || "-",
             "Job Type": item.job_type_name || "-",
@@ -1093,9 +1033,9 @@ const JobStatus = () => {
             Timesheet:
               item.total_hours_status == "1" && item.total_hours
                 ? item.total_hours.split(":")[0] +
-                  "h " +
-                  item.total_hours.split(":")[1] +
-                  "m"
+                "h " +
+                item.total_hours.split(":")[1] +
+                "m"
                 : "-",
             Invoicing: item.invoiced == "1" ? "YES" : "NO",
             "Created By": item.job_created_by || "-",
