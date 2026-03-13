@@ -19,8 +19,8 @@ const Datatable = ({ columns, data, filter ,pagination = true }) => {
   //get last index of columns
   const lastIndex = columns.length - 1;
   let actionColumn = false
-  if (columns[lastIndex].name?.toLowerCase() === 'actions' || columns[lastIndex].name?.toLowerCase() === 'action') {
-    actionColumn = true
+  if(['actions','action'].includes(columns[lastIndex].name?.toLowerCase())) {
+   actionColumn = true
   }
 
 
