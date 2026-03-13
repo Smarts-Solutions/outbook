@@ -177,7 +177,7 @@ const Customer = () => {
     {
       name: "Created At",
       selector: (row) => row.created_at,
-      cell: (row) => <div title={row.created_at}>{convertDate(row.created_at)}</div>,
+      cell: (row) => <div title={row.created_at}>{(row.created_at)}</div>,
       sortable: true,
     },
 
