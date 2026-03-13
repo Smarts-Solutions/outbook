@@ -504,6 +504,38 @@ const ClientList = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
+    // {
+    //   name: "Actions",
+    //   cell: (row) => (
+    //     <div className="d-flex">
+    //       {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
+    //         <>
+    //           <button className="edit-icon" onClick={() => handleEdit(row)}>
+    //             <i className="ti-pencil" />
+    //           </button>
+
+
+    //           <button className="copy-icon" onClick={() => copyRow(row)}>
+    //             <i className="ti-files"></i>
+    //           </button>
+    //         </>
+    //       )}
+    //       {row.timesheet_job_id == null
+    //         ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
+    //           <button
+    //             className="delete-icon"
+    //             onClick={() => handleDelete(row, "job")}
+    //           >
+    //             <i className="ti-trash text-danger" />
+    //           </button>
+    //         )
+    //         : ""}
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
     {
       name: "Actions",
       cell: (row) => (
@@ -514,12 +546,12 @@ const ClientList = () => {
                 <i className="ti-pencil" />
               </button>
 
-
               <button className="copy-icon" onClick={() => copyRow(row)}>
                 <i className="ti-files"></i>
               </button>
             </>
           )}
+
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
               <button
@@ -532,10 +564,36 @@ const ClientList = () => {
             : ""}
         </div>
       ),
+
+      width: "180px",
+
+      // conditionalCellStyles: [
+      //   {
+      //     when: () => true,
+      //     style: {
+      //       position: "sticky",
+      //       right: "0",
+      //       background: "#fff",
+      //     },
+      //   },
+      // ],
+
+      // conditionalHeaderStyles: [
+      //   {
+      //     when: () => true,
+      //     style: {
+      //       position: "sticky",
+      //       right: "0",
+      //       background: "#fff",
+      //       zIndex: 3,
+      //     },
+      //   },
+      // ],
+
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-    },
+    }
   ];
 
   const HandleJob = (row) => {

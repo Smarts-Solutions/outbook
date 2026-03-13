@@ -4932,3 +4932,26 @@ button.secondary-icon,
   width: 40px !important;
   height: 40px;
 }
+
+/* .custom-datatable .rdt_TableRow .sticky-action-column,
+.custom-datatable .rdt_TableHeadRow .sticky-action-column {
+  position: sticky !important;
+  right: 0;
+  background: white;
+  z-index: 5;
+}
+
+.custom-datatable .rdt_TableHeadRow .sticky-action-column {
+  z-index: 10;
+}
+
+.datatable-container {
+  overflow-x: auto;
+} */
+
+
+.custom-datatable-sticky-action .rdt_TableHeadRow .rdt_TableCol:last-child, .custom-datatable-sticky-action .rdt_TableBody .rdt_TableRow .rdt_TableCell:last-child {
+    position: sticky;
+    right: 0;
+    background: #fff;
+}
