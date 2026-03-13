@@ -536,6 +536,7 @@ const ClientList = () => {
       allowOverflow: true,
       button: true,
     },
+    
   ];
 
   const HandleJob = (row) => {

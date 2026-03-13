@@ -440,6 +440,7 @@ const ClientList = () => {
             : ""}
         </div>
       ),
+      width: "180px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,

@@ -15,6 +15,15 @@ const Datatable = ({ columns, data, filter ,pagination = true }) => {
     }
   };
 
+
+  //get last index of columns
+  const lastIndex = columns.length - 1;
+  let actionColumn = false
+  if(['actions','action'].includes(columns[lastIndex]?.name?.toLowerCase())) {
+   actionColumn = true
+  }
+
+
   return (
     <div className="datatable-container" ref={handleTableRef}>
       {data.length === 0 ? (
@@ -37,7 +46,8 @@ const Datatable = ({ columns, data, filter ,pagination = true }) => {
             filter={filter}
           >
             <DataTable
-            className='custom-datatable'
+              //className='custom-datatable custom-datatable-sticky-action'
+              className={actionColumn ? 'custom-datatable custom-datatable-sticky-action' : 'custom-datatable'}
               fixedHeader={true}
               fixedHeaderScrollHeight="500px"
               noHeader
@@ -55,5 +65,69 @@ const Datatable = ({ columns, data, filter ,pagination = true }) => {
     </div>
   );
 };
+// const Datatable = ({ columns, data, filter, pagination = true }) => {
+//   const noDataImage = '/assets/images/No-data-amico.png';
+
+//   const handleTableRef = (node) => {
+//     if (node) {
+//       const searchInput = node.querySelector('.data-table-extensions-filter input');
+//       if (searchInput && searchInput.placeholder !== 'Search here') {
+//         searchInput.placeholder = 'Search here';
+//       }
+//     }
+//   };
+
+//   // last column index
+//   const lastIndex = columns.length - 1;
+
+//   // last column me sticky class add
+//   const updatedColumns = columns.map((col, index) => {
+//     if (index === lastIndex) {
+//       return {
+//         ...col,
+//         className: 'sticky-action-column'
+//       };
+//     }
+//     return col;
+//   });
+
+//   return (
+//     <div className="datatable-container" ref={handleTableRef}>
+//       {data.length === 0 ? (
+//         <div className='text-center'>
+//           <img 
+//             src={noDataImage} 
+//             alt="No records available" 
+//             style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+//           />
+//           <p className='fs-16'>There are no records to display</p>
+//         </div>
+//       ) : (
+//         <DataTableExtensions
+//           columns={updatedColumns}
+//           data={data}
+//           export={false}
+//           print={false}
+//           search={true}
+//           filter={filter}
+//         >
+//           <DataTable
+//             className='custom-datatable custom-datatable-sticky-action'
+//             fixedHeader={true}
+//             fixedHeaderScrollHeight="500px"
+//             noHeader
+//             defaultSortField="JobId"
+//             defaultSortAsc={false}
+//             pagination={pagination}
+//             highlightOnHover
+//             paginationRowsPerPageOptions={[10, 50, 100]}
+//             paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
+//           />
+//         </DataTableExtensions>
+//       )}
+//     </div>
+//   );
+// };
+
 
 export default Datatable;
