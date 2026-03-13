@@ -95,7 +95,7 @@ const JobStatus = () => {
         sortable: true,
       },
       {
-        name: `Employee Id`,
+        name: `Employee ID`,
         cell: (row) => {
           const manager = row.account_managers?.[index];
           return (
@@ -531,7 +531,7 @@ const JobStatus = () => {
       for (let i = 0; i < maxManagers; i++) {
         const manager = item.account_managers?.[i];
         rowData[`Individual Account Manager ${i + 1}`] = manager?.full_name || "-";
-        rowData[`Employee Id ${i + 1}`] = manager?.employee_number || "-";
+        rowData[`Employee ID ${i + 1}`] = manager?.employee_number || "-";
       }
 
       // 8. Clients
