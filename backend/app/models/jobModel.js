@@ -1661,6 +1661,9 @@ const getJobByClient = async (job) => {
         ORDER BY 
         jobs.id DESC;
         `;
+
+    //console.log("query -", query);
+
     console.log("query", query)
     const [result] = await pool.execute(query);
 
@@ -4232,6 +4235,62 @@ const GetJobStatus = async (job) => {
   }
 };
 
+const copy_job = async (job) => {
+  const { row, StaffUserId, ip } = job;
+  console.log("job -->>>>", row.job_id);
+
+  try{
+
+  let id = row.job_id;
+  // find job 
+  const [[data]] = await pool.execute(
+    `SELECT * FROM jobs WHERE id = ?`,
+    [id]
+  );
+
+  if (!data) {
+    return { status: false, message: "Job not found" };
+  }
+
+  delete data.id;
+
+   let input = {
+    table: "jobs",
+    field: "job_id",
+  };
+  //CUS_CLI_00001
+  const job_id = await generateNextUniqueCode(input);
+
+  data.created_at = new Date();
+  data.updated_at = new Date();
+  data.date_received_on = new Date();
+  data.allocated_on = new Date();
+  data.status_type = 1 ;
+  data.job_id = job_id ;
+  data.status_updation_date = null ;
+  
+  
+
+  const columns = Object.keys(data).join(",");
+  const values = Object.values(data);
+
+  const placeholders = Object.keys(data).map(() => "?").join(",");
+
+  await pool.execute(
+    `INSERT INTO jobs (${columns}) VALUES (${placeholders})`,
+    values
+  );
+
+  return { status: true, message: "Job copied successfully" };
+}
+catch(err){
+  console.log(err);
+  return { status: false, message: "Error copying job" };
+}
+
+
+}
+
 module.exports = {
   getAddJobData,
   jobAdd,
@@ -4245,4 +4304,5 @@ module.exports = {
   updateJobStatus,
   GetJobStatus,
   get_jobs_filter,
+  copy_job
 };

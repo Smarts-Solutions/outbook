@@ -3474,6 +3474,8 @@ button.view-icon,
   border: 3px solid #ffc107;
 }
 
+
+
 .datatable-container button.edit-icon,
 button.edit-icon {
   border: 3px solid #0d6efd;
@@ -4905,4 +4907,28 @@ font-size: 12px !important;
   to {
     transform: rotate(1turn);
   }
+}
+
+button.copy-icon,
+.datatable-container button.copy-icon {
+  color: #03d87f;
+  border-color: #03d87f;
+  border: 3px solid #03d87f;
+}
+
+.datatable-container button.copy-icon,
+button.copy-icon,
+button.add-icon,
+button.secondary-icon,
+.datatable-container button.add-icon,
+.secondary-icon {
+  border-radius: 20px;
+  padding: 7px 8px;
+  font-size: 20px;
+  margin: 0px 4px;
+  background: none;
+  border-width: 3px;
+  line-height: 19px;
+  width: 40px !important;
+  height: 40px;
 }

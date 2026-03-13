@@ -1491,9 +1491,6 @@ function JobCustomReport() {
     }, 500);
 
   };
-
-
-
   ///////////////---- FOR JOB SERACH  END-----//////////////
 
 
