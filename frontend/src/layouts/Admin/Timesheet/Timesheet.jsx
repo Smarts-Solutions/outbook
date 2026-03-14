@@ -1802,7 +1802,7 @@ const Timesheet = () => {
     { value: "2", label: "External" },
   ];
 
-  console.log("timeSheetRows", timeSheetRows);
+  // console.log("timeSheetRows", timeSheetRows);
 
   return (
     <div className="container-fluid">
