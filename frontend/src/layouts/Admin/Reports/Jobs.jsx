@@ -157,9 +157,9 @@ const JobStatus = () => {
     await dispatch(Jobs(data))
       .unwrap()
       .then((res) => {
-        if (res.status) {
-          setJobsData(res.data);
-          setTotalRecords(res.pagination?.totalItems || 0);
+        if (res.status && res.data) {
+          setJobsData(res.data.data);
+          setTotalRecords(res.data.pagination?.totalItems || 0);
         } else {
           setJobsData([]);
           setTotalRecords(0);
@@ -213,8 +213,8 @@ const JobStatus = () => {
     
     try {
         const res = await dispatch(Jobs(data)).unwrap();
-        if (res.status && res.data && res.data.length > 0) {
-            const apiData = res.data;
+        if (res.status && res.data && res.data.data && res.data.data.length > 0) {
+            const apiData = res.data.data;
             const exportData = apiData.map((item) => {
                 const status = statusDataAll.find(
                     (s) => Number(s.id) === Number(item.status_type)
@@ -542,105 +542,92 @@ const JobStatus = () => {
 
   return (
     <div>
-      <div className="container-fluid">
-        <div className="content-title">
-          <div className="row">
-            <div className="col-md-6 col-sm-5">
-              <div className="tab-title d-flex align-items-center">
-                <button
-                  type="button"
-                  className="btn p-0"
-                  onClick={() => {
-                    window.history.back();
-                  }}
-                >
-                  <i className="pe-3 fa-regular fa-arrow-left-long fs-4"></i>
-                </button>
-                <h3 className="mt-0">Job</h3>
+      <div className="report-data mt-5">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="">
+              <div className="row mb-5">
+                <div className="tab-title col-lg-6">
+                  <h3>Job Report</h3>
+                </div>
+                <div className="col-lg-6 d-flex justify-content-end">
+                  <div
+                    className="btn btn-info text-white blue-btn"
+                    onClick={() => navigate(-1)}
+                  >
+                    <i className="fa fa-arrow-left pe-1" /> Back
+                  </div>
+
+                  {jobsData && jobsData.length > 0 && (
+                    <div className="ms-2">
+                      <button
+                        className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
+                        onClick={() => handleExport()}
+                      >
+                        <i className="fa fa-download" aria-hidden="true"></i>
+                        <span>Export Excel</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Search Row */}
+              <div className="row mb-4">
+                <div className="col-md-4 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Search Jobs"
+                    className="form-control"
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="report-data mt-4">
-          <div className="col-sm-12">
-            <div className="page-title-box pt-0 pb-0">
-              <div className="row align-items-start justify-content-end">
-                <div className="col-4">
-                  <div className="form-group mb-2 mt-1 pe-3 pt-5"></div>
-                </div>
-
-                <div className="col-12">
-                  <div className="tab-content mt-minus-60">
-                    <div className="card-datatable">
-                      <div className="card-datatable">
-                        <div className="row mb-3">
-                          <div className="col-md-4">
-                            <input
-                              type="text"
-                              placeholder="Search Jobs"
-                              className="form-control"
-                              value={searchTerm}
-                              onChange={(e) =>
-                                handleSearchChange(e.target.value)
-                              }
-                            />
-                          </div>
-                          <div className="col-md-2">
-                             {jobsData && jobsData.length > 0 && (
-                                <button
-                                    className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
-                                    onClick={() => handleExport()}
-                                >
-                                    <i className="fa fa-download" aria-hidden="true"></i>
-                                    <span>Export Excel</span>
-                                </button>
-                             )}
-                          </div>
-                        </div>
-
-                        {loading && (
-                          <div className="overlay">
-                            <div className="loader"></div>
-                          </div>
-                        )}
-
-                        <Datatable
-                          columns={columns}
-                          data={jobsData && jobsData}
-                        />
-
-                        {/* Pagination Controls */}
-                        <ReactPaginate
-                          previousLabel={"Previous"}
-                          nextLabel={"Next"}
-                          breakLabel={"..."}
-                          pageCount={Math.ceil(totalRecords / pageSize)}
-                          marginPagesDisplayed={2}
-                          pageRangeDisplayed={5}
-                          onPageChange={handlePageChange}
-                          containerClassName={"pagination"}
-                          activeClassName={"active"}
-                          forcePage={currentPage - 1}
-                        />
-                      </div>
-                      <select
-                        className="perpage-select"
-                        value={pageSize}
-                        onChange={handlePageSizeChange}
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                        <option value={500}>500</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div className="datatable-wrapper mt-minus">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
             </div>
+          )}
+
+          <Datatable
+            filter={false}
+            pagination={false}
+            columns={columns}
+            data={jobsData || []}
+          />
+
+          <div className="d-flex justify-content-between align-items-center mt-3">
+            <div className="pagination-wrapper">
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                breakLabel={"..."}
+                pageCount={Math.ceil(totalRecords / pageSize)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+              />
+            </div>
+            <select
+              className="perpage-select"
+              value={pageSize}
+              onChange={handlePageSizeChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={500}>500</option>
+            </select>
           </div>
         </div>
       </div>
