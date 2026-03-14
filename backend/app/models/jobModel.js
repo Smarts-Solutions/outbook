@@ -2896,6 +2896,7 @@ const getJobById = async (job) => {
       );
 
       result = {
+        timesheet_job_id:rows[0].timesheet_job_id,
         job_id: rows[0].job_id,
         staff_created_id: rows[0].staff_created_id,
         job_code_id: rows[0].job_code_id,
@@ -3211,6 +3212,11 @@ const jobUpdate = async (job) => {
  `;
   try {
     const [[ExistJob]] = await pool.execute(ExistJobQuery, [job_id]);
+
+    // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
+    // console.log("ExistJob?.job_type_id ",job_type_id)
+
+   // return
 
     // console.log("ExistJob", ExistJob);
     // console.log("expected_delivery_date", expected_delivery_date);
@@ -3562,13 +3568,25 @@ const jobUpdate = async (job) => {
 
     if (result.affectedRows > 0) {
       if (tasks.task.length > 0) {
+        // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
+        // console.log("ExistJob?.job_type_id ",job_type_id)
+        if(Number(ExistJob?.job_type_id) != Number(job_type_id)){
+            const deleteQuery = `
+              DELETE FROM client_job_task 
+              WHERE job_id = ? AND client_id = ?
+          `;
+          await pool.execute(deleteQuery, [job_id,client_id]);
+        }
+
+
+
+
         const checklist_id = tasks.checklist_id;
         const providedTaskIds = tasks.task
           .filter((tsk) => tsk.task_id !== null && tsk.task_id !== "")
           .map((tsk) => tsk.task_id);
 
-        // Working progresss.................
-
+      
         // Get existing task IDs for the checklist
         const getExistingTasksQuery = `
             SELECT task_id FROM client_job_task WHERE job_id = ?
@@ -3587,11 +3605,11 @@ const jobUpdate = async (job) => {
           //   `;
           // await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
           const deleteQuery = `
-    DELETE FROM client_job_task 
-    WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
-              .map(() => "?")
-              .join(",")})
-`;
+              DELETE FROM client_job_task 
+              WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
+                        .map(() => "?")
+                        .join(",")})
+          `;
           await pool.execute(deleteQuery, [
             job_id,
             client_id,
@@ -3599,9 +3617,7 @@ const jobUpdate = async (job) => {
           ]);
         }
         // Insert or update tasks
-
         // console.log("tasks --  ", tasks);
-
         for (const tsk of tasks.task) {
           let task_id = tsk.task_id;
           let task_name = tsk.task_name;
@@ -3685,6 +3701,8 @@ const jobUpdate = async (job) => {
             }
           }
         }
+
+
       }
 
       //Add log

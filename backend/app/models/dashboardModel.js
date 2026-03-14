@@ -736,6 +736,7 @@ const getByAllClient = async (dashboard) => {
           OR client_contact_details.email LIKE ?
           OR ${clientCodeExpr} LIKE ?
           OR ? LIKE CONCAT('%', ${clientCodeExpr}, '%')
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
@@ -746,6 +747,7 @@ const getByAllClient = async (dashboard) => {
         likeSearch,
         likeSearch,
         search,
+        likeSearch,
       ];
     }
 
@@ -861,10 +863,21 @@ const getByAllCustomer = async (dashboard) => {
           OR customer_company_information.company_name LIKE ?
           OR ${customerCodeExpr} LIKE ?
           OR ? LIKE CONCAT('%', ${customerCodeExpr}, '%')
+          OR CONCAT(staff2.first_name, ' ', staff2.last_name) LIKE ?
+          OR staff1.employee_number LIKE ?
+          OR CONCAT(staff1.first_name, ' ', staff1.last_name) LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
-      searchParams = [likeSearch, likeSearch, likeSearch, search];
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        search,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+      ];
     }
 
     const [countResult] = await pool.execute(
@@ -887,6 +900,8 @@ const getByAllCustomer = async (dashboard) => {
         customers.customer_type AS customer_type,
         customers.staff_id AS staff_id,
         customers.account_manager_id AS account_manager_id,
+        staffs.employee_number AS employee_number,
+
         customers.trading_name AS trading_name,
         customers.trading_address AS trading_address,
         customers.vat_registered AS vat_registered,

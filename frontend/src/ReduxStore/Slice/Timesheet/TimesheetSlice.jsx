@@ -112,10 +112,7 @@ const TimesheetSlice = createSlice({
             .addCase(saveTimesheetData.rejected, (state) => {
                 state.isLoading = false;
                 state.isError = true;
-            });
-
-
-           
+            });       
     },
 });
 

@@ -147,7 +147,6 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 
 
 
-
 const getTimesheet = async (Timesheet) => {
 
   const { staff_id, weekOffset } = Timesheet;
@@ -1153,6 +1152,7 @@ const getStaffHourMinute = async (Timesheet) => {
 }
 
 module.exports = {
+
   getTimesheet,
   getTimesheetTaskType,
   saveTimesheet,

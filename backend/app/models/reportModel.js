@@ -236,11 +236,11 @@ const jobStatusReports = async (Report) => {
       LIMIT ? OFFSET ?
     `;
 
-    const [rowsData] = await pool.execute(dataQuery, [
-      ...searchValues,
-      Number(limit),
-      Number(offset),
-    ]);
+        let [rowsData] = await pool.execute(dataQuery, [
+            ...searchValues,
+            Number(limit),
+            Number(offset),
+        ]);
 
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
@@ -267,15 +267,53 @@ const jobStatusReports = async (Report) => {
 
     const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
-    return {
-      status: true,
-      message: "Success.",
-      data: { rows: rowsData, total },
-    };
-  } catch (error) {
-    console.log("error ", error);
-    return { status: false, message: "Error getting job status report." };
-  }
+        if (rowsData && rowsData.length > 0) {
+
+            rowsData = await Promise.all(
+                rowsData.map(async (element, index) => {
+
+
+                    const Get_account_manger_id = `
+      SELECT s.id,
+             CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+             s.employee_number
+      FROM staffs s
+      JOIN customer_service_account_managers csam 
+        ON s.id = csam.account_manager_id
+      JOIN customer_services cs 
+        ON csam.customer_service_id = cs.id
+      WHERE cs.customer_id = ?
+      AND cs.service_id = ?
+      AND s.id != ?
+    `;
+
+                    const [rowsAccountManager] = await pool.execute(
+                        Get_account_manger_id,
+                        [element.customer_id, element.service_id, element.account_manager_id]
+                    );
+
+                    return {
+                        ...element,
+                        account_managers: rowsAccountManager
+                    };
+
+                })
+            );
+
+        }
+
+
+        return {
+            status: true,
+            message: "Success.",
+            data: { rows: rowsData, total },
+        };
+
+
+    } catch (error) {
+        console.log("error ", error);
+        return { status: false, message: "Error getting job status report." };
+    }
 };
 
 const getCustomWeekNumber = (day) => {
