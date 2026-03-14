@@ -921,7 +921,24 @@ const reportCountJob = async (Report) => {
   const { StaffUserId, job_ids, page = 1, limit = 10, search = "" } = Report;
   const offset = (page - 1) * (Number(limit) || 10);
 
-  const cleaneJob_ids = job_ids.replace(/^,+|,+$/g, "");
+  const cleaneJob_ids = job_ids ? job_ids.replace(/^,+|,+$/g, "") : "";
+
+  if (!cleaneJob_ids) {
+    return {
+      status: true,
+      message: "No jobs found.",
+      data: {
+        data: [],
+        pagination: {
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: page,
+          limit: limit,
+        },
+      },
+    };
+  }
+
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
@@ -1060,13 +1077,15 @@ const reportCountJob = async (Report) => {
       return {
         status: true,
         message: "Success.",
-        pagination: {
+        data: {
+          data: rowsData,
+          pagination: {
             totalItems: total,
             totalPages: Math.ceil(total / limit),
             currentPage: page,
-            pageSize: limit
+            limit: limit,
+          },
         },
-        data: rowsData
       };
     }
 
@@ -1129,13 +1148,15 @@ const reportCountJob = async (Report) => {
     return {
       status: true,
       message: "Success.",
-      pagination: {
+      data: {
+        data: rowsData,
+        pagination: {
           totalItems: total,
           totalPages: Math.ceil(total / limit),
           currentPage: page,
-          pageSize: limit
+          limit: limit,
+        },
       },
-      data: rowsData
     };
   } catch (error) {
     console.log("error ", error);
