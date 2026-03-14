@@ -18,6 +18,9 @@ import {
   saveTimesheetData,
   getStaffHourMinute,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+
+import { SAVE_TIMESHEET} from "../../../Services/Timesheet/TimesheetService";
+
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
@@ -1146,9 +1149,10 @@ const Timesheet = () => {
         return;
       }
 
-      const res = await dispatch(
-        saveTimesheetData({ req, authToken: token })
-      ).unwrap();
+      // const res = await dispatch(
+      //   saveTimesheetData({ req, authToken: token })
+      // ).unwrap();
+      const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
         setActiveField(null);
@@ -1307,9 +1311,10 @@ const Timesheet = () => {
         }
       }
 
-      const res = await dispatch(
-        saveTimesheetData({ req, authToken: token })
-      ).unwrap();
+      // const res = await dispatch(
+      //   saveTimesheetData({ req, authToken: token })
+      // ).unwrap();
+      const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
         setActiveField(null);
@@ -1410,9 +1415,10 @@ const Timesheet = () => {
       }
     }
 
-    const res = await dispatch(
-      saveTimesheetData({ req, authToken: token })
-    ).unwrap();
+    // const res = await dispatch(
+    //   saveTimesheetData({ req, authToken: token })
+    // ).unwrap();
+    const res = await SAVE_TIMESHEET({ req, authToken: token });
     if (res.status) {
       setRemarkText(null);
       setUpdateTimeSheetRows([]);

@@ -33,12 +33,25 @@ export async function GET_TIMESHEET_TASK_TYPE(data) {
 
 export async function SAVE_TIMESHEET(data) {
   try {
-    const token = JSON.parse(localStorage.getItem("token"));
 
-    const res = await axios.post(`${Config.base_url}saveTimesheet`, data, {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const { req, authToken } = data;
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await axios.post(`${Config.base_url}saveTimesheet`, updatedReq, {
       headers: header(token),
       data: {},
     });
+
+    // const res = await axios.post(`${Config.base_url}saveTimesheet`, data, {
+    //   headers: header(token),
+    //   data: {},
+    // });
     return await res?.data;
   } catch (err) {
     return await err;
