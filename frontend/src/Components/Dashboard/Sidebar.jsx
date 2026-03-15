@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { LayoutDashboard ,Users ,ChevronDown, ChevronRight ,UserRound ,User,Briefcase ,PieChart,ShieldCheck,Ratio,FileText,Clock,Settings} from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -126,7 +127,8 @@ const Sidebar = () => {
                 onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
               >
                 <span className="sidebar-icons">
-                  <i className="fa-regular fa-grid-2"></i>
+                  {/* <i className="fa-regular fa-grid-2"></i> */}
+                   <LayoutDashboard />
                 </span>
                 <span>Dashboard</span>
               </Link>
@@ -156,17 +158,23 @@ const Sidebar = () => {
                   >
                     <div>
                       <span className="sidebar-icons">
-                        <i className="fas fa-users"></i>
+                        {/* <i className="fas fa-users"></i> */}
+                        <Users />
                       </span>
                       <span className="pe-4 pe-lg-4">Customer</span>
                     </div>
                     <span className="chevron-icon">
-                      <i
+                      {/* <i
                         className={`fas ${menuState.dropdownOpen["/admin/customer"]
                           ? "fa-chevron-down"
                           : "fa-chevron-right"
                           }`}
-                      ></i>
+                      ></i> */}
+                      {
+                        menuState.dropdownOpen["/admin/customer"]?
+                         <ChevronDown />
+                        :<ChevronRight />
+                      }
                     </span>
                   </Link>
                 )}
@@ -188,7 +196,8 @@ const Sidebar = () => {
                         onClick={(e) => handleLinkClick(e, "/admin/customer")}
                       >
                         {/* <i className="ti-control-record" /> */}
-                        <i className="fa-solid fa-users-line"></i>
+                        {/* <i className="fa-solid fa-users-line"></i> */}
+                        <UserRound />
                         Customers
                       </Link>
                     )}
@@ -206,8 +215,8 @@ const Sidebar = () => {
                         to="/admin/ClientLists"
                         onClick={(e) => handleLinkClick(e, "/admin/ClientLists")}
                       >
-                        <i className="fa-solid fa-user"></i>
-                        {/* <i className="ti-control-record" /> */}
+                        {/* <i className="fa-solid fa-user"></i> */}
+                        <User />
                         Clients
                       </Link>
 
@@ -226,8 +235,8 @@ const Sidebar = () => {
                         to="/admin/client/profiles"
                         onClick={(e) => handleLinkClick(e, "/admin/client/profiles")}
                       >
-                        <i className="fa-solid fa-briefcase"></i>
-                        {/* <i className="ti-control-record" /> */}
+                        {/* <i className="fa-solid fa-briefcase"></i> */}
+                        <Briefcase />
                         Jobs
                       </Link>
                     )}
@@ -248,7 +257,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/status")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-chart-pie"></i>
+                      {/* <i className="fas fa-chart-pie"></i> */}
+                      <PieChart />
                     </span>
                     <span>Status</span>
                   </Link>
@@ -266,7 +276,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/staff")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-user-friends"></i>
+                      {/* <i className="fas fa-user-friends"></i> */}
+                       <User />
                     </span>
                     <span>Staffs</span>
                   </Link>
@@ -283,8 +294,8 @@ const Sidebar = () => {
                   onClick={(e) => handleLinkClick(e, "/admin/access")}
                 >
                   <span className="sidebar-icons">
-                    <i className="fas fa-shield-alt"></i>{" "}
-                    {/* Access icon */}
+                    {/* <i className="fas fa-shield-alt"></i>{" "} */}
+                    <ShieldCheck />
                   </span>
                   <span>Access</span>
                 </Link>
@@ -355,17 +366,23 @@ const Sidebar = () => {
                 >
                   <div>
                     <span className="sidebar-icons">
-                      <i className="fas fa-users"></i>
+                      {/* <i className="fas fa-users"></i> */}
+                      <Ratio />
                     </span>
                     <span className="pe-4 pe-lg-4">Reports</span>
                   </div>
                   <span className="chevron-icon">
-                    <i
+                    {/* <i
                       className={`fas ${menuState.dropdownOpen["/admin/reports"]
                         ? "fa-chevron-down"
                         : "fa-chevron-right"
                         }`}
-                    ></i>
+                    ></i> */}
+                    {
+                        menuState.dropdownOpen["/admin/reports"] ?
+                         <ChevronDown />
+                        :<ChevronRight />
+                      }
                   </span>
                 </a>
               )}
@@ -389,7 +406,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/reports")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-file-alt"></i>{" "}
+                      {/* <i className="fas fa-file-alt"></i>{" "} */}
+                      <FileText />
 
                     </span>
                     <span>Standard</span>
@@ -410,7 +428,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/timesheetReports")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-clock"></i>{" "}
+                      {/* <i className="fas fa-clock"></i>{" "} */}
+                      <Clock />
                     </span>
                     <span>Custom TimeSheet</span>
                   </Link>
@@ -428,8 +447,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/job/customreport")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-clock"></i>{" "}
-
+                      {/* <i className="fas fa-clock"></i>{" "} */}
+                      <Clock />
                     </span>
                     <span>Custom Job</span>
                   </Link>
@@ -540,8 +559,9 @@ const Sidebar = () => {
                       onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
                     >
                       <span className="sidebar-icons">
-                        <i className="fas fa-clock"></i>{" "}
-                        {/* Time Sheet icon */}
+                        {/* <i className="fas fa-clock"></i>{" "} */}
+                         <Clock />
+                      
                       </span>
                       <span>Time Sheet</span>
                     </Link>
@@ -564,7 +584,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/setting")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-cog"></i> {/* Setting icon */}
+                      {/* <i className="fas fa-cog"></i>  */}
+                      <Settings />
                     </span>
                     <span>Settings</span>
                   </Link>

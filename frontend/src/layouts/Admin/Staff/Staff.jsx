@@ -23,6 +23,8 @@ import {
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
+import { MoveVertical } from 'lucide-react';
+
 const StaffPage = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -494,7 +496,8 @@ const StaffPage = () => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  {/* <i className="fa fa-ellipsis-v" aria-hidden="true"></i> */}
+                   <MoveVertical />
                 </button>
                 <div
                   className="dropdown-menu custom-dropdown"
