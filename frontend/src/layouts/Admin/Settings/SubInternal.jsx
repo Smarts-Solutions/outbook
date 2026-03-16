@@ -6,6 +6,7 @@ import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import sweatalert from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
+import { Plus } from "lucide-react";
 
 const SubInternal = () => {
     const token = JSON.parse(localStorage.getItem("token"));
@@ -305,7 +306,7 @@ const SubInternal = () => {
                                     onClick={(e) => handleAdd(e, "1")}
                                     style={{zIndex:"9"}}
                                 >
-                                    <i className="fa fa-plus" /> Add Internal Task
+                                    <Plus /> Add Internal Task
                                 </button>
                             </div>
                         </div>

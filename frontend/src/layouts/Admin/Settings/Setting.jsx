@@ -20,6 +20,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
+import { Plus } from "lucide-react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -1292,7 +1293,7 @@ const Setting = () => {
                           className="btn btn-info btn-sm text-white ms-1 dropdown-item w-auto "
                           onClick={(e) => handleSubSource(row)}
                         >
-                          <i className="fa fa-plus pe-1" />
+                          <Plus />
                           Add Sub Source Type
                         </button>
                       )}
@@ -1322,7 +1323,7 @@ const Setting = () => {
                       className="btn btn-info btn-sm text-white ms-1"
                       onClick={(e) => handleSubSource(row)}
                     >
-                      <i className="fa fa-plus pe-1" />
+                      <Plus />
                       Add Sub Source Type
                     </button>
                   )}
@@ -1569,7 +1570,7 @@ const Setting = () => {
                           className="btn btn-info btn-sm text-white dropdown-item"
                           onClick={(e) => handleTaskAdd(row)}
                         >
-                          <i className="fa fa-plus pe-1" />
+                          <Plus />
                           Add Internal Task
                         </button>
                       )}
@@ -1600,7 +1601,7 @@ const Setting = () => {
                       className="btn btn-info btn-sm text-white ms-1"
                       onClick={(e) => handleTaskAdd(row)}
                     >
-                      <i className="fa fa-plus pe-1" />
+                      <Plus />
                       Add Internal Task
                     </button>
                   )}
@@ -2401,7 +2402,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "1")}
                       >
-                        <i className="fa fa-plus" /> Add Staff Role
+                        <Plus /> Add Staff Role
                       </button>
                     </div>
                   )}
@@ -2448,7 +2449,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "2")}
                       >
-                        <i className="fa fa-plus" /> Customer Contact Person
+                        <Plus /> Customer Contact Person
                         Role
                       </button>
                     </div>
@@ -2494,7 +2495,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "3")}
                       >
-                        <i className="fa fa-plus" /> Add Status
+                        <Plus /> Add Status
                       </button>
                     </div>
                   )}
@@ -2539,7 +2540,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "4")}
                       >
-                        <i className="fa fa-plus" /> Add Service
+                        <Plus /> Add Service
                       </button>
                     </div>
                   )}
@@ -2584,7 +2585,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "5")}
                       >
-                        <i className="fa fa-plus" /> Add Client Industry
+                        <Plus /> Add Client Industry
                       </button>
                     </div>
                   )}
@@ -2629,7 +2630,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "6")}
                       >
-                        <i className="fa fa-plus" /> Add Country
+                        <Plus /> Add Country
                       </button>
                     </div>
                   )}
@@ -2676,7 +2677,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "7")}
                       >
-                        <i className="fa fa-plus" /> Add Incorporation{" "}
+                        <Plus /> Add Incorporation{" "}
                       </button>
                     </div>
                   )}
@@ -2721,7 +2722,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "8")}
                       >
-                        <i className="fa fa-plus" /> Add Customer Source
+                        <Plus /> Add Customer Source
                       </button>
                     </div>
                   )}
@@ -2766,7 +2767,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={() => HandleAddCheckList()}
                       >
-                        <i className="fa fa-plus" /> Add CheckList
+                        <Plus /> Add CheckList
                       </button>
                     </div>
                   )}
@@ -2811,7 +2812,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "10")}
                       >
-                        <i className="fa fa-plus" /> Add Internal Job/Project
+                        <Plus /> Add Internal Job/Project
                       </button>
                     </div>
                   )}

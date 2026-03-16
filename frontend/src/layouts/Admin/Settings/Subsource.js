@@ -6,6 +6,7 @@ import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import sweatalert from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
+import { Plus } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -263,7 +264,7 @@ const Setting = () => {
                   onClick={(e) => handleAdd(e, "1")}
                 >
                   {" "}
-                  <i className="fa fa-plus" /> Add Sub Source Type
+                  <Plus /> Add Sub Source Type
                 </button>
               </div>
             </div>

@@ -14,6 +14,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
+import { Plus } from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -3777,7 +3778,7 @@ const CreateJob = () => {
                                         // disabled={getChecklistId == ""}
                                         onClick={() => setShowAddJobModal(true)}
                                       >
-                                        <i className="fa fa-plus pe-1" /> Add
+                                        <Plus /> Add
                                         Task
                                       </button>
                                     </div>

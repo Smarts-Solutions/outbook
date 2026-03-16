@@ -23,6 +23,8 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 
+import { Plus , ArrowLeft} from "lucide-react";
+
 const ClientList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1478,7 +1480,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft /> Back
                     </div>
                     {(getAccessDataClient.insert === 1 ||
                       role === "SUPERADMIN") &&
@@ -1495,7 +1497,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Add Client
+                          <Plus /> Add Client
                         </div>
                       </>
                     ) : ClientData?.length > 0 &&
@@ -1514,7 +1516,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Create Job
+                          <Plus /> Create Job
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
@@ -1532,7 +1534,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Add Checklist
+                          <Plus /> Add Checklist
                         </div>
                       </>
                     ) : null}

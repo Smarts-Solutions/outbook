@@ -15,6 +15,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
+import { Plus } from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -1319,7 +1320,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Add Client
+                           <Plus /> Add Client
                           </div>
                         </>
                       ) : ClientData?.length > 0 &&
@@ -1339,7 +1340,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Create Job
+                           <Plus /> Create Job
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
@@ -1354,7 +1355,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Add Checklist
+                           <Plus /> Add Checklist
                           </div>
                         </>
                       ) : null}

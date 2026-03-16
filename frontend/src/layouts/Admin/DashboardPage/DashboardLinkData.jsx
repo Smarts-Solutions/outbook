@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { Link } from 'react-router-dom';
+import { Plus } from "lucide-react";
 const JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -584,7 +585,7 @@ const JobStatus = () => {
                         to="/admin/addcustomer"
                         className="btn btn-outline-info  fw-bold float-end border-3"
                       >
-                        <i className="fa fa-plus" /> Add Customer
+                        <Plus /> Add Customer
                       </Link>
                     </div>
                   ) : (

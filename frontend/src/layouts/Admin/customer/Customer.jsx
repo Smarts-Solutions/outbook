@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { Plus } from "lucide-react";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -643,7 +644,7 @@ const Customer = () => {
                   to="/admin/addcustomer"
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
-                  <i className="fa fa-plus" />
+                 <Plus />
                    Add Customer
                 </Link>
               </div>
@@ -654,7 +655,7 @@ const Customer = () => {
                     to="/admin/addcustomer"
                     className="btn btn-outline-info fw-bold float-end border-3"
                   >
-                    <i className="fa fa-plus" /> Add Customer
+                   <Plus /> Add Customer
                   </Link>
                 </div>
               )

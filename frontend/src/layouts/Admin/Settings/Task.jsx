@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
+import { Plus } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -470,7 +471,7 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  <i className="fa fa-plus" /> Add Task
+                  <Plus /> Add Task
                 </button>
               </div>
             </div>

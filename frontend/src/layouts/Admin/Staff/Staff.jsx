@@ -24,6 +24,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
 import { MoveVertical } from 'lucide-react';
+import { Plus } from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -1157,7 +1158,7 @@ const StaffPage = () => {
                           formik.resetForm();
                         }}
                       >
-                        <i className="fa fa-plus" /> Add Staff
+                        <Plus /> Add Staff
                       </button>
                     )}
                   </div>

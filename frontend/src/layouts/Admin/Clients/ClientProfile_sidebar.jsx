@@ -13,6 +13,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
+import { Plus } from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -1108,7 +1109,7 @@ const ClientList = () => {
                               className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
                               onClick={handleCreateJob}
                             >
-                              <i className="fa fa-plus pe-1" /> Create Job
+                              <Plus /> Create Job
                             </div>
                           )}
                       </div>

@@ -16,6 +16,7 @@ import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
+import { Plus } from "lucide-react";
 
 const CustomerUsers = () => {
 
@@ -626,7 +627,7 @@ const CustomerUsers = () => {
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                   onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
                 >
-                  <i className="fa fa-plus" />
+                  <Plus />
                   Add Customer User
                 </button>
               </div>

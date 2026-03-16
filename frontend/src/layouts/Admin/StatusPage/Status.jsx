@@ -14,6 +14,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import { use } from "react";
 
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Plus } from "lucide-react";
 
 const Status = () => {
   const dispatch = useDispatch();
@@ -404,7 +405,7 @@ const confirmDeleteStatus = async (row) => {
                           });
                         }}
                       >
-                        <i className="fa fa-plus pe-1" /> Add Status
+                        <Plus /> Add Status
                       </button>
                     ) : (
                       <div className="mt-5"></div>

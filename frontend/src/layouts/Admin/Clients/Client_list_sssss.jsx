@@ -23,6 +23,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import ReactPaginate from "react-paginate";
+import { Plus } from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -1534,7 +1535,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Add Client
+                          <Plus /> Add Client
                         </div>
                       </>
                     ) : ClientData?.length > 0 &&
@@ -1555,7 +1556,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Create Job
+                          <Plus /> Create Job
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
@@ -1574,7 +1575,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Add Checklist
+                          <Plus /> Add Checklist
                         </div>
                       </>
                     ) : null}

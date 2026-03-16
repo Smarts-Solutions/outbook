@@ -25,6 +25,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
+import { Plus } from "lucide-react";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -1076,7 +1077,7 @@ const ClientList = () => {
                         className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
                         onClick={handleCreateJob}
                       >
-                        <i className="fa fa-plus pe-1" /> Create Job
+                        <Plus /> Create Job
                       </div>
                     )}
                   </div>
