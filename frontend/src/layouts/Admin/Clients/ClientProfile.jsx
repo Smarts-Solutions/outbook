@@ -961,6 +961,7 @@ const ClientList = () => {
                   showConfirmButton: false,
                   timer: 1500,
                 });
+                GetAllJobList();
               } else {
                 sweatalert.fire({
                   title: "Failed",
