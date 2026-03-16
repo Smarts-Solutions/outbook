@@ -643,7 +643,8 @@ const Customer = () => {
                   to="/admin/addcustomer"
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
-                  <i className="fa fa-plus" /> Add Customer
+                  <i className="fa fa-plus" />
+                   Add Customer
                 </Link>
               </div>
             ) : (
