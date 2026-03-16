@@ -23,7 +23,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 
-import { Plus , ArrowLeft} from "lucide-react";
+import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -128,9 +128,9 @@ const ClientList = () => {
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob &&
-                (getAccessDataJob.job == 1 ||
-                  getAccessDataJob.all_jobs == 1)) ||
-              role === "SUPERADMIN"
+            (getAccessDataJob.job == 1 ||
+              getAccessDataJob.all_jobs == 1)) ||
+            role === "SUPERADMIN"
             ? "job"
             : "documents",
       );
@@ -138,9 +138,9 @@ const ClientList = () => {
   }, [getAccessDataJob, getAccessDataClient]);
 
   const initialTabs = [
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
-    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
+    { id: "documents", label: "Documents", icon: <File size={16} className="me-1"/> },
+    { id: "status", label: "Status", icon: <Info size={16} className="me-1" /> },
+    { id: "checklist", label: "Checklist", icon: <SquareCheck size={16} className="me-1" /> },
   ];
 
   const [tabs, setTabs] = useState(initialTabs);
@@ -251,7 +251,7 @@ const ClientList = () => {
       tabsData.push({
         id: "client",
         label: "Client",
-        icon: "fa-solid fa-user",
+        icon: <User size={16} className="me-1" />,
       });
     }
     if (
@@ -259,7 +259,7 @@ const ClientList = () => {
         (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
       role === "SUPERADMIN"
     ) {
-      tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
+      tabsData.push({ id: "job", label: "Job", icon: <Briefcase size={16} className="me-1" /> });
     }
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
@@ -270,8 +270,8 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {getAccessDataJob.job === 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -341,9 +341,8 @@ const ClientList = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -479,8 +478,8 @@ const ClientList = () => {
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -490,8 +489,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -512,8 +511,8 @@ const ClientList = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -523,8 +522,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -544,26 +543,26 @@ const ClientList = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -1012,8 +1011,8 @@ const ClientList = () => {
         <div>
           <a
             title={row.check_list_name}
-            // onClick={() => HandleClientView(row)}
-            // style={{ cursor: "pointer", color: "#26bdf0" }}
+          // onClick={() => HandleClientView(row)}
+          // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.check_list_name}
           </a>
@@ -1449,9 +1448,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1461,7 +1459,8 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => SetTab(tab.id)}
                       >
-                        <i className={tab.icon}></i>
+                        {/* <i className={tab.icon}></i> */}
+                        {tab.icon}
                         {tab.label}
                       </button>
                     </li>
@@ -1470,9 +1469,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
@@ -1484,7 +1483,7 @@ const ClientList = () => {
                     </div>
                     {(getAccessDataClient.insert === 1 ||
                       role === "SUPERADMIN") &&
-                    activeTab === "client" ? (
+                      activeTab === "client" ? (
                       <>
                         <div
                           className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
@@ -1520,7 +1519,7 @@ const ClientList = () => {
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
-                        role === "SUPERADMIN") &&
+                      role === "SUPERADMIN") &&
                       activeTab === "checklist" ? (
                       <>
                         <div
@@ -1547,7 +1546,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft /> Back
                     </div>
                   </>
                 ) : activeTab === "status" ? (
@@ -1558,7 +1557,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft /> Back
                     </div>
                   </>
                 ) : null}
@@ -1585,9 +1584,8 @@ const ClientList = () => {
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${
-              activeTab == tab.key ? "show active" : ""
-            }`}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
@@ -1611,13 +1609,13 @@ const ClientList = () => {
                 )} */}
 
                 {tab.data && tab.data.length > 0 && activeTab === "client" && (
-      <button
-        className="btn btn-outline-info fw-bold float-end border-3"
-        onClick={handleExport}
-      >
-        Export Excel
-      </button>
-    )}
+                  <button
+                    className="btn btn-outline-info fw-bold float-end border-3"
+                    onClick={handleExport}
+                  >
+                    Export Excel
+                  </button>
+                )}
               </div>
 
               <div className="datatable-wrapper">

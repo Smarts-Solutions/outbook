@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { Link } from 'react-router-dom';
-import { Plus } from "lucide-react";
+import { Plus , ArrowLeft } from "lucide-react";
 const JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -577,7 +577,7 @@ const JobStatus = () => {
                   <div className="btn btn-info text-white blue-btn"
                     onClick={() => { window.history.back() }}
                   >
-                    <i className="fa fa-arrow-left pe-1" /> Back
+                    <ArrowLeft /> Back
                   </div>
                   {(role === "SUPERADMIN" || (getAccessData.insert === 1 && getAccessData.view === 1)) && location?.state?.req?.heading == "Customers" ? (
                     <div className="ms-2">

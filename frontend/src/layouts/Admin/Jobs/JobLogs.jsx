@@ -8,6 +8,7 @@ import JobTimeline from './JobTimeline'
 import JobInformation from './JobInformation'; 
 import { useLocation } from 'react-router-dom';
 import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Clock,Table,TriangleAlert,CircleHelp,FileText ,Folder} from "lucide-react";
 
 
 const JobLogs = () => {
@@ -64,7 +65,7 @@ const JobLogs = () => {
                         }
                           }
                       >
-                        <i className='fa-solid fa-info-circle' />
+                        <Info size={16} className="me-1" />
                         Job Information
                       </button>
                     </li>
@@ -82,7 +83,7 @@ const JobLogs = () => {
                           setSelectedTab('task timesheet'); 
                           sessionStorage.setItem('activeTab2', 'task timesheet');}}
                       >
-                        <i className='fa-solid fa-clock' />
+                        <Clock size={16} className="me-1" />
                         Task Timesheet
                       </button>
                     </li>
@@ -100,7 +101,7 @@ const JobLogs = () => {
                           setSelectedTab('job timeline');
                           sessionStorage.setItem('activeTab2', 'job timeline');}}
                       >
-                        <i className='fa-solid fa-table' />
+                        <Table size={16} className="me-1" />
                         Job Timeline
                       </button>
                     </li>
@@ -118,7 +119,7 @@ const JobLogs = () => {
                           setSelectedTab('missing logs');
                            sessionStorage.setItem('activeTab2', 'missing logs');}}
                       >
-                        <i className='fa-solid fa-exclamation-triangle' />
+                        <TriangleAlert size={16} className="me-1" />
                         Missing Logs
                       </button>
                     </li>
@@ -136,7 +137,7 @@ const JobLogs = () => {
                           setSelectedTab('queries');
                            sessionStorage.setItem('activeTab2', 'queries');}}
                       >
-                        <i className='fa-solid fa-question-circle' />
+                        <CircleHelp size={16} className="me-1" />
                         Queries
                       </button>
                     </li>
@@ -154,7 +155,7 @@ const JobLogs = () => {
                           setSelectedTab('drafts'); 
                           sessionStorage.setItem('activeTab2', 'drafts');}}
                       >
-                        <i className='fa-solid fa-file-alt' />
+                        <FileText size={16} className="me-1" />
                         Drafts
                       </button>
                     </li>
@@ -172,7 +173,7 @@ const JobLogs = () => {
                           setSelectedTab('documents');
                            sessionStorage.setItem('activeTab2', 'documents');}}
                       >
-                        <i className='fa-solid fa-folder' />
+                        <Folder size={16} className="me-1" />
                         Documents
                       </button>
                     </li>
@@ -190,7 +191,7 @@ const JobLogs = () => {
                       sessionStorage.removeItem('activeTab2');
                     }}
                   >
-                    <i className="fa fa-arrow-left pe-1" /> Back
+                    <ArrowLeft /> Back
                   </div>
                 </div>
               </div>

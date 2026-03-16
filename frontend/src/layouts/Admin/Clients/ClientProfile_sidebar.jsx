@@ -13,7 +13,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Plus } from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -264,16 +264,11 @@ const ClientList = () => {
       });
   };
 
-  // const tabs = [
-  //   { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-  //   { id: "view client",label: "View Client", icon: "fa-solid fa-user" },
-  //   //{ id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-  // ];
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} className="me-1" /> },
     ...(clientDetailSingle.id !== ""
-      ? [{ id: "view client", label: "View Client", icon: "fa-solid fa-user" }]
+      ? [{ id: "view client", label: "View Client", icon:<User size={16} className="me-1" /> }]
       : []),
     // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
@@ -1092,7 +1087,8 @@ const ClientList = () => {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            <i className={tab.icon}></i>
+                            {/* <i className={tab.icon}></i> */}
+                            {tab.icon}
                             {tab.label}
                           </button>
                         </li>

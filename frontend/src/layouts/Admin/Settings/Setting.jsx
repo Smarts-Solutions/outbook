@@ -20,7 +20,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
-import { Plus } from "lucide-react";
+import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock } from "lucide-react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -2267,17 +2267,17 @@ const Setting = () => {
   };
 
   const tabsArr = [
-    { id: "1", label: "Staff Role", icon: "fas fa-user" },
-    { id: "2", label: "Customer Contact Person Role", icon: "fas fa-phone" },
-    { id: "3", label: "Status Type", icon: "fas fa-tasks" },
-    { id: "4", label: "Services", icon: "fas fa-gear" },
-    { id: "5", label: "Client Industry", icon: "fas fa-industry" },
-    { id: "6", label: "Country", icon: "fas fa-globe" },
-    { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
-    { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
-    { id: "9", label: "Checklist", icon: "fas fa-check-square" },
-    { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
-  ];
+  { id: "1", label: "Staff Role", icon: <User size={16} className="me-1" /> },
+  { id: "2", label: "Customer Contact Person Role", icon: <Phone size={16} className="me-1" /> },
+  { id: "3", label: "Status Type", icon: <ListChecks size={16} className="me-1" /> },
+  { id: "4", label: "Services", icon: <Settings size={16} className="me-1" /> },
+  { id: "5", label: "Client Industry", icon: <Factory size={16} className="me-1" /> },
+  { id: "6", label: "Country", icon: <Globe size={16} className="me-1" /> },
+  { id: "7", label: "Incorporation", icon: <FileText size={16} className="me-1" /> },
+  { id: "8", label: "Source", icon: <ExternalLink size={16} className="me-1" /> },
+  { id: "9", label: "Checklist", icon: <SquareCheck size={16} className="me-1" /> },
+  { id: "10", label: "Internal Job/Project", icon: <Lock size={16} className="me-1" /> },
+];
 
   useEffect(() => {
     GetStaffroleWise();
@@ -2369,7 +2369,8 @@ const Setting = () => {
                               aria-selected={tabStatus.current === tab.id}
                               onClick={() => handleTabChange(tab.id)}
                             >
-                              <i className={`${tab.icon} me-2`}></i>
+                              {/* <i className={`${tab.icon} me-2`}></i> */}
+                              {tab.icon}
                               {tab.label}
                             </button>
                           </li>

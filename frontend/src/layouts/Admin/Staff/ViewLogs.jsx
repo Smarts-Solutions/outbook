@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import { Plus , ArrowLeft } from "lucide-react";
 
 const ViewLogs = () => {
   const location = useLocation();
@@ -58,7 +59,7 @@ const ViewLogs = () => {
                 window.history.back();
               }}
             >
-              <i className="fa fa-arrow-left pe-1" /> Back
+             <ArrowLeft /> Back
             </div>
           </div>
         </div>

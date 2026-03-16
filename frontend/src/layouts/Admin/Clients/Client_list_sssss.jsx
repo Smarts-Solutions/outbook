@@ -23,7 +23,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import ReactPaginate from "react-paginate";
-import { Plus } from "lucide-react";
+import { Plus ,ArrowLeft } from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -1517,7 +1517,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft /> Back
                     </div>
                     {(getAccessDataClient.insert === 1 ||
 
@@ -1590,7 +1590,7 @@ const ClientList = () => {
                           window.history.back();
                         }}
                       >
-                        <i className="fa fa-arrow-left pe-1" /> Back
+                        <ArrowLeft /> Back
                       </div>
                     </>
                   ) :
@@ -1602,7 +1602,7 @@ const ClientList = () => {
                             window.history.back();
                           }}
                         >
-                          <i className="fa fa-arrow-left pe-1" /> Back
+                          <ArrowLeft /> Back
                         </div>
                       </>
                     ) : null

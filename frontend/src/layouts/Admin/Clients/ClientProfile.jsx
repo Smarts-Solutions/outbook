@@ -25,7 +25,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
-import { Plus } from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -146,9 +146,9 @@ const ClientList = () => {
   };
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-    { id: "view client", label: "View Client", icon: "fa-solid fa-user" },
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} className="me-1" /> },
+    { id: "view client", label: "View Client", icon:<User size={16} className="me-1" />, },
+    { id: "documents", label: "Documents", icon: <File size={16} className="me-1"/> },
   ];
 
   const GetStatus = async () => {
@@ -1048,7 +1048,8 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => setActiveTab(tab.id)}
                       >
-                        <i className={tab.icon}></i>
+                        {/* <i className={tab.icon}></i> */}
+                        {tab.icon}
                         {tab.label}
                       </button>
                     </li>
@@ -1069,7 +1070,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft /> Back
                     </button>
                     {(getAccessDataJob.insert == 1 ||
                       role === "SUPERADMIN") && (
@@ -1097,7 +1098,7 @@ const ClientList = () => {
                       window.history.back();
                     }}
                   >
-                    <i className="fa fa-arrow-left pe-1" /> Back
+                    <ArrowLeft /> Back
                   </button>
                 </div>
               )}
@@ -1116,7 +1117,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft /> Back
                     </button>
                   </div>
                 </>

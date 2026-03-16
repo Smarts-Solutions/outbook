@@ -15,7 +15,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Plus } from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -261,7 +261,7 @@ const ClientLists = () => {
       tabsData.push({
         id: "client",
         label: "Client",
-        icon: "fa-solid fa-user",
+        icon: <User size={16} className="me-1" />,
       });
     }
     if (
@@ -273,7 +273,7 @@ const ClientLists = () => {
         tabsData.push({
           id: "job",
           label: "Job",
-          icon: "fa-solid fa-briefcase",
+          icon: <Briefcase size={16} className="me-1" />,
         });
       }
     }
@@ -1294,7 +1294,8 @@ const ClientLists = () => {
                           aria-selected={activeTab === tab.id}
                           onClick={() => SetTab(tab.id)}
                         >
-                          <i className={tab.icon}></i>
+                          {/* <i className={tab.icon}></i> */}
+                          {tab.icon}
                           {tab.label}
                         </button>
                       </li>
@@ -1368,7 +1369,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <i className="fa fa-arrow-left pe-1" /> Back
+                        <ArrowLeft /> Back
                       </div>
                     </>
                   ) : activeTab === "status" ? (
@@ -1379,7 +1380,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <i className="fa fa-arrow-left pe-1" /> Back
+                        <ArrowLeft /> Back
                       </div>
                     </>
                   ) : null}
