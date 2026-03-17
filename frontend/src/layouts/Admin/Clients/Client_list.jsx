@@ -23,7 +23,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 
-import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase,FileText, File} from "lucide-react";
+import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase,FileText} from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();

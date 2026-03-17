@@ -25,7 +25,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
-import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase ,FileText,File} from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase ,FileText} from "lucide-react";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
