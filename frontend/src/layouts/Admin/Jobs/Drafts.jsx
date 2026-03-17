@@ -6,6 +6,8 @@ import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Cust
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
 import { convertDate, validate } from '../../../Utils/Comman_function';
+import { Plus ,FileText ,File,Eye} from "lucide-react";
+
 
 const Drafts = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -254,7 +256,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
       cell: (row) => (
         <div className="d-flex">
           <button className="view-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
-            <i className="fa fa-eye fs-6 text-warning" />
+            <Eye size={18} className="text-warning cursor-pointer" />
           </button>
           {
             row.was_it_complete == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?

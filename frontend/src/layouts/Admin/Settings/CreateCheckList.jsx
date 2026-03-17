@@ -595,7 +595,7 @@ const CreateCheckList = () => {
               }
               }
             >
-              <i className="fa fa-times pe-1"></i>
+              <X size={16} className="pe-1" />
               Cancel
             </button>
             <button className="btn btn-outline-success ms-2" onClick={handleSubmit}>

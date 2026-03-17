@@ -14,7 +14,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
-import { Plus ,Save } from "lucide-react";
+import { Plus ,Save,X } from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -3941,7 +3941,7 @@ const CreateJob = () => {
                               setAddTaskArr([]);
                             }}
                           >
-                            <i className="fa fa-times pe-1"></i>
+                            <X size={16} className="pe-1" />
                             Close
                           </Button>
                           <Button
@@ -4056,7 +4056,7 @@ const CreateJob = () => {
                               HandleReset();
                             }}
                           >
-                            <i className="fa fa-times pe-1"></i>
+                            <X size={16} className="pe-1" />
                             Close
                           </Button>
                           <Button

@@ -20,7 +20,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
-import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock ,Save ,MoreVertical } from "lucide-react";
+import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock ,Save ,MoreVertical,RefreshCw } from "lucide-react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -2859,7 +2859,7 @@ const Setting = () => {
               buttonName={
                 isEdit ? (
                   <>
-                    <i className="fa fa-edit"></i> Update
+                     <RefreshCw size={16} className="me-1" /> Update
                   </>
                 ) : (
                   <>

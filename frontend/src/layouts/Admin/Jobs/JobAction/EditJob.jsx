@@ -17,7 +17,8 @@ import Select from 'react-select';
 import {
   Save,
   X,
-  Plus
+  Plus,
+  RefreshCw
 } from "lucide-react";
 
 const EditJob = () => {
@@ -4346,7 +4347,7 @@ const EditJob = () => {
                                     }}
                                   >
                                     {" "}
-                                    <i className="fa fa-times"></i> Close
+                                    <X size={16} className="pe-1" /> Close
                                   </Button>
                                   <Button
                                     variant="btn btn-outline-success float-end "
@@ -4452,7 +4453,7 @@ const EditJob = () => {
                                     HandleReset();
                                   }}
                                 >
-                                  <i className="fa fa-times"></i> Close
+                                  <X size={16} className="pe-1" /> Close
                                 </Button>
                                 <Button
                                   variant="btn btn-info text-white float-end blue-btn"
@@ -4510,14 +4511,14 @@ const EditJob = () => {
                                 window.history.back();
                               }}
                             >
-                              <i className="fa fa-times"></i> Cancel
+                              <X size={16} className="pe-1" /> Cancel
                             </button>
                             <button
                               type="button"
                               className="btn   float-end btn-outline-success"
                               onClick={handleSubmit}
                             >
-                              <i className="fa fa-edit"></i> Update
+                               <RefreshCw size={16} className="me-1" /> Update
                             </button>
                           </div>
                         </div>

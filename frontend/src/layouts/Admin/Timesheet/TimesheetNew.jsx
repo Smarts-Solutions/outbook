@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DivideCircle, Trash2 , Save} from "lucide-react";
+import { DivideCircle, Trash2 , Save ,Pencil,Check} from "lucide-react";
 
 const TimesheetNew = () => {
   const [addtask, setAddtask] = useState(false);
@@ -106,7 +106,7 @@ const TimesheetNew = () => {
                   <div className="report-data">
                     <div className="col-12 d-flex justify-content-end mb-3">
                       <button className=" edit-icon">
-                        <i className="fa fa-pencil"></i>
+                        <Pencil size={18} />
                       </button>
                       <button className=" delete-icon">
                         <i className="ti-trash text-danger"></i>
@@ -192,7 +192,7 @@ const TimesheetNew = () => {
              setAddtask(true);
               
             }}>
-                          <i className="fa fa-check pe-1"></i>Save
+                          <Check size={18} className="pe-1" />Save
                         </button>
                         <button className="btn btn-outline-success ms-2">
                           <Save size={16} className="pe-1" />Submit
@@ -209,7 +209,7 @@ const TimesheetNew = () => {
                   <div className="report-data">
                     <div className="col-12 d-flex justify-content-end mb-3">
                       <button className=" edit-icon">
-                        <i className="fa fa-pencil"></i>
+                        <Pencil size={18} />
                       </button>
                       <button className=" delete-icon">
                         <i className="ti-trash text-danger"></i>
@@ -327,7 +327,7 @@ const TimesheetNew = () => {
                       </div>
                       <div className="col-12 d-flex justify-content-end">
                         <button className="btn btn-info">
-                          <i className="fa fa-check pe-1"></i>Save
+                          <Check size={18} className="pe-1" />Save
                         </button>
                         <button className="btn btn-outline-success ms-2">
                           <Save size={16} className="pe-1" />Submit

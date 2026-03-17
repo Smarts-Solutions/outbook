@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { getAllTaskTimeSheet, JobTimeSheetAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from 'sweetalert2';
-import { Plus ,Save } from "lucide-react";
+import { Plus ,Save ,Eye} from "lucide-react";
 
 
 const TaskTimesheet = ({ getAccessDataJob , goto }) => {
@@ -208,7 +208,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
           {
             goto!="report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") && (
               <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
-                <i className="fa fa-eye fs-6 text-warning" />
+                <Eye size={18} className="text-warning cursor-pointer" />
               </button>)
           }
 

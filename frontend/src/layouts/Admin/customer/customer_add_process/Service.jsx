@@ -20,6 +20,7 @@ import {
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import Swal from "sweetalert2";
 import Select from 'react-select';
+import { Plus ,User} from "lucide-react";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -769,7 +770,7 @@ const Service = () => {
                               }}
                             >
                               Assign Account Manager{" "}
-                              <i className="fa fa-user" />
+                              <User size={18} />
                             </button>
                           </td>
                         </tr>

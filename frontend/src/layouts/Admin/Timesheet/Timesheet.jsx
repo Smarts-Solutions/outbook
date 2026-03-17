@@ -9,7 +9,8 @@ import {
   Eye,
   Pencil,
   Check,
-  Save
+  Save,
+  CalendarClock
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -1835,7 +1836,7 @@ const Timesheet = () => {
 
               <div className="text-center ">
                 <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
-                  <i className="fa fa-calendar-clock me-1" />
+                  <CalendarClock size={18} className="me-1" />
                   <span> {getFormattedDate("current", "")}</span>
                 </p>
               </div>
@@ -1851,7 +1852,7 @@ const Timesheet = () => {
                     onClick={() => exportToCSV(timeSheetRows)}
                   >
                     Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
+                    <Download size={16} className="ms-2" />
                   </button>
                 </div>
               ) : (
@@ -1865,7 +1866,7 @@ const Timesheet = () => {
                   onClick={() => exportToCSV(timeSheetRows)}
                 >
                   Export Timesheet Data
-                  <i className="fa fa-download ms-2" />
+                   <Download size={16} className="ms-2" />
                 </button>
               </div>
             ) : (
@@ -2948,7 +2949,7 @@ const Timesheet = () => {
                                           handleSingleRemark(e, item, index);
                                         }}
                                       >
-                                        <i className="fa fa-eye text-primary"></i>
+                                        <Eye size={16} className="text-primary" />
                                       </button>
                                     </div>
                                   )}
@@ -3165,7 +3166,7 @@ const Timesheet = () => {
                                   className="edit-icon"
                                   onClick={() => setRemarkModel(true)}
                                 >
-                                  <i className="fa fa-eye text-primary"></i>
+                                   <Eye size={16} className="text-primary" />
                                 </button>
                               </span>
                             </div>
