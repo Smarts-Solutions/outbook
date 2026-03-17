@@ -8,6 +8,8 @@ import {
   FileAxis3d,
   Eye,
   Pencil,
+  Check,
+  Save
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -3210,7 +3212,9 @@ const Timesheet = () => {
                       saveData(e);
                     }}
                   >
-                    <i className="fa fa-check"></i> Save
+                   
+                    <Check size={18} />
+                     Save
                   </button>
 
                   <button
@@ -3219,7 +3223,7 @@ const Timesheet = () => {
                       submitData(e);
                     }}
                   >
-                    <i className="far fa-save"></i> Submit
+                    <Save size={18} /> Submit
                   </button>
                 </>
               ) : (

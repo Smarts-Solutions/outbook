@@ -14,6 +14,9 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from 'react-select';
+import {
+  Save
+} from "lucide-react";
 
 const EditJob = () => {
   const location = useLocation();
@@ -4348,7 +4351,7 @@ const EditJob = () => {
                                     onClick={handleAddCheckList}
                                   >
                                     {" "}
-                                    <i className="far fa-save pe-1"></i>Submit
+                                   <Save size={16} className="pe-1" />Submit
                                   </Button>
                                 </Modal.Footer>
                               </Modal>

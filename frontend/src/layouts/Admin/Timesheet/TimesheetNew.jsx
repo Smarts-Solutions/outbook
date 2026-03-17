@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DivideCircle, Trash2 } from "lucide-react";
+import { DivideCircle, Trash2 , Save} from "lucide-react";
 
 const TimesheetNew = () => {
   const [addtask, setAddtask] = useState(false);
@@ -195,7 +195,7 @@ const TimesheetNew = () => {
                           <i className="fa fa-check pe-1"></i>Save
                         </button>
                         <button className="btn btn-outline-success ms-2">
-                          <i className="far fa-save pe-1"></i>Submit
+                          <Save size={16} className="pe-1" />Submit
                         </button>
                       </div>
                     </div>
@@ -330,7 +330,7 @@ const TimesheetNew = () => {
                           <i className="fa fa-check pe-1"></i>Save
                         </button>
                         <button className="btn btn-outline-success ms-2">
-                          <i className="far fa-save pe-1"></i>Submit
+                          <Save size={16} className="pe-1" />Submit
                         </button>
                       </div>
                     </div>

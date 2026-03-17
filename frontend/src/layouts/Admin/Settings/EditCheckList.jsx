@@ -12,6 +12,9 @@ import {
 import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import {
+  Save
+} from "lucide-react";
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -569,7 +572,7 @@ const CreateCheckList = () => {
                   className="btn btn-outline-success"
                   onClick={handleSubmit}
                 >
-                  <i className="far fa-save pe-1"></i>
+                 <Save size={16} className="pe-1" />
                   Submit
                 </button>
               </div>

@@ -24,7 +24,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
 import { MoveVertical } from 'lucide-react';
-import { Plus } from "lucide-react";
+import { Plus ,Save } from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -1453,7 +1453,7 @@ const StaffPage = () => {
             color="primary"
             onClick={handleUpdate}
           >
-            <i className="far fa-save pe-1"></i>
+           <Save size={16} className="pe-1" />
             Update
           </Button>
         </div>

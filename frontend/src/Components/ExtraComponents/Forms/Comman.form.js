@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import Select from 'react-select';
+import {
+  Save
+} from "lucide-react";
 
 const ReusableForm = ({
   initialValues,
@@ -902,7 +905,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-              <i className="far fa-save pe-1"></i>
+              <Save size={16} className="pe-1" />
               {btn_name}
             </button>
           </div>
@@ -922,7 +925,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-              <i className='far fa-save'></i> {btn_name}
+              <Save size={16} /> {btn_name}
             </button>
           </div>
         )}

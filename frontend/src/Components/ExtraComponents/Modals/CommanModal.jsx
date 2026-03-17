@@ -1,5 +1,8 @@
 import React from 'react'
 import { Modal, Button } from 'react-bootstrap';
+import {
+  Save
+} from "lucide-react";
 
 
 
@@ -21,12 +24,12 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
 
                     {hideBtn === true ? "" :
                         <Button type="submit" className="btn btn-outline-success " disabled={disabled_submit} onClick={()=> Submit_Function()}>
-                          <i className='far fa-save pe-1'></i>  {btn_name} 
+                          <Save size={16} className="pe-1" />  {btn_name} 
                         </Button>}
 
                     {btn_2 === true ?
                         <Button type="submit" className="btn btn-outline-success " disabled={disabled_submit} onClick={() => Submit_Function_2()}>
-                           <i className='far fa-save pe-1'></i>  {btn_name_2} 
+                           <Save size={16} className="pe-1" />  {btn_name_2} 
                         </Button> : ""
                     }
 

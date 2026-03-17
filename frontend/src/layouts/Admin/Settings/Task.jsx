@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
-import { Plus } from "lucide-react";
+import { Plus ,Save } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -814,7 +814,7 @@ const Setting = () => {
                 className="btn btn-outline-success"
                 onClick={(e) => handleSaveTask()}
               >
-                <i className="far fa-save pe-1"></i>
+                <Save size={16} className="pe-1" />
                 Submit
               </button>
             </div>

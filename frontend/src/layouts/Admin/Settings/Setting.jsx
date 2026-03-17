@@ -20,7 +20,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
-import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock } from "lucide-react";
+import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock ,Save } from "lucide-react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -2863,7 +2863,7 @@ const Setting = () => {
                   </>
                 ) : (
                   <>
-                    <i className="far fa-save pe-1"></i>
+                    <Save size={16} className="pe-1" />
                     Save
                   </>
                 )

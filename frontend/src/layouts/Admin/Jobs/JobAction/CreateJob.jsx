@@ -14,7 +14,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
-import { Plus } from "lucide-react";
+import { Plus ,Save } from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -3948,7 +3948,7 @@ const CreateJob = () => {
                             variant="btn btn-outline-success float-end "
                             onClick={handleAddCheckList}
                           >
-                            <i className="far fa-save pe-1"></i>
+                            <Save size={16} className="pe-1" />
                             Submit
                           </Button>
                         </Modal.Footer>

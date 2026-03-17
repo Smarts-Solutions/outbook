@@ -4,6 +4,9 @@ import { useDispatch } from 'react-redux';
 import { Role } from '../../../ReduxStore/Slice/Settings/settingSlice';
 import { GetAccess } from '../../../ReduxStore/Slice/Access/AccessSlice';
 import Swal from 'sweetalert2';
+import {
+  Save
+} from "lucide-react";
 
 const Access = () => {
 
@@ -301,7 +304,7 @@ const Access = () => {
                         ]} data={roleDataAll.data} /> */}
                 </div>
                 <div className="modal-footer">
-                    <button type="button" className="btn btn-outline-success mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
+                    <button type="button" className="btn btn-outline-success mt-3" onClick={handleSaveChanges}>    <Save size={16} className="pe-1" /> Save changes</button>
                 </div>
             </div>
 
