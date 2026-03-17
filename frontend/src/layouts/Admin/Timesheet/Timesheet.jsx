@@ -10,7 +10,16 @@ import {
   Pencil,
   Check,
   Save,
-  CalendarClock
+  CalendarClock,
+  Briefcase,
+  User,
+  SquareCheck,
+  Info,
+  File,
+  ArrowLeft,
+  Plus,
+  Minus
+
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,7 +35,6 @@ import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
 
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
-import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
 
 const Timesheet = () => {
 
@@ -1817,7 +1825,7 @@ const Timesheet = () => {
 
   // console.log("timeSheetRows", timeSheetRows);
 
-  
+
   return (
     <div className="container-fluid">
       {isLoading && (
@@ -1866,7 +1874,7 @@ const Timesheet = () => {
                   onClick={() => exportToCSV(timeSheetRows)}
                 >
                   Export Timesheet Data
-                   <Download size={16} className="ms-2" />
+                  <Download size={16} className="ms-2" />
                 </button>
               </div>
             ) : (
@@ -2107,11 +2115,16 @@ const Timesheet = () => {
                                   onClick={toggleAllRowsView}
                                   className="px-0 btn btn-sm btn-link text-decoration-none"
                                 >
-                                  <i
+                                  {/* <i
                                     className={`fa ${isExpanded ? "fa-minus" : "fa-plus"
                                       }`}
                                     aria-hidden="true"
-                                  ></i>
+                                  ></i> */}
+                                  {isExpanded ? (
+                                    <Minus size={18} className="cursor-pointer" />
+                                  ) : (
+                                    <Plus size={18} className="cursor-pointer" />
+                                  )}
                                 </button>
 
                                 <ChevronRight
@@ -3166,7 +3179,7 @@ const Timesheet = () => {
                                   className="edit-icon"
                                   onClick={() => setRemarkModel(true)}
                                 >
-                                   <Eye size={16} className="text-primary" />
+                                  <Eye size={16} className="text-primary" />
                                 </button>
                               </span>
                             </div>
@@ -3213,9 +3226,9 @@ const Timesheet = () => {
                       saveData(e);
                     }}
                   >
-                   
+
                     <Check size={18} />
-                     Save
+                    Save
                   </button>
 
                   <button
