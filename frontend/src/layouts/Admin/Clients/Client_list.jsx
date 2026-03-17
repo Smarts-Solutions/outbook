@@ -23,7 +23,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 
-import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
+import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase,FileText, File} from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -650,18 +650,12 @@ const ClientList = () => {
             />
           ) : row.file_type === "application/pdf" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file-pdf"
-                style={{ fontSize: "24px", color: "#FF0000" }}
-              ></i>
+              <FileText size={24} style={{ color: "#FF0000" }} />
               <span>PDF</span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file"
-                style={{ fontSize: "24px", color: "#000" }}
-              ></i>
+              <File size={24} style={{ color: "#000" }} />
               <span>{row.file_type}</span>
             </div>
           )}

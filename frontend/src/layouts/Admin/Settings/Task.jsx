@@ -743,7 +743,7 @@ const Setting = () => {
               <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
                   <button className="btn  btn-info" onClick={handleAddTask}>
-                    <i className="fa fa-plus pe-2"> </i>
+                    <Plus size={16} className="pe-1" />
                     Add
                   </button>
                 </div>

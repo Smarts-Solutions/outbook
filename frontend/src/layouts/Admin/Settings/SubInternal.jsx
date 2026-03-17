@@ -6,7 +6,7 @@ import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import sweatalert from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
-import { Plus } from "lucide-react";
+import { Plus ,MoreVertical} from "lucide-react";
 
 const SubInternal = () => {
     const token = JSON.parse(localStorage.getItem("token"));
@@ -105,7 +105,7 @@ const SubInternal = () => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  <MoreVertical size={18} className="cursor-pointer" />
                 </button>
                 <div
                   className="dropdown-menu custom-dropdown"

@@ -13,7 +13,9 @@ import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 import {
-  Save
+  Save,
+  X,
+  Plus
 } from "lucide-react";
 
 const CreateCheckList = () => {
@@ -485,7 +487,7 @@ const CreateCheckList = () => {
                   className="btn btn-info ms-2"
                   onClick={addTask}
                 >
-                  <i className="fa fa-plus"></i> Add Task
+                  <Plus size={16} className="pe-1" /> Add Task
                 </button>
               </div>
             </div>

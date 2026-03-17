@@ -4063,7 +4063,7 @@ const CreateJob = () => {
                             variant="btn btn-info text-white float-end blue-btn"
                             onClick={handleAddTask}
                           >
-                            <i className="fa fa-plus pe-1"></i>
+                           <Plus size={16} className="pe-1" />
                             Add
                           </Button>
                         </Modal.Footer>
@@ -4076,7 +4076,7 @@ const CreateJob = () => {
                         className="btn btn-info text-white float-end blue-btn"
                         onClick={handleSubmit}
                       >
-                        <i className="fa fa-plus pe-1"></i>Add Job
+                       <Plus size={16} className="pe-1" />Add Job
                       </button>
                     </div>
                   </div>

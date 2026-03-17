@@ -20,7 +20,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
-import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock ,Save } from "lucide-react";
+import {Plus, User, Phone, ListChecks, Settings, Factory, Globe, FileText, ExternalLink, SquareCheck, Lock ,Save ,MoreVertical } from "lucide-react";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -679,7 +679,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -777,7 +777,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -807,7 +807,7 @@ const Setting = () => {
                           className="btn btn-sm btn-info text-white dropdown-item"
                           onClick={(e) => handleJobType(row)}
                         >
-                          <i className="fa fa-plus pe-1"></i>Add Job Type
+                          <Plus size={16} className="pe-1" />Add Job Type
                         </button>
                       )}
                     </div>
@@ -838,7 +838,7 @@ const Setting = () => {
                       className="btn btn-sm btn-info text-white ms-2"
                       onClick={(e) => handleJobType(row)}
                     >
-                      <i className="fa fa-plus pe-1"></i>Add Job Type
+                      <Plus size={16} className="pe-1" />Add Job Type
                     </button>
                   )}
                 </div>
@@ -885,7 +885,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -981,7 +981,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1076,7 +1076,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1171,7 +1171,7 @@ const Setting = () => {
               aria-haspopup="true"
               aria-expanded="false"
             >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              <MoreVertical size={18} className="cursor-pointer" />
             </button>
             <div
               className="dropdown-menu custom-dropdown"
@@ -1265,7 +1265,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1404,7 +1404,7 @@ const Setting = () => {
               aria-haspopup="true"
               aria-expanded="false"
             >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              <MoreVertical size={18} className="cursor-pointer" />
             </button>
             <div
               className="dropdown-menu custom-dropdown"
@@ -1541,7 +1541,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} className="cursor-pointer" />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"

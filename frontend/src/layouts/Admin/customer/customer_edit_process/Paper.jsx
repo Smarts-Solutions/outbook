@@ -9,6 +9,7 @@ import { ADD_PEPPER_WORKS, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../..
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
 import { allowedTypes } from "../../../../Utils/Comman_function";
+import { Plus ,Save ,FileText,File} from "lucide-react";
 
 const Paper = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -456,22 +457,10 @@ const Paper = () => {
                                                     />
                                                   ) : file.type === "application/pdf" ? (
 
-                                                    <i
-                                                      className="fa fa-file-pdf"
-                                                      style={{
-                                                        fontSize: "24px",
-                                                        color: "#FF0000",
-                                                      }}
-                                                    ></i>
+                                                   <FileText size={24} style={{ color: "#FF0000" }} />
                                                   ) : (
 
-                                                    <i
-                                                      className="fa fa-file"
-                                                      style={{
-                                                        fontSize: "24px",
-                                                        color: "#000",
-                                                      }}
-                                                    ></i>
+                                                   <File size={24} style={{ color: "#000" }} />
                                                   )}
                                                 </td>
 
@@ -619,22 +608,10 @@ const Paper = () => {
                                                 />
                                               ) : file.file_type === "application/pdf" ? (
 
-                                                <i
-                                                  className="fa fa-file-pdf"
-                                                  style={{
-                                                    fontSize: "24px",
-                                                    color: "#FF0000",
-                                                  }}
-                                                ></i>
+                                               <FileText size={24} style={{ color: "#FF0000" }} />
                                               ) : (
 
-                                                <i
-                                                  className="fa fa-file"
-                                                  style={{
-                                                    fontSize: "24px",
-                                                    color: "#000",
-                                                  }}
-                                                ></i>
+                                               <File size={24} style={{ color: "#000" }} />
                                               )}
                                             </td>
 

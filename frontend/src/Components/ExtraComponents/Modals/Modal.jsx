@@ -1,4 +1,8 @@
 import React from "react";
+import {
+  Save,
+  X
+} from "lucide-react";
 
 const CommonModal = ({
   modalId,
@@ -179,7 +183,7 @@ const CommonModal = ({
               className="btn btn-secondary"
               onClick={onClose}
             >
-              <i className="fa fa-times pe-1 "></i>
+               <X size={16} />
               Cancel
             </button>
             <button

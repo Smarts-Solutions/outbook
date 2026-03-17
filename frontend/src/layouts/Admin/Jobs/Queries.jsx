@@ -8,6 +8,7 @@ import sweatalert from 'sweetalert2';
 import { convertDate } from '../../../Utils/Comman_function';
 
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder ,deleteFolderFromFolder } from "../../../Utils/graphAPI";
+import { Plus ,FileText ,File} from "lucide-react";
 
 const Queries = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -420,22 +421,10 @@ const Queries = ({ getAccessDataJob, goto }) => {
           />
         ) : row.file_type === "application/pdf" ? (
 
-          <i
-            className="fa fa-file-pdf"
-            style={{
-              fontSize: "24px",
-              color: "#FF0000",
-            }}
-          ></i>
+          <FileText size={24} style={{ color: "#FF0000" }} />
         ) : (
 
-          <i
-            className="fa fa-file"
-            style={{
-              fontSize: "24px",
-              color: "#000",
-            }}
-          ></i>
+          <File size={24} style={{ color: "#000" }} />
         )
 
         : "", reorder: false, sortable: true

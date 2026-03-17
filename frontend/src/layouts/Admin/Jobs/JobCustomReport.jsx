@@ -17,6 +17,7 @@ import { TextSelect } from "lucide-react";
 import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 import { useNavigate } from "react-router-dom";
 import ReactPaginate from "react-paginate";
+import { Plus ,Trash2} from "lucide-react";
 
 function JobCustomReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -1007,7 +1008,7 @@ function JobCustomReport() {
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-       // console.log("filter response ", response);
+        // console.log("filter response ", response);
         if (response.status) {
           setLoading(false);
           setShowData(response.data);
@@ -1275,7 +1276,7 @@ function JobCustomReport() {
       try {
         parsedFilters = JSON.parse(selectedFilter.filters);
 
-       // console.log("parsedFilters ", parsedFilters?.job_id);
+        // console.log("parsedFilters ", parsedFilters?.job_id);
 
         if (parsedFilters?.groupBy?.includes("job_id")) {
           await GetAllJobs();
@@ -1499,12 +1500,18 @@ function JobCustomReport() {
                   />
 
                   {!["", null, undefined].includes(filterId) && (
-                    <i
-                      className="fa fa-trash"
+                    // <i
+                    //   className="fa fa-trash"
+                    //   title="Delete Filter"
+                    //   onClick={() => deleteFilterIdFunction()}
+                    //   style={{ cursor: "pointer", color: "red" }}
+                    // ></i>
+                    <Trash2
+                      size={18}
                       title="Delete Filter"
                       onClick={() => deleteFilterIdFunction()}
                       style={{ cursor: "pointer", color: "red" }}
-                    ></i>
+                    />
                   )}
                 </div>
               </div>
@@ -1576,7 +1583,7 @@ function JobCustomReport() {
               //console.log("Action Meta:", actionMeta);
 
               if (actionMeta.action === "remove-value") {
-               // console.log("Removed value:", actionMeta.removedValue.value);
+                // console.log("Removed value:", actionMeta.removedValue.value);
                 addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
               }
               if (actionMeta.action === "select-option") {
@@ -2152,7 +2159,7 @@ function JobCustomReport() {
               <option value={20}>20</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
-                            <option value={500}>500</option>
+              <option value={500}>500</option>
               {/* <option value={100000}>All</option> */}
             </select>
 

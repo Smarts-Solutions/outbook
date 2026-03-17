@@ -15,7 +15,9 @@ import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from 'react-select';
 import {
-  Save
+  Save,
+  X,
+  Plus
 } from "lucide-react";
 
 const EditJob = () => {
@@ -4125,7 +4127,7 @@ const EditJob = () => {
                                                   setShowAddJobModal(true)
                                                 }
                                               >
-                                                <i className="fa fa-plus"></i>
+                                                <Plus size={16} className="pe-1" />
                                                 Add Task
                                               </button>
                                             </div>

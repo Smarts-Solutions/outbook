@@ -69,11 +69,11 @@ function TimesheetReport() {
   const staffData = async () => {
     //  console.log("role ", role);
     if (role?.toUpperCase() === "SUPERADMIN") {
-      await dispatch(Staff({ req: { action: "get", page : 1, limit : 10000, search : "" }, authToken: token }))
+      await dispatch(Staff({ req: { action: "get", page: 1, limit: 10000, search: "" }, authToken: token }))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-             console.log("response.data ", response.data);
+            console.log("response.data ", response.data);
             const data = response?.data?.data?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`
@@ -101,57 +101,57 @@ function TimesheetReport() {
 
   // All Employee Number Data
   const employeeData = async () => {
-      if (role?.toUpperCase() === "SUPERADMIN") {
-        var req = { action: "getStaffWithRole", role_id: "employee_number" || "" };
-        var data = { req: req, authToken: token };
-        await dispatch(getAllTaskByStaff(data))
-          .unwrap()
-          .then(async (response) => {
-            if (response.status) {
-              // console.log("response.data ", response.data);
-              const data = response?.data
-                ?.filter(item => ![null, '', 'null', undefined].includes(item.employee_number))
-                ?.map(item => ({
-                  value: item.employee_number,
-                  // value: item.id,
-                  label: `${item.employee_number}`,
-                }));
-              setEmployeeNumberAllData(data);
-            } else {
-              setEmployeeNumberAllData([]);
-            }
-          })
-          .catch((error) => {
-            return;
-          });
+    if (role?.toUpperCase() === "SUPERADMIN") {
+      var req = { action: "getStaffWithRole", role_id: "employee_number" || "" };
+      var data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            // console.log("response.data ", response.data);
+            const data = response?.data
+              ?.filter(item => ![null, '', 'null', undefined].includes(item.employee_number))
+              ?.map(item => ({
+                value: item.employee_number,
+                // value: item.id,
+                label: `${item.employee_number}`,
+              }));
+            setEmployeeNumberAllData(data);
+          } else {
+            setEmployeeNumberAllData([]);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
 
-      } else {
-        let data = [{ id: staffDetails?.employee_number, employee_number: `${staffDetails.employee_number}` }]
+    } else {
+      let data = [{ id: staffDetails?.employee_number, employee_number: `${staffDetails.employee_number}` }]
 
-        data = data?.map((item) => ({
-          value: item.employee_number,
-          // value: item.id,
-          label: item.employee_number
-        }));
-        setEmployeeNumberAllData(data);
-      }
-    
+      data = data?.map((item) => ({
+        value: item.employee_number,
+        // value: item.id,
+        label: item.employee_number
+      }));
+      setEmployeeNumberAllData(data);
+    }
+
 
   };
 
-  function formatStringToTitleCase(text,key) {
-  if (!text) return "";
+  function formatStringToTitleCase(text, key) {
+    if (!text) return "";
 
-  if(key == 'date'){
-    return dayjs(text).format('DD-MM-YYYY');
+    if (key == 'date') {
+      return dayjs(text).format('DD-MM-YYYY');
+    }
+
+    return text
+      .replace(/_/g, " ")                 // underscores → spaces
+      .toLowerCase()                      // make all lowercase first
+      .replace(/\b\w/g, char => char.toUpperCase()) // capitalize first letter of each word
+      .trim();
   }
-  
-  return text
-    .replace(/_/g, " ")                 // underscores → spaces
-    .toLowerCase()                      // make all lowercase first
-    .replace(/\b\w/g, char => char.toUpperCase()) // capitalize first letter of each word
-    .trim();
-}
 
   const getAllFilters = async () => {
     var req = { action: "getAllFilters", type: "timesheet_report" };
@@ -160,10 +160,10 @@ function TimesheetReport() {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-            
+
           console.log("getAllFilters response ", response.data);
           const data = response?.data?.map((item) => ({
-            
+
             value: item.id,
             // label: `Group By : [${JSON.parse(item?.groupBy)}]  ⮞ Staff : ${item.staff_fullname}  ⮞ Customer : ${item.customer_name}  ⮞ Client : ${item.client_name}  ⮞ Job : ${item.job_name}  ⮞ Task : ${item.task_name}  ⮞ Internal Job : ${item.internal_job_name}  ⮞ Internal Task : ${item.internal_task_name}`,
             label: `
@@ -177,8 +177,8 @@ function TimesheetReport() {
             ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}<br/>` : ""}
             ${item.timePeriod ? `⮞ Time Period : ${formatStringToTitleCase(item.timePeriod)}<br/>` : ""}
             ${item.displayBy ? `⮞ Display By : ${formatStringToTitleCase(item.displayBy)}<br/>` : ""}
-            ${!['',null,'null',undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate,'date')}<br/>` : ""}
-            ${!['',null,'null',undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate,'date')}` : ""}
+            ${!['', null, 'null', undefined].includes(item.fromDate) ? `⮞ From Date : ${formatStringToTitleCase(item.fromDate, 'date')}<br/>` : ""}
+            ${!['', null, 'null', undefined].includes(item.toDate) ? `⮞ To Date : ${formatStringToTitleCase(item.toDate, 'date')}` : ""}
           `,
 
             filters: item.filter_record
@@ -221,7 +221,7 @@ function TimesheetReport() {
   };
   // Get All Clients
   const GetAllClient = async () => {
-    const req = { action: "get", customer_id: "" ,page: 1,limit: 100000,search: ""};
+    const req = { action: "get", customer_id: "", page: 1, limit: 100000, search: "" };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -266,7 +266,7 @@ function TimesheetReport() {
 
 
       // External get All jobs
-      var req = { action: "getByCustomer", customer_id: "" ,page: 1,limit: 100000,search: "" };
+      var req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       var data = { req: req, authToken: token };
       await dispatch(JobAction(data))
         .unwrap()
@@ -315,7 +315,7 @@ function TimesheetReport() {
 
     else if (internal_external == "2") {
       // External get All jobs
-      const req = { action: "getByCustomer", customer_id: "" ,page: 1,limit: 100000,search: ""};
+      const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       const data = { req: req, authToken: token };
       await dispatch(JobAction(data))
         .unwrap()
@@ -651,7 +651,7 @@ function TimesheetReport() {
         }));
 
       }
-       else if (value == 'job_id') {
+      else if (value == 'job_id') {
 
         if (filters.internal_external == "0") {
           setJobAllData([]);
@@ -713,7 +713,7 @@ function TimesheetReport() {
   const callFilterApi = async () => {
     // Call your filter API here
     // console.log("Calling filter API with filters: ", filters);
-    const req = { action: "get", filters: filters , role : role };
+    const req = { action: "get", filters: filters, role: role };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
@@ -733,9 +733,9 @@ function TimesheetReport() {
 
   useEffect(() => {
     //if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
-      callFilterApi();
-   // }
-  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id,filters.employee_number]);
+    callFilterApi();
+    // }
+  }, [filters.fieldsToDisplay, filters.timePeriod, filters.fromDate, filters.toDate, filters.displayBy, filters.internal_external, filters.groupBy, filters.staff_id, filters.customer_id, filters.client_id, filters.job_id, filters.task_id, filters.internal_job_id, filters.internal_task_id, filters.employee_number]);
 
 
   //console.log("filters ", filters);
@@ -881,7 +881,7 @@ function TimesheetReport() {
         if (parsedFilters?.groupBy?.includes('task_id')) {
           await GetAllTask(parsedFilters?.internal_external);
         }
-        
+
         //console.log("Parsed Filters: 4  ", parsedFilters);
         setFilters(parsedFilters);
         callFilterApi();
@@ -973,42 +973,6 @@ function TimesheetReport() {
 
               </div>
 
-              {/* <div className='w-50 mt-2'>
-                <label className="form-label fw-medium form-label fw-medium mt-2 mb-1">
-                  Select Saved Filters
-                </label>
-                <Select
-                  options={[
-                    { value: "", label: "Select..." },
-                    ...getAllFilterData,
-                  ]}
-                  value={
-                    getAllFilterData && getAllFilterData.length > 0
-                      ? getAllFilterData.find(
-                        (opt) => Number(opt.value) === Number(filterId)
-                      ) || null
-                      : null
-                  }
-                  onChange={handleFilterSelect}
-                  isSearchable
-                  className="shadow-sm select-staff rounded-pill"
-                />
-
-
-                {
-                  !['', null, undefined].includes(filterId) ?
-
-                    <i className="fa fa-trash"
-                      title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
-
-                    : ""
-                }
-
-
-              </div> */}
               <div className='w-50 mt-2'>
                 <label className="form-label fw-medium mt-2 mb-1">
                   Select Saved Filters
@@ -1020,7 +984,7 @@ function TimesheetReport() {
                     //   { value: "", label: "Select..." },
                     //   ...getAllFilterData,
                     // ]}
-                     options={[
+                    options={[
                       { value: "", label: "Select..." },
                       ...getAllFilterData.map(opt => ({
                         value: opt.value,
@@ -1042,12 +1006,19 @@ function TimesheetReport() {
                   {
 
                     !['', null, undefined].includes(filterId) && (
-                      <i
-                        className="fa fa-trash"
-                        title="Delete Filter"
-                        onClick={() => deleteFilterIdFunction()}
-                        style={{ cursor: "pointer", color: "red" }}
-                      ></i>
+                      // <i
+                      //   className="fa fa-trash"
+                      //   title="Delete Filter"
+                      //   onClick={() => deleteFilterIdFunction()}
+                      //   style={{ cursor: "pointer", color: "red" }}
+                      // ></i>
+
+                      <Trash2
+                      size={18}
+                      title="Delete Filter"
+                      onClick={() => deleteFilterIdFunction()}
+                      style={{ cursor: "pointer", color: "red" }}
+                    />
                     )
                   }
 
@@ -1200,7 +1171,7 @@ function TimesheetReport() {
             />
           </div>
         )}
-        
+
         {/* Field To Display Employee Number */}
         {filters?.groupBy?.includes('employee_number') && (
           <div className="col-lg-4 col-md-6">
@@ -1227,7 +1198,7 @@ function TimesheetReport() {
             />
           </div>
         )}
-       
+
         {/* Field To Display Customer */}
         {filters?.groupBy?.includes('customer_id') && (
           <div className="col-lg-4 col-md-6">

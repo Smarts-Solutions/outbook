@@ -14,6 +14,7 @@ import sweatalert from "sweetalert2";
 import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm, convertDate } from '../../../../Utils/Comman_function'
 import { use } from "react";
 import Select from 'react-select';
+import { Plus } from "lucide-react";
 
 const Information = ({ id, pageStatus }) => {
   const { address, setAddress, next } = useContext(MultiStepFormContext);
@@ -2205,7 +2206,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="btn btn-info text-white blue-btn"
                                 onClick={handleAddContact}
                               >
-                                <i className="fa fa-plus pe-1"></i> Add
+                                <Plus size={16} className="pe-1" /> Add
                                 Contact
                               </button>
                             </div>
@@ -2657,7 +2658,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="btn btn-info text-white blue-btn"
                                 onClick={handleAddContact1}
                               >
-                                <i className="fa fa-plus pe-2"></i>Add Partner
+                                <Plus size={16} className="pe-1" />Add Partner
                               </button>
                             </div>
                           </div>

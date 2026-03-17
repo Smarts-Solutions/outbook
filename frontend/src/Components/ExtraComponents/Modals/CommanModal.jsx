@@ -1,7 +1,8 @@
 import React from 'react'
 import { Modal, Button } from 'react-bootstrap';
 import {
-  Save
+  Save,
+  X
 } from "lucide-react";
 
 
@@ -19,7 +20,7 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
 
                     {cancel_btn ?
                         <button type="submit" className="btn btn-secondary " onClick={() => Submit_Cancel_Function()}>
-                          <i className='fa fa-xmark'></i>  Cancel
+                          <X size={16} />  Cancel
                         </button> : ""} 
 
                     {hideBtn === true ? "" :

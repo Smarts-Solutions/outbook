@@ -80,7 +80,7 @@ const Profile = () => {
                     </li>
                     {/* <li className="">
                       <button className="btn btn-info">
-                        <i className="fa fa-edit pe-2"></i>Edit{" "}
+                        Edit{" "}
                       </button>
                     </li> */}
                   </ul>

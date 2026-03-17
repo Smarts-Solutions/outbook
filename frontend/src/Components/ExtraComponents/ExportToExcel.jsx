@@ -74,7 +74,7 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
             className="btn btn-outline-info fw-bold float-end border-3"
             title="Export To Excel"
         >
-            {/* <i className="fa fa-download" aria-hidden="true"></i>  */}
+            
              <ArrowDownToLine />
             Export Excel
         </button>

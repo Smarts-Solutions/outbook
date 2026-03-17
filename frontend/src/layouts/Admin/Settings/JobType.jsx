@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
-import { Plus , ArrowLeft, Save } from "lucide-react";
+import { Plus , ArrowLeft, Save ,MoreVertical } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -128,7 +128,7 @@ const Setting = () => {
               aria-haspopup="true"
               aria-expanded="false"
             >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              <MoreVertical size={18} className="cursor-pointer" />
             </button>
             <div
               className="dropdown-menu custom-dropdown"
@@ -165,7 +165,7 @@ const Setting = () => {
                     setJobTypeId(row);
                   }}
                 >
-                  <i className="fa fa-plus pe-1"></i> Add Task
+                  <Plus size={16} className="pe-1" /> Add Task
                 </button>
 
 
@@ -196,7 +196,7 @@ const Setting = () => {
                 setJobTypeId(row);
               }}
             >
-              <i className="fa fa-plus pe-1"></i> Add Task
+              <Plus size={16} className="pe-1" /> Add Task
             </button> */}
 
             <button
@@ -205,7 +205,7 @@ const Setting = () => {
                 navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab, service_id: location.state.Id } });
               }}
             >
-              <i className="fa fa-plus pe-1"></i> Add Task
+              <Plus size={16} className="pe-1" /> Add Task
             </button>
           </div>
         </>
@@ -613,7 +613,7 @@ const Setting = () => {
               <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
                   <button className="btn  btn-info" onClick={handleAddTask}>
-                    <i className="fa fa-plus pe-2"> </i>
+                   <Plus size={16} className="pe-1" />
                     Add
                   </button>
                 </div>
