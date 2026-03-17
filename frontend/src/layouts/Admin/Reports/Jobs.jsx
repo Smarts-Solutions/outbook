@@ -284,11 +284,16 @@ const JobStatus = () => {
   };
 
   const HandleJobView = (row) => {
+    const updatedData = {
+      job: row,
+    };
+
     navigate("/admin/job/logs", {
       state: {
-        job_id: row.job_id,
+        job_id: row.id || row.job_id,
         timesheet_job_id: row.timesheet_job_id,
-        goto: "report",
+        data: updatedData,
+        goto: "client",
       },
     });
   };
@@ -484,7 +489,7 @@ const JobStatus = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const req = { job_id: row.job_id, status_type: Number(Id) };
+          const req = { job_id: row.id || row.job_id, status_type: Number(Id) };
           const res = await dispatch(
             Update_Status({ req, authToken: token }),
           ).unwrap();
