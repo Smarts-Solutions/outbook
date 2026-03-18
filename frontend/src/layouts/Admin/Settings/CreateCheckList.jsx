@@ -85,6 +85,7 @@ const CreateCheckList = () => {
   };
 
   const fieldErrors = {
+    work_flow_type: "Please Select Work Flow Type",
     service_id: "Please Select Service Type",
     job_type_id: "Please Select Job Type",
     check_list_name: "Please Enter Check List Name",
@@ -94,7 +95,7 @@ const CreateCheckList = () => {
   const handleInputChange = (e) => {
     let name = e.target.name;
     let value = e.target.value;
-    setFormData1((prevState) => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: value?.trim(),
     }));
@@ -133,48 +134,7 @@ const CreateCheckList = () => {
     return isValid;
   };
 
-  const handleTaskChange = (index, e) => {
-    const { name, value } = e.target;
-    const newTasks = [...tasks];
-
-    // If the name is hours or minutes, handle them separately
-    if (name === "hours" || name === "minutes") {
-      const hours = newTasks[index].budgeted_hour?.hours || "";
-      const minutes = newTasks[index].budgeted_hour?.minutes || "";
-
-      if (name === "hours") {
-        const numericValue = Number(value);
-        if (!isNaN(numericValue) && numericValue >= 0) {
-          newTasks[index].budgeted_hour = {
-            hours: value === "" ? "" : numericValue.toString().padStart(2, "0"),
-            minutes,
-          };
-        }
-      } else if (name === "minutes") {
-        const numericValue = Number(value);
-
-        if (value === "" || (numericValue >= 0 && numericValue <= 59)) {
-          newTasks[index].budgeted_hour = {
-            hours,
-            minutes:
-              value === "" ? "" : numericValue.toString().padStart(2, "0"),
-          };
-        } else {
-          e.target.value = "59";
-          newTasks[index].budgeted_hour = {
-            hours,
-            minutes: "59",
-          };
-        }
-        // If value is greater than 59 or not a number, do nothing (ignore the input)
-      }
-    } else {
-      // Handle other changes, e.g., task_name
-      newTasks[index][name] = value;
-    }
-
-    setTasks(newTasks);
-  };
+  
 
   const formatBudgetedHours = () => {
     return tasks.map((task) => {
@@ -187,16 +147,6 @@ const CreateCheckList = () => {
     });
   };
 
-  const addTask = () => {
-    setTasks([...tasks, { task_name: "", budgeted_hour: "", task_id: null }]);
-  };
-
-  const removeTask = (tsk, index) => {
-    setTasks((prevTasks) => {
-      const newTasks = prevTasks.filter((item) => item.task_id !== tsk.task_id);
-      return newTasks;
-    });
-  };
 
   const getJobTypeData = async (service_id) => {
     const req = { service_id, action: "get" };
@@ -214,29 +164,6 @@ const CreateCheckList = () => {
       });
   };
 
-  const getTaskData = async (job_type_id) => {
-    const req = { service_id: formData1.service_id, job_type_id };
-    const data = { req, authToken: token };
-    await dispatch(GETTASKDATA(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          if (response.data.length > 0) {
-            const taskData = response.data.map((item) => ({
-              task_id: item.id,
-              task_name: item.name,
-              budgeted_hour: "",
-            }));
-            setTasks(taskData);
-          } else {
-            setTasks([{ task_name: "", budgeted_hour: "" }]);
-          }
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
 
   const handleSubmit = async () => {
     let validationErrors = {};
@@ -263,7 +190,7 @@ const CreateCheckList = () => {
     });
 
     const req = {
-      ...formData1,
+      ...formData,
       client_type_id: ClienTypeArr.slice(0, -1),
       task: formattedTasks.map((task) => ({
         task_name: task.task_name,
@@ -317,6 +244,8 @@ const CreateCheckList = () => {
     setSelectedClientType(e);
   };
 
+  console.log("formData",formData)
+
   return (
     <div className="container-fluid">
       <div className="card mt-4">
@@ -339,7 +268,7 @@ const CreateCheckList = () => {
              <div className="col-lg-4">
               <div className=" row flex-column">
                 <div>
-                  <label className="form-label">Check List Name</label>
+                  <label className="form-label">CheckList Name</label>
                   <input
                     type="text"
                     className={
@@ -354,6 +283,32 @@ const CreateCheckList = () => {
                   />
                   {errors.check_list_name && (
                     <p className="mb-0 error-text">{errors.check_list_name}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 mb-lg-0 mb-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Work Flow Type</label>
+                  <select
+                    className={
+                      errors.work_flow_type
+                        ? "error-field form-select"
+                        : "form-select"
+                    }
+                    name="work_flow_type"
+                    defaultValue={formData.work_flow_type}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                    }}
+                  >
+                    <option value=""> -- Select --</option>
+                    
+                  </select>
+                  {errors.work_flow_type && (
+                    <p className="mb-0 error-text">{errors.work_flow_type}</p>
                   )}
                 </div>
               </div>
@@ -390,8 +345,8 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="col-lg-4 mb-lg-0 mb-3">
+
+            <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Job Type</label>
@@ -406,7 +361,6 @@ const CreateCheckList = () => {
                     defaultValue={formData.job_type_id}
                     onChange={(e) => {
                       handleInputChange(e);
-                      getTaskData(e.target.value);
                     }}
                   >
                     <option value="">Please Select Job Type</option>
