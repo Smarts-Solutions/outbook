@@ -86,9 +86,9 @@ const CreateCheckList = () => {
 
   const fieldErrors = {
     work_flow_type: "Please Select Work Flow Type",
-    service_id: "Please Select Service Type",
-    job_type_id: "Please Select Job Type",
-    check_list_name: "Please Enter Check List Name",
+    // service_id: "Please Select Service Type",
+    // job_type_id: "Please Select Job Type",
+    check_list_name: "Please Enter CheckList Name",
     // status: "Please Select Status",
   };
 
@@ -136,18 +136,6 @@ const CreateCheckList = () => {
 
   
 
-  const formatBudgetedHours = () => {
-    return tasks.map((task) => {
-      const hours = task.budgeted_hour?.hours || ""; // Fallback to "00" if empty
-      const minutes = task.budgeted_hour?.minutes || ""; // Fallback to "00" if empty
-      return {
-        ...task,
-        budgeted_hour: `${hours}:${minutes}`, // Combine into HH:MM format
-      };
-    });
-  };
-
-
   const getJobTypeData = async (service_id) => {
     const req = { service_id, action: "get" };
     const data = { req, authToken: token };
@@ -167,8 +155,6 @@ const CreateCheckList = () => {
 
   const handleSubmit = async () => {
     let validationErrors = {};
-
-    const formattedTasks = formatBudgetedHours();
 
     const isValid = validateAllFields();
     if (!isValid) {
@@ -191,12 +177,7 @@ const CreateCheckList = () => {
 
     const req = {
       ...formData,
-      client_type_id: ClienTypeArr.slice(0, -1),
-      task: formattedTasks.map((task) => ({
-        task_name: task.task_name,
-        budgeted_hour: task.budgeted_hour,
-        task_id: task.task_id,
-      })),
+      client_type_id: ClienTypeArr.slice(0, -1)
     };
 
     const data = { req, authToken: token };
@@ -304,7 +285,7 @@ const CreateCheckList = () => {
                       handleInputChange(e);
                     }}
                   >
-                    <option value=""> -- Select --</option>
+                  <option value=""> -- Select --</option>
                     
                   </select>
                   {errors.work_flow_type && (
@@ -339,9 +320,7 @@ const CreateCheckList = () => {
                         </option>
                       ))}
                   </select>
-                  {errors.service_id && (
-                    <p className="mb-0 error-text">{errors.service_id}</p>
-                  )}
+                  
                 </div>
               </div>
             </div>
@@ -371,9 +350,7 @@ const CreateCheckList = () => {
                         </option>
                       ))}
                   </select>
-                  {errors.job_type_id && (
-                    <p className="mb-0 error-text">{errors.job_type_id}</p>
-                  )}
+                  
                 </div>
               </div>
             </div>
@@ -390,9 +367,7 @@ const CreateCheckList = () => {
                       handleOnChange={(e) => handleMultipleSelect(e)}
                     />
                   </div>
-                  {errors.client_type_id && (
-                    <p className="mb-0 error-text">{errors.client_type_id}</p>
-                  )}
+                  
                 </div>
               </div>
             </div>
