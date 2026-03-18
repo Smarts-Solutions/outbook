@@ -39,10 +39,31 @@ const ClientList = () => {
   const [jobLoading, setJobLoading] = useState(false);
   const debounceRef = useRef(null);
 
+  // useEffect(() => {
+  //   GetAllJobListByCustomer("");
+  //   GetAllCustomer();
+  //   GetStatus();
+  //   if (
+  //     ![undefined, "", null].includes(cust_id_sidebar) &&
+  //     ![undefined, "", null].includes(cli_id_sidebar)
+  //   ) {
+  //     getAllClientData1(
+  //       cust_id_sidebar,
+  //       cust_id_sidebar_name,
+  //       cli_id_sidebar,
+  //       cli_id_sidebar_name,
+  //     );
+  //     setHararchyData({
+  //       customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
+  //       client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
-    GetAllJobListByCustomer("");
     GetAllCustomer();
     GetStatus();
+
     if (
       ![undefined, "", null].includes(cust_id_sidebar) &&
       ![undefined, "", null].includes(cli_id_sidebar)
@@ -57,6 +78,18 @@ const ClientList = () => {
         customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
         client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
       });
+    } else if (![undefined, "", null].includes(cust_id_sidebar)) {
+      setCustomerDetails({
+        id: cust_id_sidebar,
+        trading_name: cust_id_sidebar_name,
+      });
+      setHararchyData({
+        customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
+        client: { id: "", client_name: "" },
+      });
+      GetAllClientData(cust_id_sidebar, cust_id_sidebar_name);
+    } else {
+      GetAllJobListByCustomer("");
     }
   }, []);
 
