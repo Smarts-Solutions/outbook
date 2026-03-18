@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getJobTimeline } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Download } from "lucide-react";
 
 const JobTimeline = () => {
   const location = useLocation();
@@ -107,7 +108,8 @@ const JobTimeline = () => {
                 id="btn-export"
                 onClick={handleExport}
               >
-                <i className="fa fa-download" aria-hidden="true"></i>
+                    <Download size={16}/>
+
                 <span>Export Data</span>
               </button>
             )}

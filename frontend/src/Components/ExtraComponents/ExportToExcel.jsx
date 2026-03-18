@@ -2,6 +2,7 @@ import React from "react";
 import {saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
+import { Download } from "lucide-react";
 export default function ExportToExcel({ apiData = [], fileName, headers = [] }) {
     const fileType =
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -73,7 +74,7 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
             className="btn btn-outline-info fw-bold float-end border-3"
             title="Export To Excel"
         >
-            <i className="fa fa-download" aria-hidden="true"></i> Export Excel
+             <Download size={16} /> Export Excel
         </button>
     );
 }

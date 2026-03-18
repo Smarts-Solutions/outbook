@@ -8,6 +8,11 @@ import {
   FileAxis3d,
   Eye,
   Pencil,
+  Save,
+  Check,
+  Plus,
+  Minus,
+  CalendarClock,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +24,7 @@ import {
   getStaffHourMinute,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
-import { SAVE_TIMESHEET} from "../../../Services/Timesheet/TimesheetService";
+import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
@@ -77,22 +82,22 @@ const Timesheet = () => {
     setWeekDays({
       monday: formatDate(startOfWeek),
       tuesday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1)),
       ),
       wednesday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1)),
       ),
       thursday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1)),
       ),
       friday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1)),
       ),
       saturday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1)),
       ),
       sunday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1)),
       ),
     });
   }, [weekOffset]);
@@ -137,7 +142,7 @@ const Timesheet = () => {
 
   const GetLineManagerData = async () => {
     await dispatch(
-      Staff({ req: { action: "get_line_manager" }, authToken: token })
+      Staff({ req: { action: "get_line_manager" }, authToken: token }),
     )
       .unwrap()
       .then(async (response) => {
@@ -155,7 +160,7 @@ const Timesheet = () => {
   const GetTimeSheet = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
-      getTimesheetData({ req, authToken: token })
+      getTimesheetData({ req, authToken: token }),
     ).unwrap();
     setSubmitStatusAllKey(0);
     setDeleteRows([]);
@@ -189,7 +194,7 @@ const Timesheet = () => {
       const hasValidWeekOffsetZeroValue =
         res.filterDataWeek.length > 0 &&
         res.filterDataWeek.some(
-          (item) => parseInt(item.valid_weekOffsets) === 0
+          (item) => parseInt(item.valid_weekOffsets) === 0,
         );
       if (hasValidWeekOffsetZeroValue) {
         setHasValidWeekOffsetZero(true);
@@ -212,7 +217,7 @@ const Timesheet = () => {
             (parseFloat(row.saturday_hours) || 0) +
             (parseFloat(row.sunday_hours) || 0);
           return { ...row, total_hours: parseFloat(sum).toFixed(2) };
-        })
+        }),
       );
     } else {
       setStaffDataWeekDataAll({ loading: false, data: [] });
@@ -247,7 +252,7 @@ const Timesheet = () => {
   const getTimeSheetCopyRecord = async (weekOffset) => {
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
-      getTimesheetData({ req, authToken: token })
+      getTimesheetData({ req, authToken: token }),
     ).unwrap();
 
     if (res.status) {
@@ -263,7 +268,7 @@ const Timesheet = () => {
             (parseFloat(row.saturday_hours) || 0) +
             (parseFloat(row.sunday_hours) || 0);
           return { ...row, total_hours: parseFloat(sum).toFixed(2) };
-        })
+        }),
       );
     }
   };
@@ -273,7 +278,7 @@ const Timesheet = () => {
       Staff({
         req: { action: "get", page: 1, limit: 10000, search: "" },
         authToken: token,
-      })
+      }),
     )
       .unwrap()
       .then(async (response) => {
@@ -298,7 +303,7 @@ const Timesheet = () => {
 
   const toggleRowView = (index) => {
     setExpandedRows((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
 
@@ -356,7 +361,6 @@ const Timesheet = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
@@ -413,7 +417,7 @@ const Timesheet = () => {
     // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
     let req = { staff_id: multipleFilter.staff_id };
     const resStaffTime = await dispatch(
-      getStaffHourMinute({ req, authToken: token })
+      getStaffHourMinute({ req, authToken: token }),
     ).unwrap();
     let staffs_hourminute = resStaffTime?.data?.[0]?.hourminute || null;
 
@@ -428,7 +432,7 @@ const Timesheet = () => {
 
     req = { staff_id: multipleFilter.staff_id, task_type: "1" };
     const res = await dispatch(
-      getTimesheetTaskTypedData({ req, authToken: token })
+      getTimesheetTaskTypedData({ req, authToken: token }),
     ).unwrap();
 
     if (res.status) {
@@ -438,7 +442,7 @@ const Timesheet = () => {
         internal_id: res.data[0].id,
       };
       const res1 = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
+        getTimesheetTaskTypedData({ req, authToken: token }),
       ).unwrap();
       setTimeSheetRows((prevRows) => {
         const updatedRows = [...prevRows];
@@ -508,7 +512,7 @@ const Timesheet = () => {
         task_type: e.target.value,
       };
       const res = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
+        getTimesheetTaskTypedData({ req, authToken: token }),
       ).unwrap();
 
       if (res.status) {
@@ -518,7 +522,7 @@ const Timesheet = () => {
           internal_id: res.data[0].id,
         };
         const res1 = await dispatch(
-          getTimesheetTaskTypedData({ req, authToken: token })
+          getTimesheetTaskTypedData({ req, authToken: token }),
         ).unwrap();
         updatedRows[index].jobData = res.data;
         updatedRows[index].job_id = res.data[0].id;
@@ -535,7 +539,7 @@ const Timesheet = () => {
         task_type: e.target.value,
       };
       const res = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
+        getTimesheetTaskTypedData({ req, authToken: token }),
       ).unwrap();
       if (res.status) {
         if (res.data.length > 0) {
@@ -548,7 +552,7 @@ const Timesheet = () => {
             customer_id: res.data[0].id,
           };
           const res1 = await dispatch(
-            getTimesheetTaskTypedData({ req, authToken: token })
+            getTimesheetTaskTypedData({ req, authToken: token }),
           ).unwrap();
           if (res1.status) {
             if (res1.data.length > 0) {
@@ -560,7 +564,7 @@ const Timesheet = () => {
                 client_id: res1.data[0].id,
               };
               const res2 = await dispatch(
-                getTimesheetTaskTypedData({ req, authToken: token })
+                getTimesheetTaskTypedData({ req, authToken: token }),
               ).unwrap();
               if (res2.status) {
                 if (res2.data.length > 0) {
@@ -572,7 +576,7 @@ const Timesheet = () => {
                     job_id: res2.data[0].id,
                   };
                   const res3 = await dispatch(
-                    getTimesheetTaskTypedData({ req, authToken: token })
+                    getTimesheetTaskTypedData({ req, authToken: token }),
                   ).unwrap();
                   if (res3.status) {
                     if (res3.data.length > 0) {
@@ -630,7 +634,7 @@ const Timesheet = () => {
       customer_id: e.target.value,
     };
     const res = await dispatch(
-      getTimesheetTaskTypedData({ req, authToken: token })
+      getTimesheetTaskTypedData({ req, authToken: token }),
     ).unwrap();
 
     if (res.status) {
@@ -645,7 +649,7 @@ const Timesheet = () => {
           client_id: res.data[0].id,
         };
         const res2 = await dispatch(
-          getTimesheetTaskTypedData({ req, authToken: token })
+          getTimesheetTaskTypedData({ req, authToken: token }),
         ).unwrap();
         if (res2.status) {
           if (res2.data.length > 0) {
@@ -657,7 +661,7 @@ const Timesheet = () => {
               job_id: res2.data[0].id,
             };
             const res3 = await dispatch(
-              getTimesheetTaskTypedData({ req, authToken: token })
+              getTimesheetTaskTypedData({ req, authToken: token }),
             ).unwrap();
             if (res3.status) {
               if (res3.data.length > 0) {
@@ -713,7 +717,7 @@ const Timesheet = () => {
       client_id: e.target.value,
     };
     const res = await dispatch(
-      getTimesheetTaskTypedData({ req, authToken: token })
+      getTimesheetTaskTypedData({ req, authToken: token }),
     ).unwrap();
     if (res.status) {
       if (res.data.length > 0) {
@@ -721,7 +725,7 @@ const Timesheet = () => {
         updatedRows[index].jobData = res.data;
         updatedRows[index].job_id = res.data[0].id;
         updatedRows[index].job_total_time = convertTimeFormat(
-          res.data[0].job_total_time
+          res.data[0].job_total_time,
         );
         let req;
         if (updatedRows[index].task_type === "1") {
@@ -739,7 +743,7 @@ const Timesheet = () => {
         }
         if (req.staff_id != undefined) {
           const res = await dispatch(
-            getTimesheetTaskTypedData({ req, authToken: token })
+            getTimesheetTaskTypedData({ req, authToken: token }),
           ).unwrap();
           if (res.status) {
             if (res.data.length > 0) {
@@ -787,12 +791,12 @@ const Timesheet = () => {
     updatedRows[index].job_id = e.target.value;
     if (req.staff_id != undefined) {
       const res = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
+        getTimesheetTaskTypedData({ req, authToken: token }),
       ).unwrap();
       if (res.status) {
         if (res.data.length > 0) {
           let job_total_time = updatedRows[index].jobData.find(
-            (item) => item.id === parseInt(e.target.value)
+            (item) => item.id === parseInt(e.target.value),
           );
           updatedRows[index].job_id = e.target.value;
           updatedRows[index].job_total_time =
@@ -842,7 +846,6 @@ const Timesheet = () => {
       // final_value = `${intPart}.${multiplied}`;
     }
 
-
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
       updatedRows[index][name] = "";
@@ -865,8 +868,6 @@ const Timesheet = () => {
       });
       return;
     }
-
-
 
     const [integerPart, fractionalPartRaw] = final_value.split(".");
     let fractionalPart = fractionalPartRaw || "0";
@@ -933,7 +934,7 @@ const Timesheet = () => {
     // update record only
     const updatedRows_update = [...updateTimeSheetRows];
     const existingUpdateIndex = updatedRows_update.findIndex(
-      (row) => row.id === rowId
+      (row) => row.id === rowId,
     );
     if (existingUpdateIndex !== -1) {
       updatedRows_update[existingUpdateIndex][name] = value;
@@ -1071,7 +1072,9 @@ const Timesheet = () => {
 
       if (duplicateItem) {
         let fieldName = `${currentDay}_hours`;
-        if (checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)) {
+        if (
+          checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)
+        ) {
           return;
         }
       }
@@ -1116,7 +1119,7 @@ const Timesheet = () => {
             acc.totalMinutes += hrs * 60 + mins;
             return acc;
           },
-          { totalMinutes: 0 }
+          { totalMinutes: 0 },
         );
 
         const totalHours = Math.floor(total.totalMinutes / 60);
@@ -1242,7 +1245,9 @@ const Timesheet = () => {
 
       if (duplicateItem) {
         let fieldName = `${currentDay}_hours`;
-        if (checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)) {
+        if (
+          checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)
+        ) {
           return;
         }
       }
@@ -1287,7 +1292,6 @@ const Timesheet = () => {
       let staff_hourminute =
         updatedTimeSheetRows1?.[0]?.staffs_hourminute || null;
 
-
       if (staff_hourminute != null && staff_hourminute?.includes(":")) {
         const [hours, minutes] = staff_hourminute.split(":").map(Number);
         const decimal = hours + "." + minutes;
@@ -1297,9 +1301,6 @@ const Timesheet = () => {
       }
 
       if (staff_hourminute != null) {
-
-
-
         const totalHours =
           timeSheetRows &&
           timeSheetRows?.reduce((acc, item) => {
@@ -1308,7 +1309,6 @@ const Timesheet = () => {
           }, 0);
 
         let finalTotalHours = await convertHoursMinutes(totalHours);
-
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
           sweatalert.fire({
@@ -1324,7 +1324,7 @@ const Timesheet = () => {
       }
 
       // const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
-       const res = await SAVE_TIMESHEET({ req, authToken: token });
+      const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
         setActiveField(null);
@@ -1379,8 +1379,6 @@ const Timesheet = () => {
     }
 
     if (staff_hourminute != null) {
-
-
       const totalHours =
         timeSheetRows &&
         timeSheetRows?.reduce((acc, item) => {
@@ -1389,7 +1387,6 @@ const Timesheet = () => {
         }, 0);
 
       let finalTotalHours = await convertHoursMinutes(totalHours);
-
 
       if (staff_hourminute > parseFloat(finalTotalHours)) {
         sweatalert.fire({
@@ -1431,7 +1428,6 @@ const Timesheet = () => {
     }
   };
 
-
   const dayMonthFormatDate = (dateString) => {
     const parts = dateString.split(", ");
     const dateParts = parts[1].split("/");
@@ -1443,14 +1439,11 @@ const Timesheet = () => {
     return `${day}/${month}/${year}`;
   };
 
-
   const exportToCSV = (timeSheetRows) => {
     if (!timeSheetRows || timeSheetRows.length === 0) {
       alert("No data to export!");
       return;
     }
-
-
 
     const headers = [
       "Index",
@@ -1580,7 +1573,7 @@ const Timesheet = () => {
   }
 
   let currentValue = weekOptions.find(
-    (opt) => opt.value == weekOffSetValue.current
+    (opt) => opt.value == weekOffSetValue.current,
   );
 
   // SELECT OPTIONS FOR WEEK END //
@@ -1592,7 +1585,7 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
     setUpdateTimeSheetRows((prev) => {
       const existingIndex = prev.findIndex(
-        (row) => row.id === updatedRows[selectedRowIndex].id
+        (row) => row.id === updatedRows[selectedRowIndex].id,
       );
       if (existingIndex !== -1) {
         const updatedPrev = [...prev];
@@ -1635,7 +1628,6 @@ const Timesheet = () => {
   ];
 
   const selectLineManager = async (e) => {
-
     let name = e.target.name;
     let value = e.target.value;
 
@@ -1649,7 +1641,6 @@ const Timesheet = () => {
       selectFilterStaffANdWeek(e);
     }
   };
-
 
   const convertDateFormatForCopy = (dateString) => {
     const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
@@ -1722,7 +1713,6 @@ const Timesheet = () => {
     setIsCopyModalOpen(false);
   };
 
-
   // External Customer DropDown
   const getCustomerOptions = (item) =>
     item.customerData?.map((customer) => ({
@@ -1753,9 +1743,7 @@ const Timesheet = () => {
     { value: "2", label: "External" },
   ];
 
-
   const checkDuplicateRow = (item, index, fieldName) => {
-
     const seen = new Set();
     let firstDuplicateIndex = -1;
 
@@ -1783,17 +1771,24 @@ const Timesheet = () => {
     });
 
     if (filteredRows.length !== timeSheetRows.length) {
-
-
-      const existingRow = filteredRows.find((row) =>
-        row.customer_id === item.customer_id &&
-        row.client_id === item.client_id &&
-        row.job_id === item.job_id &&
-        row.task_id === item.task_id &&
-        row.task_type === item.task_type
+      const existingRow = filteredRows.find(
+        (row) =>
+          row.customer_id === item.customer_id &&
+          row.client_id === item.client_id &&
+          row.job_id === item.job_id &&
+          row.task_id === item.task_id &&
+          row.task_type === item.task_type,
       );
 
-      const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+      const days = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+      ];
 
       let focusFieldName = "monday_hours";
       let focusDay = "monday";
@@ -1807,12 +1802,15 @@ const Timesheet = () => {
             focusDay = currentDay || "monday";
             focusFieldName = `${focusDay}_hours`;
             val = existingRow[fieldName];
-
           }
 
-
-
-          if (val === "0" || val === 0 || val === "" || val === null || val === undefined) {
+          if (
+            val === "0" ||
+            val === 0 ||
+            val === "" ||
+            val === null ||
+            val === undefined
+          ) {
             focusFieldName = hKey;
             focusDay = day;
             break;
@@ -1822,36 +1820,36 @@ const Timesheet = () => {
 
       setTimeSheetRows(filteredRows);
 
-      sweatalert.fire({
-        icon: "error",
-        title: "Entry already exists",
-        text: "Entry already exists. Redirecting to the original record.",
-      }).then(() => {
-
-        if (focusDay !== "monday") {
-          setIsExpanded(true);
-        }
-
-        setTimeout(() => {
-
-          const targetIndex = filteredRows.findIndex((row) =>
-            row.customer_id === item.customer_id &&
-            row.client_id === item.client_id &&
-            row.job_id === item.job_id &&
-            row.task_id === item.task_id &&
-            row.task_type === item.task_type
-          );
-
-          const inputs = document.getElementsByName(focusFieldName);
-
-          if (inputs[targetIndex]) {
-            inputs[targetIndex].focus();
-            setActiveIndex(targetIndex);
-            setActiveField(focusDay);
+      sweatalert
+        .fire({
+          icon: "error",
+          title: "Entry already exists",
+          text: "Entry already exists. Redirecting to the original record.",
+        })
+        .then(() => {
+          if (focusDay !== "monday") {
+            setIsExpanded(true);
           }
 
-        }, 300);
-      });
+          setTimeout(() => {
+            const targetIndex = filteredRows.findIndex(
+              (row) =>
+                row.customer_id === item.customer_id &&
+                row.client_id === item.client_id &&
+                row.job_id === item.job_id &&
+                row.task_id === item.task_id &&
+                row.task_type === item.task_type,
+            );
+
+            const inputs = document.getElementsByName(focusFieldName);
+
+            if (inputs[targetIndex]) {
+              inputs[targetIndex].focus();
+              setActiveIndex(targetIndex);
+              setActiveField(focusDay);
+            }
+          }, 300);
+        });
 
       return true;
     }
@@ -1871,7 +1869,7 @@ const Timesheet = () => {
       const m1 = Math.round((v1 - h1) * 100);
       const h2 = Math.floor(v2);
       const m2 = Math.round((v2 - h2) * 100);
-      let totalMins = (h1 * 60 + m1) + (h2 * 60 + m2);
+      let totalMins = h1 * 60 + m1 + (h2 * 60 + m2);
       const finalHours = Math.floor(totalMins / 60);
       const finalMinutes = totalMins % 60;
       return `${finalHours}.${finalMinutes.toString().padStart(2, "0")}`;
@@ -1894,9 +1892,17 @@ const Timesheet = () => {
       } else {
         // This is a duplicate. Sum hours into the first occurrence.
         const firstRow = uniqueRowsMap.get(key);
-        const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+        const days = [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday",
+        ];
 
-        days.forEach(day => {
+        days.forEach((day) => {
           const hKey = day + "_hours";
           const v2 = parseFloat(row[hKey]) || 0;
           if (v2 > 0) {
@@ -1909,11 +1915,11 @@ const Timesheet = () => {
 
         // Recalculate total_hours for the firstRow
         let totalMinsAll = 0;
-        days.forEach(day => {
+        days.forEach((day) => {
           const v = parseFloat(firstRow[day + "_hours"]) || 0;
           const h = Math.floor(v);
           const m = Math.round((v - h) * 100);
-          totalMinsAll += (h * 60 + m);
+          totalMinsAll += h * 60 + m;
         });
         const finalH = Math.floor(totalMinsAll / 60);
         const finalM = totalMinsAll % 60;
@@ -1932,14 +1938,22 @@ const Timesheet = () => {
 
       // Update deleteRows state if any merged rows had IDs
       if (duplicateIds.length > 0) {
-        setDeleteRows(prev => [...new Set([...prev, ...duplicateIds])]);
+        setDeleteRows((prev) => [...new Set([...prev, ...duplicateIds])]);
       }
 
       // Ensure the merged results are ready to be saved
-      filteredRows.forEach(row => {
+      filteredRows.forEach((row) => {
         if (row.id) {
-          const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-          days.forEach(day => {
+          const days = [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+          ];
+          days.forEach((day) => {
             const hKey = day + "_hours";
             updateRecordSheet(row.id, hKey, row[hKey]);
           });
@@ -1947,15 +1961,24 @@ const Timesheet = () => {
         }
       });
 
-      const existingRow = filteredRows.find((row) =>
-        row.customer_id === item.customer_id &&
-        row.client_id === item.client_id &&
-        row.job_id === item.job_id &&
-        row.task_id === item.task_id &&
-        row.task_type === item.task_type
+      const existingRow = filteredRows.find(
+        (row) =>
+          row.customer_id === item.customer_id &&
+          row.client_id === item.client_id &&
+          row.job_id === item.job_id &&
+          row.task_id === item.task_id &&
+          row.task_type === item.task_type,
       );
 
-      const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+      const days = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+      ];
       let focusFieldName = "monday_hours";
       let focusDay = "monday";
 
@@ -1970,7 +1993,13 @@ const Timesheet = () => {
             val = existingRow[focusFieldName];
           }
 
-          if (val === "0" || val === 0 || val === "" || val === null || val === undefined) {
+          if (
+            val === "0" ||
+            val === 0 ||
+            val === "" ||
+            val === null ||
+            val === undefined
+          ) {
             focusFieldName = hKey;
             focusDay = day;
             break;
@@ -1980,43 +2009,42 @@ const Timesheet = () => {
 
       setTimeSheetRows(filteredRows);
 
-      sweatalert.fire({
-        icon: "error",
-        title: "Entry already exists",
-        text: "Entry already exists. Redirecting to the original record.",
-      }).then(() => {
-
-        if (focusDay !== "monday") {
-          setIsExpanded(true);
-        }
-
-        setTimeout(() => {
-
-          const targetIndex = filteredRows.findIndex((row) =>
-            row.customer_id === item.customer_id &&
-            row.client_id === item.client_id &&
-            row.job_id === item.job_id &&
-            row.task_id === item.task_id &&
-            row.task_type === item.task_type
-          );
-
-          const inputs = document.getElementsByName(focusFieldName);
-
-          if (inputs[targetIndex]) {
-            inputs[targetIndex].focus();
-            setActiveIndex(targetIndex);
-            setActiveField(focusDay);
+      sweatalert
+        .fire({
+          icon: "error",
+          title: "Entry already exists",
+          text: "Entry already exists. Redirecting to the original record.",
+        })
+        .then(() => {
+          if (focusDay !== "monday") {
+            setIsExpanded(true);
           }
 
-        }, 300);
-      });
+          setTimeout(() => {
+            const targetIndex = filteredRows.findIndex(
+              (row) =>
+                row.customer_id === item.customer_id &&
+                row.client_id === item.client_id &&
+                row.job_id === item.job_id &&
+                row.task_id === item.task_id &&
+                row.task_type === item.task_type,
+            );
+
+            const inputs = document.getElementsByName(focusFieldName);
+
+            if (inputs[targetIndex]) {
+              inputs[targetIndex].focus();
+              setActiveIndex(targetIndex);
+              setActiveField(focusDay);
+            }
+          }, 300);
+        });
 
       return true;
     }
 
     return false;
   };
-
 
   return (
     <div className="container-fluid">
@@ -2031,7 +2059,7 @@ const Timesheet = () => {
 
               <div className="text-center ">
                 <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
-                  <i className="fa fa-calendar-clock me-1" />
+                  <CalendarClock size={18} className="me-1" />
                   <span> {getFormattedDate("current", "")}</span>
                 </p>
               </div>
@@ -2047,7 +2075,8 @@ const Timesheet = () => {
                     onClick={() => exportToCSV(timeSheetRows)}
                   >
                     Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
+                        <Download size={16}/>
+
                   </button>
                 </div>
               ) : (
@@ -2060,10 +2089,10 @@ const Timesheet = () => {
                   className="btn btn-info "
                   onClick={() => exportToCSV(timeSheetRows)}
                 >
-                  <i className="fa fa-download" aria-hidden="true" />
+                  <Download size={16} />
                   <span> Export Timesheet Data</span>
 
-                  {/* <i className="fa fa-download ms-2" /> */}
+                  <Download size={16} />
                 </button>
               </div>
             ) : (
@@ -2086,7 +2115,7 @@ const Timesheet = () => {
                   className="basic-multi-select"
                   options={staffOptions}
                   value={staffOptions.find(
-                    (opt) => Number(opt.value) === Number(selectedStaff)
+                    (opt) => Number(opt.value) === Number(selectedStaff),
                   )}
                   onChange={(selectedOption) => {
                     // simulate e.target.value
@@ -2104,7 +2133,7 @@ const Timesheet = () => {
             )}
 
             {staffDataWeekDataAll.data &&
-              staffDataWeekDataAll.data.length > 0 ? (
+            staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4   pe-0">
                 <label className="form-label mb-2">Date</label>
                 <Select
@@ -2133,8 +2162,8 @@ const Timesheet = () => {
             )}
 
             {isExistStaffDataWeekDataAll?.data &&
-              isExistStaffDataWeekDataAll?.data.length > 0 &&
-              staffDataWeekDataAll?.data.length === 0 ? (
+            isExistStaffDataWeekDataAll?.data.length > 0 &&
+            staffDataWeekDataAll?.data.length === 0 ? (
               <div className="form-group col-md-4 pe-0">
                 <label className="form-label mb-2">Date</label>
                 <Select
@@ -2193,8 +2222,8 @@ const Timesheet = () => {
             )}
 
             {selectedLineManager != "" &&
-              staffDataWeekDataAll.data &&
-              staffDataWeekDataAll.data.length > 0 ? (
+            staffDataWeekDataAll.data &&
+            staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4  pe-0">
                 <label className="form-label mb-2">
                   Line Manager Select Week
@@ -2261,9 +2290,10 @@ const Timesheet = () => {
                             </th>
 
                             <th
-                              className={`pe-0 week-data ${isExpanded ? "expanded" : ""
-                                }`}
-                            // style={{ width: isExpanded ? "50%" : "100px" }}
+                              className={`pe-0 week-data ${
+                                isExpanded ? "expanded" : ""
+                              }`}
+                              // style={{ width: isExpanded ? "50%" : "100px" }}
                             >
                               <div className="d-flex align-items-center">
                                 <ChevronLeft
@@ -2304,11 +2334,11 @@ const Timesheet = () => {
                                   onClick={toggleAllRowsView}
                                   className="px-0 btn btn-sm btn-link text-decoration-none"
                                 >
-                                  <i
-                                    className={`fa ${isExpanded ? "fa-minus" : "fa-plus"
-                                      }`}
-                                    aria-hidden="true"
-                                  ></i>
+                                  {isExpanded ? (
+                                    <Minus size={16} />
+                                  ) : (
+                                    <Plus size={16} />
+                                  )}
                                 </button>
 
                                 <ChevronRight
@@ -2354,7 +2384,6 @@ const Timesheet = () => {
 
                                 <td className="ps-0">
                                   {item.newRow === 1 ? (
-
                                     <Select
                                       className="basic-multi-select"
                                       menuPortalTarget={document.body}
@@ -2370,7 +2399,7 @@ const Timesheet = () => {
                                       value={taskTypeOptions.find(
                                         (opt) =>
                                           String(opt.value) ===
-                                          String(item.task_type)
+                                          String(item.task_type),
                                       )}
                                       isSearchable={false} // only 2 options, search not needed
                                       placeholder="Task Type"
@@ -2403,7 +2432,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                    item.task_type === "2" ? (
+                                  item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "100px" }}
@@ -2437,7 +2466,7 @@ const Timesheet = () => {
                                       value={getCustomerOptions(item).find(
                                         (opt) =>
                                           Number(opt.value) ===
-                                          Number(item.customer_id)
+                                          Number(item.customer_id),
                                       )}
                                       isSearchable
                                       onChange={(selectedOption) => {
@@ -2469,7 +2498,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                    item.task_type === "2" ? (
+                                  item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "90px" }}
@@ -2502,7 +2531,7 @@ const Timesheet = () => {
                                       value={getClientOptions(item).find(
                                         (opt) =>
                                           Number(opt.value) ===
-                                          Number(item.client_id)
+                                          Number(item.client_id),
                                       )}
                                       isSearchable
                                       isDisabled={
@@ -2511,7 +2540,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.clientData ||
-                                          item.clientData.length === 0
+                                        item.clientData.length === 0
                                           ? "No Client"
                                           : "Client"
                                       }
@@ -2573,7 +2602,7 @@ const Timesheet = () => {
                                       value={getJobOptions(item).find(
                                         (opt) =>
                                           Number(opt.value) ===
-                                          Number(item.job_id)
+                                          Number(item.job_id),
                                       )}
                                       isSearchable
                                       isDisabled={
@@ -2582,7 +2611,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.jobData ||
-                                          item.jobData.length === 0
+                                        item.jobData.length === 0
                                           ? "No Job"
                                           : "Job"
                                       }
@@ -2618,11 +2647,12 @@ const Timesheet = () => {
                                     (() => {
                                       const matchedJob = item.jobData?.find(
                                         (job) =>
-                                          Number(job.id) === Number(item.job_id)
+                                          Number(job.id) ===
+                                          Number(item.job_id),
                                       );
                                       return matchedJob &&
                                         matchedJob.job_type_name !==
-                                        undefined ? (
+                                          undefined ? (
                                         <div style={{ width: "100px" }}>
                                           {matchedJob.job_type_name}
                                         </div>
@@ -2642,7 +2672,6 @@ const Timesheet = () => {
                                 {/* Task Selection */}
                                 <td>
                                   {item.newRow === 1 ? (
-
                                     <Select
                                       className="basic-multi-select"
                                       menuPortalTarget={document.body}
@@ -2658,7 +2687,7 @@ const Timesheet = () => {
                                       value={getTaskOptions(item).find(
                                         (opt) =>
                                           Number(opt.value) ===
-                                          Number(item.task_id)
+                                          Number(item.task_id),
                                       )}
                                       isSearchable
                                       isDisabled={
@@ -2667,7 +2696,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.taskData ||
-                                          item.taskData.length === 0
+                                        item.taskData.length === 0
                                           ? "No Task"
                                           : "Task"
                                       }
@@ -2715,10 +2744,9 @@ const Timesheet = () => {
                                                 index,
                                                 "monday_date",
                                                 weekDays.monday,
-                                                item
-                                              )
-                                            }
-                                            }
+                                                item,
+                                              );
+                                            }}
                                             value={
                                               item.monday_hours == null
                                                 ? "0"
@@ -2727,7 +2755,7 @@ const Timesheet = () => {
                                             // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : false}
                                             disabled={
                                               staffDetails.id !=
-                                                multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
                                                   ? true
@@ -2737,7 +2765,6 @@ const Timesheet = () => {
                                               setActiveIndex(index);
                                               setActiveField("monday");
                                             }}
-
                                           />
                                         </span>
 
@@ -2749,7 +2776,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index); // store row index
                                                 setModalText(
-                                                  item.monday_note || ""
+                                                  item.monday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true); // show modal
                                               }}
@@ -2768,7 +2795,7 @@ const Timesheet = () => {
                                               index,
                                               "tuesday_date",
                                               weekDays.tuesday,
-                                              item
+                                              item,
                                             )
                                           }
                                           value={
@@ -2779,7 +2806,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2789,10 +2816,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("tuesday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "tuesday" && (
@@ -2802,7 +2829,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index);
                                                 setModalText(
-                                                  item.tuesday_note || ""
+                                                  item.tuesday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true);
                                               }}
@@ -2821,7 +2848,7 @@ const Timesheet = () => {
                                               index,
                                               "wednesday_date",
                                               weekDays.wednesday,
-                                              item
+                                              item,
                                             )
                                           }
                                           value={
@@ -2832,7 +2859,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2842,10 +2869,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("wednesday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "wednesday" && (
@@ -2855,7 +2882,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index);
                                                 setModalText(
-                                                  item.wednesday_note || ""
+                                                  item.wednesday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true);
                                               }}
@@ -2874,7 +2901,7 @@ const Timesheet = () => {
                                               index,
                                               "thursday_date",
                                               weekDays.thursday,
-                                              item
+                                              item,
                                             )
                                           }
                                           value={
@@ -2885,7 +2912,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2895,10 +2922,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "thursday" && (
@@ -2908,7 +2935,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index);
                                                 setModalText(
-                                                  item.thursday_note || ""
+                                                  item.thursday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true);
                                               }}
@@ -2927,7 +2954,7 @@ const Timesheet = () => {
                                               index,
                                               "friday_date",
                                               weekDays.friday,
-                                              item
+                                              item,
                                             )
                                           }
                                           value={
@@ -2938,7 +2965,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2948,10 +2975,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("friday");
                                           }}
-                                        // onBlur={() => {
-                                        //   setActiveIndex(null);
-                                        //   setActiveField(null);
-                                        // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "friday" && (
@@ -2961,7 +2988,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index);
                                                 setModalText(
-                                                  item.friday_note || ""
+                                                  item.friday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true);
                                               }}
@@ -2980,7 +3007,7 @@ const Timesheet = () => {
                                               index,
                                               "saturday_date",
                                               weekDays.saturday,
-                                              item
+                                              item,
                                             )
                                           }
                                           value={
@@ -2991,7 +3018,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3001,7 +3028,6 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("saturday");
                                           }}
-
                                         />
                                         {activeIndex === index &&
                                           activeField === "saturday" && (
@@ -3011,7 +3037,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index);
                                                 setModalText(
-                                                  item.saturday_note || ""
+                                                  item.saturday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true);
                                               }}
@@ -3027,18 +3053,14 @@ const Timesheet = () => {
                                           style={{ width: "80px" }}
                                           name="monday_hours"
                                           onChange={(e) => {
-
-
                                             handleHoursInput(
                                               e,
                                               index,
                                               "monday_date",
                                               weekDays.monday,
-                                              item
-                                            )
-                                          }
-                                          }
-
+                                              item,
+                                            );
+                                          }}
                                           value={
                                             item.monday_hours == null
                                               ? "0"
@@ -3047,7 +3069,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                              multipleFilter.staff_id
+                                            multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3066,7 +3088,7 @@ const Timesheet = () => {
                                               onClick={() => {
                                                 setSelectedRowIndex(index); // store row index
                                                 setModalText(
-                                                  item.monday_note || ""
+                                                  item.monday_note || "",
                                                 ); // existing value if any
                                                 setIsModalOpen(true); // show modal
                                               }}
@@ -3076,8 +3098,6 @@ const Timesheet = () => {
                                     )}
                                   </div>
                                 </td>
-
-
 
                                 <td className="d-flex ps-0">
                                   {submitStatusAllKey === 0 ? (
@@ -3106,7 +3126,7 @@ const Timesheet = () => {
                                           handleSingleRemark(e, item, index);
                                         }}
                                       >
-                                        <i className="fa fa-eye text-primary"></i>
+                                        <Eye size={16} />
                                       </button>
                                     </div>
                                   )}
@@ -3323,7 +3343,7 @@ const Timesheet = () => {
                                   className="edit-icon"
                                   onClick={() => setRemarkModel(true)}
                                 >
-                                  <i className="fa fa-eye text-primary"></i>
+                                  <Eye size={16} />
                                 </button>
                               </span>
                             </div>
@@ -3370,7 +3390,7 @@ const Timesheet = () => {
                       saveData(e);
                     }}
                   >
-                    <i className="fa fa-check"></i> Save
+                    <Check size={16} /> Save
                   </button>
 
                   <button
@@ -3379,7 +3399,7 @@ const Timesheet = () => {
                       submitData(e);
                     }}
                   >
-                    <i className="far fa-save"></i> Submit
+                    <Save size={16} /> Submit
                   </button>
                 </>
               ) : (
@@ -3463,12 +3483,12 @@ const Timesheet = () => {
                     <p>
                       {remarkSingleIndex != null && timeSheetRows.length > 0
                         ? ["", null, undefined].includes(
-                          timeSheetRows[remarkSingleIndex]
-                        )
+                            timeSheetRows[remarkSingleIndex],
+                          )
                           ? "No Remark Found"
                           : !["", null, undefined].includes(
-                            timeSheetRows[remarkSingleIndex].remark
-                          )
+                                timeSheetRows[remarkSingleIndex].remark,
+                              )
                             ? timeSheetRows[remarkSingleIndex].remark
                             : "No Remark Found"
                         : "No Remark Found"}
@@ -3492,8 +3512,8 @@ const Timesheet = () => {
                         value={
                           remarkSingleIndex != null && timeSheetRows.length > 0
                             ? ["", null, undefined].includes(
-                              timeSheetRows[remarkSingleIndex]
-                            )
+                                timeSheetRows[remarkSingleIndex],
+                              )
                               ? ""
                               : timeSheetRows[remarkSingleIndex].remark
                             : ""

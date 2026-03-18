@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ReceivedSentReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const JobsReceivedSentReports = () => {
     const dispatch = useDispatch();
@@ -132,7 +133,7 @@ const JobsReceivedSentReports = () => {
                                         <ul className="pagination pagination-separated pagination-sm mb-0 justify-content-center justify-content-sm-start">
                                             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                                 <button onClick={() => handlePageChange(currentPage - 1)} className="page-link">
-                                                    <i className="fa fa-angle-left" />
+                                                   <ChevronLeft size={16}/>
                                                 </button>
                                             </li>
                                             {[...Array(totalPages)].map((_, i) => (
@@ -144,7 +145,7 @@ const JobsReceivedSentReports = () => {
                                             ))}
                                             <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                                                 <button onClick={() => handlePageChange(currentPage + 1)} className="page-link">
-                                                    <i className="mdi mdi-chevron-right" />
+                                                   <ChevronRight size={16}/>
                                                 </button>
                                             </li>
                                         </ul>

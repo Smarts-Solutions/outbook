@@ -21,6 +21,7 @@ import {
   deleteFileFromFolder,
   deleteFolderFromFolder,
 } from "../../../Utils/graphAPI";
+import { Download,Plus ,FileText,File,Eye  } from "lucide-react";
 
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -586,21 +587,9 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
               }}
             />
           ) : row.file_type === "application/pdf" ? (
-            <i
-              className="fa fa-file-pdf"
-              style={{
-                fontSize: "24px",
-                color: "#FF0000",
-              }}
-            ></i>
+            <FileText size={24} color="#FF0000" />
           ) : (
-            <i
-              className="fa fa-file"
-              style={{
-                fontSize: "24px",
-                color: "#000",
-              }}
-            ></i>
+           <File size={24} color="#000" />
           )
         ) : (
           ""
@@ -620,7 +609,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
               setViewmissinglogs(true);
             }}
           >
-            <i className="fa fa-eye fs-6 text-warning" />
+           <Eye size={16} className="text-warning" />
           </button>
           {row.status == 1 ? (
             ""
@@ -737,7 +726,8 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                 onClick={handleExport}
               >
-                <i className="fa fa-download" aria-hidden="true" />
+                   <Download size={16}/>
+
                 <span>Export Excel</span>
               </button>
             </div>
@@ -757,7 +747,8 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 onClick={handleExport}
               >
-                <i className="fa fa-download" aria-hidden="true"></i>
+                    <Download size={16}/>
+
                 <span>Export Data</span>
               </button>
             )}
@@ -770,7 +761,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   className="btn btn-info text-white"
                   onClick={() => setAddmissinglogs(true)}
                 >
-                  <i className="fa fa-plus me-1"></i>
+                 <Plus size={16}/>
                   Add Missing Logs
                 </button>
               )}

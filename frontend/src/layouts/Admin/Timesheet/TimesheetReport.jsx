@@ -13,6 +13,7 @@ import * as XLSX from "xlsx";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
+import { Trash,Download } from "lucide-react";
 
 function TimesheetReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -1363,12 +1364,12 @@ function TimesheetReport() {
                   />
 
                   {!["", null, undefined].includes(filterId) && (
-                    <i
-                      className="fa fa-trash"
-                      title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
+                  <Trash
+   size={50}
+  title="Delete Filter"
+  onClick={deleteFilterIdFunction}
+  style={{ cursor: "pointer", color: "red" }}
+/>
                   )}
                 </div>
               </div>
@@ -1385,7 +1386,8 @@ function TimesheetReport() {
                   id="btn-export"
                   onClick={() => exportToCSV(showData)}
                 >
-                  <i className="fa fa-download" aria-hidden="true"></i>
+                     <Download size={16}/>
+
                   <span>Export Data</span>
                 </button>
               </div>
@@ -1399,7 +1401,7 @@ function TimesheetReport() {
                     id="btn-export"
                     onClick={() => exportToCSV(showData)}
                   >
-                    <i className="fa fa-download" aria-hidden="true"></i>
+                   <Download size={16}/>
                     <span>Export Data</span>
                   </button>
                 </div>

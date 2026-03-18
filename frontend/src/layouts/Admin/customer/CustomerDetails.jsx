@@ -14,6 +14,7 @@ import Swal from "sweetalert2";
 import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
+import { Plus } from "lucide-react";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
@@ -748,7 +749,7 @@ const CustomerUsers = () => {
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                   onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
                 >
-                  <i className="fa fa-plus" />
+                  <Plus size={16}/>
                   Add Customer User
                 </button>
               </div>

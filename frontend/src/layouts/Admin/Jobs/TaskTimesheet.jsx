@@ -9,6 +9,7 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
+import { Download,Plus,Eye  } from "lucide-react";
 
 const TaskTimesheet = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -213,7 +214,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                   setViewtimesheet(true);
                 }}
               >
-                <i className="fa fa-eye fs-6 text-warning" />
+               <Eye size={16} className="text-warning" />
               </button>
             )}
         </div>
@@ -435,7 +436,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                     }}
                     className="btn btn-info text-white float-end ms-2"
                   >
-                    <i className="fa fa-plus pe-1"></i> Job Timesheet
+                    <Plus size={16}/> Job Timesheet
                   </button>
                 )}
               {taskTimeData && taskTimeData.length > 0 && (
@@ -443,7 +444,8 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                   className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                   onClick={handleExport}
                 >
-                  <i className="fa fa-download" aria-hidden="true" />
+                      <Download size={16}/>
+
                   <span>Export Excel</span>
                 </button>
               )}
@@ -619,7 +621,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
           <div className="col-lg-4">
             <div className="mb-3">
               <button className="btn btn-secondary">
-                <i className="fa fa-plus pe-1"></i>Add Task
+                 <Plus size={16}/> Add Task
               </button>
             </div>
           </div>
@@ -653,7 +655,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                             data-bs-toggle="modal"
                             data-bs-target="#addRecordModal"
                           >
-                            <i className="fa fa-plus text-success" />
+                            <Plus size={16}/>
                             {/* Change the icon class to your desired plus icon */}
                           </button>
                         </div>
@@ -669,7 +671,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                             data-bs-toggle="modal"
                             data-bs-target="#addRecordModal"
                           >
-                            <i className="fa fa-plus text-success" />
+                            <Plus size={16}/>
                             {/* Change the icon class to your desired plus icon */}
                           </button>
                         </div>
@@ -685,7 +687,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                             data-bs-toggle="modal"
                             data-bs-target="#addRecordModal"
                           >
-                            <i className="fa fa-plus text-success" />
+                            <Plus size={16}/>
                             {/* Change the icon class to your desired plus icon */}
                           </button>
                         </div>

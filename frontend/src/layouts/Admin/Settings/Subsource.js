@@ -6,6 +6,7 @@ import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import sweatalert from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
+import { Plus,Pencil ,ArrowLeft,Save} from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -250,7 +251,7 @@ const Setting = () => {
                 sessionStorage.setItem('settingTab', location?.state?.settingTab);
                  window.history.back()}}
             >
-              <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
+              <ArrowLeft size={16}/>
             </button>
             <h4 className="card-title">Sub Source Type</h4>
           </div>
@@ -263,7 +264,7 @@ const Setting = () => {
                   onClick={(e) => handleAdd(e, "1")}
                 >
                   {" "}
-                  <i className="fa fa-plus" /> Add Sub Source Type
+                  <Plus size={16}/> Add Sub Source Type
                 </button>
               </div>
             </div>
@@ -291,7 +292,17 @@ const Setting = () => {
     onChange={handleModalChange}
     buttonName={
       <>
-        <i className={`fas ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
+      {isEdit ? (
+  <>
+    <Pencil size={16} className="me-1" />
+    Update
+  </>
+) : (
+  <>
+    <Save size={16} className="me-1" />
+    Save
+  </>
+)}
       </>
     }
   />

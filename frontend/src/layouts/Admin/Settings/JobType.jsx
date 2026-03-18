@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
+import { Plus,Eye ,Pencil, Save,ArrowLeft,MoreVertical  } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -127,7 +128,7 @@ const Setting = () => {
               aria-haspopup="true"
               aria-expanded="false"
             >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              <MoreVertical size={18} />
             </button>
             <div
               className="dropdown-menu custom-dropdown"
@@ -164,7 +165,7 @@ const Setting = () => {
                     setJobTypeId(row);
                   }}
                 >
-                  <i className="fa fa-plus pe-1"></i> Add Task
+                 <Plus size={16}/> Add Task
                 </button>
 
 
@@ -185,7 +186,7 @@ const Setting = () => {
                 setViewtask(true);
               }}
             >
-              <i className="fa-regular fa-eye " />
+              <Eye size={16} />
             </button>
 
             {/* <button
@@ -195,7 +196,7 @@ const Setting = () => {
                 setJobTypeId(row);
               }}
             >
-              <i className="fa fa-plus pe-1"></i> Add Task
+              <Plus size={16}/> Add Task
             </button> */}
 
             <button
@@ -204,7 +205,7 @@ const Setting = () => {
                 navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab, service_id: location.state.Id } });
               }}
             >
-              <i className="fa fa-plus pe-1"></i> Add Task
+             <Plus size={16}/> Add Task
             </button>
           </div>
         </>
@@ -520,7 +521,7 @@ const Setting = () => {
                 window.history.back();
               }}
             >
-              <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
+             <ArrowLeft size={16}/>
             </button>
             <h4 className="card-title">Job Type</h4>
           </div>
@@ -533,7 +534,7 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  <i className="fa fa-plus" /> Add Job Type
+                  <Plus size={16}/> Add Job Type
                 </button>
               </div>
             </div>
@@ -548,25 +549,29 @@ const Setting = () => {
         </div>
       </div>
 
-      {isModalOpen && (
-        <Modal
-          modalId="exampleModal3"
-          title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
-          fields={modalData.fields}
-          onClose={() => {
-            setIsModalOpen(false);
-            setModalData({});
-          }}
-          onSave={handleSave}
-          onChange={handleModalChange}
-          buttonName={
-            <>
-              <i className={`far ${isEdit ? "fa-edit" : "fa-save"}`}></i>{" "}
-              {isEdit ? "Update" : "Save"}
-            </>
-          }
-        />
-      )}
+    {isModalOpen && (
+  <Modal
+    modalId="exampleModal3"
+    title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
+    fields={modalData.fields}
+    onClose={() => {
+      setIsModalOpen(false);
+      setModalData({});
+    }}
+    onSave={handleSave}
+    onChange={handleModalChange}
+    buttonName={
+      <>
+        {isEdit ? (
+          <Pencil size={16} className="me-1" />
+        ) : (
+          <Save size={16} className="me-1" />
+        )}
+        {isEdit ? "Update" : "Save"}
+      </>
+    }
+  />
+)}
 
       <CommanModal
         isOpen={showAddTask}
@@ -612,7 +617,7 @@ const Setting = () => {
               <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
                   <button className="btn  btn-info" onClick={handleAddTask}>
-                    <i className="fa fa-plus pe-2"> </i>
+                     <Plus size={16}/>
                     Add
                   </button>
                 </div>
@@ -680,7 +685,7 @@ const Setting = () => {
                 className="btn btn-outline-success"
                 onClick={(e) => handleSaveTask()}
               >
-                <i className="far fa-save pe-1"></i>
+               <Save size={16}/>
                 Submit
               </button>
             </div>

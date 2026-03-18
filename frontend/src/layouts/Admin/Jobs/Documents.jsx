@@ -8,6 +8,7 @@ import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
+import { FileText,File  } from "lucide-react";
 
 
 const Documents = ({ getAccessDataJob }) => {
@@ -75,18 +76,12 @@ const Documents = ({ getAccessDataJob }) => {
             />
           ) : row.file_type === "application/pdf" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file-pdf"
-                style={{ fontSize: "24px", color: "#FF0000" }}
-              ></i>
+              <FileText size={24} color="#FF0000" />
               <span>PDF</span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file"
-                style={{ fontSize: "24px", color: "#000" }}
-              ></i>
+             <File size={24} color="#000" />
               <span>{row.file_type}</span>
             </div>
           )}

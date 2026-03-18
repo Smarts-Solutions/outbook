@@ -10,6 +10,7 @@ import {
 import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import { Save,Plus ,ArrowLeft, X} from "lucide-react";
 
 const CreateCheckList = () => {
 
@@ -362,7 +363,7 @@ const CreateCheckList = () => {
               window.history.back()
             }}
           >
-            <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
+             <ArrowLeft size={16}/>
           </button>
           <h3 className="card-title mb-0">Create New Checklist</h3>
         </div>
@@ -491,7 +492,7 @@ const CreateCheckList = () => {
           </div>
 
           <button className="btn btn-info mt-3" onClick={addTask}>
-            <i className="fa fa-plus"></i>Add Task
+           <Plus size={16}/> Add Task
           </button>
 
           <div className="mt-4">
@@ -581,11 +582,11 @@ const CreateCheckList = () => {
               }
               }
             >
-              <i className="fa fa-times pe-1"></i>
+              < X size={16}/>
               Cancel
             </button>
             <button className="btn btn-outline-success ms-2" onClick={handleSubmit}>
-              <i className="far fa-save pe-1"></i> Submit
+             <Save size={16}/> Submit
             </button>
           </div>
         </div>

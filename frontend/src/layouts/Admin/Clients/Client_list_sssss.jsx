@@ -12,6 +12,7 @@ import {
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
+import { Plus , User ,FileText } from "lucide-react";
 
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
@@ -23,6 +24,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import ReactPaginate from "react-paginate";
+import { ArrowLeft,File  } from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -292,7 +294,7 @@ const ClientList = () => {
       tabsData.push({
         id: "client",
         label: "Client",
-        icon: "fa-solid fa-user",
+        icon: <User size={16}/>,
       });
     }
     if (
@@ -700,18 +702,12 @@ const ClientList = () => {
             />
           ) : row.file_type === "application/pdf" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file-pdf"
-                style={{ fontSize: "24px", color: "#FF0000" }}
-              ></i>
+              <FileText size={24} color="#FF0000" />
               <span>PDF</span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file"
-                style={{ fontSize: "24px", color: "#000" }}
-              ></i>
+              <File size={24} color="#000" />
               <span>{row.file_type}</span>
             </div>
           )}
@@ -1515,7 +1511,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft size={16}/> Back
                     </div>
                     {(getAccessDataClient.insert === 1 ||
 
@@ -1533,7 +1529,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Add Client
+                          <Plus size={16}/> Add Client
                         </div>
                       </>
                     ) : ClientData?.length > 0 &&
@@ -1554,7 +1550,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Create Job
+                           <Plus size={16}/> Create Job
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
@@ -1573,7 +1569,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <i className="fa fa-plus pe-1" /> Add Checklist
+                           <Plus size={16}/> Add Checklist
                         </div>
                       </>
                     ) : null}
@@ -1588,7 +1584,7 @@ const ClientList = () => {
                           window.history.back();
                         }}
                       >
-                        <i className="fa fa-arrow-left pe-1" /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) :
@@ -1600,7 +1596,7 @@ const ClientList = () => {
                             window.history.back();
                           }}
                         >
-                          <i className="fa fa-arrow-left pe-1" /> Back
+                           <ArrowLeft size={16}/> Back
                         </div>
                       </>
                     ) : null

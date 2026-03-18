@@ -9,6 +9,7 @@ import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
 import {allowedTypes } from "../../../../Utils/Comman_function";
+import { ArrowLeft,ArrowRight,FileText,File  } from "lucide-react";
 
 const Paper = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -299,22 +300,10 @@ const Paper = () => {
                                                   />
                                                 ) : file.type === "application/pdf" ? (
 
-                                                  <i
-                                                    className="fa fa-file-pdf"
-                                                    style={{
-                                                      fontSize: "24px",
-                                                      color: "#FF0000",
-                                                    }}
-                                                  ></i>
+                                                  <FileText size={24} color="#FF0000" />
                                                 ) : (
 
-                                                  <i
-                                                    className="fa fa-file"
-                                                    style={{
-                                                      fontSize: "24px",
-                                                      color: "#000",
-                                                    }}
-                                                  ></i>
+                                                 <File size={24} color="#000" />
                                                 )}
                                               </td>
                                               <td className="file_name">
@@ -377,7 +366,7 @@ const Paper = () => {
                                     className="btn btn-info text-decoration-none previestab"
                                     onClick={prev}
                                   >
-                                    <i className="pe-2 fa-regular fa-arrow-left-long"></i>{" "}
+                                    <ArrowLeft size={16}/>{" "}
                                     Previous
                                   </button>
 
@@ -387,7 +376,7 @@ const Paper = () => {
                                     onClick={(e) => handleSubmit(e)}
                                   >
                                     Save{" "}
-                                    <i className="ps-2 fa-regular fa-arrow-right-long"></i>
+                                    <ArrowRight size={16}/>
                                   </Button>
                                 </div>
                               </div>

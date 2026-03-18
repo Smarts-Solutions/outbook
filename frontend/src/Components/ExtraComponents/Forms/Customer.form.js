@@ -1,5 +1,7 @@
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { ArrowLeft,ArrowRight } from "lucide-react";
 
 const ReusableForm = ({
   initialValues,
@@ -668,7 +670,7 @@ const ReusableForm = ({
               className="btn btn-info m-2"
               onClick={closeBtn}
             >
-              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
+              <ArrowLeft size={16}/> Previous
             </button>
 
             <button
@@ -676,7 +678,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name} <i className="ps-2 fa-regular fa-arrow-right-long"></i>
+              {btn_name} <ArrowRight size={16}/>
             </button>
           </div>
         ) : (
@@ -686,7 +688,7 @@ const ReusableForm = ({
               className="btn btn-info m-2"
               onClick={closeBtn}
             >
-              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Cancel
+             <ArrowLeft size={16}/> Cancel
             </button>
 
             <button
@@ -696,7 +698,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name} <i className="ps-2 fa-regular fa-arrow-right-long"></i>
+              {btn_name} <ArrowRight size={16}/>
             </button>
           </div>
         )}

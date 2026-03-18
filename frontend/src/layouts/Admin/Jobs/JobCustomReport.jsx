@@ -18,6 +18,7 @@ import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 import { useNavigate } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 import { AsyncPaginate } from "react-select-async-paginate";
+import { Download, Trash } from "lucide-react";
 
 function JobCustomReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -112,8 +113,6 @@ function JobCustomReport() {
       .trim();
   }
 
-
-
   // Get All Jobs
   // const GetAllJobs = async (filter) => {
   //   const req = { action: "get_jobs_filter", filters: filter };
@@ -154,63 +153,75 @@ function JobCustomReport() {
             )}]<br/>
             
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
-            ${item.customer_name
+            ${
+              item.customer_name
                 ? `⮞ Customer : ${item.customer_name}<br/>`
                 : ""
-              }
+            }
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.account_manager_name
+            ${
+              item.account_manager_name
                 ? `⮞ Account Manager Name : ${item.account_manager_name}<br/>`
                 : ""
-              }
-            ${item.allocated_to_name
+            }
+            ${
+              item.allocated_to_name
                 ? `⮞ Allocated To : ${item.allocated_to_name}<br/>`
                 : ""
-              }
-            ${item.reviewer_name
+            }
+            ${
+              item.reviewer_name
                 ? `⮞ Reviewer : ${item.reviewer_name}<br/>`
                 : ""
-              }
-            ${item.allocated_to_other_name
+            }
+            ${
+              item.allocated_to_other_name
                 ? `⮞ Allocated To (Other) : ${item.allocated_to_other_name}<br/>`
                 : ""
-              }
-            ${item.service_name
+            }
+            ${
+              item.service_name
                 ? `⮞ Service Type : ${item.service_name}<br/>`
                 : ""
-              }
-            ${item.job_type_name
+            }
+            ${
+              item.job_type_name
                 ? `⮞ Job Type : ${item.job_type_name}<br/>`
                 : ""
-              }
-            ${item.status_type_name
+            }
+            ${
+              item.status_type_name
                 ? `⮞ Status : ${item.status_type_name}<br/>`
                 : ""
-              }
+            }
 
-            ${item.timePeriod
+            ${
+              item.timePeriod
                 ? `⮞ Time Period : ${formatStringToTitleCase(
-                  item.timePeriod,
-                )}<br/>`
+                    item.timePeriod,
+                  )}<br/>`
                 : ""
-              }
-            ${item.displayBy
+            }
+            ${
+              item.displayBy
                 ? `⮞ Display By : ${formatStringToTitleCase(
-                  item.displayBy,
-                )}<br/>`
+                    item.displayBy,
+                  )}<br/>`
                 : ""
-              }
-            ${!["", null, "null", undefined].includes(item.fromDate)
+            }
+            ${
+              !["", null, "null", undefined].includes(item.fromDate)
                 ? `⮞ From Date : ${formatStringToTitleCase(
-                  item.fromDate,
-                  "date",
-                )}<br/>`
+                    item.fromDate,
+                    "date",
+                  )}<br/>`
                 : ""
-              }
-            ${!["", null, "null", undefined].includes(item.toDate)
+            }
+            ${
+              !["", null, "null", undefined].includes(item.toDate)
                 ? `⮞ To Date : ${formatStringToTitleCase(item.toDate, "date")}`
                 : ""
-              }
+            }
           `,
 
             filters: item.filter_record,
@@ -229,7 +240,6 @@ function JobCustomReport() {
     GetAllJobs({ searchValue: "", pageNo: 1 });
     GetAllCustomer({ searchValue: "", pageNo: 1 });
     GetAllClient({ searchValue: "", pageNo: 1 });
-
 
     GetAllService("all");
     GetAllJobType("all");
@@ -560,7 +570,6 @@ function JobCustomReport() {
   };
 
   const exportToCSV = async (data1) => {
-
     setLoading(true);
     const req = {
       action: "getJobCustomReport",
@@ -576,7 +585,7 @@ function JobCustomReport() {
         setLoading(false);
         // console.log("filter response ", response);
         if (response.status) {
-          const data = response.data
+          const data = response.data;
           const colMap = {
             job_id: "Job Name",
             customer_id: "Customer Name",
@@ -592,7 +601,8 @@ function JobCustomReport() {
             allocated_on: "Allocated On",
             job_priority: "Job Priority",
             engagement_model: "Engagement Model",
-            customer_account_manager_officer: "Customer Account Manager (Officer)",
+            customer_account_manager_officer:
+              "Customer Account Manager (Officer)",
             status_updation_date: "Status Updation Date",
             Transactions_Posting_id_2: "Transactions Posting",
             Number_of_Bank_Transactions_id_2: "Number of Bank Transactions",
@@ -605,7 +615,8 @@ function JobCustomReport() {
             Number_of_Total_Transactions_id_2: "Number of Total Transactions",
             submission_deadline: "Submission Deadline",
             Tax_Year_id_4: "Tax Year",
-            If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Who is doing Bookkeeping",
+            If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+              "Who is doing Bookkeeping",
             Whose_Tax_Return_is_it_id_4: "Whose Tax Return is it",
             Type_of_Payslip_id_3: "Type of Payslip",
             Year_Ending_id_1: "Year Ending",
@@ -662,29 +673,30 @@ function JobCustomReport() {
             });
           });
 
-          const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n");
-          const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+          const csvContent = [headers, ...rows]
+            .map((r) => r.join(","))
+            .join("\n");
+          const blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           link.download = "JobCustomReportData.csv";
           link.click();
           setLoading(false);
-          return
-
+          return;
         } else {
           setLoading(false);
-          return
+          return;
         }
       })
       .catch((error) => {
         setLoading(false);
         return;
       });
-    
   };
 
   const handleFilterChange = (e, type) => {
-
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
       let additionalFieldArray = sortByReference(values);
@@ -799,7 +811,6 @@ function JobCustomReport() {
       //   }
       // }
     }
-
   };
 
   const addAndRemoveGroupBy = (value, type) => {
@@ -818,7 +829,7 @@ function JobCustomReport() {
       //   } else {
       //     GetAllClient(filters); // fetch filtered clients
       //   }
-      // } 
+      // }
 
       if (value == "account_manager_id") {
         if (["", null, undefined].includes(filters.job_id)) {
@@ -1214,7 +1225,6 @@ function JobCustomReport() {
   };
 
   const handleFilterSelect = async (selected) => {
-
     setFilterId(selected.value);
     // set filters from selected
     // console.log("selected  1 --", selected);
@@ -1404,9 +1414,6 @@ function JobCustomReport() {
 
   //  { job_id: row?.job_id, timesheet_job_id: row?.timesheet_job_id, data: updatedData, goto: "client", activeTab: location?.state?.activeTab }
 
-
-
-
   ///////////////---- FOR JOB SERACH  START-----//////////////
   const [jobOptions, setJobOptions] = useState([]);
   const [page, setPage] = useState(1);
@@ -1415,7 +1422,11 @@ function JobCustomReport() {
   const cacheRef = useRef({});
   const debounceTimeout = useRef(null);
 
-  const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false }) => {
+  const GetAllJobs = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  }) => {
     if (loading) return;
 
     const cacheKey = `${searchValue}_${pageNo}`;
@@ -1429,10 +1440,10 @@ function JobCustomReport() {
     // }
     if (cacheRef.current[cacheKey]) {
       const cached = cacheRef.current[cacheKey];
-      setJobOptions(prev => {
+      setJobOptions((prev) => {
         const combined = [...prev, ...cached];
         const unique = Array.from(
-          new Map(combined.map(item => [item.value, item])).values()
+          new Map(combined.map((item) => [item.value, item])).values(),
         );
         return unique;
       });
@@ -1447,36 +1458,34 @@ function JobCustomReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20
-      }
+        limit: 20,
+      },
     };
     const data = { req, authToken: token };
 
     try {
-
       const response = await dispatch(JobAction(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map(item => ({
+        const formatted = response.data.map((item) => ({
           value: item.job_id,
-          label: item.job_code_id
+          label: item.job_code_id,
         }));
         cacheRef.current[cacheKey] = formatted;
         // setJobOptions(prev =>
         //   append ? [...prev, ...formatted] : formatted
         // );
-        setJobOptions(prev => {
+        setJobOptions((prev) => {
           const combined = [...prev, ...formatted];
           const unique = Array.from(
-            new Map(combined.map(item => [item.value, item])).values()
+            new Map(combined.map((item) => [item.value, item])).values(),
           );
           return unique;
         });
         setHasMore(response.data.length === 20);
         setPage(pageNo);
       }
-    } catch (err) { }
+    } catch (err) {}
     setLoading(false);
-
   };
 
   const handleSearch = (value) => {
@@ -1489,11 +1498,8 @@ function JobCustomReport() {
       setPage(1);
       GetAllJobs({ searchValue: value, pageNo: 1 });
     }, 500);
-
   };
   ///////////////---- FOR JOB SERACH  END-----//////////////
-
-
 
   ///////////////---- FOR CUSTOMER SERACH  START-----//////////////
   const [customerPage, setCustomerPage] = useState(1);
@@ -1504,9 +1510,11 @@ function JobCustomReport() {
   const customerCache = useRef({});
   const debounceRef = useRef(null);
 
-  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
-
-
+  const GetAllCustomer = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  }) => {
     if (loading) return;
     const cacheKey = `${searchValue}_${pageNo}`;
     // if (customerCache.current[cacheKey]) {
@@ -1518,10 +1526,10 @@ function JobCustomReport() {
     // }
     if (customerCache.current[cacheKey]) {
       const cached = customerCache.current[cacheKey];
-      setCustomerAllData(prev => {
+      setCustomerAllData((prev) => {
         const combined = [...prev, ...cached];
         const unique = Array.from(
-          new Map(combined.map(item => [item.value, item])).values()
+          new Map(combined.map((item) => [item.value, item])).values(),
         );
         return unique;
       });
@@ -1535,19 +1543,17 @@ function JobCustomReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20
-      }
+        limit: 20,
+      },
     };
 
     const data = { req: req, authToken: token };
     try {
-
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
-
         const formatted = response.data.map((item) => ({
           value: item.id,
-          label: item.trading_name
+          label: item.trading_name,
         }));
 
         customerCache.current[cacheKey] = formatted;
@@ -1555,25 +1561,20 @@ function JobCustomReport() {
         // setCustomerAllData(prev =>
         //   append ? [...prev, ...formatted] : formatted
         // );
-        setCustomerAllData(prev => {
+        setCustomerAllData((prev) => {
           const combined = [...prev, ...formatted];
           const unique = Array.from(
-            new Map(combined.map(item => [item.value, item])).values()
+            new Map(combined.map((item) => [item.value, item])).values(),
           );
           return unique;
-
         });
 
         setCustomerHasMore(response.data.length === 20);
         setCustomerPage(pageNo);
-
       } else {
-
         if (!append) setCustomerAllData([]);
-
       }
-
-    } catch (error) { }
+    } catch (error) {}
 
     setLoading(false);
   };
@@ -1587,11 +1588,9 @@ function JobCustomReport() {
       setCustomerSearch(value);
       GetAllCustomer({
         searchValue: value,
-        pageNo: 1
+        pageNo: 1,
       });
-
     }, 500);
-
   };
 
   //   const handleCustomerSearch = (value) => {
@@ -1609,8 +1608,6 @@ function JobCustomReport() {
 
   ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
 
-
-
   /////////////////---- FOR CLIENT SERACH  START-----//////////////
   const [clientPage, setClientPage] = useState(1);
   const [clientHasMore, setClientHasMore] = useState(true);
@@ -1620,8 +1617,11 @@ function JobCustomReport() {
   const clientCache = useRef({});
   const clientDebounceRef = useRef(null);
 
-  const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false }) => {
-
+  const GetAllClient = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  }) => {
     if (loading) return;
     const cacheKey = `${searchValue}_${pageNo}`;
     // Cache check
@@ -1636,10 +1636,10 @@ function JobCustomReport() {
 
     if (clientCache.current[cacheKey]) {
       const cached = clientCache.current[cacheKey];
-      setClientAllData(prev => {
+      setClientAllData((prev) => {
         const combined = [...prev, ...cached];
         const unique = Array.from(
-          new Map(combined.map(item => [item.value, item])).values()
+          new Map(combined.map((item) => [item.value, item])).values(),
         );
         return unique;
       });
@@ -1654,19 +1654,18 @@ function JobCustomReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20
-      }
+        limit: 20,
+      },
     };
 
     const data = { req, authToken: token };
 
     try {
-
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map((item) => ({
           value: item.id,
-          label: `${item.client_name} (${item.client_code})`
+          label: `${item.client_name} (${item.client_code})`,
         }));
 
         // Cache store
@@ -1674,25 +1673,22 @@ function JobCustomReport() {
         // setClientAllData(prev =>
         //   append ? [...prev, ...formatted] : formatted
         // );
-        setClientAllData(prev => {
+        setClientAllData((prev) => {
           const combined = [...prev, ...formatted];
           const unique = Array.from(
-            new Map(combined.map(item => [item.value, item])).values()
+            new Map(combined.map((item) => [item.value, item])).values(),
           );
           return unique;
         });
 
         setClientHasMore(response.data.length === 20);
         setClientPage(pageNo);
-
       } else {
         if (!append) setClientAllData([]);
       }
-
-    } catch (error) { }
+    } catch (error) {}
 
     setLoading(false);
-
   };
 
   const handleClientSearch = (value) => {
@@ -1705,15 +1701,12 @@ function JobCustomReport() {
       setClientSearch(value);
       GetAllClient({
         searchValue: value,
-        pageNo: 1
+        pageNo: 1,
       });
     }, 500);
   };
 
   /////////////////---- FOR CLIENT SERACH  END-----//////////////
-
-
-
 
   return (
     <div className="container-fluid pb-3">
@@ -1752,8 +1745,8 @@ function JobCustomReport() {
                     value={
                       getAllFilterData && getAllFilterData.length > 0
                         ? getAllFilterData.find(
-                          (opt) => Number(opt.value) === Number(filterId),
-                        ) || null
+                            (opt) => Number(opt.value) === Number(filterId),
+                          ) || null
                         : null
                     }
                     onChange={handleFilterSelect}
@@ -1762,12 +1755,13 @@ function JobCustomReport() {
                   />
 
                   {!["", null, undefined].includes(filterId) && (
-                    <i
-                      className="fa fa-trash"
+                    <Trash
+                      size={18}
+                      color="red"
                       title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
+                      onClick={deleteFilterIdFunction}
+                      style={{ cursor: "pointer" }}
+                    />
                   )}
                 </div>
               </div>
@@ -1783,7 +1777,7 @@ function JobCustomReport() {
                     id="btn-export"
                     onClick={() => exportToCSV(showData)}
                   >
-                    <i className="fa fa-download" aria-hidden="true"></i>
+                    <Download size={16} />
                     <span>Export Data</span>
                   </button>
                 </div>
@@ -1881,8 +1875,8 @@ function JobCustomReport() {
               isMulti
               closeMenuOnSelect={false}
               options={jobOptions}
-              value={jobOptions.filter(opt =>
-                filters.job_id.includes(opt.value)
+              value={jobOptions.filter((opt) =>
+                filters.job_id.includes(opt.value),
               )}
               // onChange={(selectedOptions) =>
               //   handleFilterChange({
@@ -1896,13 +1890,13 @@ function JobCustomReport() {
               // }
               onChange={(selectedOptions) => {
                 const values = selectedOptions
-                  ? selectedOptions.map(opt => opt.value)
+                  ? selectedOptions.map((opt) => opt.value)
                   : [];
                 handleFilterChange({
                   target: {
                     key: "job_id",
-                    value: values
-                  }
+                    value: values,
+                  },
                 });
                 // Call API only when empty
                 if (values.length === 0) {
@@ -1921,7 +1915,7 @@ function JobCustomReport() {
                   GetAllJobs({
                     searchValue: search,
                     pageNo: page + 1,
-                    append: true
+                    append: true,
                   });
                 }
               }}
@@ -1941,8 +1935,6 @@ function JobCustomReport() {
               // }}
               className="shadow-sm select-staff rounded-pill"
             />
-
-
           </div>
         )}
 
@@ -1955,7 +1947,7 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               options={customerAllData}
               value={customerAllData.filter((opt) =>
-                filters?.customer_id?.includes(opt.value)
+                filters?.customer_id?.includes(opt.value),
               )}
               // onChange={(selectedOptions) =>
               //   handleFilterChange({
@@ -1969,13 +1961,13 @@ function JobCustomReport() {
               // }
               onChange={(selectedOptions) => {
                 const values = selectedOptions
-                  ? selectedOptions.map(opt => opt.value)
+                  ? selectedOptions.map((opt) => opt.value)
                   : [];
                 handleFilterChange({
                   target: {
                     key: "customer_id",
-                    value: values
-                  }
+                    value: values,
+                  },
                 });
                 // Call API only when empty
                 if (values.length === 0) {
@@ -1993,7 +1985,7 @@ function JobCustomReport() {
                   GetAllCustomer({
                     searchValue: customerSearch,
                     pageNo: customerPage + 1,
-                    append: true
+                    append: true,
                   });
                 }
               }}
@@ -2021,7 +2013,7 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               options={clientAllData}
               value={clientAllData.filter((opt) =>
-                filters?.client_id?.includes(opt.value)
+                filters?.client_id?.includes(opt.value),
               )}
               // onChange={(selectedOptions) =>
               //   handleFilterChange({
@@ -2035,13 +2027,13 @@ function JobCustomReport() {
               // }
               onChange={(selectedOptions) => {
                 const values = selectedOptions
-                  ? selectedOptions.map(opt => opt.value)
+                  ? selectedOptions.map((opt) => opt.value)
                   : [];
                 handleFilterChange({
                   target: {
                     key: "client_id",
-                    value: values
-                  }
+                    value: values,
+                  },
                 });
                 // Call API only when empty
                 if (values.length === 0) {
@@ -2059,7 +2051,7 @@ function JobCustomReport() {
                   GetAllClient({
                     searchValue: clientSearch,
                     pageNo: clientPage + 1,
-                    append: true
+                    append: true,
                   });
                 }
               }}
@@ -2622,13 +2614,13 @@ function JobCustomReport() {
             <div className="table-responsive fixed-table-header">
               <table
                 className="table rdt_Table"
-              // className="table table-bordered"
-              // style={{
-              //   fontSize: "14px",
-              //   width: "100%",
-              //   overflowX: "auto",
-              //   display: "block",
-              // }}
+                // className="table table-bordered"
+                // style={{
+                //   fontSize: "14px",
+                //   width: "100%",
+                //   overflowX: "auto",
+                //   display: "block",
+                // }}
               >
                 <thead
                 // className="rdt_TableHead"

@@ -5,6 +5,7 @@ import Service from "./Service";
 import Engagement from "./Engagement";
 import Paper from "./Paper";
 import Information from "./Information";
+import { ArrowLeft } from "lucide-react";
 let detailsInitialState = {
     name: "",
     age: "",
@@ -75,12 +76,12 @@ const AddCustomer = () => {
                         type="button"
                         className="btn p-0" 
                     >
-                        <i className="pe-3 fa-regular fa-arrow-left-long  fs-4" onClick={()=>
-                        {
-                            localStorage.removeItem('newCustomerId');
-                            window.history.back();
-                        }
-                            }></i>
+                       <ArrowLeft size={20} className="me-3 cursor-pointer" 
+  onClick={() => {
+    localStorage.removeItem("newCustomerId");
+    window.history.back();
+  }}
+/>
                     </button>
                     <h3 className='mt-0'>Create New Customer</h3>
                 </div>

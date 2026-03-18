@@ -8,6 +8,7 @@ import sweatalert from 'sweetalert2';
 import { convertDate } from '../../../Utils/Comman_function';
 
 import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder ,deleteFolderFromFolder } from "../../../Utils/graphAPI";
+import { FileText,File ,Eye  } from "lucide-react";
 
 const Queries = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -420,22 +421,10 @@ const Queries = ({ getAccessDataJob, goto }) => {
           />
         ) : row.file_type === "application/pdf" ? (
 
-          <i
-            className="fa fa-file-pdf"
-            style={{
-              fontSize: "24px",
-              color: "#FF0000",
-            }}
-          ></i>
+          <FileText size={24} color="#FF0000" />
         ) : (
 
-          <i
-            className="fa fa-file"
-            style={{
-              fontSize: "24px",
-              color: "#000",
-            }}
-          ></i>
+         <File size={24} color="#000" />
         )
 
         : "", reorder: false, sortable: true
@@ -445,7 +434,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
       cell: (row) => (
         <div className="d-flex">
           <button className="view-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
-            <i className="fa fa-eye fs-6 text-warning" />
+           <Eye size={16} className="text-warning" />
           </button>
           {
             row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?

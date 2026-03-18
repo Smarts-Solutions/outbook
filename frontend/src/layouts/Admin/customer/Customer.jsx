@@ -12,6 +12,7 @@ import {
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import { convertDate } from "../../../Utils/Comman_function";
+import { Download,Plus } from "lucide-react";
 
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 
@@ -652,7 +653,7 @@ const Customer = () => {
                   to="/admin/addcustomer"
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
-                  <i className="fa fa-plus" /> Add Customer
+                   <Plus size={16}/> Add Customer
                 </Link>
               </div>
             ) : (
@@ -662,7 +663,7 @@ const Customer = () => {
                     to="/admin/addcustomer"
                     className="btn btn-outline-info fw-bold float-end border-3"
                   >
-                    <i className="fa fa-plus" /> Add Customer
+                    <Plus size={16}/> Add Customer
                   </Link>
                 </div>
               )
@@ -719,10 +720,8 @@ const Customer = () => {
                               className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                               onClick={handleExport}
                             >
-                              <i
-                                className="fa fa-download"
-                                aria-hidden="true"
-                              ></i>
+                                   <Download size={16}/>
+
                               <span>Export Excel</span>
                             </button> */}
 
@@ -731,10 +730,8 @@ const Customer = () => {
                                 className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                                 onClick={handleExport}
                               >
-                                <i
-                                  className="fa fa-download"
-                                  aria-hidden="true"
-                                ></i>
+                                    <Download size={16}/>
+
                                 <span>Export Excel</span>
                               </button>
                             )}

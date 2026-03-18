@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DivideCircle, Trash2 } from "lucide-react";
+import { DivideCircle, Trash2, Save, Pencil, Check } from "lucide-react";
 
 const TimesheetNew = () => {
   const [addtask, setAddtask] = useState(false);
@@ -106,7 +106,7 @@ const TimesheetNew = () => {
                   <div className="report-data">
                     <div className="col-12 d-flex justify-content-end mb-3">
                       <button className=" edit-icon">
-                        <i className="fa fa-pencil"></i>
+                        <Pencil />
                       </button>
                       <button className=" delete-icon">
                         <i className="ti-trash text-danger"></i>
@@ -188,14 +188,17 @@ const TimesheetNew = () => {
                         </div>
                       </div>
                       <div className="col-12 d-flex justify-content-end">
-                        <button className="btn btn-info" onClick={(e) => {
-             setAddtask(true);
-              
-            }}>
-                          <i className="fa fa-check pe-1"></i>Save
+                        <button
+                          className="btn btn-info"
+                          onClick={(e) => {
+                            setAddtask(true);
+                          }}
+                        >
+                          <Check size={18} />
+                          Save
                         </button>
                         <button className="btn btn-outline-success ms-2">
-                          <i className="far fa-save pe-1"></i>Submit
+                          <Save size={16} /> Submit
                         </button>
                       </div>
                     </div>
@@ -204,12 +207,11 @@ const TimesheetNew = () => {
                   <button className="d-flex btn btn-info fw-normal px-2 my-3">
                     <i class="ri-add-circle-fill fs-4 pe-1"></i>Add Timesheet
                   </button>
-                 
 
                   <div className="report-data">
                     <div className="col-12 d-flex justify-content-end mb-3">
                       <button className=" edit-icon">
-                        <i className="fa fa-pencil"></i>
+                        <pencil />
                       </button>
                       <button className=" delete-icon">
                         <i className="ti-trash text-danger"></i>
@@ -327,10 +329,10 @@ const TimesheetNew = () => {
                       </div>
                       <div className="col-12 d-flex justify-content-end">
                         <button className="btn btn-info">
-                          <i className="fa fa-check pe-1"></i>Save
+                          <Check size={18} /> Save
                         </button>
                         <button className="btn btn-outline-success ms-2">
-                          <i className="far fa-save pe-1"></i>Submit
+                          <Save size={16} /> Submit
                         </button>
                       </div>
                     </div>
@@ -373,17 +375,13 @@ const TimesheetNew = () => {
             }}
           >
             <div className="modal-body">
-          
-           
-             
               <div className="col-lg-12">
                 <label htmlFor="customername-field" className="form-label">
                   Remark
                 </label>
                 <textarea
                   className="form-control cursor-pointer"
-                style={{minHeight:'100px'}}
-               
+                  style={{ minHeight: "100px" }}
                 />
               </div>
             </div>

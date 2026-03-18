@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getProfile } from "../../ReduxStore/Slice/Staff/staffSlice";
+import { Pencil} from "lucide-react";
 
 const Profile = () => {
   const dispatch = useDispatch(); 
@@ -80,7 +81,7 @@ const Profile = () => {
                     </li>
                     {/* <li className="">
                       <button className="btn btn-info">
-                        <i className="fa fa-edit pe-2"></i>Edit{" "}
+                       <Pencil size={16}/>Edit{" "}
                       </button>
                     </li> */}
                   </ul>

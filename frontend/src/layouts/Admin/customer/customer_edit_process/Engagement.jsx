@@ -9,6 +9,7 @@ import { useLocation } from "react-router-dom";
 import { GET_CUSTOMER_DATA, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
+import { ArrowLeft,ArrowRight } from "lucide-react";
 
 const checkboxOptions = [
   { id: "formCheck1", label: "FTE/Dedicated Staffing" },
@@ -1252,13 +1253,13 @@ const Engagement = () => {
                 type="default"
                 onClick={prev}
               >
-                <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
+               <ArrowLeft size={16}/> Previous
               </Button>
               <Button
                 className="btn btn-info text-white blue-btn"
                 onClick={handleSubmit}
               >
-                Next <i className="ps-2 fa-regular fa-arrow-right-long"></i>
+                Next <ArrowRight size={16}/>
               </Button>
             </div>
           </div>

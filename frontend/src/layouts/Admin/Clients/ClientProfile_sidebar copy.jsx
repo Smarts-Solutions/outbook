@@ -8,6 +8,7 @@ import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
+import { Briefcase, Plus, User  } from "lucide-react";
 
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 const ClientList = () => {
@@ -211,14 +212,14 @@ const ClientList = () => {
 
   // const tabs = [
   //   { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-  //   { id: "view client",label: "View Client", icon: "fa-solid fa-user" },
+  //   { id: "view client",label: "View Client", icon:<User size={16}/> },
   //   //{ id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   // ];
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon:<Briefcase size={16}/> },
     ...(clientDetailSingle.id !== ""
-      ? [{ id: "view client", label: "View Client", icon: "fa-solid fa-user" }]
+      ? [{ id: "view client", label: "View Client", icon: <User size={16}/> }]
       : []),
     // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
@@ -820,7 +821,7 @@ const ClientList = () => {
                           {
                             ((getAccessDataJob.insert == 1 || role === "SUPERADMIN") && clientData.length > 0) && (
                               <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
-                                <i className="fa fa-plus pe-1" /> Create Job
+                                 <Plus size={16}/> Create Job
                               </div>
                             )
                           }

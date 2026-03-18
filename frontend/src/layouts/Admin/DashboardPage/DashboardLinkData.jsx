@@ -12,6 +12,7 @@ import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import ReactPaginate from "react-paginate";
+import { Download,ArrowLeft,Plus } from "lucide-react";
 
 const JobStatus = () => {
   const dispatch = useDispatch();
@@ -1077,7 +1078,7 @@ const JobStatus = () => {
                     className="btn btn-info text-white blue-btn"
                     onClick={() => window.history.back()}
                   >
-                    <i className="fa fa-arrow-left pe-1" /> Back
+                    <ArrowLeft size={16}/> Back
                   </div>
 
                   {(role === "SUPERADMIN" ||
@@ -1088,7 +1089,7 @@ const JobStatus = () => {
                           to="/admin/addcustomer"
                           className="btn btn-outline-info fw-bold float-end border-3"
                         >
-                          <i className="fa fa-plus" /> Add Customer
+                          <Plus size={16}/> Add Customer
                         </Link>
                       </div>
                     )}
@@ -1099,7 +1100,8 @@ const JobStatus = () => {
                         className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                         onClick={handleExport}
                       >
-                        <i className="fa fa-download" aria-hidden="true"></i>
+                            <Download size={16}/>
+
                         <span>Export Excel</span>
                       </button>
                     </div>

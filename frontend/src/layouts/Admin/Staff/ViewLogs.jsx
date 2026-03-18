@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import Swal from "sweetalert2";
+import { ArrowLeft, Download ,Info } from "lucide-react";
 
 const ViewLogs = () => {
   const location = useLocation();
@@ -112,7 +113,7 @@ const handleExport = () => {
       className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2 me-2 float-end"
       onClick={handleExport}
     >
-      <i className="fa fa-download" aria-hidden="true"></i>
+     <Download size={16}/>
       <span>Export Excel</span>
     </button>
   )}
@@ -122,7 +123,7 @@ const handleExport = () => {
                 window.history.back();
               }}
             >
-              <i className="fa fa-arrow-left pe-1" /> Back
+             <ArrowLeft size={16}/> Back
             </div>
           </div>
         </div>
@@ -153,7 +154,7 @@ const handleExport = () => {
                     </div>
                     <div className="itemInfo">
                       <span>
-                        <i className="fa-solid fa-circle-info pe-1"></i>
+                       <Info size={16} className="me-1" />
                       </span>
                       {item.info}
                     </div>
@@ -206,7 +207,7 @@ const handleExport = () => {
               </div>
               <div className="itemInfo">
                 <span>
-                  <i className="fa-solid fa-circle-info pe-1"></i>
+                 <Info size={16} />
                 </span>
                 {item.info}
               </div>

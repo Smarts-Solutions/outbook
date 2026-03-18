@@ -10,6 +10,7 @@ import {
 import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import { Save, Plus, ArrowLeft, X } from "lucide-react";
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -18,12 +19,11 @@ const CreateCheckList = () => {
   const navigate = useNavigate();
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [tasks, setTasks] = useState([
-    { task_id: "", task_name: "", budgeted_hour: "" }
+    { task_id: "", task_name: "", budgeted_hour: "" },
   ]);
 
   const [errors, setErrors] = useState({});
   const [errors1, setErrors1] = useState({});
-
 
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || "",
@@ -88,7 +88,7 @@ const CreateCheckList = () => {
     service_id: "Please Select Service Type",
     job_type_id: "Please Select Job Type",
     check_list_name: "Please Enter Check List Name",
-   // status: "Please Select Status",
+    // status: "Please Select Status",
   };
 
   const handleInputChange = (e) => {
@@ -191,7 +191,7 @@ const CreateCheckList = () => {
     setTasks([...tasks, { task_name: "", budgeted_hour: "", task_id: null }]);
   };
 
-  const removeTask = (tsk ,index) => {
+  const removeTask = (tsk, index) => {
     setTasks((prevTasks) => {
       const newTasks = prevTasks.filter((item) => item.task_id !== tsk.task_id);
       return newTasks;
@@ -199,8 +199,6 @@ const CreateCheckList = () => {
   };
 
   const getJobTypeData = async (service_id) => {
-
-
     const req = { service_id, action: "get" };
     const data = { req, authToken: token };
 
@@ -243,17 +241,13 @@ const CreateCheckList = () => {
   const handleSubmit = async () => {
     let validationErrors = {};
 
-
-
-
-
     const formattedTasks = formatBudgetedHours();
 
     const isValid = validateAllFields();
     if (!isValid) {
       return;
     }
-    if(selectedClientType.length==0){
+    if (selectedClientType.length == 0) {
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
       return;
     }
@@ -302,7 +296,7 @@ const CreateCheckList = () => {
             icon: "success",
             confirmButtonText: "Ok",
             timer: 1000,
-            timerProgressBar: true
+            timerProgressBar: true,
           });
 
           // Reset form and tasks after successful submission
@@ -316,7 +310,7 @@ const CreateCheckList = () => {
           });
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
 
-          sessionStorage.setItem('settingTab', location?.state?.settingTab);
+          sessionStorage.setItem("settingTab", location?.state?.settingTab);
           window.history.back();
         }
       })
@@ -344,11 +338,11 @@ const CreateCheckList = () => {
             type="button"
             className="btn p-0"
             onClick={() => {
-              sessionStorage.setItem('settingTab', location?.state?.settingTab)
-              window.history.back()
+              sessionStorage.setItem("settingTab", location?.state?.settingTab);
+              window.history.back();
             }}
           >
-            <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
+            <ArrowLeft size={16} />
           </button>
           <h3 className="card-title mb-0">Create New Checklist</h3>
         </div>
@@ -359,7 +353,11 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
                   <select
-                    className={errors.service_id ? "error-field form-select" : "form-select"}
+                    className={
+                      errors.service_id
+                        ? "error-field form-select"
+                        : "form-select"
+                    }
                     name="service_id"
                     defaultValue={formData.service_id}
                     onChange={(e) => {
@@ -370,10 +368,7 @@ const CreateCheckList = () => {
                     <option value="">Please Select Service Type</option>
                     {formData.service_id &&
                       formData.service_id.map((service) => (
-                        <option
-                          key={service.id}
-                          value={service.id}
-                        >
+                        <option key={service.id} value={service.id}>
                           {service.name}
                         </option>
                       ))}
@@ -389,7 +384,11 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Job Type</label>
                   <select
-                    className={errors.job_type_id ? "error-field form-select" : "form-select"}
+                    className={
+                      errors.job_type_id
+                        ? "error-field form-select"
+                        : "form-select"
+                    }
                     // className="default-select wide form-select"
                     name="job_type_id"
                     defaultValue={formData.job_type_id}
@@ -436,8 +435,11 @@ const CreateCheckList = () => {
                   <label className="form-label">Check List Name</label>
                   <input
                     type="text"
-
-                    className={errors.check_list_name ? "error-field form-control" : "form-control"}
+                    className={
+                      errors.check_list_name
+                        ? "error-field form-control"
+                        : "form-control"
+                    }
                     placeholder="Check List Name"
                     name="check_list_name"
                     defaultValue={formData.check_list_name}
@@ -455,7 +457,9 @@ const CreateCheckList = () => {
                   <label className="form-label">Status</label>
 
                   <select
-                    className={errors.status ? "error-field form-select" : "form-select"}
+                    className={
+                      errors.status ? "error-field form-select" : "form-select"
+                    }
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
@@ -473,11 +477,11 @@ const CreateCheckList = () => {
           </div>
 
           <button className="btn btn-info mt-3" onClick={addTask}>
-            <i className="fa fa-plus"></i>Add Task
+            <Plus size={16} /> Add Task
           </button>
 
           <div className="mt-4">
-          {tasks.map((task, index) => (
+            {tasks.map((task, index) => (
               <div key={task.task_id} className="row  mt-4 ">
                 <div className="col-lg-5 mb-lg-0 mb-3">
                   <div>
@@ -537,9 +541,11 @@ const CreateCheckList = () => {
                     <div className="hours-div w-50">
                       <input
                         type="number"
-
-                        className={errors1[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
-
+                        className={
+                          errors1[`budgeted_hour_${index}`]
+                            ? "error-field form-control"
+                            : "form-control"
+                        }
                         placeholder="Hours"
                         name="hours"
                         defaultValue={task.budgeted_hour?.hours || ""}
@@ -570,10 +576,12 @@ const CreateCheckList = () => {
                       {errors1[`budgeted_hour_${index}`]}
                     </p>
                   )}
-
                 </div>
                 <div className="col-lg-2">
-                  <button className="delete-icon mt-4" onClick={(e) => removeTask(task, index)}>
+                  <button
+                    className="delete-icon mt-4"
+                    onClick={(e) => removeTask(task, index)}
+                  >
                     <i className="ti-trash text-danger "></i>
                   </button>
                 </div>
@@ -585,16 +593,21 @@ const CreateCheckList = () => {
             <button
               className="btn btn-secondary "
               onClick={(e) => {
-                sessionStorage.setItem('settingTab', location?.state?.settingTab)
-                window.history.back()
-              }
-              }
+                sessionStorage.setItem(
+                  "settingTab",
+                  location?.state?.settingTab,
+                );
+                window.history.back();
+              }}
             >
-              <i className="fa fa-times pe-1"></i>
+              <X size={16} />
               Cancel
             </button>
-            <button className="btn btn-outline-success ms-2" onClick={handleSubmit}>
-              <i className="far fa-save pe-1"></i> Submit
+            <button
+              className="btn btn-outline-success ms-2"
+              onClick={handleSubmit}
+            >
+              <Save size={16} /> Submit
             </button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { convertDate } from "../../../Utils/Comman_function";
 import ReactPaginate from "react-paginate";
 import { useNavigate } from "react-router-dom";
+import { Download } from "lucide-react";
 
 const JobStatus = () => {
   const navigate = useNavigate();
@@ -769,7 +770,7 @@ const JobStatus = () => {
                   className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
                   onClick={handleExport}
                 >
-                  <i className="fa fa-download" aria-hidden="true"></i>
+                 <Download size={16}/>
                   <span>Export Excel</span>
                 </button>
               </div>

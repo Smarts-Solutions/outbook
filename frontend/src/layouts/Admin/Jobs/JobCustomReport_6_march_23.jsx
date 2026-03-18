@@ -13,10 +13,11 @@ import * as XLSX from "xlsx";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
-import { TextSelect } from "lucide-react";
 import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 import { useNavigate } from "react-router-dom";
 import ReactPaginate from "react-paginate";
+import { Download,Trash } from "lucide-react";
+
 
 function JobCustomReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -1556,12 +1557,13 @@ function JobCustomReport() {
                   />
 
                   {!["", null, undefined].includes(filterId) && (
-                    <i
-                      className="fa fa-trash"
-                      title="Delete Filter"
-                      onClick={() => deleteFilterIdFunction()}
-                      style={{ cursor: "pointer", color: "red" }}
-                    ></i>
+                   <Trash
+  size={18}
+  color="red"
+  title="Delete Filter"
+  onClick={deleteFilterIdFunction}
+  style={{ cursor: "pointer" }}
+/>
                   )}
                 </div>
               </div>
@@ -1578,7 +1580,8 @@ function JobCustomReport() {
                   id="btn-export"
                   onClick={() => exportToCSV(showData)}
                 >
-                  <i className="fa fa-download" aria-hidden="true"></i>
+                      <Download size={16}/>
+
                   <span>Export Data</span>
                 </button>
               </div>
@@ -1592,7 +1595,8 @@ function JobCustomReport() {
                     id="btn-export"
                     onClick={() => exportToCSV(showData)}
                   >
-                    <i className="fa fa-download" aria-hidden="true"></i>
+                        <Download size={16}/>
+
                     <span>Export Data</span>
                   </button>
                 </div>

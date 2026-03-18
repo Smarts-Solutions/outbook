@@ -22,6 +22,7 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
+import { Download, Ellipsis, Plus, Save, Trash, User, User2, X } from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -506,7 +507,7 @@ const StaffPage = () => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  <Ellipsis size={16} />
                 </button>
                 <div
                   className="dropdown-menu custom-dropdown"
@@ -1183,7 +1184,7 @@ const StaffPage = () => {
                           formik.resetForm();
                         }}
                       >
-                        <i className="fa fa-plus" /> Add Staff
+                        <Plus size={16} /> Add Staff
                       </button>
                     )}
                   </div>
@@ -1209,7 +1210,7 @@ const StaffPage = () => {
                   className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                   onClick={handleExport}
                 >
-                  <i className="fa fa-download" aria-hidden="true" />
+                  <Download size={16} />
                   <span>Export Excel</span>
                 </button>
               </div>
@@ -1505,7 +1506,7 @@ const StaffPage = () => {
             color="primary"
             onClick={handleUpdate}
           >
-            <i className="far fa-save pe-1"></i>
+           <Save size={16}/>
             Update
           </Button>
         </div>
@@ -1585,7 +1586,7 @@ const StaffPage = () => {
 
           <div className="mb-4">
             <label className="form-label fw-semibold">
-              <i className="bi bi-person-fill"></i>Staff to Replace:
+             <User size={16}/> Staff to Replace:
             </label>
 
             <Select
@@ -1640,7 +1641,7 @@ const StaffPage = () => {
           <div className="d-grid gap-2">
             {selectedStaff && (
               <button onClick={handleDeleteClick} className="btn btn-danger">
-                <i className="bi bi-trash"></i> Delete
+               <Trash size={16}/> Delete
               </button>
             )}
             <button
@@ -1650,14 +1651,14 @@ const StaffPage = () => {
               }}
               className="btn btn-secondary"
             >
-              <i className="bi bi-x-circle"></i> Cancel
+             <X size={16}/> Cancel
             </button>
           </div>
 
           {/* {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
-                <i className="bi bi-people"></i> Customers Assigned:
+               <User2 size={16}/> Customers Assigned:
               </h6>
               <ul className="list-group">
                 {deleteStaffCustomer.map((customer) => (
@@ -1680,7 +1681,7 @@ const StaffPage = () => {
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
-                <i className="bi bi-people"></i> Customers Assigned:
+               <User2 size={16}/> Customers Assigned:
               </h6>
 
               <ul className="list-group">
@@ -1729,7 +1730,7 @@ const StaffPage = () => {
         <div className="modal-body">
           <div className="mb-4">
             <label htmlFor="staff-select" className="form-label fw-semibold">
-              <i className="bi bi-person-fill me-2"></i>Staff to Replace
+            <user size={16}/> Staff to Replace
             </label>
 
             <div className="dropdown w-100">
@@ -1788,14 +1789,14 @@ const StaffPage = () => {
               }}
               className="btn btn-secondary"
             >
-              <i className="bi bi-x-circle me-1"></i> Cancel
+             < X size={16}/> Cancel
             </button>
           </div>
 
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
-                <i className="bi bi-people"></i> Customers Assigned:
+               <User2 size={16}/> Customers Assigned:
               </h6>
               <ul className="list-group">
                 {deleteStaffCustomer.map((customer) => (

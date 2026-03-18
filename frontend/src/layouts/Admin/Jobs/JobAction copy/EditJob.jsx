@@ -13,6 +13,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from 'react-select';
+import { Save,Plus,ArrowLeft, Pencil, X } from "lucide-react";
 
 const EditJob = () => {
   const location = useLocation();
@@ -2057,7 +2058,7 @@ const EditJob = () => {
                     window.history.back();
                   }}
                 >
-                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
+                  <ArrowLeft size={16}/>
                 </button>
                 <h3 className="card-title mb-0">Update Job</h3>
               </div>
@@ -3713,7 +3714,7 @@ const EditJob = () => {
                                                   setShowAddJobModal(true)
                                                 }
                                               >
-                                                <i className="fa fa-plus"></i>
+                                                <Plus size={16}/>
                                                 Add Task
                                               </button>
                                             </div>
@@ -3881,14 +3882,14 @@ const EditJob = () => {
                                     }}
                                   >
                                     {" "}
-                                    <i className="fa fa-times"></i> Close
+                                   < X size={16}/> Close
                                   </Button>
                                   <Button
                                     variant="btn btn-outline-success float-end "
                                     onClick={handleAddCheckList}
                                   >
                                     {" "}
-                                    <i className="far fa-save pe-1"></i>Submit
+                                   <Save size={16}/> Submit
                                   </Button>
                                 </Modal.Footer>
                               </Modal>
@@ -3987,7 +3988,7 @@ const EditJob = () => {
                                     HandleReset();
                                   }}
                                 >
-                                  <i className="fa fa-times"></i> Close
+                                 < X size={16}/> Close
                                 </Button>
                                 <Button
                                   variant="btn btn-info text-white float-end blue-btn"
@@ -4045,14 +4046,14 @@ const EditJob = () => {
                                 window.history.back();
                               }}
                             >
-                              <i className="fa fa-times"></i> Cancel
+                              < X size={16}/> Cancel
                             </button>
                             <button
                               type="button"
                               className="btn   float-end btn-outline-success"
                               onClick={handleSubmit}
                             >
-                              <i className="fa fa-edit"></i> Update
+                            <Pencil size={16}/> Update
                             </button>
                           </div>
                         </div>

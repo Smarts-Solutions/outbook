@@ -8,6 +8,7 @@ import JobTimeline from './JobTimeline'
 import JobInformation from './JobInformation'; 
 import { useLocation } from 'react-router-dom';
 import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
+import { ArrowLeft } from "lucide-react";
 
 
 const JobLogs = () => {
@@ -190,7 +191,7 @@ const JobLogs = () => {
                       sessionStorage.removeItem('activeTab2');
                     }}
                   >
-                    <i className="fa fa-arrow-left pe-1" /> Back
+                    <ArrowLeft size={16}/> Back
                   </div>
                 </div>
               </div>

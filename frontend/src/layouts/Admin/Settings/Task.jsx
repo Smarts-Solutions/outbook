@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
+import { Plus, Save, ArrowLeft, Pencil } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -34,10 +35,12 @@ const Setting = () => {
 
   const [isModalOpenEditTask, setIsModalOpenEditTask] = useState(false);
   const [taskEditRow, setTaskEditRow] = useState({});
-  
 
   const TaskData = async () => {
-    const req = { service_id: location?.state?.service_id, job_type_id: location?.state?.Id };
+    const req = {
+      service_id: location?.state?.service_id,
+      job_type_id: location?.state?.Id,
+    };
     const data = { req: req, authToken: token };
     await dispatch(GETTASKDATA(data))
       .unwrap()
@@ -46,7 +49,6 @@ const Setting = () => {
           setTaskData({ loading: false, data: response.data });
         } else {
           setTaskData({ loading: false, data: [] });
-
         }
       })
       .catch((error) => {
@@ -57,7 +59,6 @@ const Setting = () => {
   useEffect(() => {
     TaskData();
   }, []);
-
 
   const columnJobType = [
     {
@@ -80,9 +81,10 @@ const Setting = () => {
     },
     {
       name: "Budgeted Time",
-      selector: (row) => row?.budgeted_hour
-                        ? `${row?.budgeted_hour.split(":")[0]} Hours ${row?.budgeted_hour.split(":")[1]} Minutes`
-                        : "",
+      selector: (row) =>
+        row?.budgeted_hour
+          ? `${row?.budgeted_hour.split(":")[0]} Hours ${row?.budgeted_hour.split(":")[1]} Minutes`
+          : "",
       sortable: true,
       width: "20%",
     },
@@ -94,13 +96,11 @@ const Setting = () => {
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
-            {
-              row?.is_assigned != 1 && (
-                <button className="delete-icon" onClick={() => handleDelete(row)}>
-                  <i className="ti-trash text-danger" />
-                </button>
-              )
-            }
+            {row?.is_assigned != 1 && (
+              <button className="delete-icon" onClick={() => handleDelete(row)}>
+                <i className="ti-trash text-danger" />
+              </button>
+            )}
           </div>
         </>
       ),
@@ -179,7 +179,7 @@ const Setting = () => {
     setModalData((prevModalData) => ({
       ...prevModalData,
       fields: prevModalData.fields.map((field) =>
-        field.name === name ? { ...field, value: value } : field
+        field.name === name ? { ...field, value: value } : field,
       ),
     }));
   };
@@ -204,20 +204,20 @@ const Setting = () => {
   };
 
   const handleEdit = (data) => {
-    setIsModalOpenEditTask(true)
-    setTaskEditRow(data)
-    setTaskInput(data?.name || "")
+    setIsModalOpenEditTask(true);
+    setTaskEditRow(data);
+    setTaskInput(data?.name || "");
     setBudgetedHours({
       hours: data?.budgeted_hour ? data?.budgeted_hour.split(":")[0] : "",
       minutes: data?.budgeted_hour ? data?.budgeted_hour.split(":")[1] : "",
-    })
+    });
   };
 
   const onCloseEditTask = () => {
-    setIsModalOpenEditTask(false)
-    setTaskEditRow({})
-    setBudgetedHours({ hours: "", minutes: "" })
-  }
+    setIsModalOpenEditTask(false);
+    setTaskEditRow({});
+    setBudgetedHours({ hours: "", minutes: "" });
+  };
   const onSaveEditTask = () => {
     // Logic to save the edited task
     if (taskInput?.trim() == "" || taskInput == undefined) {
@@ -234,7 +234,7 @@ const Setting = () => {
     req.service_id = taskEditRow.service_id;
     req.job_type_id = taskEditRow.job_type_id;
     req.name = taskInput;
-    dispatch(AddTask({ req, authToken: token }))  
+    dispatch(AddTask({ req, authToken: token }))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -260,7 +260,7 @@ const Setting = () => {
       .catch((error) => {
         return;
       });
-  }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -289,7 +289,6 @@ const Setting = () => {
         req.status = field.value;
       }
     });
-
 
     await dispatch(AddTask({ req, authToken: token }))
       .unwrap()
@@ -340,7 +339,7 @@ const Setting = () => {
             action: "delete",
             id: data.id,
           };
-          dispatch(AddTask({ req, authToken: token }))  
+          dispatch(AddTask({ req, authToken: token }))
             .unwrap()
             .then(async (response) => {
               if (response.status) {
@@ -377,17 +376,16 @@ const Setting = () => {
   // };
 
   const handleAddTask = () => {
-  if (taskInput.trim() !== "") {
-    const newTask = {
-      name: taskInput,   
-      budgeted_hour: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
-    };
+    if (taskInput.trim() !== "") {
+      const newTask = {
+        name: taskInput,
+        budgeted_hour: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+      };
 
-    setTasks([...tasks, newTask]);
-    setTaskInput("");
-  }
-};
-
+      setTasks([...tasks, newTask]);
+      setTaskInput("");
+    }
+  };
 
   const handleSaveTask = async () => {
     let req = {
@@ -451,12 +449,12 @@ const Setting = () => {
               onClick={(e) => {
                 sessionStorage.setItem(
                   "settingTab",
-                  location?.state?.settingTab
+                  location?.state?.settingTab,
                 );
                 window.history.back();
               }}
             >
-              <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
+              <ArrowLeft size={16} />
             </button>
             <h4 className="card-title">Tasks</h4>
           </div>
@@ -469,7 +467,7 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  <i className="fa fa-plus" /> Add Task
+                  <Plus size={16} /> Add Task
                 </button>
               </div>
             </div>
@@ -497,133 +495,136 @@ const Setting = () => {
           onChange={handleModalChange}
           buttonName={
             <>
-              <i className={`far ${isEdit ? "fa-edit" : "fa-save"}`}></i>{" "}
-              {isEdit ? "Update" : "Save"}
+              {isEdit ? (
+                <>
+                  <Pencil size={16} className="me-1" />
+                  Update
+                </>
+              ) : (
+                <>
+                  <Save size={16} className="me-1" />
+                  Save
+                </>
+              )}
             </>
           }
         />
       )}
 
+      {isModalOpenEditTask && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          tabIndex="-1"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              {/* Header */}
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Task</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={onCloseEditTask}
+                ></button>
+              </div>
 
-       {isModalOpenEditTask && (
-         <div
-      className="modal fade show"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-      tabIndex="-1"
-    >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-
-          {/* Header */}
-          <div className="modal-header">
-            <h5 className="modal-title">Edit Task</h5>
-            <button type="button" className="btn-close" onClick={onCloseEditTask}></button>
-          </div>
-
-          <div className="modal-body">
-             <div className="row ">
-              <div className="col-lg-9">
-                <div className="mb-3">
-                  <label htmlFor="">Task Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Task Name"
-                    id="firstNameinput"
-                    autoFocus
-                    value={taskInput || ""}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Budgeted Time
-                  </label>
-                  <div className="input-group">
-                    {/* Hours Input */}
-                    <div className="hours-div">
+              <div className="modal-body">
+                <div className="row ">
+                  <div className="col-lg-9">
+                    <div className="mb-3">
+                      <label htmlFor="">Task Name</label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Hours"
-                        onChange={(e) => {
-                          const value = e.target.value;
-
-                          // Only allow non-negative numbers for hours
-                          if (
-                            value === "" ||
-                            Number(value) >= 0
-                          ) {
-                            setBudgetedHours({
-                              ...budgetedHours,
-                              hours: value,
-                            });
-                          }
-                        }}
-                        value={budgetedHours?.hours || ""}
+                        placeholder="Enter Task Name"
+                        id="firstNameinput"
+                        autoFocus
+                        value={taskInput || ""}
+                        onChange={handleInputChange}
                       />
-                      <span
-                        className="input-group-text"
-                        id="basic-addon2"
-                      >
-                        H
-                      </span>
                     </div>
 
-                    {/* Minutes Input */}
-                    <div className="hours-div">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Minutes"
-                        onChange={(e) => {
-                          const value = e.target.value;
+                    <div className="mb-3">
+                      <label className="form-label">Budgeted Time</label>
+                      <div className="input-group">
+                        {/* Hours Input */}
+                        <div className="hours-div">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Hours"
+                            onChange={(e) => {
+                              const value = e.target.value;
 
-                          // Only allow minutes between 0 and 59
-                          if (
-                            value === "" ||
-                            (Number(value) >= 0 &&
-                              Number(value) <= 59)
-                          ) {
-                            setBudgetedHours({
-                              ...budgetedHours,
-                              minutes: value,
-                            });
-                          }
-                        }}
-                        value={budgetedHours?.minutes || ""}
-                      />
-                      <span
-                        className="input-group-text"
-                        id="basic-addon2"
-                      >
-                        M
-                      </span>
+                              // Only allow non-negative numbers for hours
+                              if (value === "" || Number(value) >= 0) {
+                                setBudgetedHours({
+                                  ...budgetedHours,
+                                  hours: value,
+                                });
+                              }
+                            }}
+                            value={budgetedHours?.hours || ""}
+                          />
+                          <span className="input-group-text" id="basic-addon2">
+                            H
+                          </span>
+                        </div>
+
+                        {/* Minutes Input */}
+                        <div className="hours-div">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Minutes"
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              // Only allow minutes between 0 and 59
+                              if (
+                                value === "" ||
+                                (Number(value) >= 0 && Number(value) <= 59)
+                              ) {
+                                setBudgetedHours({
+                                  ...budgetedHours,
+                                  minutes: value,
+                                });
+                              }
+                            }}
+                            value={budgetedHours?.minutes || ""}
+                          />
+                          <span className="input-group-text" id="basic-addon2">
+                            M
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-  
-            </div>
-            </div>
 
-          {/* Footer */}
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onCloseEditTask}>
-              Close
-            </button>
-            <button type="button" className="btn btn-primary" onClick={onSaveEditTask}>
-              Update
-            </button>
+              {/* Footer */}
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={onCloseEditTask}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={onSaveEditTask}
+                >
+                  Update
+                </button>
+              </div>
+            </div>
           </div>
-
         </div>
-      </div>
-    </div>
       )}
-
-
 
       <CommanModal
         isOpen={showAddTask}
@@ -670,9 +671,7 @@ const Setting = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">
-                    Budgeted Time
-                  </label>
+                  <label className="form-label">Budgeted Time</label>
                   <div className="input-group">
                     {/* Hours Input */}
                     <div className="hours-div">
@@ -684,10 +683,7 @@ const Setting = () => {
                           const value = e.target.value;
 
                           // Only allow non-negative numbers for hours
-                          if (
-                            value === "" ||
-                            Number(value) >= 0
-                          ) {
+                          if (value === "" || Number(value) >= 0) {
                             setBudgetedHours({
                               ...budgetedHours,
                               hours: value,
@@ -696,10 +692,7 @@ const Setting = () => {
                         }}
                         value={budgetedHours?.hours || ""}
                       />
-                      <span
-                        className="input-group-text"
-                        id="basic-addon2"
-                      >
+                      <span className="input-group-text" id="basic-addon2">
                         H
                       </span>
                     </div>
@@ -716,8 +709,7 @@ const Setting = () => {
                           // Only allow minutes between 0 and 59
                           if (
                             value === "" ||
-                            (Number(value) >= 0 &&
-                              Number(value) <= 59)
+                            (Number(value) >= 0 && Number(value) <= 59)
                           ) {
                             setBudgetedHours({
                               ...budgetedHours,
@@ -727,22 +719,17 @@ const Setting = () => {
                         }}
                         value={budgetedHours?.minutes || ""}
                       />
-                      <span
-                        className="input-group-text"
-                        id="basic-addon2"
-                      >
+                      <span className="input-group-text" id="basic-addon2">
                         M
                       </span>
                     </div>
                   </div>
                 </div>
-
               </div>
               <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
                   <button className="btn  btn-info" onClick={handleAddTask}>
-                    <i className="fa fa-plus pe-2"> </i>
-                    Add
+                    <Plus size={16} /> Add
                   </button>
                 </div>
               </div>
@@ -785,24 +772,25 @@ const Setting = () => {
                 </tr>
               </thead>
               <tbody className="list form-check-all">
-                {tasks && tasks?.map((task, index) => (
-                  <tr className="tabel_new" key={index}>
-                    <td>{task.name}</td>
-                    <td>{task.budgeted_hour}</td>
-                    <td className="tabel_left">
-                      <div className="d-flex gap-2">
-                        <div className="remove">
-                          <button
-                            className="delete-icon"
-                            onClick={(e) => handleDeleteTask(e)}
-                          >
-                            <i className="ti-trash text-danger" />
-                          </button>
+                {tasks &&
+                  tasks?.map((task, index) => (
+                    <tr className="tabel_new" key={index}>
+                      <td>{task.name}</td>
+                      <td>{task.budgeted_hour}</td>
+                      <td className="tabel_left">
+                        <div className="d-flex gap-2">
+                          <div className="remove">
+                            <button
+                              className="delete-icon"
+                              onClick={(e) => handleDeleteTask(e)}
+                            >
+                              <i className="ti-trash text-danger" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -812,15 +800,12 @@ const Setting = () => {
                 className="btn btn-outline-success"
                 onClick={(e) => handleSaveTask()}
               >
-                <i className="far fa-save pe-1"></i>
-                Submit
+                <Save size={16} /> Submit
               </button>
             </div>
           </div>
         </div>
       </CommanModal>
-
-
     </div>
   );
 };

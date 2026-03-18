@@ -8,7 +8,7 @@ import * as XLSX from "xlsx";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
-
+import { Trash } from "lucide-react";
 
 function JobCustomReport() {
   const noDataImage = '/assets/images/No-data-amico.png';
@@ -1027,12 +1027,13 @@ function JobCustomReport() {
                   {
 
                     !['', null, undefined].includes(filterId) && (
-                      <i
-                        className="fa fa-trash"
-                        title="Delete Filter"
-                        onClick={() => deleteFilterIdFunction()}
-                        style={{ cursor: "pointer", color: "red" }}
-                      ></i>
+                     <Trash
+  size={18}
+  color="red"
+  title="Delete Filter"
+  onClick={deleteFilterIdFunction}
+  style={{ cursor: "pointer" }}
+/>
                     )
                   }
 

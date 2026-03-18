@@ -13,6 +13,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
+import { Download, Plus, Briefcase, User } from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -232,9 +233,9 @@ const ClientList = () => {
   };
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
     ...(clientDetailSingle.id !== ""
-      ? [{ id: "view client", label: "View Client", icon: "fa-solid fa-user" }]
+      ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
 
@@ -347,8 +348,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-            getAccessDataJob.all_jobs == 1 ||
-            role === "SUPERADMIN" ? (
+          getAccessDataJob.all_jobs == 1 ||
+          role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -514,7 +515,6 @@ const ClientList = () => {
                 <i className="ti-pencil" />
               </button>
 
-
               <button className="copy-icon" onClick={() => copyRow(row)}>
                 <i className="ti-files"></i>
               </button>
@@ -522,13 +522,13 @@ const ClientList = () => {
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
-              </button>
-            )
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
             : ""}
         </div>
       ),
@@ -537,7 +537,6 @@ const ClientList = () => {
       allowOverflow: true,
       button: true,
     },
-    
   ];
 
   const HandleJob = (row) => {
@@ -649,11 +648,9 @@ const ClientList = () => {
               return;
             });
         } else {
-          return
+          return;
         }
       });
-
-
   };
 
   const GetAllJobList = async (
@@ -892,8 +889,8 @@ const ClientList = () => {
     clientDetailSingle.id === ""
       ? { value: "", label: "All" }
       : clientOptions.find(
-        (opt) => Number(opt.value) === Number(clientDetailSingle.id),
-      );
+          (opt) => Number(opt.value) === Number(clientDetailSingle.id),
+        );
 
   const handleExport = async () => {
     setLoading(true);
@@ -930,15 +927,16 @@ const ClientList = () => {
       //   " " +
       //   item.account_manager_officer_last_name||"-",
       "Client Contact Person":
-        item.account_manager_officer_first_name && item.account_manager_officer_last_name
+        item.account_manager_officer_first_name &&
+        item.account_manager_officer_last_name
           ? item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name
+            " " +
+            item.account_manager_officer_last_name
           : "-",
       "Outbooks Account Manager":
         item.outbooks_acount_manager_first_name +
-        " " +
-        item.outbooks_acount_manager_last_name || "-",
+          " " +
+          item.outbooks_acount_manager_last_name || "-",
       "Allocated To":
         item.allocated_id != null
           ? item.allocated_first_name + " " + item.allocated_last_name
@@ -1062,8 +1060,9 @@ const ClientList = () => {
                           key={tab.id}
                         >
                           <button
-                            className={`nav-link ${activeTab === tab.id ? "active" : ""
-                              }`}
+                            className={`nav-link ${
+                              activeTab === tab.id ? "active" : ""
+                            }`}
                             id={`${tab.id}-tab`}
                             data-bs-toggle="pill"
                             data-bs-target={`#${tab.id}`}
@@ -1073,7 +1072,7 @@ const ClientList = () => {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            <i className={tab.icon}></i>
+                            {tab.icon}{" "}
                             {tab.label}
                           </button>
                         </li>
@@ -1092,7 +1091,7 @@ const ClientList = () => {
                               className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
                               onClick={handleCreateJob}
                             >
-                              <i className="fa fa-plus pe-1" /> Create Job
+                              <Plus size={16} /> Create Job
                             </div>
                           )}
                       </div>
@@ -1113,9 +1112,7 @@ const ClientList = () => {
                 ]}
                 active={2}
                 data={hararchyData}
-                NumberOfActive={
-                  activeTab == "NoOfJobs" ? totalRecords : ""
-                }
+                NumberOfActive={activeTab == "NoOfJobs" ? totalRecords : ""}
               />
             </>
           ) : (
@@ -1126,8 +1123,9 @@ const ClientList = () => {
         <div className="mt-2">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab == "NoOfJobs" ? "show active" : ""
+              }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1159,7 +1157,8 @@ const ClientList = () => {
                           className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                           onClick={handleExport}
                         >
-                          <i className="fa fa-download" aria-hidden="true"></i>
+                          <Download size={16} />
+
                           <span>Export Excel</span>
                         </button>
                       </div>
@@ -1271,8 +1270,8 @@ const ClientList = () => {
                             {(clientInformationData &&
                               clientInformationData.phone &&
                               clientInformationData.phone_code +
-                              " " +
-                              clientInformationData.phone) ||
+                                " " +
+                                clientInformationData.phone) ||
                               "NA"}
                           </li>
                           <li className="mt-2">
@@ -1410,7 +1409,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>

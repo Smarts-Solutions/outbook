@@ -21,6 +21,7 @@ import {
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { convertDate } from '../../../../Utils/Comman_function'
 import Select from 'react-select';
+import { Plus ,ArrowLeft,ArrowRight} from "lucide-react";
 
 const Information = ({ id, pageStatus }) => {
   const { address, setAddress, next } = useContext(MultiStepFormContext);
@@ -2024,7 +2025,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="btn btn-info text-white blue-btn"
                                 onClick={handleAddContact}
                               >
-                                <i className="fa fa-plus pe-1"></i> Add Contact
+                                <Plus size={16}/> Add Contact
                               </button>
                             </div>
                           </div>
@@ -2478,7 +2479,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="btn btn-info text-white blue-btn"
                                 onClick={handleAddContact1}
                               >
-                                <i className="fa fa-plus"></i>
+                                <Plus size={16}/>
                                 Add Partner
                               </button>
                             </div>
@@ -2533,14 +2534,14 @@ const Information = ({ id, pageStatus }) => {
                 type="default"
                 onClick={(e) => navigate("/admin/customer")}
               >
-                <i className="pe-2 fa-regular fa-arrow-left-long"></i>Back
+                 <ArrowLeft size={16}/> Back
               </Button>
               <Button
                 className="btn btn-info text-white blue-btn"
                 type="submit"
                 onClick={handleSubmit}
               >
-                Next<i className="ps-2 fa-regular fa-arrow-right-long"></i>
+                Next <ArrowRight size={16}/>
               </Button>
             </div>
           </Form>

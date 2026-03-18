@@ -12,6 +12,7 @@ import {
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import { Save,Download,Eye ,CalendarClock ,Check } from "lucide-react";
 
 
 const Timesheet = () => {
@@ -1791,7 +1792,7 @@ const Timesheet = () => {
 
               <div className="text-center ">
                 <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
-                  <i className="fa fa-calendar-clock me-1" />
+                 <CalendarClock size={18} className="me-1" />
                   <span> {getFormattedDate("current", "")}</span>
                 </p>
               </div>
@@ -1810,7 +1811,8 @@ const Timesheet = () => {
                     onClick={() => exportToCSV(timeSheetRows)}
                   >
                     Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
+                        <Download size={16}/>
+
                   </button>
                 </div>
               ) : (
@@ -1827,7 +1829,8 @@ const Timesheet = () => {
                     onClick={() => exportToCSV(timeSheetRows)}
                   >
                     Export Timesheet Data
-                    <i className="fa fa-download ms-2" />
+                        <Download size={16}/>
+
                   </button>
                 </div>
               ) : (
@@ -2751,7 +2754,7 @@ const Timesheet = () => {
                                           handleSingleRemark(e, item, index)
                                         }}
                                       >
-                                        <i className="fa fa-eye text-primary"></i>
+                                       <Eye size={16} className="text-primary" />
                                       </button>
 
 
@@ -2947,7 +2950,7 @@ const Timesheet = () => {
                                       className="edit-icon"
                                       onClick={() => setRemarkModel(true)}
                                     >
-                                      <i className="fa fa-eye text-primary"></i>
+                                     <Eye size={16} className="text-primary" />
                                     </button>
                                   </span>
                                 </div>
@@ -2997,7 +3000,7 @@ const Timesheet = () => {
                       saveData(e);
                     }}
                   >
-                    <i className="fa fa-check"></i> Save
+                    <Check size={18} /> Save
                   </button>
 
                   <button
@@ -3006,7 +3009,7 @@ const Timesheet = () => {
                       submitData(e);
                     }}
                   >
-                    <i className="far fa-save"></i> Submit
+                   <Save size={16}/> Submit
                   </button>
                 </>
               ) : (

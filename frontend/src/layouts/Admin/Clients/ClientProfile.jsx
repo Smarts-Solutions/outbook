@@ -25,6 +25,8 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
+import { Download,ArrowLeft,Plus ,ArrowRight, Briefcase,User,File,FileText} from "lucide-react";
+
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -147,9 +149,9 @@ const ClientList = () => {
   };
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-    { id: "view client", label: "View Client", icon: "fa-solid fa-user" },
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16}/> },
+    { id: "view client", label: "View Client", icon: <User size={16}/> },
+    { id: "documents", label: "Documents", icon: <File size={16}/> },
   ];
 
   const GetStatus = async () => {
@@ -640,18 +642,12 @@ const ClientList = () => {
             />
           ) : row.file_type === "application/pdf" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file-pdf"
-                style={{ fontSize: "24px", color: "#FF0000" }}
-              ></i>
+              <FileText size={24} color="#FF0000" />
               <span>PDF</span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <i
-                className="fa fa-file"
-                style={{ fontSize: "24px", color: "#000" }}
-              ></i>
+             <File size={24} color="#000" />
               <span>{row.file_type}</span>
             </div>
           )}
@@ -1137,7 +1133,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                       <ArrowLeft size={16}/> Back
                     </button>
                     {(getAccessDataJob.insert == 1 ||
                       role === "SUPERADMIN") && (
@@ -1145,7 +1141,7 @@ const ClientList = () => {
                           className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
                           onClick={handleCreateJob}
                         >
-                          <i className="fa fa-plus pe-1" /> Create Job
+                           <Plus size={16}/> Create Job
                         </div>
                       )}
                   </div>
@@ -1165,7 +1161,7 @@ const ClientList = () => {
                       window.history.back();
                     }}
                   >
-                    <i className="fa fa-arrow-left pe-1" /> Back
+                     <ArrowLeft size={16}/> Back
                   </button>
                 </div>
               )}
@@ -1184,7 +1180,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <i className="fa fa-arrow-left pe-1" /> Back
+                      <ArrowLeft size={16}/> Back
                     </button>
                   </div>
                 </>
@@ -1239,7 +1235,8 @@ const ClientList = () => {
                         className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                         onClick={handleExport}
                       >
-                        <i className="fa fa-download" aria-hidden="true"></i>
+                            <Download size={16}/>
+
                         <span>Export Excel</span>
                       </button>
                     )}
@@ -1857,24 +1854,9 @@ const ClientList = () => {
                                                               />
                                                             ) : file.type ===
                                                               "application/pdf" ? (
-                                                              <i
-                                                                className="fa fa-file-pdf"
-                                                                style={{
-                                                                  fontSize:
-                                                                    "24px",
-                                                                  color:
-                                                                    "#FF0000",
-                                                                }}
-                                                              ></i>
+                                                              <FileText size={24} color="#FF0000" />
                                                             ) : (
-                                                              <i
-                                                                className="fa fa-file"
-                                                                style={{
-                                                                  fontSize:
-                                                                    "24px",
-                                                                  color: "#000",
-                                                                }}
-                                                              ></i>
+                                                            <File size={24} color="#000" />
                                                             )}
                                                           </td>
                                                           <td className="file_name">
@@ -1958,7 +1940,7 @@ const ClientList = () => {
                                                 onClick={(e) => handleSubmit(e)}
                                               >
                                                 Save{" "}
-                                                <i className="ps-2 fa-regular fa-arrow-right-long"></i>
+                                               <ArrowRight size={16}/>
                                               </Button>
                                             </div>
                                           </div>

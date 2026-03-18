@@ -19,7 +19,7 @@ import {
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import Swal from "sweetalert2";
 import Select from 'react-select';
-
+import { ArrowLeft,ArrowRight, User  } from "lucide-react";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -898,7 +898,7 @@ const Service = () => {
                               }}
                             >
                               Assign Account Manager{" "}
-                              <i className="fa fa-user" />
+                            <User size={16}/>
                             </button>
                           </td>
                         </tr>
@@ -963,14 +963,14 @@ const Service = () => {
 
           <div className="form__item button__items d-flex justify-content-between">
             <Button className="btn btn-info" type="default" onClick={prev}>
-              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
+             <ArrowLeft size={16}/> Previous
             </Button>
             <Button
               className="btn btn-info text-white blue-btn"
               type="submit"
               onClick={handleSubmit}
             >
-              Next <i className="ps-2 fa-regular fa-arrow-right-long"></i>
+              Next <ArrowRight size={16}/>
             </Button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import Engagement from "./Engagement";
 import Paper from "./Paper";
 import Information from "./Information";
 import { useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 let detailsInitialState = {
     name: "",
@@ -72,7 +73,11 @@ const AddCustomer = () => {
             <div className="content-title">
                 <div className="tab-title d-flex">
                     <button type="button" className="btn p-0">
-                        <i className="pe-3 fa-regular fa-arrow-left-long  fs-4" onClick={() => window.history.back()}></i>
+                      <ArrowLeft
+  size={20}
+  className="me-3 cursor-pointer"
+  onClick={() => window.history.back()}
+/>
                     </button>
                     <h3 className="mt-0">Update Customer</h3>
                 </div>

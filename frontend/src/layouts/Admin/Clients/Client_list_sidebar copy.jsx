@@ -14,6 +14,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
+import { ArrowLeft,Plus, User  } from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -257,7 +258,7 @@ const ClientLists = () => {
       tabsData.push({
         id: "client",
         label: "Client",
-        icon: "fa-solid fa-user",
+        icon: <User size={16}/>,
       });
     }
     if (
@@ -1179,7 +1180,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Add Client
+                             <Plus size={16}/> Add Client
                           </div>
                         </>
                       ) : ClientData?.length > 0 &&
@@ -1200,7 +1201,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Create Job
+                            <Plus size={16}/> Create Job
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
@@ -1216,7 +1217,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Add Checklist
+                            <Plus size={16}/> Add Checklist
                           </div>
                         </>
                       ) : null}
@@ -1230,7 +1231,7 @@ const ClientLists = () => {
                             window.history.back();
                           }}
                         >
-                          <i className="fa fa-arrow-left pe-1" /> Back
+                          <ArrowLeft size={16}/> Back
                         </div>
                       </>
                     ) :
@@ -1242,7 +1243,7 @@ const ClientLists = () => {
                               window.history.back();
                             }}
                           >
-                            <i className="fa fa-arrow-left pe-1" /> Back
+                             <ArrowLeft size={16}/> Back
                           </div>
                         </>
                       ) : null

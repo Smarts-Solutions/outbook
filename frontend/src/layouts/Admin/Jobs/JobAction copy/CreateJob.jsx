@@ -13,6 +13,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
+import { Save,Plus,ArrowLeft , X} from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -1899,7 +1900,7 @@ const CreateJob = () => {
                     window.history.back();
                   }}
                 >
-                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />{" "}
+                   <ArrowLeft size={16}/>{" "}
                 </button>
                 <h3 className="card-title mb-0">Create New Job</h3>
               </div>
@@ -3572,7 +3573,7 @@ const CreateJob = () => {
                                         // disabled={getChecklistId == ""}
                                         onClick={() => setShowAddJobModal(true)}
                                       >
-                                        <i className="fa fa-plus pe-1" /> Add
+                                        <Plus size={16}/> Add
                                         Task
                                       </button>
                                     </div>
@@ -3725,14 +3726,14 @@ const CreateJob = () => {
                               setAddTaskArr([]);
                             }}
                           >
-                            <i className="fa fa-times pe-1"></i>
+                            < X size={16}/>
                             Close
                           </Button>
                           <Button
                             variant="btn btn-outline-success float-end "
                             onClick={handleAddCheckList}
                           >
-                            <i className="far fa-save pe-1"></i>
+                           <Save size={16}/>
                             Submit
                           </Button>
                         </Modal.Footer>
@@ -3840,14 +3841,14 @@ const CreateJob = () => {
                               HandleReset();
                             }}
                           >
-                            <i className="fa fa-times pe-1"></i>
+                           < X size={16}/>
                             Close
                           </Button>
                           <Button
                             variant="btn btn-info text-white float-end blue-btn"
                             onClick={handleAddTask}
                           >
-                            <i className="fa fa-plus pe-1"></i>
+                           <Plus size={16}/>
                             Add
                           </Button>
                         </Modal.Footer>
@@ -3860,7 +3861,7 @@ const CreateJob = () => {
                         className="btn btn-info text-white float-end blue-btn"
                         onClick={handleSubmit}
                       >
-                        <i className="fa fa-plus pe-1"></i>Add Job
+                        <Plus size={16}/> Add Job
                       </button>
                     </div>
                   </div>

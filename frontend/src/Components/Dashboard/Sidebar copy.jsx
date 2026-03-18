@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import {User} from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -145,7 +146,7 @@ const Sidebar = () => {
                   >
                     <div>
                       <span className="sidebar-icons">
-                        <i className="fas fa-users"></i>
+                        <User size={16}/>
                       </span>
                       <span className="pe-4 pe-lg-4">Customer</span>
                     </div>
@@ -177,7 +178,7 @@ const Sidebar = () => {
                         onClick={(e) => handleLinkClick(e, "/admin/customer")}
                       >
                         {/* <i className="ti-control-record" /> */}
-                        <i className="fa-solid fa-users-line"></i>
+                        <User size={16}/>
                         Customers
                       </Link>
                     )}
@@ -195,7 +196,7 @@ const Sidebar = () => {
                         to="/admin/ClientLists"
                         onClick={(e) => handleLinkClick(e, "/admin/ClientLists")}
                       >
-                        <i className="fa-solid fa-user"></i>
+                       <User size={16}/>
                         {/* <i className="ti-control-record" /> */}
                         Clients
                       </Link>
@@ -257,7 +258,7 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/staff")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-user-friends"></i>
+                     <User size={16}/>
                     </span>
                     <span>Staffs</span>
                   </Link>
@@ -477,7 +478,7 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-user-cog"></i> {/* Customer Details icon */}
+                      <User size={16}/> {/* Customer Details icon */}
                     </span>
                     <span>Customer Details</span>
                   </Link>

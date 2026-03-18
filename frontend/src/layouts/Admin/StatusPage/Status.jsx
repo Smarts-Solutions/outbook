@@ -14,6 +14,7 @@ import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import { use } from "react";
 
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Plus, User2 } from "lucide-react";
 
 const Status = () => {
   const dispatch = useDispatch();
@@ -400,7 +401,7 @@ const Status = () => {
                           });
                         }}
                       >
-                        <i className="fa fa-plus pe-1" /> Add Status
+                       <Plus size={16}/> Add Status
                       </button>
                     ) : (
                       <div className="mt-5"></div>
@@ -551,7 +552,7 @@ const Status = () => {
                 {JobData.length > 0 && (
                   <div className="mb-4">
                     <h6 className="fw-bold text-primary">
-                      <i className="bi bi-people"></i> Job Assigned:
+                     <User2 size={16}/> Job Assigned:
                     </h6>
                     <ul className="list-group">
                       <label className="">Job ID</label>

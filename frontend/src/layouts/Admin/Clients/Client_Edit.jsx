@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { validate, ScrollToViewFirstErrorContactForm, convertDate, ScrollToViewFirstError } from '../../../Utils/Comman_function'
 import { PersonRole, Country, IncorporationApi } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { Plus,ArrowLeft, Pencil, X } from "lucide-react";
 
 const ClientEdit = () => {
   const dispatch = useDispatch();
@@ -1896,7 +1897,7 @@ const ClientEdit = () => {
                     window.history.back()
                   }}
                 >
-                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
+                 <ArrowLeft size={16}/>
                 </button>
                 <h4 className="card-title  mb-0">Edit Client</h4>
               </div>
@@ -3086,7 +3087,7 @@ const ClientEdit = () => {
                                             className="btn btn-info text-white blue-btn"
                                             onClick={handleAddCompanyContact}
                                           >
-                                            <i className="fa fa-plus pe-1"></i>
+                                            <Plus size={16}/>
                                             Add Officer
                                           </button>
                                         </div>
@@ -3752,7 +3753,7 @@ const ClientEdit = () => {
                                             className="btn btn-info text-white blue-btn"
                                             onClick={handleAddPartnershipContact}
                                           >
-                                            <i className="fa fa-plus pe-1"></i>
+                                            <Plus size={16}/>
                                             Add Partner
                                           </button>
                                         </div>
@@ -4726,9 +4727,7 @@ const ClientEdit = () => {
                                             onClick={handleAddContactMemberDetails}
                                           >
                                             {" "}
-                                            <i className="fa fa-plus pe-1">
-                                              {" "}
-                                            </i>
+                                           <Plus size={16}/>
                                             Add Member
                                           </button>
                                         </div>
@@ -5127,9 +5126,7 @@ const ClientEdit = () => {
                                             onClick={handleAddContactTrusteeDetails}
                                           >
                                             {" "}
-                                            <i className="fa fa-plus pe-1">
-                                              {" "}
-                                            </i>
+                                             <Plus size={16}/>
                                             Add Trustee
                                           </button>
                                         </div>
@@ -5713,9 +5710,7 @@ const ClientEdit = () => {
                                             onClick={handleAddContactMemberDetailsUnincorporated}
                                           >
                                             {" "}
-                                            <i className="fa fa-plus pe-1">
-                                              {" "}
-                                            </i>
+                                           <Plus size={16}/>
                                             Add Member
                                           </button>
                                         </div>
@@ -6295,9 +6290,7 @@ const ClientEdit = () => {
                                             onClick={handleAddContactTrustMemberDetails}
                                           >
                                             {" "}
-                                            <i className="fa fa-plus pe-1">
-                                              {" "}
-                                            </i>
+                                             <Plus size={16}/>
                                             Add Beneficiary
                                           </button>
                                         </div>
@@ -6692,9 +6685,7 @@ const ClientEdit = () => {
                                             onClick={handleAddContactTrustTrusteeDetails}
                                           >
                                             {" "}
-                                            <i className="fa fa-plus pe-1">
-                                              {" "}
-                                            </i>
+                                            <Plus size={16}/>
                                             Add Trustee
                                           </button>
                                         </div>
@@ -6758,14 +6749,14 @@ const ClientEdit = () => {
                             window.history.back()
                           }}
                         >
-                          <i className="fa fa-times pe-1"></i>
+                         < X size={16}/>
                           Cancel
                         </button>
                         <button
                           className="btn btn-outline-success"
                           onClick={handleUpdate}
                         >
-                          <i className="fa fa-edit pe-1"></i>
+                          <Pencil size={16}/>
                           Update Client
                         </button>
                       </div>

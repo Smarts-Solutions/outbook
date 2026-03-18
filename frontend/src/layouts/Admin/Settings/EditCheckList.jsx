@@ -8,6 +8,7 @@ import {
   getList,
   UpdateChecklistData,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { Save,Plus ,ArrowLeft} from "lucide-react";
 
 import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
@@ -350,7 +351,7 @@ const CreateCheckList = () => {
                window.history.back()}}
             
           >
-            <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
+            <ArrowLeft size={16}/>
           </button>
           <h3 className="card-title mb-0">Update Checklist</h3>
         </div>
@@ -482,7 +483,7 @@ const CreateCheckList = () => {
                   className="btn btn-info ms-2"
                   onClick={addTask}
                 >
-                  <i className="fa fa-plus"></i> Add Task
+                  <Plus size={16}/> Add Task
                 </button>
               </div>
             </div>
@@ -569,7 +570,7 @@ const CreateCheckList = () => {
                   className="btn btn-outline-success"
                   onClick={handleSubmit}
                 >
-                  <i className="far fa-save pe-1"></i>
+                 <Save size={16}/>
                   Submit
                 </button>
               </div>

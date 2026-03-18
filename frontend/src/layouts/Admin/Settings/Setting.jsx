@@ -21,6 +21,23 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
 import { use } from "react";
 import Select from "react-select";
+import {
+  User,
+  Phone,
+  ListChecks,
+  Settings,
+  Factory,
+  Globe,
+  FileText,
+  ExternalLink,
+  SquareCheck,
+  Lock,
+  Plus,
+  Pencil,
+  Save,
+  User2,
+  MoreVertical,
+} from "lucide-react";
 
 const Setting = () => {
   const navigate = useNavigate();
@@ -681,7 +698,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -779,7 +796,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -809,7 +826,7 @@ const Setting = () => {
                           className="btn btn-sm btn-info text-white dropdown-item"
                           onClick={(e) => handleJobType(row)}
                         >
-                          <i className="fa fa-plus pe-1"></i>Add Job Type
+                          <Plus size={16} /> Add Job Type
                         </button>
                       )}
                     </div>
@@ -840,7 +857,7 @@ const Setting = () => {
                       className="btn btn-sm btn-info text-white ms-2"
                       onClick={(e) => handleJobType(row)}
                     >
-                      <i className="fa fa-plus pe-1"></i>Add Job Type
+                      <Plus size={16} /> Add Job Type
                     </button>
                   )}
                 </div>
@@ -887,7 +904,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -983,7 +1000,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1078,7 +1095,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1173,7 +1190,7 @@ const Setting = () => {
               aria-haspopup="true"
               aria-expanded="false"
             >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              <MoreVertical size={18} />
             </button>
             <div
               className="dropdown-menu custom-dropdown"
@@ -1267,7 +1284,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1295,7 +1312,7 @@ const Setting = () => {
                           className="btn btn-info btn-sm text-white ms-1 dropdown-item w-auto "
                           onClick={(e) => handleSubSource(row)}
                         >
-                          <i className="fa fa-plus pe-1" />
+                          <Plus size={16} />
                           Add Sub Source Type
                         </button>
                       )}
@@ -1325,7 +1342,7 @@ const Setting = () => {
                       className="btn btn-info btn-sm text-white ms-1"
                       onClick={(e) => handleSubSource(row)}
                     >
-                      <i className="fa fa-plus pe-1" />
+                      <Plus size={16} />
                       Add Sub Source Type
                     </button>
                   )}
@@ -1406,7 +1423,7 @@ const Setting = () => {
               aria-haspopup="true"
               aria-expanded="false"
             >
-              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+              <MoreVertical size={18} />
             </button>
             <div
               className="dropdown-menu custom-dropdown"
@@ -1535,7 +1552,7 @@ const Setting = () => {
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                    <MoreVertical size={18} />
                   </button>
                   <div
                     className="dropdown-menu custom-dropdown"
@@ -1564,7 +1581,7 @@ const Setting = () => {
                           className="btn btn-info btn-sm text-white dropdown-item"
                           onClick={(e) => handleTaskAdd(row)}
                         >
-                          <i className="fa fa-plus pe-1" />
+                          <Plus size={16} />
                           Add Internal Task
                         </button>
                       )}
@@ -1595,7 +1612,7 @@ const Setting = () => {
                       className="btn btn-info btn-sm text-white ms-1"
                       onClick={(e) => handleTaskAdd(row)}
                     >
-                      <i className="fa fa-plus pe-1" />
+                      <Plus size={16} />
                       Add Internal Task
                     </button>
                   )}
@@ -2260,17 +2277,71 @@ const Setting = () => {
     });
   };
 
+  // const tabsArr = [
+  //   { id: "1", label: "Staff Role", icon: <User size={16}/> },
+  //   { id: "2", label: "Customer Contact Person Role", icon: "fas fa-phone" },
+  //   { id: "3", label: "Status Type", icon: "fas fa-tasks" },
+  //   { id: "4", label: "Services", icon: "fas fa-gear" },
+  //   { id: "5", label: "Client Industry", icon: "fas fa-industry" },
+  //   { id: "6", label: "Country", icon: "fas fa-globe" },
+  //   { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
+  //   { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
+  //   { id: "9", label: "Checklist", icon: "fas fa-check-square" },
+  //   { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
+  // ];
+
   const tabsArr = [
-    { id: "1", label: "Staff Role", icon: "fas fa-user" },
-    { id: "2", label: "Customer Contact Person Role", icon: "fas fa-phone" },
-    { id: "3", label: "Status Type", icon: "fas fa-tasks" },
-    { id: "4", label: "Services", icon: "fas fa-gear" },
-    { id: "5", label: "Client Industry", icon: "fas fa-industry" },
-    { id: "6", label: "Country", icon: "fas fa-globe" },
-    { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
-    { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
-    { id: "9", label: "Checklist", icon: "fas fa-check-square" },
-    { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
+    { id: "1", label: "Staff Role", icon: <User size={16} className="me-1" /> },
+
+    {
+      id: "2",
+      label: "Customer Contact Person Role",
+      icon: <Phone size={16} className="me-1" />,
+    },
+
+    {
+      id: "3",
+      label: "Status Type",
+      icon: <ListChecks size={16} className="me-1" />,
+    },
+
+    {
+      id: "4",
+      label: "Services",
+      icon: <Settings size={16} className="me-1" />,
+    },
+
+    {
+      id: "5",
+      label: "Client Industry",
+      icon: <Factory size={16} className="me-1" />,
+    },
+
+    { id: "6", label: "Country", icon: <Globe size={16} className="me-1" /> },
+
+    {
+      id: "7",
+      label: "Incorporation",
+      icon: <FileText size={16} className="me-1" />,
+    },
+
+    {
+      id: "8",
+      label: "Source",
+      icon: <ExternalLink size={16} className="me-1" />,
+    },
+
+    {
+      id: "9",
+      label: "Checklist",
+      icon: <SquareCheck size={16} className="me-1" />,
+    },
+
+    {
+      id: "10",
+      label: "Internal Job/Project",
+      icon: <Lock size={16} className="me-1" />,
+    },
   ];
 
   useEffect(() => {
@@ -2375,7 +2446,7 @@ const Setting = () => {
                               aria-selected={tabStatus.current === tab.id}
                               onClick={() => handleTabChange(tab.id)}
                             >
-                              <i className={`${tab.icon} me-2`}></i>
+                              {tab.icon}
                               {tab.label}
                             </button>
                           </li>
@@ -2408,7 +2479,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "1")}
                       >
-                        <i className="fa fa-plus" /> Add Staff Role
+                        <Plus size={16} /> Add Staff Role
                       </button>
                     </div>
                   )}
@@ -2455,8 +2526,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "2")}
                       >
-                        <i className="fa fa-plus" /> Customer Contact Person
-                        Role
+                        <Plus size={16} /> Customer Contact Person Role
                       </button>
                     </div>
                   )}
@@ -2504,7 +2574,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "3")}
                       >
-                        <i className="fa fa-plus" /> Add Status
+                        <Plus size={16} /> Add Status
                       </button>
                     </div>
                   )}
@@ -2549,7 +2619,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "4")}
                       >
-                        <i className="fa fa-plus" /> Add Service
+                        <Plus size={16} /> Add Service
                       </button>
                     </div>
                   )}
@@ -2594,7 +2664,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "5")}
                       >
-                        <i className="fa fa-plus" /> Add Client Industry
+                        <Plus size={16} /> Add Client Industry
                       </button>
                     </div>
                   )}
@@ -2639,7 +2709,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "6")}
                       >
-                        <i className="fa fa-plus" /> Add Country
+                        <Plus size={16} /> Add Country
                       </button>
                     </div>
                   )}
@@ -2686,7 +2756,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "7")}
                       >
-                        <i className="fa fa-plus" /> Add Incorporation{" "}
+                        <Plus size={16} /> Add Incorporation{" "}
                       </button>
                     </div>
                   )}
@@ -2731,7 +2801,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "8")}
                       >
-                        <i className="fa fa-plus" /> Add Customer Source
+                        <Plus size={16} /> Add Customer Source
                       </button>
                     </div>
                   )}
@@ -2776,7 +2846,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={() => HandleAddCheckList()}
                       >
-                        <i className="fa fa-plus" /> Add CheckList
+                        <Plus size={16} /> Add CheckList
                       </button>
                     </div>
                   )}
@@ -2821,7 +2891,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "10")}
                       >
-                        <i className="fa fa-plus" /> Add Internal Job/Project
+                        <Plus size={16} /> Add Internal Job/Project
                       </button>
                     </div>
                   )}
@@ -2867,12 +2937,11 @@ const Setting = () => {
               buttonName={
                 isEdit ? (
                   <>
-                    <i className="fa fa-edit"></i> Update
+                    <Pencil size={16} /> Update
                   </>
                 ) : (
                   <>
-                    <i className="far fa-save pe-1"></i>
-                    Save
+                    <Save size={16} /> Save
                   </>
                 )
               }
@@ -3018,7 +3087,7 @@ const Setting = () => {
                 {/* Staff List */}
                 <div className="mb-4">
                   <label className=" form-label fw-semibold d-flex align-items-center">
-                    <i className="bi bi-people me-2"></i> Staff Assigned
+                    <User2 size={16} /> Staff Assigned
                   </label>
                   <ul className="list-group mt-2">
                     {StaffRoleDAta.map((customer, index) => (

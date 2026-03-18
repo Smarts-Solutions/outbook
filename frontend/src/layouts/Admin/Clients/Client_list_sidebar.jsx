@@ -15,6 +15,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
+import { Download, ArrowLeft, Plus, User, Briefcase } from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -260,8 +261,8 @@ const ClientLists = () => {
     ) {
       tabsData.push({
         id: "client",
-        label: "Client",
-        icon: "fa-solid fa-user",
+        label: "Client ",
+        icon: <User size={16} />,
       });
     }
     if (
@@ -273,7 +274,7 @@ const ClientLists = () => {
         tabsData.push({
           id: "job",
           label: "Job",
-          icon: "fa-solid fa-briefcase",
+          icon: <Briefcase size={16} />,
         });
       }
     }
@@ -1198,7 +1199,7 @@ const ClientLists = () => {
 
       exportData = response.data.map((item) => ({
         "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
-        "Job Priority":item.job_priority||"-",
+        "Job Priority": item.job_priority || "-",
         "Client Name": item.client_trading_name,
         "Job Type": item.job_type_name,
         Status: item.status,
@@ -1307,7 +1308,7 @@ const ClientLists = () => {
                           aria-selected={activeTab === tab.id}
                           onClick={() => SetTab(tab.id)}
                         >
-                          <i className={tab.icon}></i>
+                          {tab.icon}{" "}
                           {tab.label}
                         </button>
                       </li>
@@ -1333,7 +1334,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Add Client
+                            <Plus size={16} /> Add Client
                           </div>
                         </>
                       ) : ClientData?.length > 0 &&
@@ -1353,7 +1354,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Create Job
+                            <Plus size={16} /> Create Job
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
@@ -1368,7 +1369,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <i className="fa fa-plus pe-1" /> Add Checklist
+                            <Plus size={16} /> Add Checklist
                           </div>
                         </>
                       ) : null}
@@ -1381,7 +1382,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <i className="fa fa-arrow-left pe-1" /> Back
+                        <ArrowLeft size={16} /> Back
                       </div>
                     </>
                   ) : activeTab === "status" ? (
@@ -1392,7 +1393,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <i className="fa fa-arrow-left pe-1" /> Back
+                        <ArrowLeft size={16} /> Back
                       </div>
                     </>
                   ) : null}
@@ -1443,7 +1444,8 @@ const ClientLists = () => {
                           className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                           onClick={handleExport}
                         >
-                          <i className="fa fa-download" aria-hidden="true"></i>
+                          <Download size={16} />
+
                           <span>Export Excel</span>
                         </button>
                       </div>
