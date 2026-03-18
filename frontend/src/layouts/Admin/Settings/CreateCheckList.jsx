@@ -251,20 +251,7 @@ const CreateCheckList = () => {
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
       return;
     }
-    tasks.forEach((task, index) => {
-      if (!task?.task_name?.trim()) {
-        validationErrors[`task_name_${index}`] = "Task Name is required";
-      }
-      if (
-        !task.budgeted_hour ||
-        task.budgeted_hour.hours === "" ||
-        task.budgeted_hour.minutes === ""
-      ) {
-        validationErrors[`budgeted_hour_${index}`] =
-          "Budgeted Time is required";
-      }
-    });
-
+   
     if (Object.keys(validationErrors).length > 0) {
       setErrors1(validationErrors);
       return;
@@ -348,10 +335,34 @@ const CreateCheckList = () => {
         </div>
         <div className="card-body">
           <div className="row">
+
+             <div className="col-lg-4 mt-3">
+              <div className=" row flex-column">
+                <div>
+                  <label className="form-label">Check List Name</label>
+                  <input
+                    type="text"
+                    className={
+                      errors.check_list_name
+                        ? "error-field form-control"
+                        : "form-control"
+                    }
+                    placeholder="Check List Name"
+                    name="check_list_name"
+                    defaultValue={formData.check_list_name}
+                    onChange={handleInputChange}
+                  />
+                  {errors.check_list_name && (
+                    <p className="mb-0 error-text">{errors.check_list_name}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="col-lg-4 mb-lg-0 mb-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label"> Select Service Type</label>
+                  <label className="form-label">Service Type</label>
                   <select
                     className={
                       errors.service_id
@@ -382,7 +393,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mb-lg-0 mb-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label"> Select Job Type</label>
+                  <label className="form-label">Job Type</label>
                   <select
                     className={
                       errors.job_type_id
@@ -429,28 +440,7 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-3">
-              <div className=" row flex-column">
-                <div>
-                  <label className="form-label">Check List Name</label>
-                  <input
-                    type="text"
-                    className={
-                      errors.check_list_name
-                        ? "error-field form-control"
-                        : "form-control"
-                    }
-                    placeholder="Check List Name"
-                    name="check_list_name"
-                    defaultValue={formData.check_list_name}
-                    onChange={handleInputChange}
-                  />
-                  {errors.check_list_name && (
-                    <p className="mb-0 error-text">{errors.check_list_name}</p>
-                  )}
-                </div>
-              </div>
-            </div>
+           
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
@@ -476,118 +466,6 @@ const CreateCheckList = () => {
             </div>
           </div>
 
-          <button className="btn btn-info mt-3" onClick={addTask}>
-            <Plus size={16} /> Add Task
-          </button>
-
-          <div className="mt-4">
-            {tasks.map((task, index) => (
-              <div key={task.task_id} className="row  mt-4 ">
-                <div className="col-lg-5 mb-lg-0 mb-3">
-                  <div>
-                    <label className="form-label">Task Name</label>
-                    <input
-                      type="text"
-                      name="task_name"
-                      className="form-control"
-                      defaultValue={task.task_name}
-                      onChange={(e) => handleTaskChange(index, e)}
-                      placeholder="Task Name"
-                      disabled={task.task_id}
-                    />
-                    {errors1[`task_name_${index}`] && (
-                      <p className="mb-0 error-text">
-                        {errors1[`task_name_${index}`]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="col-lg-5">
-                  {/* <label className="form-label">Budgeted Hours</label>
-                  <div className="input-group">
-                  
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="Hours"
-                      name="hours"
-                      defaultValue={task.budgeted_hour?.hours || ""}
-                      onChange={(e) => handleTaskChange(index, e)}
-                    />
-                  
-
-                  
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="Minutes"
-                      name="minutes"
-                      min="0"
-                      max="59"
-                      defaultValue={task.budgeted_hour?.minutes || ""}
-                      onChange={(e) => handleTaskChange(index, e)}
-                    />
-                   
-                  </div>
-                  {errors1[`budgeted_hour_${index}`] && (
-                    <p className="mb-0 error-text">
-                      {errors1[`budgeted_hour_${index}`]}
-                    </p>
-                  )} */}
-                  <label className="form-label">Budgeted Time</label>
-                  <div className="input-group">
-                    {/* Hours Input */}
-                    <div className="hours-div w-50">
-                      <input
-                        type="number"
-                        className={
-                          errors1[`budgeted_hour_${index}`]
-                            ? "error-field form-control"
-                            : "form-control"
-                        }
-                        placeholder="Hours"
-                        name="hours"
-                        defaultValue={task.budgeted_hour?.hours || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      <span className="input-group-text">H</span>
-                    </div>
-
-                    {/* Minutes Input */}
-                    <div className="hours-div w-50">
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Minutes"
-                        name="minutes"
-                        min="0"
-                        max="59"
-                        defaultValue={task.budgeted_hour?.minutes || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      <span className="input-group-text">M</span>
-                    </div>
-                  </div>
-
-                  {/* Error Message */}
-                  {errors1[`budgeted_hour_${index}`] && (
-                    <p className="mb-0 error-text">
-                      {errors1[`budgeted_hour_${index}`]}
-                    </p>
-                  )}
-                </div>
-                <div className="col-lg-2">
-                  <button
-                    className="delete-icon mt-4"
-                    onClick={(e) => removeTask(task, index)}
-                  >
-                    <i className="ti-trash text-danger "></i>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
 
           <div className="col-lg-12 mt-4">
             <button
