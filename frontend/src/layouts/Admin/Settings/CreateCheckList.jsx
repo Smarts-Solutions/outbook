@@ -336,7 +336,7 @@ const CreateCheckList = () => {
         <div className="card-body">
           <div className="row">
 
-             <div className="col-lg-4 mt-3">
+             <div className="col-lg-4">
               <div className=" row flex-column">
                 <div>
                   <label className="form-label">Check List Name</label>
@@ -422,7 +422,8 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mb-lg-0 ">
+
+            <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Client Type</label>
@@ -440,7 +441,7 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-           
+            
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
