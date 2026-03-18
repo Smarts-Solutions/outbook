@@ -633,6 +633,7 @@ const ClientList = () => {
                   showConfirmButton: false,
                   timer: 1500,
                 });
+                window.location.reload();
               } else {
                 sweatalert.fire({
                   title: "Failed",

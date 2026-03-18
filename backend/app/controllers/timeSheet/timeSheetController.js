@@ -1,3 +1,4 @@
+const limit = require("../../utils/limiter");
 const timeSheetService = require('../../services/timeSheet/timeSheetService');
 
 const getTimesheet = async (req, res) => {
@@ -37,7 +38,13 @@ const getTimesheetTaskType = async (req, res) => {
 const saveTimesheet = async (req,res) => {
   try {
     const { ...Timesheet } = req.body;
-    const result = await timeSheetService.saveTimesheet(Timesheet);
+
+    const result = await limit(() =>
+        timeSheetService.saveTimesheet(req.body)
+    );
+
+    //const result = await timeSheetService.saveTimesheet(Timesheet);
+
     if(!result.status){
       return  res.status(200).json({ status: false, message: result.message });  
       }else{

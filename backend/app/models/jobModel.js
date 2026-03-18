@@ -599,7 +599,7 @@ job_priority
 VALUES (
     ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
     
-)`;
+    )`;
 
     const values = [
       staffCreatedId,
@@ -762,7 +762,6 @@ VALUES (
 
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
-
     if (result.insertId > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({
@@ -845,6 +844,7 @@ VALUES (
         }
       }
     }
+
     return {
       status: true,
       message: "Job created successfully.",
@@ -4294,10 +4294,66 @@ const copy_job = async (job) => {
 
   const placeholders = Object.keys(data).map(() => "?").join(",");
 
-  await pool.execute(
+  const [result] = await pool.execute(
     `INSERT INTO jobs (${columns}) VALUES (${placeholders})`,
     values
   );
+
+  // last insert id
+  const insertId = result.insertId;
+
+  // insert job tasks
+  const [tasks] = await pool.execute(
+    `SELECT * FROM client_job_task WHERE job_id = ?`,
+    [id]
+  );
+
+  for (const task of tasks) {
+   
+    let job_id = insertId;
+    let client_id = task.client_id;
+    let task_id  = task.task_id;
+    let task_status = task.task_status;
+    let time = task.time;
+    await pool.execute(
+      `INSERT INTO client_job_task SET job_id = ?, client_id = ?, task_id = ?, task_status = ?, time = ?`,
+      [job_id, client_id, task_id, task_status, time]
+    );
+  }
+
+  // insert job allocated staff
+  const [allocatedStaff] = await pool.execute(
+    `SELECT * FROM job_allowed_staffs WHERE job_id = ?`,
+    [id]
+  );
+
+  for (const staff of allocatedStaff) {
+    let job_id = insertId;
+    let staff_id = staff.staff_id;
+    
+    await pool.execute(
+      `INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`,
+      [job_id, staff_id]
+    );
+  }
+ 
+
+
+
+
+
+  const currentDate = new Date();
+  await SatffLogUpdateOperation({
+    staff_id: StaffUserId,
+    ip: ip,
+    date: currentDate.toISOString().split("T")[0],
+    module_name: "job",
+    log_message: `Copied job code:`,
+    permission_type: "copied",
+    module_id: insertId,
+  });
+
+
 
   return { status: true, message: "Job copied successfully" };
 }
