@@ -1430,16 +1430,6 @@ const Setting = () => {
               aria-labelledby="dropdownMenuButton"
             >
               <div className="px-2">
-                <button
-                  className="view-icon dropdown-item w-auto mb-2"
-                  onClick={() => {
-                    setShowViewModal(true);
-                    getTaskData(row);
-                  }}
-                >
-                  <i className="ti-eye" />
-                </button>
-
                 {getAccessDataSetting.update === 1 || role === "SUPERADMIN" ? (
                   <button
                     className="edit-icon dropdown-item w-auto mb-2"
@@ -1469,16 +1459,6 @@ const Setting = () => {
           </div>
 
           <div className="d-lg-flex d-none">
-            <button
-              className="view-icon"
-              onClick={() => {
-                setShowViewModal(true);
-                getTaskData(row);
-              }}
-            >
-              <i className="ti-eye" />
-            </button>
-
             {getAccessDataSetting.update === 1 || role === "SUPERADMIN" ? (
               <button
                 className="edit-icon"

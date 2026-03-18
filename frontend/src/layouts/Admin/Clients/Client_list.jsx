@@ -142,7 +142,7 @@ const ClientList = () => {
   const initialTabs = [
     { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
     { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
-    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
+    // { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
   const [tabs, setTabs] = useState(initialTabs);
