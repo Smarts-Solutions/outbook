@@ -322,8 +322,6 @@ const addChecklist = async (checklist) => {
     customer_id = 0
   }
 
-
-
   try {
     const query = `
     INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name,status)
@@ -350,53 +348,6 @@ const addChecklist = async (checklist) => {
         module_id: checklist_id,
       }
     );
-
-
-    const checklistTasksQuery = `
-    INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
-    VALUES (?, ?, ?, ?)
-    `;
-    for (const valTask of task) {
-      const { task_id, task_name, budgeted_hour } = valTask;
-      if (task_id == "" || task_id == null || task_id == undefined) {
-
-
-        const InsertTaskquery = `
-            INSERT INTO task (name,service_id,job_type_id)
-            VALUES (?, ?, ?)
-            `;
-
-        const checkQuery = `
-                SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
-            `;
-        const [existing] = await pool.execute(checkQuery, [
-          task_name,
-          service_id,
-          job_type_id,
-        ]);
-        if (existing.length === 0) {
-          const [result] = await pool.execute(InsertTaskquery, [
-            task_name,
-            service_id,
-            job_type_id,
-          ]);
-          const task_id = result.insertId;
-          const [result1] = await pool.execute(checklistTasksQuery, [
-            checklist_id,
-            task_id,
-            task_name,
-            budgeted_hour,
-          ]);
-        }
-      } else {
-        const [result] = await pool.execute(checklistTasksQuery, [
-          checklist_id,
-          task_id,
-          task_name,
-          budgeted_hour,
-        ]);
-      }
-    }
 
     return { status: true, message: "checklist add successfully.", data: [] };
   } catch (err) {
