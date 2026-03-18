@@ -2277,19 +2277,6 @@ const Setting = () => {
     });
   };
 
-  // const tabsArr = [
-  //   { id: "1", label: "Staff Role", icon: <User size={16}/> },
-  //   { id: "2", label: "Customer Contact Person Role", icon: "fas fa-phone" },
-  //   { id: "3", label: "Status Type", icon: "fas fa-tasks" },
-  //   { id: "4", label: "Services", icon: "fas fa-gear" },
-  //   { id: "5", label: "Client Industry", icon: "fas fa-industry" },
-  //   { id: "6", label: "Country", icon: "fas fa-globe" },
-  //   { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
-  //   { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
-  //   { id: "9", label: "Checklist", icon: "fas fa-check-square" },
-  //   { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
-  // ];
-
   const tabsArr = [
     { id: "1", label: "Staff Role", icon: <User size={16} className="me-1" /> },
 

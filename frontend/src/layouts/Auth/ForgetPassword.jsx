@@ -1,4 +1,5 @@
 import React from 'react'
+import { LogIn } from 'lucide-react'
 
 const ForgetPassword = () => {
   return (
@@ -72,7 +73,7 @@ const ForgetPassword = () => {
                           className="w-100 btn btn-info fw-normal text-white "
                           type="button"
                         >
-                          Continue <i className="fas fa-sign-in-alt ml-1" />
+                          Continue <LogIn size={18} className="ml-1" />
                         </button>
                       </div>
                     </div>

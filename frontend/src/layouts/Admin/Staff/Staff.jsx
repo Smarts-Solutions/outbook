@@ -22,7 +22,17 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
-import { Download, Ellipsis, Plus, Save, Trash, User, User2, X } from "lucide-react";
+import {
+  Download,
+  Ellipsis,
+  Plus,
+  Save,
+  Trash,
+  User,
+  User2,
+  X,
+  Circle,
+} from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -1506,7 +1516,7 @@ const StaffPage = () => {
             color="primary"
             onClick={handleUpdate}
           >
-           <Save size={16}/>
+            <Save size={16} />
             Update
           </Button>
         </div>
@@ -1533,7 +1543,7 @@ const StaffPage = () => {
                             return (
                               <div className="activity-info" key={index}>
                                 <div className="icon-info-activity">
-                                  <i className="fa-solid fa-circle"></i>
+                                  <Circle size={18} />
                                 </div>
                                 <div className="activity-info-text">
                                   <div className="">
@@ -1586,7 +1596,7 @@ const StaffPage = () => {
 
           <div className="mb-4">
             <label className="form-label fw-semibold">
-             <User size={16}/> Staff to Replace:
+              <User size={16} /> Staff to Replace:
             </label>
 
             <Select
@@ -1641,7 +1651,7 @@ const StaffPage = () => {
           <div className="d-grid gap-2">
             {selectedStaff && (
               <button onClick={handleDeleteClick} className="btn btn-danger">
-               <Trash size={16}/> Delete
+                <Trash size={16} /> Delete
               </button>
             )}
             <button
@@ -1651,7 +1661,7 @@ const StaffPage = () => {
               }}
               className="btn btn-secondary"
             >
-             <X size={16}/> Cancel
+              <X size={16} /> Cancel
             </button>
           </div>
 
@@ -1681,7 +1691,7 @@ const StaffPage = () => {
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
-               <User2 size={16}/> Customers Assigned:
+                <User2 size={16} /> Customers Assigned:
               </h6>
 
               <ul className="list-group">
@@ -1730,7 +1740,7 @@ const StaffPage = () => {
         <div className="modal-body">
           <div className="mb-4">
             <label htmlFor="staff-select" className="form-label fw-semibold">
-            <user size={16}/> Staff to Replace
+              <user size={16} /> Staff to Replace
             </label>
 
             <div className="dropdown w-100">
@@ -1789,14 +1799,14 @@ const StaffPage = () => {
               }}
               className="btn btn-secondary"
             >
-             < X size={16}/> Cancel
+              <X size={16} /> Cancel
             </button>
           </div>
 
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">
               <h6 className="fw-bold text-primary">
-               <User2 size={16}/> Customers Assigned:
+                <User2 size={16} /> Customers Assigned:
               </h6>
               <ul className="list-group">
                 {deleteStaffCustomer.map((customer) => (

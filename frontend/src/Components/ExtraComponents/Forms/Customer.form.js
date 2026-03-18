@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { ArrowLeft,ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 const ReusableForm = ({
   initialValues,
@@ -35,10 +35,11 @@ const ReusableForm = ({
 
   useEffect(() => {
     setSelectSearchItem((pre) =>
-      formik.values.search_company_name == "" ? "" : pre
+      formik.values.search_company_name == "" ? "" : pre,
     );
   }, [formik.values.search_company_name]);
 
+  const Icon = passwordVisible[field.name] ? EyeOff : Eye;
 
   return (
     <form className="w-100" onSubmit={formik.handleSubmit}>
@@ -283,18 +284,15 @@ const ReusableForm = ({
                           className={`form-control`}
                           autoComplete="off"
                         />
-                        <i
-                          className={`fa-solid ${
-                            passwordVisible[field.name]
-                              ? "fa-eye-slash"
-                              : "fa-eye"
-                          }`}
+                        <Icon
+                          size={18}
                           style={{
                             position: "absolute",
                             top: "1.5px",
                             right: "20px",
                             padding: "12.4px 6.6px",
                             borderRadius: "3px",
+                            cursor: "pointer",
                           }}
                           onClick={() =>
                             setPasswordVisible((prevState) => ({
@@ -302,7 +300,7 @@ const ReusableForm = ({
                               [field.name]: !prevState[field.name],
                             }))
                           }
-                        ></i>
+                        />
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
                             <div className="error-text">
@@ -635,7 +633,9 @@ const ReusableForm = ({
                   <>
                     <div className={`col-lg-${field.col_size} px-2`}>
                       <div className="  mt-4 row flex-column">
-                        <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue" ><h6 className="my-0 fw-bold">Trading Details </h6></div>
+                        <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue">
+                          <h6 className="my-0 fw-bold">Trading Details </h6>
+                        </div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
@@ -670,7 +670,7 @@ const ReusableForm = ({
               className="btn btn-info m-2"
               onClick={closeBtn}
             >
-              <ArrowLeft size={16}/> Previous
+              <ArrowLeft size={16} /> Previous
             </button>
 
             <button
@@ -678,7 +678,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name} <ArrowRight size={16}/>
+              {btn_name} <ArrowRight size={16} />
             </button>
           </div>
         ) : (
@@ -688,7 +688,7 @@ const ReusableForm = ({
               className="btn btn-info m-2"
               onClick={closeBtn}
             >
-             <ArrowLeft size={16}/> Cancel
+              <ArrowLeft size={16} /> Cancel
             </button>
 
             <button
@@ -698,7 +698,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name} <ArrowRight size={16}/>
+              {btn_name} <ArrowRight size={16} />
             </button>
           </div>
         )}

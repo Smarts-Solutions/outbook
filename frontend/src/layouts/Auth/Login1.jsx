@@ -16,6 +16,7 @@ import {
 } from "../../Utils/Common_Message";
 import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 import sweatalert from "sweetalert2";
+import { LogIn } from "lucide-react";
 
 const Login1 = () => {
   const navigate = useNavigate();
@@ -423,7 +424,7 @@ const Login1 = () => {
                             onClick={() => handleSubmitLogin()}
                             onKeyPress={handleKeyPress}
                           >
-                            Sign In <i className="fas fa-sign-in-alt ml-1" />
+                            Sign In <LogIn size={18} className="ml-1" />
                           </button>
                         </div>
                      

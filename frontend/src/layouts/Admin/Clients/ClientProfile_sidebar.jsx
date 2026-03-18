@@ -13,7 +13,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, Plus, Briefcase, User } from "lucide-react";
+import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -1073,8 +1073,7 @@ const ClientList = () => {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            {tab.icon}{" "}
-                            {tab.label}
+                            {tab.icon} {tab.label}
                           </button>
                         </li>
                       ))}
@@ -1266,7 +1265,10 @@ const ClientList = () => {
                       <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li className="">
-                            <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
+                            <Phone
+                              size={22}
+                              className="me-2 text-secondary align-middle"
+                            />
                             <b>Phone : </b>
                             {(clientInformationData &&
                               clientInformationData.phone &&
@@ -1276,7 +1278,10 @@ const ClientList = () => {
                               "NA"}
                           </li>
                           <li className="mt-2">
-                            <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
+                            <Mail
+                              size={22}
+                              className="text-secondary align-middle me-2"
+                            />
                             <b>Email : </b>{" "}
                             {(clientInformationData &&
                               clientInformationData.email) ||

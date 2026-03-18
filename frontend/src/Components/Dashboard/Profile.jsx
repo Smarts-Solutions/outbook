@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getProfile } from "../../ReduxStore/Slice/Staff/staffSlice";
-import { Pencil} from "lucide-react";
+import { Pencil, Phone, Mail, Power } from "lucide-react";
 
 const Profile = () => {
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const [getProfileDetails, setGetProfileDetails] = useState([]);
 
   const id = JSON.parse(localStorage.getItem("staffDetails")).id;
@@ -25,7 +25,6 @@ const Profile = () => {
       });
   };
 
-  
   useEffect(() => {
     Profile();
   }, []);
@@ -59,25 +58,37 @@ const Profile = () => {
                     <li className=" mb-3">
                       <i className=" ti-user mr-2 text-secondary font-22 align-middle" />{" "}
                       <b>Full Name : </b>
-                      {getProfileDetails &&
+                      {(getProfileDetails &&
                         getProfileDetails.first_name +
                           " " +
-                          getProfileDetails.last_name || 'NA'}
+                          getProfileDetails.last_name) ||
+                        "NA"}
                     </li>
                     <li className="mb-3">
-                      <i className="fa-regular fa-phone mr-2 text-secondary font-22 align-middle" />{" "}
+                      <Phone
+                        size={15}
+                        className="mr-2 text-secondary align-middle"
+                      />{" "}
                       <b>Phone :</b>{" "}
-                      {getProfileDetails && getProfileDetails.phone || 'NA'}
+                      {(getProfileDetails && getProfileDetails.phone) || "NA"}
                     </li>
                     <li className="mb-3">
-                      <i className="fa-regular fa-envelope text-secondary font-22 align-middle mr-2" />{" "}
+                      <Mail
+                        size={15}
+                        className="text-secondary align-middle mr-2"
+                      />{" "}
                       <b>Email :</b>{" "}
-                      {getProfileDetails && getProfileDetails.email || 'NA'}
+                      {(getProfileDetails && getProfileDetails.email) || "NA"}
                     </li>
                     <li className="mb-3">
-                      <i className="fa-regular fa-power-off text-secondary font-22 align-middle mr-2" />{" "}
+                      <Power
+                        size={15}
+                        className="text-secondary align-middle mr-2"
+                      />{" "}
                       <b>Status :</b>{" "}
-                      {getProfileDetails && getProfileDetails.status==1 ? "Active" : "Inactive"}
+                      {getProfileDetails && getProfileDetails.status == 1
+                        ? "Active"
+                        : "Inactive"}
                     </li>
                     {/* <li className="">
                       <button className="btn btn-info">
@@ -91,7 +102,7 @@ const Profile = () => {
             </div>
             {/*end f_profile*/}
           </div>
-        </div> 
+        </div>
       </div>
     </div>
   );

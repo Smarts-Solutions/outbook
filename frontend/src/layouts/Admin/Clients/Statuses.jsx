@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
+import { Plus } from "lucide-react";
 
 const Statuses = () => {
-
   const [addstatus, setAddstatus] = useState(false);
   const data = [
     {
@@ -67,7 +67,12 @@ const Statuses = () => {
       sortable: true,
       reorder: false,
     },
-    { name: "Account Manager", selector: (row) => row.JobType, sortable: true,reorder: false, },
+    {
+      name: "Account Manager",
+      selector: (row) => row.JobType,
+      sortable: true,
+      reorder: false,
+    },
   ];
 
   return (
@@ -85,7 +90,7 @@ const Statuses = () => {
               className="btn btn-info text-white float-end "
               onClick={() => setAddstatus(true)}
             >
-              <i className="fa-regular fa-plus pe-1" /> Add Status
+              <Plus size={16} /> Add Status
             </button>
           </div>
         </div>
@@ -108,7 +113,6 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">USA</h6>
                       </div>
-                 
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -116,7 +120,6 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">Germany</h6>
                       </div>
-                      
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -124,7 +127,6 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">French</h6>
                       </div>
-                    
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -132,7 +134,6 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">Spain</h6>
                       </div>
-                   
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -140,7 +141,6 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">Italy</h6>
                       </div>
-                
                     </div>
                   </li>
                 </ul>
@@ -149,7 +149,6 @@ const Statuses = () => {
           </div>
         </div>
       </div>
-     
     </div>
   );
 };

@@ -11,6 +11,7 @@ import qs from "qs";
 import jwtDecode from "jwt-decode";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
+import { Circle } from "lucide-react";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -573,7 +574,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.customer &&
-                                    dashboard.customer.count,
+                                      dashboard.customer.count,
                                   )}
                                 </h3>
                                 <img
@@ -712,7 +713,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.pending_job &&
-                                    dashboard.pending_job.count,
+                                      dashboard.pending_job.count,
                                   )}
                                 </h3>
                                 <img
@@ -750,7 +751,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.completed_job &&
-                                    dashboard.completed_job.count,
+                                      dashboard.completed_job.count,
                                   )}
                                 </h3>
                                 <img
@@ -769,8 +770,6 @@ const Dashboard = () => {
               </div>
             </>
           </div>
-
-
 
           <div className="col-lg-4 col-md-4 mt-2">
             <div className="card activity-card">
@@ -885,7 +884,7 @@ const Dashboard = () => {
                           getActiviyLog.map((item, index) => (
                             <div className="activity-info" key={index}>
                               <div className="icon-info-activity">
-                                <i className="fa-solid fa-circle"></i>
+                                <Circle />
                               </div>
                               <div className="activity-info-text">
                                 <small>{formatDate(item?.created_at)}</small>
@@ -902,7 +901,7 @@ const Dashboard = () => {
                             />
                             <p className="text-center">
                               {activityRange === "custom" &&
-                                (!selectedFromDate || !selectedToDate)
+                              (!selectedFromDate || !selectedToDate)
                                 ? "Please select both From Date and To Date to view activity logs"
                                 : "No Activity Logs Found"}
                             </p>

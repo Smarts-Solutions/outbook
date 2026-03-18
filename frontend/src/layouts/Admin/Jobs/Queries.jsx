@@ -20,7 +20,7 @@ import {
   deleteFileFromFolder,
   deleteFolderFromFolder,
 } from "../../../Utils/graphAPI";
-import { Download,Plus ,FileText ,File,Eye  } from "lucide-react";
+import { Download, Plus, FileText, File, Eye } from "lucide-react";
 
 const Queries = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -589,7 +589,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
               setViewquery(true);
             }}
           >
-           <Eye size={16} className="text-warning" />
+            <Eye size={16} className="text-warning" />
           </button>
           {row.status == 1 ? (
             ""
@@ -710,7 +710,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                     className="btn btn-info text-white float-end "
                     onClick={() => setAddquery(true)}
                   >
-                    <i className="fa-regular fa-plus pe-1"></i> Add Query
+                  <Plus size={16}/> Add Query
                   </button>
                
               ) : (
@@ -733,8 +733,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                 className="btn btn-outline-info fw-bold border-3 me-2"
                 onClick={handleExport}
               >
-                    <Download size={16}/>
-
+                <Download size={16} />
                 Export Excel
               </button>
             )}
@@ -747,7 +746,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   className="btn btn-info text-white"
                   onClick={() => setAddquery(true)}
                 >
-                  <Plus size={16}/>
+                  <Plus size={16} />
                   Add Query
                 </button>
               )}
@@ -860,7 +859,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
                   // min={new Date().toISOString().split("T")[0]}
-                  min={minDateRecivedOn||""}
+                  min={minDateRecivedOn || ""}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">{errors1["QuerySentDate"]}</div>
@@ -1091,7 +1090,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="QuerySentDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
-                  min={minDateRecivedOn||""}
+                  min={minDateRecivedOn || ""}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">{errors1["QuerySentDate"]}</div>

@@ -25,8 +25,18 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
-import { Download,ArrowLeft,Plus ,ArrowRight, Briefcase,User,File,FileText} from "lucide-react";
-
+import {
+  Download,
+  ArrowLeft,
+  Plus,
+  ArrowRight,
+  Briefcase,
+  User,
+  File,
+  FileText,
+  Phone,
+  Mail,
+} from "lucide-react";
 
 const ClientList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -149,9 +159,9 @@ const ClientList = () => {
   };
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16}/> },
-    { id: "view client", label: "View Client", icon: <User size={16}/> },
-    { id: "documents", label: "Documents", icon: <File size={16}/> },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
+    { id: "view client", label: "View Client", icon: <User size={16} /> },
+    { id: "documents", label: "Documents", icon: <File size={16} /> },
   ];
 
   const GetStatus = async () => {
@@ -248,8 +258,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-            getAccessDataJob.all_jobs == 1 ||
-            role === "SUPERADMIN" ? (
+          getAccessDataJob.all_jobs == 1 ||
+          role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -432,13 +442,13 @@ const ClientList = () => {
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
-              </button>
-            )
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
             : ""}
         </div>
       ),
@@ -647,7 +657,7 @@ const ClientList = () => {
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-             <File size={24} color="#000" />
+              <File size={24} color="#000" />
               <span>{row.file_type}</span>
             </div>
           )}
@@ -737,7 +747,6 @@ const ClientList = () => {
           Accept: "application/json",
         },
       });
-
 
       // Check if the response is OK
       if (!response.ok) {
@@ -973,11 +982,9 @@ const ClientList = () => {
               return;
             });
         } else {
-          return
+          return;
         }
       });
-
-
   };
 
   const GetAllJobList = async () => {
@@ -1102,8 +1109,9 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
+                        className={`nav-link ${
+                          activeTab === tab.id ? "active" : ""
+                        }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1134,17 +1142,17 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                       <ArrowLeft size={16}/> Back
+                      <ArrowLeft size={16} /> Back
                     </button>
                     {(getAccessDataJob.insert == 1 ||
                       role === "SUPERADMIN") && (
-                        <div
-                          className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
-                          onClick={handleCreateJob}
-                        >
-                           <Plus size={16}/> Create Job
-                        </div>
-                      )}
+                      <div
+                        className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                        onClick={handleCreateJob}
+                      >
+                        <Plus size={16} /> Create Job
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -1162,7 +1170,7 @@ const ClientList = () => {
                       window.history.back();
                     }}
                   >
-                     <ArrowLeft size={16}/> Back
+                    <ArrowLeft size={16} /> Back
                   </button>
                 </div>
               )}
@@ -1181,7 +1189,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft size={16}/> Back
+                      <ArrowLeft size={16} /> Back
                     </button>
                   </div>
                 </>
@@ -1204,8 +1212,9 @@ const ClientList = () => {
         <div className="mt-4">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab == "NoOfJobs" ? "show active" : ""
+              }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1236,7 +1245,7 @@ const ClientList = () => {
                         className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                         onClick={handleExport}
                       >
-                            <Download size={16}/>
+                        <Download size={16} />
 
                         <span>Export Excel</span>
                       </button>
@@ -1290,22 +1299,22 @@ const ClientList = () => {
                             <h5 className="dastyle-user-name">
                               {getClientDetails?.data?.client?.client_type ==
                                 5 ||
-                                getClientDetails?.data?.client?.client_type == 6
+                              getClientDetails?.data?.client?.client_type == 6
                                 ? getClientDetails?.data?.member_details?.[0]
-                                  .first_name +
-                                " " +
-                                getClientDetails?.data?.member_details?.[0]
-                                  .last_name
+                                    .first_name +
+                                  " " +
+                                  getClientDetails?.data?.member_details?.[0]
+                                    .last_name
                                 : getClientDetails?.data?.client?.client_type ==
-                                  7
+                                    7
                                   ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].first_name +
-                                  " " +
-                                  getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].last_name
+                                      ?.beneficiaries_details?.[0].first_name +
+                                    " " +
+                                    getClientDetails?.data
+                                      ?.beneficiaries_details?.[0].last_name
                                   : clientInformationData.first_name +
-                                  " " +
-                                  clientInformationData.last_name}
+                                    " " +
+                                    clientInformationData.last_name}
                             </h5>
                             <p className="mb-0 dastyle-user-name-post">
                               Client Code: {informationData.client_code}
@@ -1316,35 +1325,41 @@ const ClientList = () => {
                       <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li className="">
-                            <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
+                            <Phone
+                              size={22}
+                              className="me-2 text-secondary align-middle"
+                            />
                             <b>Phone : </b>
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
+                            getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                .phone_code +
-                              " " +
-                              getClientDetails?.data?.member_details?.[0]
-                                .phone || "NA"
+                                  .phone_code +
+                                  " " +
+                                  getClientDetails?.data?.member_details?.[0]
+                                    .phone || "NA"
                               : getClientDetails?.data?.client?.client_type == 7
                                 ? getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].phone_code +
-                                " " +
-                                getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].phone || "NA"
+                                    ?.beneficiaries_details?.[0].phone_code +
+                                    " " +
+                                    getClientDetails?.data
+                                      ?.beneficiaries_details?.[0].phone || "NA"
                                 : clientInformationData.phone_code +
-                                " " +
-                                clientInformationData.phone || "NA"}
+                                    " " +
+                                    clientInformationData.phone || "NA"}
                           </li>
                           <li className="mt-2">
-                            <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
+                            <Mail
+                              size={22}
+                              className="text-secondary align-middle me-2"
+                            />
                             <b>Email : </b>{" "}
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
+                            getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                .email || "NA"
+                                  .email || "NA"
                               : getClientDetails?.data?.client?.client_type == 7
                                 ? getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].email || "NA"
+                                    ?.beneficiaries_details?.[0].email || "NA"
                                 : clientInformationData.email || "NA"}
                           </li>
                         </ul>
@@ -1390,10 +1405,10 @@ const ClientList = () => {
                               : getClientDetails?.data?.client?.client_type == 5
                                 ? "Charity Incorporated Organisation Information"
                                 : getClientDetails?.data?.client?.client_type ==
-                                  6
+                                    6
                                   ? "Charity Unincorporated Association Information"
                                   : getClientDetails?.data?.client
-                                    ?.client_type == 7
+                                        ?.client_type == 7
                                     ? "Trust"
                                     : ""}
                       </h4>
@@ -1501,7 +1516,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1545,7 +1560,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1589,7 +1604,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1633,7 +1648,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1677,7 +1692,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                                informationData.vat_registered == "0"
+                              informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1716,8 +1731,9 @@ const ClientList = () => {
 
           {activeTab == "documents" && (
             <div
-              className={`tab-pane fade ${activeTab == "documents" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab == "documents" ? "show active" : ""
+              }`}
               id={"documents"}
               role="tabpanel"
               aria-labelledby={`documents-tab`}
@@ -1843,7 +1859,7 @@ const ClientList = () => {
                                                               <img
                                                                 src={
                                                                   previews[
-                                                                  index
+                                                                    index
                                                                   ]
                                                                 }
                                                                 alt="preview"
@@ -1855,9 +1871,15 @@ const ClientList = () => {
                                                               />
                                                             ) : file.type ===
                                                               "application/pdf" ? (
-                                                              <FileText size={24} color="#FF0000" />
+                                                              <FileText
+                                                                size={24}
+                                                                color="#FF0000"
+                                                              />
                                                             ) : (
-                                                            <File size={24} color="#000" />
+                                                              <File
+                                                                size={24}
+                                                                color="#000"
+                                                              />
                                                             )}
                                                           </td>
                                                           <td className="file_name">
@@ -1868,19 +1890,19 @@ const ClientList = () => {
                                                           </td>
                                                           <td className="size">
                                                             {file.size <
-                                                              1024 * 1024
+                                                            1024 * 1024
                                                               ? `${(
-                                                                file.size /
-                                                                1024
-                                                              ).toFixed(
-                                                                2,
-                                                              )} KB`
+                                                                  file.size /
+                                                                  1024
+                                                                ).toFixed(
+                                                                  2,
+                                                                )} KB`
                                                               : `${(
-                                                                file.size /
-                                                                (1024 * 1024)
-                                                              ).toFixed(
-                                                                2,
-                                                              )} MB`}
+                                                                  file.size /
+                                                                  (1024 * 1024)
+                                                                ).toFixed(
+                                                                  2,
+                                                                )} MB`}
                                                           </td>
 
                                                           <td className="action">
@@ -1940,8 +1962,7 @@ const ClientList = () => {
                                                 type="submit"
                                                 onClick={(e) => handleSubmit(e)}
                                               >
-                                                Save{" "}
-                                               <ArrowRight size={16}/>
+                                                Save <ArrowRight size={16} />
                                               </Button>
                                             </div>
                                           </div>

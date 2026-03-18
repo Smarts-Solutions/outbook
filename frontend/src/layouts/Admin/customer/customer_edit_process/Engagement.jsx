@@ -2,14 +2,25 @@ import React, { useContext, useState, useEffect } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import { JobType, customerSourceApi, customerSubSourceApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  JobType,
+  customerSourceApi,
+  customerSubSourceApi,
+} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
 import { Edit_Customer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
-import { GET_CUSTOMER_DATA, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  GET_CUSTOMER_DATA,
+  Get_Service,
+} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
-import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
-import { ArrowLeft,ArrowRight } from "lucide-react";
+import {
+  FTEDedicatedErrorMessages,
+  PercentageModelErrorMessages,
+  AdhocPAYGHourlyErrorMessages,
+} from "../../../../Utils/Common_Message";
+import { ArrowLeft, ArrowRight, PlusCircle } from "lucide-react";
 
 const checkboxOptions = [
   { id: "formCheck1", label: "FTE/Dedicated Staffing" },
@@ -33,7 +44,6 @@ const Engagement = () => {
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
   const [formState1, setFormState1] = useState({});
 
-
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
     data: [],
@@ -52,8 +62,7 @@ const Engagement = () => {
     feePerAdmin: null,
   });
 
-
-  console.log("formValues1", formValues1)
+  console.log("formValues1", formValues1);
 
   const [formValues2, setFormValues2] = useState({
     total_outsourcing: null,
@@ -64,7 +73,6 @@ const Engagement = () => {
     tax_experts: null,
     admin_staff: null,
   });
-
 
   const [formValues3, setFormValues3] = useState({
     adhoc_accountants: null,
@@ -91,7 +99,7 @@ const Engagement = () => {
   });
 
   const [checkboxStates, setCheckboxStates] = useState(
-    Array(checkboxOptions.length).fill(0)
+    Array(checkboxOptions.length).fill(0),
   );
 
   const GetCustomerData = async () => {
@@ -105,7 +113,6 @@ const Engagement = () => {
             loading: false,
             data: response.data,
           });
-
 
           setFormState1({
             customerSource: response.data.customer?.customerSource,
@@ -165,37 +172,115 @@ const Engagement = () => {
 
       if (customer_engagement_model_status.fte_dedicated_staffing === "1") {
         setFormValues1({
-          accountants: customerDetails.data.fte_dedicated_staffing.number_of_accountants == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_accountants,
-          feePerAccountant: customerDetails.data.fte_dedicated_staffing.fee_per_accountant == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_accountant,
-          bookkeepers: customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers,
-          feePerBookkeeper: customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper,
-          payrollExperts: customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_payroll_experts,
-          feePerPayrollExpert: customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert,
-          taxExperts: customerDetails.data.fte_dedicated_staffing.number_of_tax_experts == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_tax_experts,
-          feePerTaxExpert: customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert,
-          numberOfAdmin: customerDetails.data.fte_dedicated_staffing.number_of_admin_staff == null ? null : customerDetails.data.fte_dedicated_staffing.number_of_admin_staff,
-          feePerAdmin: customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff == null ? null : customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff,
+          accountants:
+            customerDetails.data.fte_dedicated_staffing.number_of_accountants ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing
+                  .number_of_accountants,
+          feePerAccountant:
+            customerDetails.data.fte_dedicated_staffing.fee_per_accountant ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing.fee_per_accountant,
+          bookkeepers:
+            customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing
+                  .number_of_bookkeepers,
+          feePerBookkeeper:
+            customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper,
+          payrollExperts:
+            customerDetails.data.fte_dedicated_staffing
+              .number_of_payroll_experts == null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing
+                  .number_of_payroll_experts,
+          feePerPayrollExpert:
+            customerDetails.data.fte_dedicated_staffing
+              .fee_per_payroll_expert == null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing
+                  .fee_per_payroll_expert,
+          taxExperts:
+            customerDetails.data.fte_dedicated_staffing.number_of_tax_experts ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing
+                  .number_of_tax_experts,
+          feePerTaxExpert:
+            customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert,
+          numberOfAdmin:
+            customerDetails.data.fte_dedicated_staffing.number_of_admin_staff ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing
+                  .number_of_admin_staff,
+          feePerAdmin:
+            customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff ==
+            null
+              ? null
+              : customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff,
         });
       }
       if (customer_engagement_model_status.percentage_model === "1") {
         setFormValues2({
-          total_outsourcing: customerDetails.data.percentage_model.total_outsourcing == null ? null : customerDetails.data.percentage_model.total_outsourcing,
-          accountants: customerDetails.data.percentage_model.accountants == null ? null : customerDetails.data.percentage_model.accountants,
-          bookkeepers: customerDetails.data.percentage_model.bookkeepers == null ? null : customerDetails.data.percentage_model.bookkeepers,
-          payroll_experts: customerDetails.data.percentage_model.payroll_experts == null ? null : customerDetails.data.percentage_model.payroll_experts,
-          tax_experts: customerDetails.data.percentage_model.tax_experts == null ? null : customerDetails.data.percentage_model.tax_experts,
-          admin_staff: customerDetails.data.percentage_model.admin_staff == null ? null : customerDetails.data.percentage_model.admin_staff,
+          total_outsourcing:
+            customerDetails.data.percentage_model.total_outsourcing == null
+              ? null
+              : customerDetails.data.percentage_model.total_outsourcing,
+          accountants:
+            customerDetails.data.percentage_model.accountants == null
+              ? null
+              : customerDetails.data.percentage_model.accountants,
+          bookkeepers:
+            customerDetails.data.percentage_model.bookkeepers == null
+              ? null
+              : customerDetails.data.percentage_model.bookkeepers,
+          payroll_experts:
+            customerDetails.data.percentage_model.payroll_experts == null
+              ? null
+              : customerDetails.data.percentage_model.payroll_experts,
+          tax_experts:
+            customerDetails.data.percentage_model.tax_experts == null
+              ? null
+              : customerDetails.data.percentage_model.tax_experts,
+          admin_staff:
+            customerDetails.data.percentage_model.admin_staff == null
+              ? null
+              : customerDetails.data.percentage_model.admin_staff,
         });
       }
       if (customer_engagement_model_status.adhoc_payg_hourly === "1") {
         setFormValues3({
-          adhoc_accountants: customerDetails.data.adhoc_payg_hourly.adhoc_accountants == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_accountants,
-          adhoc_bookkeepers: customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers,
-          adhoc_payroll_experts: customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts,
-          adhoc_tax_experts: customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts,
-          adhoc_admin_staff: customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff == null ? null : customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff,
+          adhoc_accountants:
+            customerDetails.data.adhoc_payg_hourly.adhoc_accountants == null
+              ? null
+              : customerDetails.data.adhoc_payg_hourly.adhoc_accountants,
+          adhoc_bookkeepers:
+            customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers == null
+              ? null
+              : customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers,
+          adhoc_payroll_experts:
+            customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts == null
+              ? null
+              : customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts,
+          adhoc_tax_experts:
+            customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts == null
+              ? null
+              : customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts,
+          adhoc_admin_staff:
+            customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff == null
+              ? null
+              : customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff,
         });
-
       }
 
       if (customer_engagement_model_status.customised_pricing === "1") {
@@ -211,9 +296,7 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-
   useEffect(() => {
-
     if (formState1.customerSource) {
       customerSubSourceData();
     }
@@ -264,16 +347,17 @@ const Engagement = () => {
     }
   };
 
-
   const handleChange4 = (index, e) => {
     const { name, value } = e.target;
-    if (!/^[0-9+]*$/.test(value)) { return }
+    if (!/^[0-9+]*$/.test(value)) {
+      return;
+    }
 
     let newJobEntries = [...jobEntries];
     let updatedJobEntry = { ...newJobEntries[index] };
     updatedJobEntry[name] = value;
     newJobEntries[index] = updatedJobEntry;
-    validate5(name, value, index)
+    validate5(name, value, index);
     setJobEntries(newJobEntries);
   };
 
@@ -301,11 +385,12 @@ const Engagement = () => {
   const validate1 = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors1 };
     if (isSubmitting) {
-
       for (const key in FTEDedicatedErrorMessages) {
-        if (formValues1[key] == null || formValues1[key] === "" || formValues1[key] < 0) {
-
-
+        if (
+          formValues1[key] == null ||
+          formValues1[key] === "" ||
+          formValues1[key] < 0
+        ) {
           newErrors[key] = FTEDedicatedErrorMessages[key];
         }
       }
@@ -319,7 +404,6 @@ const Engagement = () => {
       }
     }
 
-
     setErrors1(newErrors);
     if (Object.keys(newErrors).length == 10) {
       Swal.fire({
@@ -328,7 +412,7 @@ const Engagement = () => {
         timer: 2000,
         showConfirmButton: true,
       });
-      return false
+      return false;
     }
     return true;
   };
@@ -337,7 +421,11 @@ const Engagement = () => {
     const newErrors = { ...errors2 };
     if (isSubmitting) {
       for (const key in PercentageModelErrorMessages) {
-        if (formValues2[key] == null || formValues2[key] === "" || formValues2[key] < 0) {
+        if (
+          formValues2[key] == null ||
+          formValues2[key] === "" ||
+          formValues2[key] < 0
+        ) {
           newErrors[key] = PercentageModelErrorMessages[key];
         }
       }
@@ -352,15 +440,15 @@ const Engagement = () => {
     }
     setErrors2(newErrors);
 
-
     if (Object.keys(newErrors).length == 6) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill at least one field in Percentage Model between 0% and 100%.",
+        title:
+          "Please fill at least one field in Percentage Model between 0% and 100%.",
         timer: 2000,
         showConfirmButton: true,
       });
-      return false
+      return false;
     }
 
     return true;
@@ -370,13 +458,24 @@ const Engagement = () => {
     const newErrors = { ...errors3 };
     if (isSubmitting) {
       for (const key in AdhocPAYGHourlyErrorMessages) {
-        if (formValues3[key] == null || formValues3[key]==undefined || formValues3[key] === "" || formValues3[key] < 7 || formValues3[key] > 25) {
-
+        if (
+          formValues3[key] == null ||
+          formValues3[key] == undefined ||
+          formValues3[key] === "" ||
+          formValues3[key] < 7 ||
+          formValues3[key] > 25
+        ) {
           newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
         }
       }
     } else {
-      if (value == null || value == undefined || value == "" || value < 7 || value > 25) {
+      if (
+        value == null ||
+        value == undefined ||
+        value == "" ||
+        value < 7 ||
+        value > 25
+      ) {
         if (AdhocPAYGHourlyErrorMessages[name]) {
           newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
         }
@@ -389,13 +488,13 @@ const Engagement = () => {
     if (Object.keys(newErrors).length == 5) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill at least one field in Adhoc/PAYG/Hourly between £7 and £25.",
+        title:
+          "Please fill at least one field in Adhoc/PAYG/Hourly between £7 and £25.",
         timer: 2000,
         showConfirmButton: true,
       });
-      return false
+      return false;
     }
-
 
     return true;
   };
@@ -406,7 +505,10 @@ const Engagement = () => {
 
     if (!value) {
       entryErrors[name] = "Please Enter " + name;
-    } else if (name === "minimum_number_of_jobs" && (value < 1 || value > 100)) {
+    } else if (
+      name === "minimum_number_of_jobs" &&
+      (value < 1 || value > 100)
+    ) {
       entryErrors[name] = "Minimum number of Jobs must be between 1 and 100";
     } else if (name === "cost_per_job" && (value < 20 || value > 500)) {
       entryErrors[name] = "Cost Per Job must be between £20 and £500";
@@ -545,8 +647,6 @@ const Engagement = () => {
     }
   };
 
-
-
   const handleSubmit = async () => {
     if (!checkboxStates.some((state) => state === 1)) {
       Swal.fire({
@@ -565,8 +665,6 @@ const Engagement = () => {
       validate4,
     ];
 
-
-
     for (let i = 0; i < checkboxStates.length; i++) {
       if (checkboxStates[i] == 1 && !validations[i]()) {
         return;
@@ -583,24 +681,43 @@ const Engagement = () => {
       ...formState1,
     };
 
-
     if (checkboxStates[0] === 1) {
       req = {
         ...req,
-        number_of_accountants: formValues1.accountants === 0 ? 0 : formValues1.accountants || null,
-        fee_per_accountant: formValues1.feePerAccountant === 0 ? 0 : formValues1.feePerAccountant || null,
-        number_of_bookkeepers: formValues1.bookkeepers === 0 ? 0 : formValues1.bookkeepers || null,
-        fee_per_bookkeeper: formValues1.feePerBookkeeper === 0 ? 0 : formValues1.feePerBookkeeper || null,
-        number_of_payroll_experts: formValues1.payrollExperts === 0 ? 0 : formValues1.payrollExperts || null,
-        fee_per_payroll_expert: formValues1.feePerPayrollExpert === 0 ? 0 : formValues1.feePerPayrollExpert || null,
-        number_of_tax_experts: formValues1.taxExperts === 0 ? 0 : formValues1.taxExperts || null,
-        fee_per_tax_expert: formValues1.feePerTaxExpert === 0 ? 0 : formValues1.feePerTaxExpert || null,
-        number_of_admin_staff: formValues1.numberOfAdmin === 0 ? 0 : formValues1.numberOfAdmin || null,
-        fee_per_admin_staff: formValues1.feePerAdmin === 0 ? 0 : formValues1.feePerAdmin || null,
+        number_of_accountants:
+          formValues1.accountants === 0 ? 0 : formValues1.accountants || null,
+        fee_per_accountant:
+          formValues1.feePerAccountant === 0
+            ? 0
+            : formValues1.feePerAccountant || null,
+        number_of_bookkeepers:
+          formValues1.bookkeepers === 0 ? 0 : formValues1.bookkeepers || null,
+        fee_per_bookkeeper:
+          formValues1.feePerBookkeeper === 0
+            ? 0
+            : formValues1.feePerBookkeeper || null,
+        number_of_payroll_experts:
+          formValues1.payrollExperts === 0
+            ? 0
+            : formValues1.payrollExperts || null,
+        fee_per_payroll_expert:
+          formValues1.feePerPayrollExpert === 0
+            ? 0
+            : formValues1.feePerPayrollExpert || null,
+        number_of_tax_experts:
+          formValues1.taxExperts === 0 ? 0 : formValues1.taxExperts || null,
+        fee_per_tax_expert:
+          formValues1.feePerTaxExpert === 0
+            ? 0
+            : formValues1.feePerTaxExpert || null,
+        number_of_admin_staff:
+          formValues1.numberOfAdmin === 0
+            ? 0
+            : formValues1.numberOfAdmin || null,
+        fee_per_admin_staff:
+          formValues1.feePerAdmin === 0 ? 0 : formValues1.feePerAdmin || null,
       };
     }
-
-
 
     if (checkboxStates[1] === 1) {
       req = {
@@ -613,7 +730,6 @@ const Engagement = () => {
         admin_staff: formValues2.admin_staff || null,
       };
     }
-
 
     if (checkboxStates[2] === 1) {
       req = {
@@ -633,12 +749,9 @@ const Engagement = () => {
       };
     }
 
-
     if (!validateForm()) {
       return;
     }
-
-
 
     const data = { req: req, authToken: token };
     await dispatch(Edit_Customer(data))
@@ -654,30 +767,28 @@ const Engagement = () => {
       });
   };
 
-
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name == 'customerJoiningDate') {
+    if (name == "customerJoiningDate") {
       let date = new Date(value);
 
       let month = date.getMonth() + 1;
       let day = date.getDate();
       let year = date.getFullYear();
-      let newDate = `${year}-${month < 10 ? `0${month}` : `${month}`}-${day < 10 ? `0${day}` : `${day}`
-        }`;
+      let newDate = `${year}-${month < 10 ? `0${month}` : `${month}`}-${
+        day < 10 ? `0${day}` : `${day}`
+      }`;
 
       setFormState1({
         ...formState1,
         [name]: newDate,
-      })
-    }
-    else {
+      });
+    } else {
       setFormState1({
         ...formState1,
         [name]: value,
-      })
+      });
     }
 
     setFormErrors((prevErrors) => ({
@@ -825,7 +936,6 @@ const Engagement = () => {
                                     value={formValues1[field.name]}
                                     onChange={(e) => handleChange1(e)}
                                   />
-
                                 </div>
                               </div>
                             ))}
@@ -888,7 +998,6 @@ const Engagement = () => {
                                   <label className="form-label">
                                     {field.label}
                                   </label>{" "}
-
                                   {/* <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
@@ -897,11 +1006,8 @@ const Engagement = () => {
                                   </label> */}
                                   <input
                                     type="text"
-
                                     // className={errors2[field.name] ? "error-field form-control" : "form-control"}
                                     className={"form-control"}
-
-
                                     name={field.name}
                                     id={field.name}
                                     value={formValues2[field.name]}
@@ -981,7 +1087,6 @@ const Engagement = () => {
                                     type="text"
                                     // className={errors3[field.name] ? "error-field form-control" : "form-control"}
                                     className={"form-control"}
-
                                     name={field.name}
                                     id={field.name}
                                     value={formValues3[field.name]}
@@ -1027,21 +1132,27 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-
-                                        className={errors4[index]?.minimum_number_of_jobs ? "error-field form-control" : "form-control"}
-
+                                        className={
+                                          errors4[index]?.minimum_number_of_jobs
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
                                         placeholder={
                                           "Please Enter Minimum number of Jobs"
                                         }
                                         name="minimum_number_of_jobs"
                                         id={`minimumJobs_${index}`}
                                         value={job.minimum_number_of_jobs}
-                                        onChange={(e) => handleChange4(index, e)}
+                                        onChange={(e) =>
+                                          handleChange4(index, e)
+                                        }
                                       />
-                                      {errors4[index]?.minimum_number_of_jobs && (
+                                      {errors4[index]
+                                        ?.minimum_number_of_jobs && (
                                         <div className="error-text">
                                           {
-                                            errors4[index].minimum_number_of_jobs
+                                            errors4[index]
+                                              .minimum_number_of_jobs
                                           }
                                         </div>
                                       )}
@@ -1057,16 +1168,17 @@ const Engagement = () => {
                                       </label>
                                       <select
                                         id={`service${index}`}
-                                        className={errors4[index]?.service_id ? "error-field form-select" : "form-select"}
-
-
+                                        className={
+                                          errors4[index]?.service_id
+                                            ? "error-field form-select"
+                                            : "form-select"
+                                        }
                                         name="service_id"
                                         value={job.service_id}
                                         onChange={(e) =>
                                           handleChange4(index, e)
                                         }
                                       >
-
                                         <option value="">
                                           Select Services
                                         </option>
@@ -1099,7 +1211,11 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className={errors4[index]?.cost_per_job ? "error-field form-control" : "form-control"}
+                                        className={
+                                          errors4[index]?.cost_per_job
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
                                         name="cost_per_job"
                                         placeholder={
                                           "Please Enter Cost Per Job"
@@ -1126,7 +1242,6 @@ const Engagement = () => {
                                       >
                                         <i
                                           style={{
-
                                             cursor: "pointer",
                                           }}
                                           className="ti-trash text-danger"
@@ -1138,13 +1253,10 @@ const Engagement = () => {
                               ))}
                               <div className="col-lg-12 text-end pe-3">
                                 <a className="add_icon" onClick={handleAddJob}>
-                                  <i
-                                    style={{
-                                      fontSize: 28,
-                                      cursor: "pointer",
-                                      color: "#00AFEF",
-                                    }}
-                                    className="fa-solid fa-circle-plus"
+                                  <PlusCircle
+                                    size={28}
+                                    color="#00AFEF"
+                                    style={{ cursor: "pointer" }}
                                   />
                                 </a>
                               </div>
@@ -1168,20 +1280,21 @@ const Engagement = () => {
                 </h4>
               </div>
               <div className="card-body">
-
                 <div className="row">
                   {/* Customer Joining Date */}
                   <div className="col-lg-4 mb-3">
-                    <label className="form-label">
-                      Customer Joining Date
-                    </label>
+                    <label className="form-label">Customer Joining Date</label>
                     <input
                       type="date"
-                      className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
+                      className={
+                        formErrors.customerJoiningDate
+                          ? "error-field form-control"
+                          : "form-control"
+                      }
                       name="customerJoiningDate"
                       defaultValue={
-                        customerDetails?.data?.customer
-                          ?.customerJoiningDate || ""
+                        customerDetails?.data?.customer?.customerJoiningDate ||
+                        ""
                       }
                       onChange={handleInputChange}
                     />
@@ -1194,11 +1307,13 @@ const Engagement = () => {
 
                   {/* Select Customer Source */}
                   <div className="col-lg-4 mb-3">
-                    <label className="form-label">
-                      Customer Source
-                    </label>
+                    <label className="form-label">Customer Source</label>
                     <select
-                      className={formErrors.customerSource ? "error-field form-select" : "form-select"}
+                      className={
+                        formErrors.customerSource
+                          ? "error-field form-select"
+                          : "form-select"
+                      }
                       name="customerSource"
                       value={formState1.customerSource}
                       onChange={handleInputChange}
@@ -1220,11 +1335,13 @@ const Engagement = () => {
 
                   {/* Select Customer Sub-Source */}
                   <div className="col-lg-4 mb-3">
-                    <label className="form-label">
-                       Customer Sub-Source
-                    </label>
+                    <label className="form-label">Customer Sub-Source</label>
                     <select
-                      className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
+                      className={
+                        formErrors.customerSubSource
+                          ? "error-field form-select"
+                          : "form-select"
+                      }
                       name="customerSubSource"
                       value={formState1.customerSubSource}
                       onChange={(e) => handleInputChange(e)}
@@ -1244,22 +1361,17 @@ const Engagement = () => {
                     )}
                   </div>
                 </div>
-
               </div>
             </div>
             <div className="form__item button__items d-flex justify-content-between">
-              <Button
-                className="btn btn-info"
-                type="default"
-                onClick={prev}
-              >
-               <ArrowLeft size={16}/> Previous
+              <Button className="btn btn-info" type="default" onClick={prev}>
+                <ArrowLeft size={16} /> Previous
               </Button>
               <Button
                 className="btn btn-info text-white blue-btn"
                 onClick={handleSubmit}
               >
-                Next <ArrowRight size={16}/>
+                Next <ArrowRight size={16} />
               </Button>
             </div>
           </div>

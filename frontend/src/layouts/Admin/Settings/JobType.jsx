@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
-import { Plus,Eye ,Pencil, Save,ArrowLeft,MoreVertical  } from "lucide-react";
+import { Plus, Eye, Pencil, Save, ArrowLeft, MoreVertical } from "lucide-react";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -155,7 +155,7 @@ const Setting = () => {
                     setViewtask(true);
                   }}
                 >
-                  <i className="fa-regular fa-eye " />
+                  <Eye size={18} />
                 </button>
 
                 <button
@@ -165,10 +165,8 @@ const Setting = () => {
                     setJobTypeId(row);
                   }}
                 >
-                 <Plus size={16}/> Add Task
+                  <Plus size={16} /> Add Task
                 </button>
-
-
               </div>
             </div>
           </div>
@@ -202,10 +200,16 @@ const Setting = () => {
             <button
               className="btn btn-sm btn-info text-white"
               onClick={(e) => {
-                navigate("/admin/settings/task", { state: { Id: row.id, settingTab: location?.state?.settingTab, service_id: location.state.Id } });
+                navigate("/admin/settings/task", {
+                  state: {
+                    Id: row.id,
+                    settingTab: location?.state?.settingTab,
+                    service_id: location.state.Id,
+                  },
+                });
               }}
             >
-             <Plus size={16}/> Add Task
+              <Plus size={16} /> Add Task
             </button>
           </div>
         </>
@@ -285,7 +289,7 @@ const Setting = () => {
     setModalData((prevModalData) => ({
       ...prevModalData,
       fields: prevModalData.fields.map((field) =>
-        field.name === name ? { ...field, value: value } : field
+        field.name === name ? { ...field, value: value } : field,
       ),
     }));
   };
@@ -516,12 +520,12 @@ const Setting = () => {
               onClick={(e) => {
                 sessionStorage.setItem(
                   "settingTab",
-                  location?.state?.settingTab
+                  location?.state?.settingTab,
                 );
                 window.history.back();
               }}
             >
-             <ArrowLeft size={16}/>
+              <ArrowLeft size={16} />
             </button>
             <h4 className="card-title">Job Type</h4>
           </div>
@@ -534,7 +538,7 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  <Plus size={16}/> Add Job Type
+                  <Plus size={16} /> Add Job Type
                 </button>
               </div>
             </div>
@@ -549,29 +553,29 @@ const Setting = () => {
         </div>
       </div>
 
-    {isModalOpen && (
-  <Modal
-    modalId="exampleModal3"
-    title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
-    fields={modalData.fields}
-    onClose={() => {
-      setIsModalOpen(false);
-      setModalData({});
-    }}
-    onSave={handleSave}
-    onChange={handleModalChange}
-    buttonName={
-      <>
-        {isEdit ? (
-          <Pencil size={16} className="me-1" />
-        ) : (
-          <Save size={16} className="me-1" />
-        )}
-        {isEdit ? "Update" : "Save"}
-      </>
-    }
-  />
-)}
+      {isModalOpen && (
+        <Modal
+          modalId="exampleModal3"
+          title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
+          fields={modalData.fields}
+          onClose={() => {
+            setIsModalOpen(false);
+            setModalData({});
+          }}
+          onSave={handleSave}
+          onChange={handleModalChange}
+          buttonName={
+            <>
+              {isEdit ? (
+                <Pencil size={16} className="me-1" />
+              ) : (
+                <Save size={16} className="me-1" />
+              )}
+              {isEdit ? "Update" : "Save"}
+            </>
+          }
+        />
+      )}
 
       <CommanModal
         isOpen={showAddTask}
@@ -617,7 +621,7 @@ const Setting = () => {
               <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
                   <button className="btn  btn-info" onClick={handleAddTask}>
-                     <Plus size={16}/>
+                    <Plus size={16} />
                     Add
                   </button>
                 </div>
@@ -685,7 +689,7 @@ const Setting = () => {
                 className="btn btn-outline-success"
                 onClick={(e) => handleSaveTask()}
               >
-               <Save size={16}/>
+                <Save size={16} />
                 Submit
               </button>
             </div>
@@ -724,7 +728,7 @@ const Setting = () => {
                   <tr className="tabel_new" key={index}>
                     <td>{index + 1}</td>
                     <td>{task.name}</td>
-                   
+
                     <td>
                       {task?.budgeted_hour
                         ? `${task?.budgeted_hour.split(":")[0]} Hours ${task?.budgeted_hour.split(":")[1]} Minutes`

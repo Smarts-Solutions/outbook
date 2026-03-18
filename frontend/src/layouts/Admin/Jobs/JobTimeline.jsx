@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getJobTimeline } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Download } from "lucide-react";
+import { Download, Info } from "lucide-react";
 
 const JobTimeline = () => {
   const location = useLocation();
@@ -108,7 +108,7 @@ const JobTimeline = () => {
                 id="btn-export"
                 onClick={handleExport}
               >
-                    <Download size={16}/>
+                <Download size={16} />
 
                 <span>Export Data</span>
               </button>
@@ -167,7 +167,7 @@ const JobTimeline = () => {
                     </div>
                     <div className="itemInfo">
                       <span>
-                        <i className="fa-solid fa-circle-info pe-1"></i>
+                        <Info size={18} className="pe-1" />
                       </span>
                       {item.info}
                     </div>
