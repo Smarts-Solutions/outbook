@@ -894,7 +894,7 @@ const EditJob = () => {
       if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
           icon: "warning",
-          title: `this job already assign timesheet.`,
+          title: `Service cannot be changed as a timesheet is already filled for this job.`,
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 2000,
@@ -930,7 +930,7 @@ const EditJob = () => {
       if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
           icon: "warning",
-          title: `this job already assign timesheet.`,
+          title: `Job type cannot be changed as a timesheet is already filled for this job.`,
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 2000,
