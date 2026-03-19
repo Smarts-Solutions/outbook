@@ -10,8 +10,7 @@ import {
 import { useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
 import { convertDate, validate } from "../../../Utils/Comman_function";
-import { Download,Plus,Eye  } from "lucide-react";
-
+import { Download, Plus, Eye } from "lucide-react";
 
 const Drafts = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -307,7 +306,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               setViewdraft(true);
             }}
           >
-           <Eye size={16} className="text-warning" />
+            <Eye size={16} className="text-warning" />
           </button>
           {row.was_it_complete == 1 ? (
             ""
@@ -423,7 +422,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               className="btn btn-info text-white float-end "
               onClick={() => setAdddraft(true)}
             >
-              <i className="fa-regular fa-plus pe-1"></i> Add Drafts
+             <Plus/> Add Drafts
             </button>
           ) : (
             ""
@@ -444,8 +443,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
               className="btn btn-outline-info fw-bold border-3 me-2"
               onClick={handleExport}
             >
-                  <Download size={16}/>
-
+              <Download size={16} />
               Export Excel
             </button>
           )}
@@ -457,7 +455,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                 className="btn btn-info text-white"
                 onClick={() => setAdddraft(true)}
               >
-                 <Plus size={16}/>
+                <Plus size={16} />
                 Add Drafts
               </button>
             )}

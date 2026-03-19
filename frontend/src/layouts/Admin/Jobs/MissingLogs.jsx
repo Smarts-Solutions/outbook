@@ -21,7 +21,7 @@ import {
   deleteFileFromFolder,
   deleteFolderFromFolder,
 } from "../../../Utils/graphAPI";
-import { Download,Plus ,FileText,File,Eye  } from "lucide-react";
+import { Download, Plus, FileText, File, Eye } from "lucide-react";
 
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -589,7 +589,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
           ) : row.file_type === "application/pdf" ? (
             <FileText size={24} color="#FF0000" />
           ) : (
-           <File size={24} color="#000" />
+            <File size={24} color="#000" />
           )
         ) : (
           ""
@@ -609,7 +609,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
               setViewmissinglogs(true);
             }}
           >
-           <Eye size={16} className="text-warning" />
+            <Eye size={16} className="text-warning" />
           </button>
           {row.status == 1 ? (
             ""
@@ -716,7 +716,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   className="btn btn-info text-white d-flex align-items-center gap-2"
                   onClick={() => setAddmissinglogs(true)}
                 >
-                  <i className="fa-regular fa-plus"></i>
+                 <Plus/>
                   <span>Add Missing Logs</span>
                 </button>
               ) : (
@@ -747,7 +747,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 onClick={handleExport}
               >
-                    <Download size={16}/>
+                <Download size={16} />
 
                 <span>Export Data</span>
               </button>
@@ -761,7 +761,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   className="btn btn-info text-white"
                   onClick={() => setAddmissinglogs(true)}
                 >
-                 <Plus size={16}/>
+                  <Plus size={16} />
                   Add Missing Logs
                 </button>
               )}

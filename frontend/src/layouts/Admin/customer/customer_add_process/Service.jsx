@@ -8,7 +8,7 @@ import {
   GET_CUSTOMER_DATA,
   Edit_Customer,
   ADD_SERVICES_CUSTOMERS,
-  getcustomerschecklistApi
+  getcustomerschecklistApi,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
@@ -19,8 +19,8 @@ import {
   GETTASKDATA,
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import Swal from "sweetalert2";
-import Select from 'react-select';
-import { ArrowLeft,ArrowRight, User } from "lucide-react";
+import Select from "react-select";
+import { ArrowLeft, ArrowRight, Download, User } from "lucide-react";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -39,12 +39,15 @@ const Service = () => {
   const [fileName, setFileName] = useState("No file selected");
   const [jobTypeData, setJobTypeData] = useState([]);
   const [tasksGet, setTasksData] = useState([]);
-  const [getCustomerService, setCustomerService] = useState({ loading: true, data: [] });
+  const [getCustomerService, setCustomerService] = useState({
+    loading: true,
+    data: [],
+  });
   const [uploadMessage, uploadSetMessage] = useState("");
   const [tasksGet1, setTasksData1] = useState([]);
   const [tasksGetRemove, setTasksDataRemove] = useState([]);
   const [selectManager, setSelectManager] = useState([]);
-  
+
   useEffect(() => {
     JobTypeDataAPi(services, 2);
   }, [services]);
@@ -53,20 +56,25 @@ const Service = () => {
     const fetchData = async () => {
       try {
         await Promise.all([
-          dispatch(GET_CUSTOMER_DATA({ req: { customer_id: newCustomerId, pageStatus: "2" }, authToken: token}))
+          dispatch(
+            GET_CUSTOMER_DATA({
+              req: { customer_id: newCustomerId, pageStatus: "2" },
+              authToken: token,
+            }),
+          )
             .unwrap()
             .then((response) =>
-              setCustomerService({ loading: false, data: response.data })
+              setCustomerService({ loading: false, data: response.data }),
             ),
           dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
             .unwrap()
             .then((response) =>
-              setAllService({ loading: false, data: response.data })
+              setAllService({ loading: false, data: response.data }),
             ),
           dispatch(Staff({ req: { action: "getmanager" }, authToken: token }))
             .unwrap()
             .then((response) =>
-              setStaffDataAll({ loading: false, data: response.data })
+              setStaffDataAll({ loading: false, data: response.data }),
             ),
         ]);
       } catch (error) {
@@ -78,28 +86,34 @@ const Service = () => {
     fetchData();
   }, [dispatch, token]);
 
-
-  console.log(" staffDataAll.data",  staffDataAll.data);
+  console.log(" staffDataAll.data", staffDataAll.data);
   useEffect(() => {
     if (getCustomerService.data.services) {
       setServices(
-        getCustomerService.data.services.map((service) => service.service_id)
+        getCustomerService.data.services.map((service) => service.service_id),
       );
 
       setManager(
         getCustomerService.data.services.map((service) => ({
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
-            ? service.account_manager_ids.map((id) => {
-                // Find the staff object matching the id
-                const staff = staffDataAll.data.find((staff) => staff.id === id);
-                // Return the staff object or handle missing staff
-                return staff ? { value: staff.id, label: staff.first_name+' '+staff.last_name } : null; 
-              }).filter(Boolean) 
+            ? service.account_manager_ids
+                .map((id) => {
+                  // Find the staff object matching the id
+                  const staff = staffDataAll.data.find(
+                    (staff) => staff.id === id,
+                  );
+                  // Return the staff object or handle missing staff
+                  return staff
+                    ? {
+                        value: staff.id,
+                        label: staff.first_name + " " + staff.last_name,
+                      }
+                    : null;
+                })
+                .filter(Boolean)
             : [],
-        }))
-  
-      
+        })),
       );
     }
   }, [getCustomerService.data, staffDataAll.data]);
@@ -108,53 +122,48 @@ const Service = () => {
     if (searchValue.trim()) {
       setFilteredData(
         staffDataAll.data.filter((data) =>
-          data.first_name.toLowerCase().includes(searchValue.toLowerCase())
-        )
+          data.first_name.toLowerCase().includes(searchValue.toLowerCase()),
+        ),
       );
     } else {
       setFilteredData([]);
     }
   }, [searchValue, staffDataAll.data]);
 
-
   const handleCheckboxChange = (e, item) => {
-
-
-
-
-    const ExistJobService = getCustomerService?.data?.services?.find((ser) => ser?.service_id === item?.id) || null
-
-
+    const ExistJobService =
+      getCustomerService?.data?.services?.find(
+        (ser) => ser?.service_id === item?.id,
+      ) || null;
 
     if (ExistJobService != null && ExistJobService?.job_exist != null) {
       Swal.fire({
-        icon: 'warning',
+        icon: "warning",
         title: "This service has been assigned to job, cannot remove it",
         timerProgressBar: true,
         showConfirmButton: true,
-        timer: 1500
+        timer: 1500,
       });
-      e.target.checked = true
-      return
+      e.target.checked = true;
+      return;
     }
-
 
     if (e.target.checked) {
       JobTypeDataAPi(item, 1);
       setServices((prevServices) =>
         !prevServices.includes(item.id)
           ? [...prevServices, item.id]
-          : prevServices
+          : prevServices,
       );
     } else {
       setServices((prevServices) =>
-        prevServices.filter((service) => service !== item.id)
+        prevServices.filter((service) => service !== item.id),
       );
     }
   };
 
   const AddManager = () => {
-    setModal(false)
+    setModal(false);
   };
 
   const handleSubmit = async (values) => {
@@ -169,7 +178,6 @@ const Service = () => {
 
     const MatchData = services.map((service) => {
       const managerData = getManager.find((item) => item.service_id == service);
-   
 
       return {
         service_id: service,
@@ -180,7 +188,7 @@ const Service = () => {
     });
 
     const filteredMatchData = MatchData.filter((item) =>
-      services.includes(item.service_id)
+      services.includes(item.service_id),
     );
 
     const req = {
@@ -192,7 +200,7 @@ const Service = () => {
 
     try {
       const response = await dispatch(
-        Edit_Customer({ req, authToken: token })
+        Edit_Customer({ req, authToken: token }),
       ).unwrap();
       if (response.status) {
         next(response.data);
@@ -203,14 +211,12 @@ const Service = () => {
   };
 
   const handleDelete1 = (id) => {
-
     if (tasksGet1.length > 0) {
       tasksGet1.map((task) => {
         if (task.id === id) {
-          setTasksDataRemove(prev => [...prev, task]);
+          setTasksDataRemove((prev) => [...prev, task]);
         }
-      })
-
+      });
     }
     setTasksData1((prev) => prev.filter((task) => task.id !== id));
   };
@@ -250,20 +256,23 @@ const Service = () => {
   };
 
   const getCheckListData = async (service_id, item) => {
-    const req = { service_id: service_id, job_type_id: item.id, customer_id: address };
+    const req = {
+      service_id: service_id,
+      job_type_id: item.id,
+      customer_id: address,
+    };
     const data = { req, authToken: token };
     await dispatch(getcustomerschecklistApi(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
           if (response.data.length > 0) {
-
             setTasksData1((prev) => {
               const mergedTasks = [...prev, ...response.data];
 
               const uniqueTasks = mergedTasks.filter(
                 (task, index, self) =>
-                  index === self.findIndex((t) => t.id === task.id)
+                  index === self.findIndex((t) => t.id === task.id),
               );
 
               return uniqueTasks;
@@ -279,16 +288,20 @@ const Service = () => {
   };
 
   const TaskUpdate = async (e, id, serviceId) => {
-
     if (tasksGet.length > 0) {
       setTasksData((prev) =>
         prev.filter(
-          (task) => !tasksGet.some((item) => item.JobTypeId === id && item.serviceId === serviceId && task.JobTypeId === id && task.serviceId === serviceId)
-        )
+          (task) =>
+            !tasksGet.some(
+              (item) =>
+                item.JobTypeId === id &&
+                item.serviceId === serviceId &&
+                task.JobTypeId === id &&
+                task.serviceId === serviceId,
+            ),
+        ),
       );
     }
-
-
 
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
@@ -302,7 +315,7 @@ const Service = () => {
       }
 
       uploadSetMessage(
-        "File " + e.target.files[0].name + " has been uploaded successfully."
+        "File " + e.target.files[0].name + " has been uploaded successfully.",
       );
 
       let file = e.target.files[0];
@@ -331,7 +344,8 @@ const Service = () => {
             let idValue = row[headers.indexOf("id")];
             let taskName = row[headers.indexOf("Task Name")] || "";
             let budgetHours = row[headers.indexOf("Budgeted Hours")] || "00";
-            let budgetMinutes = row[headers.indexOf("Budgeted Minutes")] || "00";
+            let budgetMinutes =
+              row[headers.indexOf("Budgeted Minutes")] || "00";
 
             if (budgetMinutes > 59) {
               let hours = Math.floor(budgetMinutes / 60);
@@ -409,7 +423,7 @@ const Service = () => {
     setSelectManager(selected);
     setManager((prevManager) => {
       const existingIndex = prevManager.findIndex(
-        (item) => item.service_id === tempServices
+        (item) => item.service_id === tempServices,
       );
 
       if (existingIndex !== -1) {
@@ -426,8 +440,7 @@ const Service = () => {
         return prevManager;
       }
     });
-
-  }
+  };
 
   console.log("getManager", getManager);
   console.log("tempServices", tempServices);
@@ -444,7 +457,7 @@ const Service = () => {
                 <table className="table align-middle table-nowrap">
                   <thead className="table-light table-head-blue">
                     <tr>
-                      <th scope="col" >
+                      <th scope="col">
                         <div className="form-check"></div>
                       </th>
                       <th>Service Name</th>
@@ -469,294 +482,396 @@ const Service = () => {
 
                           <td className="customer_name">
                             <div className="accordion-div">
-                            <div
-                              className="accordion"
-                              id={`accordionExample${index}`}
-                            >
-                              <div className="accordion-item">
-                                <h2
-                                  className="accordion-header"
-                                  id={`heading-${index}`}
-                                >
-                                  <button
-                                    className="accordion-button collapsed fw-bold bg-transparant"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target={`#collapse-${index}`}
-                                    aria-expanded="false"
-                                    aria-controls={`collapse-${index}`}
+                              <div
+                                className="accordion"
+                                id={`accordionExample${index}`}
+                              >
+                                <div className="accordion-item">
+                                  <h2
+                                    className="accordion-header"
+                                    id={`heading-${index}`}
                                   >
-                                    {item.name}
-                                  </button>
-                                </h2>
-                                <div
-                                  id={`collapse-${index}`}
-                                  className="accordion-collapse collapse"
-                                  aria-labelledby={`heading-${index}`}
-                                  data-bs-parent={`#accordionExample${index}`}
-                                >
-
-
-
-                                  {services.includes(item.id) && (
-                                    <div className="accordion-body">
-                                      <div className="accordion" id="sub-accordionExample">
-                                        {services.includes(item.id) &&
-                                          jobTypeData &&
-                                          jobTypeData
-                                            .filter((data) => data.service_id === item.id)
-                                            .flatMap((data, subIndex) =>
-                                              data.data.map((data1, jobIndex) => (
-                                                <div className="accordion-item" key={`${item.id}_${data1.id}_${jobIndex}`}>
-                                                  <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`} onClick={() => getCheckListData(item.id, data1)}>
-                                                    <button
-                                                      className="accordion-button  collapsed"
-                                                      type="button"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target={`#sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
-                                                      aria-expanded="false"
-                                                      aria-controls={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                                    <button
+                                      className="accordion-button collapsed fw-bold bg-transparant"
+                                      type="button"
+                                      data-bs-toggle="collapse"
+                                      data-bs-target={`#collapse-${index}`}
+                                      aria-expanded="false"
+                                      aria-controls={`collapse-${index}`}
+                                    >
+                                      {item.name}
+                                    </button>
+                                  </h2>
+                                  <div
+                                    id={`collapse-${index}`}
+                                    className="accordion-collapse collapse"
+                                    aria-labelledby={`heading-${index}`}
+                                    data-bs-parent={`#accordionExample${index}`}
+                                  >
+                                    {services.includes(item.id) && (
+                                      <div className="accordion-body">
+                                        <div
+                                          className="accordion"
+                                          id="sub-accordionExample"
+                                        >
+                                          {services.includes(item.id) &&
+                                            jobTypeData &&
+                                            jobTypeData
+                                              .filter(
+                                                (data) =>
+                                                  data.service_id === item.id,
+                                              )
+                                              .flatMap((data, subIndex) =>
+                                                data.data.map(
+                                                  (data1, jobIndex) => (
+                                                    <div
+                                                      className="accordion-item"
+                                                      key={`${item.id}_${data1.id}_${jobIndex}`}
                                                     >
-                                                      {data1.type}
-                                                    </button>
-                                                  </h2>
-                                                  <div
-                                                    id={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
-                                                    className="accordion-collapse collapse"
-                                                    aria-labelledby={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}
-                                                    data-bs-parent="#sub-accordionExample"
-                                                  >
-                                                    <div className="accordion-body">
-                                                      <div className="pb-3">
-                                                        <div className="row align-items-center justify-content-lg-between">
-                                                          {/* Upload File Button */}
-                                                          <div className="col-md-auto">
-                                                            <input
-                                                              type="file"
-                                                              id="uploadButton"
-                                                              className="form-control"
-                                                              style={{ cursor: "pointer" }}
-                                                              onChange={(e) => {
-                                                                TaskUpdate(e, data1.id, item.id);
-                                                              }}
-                                                            />
-                                                          </div>
-                                                          <div className="col-md-auto float-lg-end ms-0 ">
-                                                            <button onClick={handleDownload} className="btn btn-outline-info mt-2 mt-xxl-0">
-                                                              <i className="fas fa-download me-2"></i>
-                                                              Download Sample File
-                                                            </button>
-                                                          </div>
-                                                        </div>
-                                                        <div className="table-responsive">
-                                                          {[...tasksGet1, ...tasksGet].filter(
-                                                            (TaskShow) =>
-                                                              data1.id === TaskShow.JobTypeId || TaskShow.job_type_id && item.id === TaskShow.serviceId || TaskShow.service_id
+                                                      <h2
+                                                        className="accordion-header"
+                                                        id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}
+                                                        onClick={() =>
+                                                          getCheckListData(
+                                                            item.id,
+                                                            data1,
                                                           )
-                                                            .length > 0 && (
-                                                              <table className="table table-bordered mt-4">
-                                                                <thead className="table-head-blue">
-                                                                  <tr>
-                                                                    <th colSpan="3" className="fs-6 text-center card-header step-header-blue">
-                                                                      Checklist Name:{" "}
-                                                                      {
-                                                                        tasksGet.find(
-                                                                          (TaskShow) =>
-                                                                            data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
-                                                                        )?.checklistName
-                                                                      }
-                                                                    </th>
-                                                                  </tr>
-                                                                  <tr>
-                                                                    <th className="text-center">Tasks</th>
-                                                                    <th className="text-center" width="250">Budgeted Time</th>
-                                                                    <th className="text-center">Action</th>
-                                                                  </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                  {tasksGet.map((TaskShow) => {
-
-
-
-                                                                    if (
-                                                                      data1.id == TaskShow.JobTypeId &&
-                                                                      item.id == TaskShow.serviceId
-                                                                    ) {
-                                                                      return (
-                                                                        <tr key={TaskShow.id}>
-                                                                          <td>
-                                                                            {TaskShow.Task.map((TaskData) => (
-                                                                              <div key={TaskData.id} className="mb-2">
-                                                                                <input
-                                                                                  type="text"
-                                                                                  className="form-control"
-                                                                                  value={TaskData.TaskName}
-                                                                                  disabled
-                                                                                />
-                                                                              </div>
-                                                                            ))}
-                                                                          </td>
-                                                                          <td>
-                                                                            {TaskShow.Task.map((TaskData) => (
-                                                                              <div key={TaskData.id} className="mb-2">
-
-                                                                                <div className="input-group">
-                                                                                  <div className="hours-div">
-                                                                                    <input
-                                                                                      type="text"
-                                                                                      className="form-control"
-                                                                                      value={TaskData.BudgetHour.split(":")[0]}
-                                                                                      disabled
-                                                                                    />
-                                                                                    <span className="input-group-text">H</span>
-                                                                                  </div>
-                                                                                  <div className="hours-div">
-                                                                                    <input
-                                                                                      type="text"
-                                                                                      className="form-control"
-                                                                                      value={TaskData.BudgetHour.split(":")[1]}
-                                                                                      disabled
-                                                                                    />
-                                                                                    <span className="input-group-text">M</span>
-                                                                                  </div>
-                                                                                </div>
-                                                                              </div>
-                                                                            ))}
-                                                                          </td>
-                                                                          <td className="text-center">
-                                                                            <button
-                                                                              className=" delete-icon"
-                                                                              onClick={() => handleDelete(TaskShow.id)}
+                                                        }
+                                                      >
+                                                        <button
+                                                          className="accordion-button  collapsed"
+                                                          type="button"
+                                                          data-bs-toggle="collapse"
+                                                          data-bs-target={`#sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                                                          aria-expanded="false"
+                                                          aria-controls={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                                                        >
+                                                          {data1.type}
+                                                        </button>
+                                                      </h2>
+                                                      <div
+                                                        id={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                                                        className="accordion-collapse collapse"
+                                                        aria-labelledby={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}
+                                                        data-bs-parent="#sub-accordionExample"
+                                                      >
+                                                        <div className="accordion-body">
+                                                          <div className="pb-3">
+                                                            <div className="row align-items-center justify-content-lg-between">
+                                                              {/* Upload File Button */}
+                                                              <div className="col-md-auto">
+                                                                <input
+                                                                  type="file"
+                                                                  id="uploadButton"
+                                                                  className="form-control"
+                                                                  style={{
+                                                                    cursor:
+                                                                      "pointer",
+                                                                  }}
+                                                                  onChange={(
+                                                                    e,
+                                                                  ) => {
+                                                                    TaskUpdate(
+                                                                      e,
+                                                                      data1.id,
+                                                                      item.id,
+                                                                    );
+                                                                  }}
+                                                                />
+                                                              </div>
+                                                              <div className="col-md-auto float-lg-end ms-0 ">
+                                                                <button
+                                                                  onClick={
+                                                                    handleDownload
+                                                                  }
+                                                                  className="btn btn-outline-info mt-2 mt-xxl-0"
+                                                                >
+                                                                  <Download
+                                                                    size={16}
+                                                                  />
+                                                                  Download
+                                                                  Sample File
+                                                                </button>
+                                                              </div>
+                                                            </div>
+                                                            <div className="table-responsive">
+                                                              {[
+                                                                ...tasksGet1,
+                                                                ...tasksGet,
+                                                              ].filter(
+                                                                (TaskShow) =>
+                                                                  data1.id ===
+                                                                    TaskShow.JobTypeId ||
+                                                                  (TaskShow.job_type_id &&
+                                                                    item.id ===
+                                                                      TaskShow.serviceId) ||
+                                                                  TaskShow.service_id,
+                                                              ).length > 0 && (
+                                                                <table className="table table-bordered mt-4">
+                                                                  <thead className="table-head-blue">
+                                                                    <tr>
+                                                                      <th
+                                                                        colSpan="3"
+                                                                        className="fs-6 text-center card-header step-header-blue"
+                                                                      >
+                                                                        Checklist
+                                                                        Name:{" "}
+                                                                        {
+                                                                          tasksGet.find(
+                                                                            (
+                                                                              TaskShow,
+                                                                            ) =>
+                                                                              data1.id ===
+                                                                                TaskShow.JobTypeId &&
+                                                                              item.id ===
+                                                                                TaskShow.serviceId,
+                                                                          )
+                                                                            ?.checklistName
+                                                                        }
+                                                                      </th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                      <th className="text-center">
+                                                                        Tasks
+                                                                      </th>
+                                                                      <th
+                                                                        className="text-center"
+                                                                        width="250"
+                                                                      >
+                                                                        Budgeted
+                                                                        Time
+                                                                      </th>
+                                                                      <th className="text-center">
+                                                                        Action
+                                                                      </th>
+                                                                    </tr>
+                                                                  </thead>
+                                                                  <tbody>
+                                                                    {tasksGet.map(
+                                                                      (
+                                                                        TaskShow,
+                                                                      ) => {
+                                                                        if (
+                                                                          data1.id ==
+                                                                            TaskShow.JobTypeId &&
+                                                                          item.id ==
+                                                                            TaskShow.serviceId
+                                                                        ) {
+                                                                          return (
+                                                                            <tr
+                                                                              key={
+                                                                                TaskShow.id
+                                                                              }
                                                                             >
-                                                                              <i className="ti-trash text-danger"></i>
-                                                                            </button>
-                                                                          </td>
-                                                                        </tr>
-                                                                      );
-                                                                    }
-                                                                    return null;
-                                                                  })}
-                                                                  {tasksGet1.map(
-                                                                    (
-                                                                      TaskShow
-                                                                    ) => {
-
-                                                                      if (
-                                                                        data1.id ===
-                                                                        TaskShow.JobTypeId &&
-                                                                        item.id ===
-                                                                        TaskShow.serviceId
-                                                                      ) {
-                                                                        return (
-                                                                          <tr
-                                                                            key={
-                                                                              TaskShow.id
-                                                                            }
-                                                                          >
-                                                                            <td>
-                                                                              {TaskShow.Task.map(
-                                                                                (
-                                                                                  TaskData
-                                                                                ) => (
-                                                                                  <div
-                                                                                    key={
-                                                                                      TaskData.id
-                                                                                    }
-                                                                                    className="mb-2"
-                                                                                  >
-                                                                                    <input
-                                                                                      type="text"
-                                                                                      className="form-control"
-                                                                                      value={
-                                                                                        TaskData.TaskName
+                                                                              <td>
+                                                                                {TaskShow.Task.map(
+                                                                                  (
+                                                                                    TaskData,
+                                                                                  ) => (
+                                                                                    <div
+                                                                                      key={
+                                                                                        TaskData.id
                                                                                       }
-                                                                                      disabled
-                                                                                    />
-                                                                                  </div>
-                                                                                )
-                                                                              )}
-                                                                            </td>
-                                                                            <td>
-                                                                              {TaskShow.Task.map(
-                                                                                (
-                                                                                  TaskData
-                                                                                ) => (
-                                                                                  <div
-                                                                                    key={
-                                                                                      TaskData.id
-                                                                                    }
-                                                                                    className="mb-2"
-                                                                                  >
-                                                                                    <div className="input-group">
-                                                                                      <div className="hours-div">
-                                                                                        <input
-                                                                                          type="text"
-                                                                                          className="form-control"
-                                                                                          value={
-                                                                                            TaskData.BudgetHour.split(
-                                                                                              ":"
-                                                                                            )[0]
-                                                                                          }
-                                                                                          disabled
-                                                                                        />
-                                                                                        <span className="input-group-text">
-                                                                                          H
-                                                                                        </span>
-                                                                                      </div>
-                                                                                      <div className="hours-div">
-                                                                                        <input
-                                                                                          type="text"
-                                                                                          className="form-control"
-                                                                                          value={
-                                                                                            TaskData.BudgetHour.split(
-                                                                                              ":"
-                                                                                            )[1]
-                                                                                          }
-                                                                                          disabled
-                                                                                        />
-                                                                                        <span className="input-group-text">
-                                                                                          M
-                                                                                        </span>
+                                                                                      className="mb-2"
+                                                                                    >
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        className="form-control"
+                                                                                        value={
+                                                                                          TaskData.TaskName
+                                                                                        }
+                                                                                        disabled
+                                                                                      />
+                                                                                    </div>
+                                                                                  ),
+                                                                                )}
+                                                                              </td>
+                                                                              <td>
+                                                                                {TaskShow.Task.map(
+                                                                                  (
+                                                                                    TaskData,
+                                                                                  ) => (
+                                                                                    <div
+                                                                                      key={
+                                                                                        TaskData.id
+                                                                                      }
+                                                                                      className="mb-2"
+                                                                                    >
+                                                                                      <div className="input-group">
+                                                                                        <div className="hours-div">
+                                                                                          <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            value={
+                                                                                              TaskData.BudgetHour.split(
+                                                                                                ":",
+                                                                                              )[0]
+                                                                                            }
+                                                                                            disabled
+                                                                                          />
+                                                                                          <span className="input-group-text">
+                                                                                            H
+                                                                                          </span>
+                                                                                        </div>
+                                                                                        <div className="hours-div">
+                                                                                          <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            value={
+                                                                                              TaskData.BudgetHour.split(
+                                                                                                ":",
+                                                                                              )[1]
+                                                                                            }
+                                                                                            disabled
+                                                                                          />
+                                                                                          <span className="input-group-text">
+                                                                                            M
+                                                                                          </span>
+                                                                                        </div>
                                                                                       </div>
                                                                                     </div>
-                                                                                  </div>
-                                                                                )
-                                                                              )}
-                                                                            </td>
-                                                                            <td className="text-center">
-                                                                              <button
-                                                                                className="delete-icon"
-                                                                                onClick={() =>
-                                                                                  handleDelete1(
-                                                                                    TaskShow.id
-                                                                                  )
-                                                                                }
-                                                                              >
-                                                                                <i className=" ti-trash text-danger"></i>
-                                                                              </button>
-                                                                            </td>
-                                                                          </tr>
-                                                                        );
-                                                                      }
-                                                                      return null;
-                                                                    }
-                                                                  )}
-                                                                </tbody>
-                                                              </table>
-                                                            )}
+                                                                                  ),
+                                                                                )}
+                                                                              </td>
+                                                                              <td className="text-center">
+                                                                                <button
+                                                                                  className=" delete-icon"
+                                                                                  onClick={() =>
+                                                                                    handleDelete(
+                                                                                      TaskShow.id,
+                                                                                    )
+                                                                                  }
+                                                                                >
+                                                                                  <i className="ti-trash text-danger"></i>
+                                                                                </button>
+                                                                              </td>
+                                                                            </tr>
+                                                                          );
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                    )}
+                                                                    {tasksGet1.map(
+                                                                      (
+                                                                        TaskShow,
+                                                                      ) => {
+                                                                        if (
+                                                                          data1.id ===
+                                                                            TaskShow.JobTypeId &&
+                                                                          item.id ===
+                                                                            TaskShow.serviceId
+                                                                        ) {
+                                                                          return (
+                                                                            <tr
+                                                                              key={
+                                                                                TaskShow.id
+                                                                              }
+                                                                            >
+                                                                              <td>
+                                                                                {TaskShow.Task.map(
+                                                                                  (
+                                                                                    TaskData,
+                                                                                  ) => (
+                                                                                    <div
+                                                                                      key={
+                                                                                        TaskData.id
+                                                                                      }
+                                                                                      className="mb-2"
+                                                                                    >
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        className="form-control"
+                                                                                        value={
+                                                                                          TaskData.TaskName
+                                                                                        }
+                                                                                        disabled
+                                                                                      />
+                                                                                    </div>
+                                                                                  ),
+                                                                                )}
+                                                                              </td>
+                                                                              <td>
+                                                                                {TaskShow.Task.map(
+                                                                                  (
+                                                                                    TaskData,
+                                                                                  ) => (
+                                                                                    <div
+                                                                                      key={
+                                                                                        TaskData.id
+                                                                                      }
+                                                                                      className="mb-2"
+                                                                                    >
+                                                                                      <div className="input-group">
+                                                                                        <div className="hours-div">
+                                                                                          <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            value={
+                                                                                              TaskData.BudgetHour.split(
+                                                                                                ":",
+                                                                                              )[0]
+                                                                                            }
+                                                                                            disabled
+                                                                                          />
+                                                                                          <span className="input-group-text">
+                                                                                            H
+                                                                                          </span>
+                                                                                        </div>
+                                                                                        <div className="hours-div">
+                                                                                          <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            value={
+                                                                                              TaskData.BudgetHour.split(
+                                                                                                ":",
+                                                                                              )[1]
+                                                                                            }
+                                                                                            disabled
+                                                                                          />
+                                                                                          <span className="input-group-text">
+                                                                                            M
+                                                                                          </span>
+                                                                                        </div>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  ),
+                                                                                )}
+                                                                              </td>
+                                                                              <td className="text-center">
+                                                                                <button
+                                                                                  className="delete-icon"
+                                                                                  onClick={() =>
+                                                                                    handleDelete1(
+                                                                                      TaskShow.id,
+                                                                                    )
+                                                                                  }
+                                                                                >
+                                                                                  <i className=" ti-trash text-danger"></i>
+                                                                                </button>
+                                                                              </td>
+                                                                            </tr>
+                                                                          );
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                    )}
+                                                                  </tbody>
+                                                                </table>
+                                                              )}
+                                                            </div>
+                                                          </div>
                                                         </div>
                                                       </div>
                                                     </div>
-                                                  </div>
-                                                </div>
-                                              ))
-                                            )}
+                                                  ),
+                                                ),
+                                              )}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
                             </div>
                           </td>
 
@@ -769,8 +884,7 @@ const Service = () => {
                                 setTempServices(item.id);
                               }}
                             >
-                              Assign Account Manager{" "}
-                              <User size={16}/>
+                              Assign Account Manager <User size={16} />
                             </button>
                           </td>
                         </tr>
@@ -799,18 +913,19 @@ const Service = () => {
             <div className="row">
               <div className="col-12">
                 <Select
-               
                   options={staffDataAll.data.map((data) => ({
                     value: data.id,
-                    label: data.first_name+" "+data.last_name,
-                  }))}  
+                    label: data.first_name + " " + data.last_name,
+                  }))}
                   isMulti
                   Clearable={false}
                   className="basic-multi-select table-select"
-                  style={{ border: 'none' }}
+                  style={{ border: "none" }}
                   value={
-                    getManager &&
-                    getManager.find((item) => item.service_id == tempServices)?.account_manager_ids || []
+                    (getManager &&
+                      getManager.find((item) => item.service_id == tempServices)
+                        ?.account_manager_ids) ||
+                    []
                   }
                   onChange={(selected) => handleSelect(selected)}
                   placeholder="Select options"
@@ -831,14 +946,14 @@ const Service = () => {
 
           <div className="form__item button__items d-flex justify-content-between">
             <Button className="btn btn-info" type="default" onClick={prev}>
-             <ArrowLeft size={16}/> Previous
+              <ArrowLeft size={16} /> Previous
             </Button>
             <Button
               className="btn btn-info text-white blue-btn"
               type="submit"
               onClick={handleSubmit}
             >
-              Next <ArrowRight size={16}/>
+              Next <ArrowRight size={16} />
             </Button>
           </div>
         </div>

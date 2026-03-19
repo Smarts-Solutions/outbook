@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import Datatable from '../../../Components/ExtraComponents/Datatable';
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { QueryAction, AddQuery, EditQuery, UploadDocumentMissingLogAndQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
-import sweatalert from 'sweetalert2';
-import { convertDate } from '../../../Utils/Comman_function';
+import {
+  QueryAction,
+  AddQuery,
+  EditQuery,
+  UploadDocumentMissingLogAndQuery,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import sweatalert from "sweetalert2";
+import { convertDate } from "../../../Utils/Comman_function";
 
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder ,deleteFolderFromFolder } from "../../../Utils/graphAPI";
-import { FileText,File ,Eye  } from "lucide-react";
+import {
+  fetchSiteAndDriveInfo,
+  createFolderIfNotExists,
+  uploadFileToFolder,
+  SiteUrlFolderPath,
+  deleteFileFromFolder,
+  deleteFolderFromFolder,
+} from "../../../Utils/graphAPI";
+import { FileText, File, Eye, Plus } from "lucide-react";
 
 const Queries = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,10 +43,10 @@ const Queries = ({ getAccessDataJob, goto }) => {
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
     QueriesRemaining: "0",
-    ReviewedBy: '0',
+    ReviewedBy: "0",
     MissingQueriesPreparedDate: null,
     QuerySentDate: new Date().toISOString().substr(0, 10),
-    ResponseReceived: '0',
+    ResponseReceived: "0",
     status: "0",
     id: null,
     FinalQueryResponseReceivedDate: null,
@@ -46,10 +58,10 @@ const Queries = ({ getAccessDataJob, goto }) => {
     setAllQueryInputdata({
       ...AllQueryInputdata,
       QueriesRemaining: "0",
-      ReviewedBy: '0',
+      ReviewedBy: "0",
       MissingQueriesPreparedDate: null,
       QuerySentDate: new Date().toISOString().substr(0, 10),
-      ResponseReceived: '0',
+      ResponseReceived: "0",
       status: "0",
       id: null,
       FinalQueryResponseReceivedDate: null,
@@ -57,7 +69,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
       last_chaser: new Date().toISOString().substr(0, 10),
     });
   };
-
 
   useEffect(() => {
     if (EditData && editViewquery) {
@@ -68,14 +79,14 @@ const Queries = ({ getAccessDataJob, goto }) => {
         QuerySentDate: EditData.query_sent_date,
         ResponseReceived: EditData.response_received,
         status: EditData.status,
-        FinalQueryResponseReceivedDate: EditData.final_query_response_received_date,
+        FinalQueryResponseReceivedDate:
+          EditData.final_query_response_received_date,
         QueryDocument: EditData.query_document,
         id: EditData.id,
         last_chaser: EditData.last_chaser,
       });
     }
   }, [EditData, editViewquery]);
-
 
   const fetchSiteDetails = async () => {
     const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
@@ -87,104 +98,150 @@ const Queries = ({ getAccessDataJob, goto }) => {
 
   useEffect(() => {
     GetQueryAllList();
-    fetchSiteDetails()
+    fetchSiteDetails();
   }, []);
 
   const GetQueryAllList = async () => {
-    const req = { action: "get", job_id: location.state.job_id }
-    const data = { req: req, authToken: token }
+    const req = { action: "get", job_id: location.state.job_id };
+    const data = { req: req, authToken: token };
     await dispatch(QueryAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setDraftStatus(response.data.draft_process)
-          setAllQueryList(response.data.rows || [])
-        }
-        else {
-          setAllQueryList([])
+          setDraftStatus(response.data.draft_process);
+          setAllQueryList(response.data.rows || []);
+        } else {
+          setAllQueryList([]);
         }
       })
       .catch((error) => {
         return;
-      })
-
-
-  }
+      });
+  };
 
   const HandleQueryView = async (row) => {
-    const req = { action: "getSingleView", id: row.id }
-    const data = { req: req, authToken: token }
+    const req = { action: "getSingleView", id: row.id };
+    const data = { req: req, authToken: token };
     await dispatch(QueryAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
           setSingleQueryData(response.data[0]);
-        }
-        else {
+        } else {
           setSingleQueryData([]);
         }
       })
       .catch((err) => {
         return;
-      })
-  }
+      });
+  };
 
   const HandleAddQuery = async () => {
-    const req = { action: "add", job_id: location.state.job_id, data: AllQueryInputdata }
-    const data = { req: req, authToken: token }
+    const req = {
+      action: "add",
+      job_id: location.state.job_id,
+      data: AllQueryInputdata,
+    };
+    const data = { req: req, authToken: token };
 
     await dispatch(AddQuery(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-
           if (AllQueryInputdata.QueryDocument != null) {
             setIsLoading(true);
             const invalidValues = [undefined, null, "", 0, "0"];
-            let job_name = "JOB_DEMO"
-            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-              job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
+            let job_name = "JOB_DEMO";
+            if (
+              !invalidValues.includes(location.state.data.client.id) &&
+              !invalidValues.includes(location.state.data.customer.id) &&
+              !invalidValues.includes(location.state.data.job.job_id)
+            ) {
+              job_name =
+                "CUST" +
+                location.state.data.customer.id +
+                "_CLIENT" +
+                location.state.data.client.id +
+                "_JOB" +
+                location.state.data.job.job_id;
             }
 
-
-            let query_log = "query_log"
-            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-              query_log = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id + '_QUERY_LOG_' + response.data.insertId;
+            let query_log = "query_log";
+            if (
+              !invalidValues.includes(location.state.data.client.id) &&
+              !invalidValues.includes(location.state.data.customer.id) &&
+              !invalidValues.includes(location.state.data.job.job_id)
+            ) {
+              query_log =
+                "CUST" +
+                location.state.data.customer.id +
+                "_CLIENT" +
+                location.state.data.client.id +
+                "_JOB" +
+                location.state.data.job.job_id +
+                "_QUERY_LOG_" +
+                response.data.insertId;
             }
 
             const uploadedFilesArray = [];
-            const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+            const invalidTokens = [
+              "",
+              "sharepoint_token_not_found",
+              "error",
+              undefined,
+              null,
+            ];
 
             if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
               if (AllQueryInputdata.QueryDocument.length > 0) {
                 // Fetch site and drive details
-                const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+                const { site_ID, drive_ID, folder_ID } =
+                  await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
                 // Check if 'query_log' folder exists, get its ID
-                const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+                const missingLogFolderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  folder_ID,
+                  job_name,
+                  sharepoint_token,
+                );
 
-
-
-                const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, query_log, sharepoint_token);
-
+                const subfolderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  missingLogFolderId,
+                  query_log,
+                  sharepoint_token,
+                );
 
                 for (const file of AllQueryInputdata.QueryDocument) {
-                  const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, subfolderId, file, sharepoint_token);
+                  const uploadDataUrl = await uploadFileToFolder(
+                    site_ID,
+                    drive_ID,
+                    subfolderId,
+                    file,
+                    sharepoint_token,
+                  );
                   const uploadedFileInfo = {
                     web_url: uploadDataUrl,
-                    filename: file.lastModified + '-' + file.name,
+                    filename: file.lastModified + "-" + file.name,
                     originalname: file.name,
                     mimetype: file.type,
-                    size: file.size
+                    size: file.size,
                   };
                   uploadedFilesArray.push(uploadedFileInfo);
                 }
               }
             }
 
-
-            const req = { action: "add", id: response.data.insertId, uploadedFiles: uploadedFilesArray, type: "query_log" }
-            const data = { req: req, authToken: token }
+            const req = {
+              action: "add",
+              id: response.data.insertId,
+              uploadedFiles: uploadedFilesArray,
+              type: "query_log",
+            };
+            const data = { req: req, authToken: token };
 
             await dispatch(UploadDocumentMissingLogAndQuery(data))
               .unwrap()
@@ -194,125 +251,189 @@ const Queries = ({ getAccessDataJob, goto }) => {
               .catch((err) => {
                 setIsLoading(false);
                 return;
-              })
+              });
           }
 
-
-          setAddquery(false)
-          GetQueryAllList()
-          resetForm()
+          setAddquery(false);
+          GetQueryAllList();
+          resetForm();
           sweatalert.fire({
-            icon: 'success',
+            icon: "success",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
+            timer: 1500,
           });
-        }
-        else {
+        } else {
           sweatalert.fire({
-            icon: 'error',
+            icon: "error",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
+            timer: 1500,
           });
         }
       })
       .catch((error) => {
         return;
-      })
-
-  }
+      });
+  };
 
   const HandleEditQuery = async () => {
-    const req = { action: "add", data: AllQueryInputdata }
-    const data = { req: req, authToken: token }
+    const req = { action: "add", data: AllQueryInputdata };
+    const data = { req: req, authToken: token };
 
     if (parseInt(AllQueryInputdata.QueriesRemaining) == 0) {
       sweatalert.fire({
-        icon: 'warning',
-        title: 'Warning...',
-        text: 'Change Queries Remaining to Yes',
+        icon: "warning",
+        title: "Warning...",
+        text: "Change Queries Remaining to Yes",
         timerProgressBar: true,
         showConfirmButton: true,
-        timer: 1500
+        timer: 1500,
       });
-      return
+      return;
     }
 
-    if (AllQueryInputdata.FinalQueryResponseReceivedDate == null || AllQueryInputdata.FinalQueryResponseReceivedDate == "") {
+    if (
+      AllQueryInputdata.FinalQueryResponseReceivedDate == null ||
+      AllQueryInputdata.FinalQueryResponseReceivedDate == ""
+    ) {
       sweatalert.fire({
-        icon: 'warning',
-        title: 'Warning...',
-        text: 'Change Final Query Response Reviewed Date is Required',
+        icon: "warning",
+        title: "Warning...",
+        text: "Change Final Query Response Reviewed Date is Required",
         timerProgressBar: true,
         showConfirmButton: true,
-        timer: 1500
+        timer: 1500,
       });
-      return
+      return;
     }
-
 
     await dispatch(EditQuery(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-
-
-          if (AllQueryInputdata.QueryDocument != null && AllQueryInputdata.QueryDocument != undefined) {
+          if (
+            AllQueryInputdata.QueryDocument != null &&
+            AllQueryInputdata.QueryDocument != undefined
+          ) {
             setIsLoading(true);
             const invalidValues = [undefined, null, "", 0, "0"];
-            let job_name = "JOB_DEMO"
-            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-              job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
+            let job_name = "JOB_DEMO";
+            if (
+              !invalidValues.includes(location.state.data.client.id) &&
+              !invalidValues.includes(location.state.data.customer.id) &&
+              !invalidValues.includes(location.state.data.job.job_id)
+            ) {
+              job_name =
+                "CUST" +
+                location.state.data.customer.id +
+                "_CLIENT" +
+                location.state.data.client.id +
+                "_JOB" +
+                location.state.data.job.job_id;
             }
 
-
-            let query_log = "query_log"
-            if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-              query_log = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id + '_QUERY_LOG_' + AllQueryInputdata.id;
+            let query_log = "query_log";
+            if (
+              !invalidValues.includes(location.state.data.client.id) &&
+              !invalidValues.includes(location.state.data.customer.id) &&
+              !invalidValues.includes(location.state.data.job.job_id)
+            ) {
+              query_log =
+                "CUST" +
+                location.state.data.customer.id +
+                "_CLIENT" +
+                location.state.data.client.id +
+                "_JOB" +
+                location.state.data.job.job_id +
+                "_QUERY_LOG_" +
+                AllQueryInputdata.id;
             }
 
             // Fetch site and drive details
-            const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+            const { site_ID, drive_ID, folder_ID } =
+              await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
-            const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+            const missingLogFolderId = await createFolderIfNotExists(
+              site_ID,
+              drive_ID,
+              folder_ID,
+              job_name,
+              sharepoint_token,
+            );
 
-            const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, query_log, sharepoint_token);
+            const subfolderId = await createFolderIfNotExists(
+              site_ID,
+              drive_ID,
+              missingLogFolderId,
+              query_log,
+              sharepoint_token,
+            );
 
-            await deleteFolderFromFolder(site_ID, drive_ID, subfolderId, sharepoint_token);
+            await deleteFolderFromFolder(
+              site_ID,
+              drive_ID,
+              subfolderId,
+              sharepoint_token,
+            );
 
             const uploadedFilesArray = [];
-            const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+            const invalidTokens = [
+              "",
+              "sharepoint_token_not_found",
+              "error",
+              undefined,
+              null,
+            ];
 
             if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
               if (AllQueryInputdata.QueryDocument.length > 0) {
-
-
                 // Check if 'query_log' folder exists, get its ID
-                const missingLogFolderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+                const missingLogFolderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  folder_ID,
+                  job_name,
+                  sharepoint_token,
+                );
 
-                const subfolderId = await createFolderIfNotExists(site_ID, drive_ID, missingLogFolderId, query_log, sharepoint_token);
-
+                const subfolderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  missingLogFolderId,
+                  query_log,
+                  sharepoint_token,
+                );
 
                 for (const file of AllQueryInputdata.QueryDocument) {
-                  const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, subfolderId, file, sharepoint_token);
+                  const uploadDataUrl = await uploadFileToFolder(
+                    site_ID,
+                    drive_ID,
+                    subfolderId,
+                    file,
+                    sharepoint_token,
+                  );
                   const uploadedFileInfo = {
                     web_url: uploadDataUrl,
-                    filename: file.lastModified + '-' + file.name,
+                    filename: file.lastModified + "-" + file.name,
                     originalname: file.name,
                     mimetype: file.type,
-                    size: file.size
+                    size: file.size,
                   };
                   uploadedFilesArray.push(uploadedFileInfo);
                 }
               }
             }
 
-
-            const req = { action: "add", id: AllQueryInputdata.id, uploadedFiles: uploadedFilesArray, type: "query_log" }
-            const data = { req: req, authToken: token }
+            const req = {
+              action: "add",
+              id: AllQueryInputdata.id,
+              uploadedFiles: uploadedFilesArray,
+              type: "query_log",
+            };
+            const data = { req: req, authToken: token };
 
             await dispatch(UploadDocumentMissingLogAndQuery(data))
               .unwrap()
@@ -322,36 +443,34 @@ const Queries = ({ getAccessDataJob, goto }) => {
               .catch((err) => {
                 setIsLoading(false);
                 return;
-              })
+              });
           }
 
           setIsLoading(false);
-          setEditViewquery(false)
-          GetQueryAllList()
-          resetForm()
+          setEditViewquery(false);
+          GetQueryAllList();
+          resetForm();
           sweatalert.fire({
-            icon: 'success',
+            icon: "success",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
+            timer: 1500,
           });
-        }
-        else {
+        } else {
           sweatalert.fire({
-            icon: 'error',
+            icon: "error",
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
+            timer: 1500,
           });
         }
       })
       .catch((error) => {
         return;
-      })
-
-  }
+      });
+  };
 
   const handleChange = (e) => {
     const { name } = e.target;
@@ -373,7 +492,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
         ];
 
         const validFiles = fileArray.filter((file) =>
-          allowedTypes.includes(file.type)
+          allowedTypes.includes(file.type),
         );
 
         if (validFiles.length !== fileArray.length) {
@@ -383,7 +502,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
             title: "Warning",
             text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
           });
-
 
           e.target.value = "";
           return;
@@ -400,49 +518,95 @@ const Queries = ({ getAccessDataJob, goto }) => {
   };
 
   const columns = [
-    { name: 'Query Title', selector: row => row.title, reorder: false, sortable: true },
-    { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date), reorder: false, sortable: true },
-    { name: 'Missing Queries Prepared Date', selector: row => convertDate(row.missing_queries_prepared_date), reorder: false, sortable: true },
-    { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), reorder: false, sortable: true },
-    { name: 'Last Chaser', selector: row => convertDate(row.last_chaser), reorder: false, sortable: true },
-    { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", reorder: false, sortable: true },
     {
-      name: 'File', selector: row => row.web_url != null ?
-
-        row.file_type.startsWith("image/") ? (
-
-          <img
-            src={row.web_url}
-            alt="preview"
-            style={{
-              width: "50px",
-              height: "50px",
-            }}
-          />
-        ) : row.file_type === "application/pdf" ? (
-
-          <FileText size={24} color="#FF0000" />
+      name: "Query Title",
+      selector: (row) => row.title,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Query Sent Date",
+      selector: (row) => convertDate(row.query_sent_date),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Missing Queries Prepared Date",
+      selector: (row) => convertDate(row.missing_queries_prepared_date),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Final Query Response Received Date",
+      selector: (row) => convertDate(row.final_query_response_received_date),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Last Chaser",
+      selector: (row) => convertDate(row.last_chaser),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "Status",
+      selector: (row) => (row.status == 1 ? "Complete" : "Incomplete"),
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "File",
+      selector: (row) =>
+        row.web_url != null ? (
+          row.file_type.startsWith("image/") ? (
+            <img
+              src={row.web_url}
+              alt="preview"
+              style={{
+                width: "50px",
+                height: "50px",
+              }}
+            />
+          ) : row.file_type === "application/pdf" ? (
+            <FileText size={24} color="#FF0000" />
+          ) : (
+            <File size={24} color="#000" />
+          )
         ) : (
-
-         <File size={24} color="#000" />
-        )
-
-        : "", reorder: false, sortable: true
+          ""
+        ),
+      reorder: false,
+      sortable: true,
     },
     {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          <button className="view-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
-           <Eye size={16} className="text-warning" />
+          <button
+            className="view-icon"
+            onClick={() => {
+              HandleQueryView(row);
+              setViewquery(true);
+            }}
+          >
+            <Eye size={16} className="text-warning" />
           </button>
-          {
-            row.status == 1 ? "" : goto != "report" && (getAccessDataJob.update === 1 ||  role === "SUPERADMIN") ?
-              <button className="edit-icon" onClick={() => { setEditViewquery(true); setEditData(row) }}>
-                <i className="ti-pencil" />
-              </button> : ""
-          }
-
+          {row.status == 1 ? (
+            ""
+          ) : goto != "report" &&
+            (getAccessDataJob.update === 1 || role === "SUPERADMIN") ? (
+            <button
+              className="edit-icon"
+              onClick={() => {
+                setEditViewquery(true);
+                setEditData(row);
+              }}
+            >
+              <i className="ti-pencil" />
+            </button>
+          ) : (
+            ""
+          )}
         </div>
       ),
       ignoreRowClick: true,
@@ -462,32 +626,34 @@ const Queries = ({ getAccessDataJob, goto }) => {
         </div>
       )}
 
-      <div className=''>
-        <div className='row'>
-          <div className='col-md-8'>
-            <div className='tab-title'>
+      <div className="">
+        <div className="row">
+          <div className="col-md-8">
+            <div className="tab-title">
               <h3>Queries</h3>
             </div>
           </div>
-          <div className='col-md-4'>
+          <div className="col-md-4">
             <div>
-              {
-                draftStatus == 0 && goto != "report" && (getAccessDataJob.insert === 1 ||  role === "SUPERADMIN") ?
-                  <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} >
-                    <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
-                  :
-                  ""
-              }
+              {draftStatus == 0 &&
+              goto != "report" &&
+              (getAccessDataJob.insert === 1 || role === "SUPERADMIN") ? (
+                <button
+                  type="button"
+                  className="btn btn-info text-white float-end "
+                  onClick={() => setAddquery(true)}
+                >
+                  <Plus size={16} /> Add Query
+                </button>
+              ) : (
+                ""
+              )}
             </div>
-
           </div>
         </div>
 
-        <div className='datatable-wrapper '>
-
-          <Datatable
-            filter={true}
-            columns={columns} data={AllQueryList} />
+        <div className="datatable-wrapper ">
+          <Datatable filter={true} columns={columns} data={AllQueryList} />
         </div>
 
         <CommonModal
@@ -505,7 +671,11 @@ const Queries = ({ getAccessDataJob, goto }) => {
             setErrors1({});
           }}
           Submit_Function={() => HandleAddQuery()}
-          Submit_Cancel_Function={() => { setAddquery(false); resetForm(); setErrors1({}); }}
+          Submit_Cancel_Function={() => {
+            setAddquery(false);
+            resetForm();
+            setErrors1({});
+          }}
         >
           <div className="row">
             <div className="col-lg-6">
@@ -523,17 +693,19 @@ const Queries = ({ getAccessDataJob, goto }) => {
                 value={AllQueryInputdata.QueriesRemaining}
               >
                 <option value="">Select</option>
-                <option value="1">Yes</option>                                                                                                                                        m
-                <option value="0" selected>No</option>
+                <option value="1">Yes</option> m
+                <option value="0" selected>
+                  No
+                </option>
               </select>
               {errors1["QueriesRemaining"] && (
-                <div className="error-text">
-                  {errors1["QueriesRemaining"]}
-                </div>
+                <div className="error-text">{errors1["QueriesRemaining"]}</div>
               )}
             </div>
             <div className="col-lg-6">
-              <label htmlFor="firstNameinput" className="form-label">Reviewed By</label>
+              <label htmlFor="firstNameinput" className="form-label">
+                Reviewed By
+              </label>
               <select
                 className="form-select "
                 aria-label="Default select example"
@@ -543,14 +715,11 @@ const Queries = ({ getAccessDataJob, goto }) => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.ReviewedBy}
               >
-
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
               {errors1["ReviewedBy"] && (
-                <div className="error-text">
-                  {errors1["ReviewedBy"]}
-                </div>
+                <div className="error-text">{errors1["ReviewedBy"]}</div>
               )}
             </div>
             <div className="col-lg-6">
@@ -583,7 +752,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   type="date"
                   className="form-control"
                   placeholder=""
-
                   id="QuerySentDate"
                   name="QuerySentDate"
                   onChange={(e) => handleChange(e)}
@@ -591,9 +759,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   min={new Date().toISOString().split("T")[0]}
                 />
                 {errors1["QuerySentDate"] && (
-                  <div className="error-text">
-                    {errors1["QuerySentDate"]}
-                  </div>
+                  <div className="error-text">{errors1["QuerySentDate"]}</div>
                 )}
               </div>
             </div>
@@ -611,7 +777,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.ResponseReceived}
                 >
-
                   <option value="1">Yes</option>
                   <option value="0">No</option>
                 </select>
@@ -654,16 +819,13 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   type="date"
                   className="form-control"
                   placeholder=""
-
                   id="last_chaser"
                   name="last_chaser"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.last_chaser}
                 />
                 {errors1["last_chaser"] && (
-                  <div className="error-text">
-                    {errors1["last_chaser"]}
-                  </div>
+                  <div className="error-text">{errors1["last_chaser"]}</div>
                 )}
               </div>
             </div>
@@ -678,14 +840,13 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   multiple
                   id="QueryDocument"
                   name="QueryDocument"
-                  onChange={(event) => { handleChange(event) }}
-
+                  onChange={(event) => {
+                    handleChange(event);
+                  }}
                   className="custom-file-input form-control"
                 />
                 {errors1["QueryDocument"] && (
-                  <div className="error-text">
-                    {errors1["QueryDocument"]}
-                  </div>
+                  <div className="error-text">{errors1["QueryDocument"]}</div>
                 )}
               </div>
             </div>
@@ -705,7 +866,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
                       checked={AllQueryInputdata.status === "1"}
                     />
                     &nbsp; <label htmlFor="complete">Complete</label>
-
                   </div>
                   &nbsp;
                   <div style={{ marginLeft: 10 }}>
@@ -718,20 +878,14 @@ const Queries = ({ getAccessDataJob, goto }) => {
                       checked={AllQueryInputdata.status === "0"}
                     />
                     &nbsp; <label htmlFor="incomplete">Incomplete</label>
-
                   </div>
-
                 </div>
                 {errors1["status"] && (
-                  <div className="error-text">
-                    {errors1["status"]}
-                  </div>
+                  <div className="error-text">{errors1["status"]}</div>
                 )}
-
               </div>
             </div>
           </div>
-
         </CommonModal>
 
         <CommonModal
@@ -746,10 +900,12 @@ const Queries = ({ getAccessDataJob, goto }) => {
           handleClose={() => {
             setEditViewquery(false);
             resetForm();
-
           }}
           Submit_Function={() => HandleEditQuery()}
-          Submit_Cancel_Function={() => { setEditViewquery(false); resetForm(); }}
+          Submit_Cancel_Function={() => {
+            setEditViewquery(false);
+            resetForm();
+          }}
         >
           <div className="row">
             <div className="col-lg-6">
@@ -766,18 +922,19 @@ const Queries = ({ getAccessDataJob, goto }) => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.QueriesRemaining}
               >
-
                 <option value="1">Yes</option>
-                <option value="0" selected>No</option>
+                <option value="0" selected>
+                  No
+                </option>
               </select>
               {errors1["QueriesRemaining"] && (
-                <div className="error-text">
-                  {errors1["QueriesRemaining"]}
-                </div>
+                <div className="error-text">{errors1["QueriesRemaining"]}</div>
               )}
             </div>
             <div className="col-lg-6">
-              <label htmlFor="firstNameinput" className="form-label">Reviewed By</label>
+              <label htmlFor="firstNameinput" className="form-label">
+                Reviewed By
+              </label>
               <select
                 className="form-select "
                 aria-label="Default select example"
@@ -787,14 +944,11 @@ const Queries = ({ getAccessDataJob, goto }) => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.ReviewedBy}
               >
-
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
               {errors1["ReviewedBy"] && (
-                <div className="error-text">
-                  {errors1["ReviewedBy"]}
-                </div>
+                <div className="error-text">{errors1["ReviewedBy"]}</div>
               )}
             </div>
             <div className="col-lg-6">
@@ -827,16 +981,13 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   type="date"
                   className="form-control"
                   placeholder=""
-
                   id="QuerySentDate"
                   name="QuerySentDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
                 />
                 {errors1["QuerySentDate"] && (
-                  <div className="error-text">
-                    {errors1["QuerySentDate"]}
-                  </div>
+                  <div className="error-text">{errors1["QuerySentDate"]}</div>
                 )}
               </div>
             </div>
@@ -854,7 +1005,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.ResponseReceived}
                 >
-
                   <option value="1">Yes</option>
                   <option value="0">No</option>
                 </select>
@@ -888,8 +1038,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
               </div>
             </div>
 
-
-
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -899,22 +1047,16 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   type="date"
                   className="form-control"
                   placeholder=""
-
                   id="last_chaser"
                   name="last_chaser"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.last_chaser}
                 />
                 {errors1["last_chaser"] && (
-                  <div className="error-text">
-                    {errors1["last_chaser"]}
-                  </div>
+                  <div className="error-text">{errors1["last_chaser"]}</div>
                 )}
               </div>
             </div>
-
-
-
 
             <div className="col-lg-6">
               <div className="mb-3">
@@ -926,13 +1068,13 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   multiple
                   id="QueryDocument"
                   name="QueryDocument"
-                  onChange={(event) => { handleChange(event) }}
+                  onChange={(event) => {
+                    handleChange(event);
+                  }}
                   className="custom-file-input form-control"
                 />
                 {errors1["QueryDocument"] && (
-                  <div className="error-text">
-                    {errors1["QueryDocument"]}
-                  </div>
+                  <div className="error-text">{errors1["QueryDocument"]}</div>
                 )}
               </div>
             </div>
@@ -952,7 +1094,6 @@ const Queries = ({ getAccessDataJob, goto }) => {
                       checked={AllQueryInputdata.status === "1"}
                     />
                     &nbsp; <label htmlFor="complete">Complete</label>
-
                   </div>
                   &nbsp;
                   <div style={{ marginLeft: 10 }}>
@@ -965,20 +1106,14 @@ const Queries = ({ getAccessDataJob, goto }) => {
                       checked={AllQueryInputdata.status === "0"}
                     />
                     &nbsp; <label htmlFor="incomplete">Incomplete</label>
-
                   </div>
-
                 </div>
                 {errors1["status"] && (
-                  <div className="error-text">
-                    {errors1["status"]}
-                  </div>
+                  <div className="error-text">{errors1["status"]}</div>
                 )}
-
               </div>
             </div>
           </div>
-
         </CommonModal>
 
         <CommonModal
@@ -993,7 +1128,9 @@ const Queries = ({ getAccessDataJob, goto }) => {
           handleClose={() => {
             setViewquery(false);
           }}
-          Submit_Cancel_Function={() => { setViewquery(false); }}
+          Submit_Cancel_Function={() => {
+            setViewquery(false);
+          }}
           Submit_Function={() => setViewquery(false)}
         >
           <div className="row">
@@ -1006,7 +1143,9 @@ const Queries = ({ getAccessDataJob, goto }) => {
                     </label>
                   </div>
                   <div className="col-md-6">
-                    <span className="text-muted">{singleQueryData && singleQueryData.query_sent_date}</span>
+                    <span className="text-muted">
+                      {singleQueryData && singleQueryData.query_sent_date}
+                    </span>
                   </div>
                 </div>
                 <div className="row">
@@ -1016,7 +1155,11 @@ const Queries = ({ getAccessDataJob, goto }) => {
                     </label>
                   </div>
                   <div className="col-md-6">
-                    <span className="text-muted">{singleQueryData && singleQueryData.response_received == 1 ? "Yes" : "No"}</span>
+                    <span className="text-muted">
+                      {singleQueryData && singleQueryData.response_received == 1
+                        ? "Yes"
+                        : "No"}
+                    </span>
                   </div>
                 </div>
                 {/* <div className="row">
@@ -1032,15 +1175,10 @@ const Queries = ({ getAccessDataJob, goto }) => {
               </div>
             </div>
           </div>
-
-
-
         </CommonModal>
       </div>
-
     </div>
+  );
+};
 
-  )
-}
-
-export default Queries
+export default Queries;

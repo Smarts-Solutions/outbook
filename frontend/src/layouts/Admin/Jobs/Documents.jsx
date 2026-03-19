@@ -1,15 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import Datatable from '../../../Components/ExtraComponents/Datatable';
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { JobDocumentAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
+import {
+  fetchSiteAndDriveInfo,
+  createFolderIfNotExists,
+  uploadFileToFolder,
+  SiteUrlFolderPath,
+  deleteFileFromFolder,
+} from "../../../Utils/graphAPI";
 import { allowedTypes } from "../../../Utils/Comman_function";
-import { FileText,File  } from "lucide-react";
-
+import { FileText, File, Plus } from "lucide-react";
 
 const Documents = ({ getAccessDataJob }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,28 +45,26 @@ const Documents = ({ getAccessDataJob }) => {
     fetchSiteDetails();
   }, []);
 
-
   const GetAllDocumentList = async () => {
-    const req = { action: "get", job_id: location.state.job_id }
-    const data = { req: req, authToken: token }
+    const req = { action: "get", job_id: location.state.job_id };
+    const data = { req: req, authToken: token };
     await dispatch(JobDocumentAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setJobDocumentListData(response.data || [])
-        }
-        else {
-          setJobDocumentListData([])
+          setJobDocumentListData(response.data || []);
+        } else {
+          setJobDocumentListData([]);
         }
       })
       .catch((error) => {
         return;
-      })
-  }
+      });
+  };
 
   const convertKBToMb = (kb) => {
     return (kb / 1024).toFixed(2);
-  }
+  };
 
   const columns = [
     {
@@ -81,7 +84,7 @@ const Documents = ({ getAccessDataJob }) => {
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-             <File size={24} color="#000" />
+              <File size={24} color="#000" />
               <span>{row.file_type}</span>
             </div>
           )}
@@ -91,20 +94,25 @@ const Documents = ({ getAccessDataJob }) => {
       sortable: true,
       reorder: false,
     },
-    { name: 'File Name', selector: row => row.original_name, reorder: false, sortable: true },
-    { name: 'File Type', selector: row => row.file_type, reorder: false, sortable: true },
+    {
+      name: "File Name",
+      selector: (row) => row.original_name,
+      reorder: false,
+      sortable: true,
+    },
+    {
+      name: "File Type",
+      selector: (row) => row.file_type,
+      reorder: false,
+      sortable: true,
+    },
     {
       name: "File Size",
       cell: (row) => (
         <div title={row.file_size || "-"}>
           {row.file_size < 1024 * 1024
-            ? `${(
-              row.file_size / 1024
-            ).toFixed(2)} KB`
-            : `${(
-              row.file_size /
-              (1024 * 1024)
-            ).toFixed(2)} MB` || "-"}
+            ? `${(row.file_size / 1024).toFixed(2)} KB`
+            : `${(row.file_size / (1024 * 1024)).toFixed(2)} MB` || "-"}
         </div>
       ),
       selector: (row) => row.file_size || "-",
@@ -115,26 +123,29 @@ const Documents = ({ getAccessDataJob }) => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex justify-content-end gap-2">
-          {
-            (getAccessDataJob.delete === 1 || role === "SUPERADMIN") && (
-              <>
+          {(getAccessDataJob.delete === 1 || role === "SUPERADMIN") && (
+            <>
+              <button
+                className="delete-icon"
+                onClick={() => removeItem(row, 2)}
+              >
+                <i className="ti-trash fs-5 text-danger" />
+              </button>
 
-                
-                <button className="delete-icon" onClick={() => removeItem(row, 2)}>
-                  <i className="ti-trash fs-5 text-danger" />
-                </button>
-                
-
-                <button className="download-icon" onClick={() => downloadFileFromSharePoint(row.web_url, sharepoint_token, row.original_name)}>
-                  <i className="ti-download" />
-                </button>
-
-
-              </>
-
-            )
-          }
-
+              <button
+                className="download-icon"
+                onClick={() =>
+                  downloadFileFromSharePoint(
+                    row.web_url,
+                    sharepoint_token,
+                    row.original_name,
+                  )
+                }
+              >
+                <i className="ti-download" />
+              </button>
+            </>
+          )}
         </div>
       ),
       ignoreRowClick: true,
@@ -145,11 +156,16 @@ const Documents = ({ getAccessDataJob }) => {
 
   const closeModelUploadDocument = async (e) => {
     setUploadfiles(false);
-  }
+  };
 
   const handleChangeDocument = async (e) => {
-
-    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    const invalidTokens = [
+      "",
+      "sharepoint_token_not_found",
+      "error",
+      undefined,
+      null,
+    ];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
         icon: "warning",
@@ -159,7 +175,6 @@ const Documents = ({ getAccessDataJob }) => {
       fileInputRef.current.value = "";
       return;
     }
-
 
     const files = e.target.files;
 
@@ -172,13 +187,11 @@ const Documents = ({ getAccessDataJob }) => {
       return;
     }
 
-
     const validFiles = fileArray.filter((file) =>
-      allowedTypes.includes(file.type)
+      allowedTypes.includes(file.type),
     );
 
     if (validFiles.length !== fileArray.length) {
-
       sweatalert.fire({
         icon: "error",
         title: "Oops...",
@@ -189,8 +202,10 @@ const Documents = ({ getAccessDataJob }) => {
     }
 
     //setNewFiles(validFiles);
-    const existingFileNames = new Set(newFiles.map(file => file.name));
-    const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
+    const existingFileNames = new Set(newFiles.map((file) => file.name));
+    const uniqueValidFiles = validFiles.filter(
+      (file) => !existingFileNames.has(file.name),
+    );
 
     if (uniqueValidFiles.length === 0) {
       Swal.fire({
@@ -214,42 +229,74 @@ const Documents = ({ getAccessDataJob }) => {
     Promise.all(previewArray).then((previewData) => {
       setPreviews(previewData);
     });
-
-  }
+  };
 
   const uploadDocumentFun = async (e) => {
-
     const invalidValues = [undefined, null, "", 0, "0"];
-    let job_name = "JOB_DEMO"
-    if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-      job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
+    let job_name = "JOB_DEMO";
+    if (
+      !invalidValues.includes(location.state.data.client.id) &&
+      !invalidValues.includes(location.state.data.customer.id) &&
+      !invalidValues.includes(location.state.data.job.job_id)
+    ) {
+      job_name =
+        "CUST" +
+        location.state.data.customer.id +
+        "_CLIENT" +
+        location.state.data.client.id +
+        "_JOB" +
+        location.state.data.job.job_id;
     }
 
     const uploadedFilesArray = [];
 
     if (newFiles.length > 0) {
-
-      const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+      const invalidTokens = [
+        "",
+        "sharepoint_token_not_found",
+        "error",
+        undefined,
+        null,
+      ];
       if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
-
         setIsLoading(true);
-        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(
+          siteUrl,
+          sharepoint_token,
+        );
+        const folderId = await createFolderIfNotExists(
+          site_ID,
+          drive_ID,
+          folder_ID,
+          job_name,
+          sharepoint_token,
+        );
 
         for (const file of newFiles) {
-          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadDataUrl = await uploadFileToFolder(
+            site_ID,
+            drive_ID,
+            folderId,
+            file,
+            sharepoint_token,
+          );
           const uploadedFileInfo = {
             web_url: uploadDataUrl,
-            filename: file.lastModified + '-' + file.name,
+            filename: file.lastModified + "-" + file.name,
             originalname: file.name,
             mimetype: file.type,
-            size: file.size
+            size: file.size,
           };
           uploadedFilesArray.push(uploadedFileInfo);
         }
 
-        const req = { action: "add", job_id: location.state.job_id, fileData: newFiles, uploadedFiles: uploadedFilesArray }
-        const data = { req: req, authToken: token }
+        const req = {
+          action: "add",
+          job_id: location.state.job_id,
+          fileData: newFiles,
+          uploadedFiles: uploadedFilesArray,
+        };
+        const data = { req: req, authToken: token };
         await dispatch(JobDocumentAction(data))
           .unwrap()
           .then((response) => {
@@ -278,7 +325,6 @@ const Documents = ({ getAccessDataJob }) => {
             return;
           });
       }
-
     } else {
       sweatalert.fire({
         icon: "warning",
@@ -288,14 +334,20 @@ const Documents = ({ getAccessDataJob }) => {
       return;
     }
     setUploadfiles(false);
-  }
+  };
 
   const removeItem = async (file, type) => {
     if (type == 1) {
       return;
     }
 
-    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    const invalidTokens = [
+      "",
+      "sharepoint_token_not_found",
+      "error",
+      undefined,
+      null,
+    ];
     if (invalidTokens.includes(sharepoint_token)) {
       Swal.fire({
         icon: "warning",
@@ -306,11 +358,20 @@ const Documents = ({ getAccessDataJob }) => {
     }
 
     const invalidValues = [undefined, null, "", 0, "0"];
-    let job_name = "JOB_DEMO"
-    if (!invalidValues.includes(location.state.data.client.id) && !invalidValues.includes(location.state.data.customer.id) && !invalidValues.includes(location.state.data.job.job_id)) {
-      job_name = 'CUST' + location.state.data.customer.id + '_CLIENT' + location.state.data.client.id + '_JOB' + location.state.data.job.job_id;
+    let job_name = "JOB_DEMO";
+    if (
+      !invalidValues.includes(location.state.data.client.id) &&
+      !invalidValues.includes(location.state.data.customer.id) &&
+      !invalidValues.includes(location.state.data.job.job_id)
+    ) {
+      job_name =
+        "CUST" +
+        location.state.data.customer.id +
+        "_CLIENT" +
+        location.state.data.client.id +
+        "_JOB" +
+        location.state.data.job.job_id;
     }
-
 
     let fileName = file.name;
     if (type == 2) {
@@ -318,8 +379,13 @@ const Documents = ({ getAccessDataJob }) => {
     }
 
     if (fileName != undefined) {
-      const req = { action: "delete", job_id: location.state.job_id, id: file.id, file_name: file.file_name }
-      const data = { req: req, authToken: token }
+      const req = {
+        action: "delete",
+        job_id: location.state.job_id,
+        id: file.id,
+        file_name: file.file_name,
+      };
+      const data = { req: req, authToken: token };
       sweatalert
         .fire({
           title: "Are you sure?",
@@ -342,13 +408,25 @@ const Documents = ({ getAccessDataJob }) => {
                 });
                 GetAllDocumentList();
                 setJobDocumentListData((prevFiles) =>
-                  prevFiles.filter((data) => data.id !== file.id)
+                  prevFiles.filter((data) => data.id !== file.id),
                 );
-                const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-                const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, job_name, sharepoint_token);
-                const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
+                const { site_ID, drive_ID, folder_ID } =
+                  await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+                const folderId = await createFolderIfNotExists(
+                  site_ID,
+                  drive_ID,
+                  folder_ID,
+                  job_name,
+                  sharepoint_token,
+                );
+                const deleteFile = await deleteFileFromFolder(
+                  site_ID,
+                  drive_ID,
+                  folderId,
+                  fileName,
+                  sharepoint_token,
+                );
                 return;
-
               }
             } catch (error) {
               return;
@@ -360,19 +438,22 @@ const Documents = ({ getAccessDataJob }) => {
     }
   };
 
-   const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+  const downloadFileFromSharePoint = async (
+    sharePointFileUrl,
+    accessToken,
+    fileName,
+  ) => {
     console.log("sharePointFileUrl", sharePointFileUrl);
     console.log("accessToken", accessToken);
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
       });
-
 
       // Check if the response is OK
       if (!response.ok) {
@@ -386,16 +467,15 @@ const Documents = ({ getAccessDataJob }) => {
       const fileURL = window.URL.createObjectURL(fileBlob);
 
       // Create a temporary <a> element to trigger the download
-      const downloadLink = document.createElement('a');
+      const downloadLink = document.createElement("a");
       downloadLink.href = fileURL;
       downloadLink.download = fileName; // Provide a file name (optional)
       downloadLink.click(); // Trigger the download
       window.URL.revokeObjectURL(fileURL); // Clean up after the download
     } catch (error) {
-      console.error('Error downloading the file:', error);
+      console.error("Error downloading the file:", error);
     }
   };
-
 
   return (
     <div className={isLoading ? "blur-container" : ""}>
@@ -407,35 +487,39 @@ const Documents = ({ getAccessDataJob }) => {
         </div>
       )}
 
-      <div className=''>
-        <div className='row'>
-          <div className='col-md-5 col-lg-5 col-sm-3'>
-            <div className='tab-title'>
+      <div className="">
+        <div className="row">
+          <div className="col-md-5 col-lg-5 col-sm-3">
+            <div className="tab-title">
               <h3>Document</h3>
             </div>
           </div>
-          <div className='col-md-7 col-lg-7 col-sm-9 mt-3 mt-sm-0'>
+          <div className="col-md-7 col-lg-7 col-sm-9 mt-3 mt-sm-0">
             <div>
               {/* {
               (getAccessDataJob.delete === 1 ||  role === "SUPERADMIN") && (
                 <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-sm-end ms-sm-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
               )} */}
-              {
-                (getAccessDataJob.update === 1 || role === "SUPERADMIN") && (
-                  <button type="button" className="btn btn-info text-white float-sm-end ms-2" onClick={() => setUploadfiles(true)}> <i className="fa-regular fa-plus pe-1"></i> Add Document</button>
-                )}
-
-
+              {(getAccessDataJob.update === 1 || role === "SUPERADMIN") && (
+                <button
+                  type="button"
+                  className="btn btn-info text-white float-sm-end ms-2"
+                  onClick={() => setUploadfiles(true)}
+                >
+                  {" "}
+                  <Plus /> Add Document
+                </button>
+              )}
             </div>
-
           </div>
         </div>
 
-        <div className='datatable-wrapper '>
-
+        <div className="datatable-wrapper ">
           <Datatable
             filter={true}
-            columns={columns} data={jobDocumentListData && jobDocumentListData} />
+            columns={columns}
+            data={jobDocumentListData && jobDocumentListData}
+          />
         </div>
 
         <CommonModal
@@ -456,7 +540,6 @@ const Documents = ({ getAccessDataJob }) => {
           Submit_Cancel_Function={() => {
             closeModelUploadDocument();
           }}
-
         >
           <div className="row">
             <div className="col-lg-12">
@@ -471,134 +554,136 @@ const Documents = ({ getAccessDataJob }) => {
                         id="upload_document"
                         name="upload_document"
                         className="form-control"
-                        onChange={(e) => handleChangeDocument(e)}></input>
+                        onChange={(e) => handleChangeDocument(e)}
+                      ></input>
                       <div
                         className="mb-3"
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center"
+                          justifyContent: "center",
                         }}
-                      >
-                      </div>
+                      ></div>
                       {/* <h6 className="text-center">
                       <p>Or Drag File in here</p>
                     </h6> */}
                     </div>
                   </div>
                   <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
-                  {
-                    newFiles.length > 0 ?
-                      <div className="container-fluid page-title-box">
-                        <div className="row">
-                          <div className="col-lg-12">
-                            <div className="card">
-                              <div className="card-body pt-0">
-                                <div id="customerList">
-                                  <div className="row g-4 mb-3">
-                                    <div className="d-flex justify-content-end">
-                                      <div className="pagination-wrap hstack gap-2"></div>
-                                    </div>
+                  {newFiles.length > 0 ? (
+                    <div className="container-fluid page-title-box">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <div className="card">
+                            <div className="card-body pt-0">
+                              <div id="customerList">
+                                <div className="row g-4 mb-3">
+                                  <div className="d-flex justify-content-end">
+                                    <div className="pagination-wrap hstack gap-2"></div>
                                   </div>
-                                  <div className="table-responsive table-card mb-1">
-                                    <table
-                                      className="table align-middle table-nowrap"
-                                      id="customerTable"
-                                    >
-                                      <thead className="table-light table-head-blue">
-                                        <tr>
-                                          <th className="" data-sort="file_name">
-                                            File Image
-                                          </th>
-                                          <th className="" data-sort="file_name">
-                                            File Name
-                                          </th>
-                                          <th className="" data-sort="file_type">
-                                            File Type
-                                          </th>
-                                          <th className="" data-sort="size">
-                                            Size
-                                          </th>
-                                          <th className="" data-sort="action">
-                                            Action
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="list form-check-all">
-                                        {newFiles.length > 0 &&
-                                          Array.from(newFiles).map(
-                                            (file, index) => (
-                                              <tr key={`new-${index}`}>
-                                                <td className="file_name">
-                                                  {" "}
-                                                  <img
-                                                    src={previews[index]}
-                                                    alt="preview"
-                                                    style={{
-                                                      width: "50px",
-                                                      height: "50px",
-                                                    }}
-                                                  />{" "}
-                                                </td>
-                                                <td className="file_name">
-                                                  {file.name}
-                                                </td>
-                                                <td className="file_type">
-                                                  {file.type}
-                                                </td>
-                                                <td className="size">
-                                                  {file.size < 1024 * 1024
-                                                    ? `${(file.size / 1024).toFixed(
-                                                      2
-                                                    )} KB`
-                                                    : `${(
+                                </div>
+                                <div className="table-responsive table-card mb-1">
+                                  <table
+                                    className="table align-middle table-nowrap"
+                                    id="customerTable"
+                                  >
+                                    <thead className="table-light table-head-blue">
+                                      <tr>
+                                        <th className="" data-sort="file_name">
+                                          File Image
+                                        </th>
+                                        <th className="" data-sort="file_name">
+                                          File Name
+                                        </th>
+                                        <th className="" data-sort="file_type">
+                                          File Type
+                                        </th>
+                                        <th className="" data-sort="size">
+                                          Size
+                                        </th>
+                                        <th className="" data-sort="action">
+                                          Action
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="list form-check-all">
+                                      {newFiles.length > 0 &&
+                                        Array.from(newFiles).map(
+                                          (file, index) => (
+                                            <tr key={`new-${index}`}>
+                                              <td className="file_name">
+                                                {" "}
+                                                <img
+                                                  src={previews[index]}
+                                                  alt="preview"
+                                                  style={{
+                                                    width: "50px",
+                                                    height: "50px",
+                                                  }}
+                                                />{" "}
+                                              </td>
+                                              <td className="file_name">
+                                                {file.name}
+                                              </td>
+                                              <td className="file_type">
+                                                {file.type}
+                                              </td>
+                                              <td className="size">
+                                                {file.size < 1024 * 1024
+                                                  ? `${(
+                                                      file.size / 1024
+                                                    ).toFixed(2)} KB`
+                                                  : `${(
                                                       file.size /
                                                       (1024 * 1024)
                                                     ).toFixed(2)} MB`}
-                                                </td>
+                                              </td>
 
-                                                <td className="action">
-                                                  <div className="d-flex gap-2">
-                                                    <div className="remove">
-                                                      <button
-                                                        className="delete-icon"
-
-                                                        onClick={() => {
-                                                          fileInputRef.current.value = "";
-                                                          const updatedFiles =
-                                                            newFiles.filter(
-                                                              (_, idx) =>
-                                                                idx !== index
-                                                            );
-                                                          setNewFiles(updatedFiles);
-                                                          setPreviews(
-                                                            previews.filter(
-                                                              (_, idx) =>
-                                                                idx !== index
-                                                            )
+                                              <td className="action">
+                                                <div className="d-flex gap-2">
+                                                  <div className="remove">
+                                                    <button
+                                                      className="delete-icon"
+                                                      onClick={() => {
+                                                        fileInputRef.current.value =
+                                                          "";
+                                                        const updatedFiles =
+                                                          newFiles.filter(
+                                                            (_, idx) =>
+                                                              idx !== index,
                                                           );
-                                                          removeItem(file, 1);
-                                                        }}
-                                                      >
-                                                        <i className="ti-trash text-danger " />
-                                                      </button>
-                                                    </div>
+                                                        setNewFiles(
+                                                          updatedFiles,
+                                                        );
+                                                        setPreviews(
+                                                          previews.filter(
+                                                            (_, idx) =>
+                                                              idx !== index,
+                                                          ),
+                                                        );
+                                                        removeItem(file, 1);
+                                                      }}
+                                                    >
+                                                      <i className="ti-trash text-danger " />
+                                                    </button>
                                                   </div>
-                                                </td>
-                                              </tr>
-                                            )
-                                          )}
-                                      </tbody>
-                                    </table>
-                                  </div>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          ),
+                                        )}
+                                    </tbody>
+                                  </table>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      : ""
-                  }
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
             </div>
@@ -606,7 +691,7 @@ const Documents = ({ getAccessDataJob }) => {
         </CommonModal>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Documents
+export default Documents;

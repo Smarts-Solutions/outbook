@@ -12,7 +12,17 @@ import {
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
-import { Plus , User ,FileText,File } from "lucide-react";
+import {
+  Plus,
+  User,
+  FileText,
+  File,
+  Info,
+  CheckSquare,
+  Briefcase,
+  Download,
+  ArrowLeft,
+} from "lucide-react";
 
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
@@ -23,7 +33,6 @@ import {
   SiteUrlFolderPath,
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
-import { Download,ArrowLeft } from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -253,7 +262,7 @@ const ClientList = () => {
       tabsData.push({
         id: "client",
         label: "Client",
-        icon: <User size={16}/>,
+        icon: <User size={16} />,
       });
     }
     if (
@@ -261,7 +270,7 @@ const ClientList = () => {
         (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
       role === "SUPERADMIN"
     ) {
-      tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" });
+      tabsData.push({ id: "job", label: "Job", icon: Briefcase });
     }
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
@@ -678,7 +687,7 @@ const ClientList = () => {
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-             <File size={24} color="#000" />
+              <File size={24} color="#000" />
               <span>{row.file_type}</span>
             </div>
           )}
@@ -769,7 +778,6 @@ const ClientList = () => {
           Accept: "application/json",
         },
       });
-
 
       // Check if the response is OK
       if (!response.ok) {
@@ -1530,7 +1538,7 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => SetTab(tab.id)}
                       >
-                        <i className={tab.icon}></i>
+                       {tab.icon}{" "}
                         {tab.label}
                       </button>
                     </li>
@@ -1549,7 +1557,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft size={16}/> Back
+                      <ArrowLeft size={16} /> Back
                     </div>
                     {(getAccessDataClient.insert === 1 ||
                       role === "SUPERADMIN") &&
@@ -1566,7 +1574,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <Plus size={16}/> Add Client
+                          <Plus size={16} /> Add Client
                         </div>
                       </>
                     ) : ClientData?.length > 0 &&
@@ -1585,7 +1593,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                           <Plus size={16}/> Create Job
+                          <Plus size={16} /> Create Job
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
@@ -1603,7 +1611,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                           <Plus size={16}/> Add Checklist
+                          <Plus size={16} /> Add Checklist
                         </div>
                       </>
                     ) : null}
@@ -1616,7 +1624,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft size={16}/> Back
+                      <ArrowLeft size={16} /> Back
                     </div>
                   </>
                 ) : activeTab === "status" ? (
@@ -1627,7 +1635,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft size={16}/> Back
+                      <ArrowLeft size={16} /> Back
                     </div>
                   </>
                 ) : null}
@@ -1695,7 +1703,7 @@ const ClientList = () => {
                     className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                     onClick={() => exportByTab(tab.key)}
                   >
-                       <Download size={16}/>
+                    <Download size={16} />
 
                     <span>Export Excel</span>
                   </button>

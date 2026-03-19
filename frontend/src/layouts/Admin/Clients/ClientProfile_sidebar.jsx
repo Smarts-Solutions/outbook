@@ -13,7 +13,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, Plus, Briefcase, User } from "lucide-react";
+import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -39,10 +39,31 @@ const ClientList = () => {
   const [jobLoading, setJobLoading] = useState(false);
   const debounceRef = useRef(null);
 
+  // useEffect(() => {
+  //   GetAllJobListByCustomer("");
+  //   GetAllCustomer();
+  //   GetStatus();
+  //   if (
+  //     ![undefined, "", null].includes(cust_id_sidebar) &&
+  //     ![undefined, "", null].includes(cli_id_sidebar)
+  //   ) {
+  //     getAllClientData1(
+  //       cust_id_sidebar,
+  //       cust_id_sidebar_name,
+  //       cli_id_sidebar,
+  //       cli_id_sidebar_name,
+  //     );
+  //     setHararchyData({
+  //       customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
+  //       client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
-    GetAllJobListByCustomer("");
     GetAllCustomer();
     GetStatus();
+
     if (
       ![undefined, "", null].includes(cust_id_sidebar) &&
       ![undefined, "", null].includes(cli_id_sidebar)
@@ -57,6 +78,18 @@ const ClientList = () => {
         customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
         client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
       });
+    } else if (![undefined, "", null].includes(cust_id_sidebar)) {
+      setCustomerDetails({
+        id: cust_id_sidebar,
+        trading_name: cust_id_sidebar_name,
+      });
+      setHararchyData({
+        customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
+        client: { id: "", client_name: "" },
+      });
+      GetAllClientData(cust_id_sidebar, cust_id_sidebar_name);
+    } else {
+      GetAllJobListByCustomer("");
     }
   }, []);
 
@@ -1073,8 +1106,7 @@ const ClientList = () => {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            {tab.icon}{" "}
-                            {tab.label}
+                            {tab.icon} {tab.label}
                           </button>
                         </li>
                       ))}
@@ -1266,7 +1298,10 @@ const ClientList = () => {
                       <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li className="">
-                            <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
+                            <Phone
+                              size={22}
+                              className="me-2 text-secondary align-middle"
+                            />
                             <b>Phone : </b>
                             {(clientInformationData &&
                               clientInformationData.phone &&
@@ -1276,7 +1311,10 @@ const ClientList = () => {
                               "NA"}
                           </li>
                           <li className="mt-2">
-                            <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
+                            <Mail
+                              size={22}
+                              className="text-secondary align-middle me-2"
+                            />
                             <b>Email : </b>{" "}
                             {(clientInformationData &&
                               clientInformationData.email) ||

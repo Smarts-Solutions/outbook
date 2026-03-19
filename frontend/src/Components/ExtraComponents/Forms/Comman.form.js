@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import { Save, X } from "lucide-react";
+import { Save, X, Eye, EyeOff } from "lucide-react";
 
 const ReusableForm = ({
   initialValues,
@@ -28,7 +28,7 @@ const ReusableForm = ({
   handleSearchSelectData,
   loadMoreSelectData,
   selectDataHasMore,
-  resetSelectData
+  resetSelectData,
 }) => {
   const location = useLocation();
   const [passwordVisible, setPasswordVisible] = useState({});
@@ -407,10 +407,7 @@ const ReusableForm = ({
                           }
                         }}
                         onMenuScrollToBottom={() => {
-                          if (
-                            selectDataHasMore &&
-                            loadMoreSelectData
-                          ) {
+                          if (selectDataHasMore && loadMoreSelectData) {
                             loadMoreSelectData();
                           }
                         }}
@@ -594,26 +591,43 @@ const ReusableForm = ({
                           // className={`form-control`}
                           autoComplete="off"
                         />
-                        <i
-                          className={`fa-solid ${
-                            passwordVisible[field.name]
-                              ? "fa-eye-slash"
-                              : "fa-eye"
-                          }`}
-                          style={{
-                            position: "absolute",
-                            top: "1.5px",
-                            right: "20px",
-                            padding: "12.4px 6.6px",
-                            borderRadius: "3px",
-                          }}
-                          onClick={() =>
-                            setPasswordVisible((prevState) => ({
-                              ...prevState,
-                              [field.name]: !prevState[field.name],
-                            }))
-                          }
-                        ></i>
+                        {passwordVisible[field.name] ? (
+                          <EyeOff
+                            size={18}
+                            style={{
+                              position: "absolute",
+                              top: "1.5px",
+                              right: "20px",
+                              padding: "12.4px 6.6px",
+                              borderRadius: "3px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              setPasswordVisible((prevState) => ({
+                                ...prevState,
+                                [field.name]: !prevState[field.name],
+                              }))
+                            }
+                          />
+                        ) : (
+                          <Eye
+                            size={18}
+                            style={{
+                              position: "absolute",
+                              top: "1.5px",
+                              right: "20px",
+                              padding: "12.4px 6.6px",
+                              borderRadius: "3px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              setPasswordVisible((prevState) => ({
+                                ...prevState,
+                                [field.name]: !prevState[field.name],
+                              }))
+                            }
+                          />
+                        )}
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
                             <div className="error-text">
@@ -1093,7 +1107,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-             <Save size={16}/>
+              <Save size={16} />
               {btn_name}
             </button>
           </div>
@@ -1104,7 +1118,7 @@ const ReusableForm = ({
               className="btn btn-secondary m-2 "
               onClick={closeBtn}
             >
-             < X size={16}/> Cancel
+              <X size={16} /> Cancel
             </button>
 
             <button
@@ -1114,7 +1128,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-            <Save size={16}/> {btn_name}
+              <Save size={16} /> {btn_name}
             </button>
           </div>
         )}

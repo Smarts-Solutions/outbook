@@ -487,9 +487,10 @@ const getDashboardActivityLog = async (dashboard) => {
     from_date,
     to_date,
     page = 1,
+    limit = 50,
+    export_all = false,
   } = dashboard;
 
-  const limit = 50;
   const offset = (page - 1) * limit;
 
   try {
@@ -640,8 +641,10 @@ const getDashboardActivityLog = async (dashboard) => {
         ? `WHERE ${whereConditions.join(" AND ")}`
         : "";
 
-    // Add limit and offset to params
-    queryParams.push(limit, offset);
+    // Add limit and offset to params (unless exporting all results)
+    if (!export_all) {
+      queryParams.push(limit, offset);
+    }
 
     // ================= MAIN QUERY (Fixed SQL Injection) =================
     const query = `
@@ -656,7 +659,7 @@ const getDashboardActivityLog = async (dashboard) => {
       LEFT JOIN staffs ON staffs.id = staff_logs.staff_id
       ${whereClause}
       ORDER BY staff_logs.id DESC
-      LIMIT ? OFFSET ?
+      ${!export_all ? "LIMIT ? OFFSET ?" : ""}
     `;
 
     const [result] = await pool.execute(query, queryParams);
