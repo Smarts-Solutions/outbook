@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Plus } from "lucide-react";
+import { Plus , Download } from "lucide-react";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -707,11 +707,12 @@ const Customer = () => {
                               apiData={exportData}
                               fileName={"Customer Details"}
                             /> */}
-
+                        
                             <button
                               className="btn btn-outline-info fw-bold float-end border-3 "
                               onClick={handleExport}
                             >
+                               <Download size={16}/>{" "}
                               Export Excel
                             </button>
                           </div>
