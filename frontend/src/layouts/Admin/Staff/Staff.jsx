@@ -23,8 +23,8 @@ import {
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
-import { MoveVertical } from 'lucide-react';
-import { Plus ,Save ,Download } from "lucide-react";
+
+import { Plus ,Save ,Download ,EllipsisVertical } from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -498,7 +498,7 @@ const StaffPage = () => {
                   aria-expanded="false"
                 >
                   
-                   <MoveVertical />
+                  <EllipsisVertical size={18} />
                 </button>
                 <div
                   className="dropdown-menu custom-dropdown"
