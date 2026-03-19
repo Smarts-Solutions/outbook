@@ -1321,7 +1321,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                           <Plus /> Add Client
+                           <Plus size={16}/> Add Client
                           </div>
                         </>
                       ) : ClientData?.length > 0 &&
@@ -1341,7 +1341,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                           <Plus /> Create Job
+                           <Plus size={16}/> Create Job
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
@@ -1356,7 +1356,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                           <Plus /> Add Checklist
+                           <Plus size={16}/> Add Checklist
                           </div>
                         </>
                       ) : null}
@@ -1369,7 +1369,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <ArrowLeft /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) : activeTab === "status" ? (
@@ -1380,7 +1380,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <ArrowLeft /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) : null}

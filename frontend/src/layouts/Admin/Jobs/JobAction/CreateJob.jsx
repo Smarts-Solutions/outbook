@@ -3778,7 +3778,7 @@ const CreateJob = () => {
                                         // disabled={getChecklistId == ""}
                                         onClick={() => setShowAddJobModal(true)}
                                       >
-                                        <Plus /> Add
+                                        <Plus size={16}/> Add
                                         Task
                                       </button>
                                     </div>

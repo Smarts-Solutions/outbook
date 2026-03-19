@@ -1473,7 +1473,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft /> Back
+                      <ArrowLeft size={16}/> Back
                     </div>
                     {(getAccessDataClient.insert === 1 ||
                       role === "SUPERADMIN") &&
@@ -1490,7 +1490,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <Plus /> Add Client
+                          <Plus size={16}/> Add Client
                         </div>
                       </>
                     ) : ClientData?.length > 0 &&
@@ -1509,7 +1509,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <Plus /> Create Job
+                          <Plus  size={16}/> Create Job
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
@@ -1527,7 +1527,7 @@ const ClientList = () => {
                             })
                           }
                         >
-                          <Plus /> Add Checklist
+                          <Plus size={16}/> Add Checklist
                         </div>
                       </>
                     ) : null}
@@ -1540,7 +1540,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft /> Back
+                      <ArrowLeft size={16}/> Back
                     </div>
                   </>
                 ) : activeTab === "status" ? (
@@ -1551,7 +1551,7 @@ const ClientList = () => {
                         window.history.back();
                       }}
                     >
-                      <ArrowLeft /> Back
+                      <ArrowLeft size={16}/> Back
                     </div>
                   </>
                 ) : null}

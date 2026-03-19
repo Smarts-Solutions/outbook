@@ -577,7 +577,7 @@ const JobStatus = () => {
                   <div className="btn btn-info text-white blue-btn"
                     onClick={() => { window.history.back() }}
                   >
-                    <ArrowLeft /> Back
+                    <ArrowLeft size={16}/> Back
                   </div>
                   {(role === "SUPERADMIN" || (getAccessData.insert === 1 && getAccessData.view === 1)) && location?.state?.req?.heading == "Customers" ? (
                     <div className="ms-2">
@@ -585,7 +585,7 @@ const JobStatus = () => {
                         to="/admin/addcustomer"
                         className="btn btn-outline-info  fw-bold float-end border-3"
                       >
-                        <Plus /> Add Customer
+                        <Plus size={16}/> Add Customer
                       </Link>
                     </div>
                   ) : (

@@ -2121,9 +2121,9 @@ const Timesheet = () => {
                                     aria-hidden="true"
                                   ></i> */}
                                   {isExpanded ? (
-                                    <Minus size={18} className="cursor-pointer" />
+                                    <Minus size={16} className="cursor-pointer" />
                                   ) : (
-                                    <Plus size={18} className="cursor-pointer" />
+                                    <Plus size={16} className="cursor-pointer" />
                                   )}
                                 </button>
 

@@ -1105,7 +1105,7 @@ const ClientList = () => {
                               className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
                               onClick={handleCreateJob}
                             >
-                              <Plus /> Create Job
+                              <Plus size={16}/> Create Job
                             </div>
                           )}
                       </div>

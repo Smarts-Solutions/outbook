@@ -1158,7 +1158,7 @@ const StaffPage = () => {
                           formik.resetForm();
                         }}
                       >
-                        <Plus /> Add Staff
+                        <Plus size={16}/> Add Staff
                       </button>
                     )}
                   </div>

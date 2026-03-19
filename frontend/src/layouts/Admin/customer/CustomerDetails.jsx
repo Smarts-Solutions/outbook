@@ -627,7 +627,7 @@ const CustomerUsers = () => {
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                   onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
                 >
-                  <Plus />
+                  <Plus size={16}/>
                   Add Customer User
                 </button>
               </div>

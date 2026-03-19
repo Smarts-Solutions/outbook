@@ -191,7 +191,7 @@ const JobLogs = () => {
                       sessionStorage.removeItem('activeTab2');
                     }}
                   >
-                    <ArrowLeft /> Back
+                    <ArrowLeft size={16}/> Back
                   </div>
                 </div>
               </div>

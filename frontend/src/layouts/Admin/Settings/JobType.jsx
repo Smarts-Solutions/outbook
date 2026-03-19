@@ -534,7 +534,7 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  <Plus /> Add Job Type
+                  <Plus size={16}/> Add Job Type
                 </button>
               </div>
             </div>

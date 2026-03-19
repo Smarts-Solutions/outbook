@@ -2,7 +2,7 @@ import React from "react";
 import {saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
-import { ArrowDownToLine } from 'lucide-react';
+import { ArrowDownToLine ,Download } from 'lucide-react';
 export default function ExportToExcel({ apiData = [], fileName, headers = [] }) {
     const fileType =
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -75,7 +75,7 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
             title="Export To Excel"
         >
             
-             <ArrowDownToLine />
+            <Download size={16}/>{" "}
             Export Excel
         </button>
     );

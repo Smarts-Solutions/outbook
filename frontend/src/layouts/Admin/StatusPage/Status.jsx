@@ -405,7 +405,7 @@ const confirmDeleteStatus = async (row) => {
                           });
                         }}
                       >
-                        <Plus /> Add Status
+                        <Plus size={16}/> Add Status
                       </button>
                     ) : (
                       <div className="mt-5"></div>

@@ -1293,7 +1293,7 @@ const Setting = () => {
                           className="btn btn-info btn-sm text-white ms-1 dropdown-item w-auto "
                           onClick={(e) => handleSubSource(row)}
                         >
-                          <Plus />
+                          <Plus size={16}/>
                           Add Sub Source Type
                         </button>
                       )}
@@ -1323,7 +1323,7 @@ const Setting = () => {
                       className="btn btn-info btn-sm text-white ms-1"
                       onClick={(e) => handleSubSource(row)}
                     >
-                      <Plus />
+                      <Plus size={16}/>
                       Add Sub Source Type
                     </button>
                   )}
@@ -1570,7 +1570,7 @@ const Setting = () => {
                           className="btn btn-info btn-sm text-white dropdown-item"
                           onClick={(e) => handleTaskAdd(row)}
                         >
-                          <Plus />
+                          <Plus size={16}/>
                           Add Internal Task
                         </button>
                       )}
@@ -1601,7 +1601,7 @@ const Setting = () => {
                       className="btn btn-info btn-sm text-white ms-1"
                       onClick={(e) => handleTaskAdd(row)}
                     >
-                      <Plus />
+                      <Plus size={16}/>
                       Add Internal Task
                     </button>
                   )}
@@ -2403,7 +2403,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "1")}
                       >
-                        <Plus /> Add Staff Role
+                        <Plus size={16}/> Add Staff Role
                       </button>
                     </div>
                   )}
@@ -2450,7 +2450,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "2")}
                       >
-                        <Plus /> Customer Contact Person
+                        <Plus size={16}/> Customer Contact Person
                         Role
                       </button>
                     </div>
@@ -2496,7 +2496,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "3")}
                       >
-                        <Plus /> Add Status
+                        <Plus size={16}/> Add Status
                       </button>
                     </div>
                   )}
@@ -2541,7 +2541,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "4")}
                       >
-                        <Plus /> Add Service
+                        <Plus size={16}/> Add Service
                       </button>
                     </div>
                   )}
@@ -2586,7 +2586,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "5")}
                       >
-                        <Plus /> Add Client Industry
+                        <Plus size={16}/> Add Client Industry
                       </button>
                     </div>
                   )}
@@ -2631,7 +2631,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "6")}
                       >
-                        <Plus /> Add Country
+                        <Plus size={16}/> Add Country
                       </button>
                     </div>
                   )}
@@ -2678,7 +2678,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "7")}
                       >
-                        <Plus /> Add Incorporation{" "}
+                        <Plus size={16}/> Add Incorporation{" "}
                       </button>
                     </div>
                   )}
@@ -2723,7 +2723,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "8")}
                       >
-                        <Plus /> Add Customer Source
+                        <Plus size={16}/> Add Customer Source
                       </button>
                     </div>
                   )}
@@ -2768,7 +2768,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={() => HandleAddCheckList()}
                       >
-                        <Plus /> Add CheckList
+                        <Plus size={16}/> Add CheckList
                       </button>
                     </div>
                   )}
@@ -2813,7 +2813,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "10")}
                       >
-                        <Plus /> Add Internal Job/Project
+                        <Plus size={16}/> Add Internal Job/Project
                       </button>
                     </div>
                   )}

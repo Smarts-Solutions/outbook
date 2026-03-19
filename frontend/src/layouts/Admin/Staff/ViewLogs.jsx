@@ -59,7 +59,7 @@ const ViewLogs = () => {
                 window.history.back();
               }}
             >
-             <ArrowLeft /> Back
+             <ArrowLeft size={16}/> Back
             </div>
           </div>
         </div>

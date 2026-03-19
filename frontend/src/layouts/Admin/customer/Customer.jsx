@@ -644,7 +644,7 @@ const Customer = () => {
                   to="/admin/addcustomer"
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
-                 <Plus />
+                 <Plus  size={16}/>{" "}
                    Add Customer
                 </Link>
               </div>
@@ -655,7 +655,7 @@ const Customer = () => {
                     to="/admin/addcustomer"
                     className="btn btn-outline-info fw-bold float-end border-3"
                   >
-                   <Plus /> Add Customer
+                   <Plus size={16} /> {" "} Add Customer
                   </Link>
                 </div>
               )

@@ -264,7 +264,7 @@ const Setting = () => {
                   onClick={(e) => handleAdd(e, "1")}
                 >
                   {" "}
-                  <Plus /> Add Sub Source Type
+                  <Plus size={16}/> Add Sub Source Type
                 </button>
               </div>
             </div>

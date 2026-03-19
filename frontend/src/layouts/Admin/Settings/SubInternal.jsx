@@ -306,7 +306,7 @@ const SubInternal = () => {
                                     onClick={(e) => handleAdd(e, "1")}
                                     style={{zIndex:"9"}}
                                 >
-                                    <Plus /> Add Internal Task
+                                    <Plus size={16}/> Add Internal Task
                                 </button>
                             </div>
                         </div>
