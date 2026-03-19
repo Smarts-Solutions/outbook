@@ -16,7 +16,7 @@ import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { Plus } from "lucide-react";
+import { Plus ,Download} from "lucide-react";
 
 const CustomerUsers = () => {
 
@@ -673,6 +673,7 @@ const CustomerUsers = () => {
                           <div className="col-md-2">
 
                             <button className="btn btn-outline-info fw-bold float-end border-3 " onClick={handleExport}>
+                              <Download size={16}/>{" "}
                               Export Excel
                             </button>
                           </div>

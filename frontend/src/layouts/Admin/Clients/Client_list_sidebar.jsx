@@ -15,7 +15,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Download} from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -1428,7 +1428,8 @@ const ClientLists = () => {
                       <button
                         className="btn btn-outline-info fw-bold float-end border-3"
                         onClick={handleExport}
-                      >
+                      > 
+                         <Download size={16}/>{" "}
                         Export Excel
                       </button>
                     </div>

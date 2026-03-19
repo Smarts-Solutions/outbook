@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { convertDate, convertDate1 } from "../../../Utils/Comman_function";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import ReactPaginate from "react-paginate";
+import { Download } from "lucide-react";
 
 const JobStatus = () => {
   const dispatch = useDispatch();
@@ -346,6 +347,7 @@ const JobStatus = () => {
                 className="btn btn-outline-info fw-bold float-end border-3 "
                 onClick={handleExport}
               >
+                <Download size={16}/>{" "}
                 Export Excel
               </button>
             </div>

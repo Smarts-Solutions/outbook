@@ -13,7 +13,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase} from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Download} from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -1176,6 +1176,7 @@ const ClientList = () => {
                         className="btn btn-outline-info fw-bold float-end border-3 "
                         onClick={handleExport}
                       >
+                         <Download size={16}/>{" "}
                         Export Excel
                       </button>
                     </div>

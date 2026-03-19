@@ -24,7 +24,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 
 import { MoveVertical } from 'lucide-react';
-import { Plus ,Save } from "lucide-react";
+import { Plus ,Save ,Download } from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -1183,6 +1183,7 @@ const StaffPage = () => {
                 className="btn btn-outline-info fw-bold border-3"
                 onClick={handleExport}
               >
+                <Download size={16}/>{" "}
                 Export Excel
               </button>
             </div>

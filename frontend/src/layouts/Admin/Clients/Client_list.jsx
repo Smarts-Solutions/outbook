@@ -23,7 +23,7 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 
-import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase,FileText} from "lucide-react";
+import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase,FileText,Download} from "lucide-react";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -1607,6 +1607,7 @@ const ClientList = () => {
                     className="btn btn-outline-info fw-bold float-end border-3"
                     onClick={handleExport}
                   >
+                     <Download size={16}/>{" "}
                     Export Excel
                   </button>
                 )}
