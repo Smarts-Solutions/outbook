@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -7,10 +7,14 @@ import {
   getList,
   addChecklists,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  getAllCustomerDropDown
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 import { Save, Plus, ArrowLeft, X } from "lucide-react";
+import Select from "react-select";
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -24,15 +28,19 @@ const CreateCheckList = () => {
 
   const [errors, setErrors] = useState({});
   const [errors1, setErrors1] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [customerAllData, setCustomerAllData] = useState([]);
 
   const [formData, setFormData] = useState({
-    customer_id: location.state?.id || "",
-    service_id: "",
-    job_type_id: "",
+    customer_id: [],
+    service_id: [],
+    job_type_id: [],
     client_type_id: "",
     check_list_name: "",
     status: "1",
   });
+
+  console.log("formData ,",formData)
 
   const [formData1, setFormData1] = useState({
     customer_id: location.state?.id || "",
@@ -67,7 +75,95 @@ const CreateCheckList = () => {
 
   useEffect(() => {
     getAllServices();
+    GetAllCustomer({ searchValue: "", pageNo: 1 });
   }, []);
+
+   ///////////////---- FOR CUSTOMER SERACH  START-----//////////////
+    const [customerPage, setCustomerPage] = useState(1);
+    const [customerHasMore, setCustomerHasMore] = useState(true);
+    const [customerLoading, setCustomerLoading] = useState(false);
+    const [customerSearch, setCustomerSearch] = useState("");
+  
+    const customerCache = useRef({});
+    const debounceRef = useRef(null);
+  
+    const GetAllCustomer = async ({ searchValue = "", pageNo = 1,append = false }) => {
+      if (loading) return;
+      const cacheKey = `${searchValue}_${pageNo}`;
+     
+      if (customerCache.current[cacheKey]) {
+        const cached = customerCache.current[cacheKey];
+        setCustomerAllData((prev) => {
+          const combined = [...prev, ...cached];
+          const unique = Array.from(
+            new Map(combined.map((item) => [item.value, item])).values(),
+          );
+          return unique;
+        });
+        return;
+      }
+  
+      setLoading(true);
+      const req = {
+        action: "get_customers_filter",
+        filters: {
+          job_id:[],
+          client_id:[]
+        },
+        pagination: {
+          search: searchValue,
+          page: pageNo,
+          limit: 20,
+        },
+      };
+  
+      const data = { req: req, authToken: token };
+      try {
+        const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+        if (response.status) {
+          const formatted = response.data.map((item) => ({
+            value: item.id,
+            label: item.trading_name,
+          }));
+  
+          customerCache.current[cacheKey] = formatted;
+  
+          // setCustomerAllData(prev =>
+          //   append ? [...prev, ...formatted] : formatted
+          // );
+          setCustomerAllData((prev) => {
+            const combined = [...prev, ...formatted];
+            const unique = Array.from(
+              new Map(combined.map((item) => [item.value, item])).values(),
+            );
+            return unique;
+          });
+  
+          setCustomerHasMore(response.data.length === 20);
+          setCustomerPage(pageNo);
+        } else {
+          if (!append) setCustomerAllData([]);
+        }
+      } catch (error) {}
+  
+      setLoading(false);
+    };
+  
+    const handleCustomerSearch = (value) => {
+      if (value === "") {
+        return;
+      }
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        setCustomerSearch(value);
+        GetAllCustomer({
+          searchValue: value,
+          pageNo: 1,
+        });
+      }, 500);
+    };
+  
+    ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
 
   const getAllServices = async () => {
     const req = { action: "get" };
@@ -97,7 +193,8 @@ const CreateCheckList = () => {
     let value = e.target.value;
     setFormData((prevState) => ({
       ...prevState,
-      [name]: value?.trim(),
+      // [name]: value?.trim(),
+      [name]: value
     }));
     validate(name, value);
   };
@@ -134,7 +231,7 @@ const CreateCheckList = () => {
     return isValid;
   };
 
-  
+
 
   const getJobTypeData = async (service_id) => {
     const req = { service_id, action: "get" };
@@ -164,7 +261,7 @@ const CreateCheckList = () => {
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
       return;
     }
-   
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors1(validationErrors);
       return;
@@ -225,7 +322,7 @@ const CreateCheckList = () => {
     setSelectedClientType(e);
   };
 
-  console.log("formData",formData)
+  // console.log("formData",formData)
 
   return (
     <div className="container-fluid">
@@ -246,7 +343,7 @@ const CreateCheckList = () => {
         <div className="card-body">
           <div className="row">
 
-             <div className="col-lg-4">
+            <div className="col-lg-4">
               <div className=" row flex-column">
                 <div>
                   <label className="form-label">CheckList Name</label>
@@ -285,8 +382,10 @@ const CreateCheckList = () => {
                       handleInputChange(e);
                     }}
                   >
-                  <option value=""> -- Select --</option>
-                    
+                    <option value=""> -- Select --</option>
+                    <option value="">Processing Type</option>
+                    <option value="">Reviewing Type</option>
+
                   </select>
                   {errors.work_flow_type && (
                     <p className="mb-0 error-text">{errors.work_flow_type}</p>
@@ -296,6 +395,57 @@ const CreateCheckList = () => {
             </div>
 
             <div className="col-lg-4 mb-lg-0 mb-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Customer Name</label>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={customerAllData}
+                    value={customerAllData.filter((opt) =>
+                      formData?.customer_id?.includes(opt.value),
+                    )}
+                    
+                    onChange={(selectedOptions) => {
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+                      handleInputChange({
+                        target: {
+                          key: "customer_id",
+                          value: values,
+                        },
+                      });
+
+                      // Call API only when empty
+                      if (values.length === 0) {
+                        setCustomerHasMore(true);
+                        setCustomerPage(1);
+                        setCustomerSearch("");
+                        setCustomerAllData([]);
+                        customerCache.current = {};
+                        GetAllCustomer({ searchValue: "", pageNo: 1 });
+                      }
+                    }}
+                    onInputChange={(value) => handleCustomerSearch(value)}
+                    onMenuScrollToBottom={() => {
+                      if (customerHasMore) {
+                        GetAllCustomer({
+                          searchValue: customerSearch,
+                          pageNo: customerPage + 1,
+                          append: true,
+                        });
+                      }
+                    }}
+                    isSearchable
+                    className="shadow-sm select-staff rounded-pill"
+                  />
+
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Service Type</label>
@@ -320,7 +470,7 @@ const CreateCheckList = () => {
                         </option>
                       ))}
                   </select>
-                  
+
                 </div>
               </div>
             </div>
@@ -350,7 +500,7 @@ const CreateCheckList = () => {
                         </option>
                       ))}
                   </select>
-                  
+
                 </div>
               </div>
             </div>
@@ -367,7 +517,7 @@ const CreateCheckList = () => {
                       handleOnChange={(e) => handleMultipleSelect(e)}
                     />
                   </div>
-                  
+
                 </div>
               </div>
             </div>

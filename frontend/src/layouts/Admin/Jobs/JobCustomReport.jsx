@@ -1593,19 +1593,6 @@ function JobCustomReport() {
     }, 500);
   };
 
-  //   const handleCustomerSearch = (value) => {
-  //   clearTimeout(customerDebounce.current);
-  //   customerDebounce.current = setTimeout(() => {
-  //     setCustomerPage(1);
-  //     GetAllCustomer({
-  //       searchValue: value,
-  //       pageNo: 1,
-  //       append: true
-  //     });
-
-  //   }, 500);
-  // };
-
   ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
 
   /////////////////---- FOR CLIENT SERACH  START-----//////////////
