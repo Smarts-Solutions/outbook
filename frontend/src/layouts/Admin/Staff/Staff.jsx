@@ -22,7 +22,7 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
-import { Download, Ellipsis, Plus, Save, Trash, User, User2, X } from "lucide-react";
+import { Download, Ellipsis, Plus, Save, Trash, User, User2, X ,EllipsisVertical } from "lucide-react";
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -507,7 +507,7 @@ const StaffPage = () => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <Ellipsis size={16} />
+                  <EllipsisVertical size={18}/>
                 </button>
                 <div
                   className="dropdown-menu custom-dropdown"
