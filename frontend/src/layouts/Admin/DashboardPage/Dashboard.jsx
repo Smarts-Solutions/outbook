@@ -11,6 +11,7 @@ import qs from "qs";
 import jwtDecode from "jwt-decode";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
+import {Circle} from "lucide-react"
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -872,7 +873,7 @@ const Dashboard = () => {
                           getActiviyLog?.map((item, index) => (
                             <div className="activity-info" key={index}>
                               <div className="icon-info-activity">
-                                <i className="fa-solid fa-circle"></i>
+                               <Circle size={14} fill="#00afef"/>
                               </div>
                               <div className="activity-info-text">
                                 <small>{formatDate(item?.created_at)}</small>
