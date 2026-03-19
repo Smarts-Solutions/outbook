@@ -1,4 +1,4 @@
-import React, { useState, useEffect ,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -30,6 +30,7 @@ const CreateCheckList = () => {
   const [errors1, setErrors1] = useState({});
   const [loading, setLoading] = useState(false);
   const [customerAllData, setCustomerAllData] = useState([]);
+  const [serviceAllData, setServiceAllData] = useState([]);
 
   const [formData, setFormData] = useState({
     customer_id: [],
@@ -40,7 +41,7 @@ const CreateCheckList = () => {
     status: "1",
   });
 
-  console.log("formData ,",formData)
+  console.log("formData ,", formData)
 
   const [formData1, setFormData1] = useState({
     customer_id: location.state?.id || "",
@@ -78,92 +79,92 @@ const CreateCheckList = () => {
     GetAllCustomer({ searchValue: "", pageNo: 1 });
   }, []);
 
-   ///////////////---- FOR CUSTOMER SERACH  START-----//////////////
-    const [customerPage, setCustomerPage] = useState(1);
-    const [customerHasMore, setCustomerHasMore] = useState(true);
-    const [customerLoading, setCustomerLoading] = useState(false);
-    const [customerSearch, setCustomerSearch] = useState("");
-  
-    const customerCache = useRef({});
-    const debounceRef = useRef(null);
-  
-    const GetAllCustomer = async ({ searchValue = "", pageNo = 1,append = false }) => {
-      if (loading) return;
-      const cacheKey = `${searchValue}_${pageNo}`;
-     
-      if (customerCache.current[cacheKey]) {
-        const cached = customerCache.current[cacheKey];
+  ///////////////---- FOR CUSTOMER SERACH  START-----//////////////
+  const [customerPage, setCustomerPage] = useState(1);
+  const [customerHasMore, setCustomerHasMore] = useState(true);
+  const [customerLoading, setCustomerLoading] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+
+  const customerCache = useRef({});
+  const debounceRef = useRef(null);
+
+  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
+    if (loading) return;
+    const cacheKey = `${searchValue}_${pageNo}`;
+
+    if (customerCache.current[cacheKey]) {
+      const cached = customerCache.current[cacheKey];
+      setCustomerAllData((prev) => {
+        const combined = [...prev, ...cached];
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.value, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
+    setLoading(true);
+    const req = {
+      action: "get_customers_filter",
+      filters: {
+        job_id: [],
+        client_id: []
+      },
+      pagination: {
+        search: searchValue,
+        page: pageNo,
+        limit: 20,
+      },
+    };
+
+    const data = { req: req, authToken: token };
+    try {
+      const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+      if (response.status) {
+        const formatted = response.data.map((item) => ({
+          value: item.id,
+          label: item.trading_name,
+        }));
+
+        customerCache.current[cacheKey] = formatted;
+
+        // setCustomerAllData(prev =>
+        //   append ? [...prev, ...formatted] : formatted
+        // );
         setCustomerAllData((prev) => {
-          const combined = [...prev, ...cached];
+          const combined = [...prev, ...formatted];
           const unique = Array.from(
             new Map(combined.map((item) => [item.value, item])).values(),
           );
           return unique;
         });
-        return;
+
+        setCustomerHasMore(response.data.length === 20);
+        setCustomerPage(pageNo);
+      } else {
+        if (!append) setCustomerAllData([]);
       }
-  
-      setLoading(true);
-      const req = {
-        action: "get_customers_filter",
-        filters: {
-          job_id:[],
-          client_id:[]
-        },
-        pagination: {
-          search: searchValue,
-          page: pageNo,
-          limit: 20,
-        },
-      };
-  
-      const data = { req: req, authToken: token };
-      try {
-        const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
-        if (response.status) {
-          const formatted = response.data.map((item) => ({
-            value: item.id,
-            label: item.trading_name,
-          }));
-  
-          customerCache.current[cacheKey] = formatted;
-  
-          // setCustomerAllData(prev =>
-          //   append ? [...prev, ...formatted] : formatted
-          // );
-          setCustomerAllData((prev) => {
-            const combined = [...prev, ...formatted];
-            const unique = Array.from(
-              new Map(combined.map((item) => [item.value, item])).values(),
-            );
-            return unique;
-          });
-  
-          setCustomerHasMore(response.data.length === 20);
-          setCustomerPage(pageNo);
-        } else {
-          if (!append) setCustomerAllData([]);
-        }
-      } catch (error) {}
-  
-      setLoading(false);
-    };
-  
-    const handleCustomerSearch = (value) => {
-      if (value === "") {
-        return;
-      }
-      clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        setCustomerSearch(value);
-        GetAllCustomer({
-          searchValue: value,
-          pageNo: 1,
-        });
-      }, 500);
-    };
-  
-    ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
+    } catch (error) { }
+
+    setLoading(false);
+  };
+
+  const handleCustomerSearch = (value) => {
+    if (value === "") {
+      return;
+    }
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setCustomerSearch(value);
+      GetAllCustomer({
+        searchValue: value,
+        pageNo: 1,
+      });
+    }, 500);
+  };
+
+  ///////////////---- FOR CUSTOMER SERACH  END-----//////////////
 
   const getAllServices = async () => {
     const req = { action: "get" };
@@ -172,7 +173,8 @@ const CreateCheckList = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setFormData((data) => ({ ...data, service_id: response.data }));
+          setServiceAllData(response.data)
+         // setFormData((data) => ({ ...data, service_id: response.data }));
         }
       })
       .catch((error) => {
@@ -405,14 +407,14 @@ const CreateCheckList = () => {
                     value={customerAllData.filter((opt) =>
                       formData?.customer_id?.includes(opt.value),
                     )}
-                    
+
                     onChange={(selectedOptions) => {
                       const values = selectedOptions
                         ? selectedOptions.map((opt) => opt.value)
                         : [];
                       handleInputChange({
                         target: {
-                          key: "customer_id",
+                          name: "customer_id",
                           value: values,
                         },
                       });
@@ -449,27 +451,36 @@ const CreateCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Service Type</label>
-                  <select
-                    className={
-                      errors.service_id
-                        ? "error-field form-select"
-                        : "form-select"
-                    }
-                    name="service_id"
-                    defaultValue={formData.service_id}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                      getJobTypeData(e.target.value);
+                  
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={serviceAllData?.map((service) => ({
+                      value: service.id,
+                      label: service.name,
+                    }))}
+                    value={serviceAllData
+                      .filter((service) => formData.service_id?.includes(service.id))
+                      .map((service) => ({
+                        value: service.id,
+                        label: service.name,
+                      }))}
+
+                    onChange={(selectedOptions) => {
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+                      handleInputChange({
+                        target: {
+                          name: "service_id",
+                          value: values,
+                        },
+                      });
+                      getJobTypeData(values);
                     }}
-                  >
-                    <option value="">Please Select Service Type</option>
-                    {formData.service_id &&
-                      formData.service_id.map((service) => (
-                        <option key={service.id} value={service.id}>
-                          {service.name}
-                        </option>
-                      ))}
-                  </select>
+
+
+                  />
 
                 </div>
               </div>
