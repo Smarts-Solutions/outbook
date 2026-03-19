@@ -9,9 +9,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import qs from "qs";
 import jwtDecode from "jwt-decode";
-import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 import Select from "react-select";
-import { Circle } from "lucide-react";
+import { Circle, CircleAlert, Download } from "lucide-react";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const [selectedFromDate, setSelectedFromDate] = useState("");
   const [selectedToDate, setSelectedToDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
 
   const currentDate = new Date();
@@ -184,6 +186,75 @@ const Dashboard = () => {
     const timeOptions = { hour: "numeric", minute: "numeric", hour12: true };
     const time = date.toLocaleTimeString("en-US", timeOptions);
     return `${monthDay} (${time.toUpperCase()})`;
+  };
+
+  const exportAllActivityLog = async () => {
+    try {
+      setExporting(true);
+
+      const req = {
+        staff_id: staffDetails.id,
+        filter_type: activityRange,
+        export_all: true,
+      };
+
+      if (selectedStaff) {
+        req.filter_staff_id = selectedStaff;
+      }
+
+      if (activityRange === "custom") {
+        req.from_date = selectedFromDate;
+        req.to_date = selectedToDate;
+      }
+
+      const data = { req, authToken: token };
+      const res = await dispatch(ActivityLog(data)).unwrap();
+
+      if (res.status && Array.isArray(res.data) && res.data.length > 0) {
+        const logs = Array.isArray(res.data) ? res.data : [];
+        const exportList = [];
+
+        // Support both flat log lists and grouped logs (type === "staff")
+        if (logs.length > 0 && logs[0]?.date && Array.isArray(logs[0]?.allContain)) {
+          logs.forEach((group) => {
+            group.allContain.forEach((log) => {
+              exportList.push({
+                Date: group.date,
+                "Created At": formatDate(log.created_at),
+                "Log Message": log.log_message,
+              });
+            });
+          });
+        } else {
+          exportList.push(
+            ...logs.map((item) => ({
+              "Staff Name": item.staff_name,
+              "Log Message": item.log_message,
+              "Created At": formatDate(item.created_at),
+            })),
+          );
+        }
+
+        const ws = XLSX.utils.json_to_sheet(exportList);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "ActivityLog");
+        const excelBuffer = XLSX.write(wb, {
+          bookType: "xlsx",
+          type: "array",
+        });
+        const fileData = new Blob([excelBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+        });
+        const fileName = `Activity_Log_${activityRange}_${new Date()
+          .toISOString()
+          .slice(0, 10)}`;
+        saveAs(fileData, `${fileName}.xlsx`);
+      }
+    } catch (error) {
+      console.error("Export Activity Log Error:", error);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleClick = async (type, data, heading) => {
@@ -429,12 +500,6 @@ const Dashboard = () => {
 
   // End Process SharePoint Refresh Process End //
 
-  const exportData = getActiviyLog?.map((item) => ({
-    staff_name: item.staff_name,
-    log_message: item.log_message,
-    created_at: formatDate(item.created_at),
-  }));
-
   const selectFilterValue = async (e) => {
     let { name, value } = e.target;
 
@@ -463,19 +528,30 @@ const Dashboard = () => {
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
-                <div className="col-md-2">
-                  {/* <ExportToExcel
-                    className="btn btn-outline-info fw-bold float-end border-3 "
-                    apiData={exportData}
-                    fileName={"Logs Details"}
-                  /> */}
-                  {exportData && exportData.length > 0 && (
-                    <ExportToExcel
-                      className="btn btn-outline-info fw-bold float-end border-3"
-                      apiData={exportData}
-                      fileName={"Logs Details"}
-                    />
-                  )}
+                <div className="col-md-3">
+                  <div className="d-flex justify-content-end">
+                    <button
+                      type="button"
+                      className="btn btn-outline-info fw-bold"
+                      onClick={exportAllActivityLog}
+                      disabled={exporting || !getActiviyLog?.length}
+                    >
+                      {exporting ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Exporting...
+                        </>
+                      ) : (
+                        <>
+                         <Download size={16}/> Export All
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -884,7 +960,7 @@ const Dashboard = () => {
                           getActiviyLog.map((item, index) => (
                             <div className="activity-info" key={index}>
                               <div className="icon-info-activity">
-                                <Circle />
+                               <CircleAlert size={14}/>
                               </div>
                               <div className="activity-info-text">
                                 <small>{formatDate(item?.created_at)}</small>

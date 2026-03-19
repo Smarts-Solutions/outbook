@@ -6,16 +6,16 @@ import {
   UpdateJob,
   GET_ALL_CHECKLIST,
   JobAction,
-  GetOfficerDetails
+  GetOfficerDetails,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
-import Select from 'react-select';
+import Select from "react-select";
 import Swal from "sweetalert2";
-import { Save,Plus ,ArrowLeft, Pencil, X} from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X } from "lucide-react";
 
 const EditJob = () => {
   const location = useLocation();
@@ -29,7 +29,6 @@ const EditJob = () => {
   // customer Details
 
   const [CustomerDetails, setCustomerDetails] = useState([]);
-
 
   // console.log("location EDIT -", location);
 
@@ -50,7 +49,6 @@ const EditJob = () => {
     loading: false,
     data: [],
   });
-
 
   // console.log("AllChecklistData", AllChecklistData);
   const [AddTaskArr, setAddTaskArr] = useState([]);
@@ -83,7 +81,6 @@ const EditJob = () => {
   const [tempTaskArr, setTempTaskArr] = useState([]);
   const [tempChecklistId, setTempChecklistId] = useState("");
 
-
   const [allStaffData, setAllStaffData] = useState([]);
   const [selectedStaffData, setSelectedStaffData] = useState([]);
 
@@ -91,10 +88,8 @@ const EditJob = () => {
   const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
   const [clientType, setClientType] = useState("");
 
-
   // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
   //  console.log("CustomerDetails", CustomerDetails);
-
 
   const [jobData, setJobData] = useState({
     timesheet_job_id: null,
@@ -146,8 +141,7 @@ const EditJob = () => {
     notes: "",
   });
 
-
-  console.log("jobData?.timesheet_job_id ", jobData?.timesheet_job_id)
+  console.log("jobData?.timesheet_job_id ", jobData?.timesheet_job_id);
 
   useEffect(() => {
     console.log("UPDATE ALL DEFAULT FEILDS");
@@ -190,8 +184,7 @@ const EditJob = () => {
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
       Management_Accounts_Frequency_id_6: "Quarterly",
 
-
-      ////////////////////////// 
+      
       Year_Ending_id_1: null,
 
       Day_Date_id_2: null,
@@ -209,7 +202,6 @@ const EditJob = () => {
       Other_FromDate_id_2: null,
       Other_ToDate_id_2: null,
 
-
       Payroll_Week_Year_id_3: null,
       Payroll_Week_Month_id_3: null,
       Payroll_Week_id_3: null,
@@ -221,8 +213,6 @@ const EditJob = () => {
       Payroll_Quarter_Year_id_3: null,
       Payroll_Quarter_id_3: null,
       Payroll_Year_id_3: null,
-
-
 
       Tax_Year_id_4: null,
 
@@ -247,7 +237,6 @@ const EditJob = () => {
       Other_FromDate_id_32: null,
       Other_ToDate_id_32: null,
 
-
       Payroll_Frequency_id_31: null,
       Payroll_Week_Year_id_31: null,
       Payroll_Week_Month_id_31: null,
@@ -268,14 +257,8 @@ const EditJob = () => {
       Filing_Date_id_8: null,
 
       Year_id_28: null,
-
-
-
-
     }));
   }, []);
-
-
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id };
@@ -285,7 +268,6 @@ const EditJob = () => {
       .then(async (response) => {
         if (response.status) {
           if (Object.keys(response.data).length > 0) {
-
             setSelectedStaffData(response.data.selectedStaffData || []);
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
@@ -325,28 +307,34 @@ const EditJob = () => {
               minutes: response.data.invoice_hours?.split(":")[1] ?? "",
             });
 
-
             setClientType(response.data.client_type ?? "");
-            if (response.data.client_type == "2" && response.data.client_company_number != undefined) {
-              get_information_company_number(response.data.client_company_number);
-            }
-            else if (["5"].includes(response.data.client_type)) {
+            if (
+              response.data.client_type == "2" &&
+              response.data.client_company_number != undefined
+            ) {
+              get_information_company_number(
+                response.data.client_company_number,
+              );
+            } else if (["5"].includes(response.data.client_type)) {
               get_information_company_number(response.data.company_number);
-            }
-            else if (["1", "3", "7"].includes(response.data.client_type)) {
-              dueOn_date_set(response.data.client_type, response.data.service_id);
+            } else if (["1", "3", "7"].includes(response.data.client_type)) {
+              dueOn_date_set(
+                response.data.client_type,
+                response.data.service_id,
+              );
             }
 
             setJobData((prevState) => ({
               ...prevState,
               timesheet_job_id: response.data.timesheet_job_id ?? null,
-              AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
-                } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
+              AccountManager: `${
+                response.data.outbooks_acount_manager_first_name ?? ""
+              } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
               Customer: response.data.customer_trading_name ?? "",
               Client:
                 location.state.goto == "Customer"
                   ? response.data.client_id
-                  : response.data.client_trading_name ?? "",
+                  : (response.data.client_trading_name ?? ""),
               client_id: response.data.client_id ?? "",
               ClientJobCode: response.data.client_job_code ?? "",
               CustomerAccountManager:
@@ -466,8 +454,6 @@ const EditJob = () => {
 
               //////////////////////////
 
-
-
               Year_Ending_id_1: response.data.Year_Ending_id_1 ?? null,
               Day_Date_id_2: response.data.Day_Date_id_2 ?? null,
               Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
@@ -483,20 +469,29 @@ const EditJob = () => {
               Year_id_2: response.data.Year_id_2 ?? null,
               Other_FromDate_id_2: response.data.Other_FromDate_id_2 ?? null,
               Other_ToDate_id_2: response.data.Other_ToDate_id_2 ?? null,
-              Payroll_Week_Year_id_3: response.data.Payroll_Week_Year_id_3 ?? null,
-              Payroll_Week_Month_id_3: response.data.Payroll_Week_Month_id_3 ?? null,
+              Payroll_Week_Year_id_3:
+                response.data.Payroll_Week_Year_id_3 ?? null,
+              Payroll_Week_Month_id_3:
+                response.data.Payroll_Week_Month_id_3 ?? null,
               Payroll_Week_id_3: response.data.Payroll_Week_id_3 ?? null,
-              Payroll_Fortnight_Year_id_3: response.data.Payroll_Fortnight_Year_id_3 ?? null,
-              Payroll_Fortnight_Month_id_3: response.data.Payroll_Fortnight_Month_id_3 ?? null,
-              Payroll_Fortnight_id_3: response.data.Payroll_Fortnight_id_3 ?? null,
-              Payroll_Month_Year_id_3: response.data.Payroll_Month_Year_id_3 ?? null,
+              Payroll_Fortnight_Year_id_3:
+                response.data.Payroll_Fortnight_Year_id_3 ?? null,
+              Payroll_Fortnight_Month_id_3:
+                response.data.Payroll_Fortnight_Month_id_3 ?? null,
+              Payroll_Fortnight_id_3:
+                response.data.Payroll_Fortnight_id_3 ?? null,
+              Payroll_Month_Year_id_3:
+                response.data.Payroll_Month_Year_id_3 ?? null,
               Payroll_Month_id_3: response.data.Payroll_Month_id_3 ?? null,
-              Payroll_Quarter_Year_id_3: response.data.Payroll_Quarter_Year_id_3 ?? null,
+              Payroll_Quarter_Year_id_3:
+                response.data.Payroll_Quarter_Year_id_3 ?? null,
               Payroll_Quarter_id_3: response.data.Payroll_Quarter_id_3 ?? null,
               Payroll_Year_id_3: response.data.Payroll_Year_id_3 ?? null,
               Tax_Year_id_4: response.data.Tax_Year_id_4 ?? null,
-              Management_Accounts_FromDate_id_6: response.data.Management_Accounts_FromDate_id_6 ?? null,
-              Management_Accounts_ToDate_id_6: response.data.Management_Accounts_ToDate_id_6 ?? null,
+              Management_Accounts_FromDate_id_6:
+                response.data.Management_Accounts_FromDate_id_6 ?? null,
+              Management_Accounts_ToDate_id_6:
+                response.data.Management_Accounts_ToDate_id_6 ?? null,
               Year_id_33: response.data.Year_id_33 ?? null,
               Period_id_32: response.data.Period_id_32 ?? null,
               Day_Date_id_32: response.data.Day_Date_id_32 ?? null,
@@ -504,7 +499,8 @@ const EditJob = () => {
               Week_Month_id_32: response.data.Week_Month_id_32 ?? null,
               Week_id_32: response.data.Week_id_32 ?? null,
               Fortnight_Year_id_32: response.data.Fortnight_Year_id_32 ?? null,
-              Fortnight_Month_id_32: response.data.Fortnight_Month_id_32 ?? null,
+              Fortnight_Month_id_32:
+                response.data.Fortnight_Month_id_32 ?? null,
               Fortnight_id_32: response.data.Fortnight_id_32 ?? null,
               Month_Year_id_32: response.data.Month_Year_id_32 ?? null,
               Month_id_32: response.data.Month_id_32 ?? null,
@@ -513,27 +509,36 @@ const EditJob = () => {
               Year_id_32: response.data.Year_id_32 ?? null,
               Other_FromDate_id_32: response.data.Other_FromDate_id_32 ?? null,
               Other_ToDate_id_32: response.data.Other_ToDate_id_32 ?? null,
-              Payroll_Frequency_id_31: response.data.Payroll_Frequency_id_31 ?? null,
-              Payroll_Week_Year_id_31: response.data.Payroll_Week_Year_id_31 ?? null,
-              Payroll_Week_Month_id_31: response.data.Payroll_Week_Month_id_31 ?? null,
+              Payroll_Frequency_id_31:
+                response.data.Payroll_Frequency_id_31 ?? null,
+              Payroll_Week_Year_id_31:
+                response.data.Payroll_Week_Year_id_31 ?? null,
+              Payroll_Week_Month_id_31:
+                response.data.Payroll_Week_Month_id_31 ?? null,
               Payroll_Week_id_31: response.data.Payroll_Week_id_31 ?? null,
-              Payroll_Fortnight_Year_id_31: response.data.Payroll_Fortnight_Year_id_31 ?? null,
-              Payroll_Fortnight_Month_id_31: response.data.Payroll_Fortnight_Month_id_31 ?? null,
-              Payroll_Fortnight_id_31: response.data.Payroll_Fortnight_id_31 ?? null,
-              Payroll_Month_Year_id_31: response.data.Payroll_Month_Year_id_31 ?? null,
+              Payroll_Fortnight_Year_id_31:
+                response.data.Payroll_Fortnight_Year_id_31 ?? null,
+              Payroll_Fortnight_Month_id_31:
+                response.data.Payroll_Fortnight_Month_id_31 ?? null,
+              Payroll_Fortnight_id_31:
+                response.data.Payroll_Fortnight_id_31 ?? null,
+              Payroll_Month_Year_id_31:
+                response.data.Payroll_Month_Year_id_31 ?? null,
               Payroll_Month_id_31: response.data.Payroll_Month_id_31 ?? null,
-              Payroll_Quarter_Year_id_31: response.data.Payroll_Quarter_Year_id_31 ?? null,
-              Payroll_Quarter_id_31: response.data.Payroll_Quarter_id_31 ?? null,
+              Payroll_Quarter_Year_id_31:
+                response.data.Payroll_Quarter_Year_id_31 ?? null,
+              Payroll_Quarter_id_31:
+                response.data.Payroll_Quarter_id_31 ?? null,
               Payroll_Year_id_31: response.data.Payroll_Year_id_31 ?? null,
-              Audit_Year_Ending_id_27: response.data.Audit_Year_Ending_id_27 ?? null,
-              Filing_Frequency_id_8: response.data.Filing_Frequency_id_8 ?? null,
-              Period_Ending_Date_id_8: response.data.Period_Ending_Date_id_8 ?? null,
+              Audit_Year_Ending_id_27:
+                response.data.Audit_Year_Ending_id_27 ?? null,
+              Filing_Frequency_id_8:
+                response.data.Filing_Frequency_id_8 ?? null,
+              Period_Ending_Date_id_8:
+                response.data.Period_Ending_Date_id_8 ?? null,
               Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
               Year_id_28: response.data.Year_id_28 ?? null,
               job_priority: response.data.job_priority ?? null,
-
-
-
             }));
           }
 
@@ -553,14 +558,12 @@ const EditJob = () => {
       });
   };
 
-
-
   useEffect(() => {
     JobDetails();
   }, []);
 
   const get_information_company_number = async (company_number) => {
-    const data = { company_number: company_number, type: 'company_info' };
+    const data = { company_number: company_number, type: "company_info" };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
       .then((res) => {
@@ -568,28 +571,25 @@ const EditJob = () => {
           setClientInfoCompanyDetails(res.data);
         } else {
           setClientInfoCompanyDetails({});
-
         }
       })
       .catch((err) => {
         return;
-      }
-      );
+      });
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
     let due_date = getDueDate(client_type, service_id);
 
-    if (!['', null, undefined].includes(due_date)) {
+    if (!["", null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
         ...prevState,
         DueOn: due_date,
       }));
     }
-  }
+  };
 
   function getDueDate(client_type, service_id) {
-
     if (["1", "3", "7"].includes(client_type)) {
       // Service Account Production
       if (Number(service_id) === 1) {
@@ -618,25 +618,38 @@ const EditJob = () => {
       // 1 month + 7 day added for this service
       else if (Number(service_id) === 8) {
         const today = new Date();
-        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+        const nextMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          1,
+        );
+        const nextNextMonth = new Date(
+          nextMonth.getFullYear(),
+          nextMonth.getMonth() + 1,
+          1,
+        );
         nextNextMonth.setDate(nextNextMonth.getDate() + 6);
         const y = nextNextMonth.getFullYear();
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-
       } else {
         return null;
       }
-    }
-    else {
-
+    } else {
       // 1 month + 7 day added for this service
       if (Number(service_id) == 8) {
         const today = new Date();
-        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+        const nextMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          1,
+        );
+        const nextNextMonth = new Date(
+          nextMonth.getFullYear(),
+          nextMonth.getMonth() + 1,
+          1,
+        );
         nextNextMonth.setDate(nextNextMonth.getDate() + 6);
         const y = nextNextMonth.getFullYear();
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
@@ -653,14 +666,10 @@ const EditJob = () => {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
-      }
-
-      else {
+      } else {
         return null;
       }
-
     }
-
   }
 
   const getAllChecklist = async () => {
@@ -705,7 +714,6 @@ const EditJob = () => {
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
       .then(async (response) => {
-
         console.log("getChecklistData", response);
 
         if (response.status) {
@@ -815,7 +823,6 @@ const EditJob = () => {
   //         await dueOn_date_set(clientType, value);
   //       }
 
-
   //       date.setDate(date.getDate() + 28);
   //       setJobData((prevState) => ({
   //         ...prevState,
@@ -884,14 +891,11 @@ const EditJob = () => {
   //   validate(name, value);
   // };
 
-
   const HandleChange = async (e) => {
     const { name, value } = e.target;
 
-    // ✅ Service change hone par - other-data fields null + JobType reset + Tasks clear
     if (name === "Service") {
-
-      if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
+      if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
           icon: "warning",
           title: `this job already assign timesheet.`,
@@ -899,13 +903,11 @@ const EditJob = () => {
           showConfirmButton: true,
           timer: 2000,
         });
-        return
+        return;
       }
 
-
-
       const allServiceFieldKeys = serviceFields.flatMap((sf) =>
-        sf.fields.map((f) => f.key)
+        sf.fields.map((f) => f.key),
       );
       const nulledFields = allServiceFieldKeys.reduce((acc, key) => {
         acc[key] = null;
@@ -915,19 +917,46 @@ const EditJob = () => {
       setJobData((prevState) => ({
         ...prevState,
         ...nulledFields,
-        JobType: "",   // ✅ JobType reset
+        JobType: "", 
       }));
 
-      setAddTaskArr([]);        // ✅ Tasks clear
-      setTempTaskArr([]);       // ✅ Temp tasks clear
-      setChecklistId("");       // ✅ Checklist reset
-      setTempChecklistId("");   // ✅ Temp checklist reset
+      setAddTaskArr([]); 
+      setTempTaskArr([]); 
+      setChecklistId(""); 
+      setTempChecklistId(""); 
     }
 
-    // ✅ JobType change 
+    if (name === "Bookkeeping_Frequency_id_2") {
+      const allFrequencyFields = {
+        Daily: ["Day_Date_id_2"],
+        Weekly: ["Week_Year_id_2", "Week_Month_id_2", "Week_id_2"],
+        Fortnightly: [
+          "Fortnight_Year_id_2",
+          "Fortnight_Month_id_2",
+          "Fortnight_id_2",
+        ],
+        Monthly: ["Month_Year_id_2", "Month_id_2"],
+        Quarterly: ["Quarter_Year_id_2", "Quarter_id_2"],
+        Yearly: ["Year_id_2"],
+        Other: ["Other_FromDate_id_2", "Other_ToDate_id_2"],
+      };
+
+      const fieldsToNull = Object.entries(allFrequencyFields)
+        .filter(([freq]) => freq !== value)
+        .flatMap(([, keys]) => keys)
+        .reduce((acc, key) => {
+          acc[key] = null;
+          return acc;
+        }, {});
+
+      setJobData((prevState) => ({
+        ...prevState,
+        ...fieldsToNull,
+      }));
+    }
+
     if (name === "JobType") {
-      
-      if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
+      if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
           icon: "warning",
           title: `this job already assign timesheet.`,
@@ -935,11 +964,13 @@ const EditJob = () => {
           showConfirmButton: true,
           timer: 2000,
         });
-        return
+        return;
       }
 
-
-      if (!["", undefined, null].includes(value) && Number(existJobTypeId) === Number(value)) {
+      if (
+        !["", undefined, null].includes(value) &&
+        Number(existJobTypeId) === Number(value)
+      ) {
         setAddTaskArr(existAddTaskArr);
       } else {
         setAddTaskArr([]);
@@ -949,14 +980,23 @@ const EditJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
-        const clientInfo = allClientDetails?.find((client) => Number(client.id) === Number(jobData.client_id));
-        if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-          await get_information_company_number(clientInfo.client_company_number);
-        }
-        else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+        const clientInfo = allClientDetails?.find(
+          (client) => Number(client.id) === Number(jobData.client_id),
+        );
+        if (
+          clientInfo != "" &&
+          clientInfo?.client_company_number != undefined &&
+          clientInfo?.client_client_type == "2"
+        ) {
+          await get_information_company_number(
+            clientInfo.client_company_number,
+          );
+        } else if (
+          clientInfo != "" &&
+          ["5"].includes(clientInfo?.client_client_type)
+        ) {
           await get_information_company_number(clientInfo.company_number);
-        }
-        else {
+        } else {
           await dueOn_date_set(clientType, value);
         }
 
@@ -1029,7 +1069,6 @@ const EditJob = () => {
     validate(name, value);
   };
 
-
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
     if (isSubmitting) {
@@ -1081,7 +1120,6 @@ const EditJob = () => {
   }
 
   const handleSubmit = async () => {
-
     // console.log("handleSubmit service", Number(jobData?.Service));
     // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
     // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
@@ -1090,10 +1128,13 @@ const EditJob = () => {
     let Year_Ending_id_1 = jobData?.Year_Ending_id_1;
 
     // Logic Service 1 Account Production in companie house client
-    if ([1].includes(Number(jobData?.Service)) && clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails)?.length > 0) {
-
+    if (
+      [1].includes(Number(jobData?.Service)) &&
+      clientInfoCompanyDetails &&
+      Object.keys(clientInfoCompanyDetails)?.length > 0
+    ) {
       // Year Ending validation
-      if (['', null, undefined].includes(jobData?.Year_Ending_id_1)) {
+      if (["", null, undefined].includes(jobData?.Year_Ending_id_1)) {
         sweatalert.fire({
           icon: "warning",
           title: "Please select Year Ending.",
@@ -1105,7 +1146,7 @@ const EditJob = () => {
       }
 
       // Due On validation
-      if (['', null, undefined].includes(jobData?.DueOn)) {
+      if (["", null, undefined].includes(jobData?.DueOn)) {
         sweatalert.fire({
           icon: "warning",
           title: "Please select Due On.",
@@ -1116,8 +1157,11 @@ const EditJob = () => {
         return;
       }
 
-      const dueOnDate = clientInfoCompanyDetails?.accounts?.next_accounts?.due_on ?? null;
-      const yearEndOnDate = clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on ?? null;
+      const dueOnDate =
+        clientInfoCompanyDetails?.accounts?.next_accounts?.due_on ?? null;
+      const yearEndOnDate =
+        clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on ??
+        null;
 
       if (dueOnDate != due_on && yearEndOnDate != Year_Ending_id_1) {
         sweatalert.fire({
@@ -1129,10 +1173,7 @@ const EditJob = () => {
         });
         due_on = dueOnDate;
         Year_Ending_id_1 = yearEndOnDate;
-      }
-
-
-      else if (dueOnDate != due_on) {
+      } else if (dueOnDate != due_on) {
         sweatalert.fire({
           icon: "warning",
           title: `Due On date should be same as company due on date ${dueOnDate}.`,
@@ -1141,9 +1182,7 @@ const EditJob = () => {
           timer: 2000,
         });
         due_on = dueOnDate;
-      }
-
-      else if (yearEndOnDate != Year_Ending_id_1) {
+      } else if (yearEndOnDate != Year_Ending_id_1) {
         sweatalert.fire({
           icon: "warning",
           title: `Year Ending date should be same as company year ending date ${yearEndOnDate}.`,
@@ -1153,7 +1192,6 @@ const EditJob = () => {
         });
         Year_Ending_id_1 = yearEndOnDate;
       }
-
     }
 
     if (AddTaskArr.length === 0) {
@@ -1177,7 +1215,6 @@ const EditJob = () => {
       });
       return;
     }
-
 
     const req = {
       job_id: location.state.job_id,
@@ -1206,12 +1243,12 @@ const EditJob = () => {
       year_end: jobData.YearEnd,
       total_preparation_time: formatTime(
         PreparationTimne.hours,
-        PreparationTimne.minutes
+        PreparationTimne.minutes,
       ),
       review_time: formatTime(reviewTime.hours, reviewTime.minutes),
       feedback_incorporation_time: formatTime(
         FeedbackIncorporationTime.hours,
-        FeedbackIncorporationTime.minutes
+        FeedbackIncorporationTime.minutes,
       ),
       total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
       engagement_model: jobData.EngagementModel,
@@ -1263,8 +1300,6 @@ const EditJob = () => {
       },
     };
 
-
-
     const data = { req: req, authToken: token };
     if (validate()) {
       await dispatch(UpdateJob(data))
@@ -1295,30 +1330,28 @@ const EditJob = () => {
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-      .reduce((obj, key) => {
-        const keyMapping = {
-          fte_dedicated_staffing: "FTE Dedicated Staffing",
-          percentage_model: "Percentage Model",
-          adhoc_payg_hourly: "Adhoc Payg Hourly",
-          customised_pricing: "Customised Pricing",
-        };
+        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+        .reduce((obj, key) => {
+          const keyMapping = {
+            fte_dedicated_staffing: "FTE Dedicated Staffing",
+            percentage_model: "Percentage Model",
+            adhoc_payg_hourly: "Adhoc Payg Hourly",
+            customised_pricing: "Customised Pricing",
+          };
 
-        if (keyMapping[key]) {
-          RearrangeEngagementOptionArr.push(keyMapping[key]);
-        }
+          if (keyMapping[key]) {
+            RearrangeEngagementOptionArr.push(keyMapping[key]);
+          }
 
-        obj[key] = AllJobData.data.engagement_model[0][key];
-        return obj;
-      }, {})
+          obj[key] = AllJobData.data.engagement_model[0][key];
+          return obj;
+        }, {})
     : {};
 
   const openJobModal = (e) => {
-
-    if (!['', undefined, null].includes(jobData?.timesheet_job_id)) {
-        return
+    if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
+      return;
     }
-
 
     if (e.target.value != "") {
       jobModalSetStatus(true);
@@ -1334,7 +1367,7 @@ const EditJob = () => {
 
     setAddTaskArr((prevTasks) => {
       const taskExists = prevTasks.some(
-        (task) => task.task_id === filterData.task_id
+        (task) => task.task_id === filterData.task_id,
       );
       if (taskExists) {
         return prevTasks;
@@ -1346,7 +1379,7 @@ const EditJob = () => {
 
   const RemoveTask = (id) => {
     setAddTaskArr((prevTasks) =>
-      prevTasks.filter((task) => task.task_id !== id)
+      prevTasks.filter((task) => task.task_id !== id),
     );
   };
 
@@ -1386,8 +1419,8 @@ const EditJob = () => {
           : "Required",
       budgetedMinuteError:
         BudgetedHoursAddTask.minutes &&
-          BudgetedHoursAddTask.minutes >= 0 &&
-          BudgetedHoursAddTask.minutes <= 59
+        BudgetedHoursAddTask.minutes >= 0 &&
+        BudgetedHoursAddTask.minutes <= 59
           ? ""
           : "Required",
     };
@@ -1426,7 +1459,6 @@ const EditJob = () => {
   //   setChecklistId(tempChecklistId);
   // };
 
-
   const HandleReset1 = () => {
     if (Number(existJobTypeId) === Number(jobData.JobType)) {
       setAddTaskArr(existAddTaskArr);
@@ -1436,8 +1468,6 @@ const EditJob = () => {
       setChecklistId(tempChecklistId);
     }
   };
-
-
 
   const totalHours =
     Number(PreparationTimne.hours) * 60 +
@@ -1469,12 +1499,12 @@ const EditJob = () => {
 
       // Condition: invalid if missing ":" or both hour and minute are 0 or blank
       if (
-        !value.includes(":") ||          // missing colon
-        hours === undefined ||           // missing hours
-        minutes === undefined ||         // missing minutes
-        hours.trim() === "" ||           // empty hours
-        minutes.trim() === "" ||         // empty minutes
-        (h === 0 && m === 0)             // both zero
+        !value.includes(":") || // missing colon
+        hours === undefined || // missing hours
+        minutes === undefined || // missing minutes
+        hours.trim() === "" || // empty hours
+        minutes.trim() === "" || // empty minutes
+        (h === 0 && m === 0) // both zero
       ) {
         newErrors[task.task_id] = "Please enter valid hours or minutes.";
       }
@@ -1486,7 +1516,6 @@ const EditJob = () => {
   };
 
   const handleAddCheckList = () => {
-
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "warning",
@@ -1504,7 +1533,6 @@ const EditJob = () => {
       console.log("Invalid inputs found");
       return;
     }
-
 
     let budgeted_hour_totalTime = { hours: "", minutes: "" };
     if (AddTaskArr.length > 0) {
@@ -1524,13 +1552,16 @@ const EditJob = () => {
           }
           return acc;
         },
-        { hours: 0, minutes: 0 }
+        { hours: 0, minutes: 0 },
       );
     }
 
-
     //  console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
-    setBudgetedHours({ ...budgetedHours, hours: budgeted_hour_totalTime.hours, minutes: budgeted_hour_totalTime.minutes })
+    setBudgetedHours({
+      ...budgetedHours,
+      hours: budgeted_hour_totalTime.hours,
+      minutes: budgeted_hour_totalTime.minutes,
+    });
 
     jobModalSetStatus(false);
     setTempTaskArr(AddTaskArr);
@@ -1559,7 +1590,6 @@ const EditJob = () => {
   //   );
   // }
 
-
   // Years (last 5 + current)
   const getLastFiveYears = () => {
     const currentYear = new Date().getFullYear();
@@ -1568,17 +1598,27 @@ const EditJob = () => {
 
   // Months
   const getMonths = () => [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   // Quarters
   const getQuarters = () => ["Q1", "Q2", "Q3", "Q4"];
 
-
   // helper functions (copy once globally)
   const matchesCondition = (expected, actual) => {
-    if (Array.isArray(expected)) return expected.map(String).includes(String(actual));
+    if (Array.isArray(expected))
+      return expected.map(String).includes(String(actual));
     return String(expected) === String(actual);
   };
 
@@ -1688,7 +1728,7 @@ const EditJob = () => {
         {
           name: "Year Ending",
           key: "Year_Ending_id_1",
-          type: "date",   // date input field
+          type: "date", // date input field
         },
       ],
     },
@@ -1813,12 +1853,6 @@ const EditJob = () => {
           showIf: { Bookkeeping_Frequency_id_2: "Other" },
         },
 
-
-
-
-
-
-
         {
           name: "Number of Total Transactions",
           key: "Number_of_Total_Transactions_id_2",
@@ -1936,15 +1970,8 @@ const EditJob = () => {
           name: "Payroll Frequency",
           key: "Payroll_Frequency_id_3",
           type: "dropdown",
-          options: [
-            "Weekly",
-            "Monthly",
-            "Fortnightly",
-            "Quarterly",
-            "Yearly",
-          ],
+          options: ["Weekly", "Monthly", "Fortnightly", "Quarterly", "Yearly"],
         },
-
 
         // ==================== WEEKLY ====================
         {
@@ -2032,10 +2059,6 @@ const EditJob = () => {
           options: getLastFiveYears(),
           showIf: { Payroll_Frequency_id_3: "Yearly" },
         },
-
-
-
-
 
         {
           name: "Type of Payslip",
@@ -2218,7 +2241,15 @@ const EditJob = () => {
           name: "Period",
           key: "Period_id_32",
           type: "dropdown",
-          options: ["Day", "Week", "Fortnight", "Month", "Quarter", "Year", "Other"],
+          options: [
+            "Day",
+            "Week",
+            "Fortnight",
+            "Month",
+            "Quarter",
+            "Year",
+            "Other",
+          ],
         },
         // Day
         {
@@ -2428,7 +2459,7 @@ const EditJob = () => {
         {
           name: "Year Ending",
           key: "Audit_Year_Ending_id_27",
-          type: "date",   // date input field
+          type: "date", // date input field
         },
       ],
     },
@@ -2468,35 +2499,34 @@ const EditJob = () => {
           }),
         },
       ],
-    }
+    },
   ];
 
   useEffect(() => {
     setServiceFieldsData(
       // serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
-      serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
+      serviceFields?.find((item) => item.id === jobData?.Service)?.fields ||
+        serviceFields?.[0]?.fields,
     );
   }, [jobData?.Service]);
 
-
   // Select options for Customer Account Manager
   const customerAccountManagerOptions = [
-    { value: '', label: 'Select Customer Account Manager' },
+    { value: "", label: "Select Customer Account Manager" },
     ...(AllJobData?.data?.customer_account_manager || []).map((manager) => ({
       value: manager.customer_account_manager_officer_id,
-      label: manager.customer_account_manager_officer_name
-    }))
+      label: manager.customer_account_manager_officer_name,
+    })),
   ];
 
   // Select options for Service
   let serviceOptions = [
-    { value: '', label: 'Select Service' },
+    { value: "", label: "Select Service" },
     ...(AllJobData?.data?.services || []).map((service) => ({
       value: service.service_id,
-      label: service.service_name
-    }))
+      label: service.service_name,
+    })),
   ];
-
 
   // let isAssignDetails = CustomerDetails.find(
   //   (detail) => detail.assigned_source === "assign_customer_service"
@@ -2505,42 +2535,43 @@ const EditJob = () => {
   //   serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
   // }
 
-
   let assignDetails = jobData?.CustomerDetails?.filter(
-    (detail) => detail.assigned_source === "assign_customer_service"
+    (detail) => detail.assigned_source === "assign_customer_service",
   );
 
   // console.log("assignDetails", assignDetails);
 
-  let assignedServiceIds = assignDetails?.map((d) => Number(d.service_id_assign));
+  let assignedServiceIds = assignDetails?.map((d) =>
+    Number(d.service_id_assign),
+  );
 
-
-
-  if (assignedServiceIds != undefined && Array.isArray(assignedServiceIds) && assignedServiceIds.length > 0) {
+  if (
+    assignedServiceIds != undefined &&
+    Array.isArray(assignedServiceIds) &&
+    assignedServiceIds.length > 0
+  ) {
     serviceOptions = serviceOptions.filter((option) =>
-      assignedServiceIds.includes(Number(option.value))
+      assignedServiceIds.includes(Number(option.value)),
     );
   }
 
-
   // Select options for Job Type
   const jobTypeOptions = [
-    { value: '', label: 'Select Job Type' },
+    { value: "", label: "Select Job Type" },
     ...(get_Job_Type?.data || []).map((jobtype) => ({
       value: jobtype.id,
-      label: jobtype.type
-    }))
+      label: jobtype.type,
+    })),
   ];
 
   // Select options for Reviewer
   const reviewerOptions = [
-    { value: '', label: 'Select Reviewer' },
+    { value: "", label: "Select Reviewer" },
     ...(AllJobData?.data?.reviewer || []).map((reviewer) => ({
       value: reviewer.reviewer_id,
-      label: `${reviewer.reviewer_name} (${reviewer.reviewer_email})`
-    }))
+      label: `${reviewer.reviewer_name} (${reviewer.reviewer_email})`,
+    })),
   ];
-
 
   const isReviewerDisabled = !(
     ["ADMIN", "SUPERADMIN"].includes(role) ||
@@ -2548,18 +2579,16 @@ const EditJob = () => {
       (getJobDetails.data.staff_created_id === staffCreatedId ||
         getJobDetails.data.customer_staff_id === staffCreatedId ||
         getJobDetails.data.customer_account_manager_id === staffCreatedId ||
-        getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)
-
-      ))
+        getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)))
   );
 
   // Select options for Allocated To
   const allocatedStaffOptions = [
-    { value: '', label: 'Select Staff' },
+    { value: "", label: "Select Staff" },
     ...(AllJobData?.data?.allocated || []).map((staff) => ({
       value: staff.allocated_id,
-      label: `${staff.allocated_name} (${staff.allocated_email})`
-    }))
+      label: `${staff.allocated_name} (${staff.allocated_email})`,
+    })),
   ];
 
   const isAllocatedToDisabled = !(
@@ -2568,9 +2597,7 @@ const EditJob = () => {
       (getJobDetails.data.staff_created_id === staffCreatedId ||
         getJobDetails.data.customer_staff_id === staffCreatedId ||
         getJobDetails.data.customer_account_manager_id === staffCreatedId ||
-        getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)
-
-      ))
+        getJobDetails?.data?.line_manaeger_staff?.includes(staffCreatedId)))
   );
 
   const handleBudgetTime = (e, index, row, type) => {
@@ -2591,14 +2618,14 @@ const EditJob = () => {
 
       if (type === "hour") {
         //hour = value.padStart(2, "0");
-        hour = value
+        hour = value;
       } else if (type === "minute") {
         // minute = value.padStart(2, "0");
 
         let numValue = Number(value);
         if (isNaN(numValue) || numValue < 0) numValue = 0;
         if (numValue > 59) numValue = 59;
-        minute = numValue.toString()
+        minute = numValue.toString();
       }
 
       // Update budgeted_hour
@@ -2611,10 +2638,8 @@ const EditJob = () => {
     });
   };
 
-
   const minDateRecivedOn = jobData?.DateReceivedOn;
   const minDateAllocatedOn = jobData?.AllocatedOn;
-
 
   return (
     <div>
@@ -2629,12 +2654,12 @@ const EditJob = () => {
                   onClick={() => {
                     sessionStorage.setItem(
                       "activeTab",
-                      location.state.activeTab
+                      location.state.activeTab,
                     );
                     window.history.back();
                   }}
                 >
-                   <ArrowLeft size={16}/>
+                  <ArrowLeft size={16} />
                 </button>
                 <h3 className="card-title mb-0">Update Job</h3>
               </div>
@@ -2725,7 +2750,9 @@ const EditJob = () => {
                                         id="Client"
                                         onChange={HandleChange}
                                         value={jobData.Client}
-                                        disabled={location.state.goto == "Customer"}
+                                        disabled={
+                                          location.state.goto == "Customer"
+                                        }
                                       >
                                         <option value="">Select Client</option>
 
@@ -2737,7 +2764,7 @@ const EditJob = () => {
                                             >
                                               {client.client_trading_name}
                                             </option>
-                                          )
+                                          ),
                                         )}
                                       </select>
                                       {errors["Client"] && (
@@ -2811,14 +2838,18 @@ const EditJob = () => {
                                       id="CustomerAccountManager"
                                       options={customerAccountManagerOptions}
                                       value={customerAccountManagerOptions.find(
-                                        (opt) => String(opt.value) === String(jobData.CustomerAccountManager)
+                                        (opt) =>
+                                          String(opt.value) ===
+                                          String(
+                                            jobData.CustomerAccountManager,
+                                          ),
                                       )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
-                                            name: 'CustomerAccountManager',
-                                            value: selectedOption.value
-                                          }
+                                            name: "CustomerAccountManager",
+                                            value: selectedOption.value,
+                                          },
                                         };
                                         HandleChange(e);
                                       }}
@@ -2871,23 +2902,35 @@ const EditJob = () => {
                                       id="Service"
                                       menuPortalTarget={document.body}
                                       styles={{
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }),
-                                        menu: base => ({ ...base, zIndex: 9999 })
+                                        menuPortal: (base) => ({
+                                          ...base,
+                                          zIndex: 9999,
+                                        }),
+                                        menu: (base) => ({
+                                          ...base,
+                                          zIndex: 9999,
+                                        }),
                                       }}
                                       options={serviceOptions}
                                       value={serviceOptions.find(
-                                        (opt) => String(opt.value) === String(jobData.Service)
+                                        (opt) =>
+                                          String(opt.value) ===
+                                          String(jobData.Service),
                                       )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
-                                            name: 'Service',
-                                            value: selectedOption.value
-                                          }
+                                            name: "Service",
+                                            value: selectedOption.value,
+                                          },
                                         };
                                         HandleChange(e);
                                       }}
-                                      className={errors["Service"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                      className={
+                                        errors["Service"]
+                                          ? "error-field react-select basic-multi-select"
+                                          : "react-select basic-multi-select"
+                                      }
                                       classNamePrefix="react-select "
                                       isSearchable
                                     />
@@ -2934,14 +2977,16 @@ const EditJob = () => {
                                       id="JobType"
                                       options={jobTypeOptions}
                                       value={jobTypeOptions.find(
-                                        (opt) => String(opt.value) === String(jobData.JobType)
+                                        (opt) =>
+                                          String(opt.value) ===
+                                          String(jobData.JobType),
                                       )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
-                                            name: 'JobType',
-                                            value: selectedOption.value
-                                          }
+                                            name: "JobType",
+                                            value: selectedOption.value,
+                                          },
                                         };
                                         HandleChange(e);
                                         openJobModal(e);
@@ -2986,12 +3031,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.hours || ""}
-                                          // value={
-                                          //   budgeted_hour_totalTime !=
-                                          //     undefined
-                                          //     ? budgeted_hour_totalTime.hours
-                                          //     : "0"
-                                          // }
+                                            // value={
+                                            //   budgeted_hour_totalTime !=
+                                            //     undefined
+                                            //     ? budgeted_hour_totalTime.hours
+                                            //     : "0"
+                                            // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -3019,12 +3064,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.minutes || ""}
-                                          // value={
-                                          //   budgeted_hour_totalTime !=
-                                          //     undefined
-                                          //     ? budgeted_hour_totalTime.minutes
-                                          //     : "0"
-                                          // }
+                                            // value={
+                                            //   budgeted_hour_totalTime !=
+                                            //     undefined
+                                            //     ? budgeted_hour_totalTime.minutes
+                                            //     : "0"
+                                            // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -3083,14 +3128,16 @@ const EditJob = () => {
                                       id="Reviewer"
                                       options={reviewerOptions}
                                       value={reviewerOptions.find(
-                                        (opt) => String(opt.value) === String(jobData.Reviewer)
+                                        (opt) =>
+                                          String(opt.value) ===
+                                          String(jobData.Reviewer),
                                       )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
-                                            name: 'Reviewer',
-                                            value: selectedOption.value
-                                          }
+                                            name: "Reviewer",
+                                            value: selectedOption.value,
+                                          },
                                         };
                                         HandleChange(e); // original function
                                       }}
@@ -3152,14 +3199,16 @@ const EditJob = () => {
                                       id="AllocatedTo"
                                       options={allocatedStaffOptions}
                                       value={allocatedStaffOptions.find(
-                                        (opt) => String(opt.value) === String(jobData.AllocatedTo)
+                                        (opt) =>
+                                          String(opt.value) ===
+                                          String(jobData.AllocatedTo),
                                       )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
-                                            name: 'AllocatedTo',
-                                            value: selectedOption.value
-                                          }
+                                            name: "AllocatedTo",
+                                            value: selectedOption.value,
+                                          },
                                         };
                                         HandleChange(e); // original handler
                                       }}
@@ -3186,12 +3235,11 @@ const EditJob = () => {
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
                                       min={minDateAllocatedOn}
-
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
-                                    // max={
-                                    //   new Date().toISOString().split("T")[0]
-                                    // }
+                                      // max={
+                                      //   new Date().toISOString().split("T")[0]
+                                      // }
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -3211,12 +3259,11 @@ const EditJob = () => {
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
                                       min={minDateRecivedOn}
-
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn}
-                                    // max={
-                                    //   new Date().toISOString().split("T")[0]
-                                    // }
+                                      // max={
+                                      //   new Date().toISOString().split("T")[0]
+                                      // }
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
@@ -3546,11 +3593,11 @@ const EditJob = () => {
                                           <option key={key} value={key}>
                                             {
                                               RearrangeEngagementOptionArr[
-                                              index
+                                                index
                                               ]
                                             }
                                           </option>
-                                        )
+                                        ),
                                       )}
                                     </select>
                                     {errors["EngagementModel"] && (
@@ -3560,10 +3607,7 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-                                  <div
-                                    id="satff"
-                                    className="col-lg-4 mb-3"
-                                  >
+                                  <div id="satff" className="col-lg-4 mb-3">
                                     <label
                                       htmlFor="firstNameinput"
                                       className="form-label"
@@ -3573,18 +3617,20 @@ const EditJob = () => {
 
                                     <Select
                                       // options={allStaffData
-                                      //   ?.filter(data => 
-                                      //     // data.id !== jobData.AllocatedTo && 
-                                      //     // data.id !== jobData.Reviewer && 
+                                      //   ?.filter(data =>
+                                      //     // data.id !== jobData.AllocatedTo &&
+                                      //     // data.id !== jobData.Reviewer &&
                                       //     data.id !== staffCreatedId
                                       //   )
                                       //   ?.map((data) => {
                                       //     return { label: data.full_name, value: data.id };
                                       //   })}
-                                      options={allStaffData
-                                        ?.map((data) => {
-                                          return { label: data.full_name, value: data.id };
-                                        })}
+                                      options={allStaffData?.map((data) => {
+                                        return {
+                                          label: data.full_name,
+                                          value: data.id,
+                                        };
+                                      })}
                                       isMulti
                                       closeMenuOnSelect={false}
                                       className="basic-multi-select"
@@ -3596,7 +3642,6 @@ const EditJob = () => {
                                       }}
                                       placeholder="Select options"
                                     />
-
                                   </div>
 
                                   <div className="col-lg-4">
@@ -3608,27 +3653,18 @@ const EditJob = () => {
                                         className="form-select"
                                         name="job_priority"
                                         onChange={HandleChange}
-                                        value={
-                                          jobData.job_priority
-                                        }
+                                        value={jobData.job_priority}
                                       >
                                         <option value="normal">Normal</option>
                                         <option value="urgent">Urgent</option>
                                       </select>
-                                      {errors[
-                                        "job_priority"
-                                      ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
-                                              "job_priority"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                      {errors["job_priority"] && (
+                                        <div className="error-text">
+                                          {errors["job_priority"]}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
-
                                 </div>
                               </div>
                             </div>
@@ -3653,8 +3689,9 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
-                                        min={new Date().toISOString().slice(0, 10)}
-
+                                        min={new Date()
+                                          .toISOString()
+                                          .slice(0, 10)}
                                         onChange={HandleChange}
                                         value={jobData.ExpectedDeliveryDate}
                                       />
@@ -3691,8 +3728,9 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
-                                        min={new Date().toISOString().slice(0, 10)}
-
+                                        min={new Date()
+                                          .toISOString()
+                                          .slice(0, 10)}
                                         onChange={HandleChange}
                                         value={jobData.SubmissionDeadline}
                                       />
@@ -3711,8 +3749,9 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
-                                        min={new Date().toISOString().slice(0, 10)}
-
+                                        min={new Date()
+                                          .toISOString()
+                                          .slice(0, 10)}
                                         onChange={HandleChange}
                                         value={jobData.CustomerDeadlineDate}
                                       />
@@ -3749,7 +3788,9 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
-                                        min={new Date().toISOString().slice(0, 10)}
+                                        min={new Date()
+                                          .toISOString()
+                                          .slice(0, 10)}
                                         onChange={HandleChange}
                                         value={jobData.InternalDeadlineDate}
                                       />
@@ -3798,14 +3839,14 @@ const EditJob = () => {
                                         {errors[
                                           "FilingWithCompaniesHouseRequired"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "FilingWithCompaniesHouseRequired"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -3893,14 +3934,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentRequired"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "OpeningBalanceAdjustmentRequired"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -3920,14 +3961,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentDate"
                                         ] && (
-                                            <div className="error-text">
-                                              {
-                                                errors[
+                                          <div className="error-text">
+                                            {
+                                              errors[
                                                 "OpeningBalanceAdjustmentDate"
-                                                ]
-                                              }
-                                            </div>
-                                          )}
+                                              ]
+                                            }
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
@@ -3995,43 +4036,68 @@ const EditJob = () => {
                                     </div> */}
                                     <div className="row">
                                       {serviceFieldsData?.length > 0 &&
-                                        serviceFieldsData?.map((field, index) => {
-                                          // 👇 check if field should be visible
-                                          const isVisible = shouldShowField(field, jobData);
-                                          if (!isVisible) return null;
+                                        serviceFieldsData?.map(
+                                          (field, index) => {
+                                            // 👇 check if field should be visible
+                                            const isVisible = shouldShowField(
+                                              field,
+                                              jobData,
+                                            );
+                                            if (!isVisible) return null;
 
-                                          return (
-                                            <div className="col-lg-4 mb-3" key={index}>
-                                              <label className="form-label">{field.name}</label>
-                                              {field.type === "dropdown" ? (
-                                                <select
-                                                  className="form-control"
-                                                  name={field.key}
-                                                  onChange={(e) => HandleChange(e)}
-                                                  value={jobData[field.key] || ""}
-                                                >
-                                                  <option value="">-- Select --</option>
-                                                  {field.options?.map((option, i) => (
-                                                    <option value={option} key={i}>
-                                                      {option}
+                                            return (
+                                              <div
+                                                className="col-lg-4 mb-3"
+                                                key={index}
+                                              >
+                                                <label className="form-label">
+                                                  {field.name}
+                                                </label>
+                                                {field.type === "dropdown" ? (
+                                                  <select
+                                                    className="form-control"
+                                                    name={field.key}
+                                                    onChange={(e) =>
+                                                      HandleChange(e)
+                                                    }
+                                                    value={
+                                                      jobData[field.key] || ""
+                                                    }
+                                                  >
+                                                    <option value="">
+                                                      -- Select --
                                                     </option>
-                                                  ))}
-                                                </select>
-                                              ) : (
-                                                <input
-                                                  type={field.type || "text"}
-                                                  className="form-control"
-                                                  placeholder={field.name}
-                                                  name={field.key}
-                                                  min={field.min}
-                                                  max={field.max}
-                                                  onChange={(e) => HandleChange(e)}
-                                                  value={jobData[field.key] || ""}
-                                                />
-                                              )}
-                                            </div>
-                                          );
-                                        })}
+                                                    {field.options?.map(
+                                                      (option, i) => (
+                                                        <option
+                                                          value={option}
+                                                          key={i}
+                                                        >
+                                                          {option}
+                                                        </option>
+                                                      ),
+                                                    )}
+                                                  </select>
+                                                ) : (
+                                                  <input
+                                                    type={field.type || "text"}
+                                                    className="form-control"
+                                                    placeholder={field.name}
+                                                    name={field.key}
+                                                    min={field.min}
+                                                    max={field.max}
+                                                    onChange={(e) =>
+                                                      HandleChange(e)
+                                                    }
+                                                    value={
+                                                      jobData[field.key] || ""
+                                                    }
+                                                  />
+                                                )}
+                                              </div>
+                                            );
+                                          },
+                                        )}
                                     </div>
                                   </div>
                                 </div>
@@ -4041,7 +4107,8 @@ const EditJob = () => {
 
                           {jobData.EngagementModel !=
                             "fte_dedicated_staffing" &&
-                            (jobData?.status_type == 6 || jobData?.status_type == 7) && (
+                            (jobData?.status_type == 6 ||
+                              jobData?.status_type == 7) && (
                               <div className="col-lg-12">
                                 <div className="card card_shadow">
                                   <div className="card-header align-items-center d-flex card-header-light-blue">
@@ -4309,7 +4376,7 @@ const EditJob = () => {
                                                   setShowAddJobModal(true)
                                                 }
                                               >
-                                                 <Plus size={16}/>
+                                                <Plus size={16} />
                                                 Add Task
                                               </button>
                                             </div>
@@ -4368,18 +4435,18 @@ const EditJob = () => {
                                                               <td>
                                                                 <div className="add">
                                                                   {AddTaskArr &&
-                                                                    AddTaskArr.find(
-                                                                      (task) =>
-                                                                        task.task_id ==
-                                                                        checklist.task_id
-                                                                    ) ? (
+                                                                  AddTaskArr.find(
+                                                                    (task) =>
+                                                                      task.task_id ==
+                                                                      checklist.task_id,
+                                                                  ) ? (
                                                                     ""
                                                                   ) : (
                                                                     <button
                                                                       className=" btn-info text-white blue-btn"
                                                                       onClick={() =>
                                                                         AddTask(
-                                                                          checklist.task_id
+                                                                          checklist.task_id,
                                                                         )
                                                                       }
                                                                     >
@@ -4389,7 +4456,7 @@ const EditJob = () => {
                                                                 </div>
                                                               </td>
                                                             </tr>
-                                                          )
+                                                          ),
                                                         )}
                                                     </tbody>
                                                   </table>
@@ -4454,60 +4521,122 @@ const EditJob = () => {
                                                     </tbody> */}
                                                     <tbody className="list form-check-all">
                                                       {AddTaskArr &&
-                                                        AddTaskArr.map((checklist, index) => {
-                                                          // split hours and minutes safely
-                                                          const [hours, minutes] = (checklist?.budgeted_hour || "0:0").split(":");
-                                                          const error = errorsBudgetTimeTask[checklist.task_id];
+                                                        AddTaskArr.map(
+                                                          (
+                                                            checklist,
+                                                            index,
+                                                          ) => {
+                                                            // split hours and minutes safely
+                                                            const [
+                                                              hours,
+                                                              minutes,
+                                                            ] = (
+                                                              checklist?.budgeted_hour ||
+                                                              "0:0"
+                                                            ).split(":");
+                                                            const error =
+                                                              errorsBudgetTimeTask[
+                                                                checklist
+                                                                  .task_id
+                                                              ];
 
-                                                          return (
-                                                            <tr key={checklist.task_id || index}>
-                                                              <td>{checklist.task_name} </td>
+                                                            return (
+                                                              <tr
+                                                                key={
+                                                                  checklist.task_id ||
+                                                                  index
+                                                                }
+                                                              >
+                                                                <td>
+                                                                  {
+                                                                    checklist.task_name
+                                                                  }{" "}
+                                                                </td>
 
-                                                              {/* Editable Budgeted Hour/Minutes */}
-                                                              <td>
-                                                                <div className="input-group">
-                                                                  {/* Hours */}
-                                                                  <input
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                    value={hours}
-                                                                    onChange={(e) => handleBudgetTime(e, index, checklist, "hour")}
-                                                                    style={{ width: "80px", marginRight: "5px" }}
-                                                                  />
-                                                                  <span className="input-group-text">h</span>
+                                                                {/* Editable Budgeted Hour/Minutes */}
+                                                                <td>
+                                                                  <div className="input-group">
+                                                                    {/* Hours */}
+                                                                    <input
+                                                                      type="text"
+                                                                      className="form-control"
+                                                                      value={
+                                                                        hours
+                                                                      }
+                                                                      onChange={(
+                                                                        e,
+                                                                      ) =>
+                                                                        handleBudgetTime(
+                                                                          e,
+                                                                          index,
+                                                                          checklist,
+                                                                          "hour",
+                                                                        )
+                                                                      }
+                                                                      style={{
+                                                                        width:
+                                                                          "80px",
+                                                                        marginRight:
+                                                                          "5px",
+                                                                      }}
+                                                                    />
+                                                                    <span className="input-group-text">
+                                                                      h
+                                                                    </span>
 
-                                                                  {/* Minutes */}
-                                                                  <input
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                    value={minutes}
-                                                                    onChange={(e) => handleBudgetTime(e, index, checklist, "minute")}
-                                                                    style={{ width: "80px", marginRight: "5px" }}
-
-
-                                                                  />
-                                                                  <span className="input-group-text">m</span>
-                                                                </div>
-                                                                {error && (
-                                                                  <div className="error-text text-danger">
-                                                                    {error}
+                                                                    {/* Minutes */}
+                                                                    <input
+                                                                      type="text"
+                                                                      className="form-control"
+                                                                      value={
+                                                                        minutes
+                                                                      }
+                                                                      onChange={(
+                                                                        e,
+                                                                      ) =>
+                                                                        handleBudgetTime(
+                                                                          e,
+                                                                          index,
+                                                                          checklist,
+                                                                          "minute",
+                                                                        )
+                                                                      }
+                                                                      style={{
+                                                                        width:
+                                                                          "80px",
+                                                                        marginRight:
+                                                                          "5px",
+                                                                      }}
+                                                                    />
+                                                                    <span className="input-group-text">
+                                                                      m
+                                                                    </span>
                                                                   </div>
-                                                                )}
-                                                              </td>
+                                                                  {error && (
+                                                                    <div className="error-text text-danger">
+                                                                      {error}
+                                                                    </div>
+                                                                  )}
+                                                                </td>
 
-                                                              <td>
-                                                                <div className="add">
-                                                                  <button className="delete-icon">
-                                                                    <i
-                                                                      className="ti-trash text-danger"
-                                                                      onClick={() => RemoveTask(checklist.task_id)}
-                                                                    ></i>
-                                                                  </button>
-                                                                </div>
-                                                              </td>
-                                                            </tr>
-                                                          );
-                                                        })}
+                                                                <td>
+                                                                  <div className="add">
+                                                                    <button className="delete-icon">
+                                                                      <i
+                                                                        className="ti-trash text-danger"
+                                                                        onClick={() =>
+                                                                          RemoveTask(
+                                                                            checklist.task_id,
+                                                                          )
+                                                                        }
+                                                                      ></i>
+                                                                    </button>
+                                                                  </div>
+                                                                </td>
+                                                              </tr>
+                                                            );
+                                                          },
+                                                        )}
                                                     </tbody>
                                                   </table>
                                                 </div>
@@ -4528,14 +4657,14 @@ const EditJob = () => {
                                     }}
                                   >
                                     {" "}
-                                   < X size={16}/> Close
+                                    <X size={16} /> Close
                                   </Button>
                                   <Button
                                     variant="btn btn-outline-success float-end "
                                     onClick={handleAddCheckList}
                                   >
                                     {" "}
-                                   <Save size={16}/> Submit
+                                    <Save size={16} /> Submit
                                   </Button>
                                 </Modal.Footer>
                               </Modal>
@@ -4634,7 +4763,7 @@ const EditJob = () => {
                                     HandleReset();
                                   }}
                                 >
-                                  < X size={16}/> Close
+                                  <X size={16} /> Close
                                 </Button>
                                 <Button
                                   variant="btn btn-info text-white float-end blue-btn"
@@ -4687,19 +4816,19 @@ const EditJob = () => {
                               onClick={() => {
                                 sessionStorage.setItem(
                                   "activeTab",
-                                  location.state.activeTab
+                                  location.state.activeTab,
                                 );
                                 window.history.back();
                               }}
                             >
-                             < X size={16}/> Cancel
+                              <X size={16} /> Cancel
                             </button>
                             <button
                               type="button"
                               className="btn   float-end btn-outline-success"
                               onClick={handleSubmit}
                             >
-                            <Pencil size={16}/> Update
+                              <Pencil size={16} /> Update
                             </button>
                           </div>
                         </div>
