@@ -22,6 +22,7 @@ import {
   Briefcase,
   Download,
   ArrowLeft,
+  Circle,
 } from "lucide-react";
 
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
@@ -149,8 +150,8 @@ const ClientList = () => {
   }, [getAccessDataJob, getAccessDataClient]);
 
   const initialTabs = [
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    { id: "documents", label: "Documents", icon: <File size={16}/> },
+    { id: "status", label: "Status", icon:  <Circle size={16}/> },
     // { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
@@ -270,7 +271,7 @@ const ClientList = () => {
         (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
       role === "SUPERADMIN"
     ) {
-      tabsData.push({ id: "job", label: "Job", icon: Briefcase });
+      tabsData.push({ id: "job", label: "Job", icon: <Briefcase size={16}/> });
     }
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
