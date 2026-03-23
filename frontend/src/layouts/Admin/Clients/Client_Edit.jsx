@@ -1897,7 +1897,7 @@ const ClientEdit = () => {
                     window.history.back()
                   }}
                 >
-                 <ArrowLeft size={16}/>
+                 <ArrowLeft size={18} color="blue" className="me-2"/>
                 </button>
                 <h4 className="card-title  mb-0">Edit Client</h4>
               </div>
