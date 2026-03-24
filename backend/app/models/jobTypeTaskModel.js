@@ -365,60 +365,46 @@ const addChecklist = async (checklist) => {
 const getChecklist = async (checklist) => {
   const { customer_id } = checklist;
 
-  // console.log("customer_id", customer_id)
-  // let query = `
-  //   SELECT
-  //   checklists.id AS checklists_id,
-  //   checklists.check_list_name AS check_list_name,
-  //   checklists.status AS status,
-  //   customers.id AS customer_id,
-  //   services.id AS service_id,
-  //   services.name AS service_name,
-  //   job_types.id AS job_type_id,
-  //   job_types.type AS job_type_type,
-  //   client_types.id AS client_type_id,
-  //   client_types.type AS client_type_type,
-  //   checklists.client_type_id  AS checklists_client_type_id
-  //   FROM checklists 
-  //   JOIN 
-  //        customers ON customers.id = checklists.customer_id
-  //   JOIN 
-  //        services ON services.id = checklists.service_id
-  //   JOIN
-  //        job_types ON job_types.id = checklists.job_type_id
-  //   JOIN
-  //        client_types ON client_types.id = checklists.client_type_id          
-  //   WHERE checklists.customer_id = ?
-  //   ORDER BY checklists.id DESC
-  //   `;
+  console.log("customer_id", customer_id)
+  let query = `
+    SELECT
+    *,
+    client_types.id AS client_type_id,
+    client_types.type AS client_type_type,
+    checklists.client_type_id  AS checklists_client_type_id
+    FROM checklists 
+    JOIN
+        client_types ON client_types.id = checklists.client_type_id
+    ORDER BY checklists.id DESC
+    `;
 
-   let query = `
-   SELECT
-  checklists.id AS checklists_id,
-  checklists.check_list_name,
-  checklists.status,
-  customers.id AS customer_id,
-  services.id AS service_id,
-  services.name AS service_name,
-  job_types.id AS job_type_id,
-  job_types.type AS job_type_type,
-  client_types.id AS client_type_id,
-  client_types.type AS client_type_type
-FROM checklists
+//    let query = `
+//    SELECT
+//   checklists.id AS checklists_id,
+//   checklists.check_list_name,
+//   checklists.status,
+//   customers.id AS customer_id,
+//   services.id AS service_id,
+//   services.name AS service_name,
+//   job_types.id AS job_type_id,
+//   job_types.type AS job_type_type,
+//   client_types.id AS client_type_id,
+//   client_types.type AS client_type_type
+// FROM checklists
 
-JOIN customers 
-  ON JSON_CONTAINS(checklists.customer_id, CAST(customers.id AS JSON))
+// JOIN customers 
+//   ON JSON_CONTAINS(checklists.customer_id, CAST(customers.id AS JSON))
 
-JOIN services 
-  ON JSON_CONTAINS(checklists.service_id, CAST(services.id AS JSON))
+// JOIN services 
+//   ON JSON_CONTAINS(checklists.service_id, CAST(services.id AS JSON))
 
-JOIN job_types 
-  ON JSON_CONTAINS(checklists.job_type_id, CAST(job_types.id AS JSON))
+// JOIN job_types 
+//   ON JSON_CONTAINS(checklists.job_type_id, CAST(job_types.id AS JSON))
 
-JOIN client_types 
-  ON FIND_IN_SET(client_types.id, checklists.client_type_id)
+// JOIN client_types 
+//   ON FIND_IN_SET(client_types.id, checklists.client_type_id)
 
-ORDER BY checklists.id DESC;`
+// ORDER BY checklists.id DESC;`
 
 
  
