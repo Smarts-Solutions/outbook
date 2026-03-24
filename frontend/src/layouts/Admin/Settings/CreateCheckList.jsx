@@ -426,8 +426,8 @@ const validateAllFields = () => {
                     }}
                   >
                     <option value=""> -- Select --</option>
-                    <option value="processing">Processing Type</option>
-                    <option value="reviewing">Reviewing Type</option>
+                    <option value="3">Processing Type</option>
+                    <option value="6">Reviewing Type</option>
 
                   </select>
                   {errors.work_flow_type && (
