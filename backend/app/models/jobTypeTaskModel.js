@@ -306,25 +306,26 @@ const getTask = async (task) => {
 };
 
 const addChecklist = async (checklist) => {
-
+console.log("Checklist",checklist);
   const {
     service_id,
     job_type_id,
     client_type_id,
     check_list_name,
+     work_flow_type,
     status,
     task,
   } = checklist;
 
 
   let customer_id = checklist.customer_id
-  if (customer_id == null || customer_id == '' || customer_id == undefined) {
-    customer_id = 0
-  }
+if (!customer_id) {
+  customer_id = null;
+}
 
   try {
     const query = `
-    INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name,status)
+    INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name,status,work_flow_type)
     VALUES (?, ?, ?, ?, ?, ?)
     `;
     const [result] = await pool.execute(query, [
@@ -333,6 +334,7 @@ const addChecklist = async (checklist) => {
       job_type_id,
       client_type_id,
       check_list_name,
+      work_flow_type,
       status,
     ]);
     const checklist_id = result.insertId;
@@ -351,8 +353,9 @@ const addChecklist = async (checklist) => {
 
     return { status: true, message: "checklist add successfully.", data: [] };
   } catch (err) {
-    return { status: false, message: "Error added checklist." };
-  }
+  console.error("Checklist Insert Error:", err);
+  return { status: false, message: err.message };
+}
 };
 
 const getChecklist = async (checklist) => {
