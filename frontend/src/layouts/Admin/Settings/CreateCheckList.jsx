@@ -36,7 +36,7 @@ const CreateCheckList = () => {
   const [formData, setFormData] = useState({
     customer_id: [],
     service_id: [],
-    job_type_id: "",
+    job_type_id: [],
     client_type_id: "",
     check_list_name: "",
     work_flow_type: "", 
@@ -261,7 +261,7 @@ const validateAllFields = () => {
   const getJobTypeData = async (service_ids) => {
     if (!Array.isArray(service_ids) || service_ids.length === 0) {
       setJobTypeOptions([]);
-      setFormData((data) => ({ ...data, job_type_id: "" }));
+      setFormData((data) => ({ ...data, job_type_id: [] }));
       return;
     }
 
@@ -282,11 +282,11 @@ const validateAllFields = () => {
       );
 
       setJobTypeOptions(uniqueJobTypes);
-      setFormData((data) => ({ ...data, job_type_id: "" }));
+      setFormData((data) => ({ ...data, job_type_id: [] }));
     } catch (error) {
       console.error("getJobTypeData error", error);
       setJobTypeOptions([]);
-      setFormData((data) => ({ ...data, job_type_id: "" }));
+      setFormData((data) => ({ ...data, job_type_id: [] }));
     }
   };
 
@@ -316,21 +316,6 @@ const validateAllFields = () => {
     const req = {
       ...formData,
       client_type_id: ClienTypeArr.slice(0, -1),
-
-  customer_id:
-  formData.customer_id.length > 0
-    ? formData.customer_id.join(",")
-    : null,
-
-service_id:
-  formData.service_id.length > 0
-    ? formData.service_id.join(",")
-    : null,
-
-job_type_id:
-  formData.job_type_id
-    ? formData.job_type_id
-    : null,
     };
 
     const data = { req, authToken: token };
@@ -351,7 +336,7 @@ job_type_id:
           setFormData({
             customer_id: [],
             service_id: [],
-            job_type_id: "",
+            job_type_id: [],
             client_type_id: "",
             check_list_name: "",
             work_flow_type: "", 
@@ -546,23 +531,32 @@ job_type_id:
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Job Type</label>
-                  <select
-                    className={
-                      errors.job_type_id
-                        ? "error-field form-select"
-                        : "form-select"
-                    }
-                    name="job_type_id"
-                    value={formData.job_type_id}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Please Select Job Type</option>
-                    {jobTypeOptions.map((job) => (
-                      <option key={job.id} value={job.id}>
-                        {job.type}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={jobTypeOptions.map((job) => ({
+                      value: job.id,
+                      label: job.type,
+                    }))}
+                    value={jobTypeOptions
+                      .filter((job) => formData.job_type_id?.includes(job.id))
+                      .map((job) => ({
+                        value: job.id,
+                        label: job.type,
+                      }))}
+
+                    onChange={(selectedOptions) => {
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+                      handleInputChange({
+                        target: {
+                          name: "job_type_id",
+                          value: values,
+                        },
+                      });
+                    }}
+                  />
 
                 </div>
               </div>
