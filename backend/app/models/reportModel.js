@@ -2851,10 +2851,13 @@ const missingTimesheetReport = async (Report) => {
                 ), 1
             ) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)  -- Only last week
         ${where} 
-        GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+        GROUP BY st.id
         ORDER BY st.first_name ASC;
         
     `;
+
+    // GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+    //     ORDER BY st.first_name ASC;
 
   const [result] = await pool.execute(query_last_week_filter);
   // console.log("result", result);
