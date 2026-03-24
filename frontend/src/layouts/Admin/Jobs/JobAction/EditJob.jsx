@@ -2659,7 +2659,7 @@ const EditJob = () => {
                     window.history.back();
                   }}
                 >
-                  <ArrowLeft size={16} />
+                  <ArrowLeft size={18} color="blue" className="me-2"/>
                 </button>
                 <h3 className="card-title mb-0">Update Job</h3>
               </div>

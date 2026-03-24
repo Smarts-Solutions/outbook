@@ -1106,7 +1106,7 @@ const ClientList = () => {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            {tab.icon} {tab.label}
+                            {tab.icon}{" "} {tab.label}
                           </button>
                         </li>
                       ))}
