@@ -31,13 +31,15 @@ const CreateCheckList = () => {
   const [loading, setLoading] = useState(false);
   const [customerAllData, setCustomerAllData] = useState([]);
   const [serviceAllData, setServiceAllData] = useState([]);
+  const [jobTypeOptions, setJobTypeOptions] = useState([]);
 
   const [formData, setFormData] = useState({
     customer_id: [],
     service_id: [],
-    job_type_id: [],
+    job_type_id: "",
     client_type_id: "",
     check_list_name: "",
+    work_flow_type: "", 
     status: "1",
   });
 
@@ -188,6 +190,7 @@ const CreateCheckList = () => {
     // job_type_id: "Please Select Job Type",
     check_list_name: "Please Enter CheckList Name",
     // status: "Please Select Status",
+    client_type_id:"Please Select Client Type",
   };
 
   const handleInputChange = (e) => {
@@ -205,7 +208,7 @@ const CreateCheckList = () => {
     const newErrors = { ...errors };
     if (isSubmitting) {
       for (const key in fieldErrors) {
-        if (!formData1[key]) {
+        if (!formData[key]) {
           newErrors[key] = fieldErrors[key];
         }
       }
@@ -223,32 +226,68 @@ const CreateCheckList = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in formData1) {
-      if (!validate(key, formData1[key], true)) {
+  // const validateAllFields = () => {
+  //   let isValid = true;
+  //   for (const key in formData) {
+  //     if (!validate(key, formData[key], true)) {
+  //       isValid = false;
+  //     }
+  //   }
+  //   return isValid;
+  // };
+
+const validateAllFields = () => {
+  let isValid = true;
+  let newErrors = {};
+
+  for (const key in fieldErrors) {
+    if (key === "client_type_id") {
+      if (selectedClientType.length === 0) {
+        newErrors[key] = fieldErrors[key];
+        isValid = false;
+      }
+    } else {
+      if (!formData[key]) {
+        newErrors[key] = fieldErrors[key];
         isValid = false;
       }
     }
-    return isValid;
-  };
+  }
 
+  setErrors(newErrors);
+  return isValid;
+};
 
+  const getJobTypeData = async (service_ids) => {
+    if (!Array.isArray(service_ids) || service_ids.length === 0) {
+      setJobTypeOptions([]);
+      setFormData((data) => ({ ...data, job_type_id: "" }));
+      return;
+    }
 
-  const getJobTypeData = async (service_id) => {
-    const req = { service_id, action: "get" };
-    const data = { req, authToken: token };
-
-    await dispatch(JobType(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          setFormData((data) => ({ ...data, job_type_id: response.data }));
-        }
-      })
-      .catch((error) => {
-        return;
+    try {
+      const calls = service_ids.map((service_id) => {
+        const req = { service_id, action: "get" };
+        const data = { req, authToken: token };
+        return dispatch(JobType(data)).unwrap();
       });
+
+      const responses = await Promise.all(calls);
+      const allJobTypes = responses
+        .filter((r) => r?.status)
+        .flatMap((r) => Array.isArray(r.data) ? r.data : []);
+
+      const uniqueJobTypes = Array.from(
+        new Map(allJobTypes.map((item) => [item.id, item])).values(),
+      );
+
+      setJobTypeOptions(uniqueJobTypes);
+      setFormData((data) => ({ ...data, job_type_id: "" }));
+    } catch (error) {
+      console.error("getJobTypeData error", error);
+      setJobTypeOptions([]);
+      setFormData((data) => ({ ...data, job_type_id: "" }));
+    }
   };
 
 
@@ -276,7 +315,22 @@ const CreateCheckList = () => {
 
     const req = {
       ...formData,
-      client_type_id: ClienTypeArr.slice(0, -1)
+      client_type_id: ClienTypeArr.slice(0, -1),
+
+  customer_id:
+  formData.customer_id.length > 0
+    ? formData.customer_id.join(",")
+    : null,
+
+service_id:
+  formData.service_id.length > 0
+    ? formData.service_id.join(",")
+    : null,
+
+job_type_id:
+  formData.job_type_id
+    ? formData.job_type_id
+    : null,
     };
 
     const data = { req, authToken: token };
@@ -295,13 +349,15 @@ const CreateCheckList = () => {
 
           // Reset form and tasks after successful submission
           setFormData({
-            customer_id: location.state?.id || "",
-            service_id: "",
+            customer_id: [],
+            service_id: [],
             job_type_id: "",
             client_type_id: "",
             check_list_name: "",
-            status: "",
+            work_flow_type: "", 
+            status: "1",
           });
+          setJobTypeOptions([]);
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
 
           sessionStorage.setItem("settingTab", location?.state?.settingTab);
@@ -385,8 +441,8 @@ const CreateCheckList = () => {
                     }}
                   >
                     <option value=""> -- Select --</option>
-                    <option value="">Processing Type</option>
-                    <option value="">Reviewing Type</option>
+                    <option value="processing">Processing Type</option>
+                    <option value="reviewing">Reviewing Type</option>
 
                   </select>
                   {errors.work_flow_type && (
@@ -496,20 +552,16 @@ const CreateCheckList = () => {
                         ? "error-field form-select"
                         : "form-select"
                     }
-                    // className="default-select wide form-select"
                     name="job_type_id"
-                    defaultValue={formData.job_type_id}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                    }}
+                    value={formData.job_type_id}
+                    onChange={handleInputChange}
                   >
                     <option value="">Please Select Job Type</option>
-                    {formData.job_type_id &&
-                      formData.job_type_id.map((job) => (
-                        <option key={job.id} value={job.id}>
-                          {job.type}
-                        </option>
-                      ))}
+                    {jobTypeOptions.map((job) => (
+                      <option key={job.id} value={job.id}>
+                        {job.type}
+                      </option>
+                    ))}
                   </select>
 
                 </div>
@@ -524,11 +576,13 @@ const CreateCheckList = () => {
                     <DropdownMultiselect
                       options={options}
                       name="client_type_id"
-                      className=""
+                      className={errors.client_type_id ? "error-field" : ""}
                       handleOnChange={(e) => handleMultipleSelect(e)}
                     />
                   </div>
-
+                  {errors.client_type_id && (
+                    <p className="mb-0 error-text">{errors.client_type_id}</p>
+                  )}
                 </div>
               </div>
             </div>
