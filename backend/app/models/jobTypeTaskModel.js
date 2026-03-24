@@ -307,38 +307,42 @@ const getTask = async (task) => {
 
 const addChecklist = async (checklist) => {
 console.log("Checklist",checklist);
-  const {
-    service_id,
-    job_type_id,
-    client_type_id,
-    check_list_name,
-     work_flow_type,
-    status,
-    task,
-  } = checklist;
-
-
-  let customer_id = checklist.customer_id
-if (!customer_id) {
-  customer_id = null;
-}
-
+ let {
+  customer_id,
+  service_id,
+  job_type_id,
+  client_type_id,
+  check_list_name,
+  work_flow_type,
+  status,
+  ip,
+  StaffUserId
+} = checklist
+  
+  customer_id = customer_id.length == 0 ? null : customer_id;
+  service_id = service_id.length == 0 ? null : service_id;
+  job_type_id = job_type_id.length == 0 ? null : job_type_id;
+   
   try {
     const query = `
-    INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name,status,work_flow_type)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO checklists 
+    (work_flow_type,customer_id,service_id,job_type_id,client_type_id,check_list_name,status)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     const [result] = await pool.execute(query, [
+      work_flow_type,
       customer_id,
       service_id,
       job_type_id,
       client_type_id,
       check_list_name,
-      work_flow_type,
-      status,
+      status
+      
     ]);
     const checklist_id = result.insertId;
     const currentDate = new Date();
+
+    
     await SatffLogUpdateOperation(
       {
         staff_id: checklist.StaffUserId,
