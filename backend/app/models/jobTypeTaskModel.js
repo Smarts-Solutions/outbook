@@ -328,9 +328,9 @@ const addChecklist = async (checklist) => {
     StaffUserId,
   } = checklist;
 
-  customer_id = customer_id.length == 0 ? null : customer_id;
-  service_id = service_id.length == 0 ? null : service_id;
-  job_type_id = job_type_id.length == 0 ? null : job_type_id;
+  customer_id = customer_id.length == 0 ? null : customer_id?.join(",");
+  service_id = service_id.length == 0 ? null : service_id?.join(",");
+  job_type_id = job_type_id.length == 0 ? null : job_type_id?.join(",");
 
   try {
     const query = `
