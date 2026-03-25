@@ -374,7 +374,18 @@ const getChecklist = async (checklist) => {
 
   let query = `
 SELECT
-    *,
+*,
+    checklists.id,
+    checklists.work_flow_type,
+    checklists.customer_id,
+    checklists.is_all_customer,
+    checklists.service_id,
+    checklists.job_type_id,
+    checklists.client_type_id,
+    checklists.check_list_name,
+    checklists.status,
+    checklists.created_at,
+    checklists.updated_at,
     GROUP_CONCAT(DISTINCT client_types.type) AS client_type_type,
     GROUP_CONCAT(DISTINCT services.name) AS service_name,
     GROUP_CONCAT(DISTINCT job_types.type) AS job_type_type,
