@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Select from 'react-select';
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 
 const MissingTimesheet = () => {
@@ -17,9 +18,9 @@ const MissingTimesheet = () => {
     MissingTimesheet();
   }, []);
 
-   
+
   const MissingTimesheet = async () => {
-    const req = { action: "missingTimesheetReport"};
+    const req = { action: "missingTimesheetReport" };
     const data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
       .unwrap()
@@ -44,6 +45,10 @@ const MissingTimesheet = () => {
     { name: 'Staff Email', selector: row => row.staff_email, sortable: true, width: '50%' },
   ]
 
+  const exportData = missingTimesheetReportData && missingTimesheetReportData.map((item) => ({
+    "Staff Name": item.staff_fullname,
+    "Staff Email": item.staff_email,
+  }));
 
 
   return (
@@ -55,13 +60,23 @@ const MissingTimesheet = () => {
               <h3>Missing Timesheet Report</h3>
             </div>
           </div>
+          <div className='col-md-5'>
+            <div className='d-flex justify-content-end'>
+              {exportData && exportData.length > 0 && (
+                <ExportToExcel
+                  apiData={exportData}
+                  fileName={`Missing_Timesheet_Report`}
+                />
+              )}
+            </div>
+          </div>
         </div>
 
         <div className='datatable-wrapper mt-minus'>
           <div className='row'>
           </div>
           <Datatable
-            filter={false}
+            filter={true}
             columns={columns}
             data={missingTimesheetReportData && missingTimesheetReportData} />
         </div>
