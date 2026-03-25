@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 19, 2026 at 12:39 PM
+-- Generation Time: Mar 25, 2026 at 10:02 AM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -332,10 +332,10 @@ DROP TABLE IF EXISTS `checklists`;
 CREATE TABLE IF NOT EXISTS `checklists` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `work_flow_type` varchar(50) NOT NULL,
-  `customer_id` longtext NOT NULL,
+  `customer_id` longtext,
   `is_all_customer` longtext,
-  `service_id` longtext NOT NULL,
-  `job_type_id` longtext NOT NULL,
+  `service_id` longtext,
+  `job_type_id` longtext,
   `client_type_id` varchar(250) NOT NULL,
   `check_list_name` varchar(100) NOT NULL,
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
@@ -343,17 +343,14 @@ CREATE TABLE IF NOT EXISTS `checklists` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `client_type_id` (`client_type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `checklists`
 --
 
 INSERT INTO `checklists` (`id`, `work_flow_type`, `customer_id`, `is_all_customer`, `service_id`, `job_type_id`, `client_type_id`, `check_list_name`, `status`, `created_at`, `updated_at`) VALUES
-(1, '', '0', '[1, 5, 10, 3, 13]', '7', '2', '1,2,3,4,7', 'checklist1', '1', '2025-01-30 09:06:45', '2026-01-01 12:16:51'),
-(3, '', '5', NULL, '2', '4', '1,2,3,4', 'DDD', '1', '2025-07-12 10:13:23', '2025-07-12 10:13:23'),
-(4, '', '8', NULL, '2', '4', '1,2,3,4,5,6,7', 'FFFFFFF', '1', '2025-07-17 06:00:49', '2025-07-17 09:00:46'),
-(5, '', '0', NULL, '33', '9', '2', 'yjjj', '1', '2026-03-18 10:17:25', '2026-03-18 10:17:25');
+(1, '3', '[13,12]', NULL, '[32,31]', '[8,7]', '1,2,3,4', 'Che1', '1', '2026-03-24 13:21:05', '2026-03-24 13:21:05');
 
 -- --------------------------------------------------------
 
@@ -2440,7 +2437,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-03-19 09:21:50', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3MzkxMjExMCwiZXhwIjoxNzczOTQ4MTEwfQ.w5SOIUQ0VX6VOsh9-1RVRljmlUm852YVsUPydtvWXJo'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-03-25 09:52:06', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NDQzMjMyNiwiZXhwIjoxNzc0NDY4MzI2fQ.hFxhGjBkfBG4MUMGxDVIgDEN4gytufJOUY3IW4cplmU'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2497,7 +2494,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1356 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1362 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -3864,7 +3861,13 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1352, 1, '2026-03-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-17 09:07:05', '2026-03-17 09:07:05'),
 (1353, 1, '2026-03-18', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-18 09:06:35', '2026-03-18 09:06:35'),
 (1354, 1, '2026-03-18', 'checklist', 5, 'created checklist yjjj', 'Super Admin System Super Super Admin created checklist yjjj ', 'created', '122.168.114.106', '2026-03-18 10:17:25', '2026-03-18 10:17:25'),
-(1355, 1, '2026-03-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-19 09:21:50', '2026-03-19 09:21:50');
+(1355, 1, '2026-03-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-19 09:21:50', '2026-03-19 09:21:50'),
+(1356, 1, '2026-03-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-20 12:01:21', '2026-03-20 12:01:21'),
+(1357, 1, '2026-03-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-24 06:01:14', '2026-03-24 06:01:14'),
+(1358, 1, '2026-03-24', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-03-24 06:16:22', '2026-03-24 06:16:22'),
+(1359, 1, '2026-03-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-24 07:19:26', '2026-03-24 07:19:26'),
+(1360, 1, '2026-03-24', 'checklist', 1, 'created checklist Che1', 'Super Admin System Super Super Admin created checklist Che1 ', 'created', '122.168.114.106', '2026-03-24 13:21:05', '2026-03-24 13:21:05'),
+(1361, 1, '2026-03-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-25 09:52:06', '2026-03-25 09:52:06');
 
 -- --------------------------------------------------------
 
