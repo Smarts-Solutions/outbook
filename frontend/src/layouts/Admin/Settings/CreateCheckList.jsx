@@ -31,6 +31,7 @@ const CreateCheckList = () => {
   const [customerAllData, setCustomerAllData] = useState([]);
   const [serviceAllData, setServiceAllData] = useState([]);
   const [jobTypeOptions, setJobTypeOptions] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const [formData, setFormData] = useState({
     customer_id: [],
@@ -59,6 +60,29 @@ const CreateCheckList = () => {
     { key: "3", label: "Partnership" },
     { key: "4", label: "Individual" },
   ];
+
+
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const allowedTypes = [
+        "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert("Only CSV or Excel files allowed");
+        e.target.value = null;
+        return;
+      }
+
+      setSelectedFile(file);
+    }
+  };
+
 
   useEffect(() => {
     const req = { action: "getClientType" };
@@ -619,6 +643,32 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
+
+
+
+            <div className="col-lg-4 mt-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Upload File (CSV / Excel)</label>
+
+                  <input
+                    type="file"
+                    accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    className="form-control"
+                    onChange={handleFileChange}
+                  />
+
+                  {selectedFile && (
+                    <p className="mt-2 text-success">
+                      Selected File: {selectedFile.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+
+
           </div>
 
 
