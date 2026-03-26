@@ -67,7 +67,7 @@ const EditCheckList = () => {
         getAllServices(),
         GetAllCustomer({ searchValue: "", pageNo: 1 })
       ]);
-      
+
       const checklist_id = location.state?.checklist_id || location.state?.id;
       if (checklist_id) {
         await fetchChecklistDetails(checklist_id);
@@ -87,7 +87,7 @@ const EditCheckList = () => {
       const response = await dispatch(getList(data)).unwrap();
       if (response.status && response.data) {
         const d = response.data;
-        
+
         const mappedFormData = {
           customer_id: Array.isArray(d.customer_id) ? d.customer_id.map(id => id.toString()) : [],
           service_id: Array.isArray(d.service_id) ? d.service_id.map(id => id.toString()) : [],
@@ -103,7 +103,7 @@ const EditCheckList = () => {
           setSelectedClientType(d.client_type_id.map(id => id.toString()));
         }
         setTasks(d.task || []);
-        
+
         if (Array.isArray(d.service_id) && d.service_id.length > 0) {
           getJobTypeData(d.service_id);
         }
@@ -193,9 +193,64 @@ const EditCheckList = () => {
     }
   };
 
+  const fieldErrors = {
+    work_flow_type: "Please Select Work Flow Type",
+    check_list_name: "Please Enter CheckList Name",
+    client_type_id: "Please Select Client Type",
+  };
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let name = e.target.name;
+    let value = e.target.value;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+    validate(name, value);
+  };
+
+  const validate = (name, value, isSubmitting = false) => {
+    const newErrors = { ...errors };
+    if (isSubmitting) {
+      for (const key in fieldErrors) {
+        if (!formData[key]) {
+          newErrors[key] = fieldErrors[key];
+        }
+      }
+    } else {
+      if (!value) {
+        if (fieldErrors[name]) {
+          newErrors[name] = fieldErrors[name];
+        }
+      } else {
+        delete newErrors[name];
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateAllFields = () => {
+    let isValid = true;
+    let newErrors = {};
+
+    for (const key in fieldErrors) {
+      if (key === "client_type_id") {
+        if (selectedClientType.length === 0) {
+          newErrors[key] = fieldErrors[key];
+          isValid = false;
+        }
+      } else {
+        if (!formData[key]) {
+          newErrors[key] = fieldErrors[key];
+          isValid = false;
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleTaskChange = (index, e) => {
@@ -214,7 +269,15 @@ const EditCheckList = () => {
   };
 
   const addTask = () => {
-    setTasks([...tasks, { task_name: "", budgeted_hour: "00:00", task_id: "", checklist_tasks_id: "" }]);
+    setTasks([
+      ...tasks,
+      {
+        task_name: "",
+        budgeted_hour: "00:00",
+        task_id: "",
+        checklist_tasks_id: "",
+      },
+    ]);
   };
 
   const removeTask = (index) => {
@@ -222,9 +285,8 @@ const EditCheckList = () => {
   };
 
   const handleSubmit = async () => {
-    // Validation logic similar to Create
-    if (!formData.check_list_name || !formData.work_flow_type || selectedClientType.length === 0) {
-      sweatalert.fire("Error", "Please fill required fields", "error");
+    const isValid = validateAllFields();
+    if (!isValid) {
       return;
     }
 
@@ -232,25 +294,38 @@ const EditCheckList = () => {
       checklists_id: location.state.checklist_id,
       ...formData,
       client_type_id: selectedClientType.join(","),
-      task: tasks.map(t => ({
+      task: tasks.map((t) => ({
         task_id: t.task_id,
         task_name: t.task_name,
         budgeted_hour: t.budgeted_hour,
-        checklist_tasks_id: t.checklist_tasks_id
-      }))
+        checklist_tasks_id: t.checklist_tasks_id,
+      })),
     };
-    
+
     const data = { req, authToken: token };
     try {
       const resp = await dispatch(UpdateChecklistData(data)).unwrap();
       if (resp.status) {
-        sweatalert.fire("Success", resp.message, "success");
+        sweatalert.fire({
+          title: "Success",
+          text: resp.message,
+          icon: "success",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
         window.history.back();
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const handleMultipleSelect = (e) => {
+    if (e.length === 0) {
+      setErrors({ ...errors, client_type_id: "Please Select Client Type" });
+    } else {
+      const { client_type_id, ...rest } = errors;
+      setErrors(rest);
+    }
     setSelectedClientType(e);
   };
 
@@ -268,151 +343,218 @@ const EditCheckList = () => {
         <div className="card-body">
           <div className="row">
             <div className="col-lg-4">
-              <label className="form-label">CheckList Name</label>
-              <input
-                type="text"
-                className="form-control"
-                name="check_list_name"
-                value={formData.check_list_name}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="col-lg-4">
-              <label className="form-label">Work Flow Type</label>
-              <select
-                className="form-select"
-                name="work_flow_type"
-                value={formData.work_flow_type}
-                onChange={handleInputChange}
-              >
-                <option value="">-- Select --</option>
-                <option value="3">Processing Type</option>
-                <option value="6">Reviewing Type</option>
-              </select>
-            </div>
-
-            <div className="col-lg-4">
-              <label className="form-label">Customer Name</label>
-              <Select
-                isMulti
-                options={customerAllData}
-                value={customerAllData.filter(opt => formData.customer_id.includes(opt.value))}
-                onChange={(opts) => {
-                  const values = opts ? opts.map(o => o.value) : [];
-                  setFormData(p => ({ ...p, customer_id: values }));
-                }}
-                onInputChange={(v) => handleCustomerSearch(v)}
-                className="select-staff"
-              />
-            </div>
-
-            <div className="col-lg-4 mt-3">
-              <label className="form-label">Service Type</label>
-              <Select
-                isMulti
-                options={serviceAllData.map(s => ({ value: s.id.toString(), label: s.name }))}
-                value={serviceAllData
-                  .filter(s => formData.service_id.includes(s.id.toString()))
-                  .map(s => ({ value: s.id.toString(), label: s.name }))}
-                onChange={(opts) => {
-                  const values = opts ? opts.map(o => o.value) : [];
-                  setFormData(p => ({ ...p, service_id: values, job_type_id: [] }));
-                  getJobTypeData(values);
-                }}
-              />
-            </div>
-
-            <div className="col-lg-4 mt-3">
-              <label className="form-label">Job Type</label>
-              <Select
-                isMulti
-                options={jobTypeOptions.map(j => ({ value: j.id.toString(), label: j.type }))}
-                value={jobTypeOptions
-                  .filter(j => formData.job_type_id.includes(j.id.toString()))
-                  .map(j => ({ value: j.id.toString(), label: j.type }))}
-                onChange={(opts) => {
-                  const values = opts ? opts.map(o => o.value) : [];
-                  setFormData(p => ({ ...p, job_type_id: values }));
-                }}
-              />
-            </div>
-
-            <div className="col-lg-4 mt-3">
-              <label className="form-label">Client Type</label>
-              <DropdownMultiselect
-                options={options}
-                handleOnChange={handleMultipleSelect}
-                selected={selectedClientType}
-              />
-            </div>
-
-            <div className="col-lg-4 mt-3">
-              <label className="form-label">Status</label>
-              <select
-                className="form-select"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-              >
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-              </select>
-            </div>
-          </div>
-
-          {/* <div className="mt-4">
-            <button className="btn btn-info" onClick={addTask}><Plus size={16} /> Add Task</button>
-          </div> */}
-
-          {/* {tasks.map((task, index) => (
-            <div key={index} className="row mt-3 align-items-end">
-              <div className="col-lg-5">
-                <label className="form-label">Task Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="task_name"
-                  value={task.task_name}
-                  onChange={(e) => handleTaskChange(index, e)}
-                  disabled={task.task_id}
-                />
-              </div>
-              <div className="col-lg-5">
-                <label className="form-label">Budgeted Time</label>
-                <div className="input-group">
+              <div className=" row flex-column">
+                <div>
+                  <label className="form-label">CheckList Name</label>
                   <input
-                    type="number"
-                    className="form-control"
-                    name="hours"
-                    placeholder="HH"
-                    value={task.budgeted_hour?.split(":")[0] || ""}
-                    onChange={(e) => handleTaskChange(index, e)}
+                    type="text"
+                    className={
+                      errors.check_list_name
+                        ? "error-field form-control"
+                        : "form-control"
+                    }
+                    placeholder="Check List Name"
+                    name="check_list_name"
+                    value={formData.check_list_name}
+                    onChange={handleInputChange}
                   />
-                  <span className="input-group-text">H</span>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="minutes"
-                    placeholder="MM"
-                    max="59"
-                    value={task.budgeted_hour?.split(":")[1] || ""}
-                    onChange={(e) => handleTaskChange(index, e)}
-                  />
-                  <span className="input-group-text">M</span>
+                  {errors.check_list_name && (
+                    <p className="mb-0 error-text">{errors.check_list_name}</p>
+                  )}
                 </div>
               </div>
-              <div className="col-lg-2">
-                <button className="btn text-danger" onClick={() => removeTask(index)}><i className="ti-trash"></i></button>
+            </div>
+
+            <div className="col-lg-4 mb-lg-0 mb-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Work Flow Type</label>
+                  <select
+                    className={
+                      errors.work_flow_type
+                        ? "error-field form-select"
+                        : "form-select"
+                    }
+                    name="work_flow_type"
+                    value={formData.work_flow_type}
+                    onChange={handleInputChange}
+                  >
+                    {/* <option value=""> -- Select --</option> */}
+                    <option value="3">Processing Type</option>
+                    <option value="6">Reviewing Type</option>
+                  </select>
+                  {errors.work_flow_type && (
+                    <p className="mb-0 error-text">{errors.work_flow_type}</p>
+                  )}
+                </div>
               </div>
             </div>
-          ))} */}
 
-          <div className="mt-4">
-            <button className="btn btn-secondary" onClick={() => window.history.back()}><X size={16} /> Cancel</button>
-            <button className="btn btn-outline-success ms-2" onClick={handleSubmit}><Save size={16} /> Submit</button>
+            <div className="col-lg-4 mb-lg-0 mb-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Customer Name</label>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={customerAllData}
+                    value={customerAllData.filter((opt) =>
+                      formData?.customer_id?.includes(opt.value),
+                    )}
+                    onChange={(selectedOptions) => {
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+                      setFormData((p) => ({ ...p, customer_id: values }));
+
+                      if (values.length === 0) {
+                        setCustomerHasMore(true);
+                        setCustomerPage(1);
+                        setCustomerSearch("");
+                        setCustomerAllData([]);
+                        customerCache.current = {};
+                        GetAllCustomer({ searchValue: "", pageNo: 1 });
+                      }
+                    }}
+                    onInputChange={(value) => handleCustomerSearch(value)}
+                    onMenuScrollToBottom={() => {
+                      if (customerHasMore) {
+                        GetAllCustomer({
+                          searchValue: customerSearch,
+                          pageNo: customerPage + 1,
+                          append: true,
+                        });
+                      }
+                    }}
+                    isSearchable
+                    className="shadow-sm select-staff rounded-pill"
+                  />
+                  {errors.customer_id && (
+                    <p className="mb-0 error-text">{errors.customer_id}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 mt-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Service Type</label>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={serviceAllData.map((s) => ({
+                      value: s.id.toString(),
+                      label: s.name,
+                    }))}
+                    value={serviceAllData
+                      .filter((s) =>
+                        formData.service_id.includes(s.id.toString()),
+                      )
+                      .map((s) => ({ value: s.id.toString(), label: s.name }))}
+                    onChange={(opts) => {
+                      const values = opts ? opts.map((o) => o.value) : [];
+                      setFormData((p) => ({
+                        ...p,
+                        service_id: values,
+                        job_type_id: [],
+                      }));
+                      getJobTypeData(values);
+                    }}
+                  />
+                  {errors.service_id && (
+                    <p className="mb-0 error-text">{errors.service_id}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 mt-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Job Type</label>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={jobTypeOptions.map((j) => ({
+                      value: j.id.toString(),
+                      label: j.type,
+                    }))}
+                    value={jobTypeOptions
+                      .filter((j) =>
+                        formData.job_type_id.includes(j.id.toString()),
+                      )
+                      .map((j) => ({ value: j.id.toString(), label: j.type }))}
+                    onChange={(opts) => {
+                      const values = opts ? opts.map((o) => o.value) : [];
+                      setFormData((p) => ({ ...p, job_type_id: values }));
+                    }}
+                  />
+                  {errors.job_type_id && (
+                    <p className="mb-0 error-text">{errors.job_type_id}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 mt-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Client Type</label>
+                  <div className="custom-multiselect">
+                    <DropdownMultiselect
+                      options={options}
+                      className={errors.client_type_id ? "error-field" : ""}
+                      handleOnChange={handleMultipleSelect}
+                      selected={selectedClientType}
+                    />
+                  </div>
+                  {errors.client_type_id && (
+                    <p className="mb-0 error-text">{errors.client_type_id}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 mt-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Status</label>
+                  <select
+                    className={
+                      errors.status ? "error-field form-select" : "form-select"
+                    }
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                  >
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                  </select>
+                  {errors.status && (
+                    <p className="mb-0 error-text">{errors.status}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-lg-12 mt-4">
+            <button
+              className="btn btn-secondary"
+              onClick={() => window.history.back()}
+            >
+              <X size={16} /> Cancel
+            </button>
+            <button
+              className="btn btn-outline-success ms-2"
+              onClick={handleSubmit}
+            >
+              <Save size={16} /> Submit
+            </button>
           </div>
         </div>
+
       </div>
     </div>
   );

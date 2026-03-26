@@ -392,7 +392,7 @@ SELECT
     GROUP_CONCAT(DISTINCT job_types.type) AS job_type_type,
     checklists.client_type_id AS checklists_client_type_id,
     GROUP_CONCAT(DISTINCT customers.trading_name) AS customer_name,
-    master_status.name AS work_flow_name
+    roles.role_name AS work_flow_name
 FROM checklists 
 LEFT JOIN client_types 
     ON FIND_IN_SET(client_types.id, checklists.client_type_id)
@@ -402,8 +402,8 @@ LEFT JOIN job_types
     ON FIND_IN_SET(job_types.id, checklists.job_type_id)
 LEFT JOIN customers
     ON FIND_IN_SET(customers.id, checklists.customer_id)
-LEFT JOIN master_status
-    ON master_status.id = checklists.work_flow_type
+LEFT JOIN roles
+    ON roles.id = checklists.work_flow_type
 GROUP BY checklists.id
 ORDER BY checklists.id DESC
 `;
