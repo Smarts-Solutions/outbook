@@ -336,7 +336,7 @@ const EditCheckList = () => {
                     value={formData.work_flow_type}
                     onChange={handleInputChange}
                   >
-                    <option value=""> -- Select --</option>
+          
                     <option value="3">Processing Type</option>
                     <option value="6">Reviewing Type</option>
                   </select>
