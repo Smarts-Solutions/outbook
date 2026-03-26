@@ -125,6 +125,7 @@ const getAddJobData = async (job) => {
    ORDER BY 
     customers.id DESC;
   `;
+
     const [customerDetails] = await pool.execute(queryCustomerDetails, [
       customer_id,
       StaffUserId,
@@ -149,6 +150,7 @@ const getAddJobData = async (job) => {
       queryCustomerWithCustomerAccountManager,
       [customer_id]
     );
+
     let customer_account_manager = [];
     if (rows2.length > 0) {
       customer_account_manager = rows2.map((row) => ({
@@ -339,6 +341,28 @@ const getAddJobData = async (job) => {
        staffs.first_name ASC;
          `;
     const [rowsStaff] = await pool.execute(allStaff);
+
+
+    // Check list data Processing type
+     const queryProcessingType = `
+       SELECT  
+           staffs.id AS manager_id,
+           staffs.first_name AS manager_first_name,
+           staffs.last_name AS manager_last_name
+      FROM 
+           staffs
+      WHERE  
+       staffs.id = ${rows[0].customer_account_manager_id}`;
+    const [rows10] = await pool.execute(queryAccountManeger);
+
+    let ProcessingTypeArr = [];
+    if (rows9.length > 0) {
+      AccountManagerArr = rows9.map((row) => ({
+        manager_id: row.manager_id,
+        manager_name: row.manager_first_name + " " + row.manager_last_name,
+      }));
+    }
+
 
     return {
       status: true,

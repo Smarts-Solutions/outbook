@@ -125,6 +125,8 @@ const CreateJob = () => {
     InvoiceRemark: "",
     notes: "",
     job_priority: "normal",
+    processing_checkList : "",
+    reviewing_checkList : ""
     //Bookkeeping_Frequency_id_2: "Daily",
 
   });
@@ -3247,7 +3249,6 @@ const CreateJob = () => {
                                       }}
                                       placeholder="Select options"
                                     />
-
                                   </div>
 
 
@@ -3278,6 +3279,48 @@ const CreateJob = () => {
                                             }
                                           </div>
                                         )}
+                                    </div>
+                                  </div>
+
+                                  {/* Checklist Work */}
+                                   <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Processing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="processing_checkList"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.processing_checkList
+                                        }
+                                      >
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                      </select>
+                                      
+                                    </div>
+                                  </div>
+
+
+                                   <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Reviewing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="reviewing_checkList"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.reviewing_checkList
+                                        }
+                                      >
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                      </select>
+                                     
                                     </div>
                                   </div>
 
