@@ -366,7 +366,9 @@ const getAddJobData = async (job) => {
 
   const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
 
-  
+   
+  console.log("processing_checklist_data ",processing_checklist_data)
+  console.log("reviewing_checklist_data ",reviewing_checklist_data)
 
 
     return {
