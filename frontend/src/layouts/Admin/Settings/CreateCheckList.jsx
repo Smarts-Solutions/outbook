@@ -12,7 +12,6 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 import { Save, Plus, ArrowLeft, X } from "lucide-react";
 import Select from "react-select";
 
@@ -32,6 +31,7 @@ const CreateCheckList = () => {
   const [customerAllData, setCustomerAllData] = useState([]);
   const [serviceAllData, setServiceAllData] = useState([]);
   const [jobTypeOptions, setJobTypeOptions] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const [formData, setFormData] = useState({
     customer_id: [],
@@ -39,7 +39,7 @@ const CreateCheckList = () => {
     job_type_id: [],
     client_type_id: "",
     check_list_name: "",
-    work_flow_type: "", 
+    work_flow_type: "",
     status: "1",
   });
 
@@ -60,6 +60,29 @@ const CreateCheckList = () => {
     { key: "3", label: "Partnership" },
     { key: "4", label: "Individual" },
   ];
+
+
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const allowedTypes = [
+        "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert("Only CSV or Excel files allowed");
+        e.target.value = null;
+        return;
+      }
+
+      setSelectedFile(file);
+    }
+  };
+
 
   useEffect(() => {
     const req = { action: "getClientType" };
@@ -176,7 +199,7 @@ const CreateCheckList = () => {
       .then((response) => {
         if (response.status) {
           setServiceAllData(response.data)
-         // setFormData((data) => ({ ...data, service_id: response.data }));
+          // setFormData((data) => ({ ...data, service_id: response.data }));
         }
       })
       .catch((error) => {
@@ -190,7 +213,7 @@ const CreateCheckList = () => {
     // job_type_id: "Please Select Job Type",
     check_list_name: "Please Enter CheckList Name",
     // status: "Please Select Status",
-    client_type_id:"Please Select Client Type",
+    client_type_id: "Please Select Client Type",
   };
 
   const handleInputChange = (e) => {
@@ -236,27 +259,27 @@ const CreateCheckList = () => {
   //   return isValid;
   // };
 
-const validateAllFields = () => {
-  let isValid = true;
-  let newErrors = {};
+  const validateAllFields = () => {
+    let isValid = true;
+    let newErrors = {};
 
-  for (const key in fieldErrors) {
-    if (key === "client_type_id") {
-      if (selectedClientType.length === 0) {
-        newErrors[key] = fieldErrors[key];
-        isValid = false;
-      }
-    } else {
-      if (!formData[key]) {
-        newErrors[key] = fieldErrors[key];
-        isValid = false;
+    for (const key in fieldErrors) {
+      if (key === "client_type_id") {
+        if (selectedClientType.length === 0) {
+          newErrors[key] = fieldErrors[key];
+          isValid = false;
+        }
+      } else {
+        if (!formData[key]) {
+          newErrors[key] = fieldErrors[key];
+          isValid = false;
+        }
       }
     }
-  }
 
-  setErrors(newErrors);
-  return isValid;
-};
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const getJobTypeData = async (service_ids) => {
     if (!Array.isArray(service_ids) || service_ids.length === 0) {
@@ -339,7 +362,7 @@ const validateAllFields = () => {
             job_type_id: [],
             client_type_id: "",
             check_list_name: "",
-            work_flow_type: "", 
+            work_flow_type: "",
             status: "1",
           });
           setJobTypeOptions([]);
@@ -482,6 +505,8 @@ const validateAllFields = () => {
                     }}
                     isSearchable
                     className="shadow-sm select-staff rounded-pill"
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                   />
 
                 </div>
@@ -492,7 +517,7 @@ const validateAllFields = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Service Type</label>
-                  
+
                   <Select
                     isMulti
                     closeMenuOnSelect={false}
@@ -519,8 +544,8 @@ const validateAllFields = () => {
                       });
                       getJobTypeData(values);
                     }}
-
-
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                   />
 
                 </div>
@@ -556,6 +581,8 @@ const validateAllFields = () => {
                         },
                       });
                     }}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                   />
 
                 </div>
@@ -566,14 +593,26 @@ const validateAllFields = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Client Type</label>
-                  <div className="custom-multiselect">
-                    <DropdownMultiselect
-                      options={options}
-                      name="client_type_id"
-                      className={errors.client_type_id ? "error-field" : ""}
-                      handleOnChange={(e) => handleMultipleSelect(e)}
-                    />
-                  </div>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={options.map((opt) => ({
+                      value: opt.key,
+                      label: opt.label,
+                    }))}
+                    value={options
+                      .filter((opt) => selectedClientType.includes(opt.key))
+                      .map((opt) => ({ value: opt.key, label: opt.label }))}
+                    onChange={(selectedOptions) => {
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+                      handleMultipleSelect(values);
+                    }}
+                    className={errors.client_type_id ? "field-error" : ""}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                  />
                   {errors.client_type_id && (
                     <p className="mb-0 error-text">{errors.client_type_id}</p>
                   )}
@@ -604,6 +643,32 @@ const validateAllFields = () => {
                 </div>
               </div>
             </div>
+
+
+
+            <div className="col-lg-4 mt-3">
+              <div className="row">
+                <div className="col-lg-12">
+                  <label className="form-label">Upload File (CSV / Excel)</label>
+
+                  <input
+                    type="file"
+                    accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    className="form-control"
+                    onChange={handleFileChange}
+                  />
+
+                  {selectedFile && (
+                    <p className="mt-2 text-success">
+                      Selected File: {selectedFile.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+
+
           </div>
 
 

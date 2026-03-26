@@ -10,9 +10,8 @@ import {
   getAllCustomerDropDown,
   Get_Service
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Save, Plus, ArrowLeft, X } from "lucide-react";
+import { Save, ArrowLeft, X } from "lucide-react";
 import Select from "react-select";
-import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 import sweatalert from "sweetalert2";
 
 const EditCheckList = () => {
@@ -30,10 +29,6 @@ const EditCheckList = () => {
     work_flow_type: "",
     status: "1",
   });
-
-  const [tasks, setTasks] = useState([
-    { task_id: "", task_name: "", budgeted_hour: "", checklist_tasks_id: "" },
-  ]);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [errors, setErrors] = useState({});
@@ -102,7 +97,6 @@ const EditCheckList = () => {
         if (Array.isArray(d.client_type_id)) {
           setSelectedClientType(d.client_type_id.map(id => id.toString()));
         }
-        setTasks(d.task || []);
 
         if (Array.isArray(d.service_id) && d.service_id.length > 0) {
           getJobTypeData(d.service_id);
@@ -253,37 +247,6 @@ const EditCheckList = () => {
     return isValid;
   };
 
-  const handleTaskChange = (index, e) => {
-    const { name, value } = e.target;
-    const newTasks = [...tasks];
-    if (name === "hours" || name === "minutes") {
-      const current = newTasks[index].budgeted_hour || "00:00";
-      let [h, m] = current.split(":");
-      if (name === "hours") h = value.padStart(2, "0");
-      else m = value.padStart(2, "0");
-      newTasks[index].budgeted_hour = `${h}:${m}`;
-    } else {
-      newTasks[index][name] = value;
-    }
-    setTasks(newTasks);
-  };
-
-  const addTask = () => {
-    setTasks([
-      ...tasks,
-      {
-        task_name: "",
-        budgeted_hour: "00:00",
-        task_id: "",
-        checklist_tasks_id: "",
-      },
-    ]);
-  };
-
-  const removeTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async () => {
     const isValid = validateAllFields();
     if (!isValid) {
@@ -291,15 +254,9 @@ const EditCheckList = () => {
     }
 
     const req = {
-      checklists_id: location.state.checklist_id,
+      checklists_id: location.state?.checklist_id || location.state?.id,
       ...formData,
       client_type_id: selectedClientType.join(","),
-      task: tasks.map((t) => ({
-        task_id: t.task_id,
-        task_name: t.task_name,
-        budgeted_hour: t.budgeted_hour,
-        checklist_tasks_id: t.checklist_tasks_id,
-      })),
     };
 
     const data = { req, authToken: token };
@@ -379,7 +336,7 @@ const EditCheckList = () => {
                     value={formData.work_flow_type}
                     onChange={handleInputChange}
                   >
-                    {/* <option value=""> -- Select --</option> */}
+                    <option value=""> -- Select --</option>
                     <option value="3">Processing Type</option>
                     <option value="6">Reviewing Type</option>
                   </select>
@@ -428,10 +385,9 @@ const EditCheckList = () => {
                     }}
                     isSearchable
                     className="shadow-sm select-staff rounded-pill"
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                   />
-                  {errors.customer_id && (
-                    <p className="mb-0 error-text">{errors.customer_id}</p>
-                  )}
                 </div>
               </div>
             </div>
@@ -461,10 +417,9 @@ const EditCheckList = () => {
                       }));
                       getJobTypeData(values);
                     }}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                   />
-                  {errors.service_id && (
-                    <p className="mb-0 error-text">{errors.service_id}</p>
-                  )}
                 </div>
               </div>
             </div>
@@ -489,10 +444,9 @@ const EditCheckList = () => {
                       const values = opts ? opts.map((o) => o.value) : [];
                       setFormData((p) => ({ ...p, job_type_id: values }));
                     }}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                   />
-                  {errors.job_type_id && (
-                    <p className="mb-0 error-text">{errors.job_type_id}</p>
-                  )}
                 </div>
               </div>
             </div>
@@ -501,14 +455,26 @@ const EditCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Client Type</label>
-                  <div className="custom-multiselect">
-                    <DropdownMultiselect
-                      options={options}
-                      className={errors.client_type_id ? "error-field" : ""}
-                      handleOnChange={handleMultipleSelect}
-                      selected={selectedClientType}
-                    />
-                  </div>
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={options.map((opt) => ({
+                      value: opt.key,
+                      label: opt.label,
+                    }))}
+                    value={options
+                      .filter((opt) => selectedClientType.includes(opt.key))
+                      .map((opt) => ({ value: opt.key, label: opt.label }))}
+                    onChange={(selectedOptions) => {
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+                      handleMultipleSelect(values);
+                    }}
+                    className={errors.client_type_id ? "error-field" : ""}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                  />
                   {errors.client_type_id && (
                     <p className="mb-0 error-text">{errors.client_type_id}</p>
                   )}
@@ -554,7 +520,6 @@ const EditCheckList = () => {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -493,35 +493,16 @@ const getByIdChecklist = async (checklist) => {
 
     const row = checklistRows[0];
     
-    // Fetch tasks separately
-    const tasksQuery = `
-      SELECT 
-      id AS checklist_tasks_id,
-      task_id,
-      task_name,
-      budgeted_hour
-      FROM checklist_tasks 
-      WHERE checklist_id = ?
-      ORDER BY id DESC
-    `;
-    const [taskRows] = await pool.execute(tasksQuery, [checklist_id]);
-
     const result = {
       checklists_id: row.checklists_id,
       check_list_name: row.check_list_name,
       status: row.status,
       work_flow_type: row.work_flow_type,
-      // Convert comma-separated strings to arrays of numbers (or strings)
+      // Convert comma-separated strings to arrays
       customer_id: row.customer_id ? row.customer_id.toString().split(",") : [],
       service_id: row.service_id ? row.service_id.toString().split(",") : [],
       job_type_id: row.job_type_id ? row.job_type_id.toString().split(",") : [],
       client_type_id: row.client_type_id ? row.client_type_id.toString().split(",") : [],
-      task: taskRows.map((task) => ({
-        checklist_tasks_id: task.checklist_tasks_id,
-        task_id: task.task_id,
-        task_name: task.task_name,
-        budgeted_hour: task.budgeted_hour,
-      })),
     };
 
     return {
@@ -565,33 +546,27 @@ const deleteChecklist = async (checklist) => {
 };
 
 const updateChecklist = async (checklist) => {
-  const {
+  let {
     checklists_id,
+    work_flow_type,
+    customer_id,
     service_id,
     job_type_id,
     client_type_id,
     check_list_name,
     status,
-    task,
   } = checklist;
 
-  let customer_id = checklist.customer_id;
-  if (customer_id == null || customer_id == "" || customer_id == undefined) {
-    customer_id = 0;
-  }
-
-  // EXIST checklist tasks id
-  const [ExistChecklistsids] = await pool.execute(
-    "SELECT id  FROM `checklist_tasks` WHERE checklist_id =" + checklists_id,
-  );
-  const idArray = await ExistChecklistsids.map((item) => item.id);
-  let arrayInterId = [];
+  customer_id = (customer_id == null || customer_id?.length == 0) ? null : (Array.isArray(customer_id) ? customer_id.join(",") : customer_id);
+  service_id = (service_id == null || service_id?.length == 0) ? null : (Array.isArray(service_id) ? service_id.join(",") : service_id);
+  job_type_id = (job_type_id == null || job_type_id?.length == 0) ? null : (Array.isArray(job_type_id) ? job_type_id.join(",") : job_type_id);
 
   try {
     // Update query for checklists table
     const updateChecklistQuery = `
     UPDATE checklists 
-    SET customer_id = ?, 
+    SET work_flow_type = ?,
+        customer_id = ?, 
         service_id = ?, 
         job_type_id = ?, 
         client_type_id = ?, 
@@ -600,6 +575,7 @@ const updateChecklist = async (checklist) => {
     WHERE id = ?
     `;
     const [checklistResult] = await pool.execute(updateChecklistQuery, [
+      work_flow_type,
       customer_id,
       service_id,
       job_type_id,
@@ -609,7 +585,7 @@ const updateChecklist = async (checklist) => {
       checklists_id,
     ]);
 
-    if (checklistResult.changedRows > 0) {
+    if (checklistResult.affectedRows > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({
         staff_id: checklist.StaffUserId,
@@ -620,77 +596,6 @@ const updateChecklist = async (checklist) => {
         permission_type: "updated",
         module_id: checklists_id,
       });
-    }
-
-    // Update query for checklist_tasks table
-    const updateChecklistTasksQuery = `
-    UPDATE checklist_tasks 
-    SET task_name = ?, 
-        budgeted_hour = ?
-    WHERE checklist_id = ? AND task_id = ?
-    `;
-    for (const valTask of task) {
-      const { checklist_tasks_id, task_id, task_name, budgeted_hour } = valTask;
-      arrayInterId.push(checklist_tasks_id);
-      if (["", null, undefined].includes(task_id)) {
-        const InsertTaskquery = `
-            INSERT INTO task (name,service_id,job_type_id)
-            VALUES (?, ?, ?)
-            `;
-
-        const checkQuery = `
-                SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
-            `;
-        const [existing] = await pool.execute(checkQuery, [
-          task_name,
-          service_id,
-          job_type_id,
-        ]);
-        if (existing.length === 0) {
-          const [result] = await pool.execute(InsertTaskquery, [
-            task_name,
-            service_id,
-            job_type_id,
-          ]);
-          const task_id = result.insertId;
-
-          const checklistTasksQuery = `
-          INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
-          VALUES (?, ?, ?, ?)
-          `;
-          const [result1] = await pool.execute(checklistTasksQuery, [
-            checklists_id,
-            task_id,
-            task_name,
-            budgeted_hour,
-          ]);
-        } else {
-          const checklistTasksQuery = `
-    INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
-    VALUES (?, ?, ?, ?)
-    `;
-          const [result1] = await pool.execute(checklistTasksQuery, [
-            checklists_id,
-            existing[0].id,
-            task_name,
-            budgeted_hour,
-          ]);
-        }
-      } else {
-        await pool.execute(updateChecklistTasksQuery, [
-          task_name,
-          budgeted_hour,
-          checklists_id,
-          task_id,
-        ]);
-      }
-    }
-
-    let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
-    if (deleteIdArray.length > 0) {
-      for (const id of deleteIdArray) {
-        await pool.execute("DELETE FROM checklist_tasks WHERE id = ?", [id]);
-      }
     }
 
     return {
