@@ -345,23 +345,28 @@ const getAddJobData = async (job) => {
 
     // Check list data Processing type
      const queryProcessingType = `
-       SELECT  
-           staffs.id AS manager_id,
-           staffs.first_name AS manager_first_name,
-           staffs.last_name AS manager_last_name
-      FROM 
-           staffs
-      WHERE  
-       staffs.id = ${rows[0].customer_account_manager_id}`;
-    const [rows10] = await pool.execute(queryAccountManeger);
+    SELECT *
+    FROM checklists
+    WHERE 
+        (FIND_IN_SET(?, customer_id)
+        OR customer_id IS NULL) AND work_flow_type = "3"
+  `;
 
-    let ProcessingTypeArr = [];
-    if (rows9.length > 0) {
-      AccountManagerArr = rows9.map((row) => ({
-        manager_id: row.manager_id,
-        manager_name: row.manager_first_name + " " + row.manager_last_name,
-      }));
-    }
+  const [processing_checklist_data] = await pool.execute(queryProcessingType, [customer_id]);
+
+
+  // Check list data reviewing type
+     const queryReviewingType = `
+    SELECT *
+    FROM checklists
+    WHERE 
+        (FIND_IN_SET(?, customer_id)
+        OR customer_id IS NULL) AND work_flow_type = "6"
+  `;
+
+  const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
+
+  
 
 
     return {
@@ -380,6 +385,9 @@ const getAddJobData = async (job) => {
         Manager: AccountManagerArr,
         allStaff: rowsStaff,
         customerDetails: customerDetails,
+        processing_checklist_data : processing_checklist_data,
+        reviewing_checklist_data : reviewing_checklist_data
+
       },
     };
   } catch (err) {
