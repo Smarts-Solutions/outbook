@@ -376,6 +376,7 @@ const getChecklist = async (checklist) => {
 SELECT
 *,
     checklists.id,
+    checklists.id AS checklists_id,
     checklists.work_flow_type,
     checklists.customer_id,
     checklists.is_all_customer,
@@ -471,66 +472,65 @@ const getByIdChecklist = async (checklist) => {
   const { checklist_id } = checklist;
   const query = `
     SELECT
-    checklists.id AS checklists_id,
-    checklists.check_list_name AS check_list_name,
-    checklists.status AS status,
-    checklists.client_type_id AS client_type_id,
-    customers.id AS customer_id,
-    services.id AS service_id,
-    services.name AS service_name,
-    job_types.id AS job_type_id,
-    job_types.type AS job_type_type,
- 
-    checklist_tasks.id AS checklist_tasks_id,
-    checklist_tasks.task_id AS task_id,
-    checklist_tasks.task_name AS task_name,
-    checklist_tasks.budgeted_hour AS budgeted_hour
+    id AS checklists_id,
+    check_list_name,
+    status,
+    client_type_id,
+    customer_id,
+    service_id,
+    job_type_id,
+    work_flow_type
     FROM checklists 
-    LEFT JOIN 
-         customers ON customers.id = checklists.customer_id
-    JOIN 
-         services ON services.id = checklists.service_id
-    JOIN
-         job_types ON job_types.id = checklists.job_type_id
-
-    JOIN
-         checklist_tasks ON checklist_tasks.checklist_id = checklists.id
-    WHERE checklists.id = ?
-    ORDER BY checklist_tasks.id DESC
+    WHERE id = ?
     `;
-  try {
-    const [rows] = await pool.execute(query, [checklist_id]);
-    let result = {};
 
-    if (rows.length > 0) {
-      result = {
-        checklists_id: rows[0].checklists_id,
-        check_list_name: rows[0].check_list_name,
-        status: rows[0].status,
-        customer_id: rows[0].customer_id,
-        service_id: rows[0].service_id,
-        service_name: rows[0].service_name,
-        job_type_id: rows[0].job_type_id,
-        job_type_type: rows[0].job_type_type,
-        client_type_id:
-          rows[0].client_type_id.length > 0
-            ? rows[0].client_type_id.split(",")
-            : [],
-        // client_type_type: rows[0].client_type_type,
-        task: rows.map((row) => ({
-          checklist_tasks_id: row.checklist_tasks_id,
-          task_id: row.task_id,
-          task_name: row.task_name,
-          budgeted_hour: row.budgeted_hour,
-        })),
-      };
+  try {
+    const [checklistRows] = await pool.execute(query, [checklist_id]);
+    
+    if (checklistRows.length === 0) {
+      return { status: false, message: "Checklist not found." };
     }
+
+    const row = checklistRows[0];
+    
+    // Fetch tasks separately
+    const tasksQuery = `
+      SELECT 
+      id AS checklist_tasks_id,
+      task_id,
+      task_name,
+      budgeted_hour
+      FROM checklist_tasks 
+      WHERE checklist_id = ?
+      ORDER BY id DESC
+    `;
+    const [taskRows] = await pool.execute(tasksQuery, [checklist_id]);
+
+    const result = {
+      checklists_id: row.checklists_id,
+      check_list_name: row.check_list_name,
+      status: row.status,
+      work_flow_type: row.work_flow_type,
+      // Convert comma-separated strings to arrays of numbers (or strings)
+      customer_id: row.customer_id ? row.customer_id.toString().split(",") : [],
+      service_id: row.service_id ? row.service_id.toString().split(",") : [],
+      job_type_id: row.job_type_id ? row.job_type_id.toString().split(",") : [],
+      client_type_id: row.client_type_id ? row.client_type_id.toString().split(",") : [],
+      task: taskRows.map((task) => ({
+        checklist_tasks_id: task.checklist_tasks_id,
+        task_id: task.task_id,
+        task_name: task.task_name,
+        budgeted_hour: task.budgeted_hour,
+      })),
+    };
+
     return {
       status: true,
       message: "checklist get successfully.",
       data: result,
     };
   } catch (err) {
+    console.error("Error in getByIdChecklist:", err);
     return { status: false, message: "Error get checklist." };
   }
 };

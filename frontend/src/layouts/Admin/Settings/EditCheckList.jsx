@@ -1,46 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   JobType,
-  GetServicesByCustomers,
-  GETTASKDATA,
   getList,
   UpdateChecklistData,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { Save,Plus ,ArrowLeft} from "lucide-react";
-
-import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import sweatalert from "sweetalert2";
+import {
+  getAllCustomerDropDown,
+  Get_Service
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Save, Plus, ArrowLeft, X } from "lucide-react";
+import Select from "react-select";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import sweatalert from "sweetalert2";
 
-const CreateCheckList = () => {
+const EditCheckList = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    customer_id: location.state?.id || "",
-    service_id: "",
-    job_type_id: "",
+    customer_id: [],
+    service_id: [],
+    job_type_id: [],
     client_type_id: "",
     check_list_name: "",
-    status: "",
+    work_flow_type: "",
+    status: "1",
   });
-
-
-  console.log(formData, "formData");  
 
   const [tasks, setTasks] = useState([
     { task_id: "", task_name: "", budgeted_hour: "", checklist_tasks_id: "" },
   ]);
 
-  const [data, setData] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [errors, setErrors] = useState({});
-  const [serviceList, setServiceList] = useState([]);
-  const [clientTypeList, setClientTypeList] = useState([]);
-  const [jobTypeList, setJobTypeList] = useState([]);
+  const [customerAllData, setCustomerAllData] = useState([]);
+  const [serviceAllData, setServiceAllData] = useState([]);
+  const [jobTypeOptions, setJobTypeOptions] = useState([]);
   const [selectedClientType, setSelectedClientType] = useState([]);
 
   const options = [
@@ -48,538 +47,375 @@ const CreateCheckList = () => {
     { key: "2", label: "Company" },
     { key: "3", label: "Partnership" },
     { key: "4", label: "Individual" },
-    { key: "5", label: "Charity Incorporated Organisation" },
-    { key: "6", label: "Charity Unincorporated Association" },
-    { key: "7", label: "Trust" },
   ];
 
-  console.log(location.state, "selectedClientType");
+  // For Customer Search
+  const [customerPage, setCustomerPage] = useState(1);
+  const [customerHasMore, setCustomerHasMore] = useState(true);
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const customerCache = useRef({});
+  const debounceRef = useRef(null);
+
   useEffect(() => {
-    if (location.state?.checklist_id) {
-      let req = {
-        action: "getById",
-        checklist_id: location.state.checklist_id,
-      };
-      let data = { req, authToken: token };
+    fetchInitialData();
+  }, []);
 
-      dispatch(getList(data))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            const checklistData = response.data;
+  const fetchInitialData = async () => {
+    try {
+      await Promise.all([
+        getAllServices(),
+        GetAllCustomer({ searchValue: "", pageNo: 1 })
+      ]);
+      
+      const checklist_id = location.state?.checklist_id || location.state?.id;
+      if (checklist_id) {
+        await fetchChecklistDetails(checklist_id);
+      } else {
+        setIsLoaded(true);
+      }
+    } catch (error) {
+      console.error("fetchInitialData error", error);
+      setIsLoaded(true);
+    }
+  };
 
-            setSelectedClientType(checklistData.client_type_id);
+  const fetchChecklistDetails = async (id) => {
+    const req = { action: "getById", checklist_id: id };
+    const data = { req, authToken: token };
+    try {
+      const response = await dispatch(getList(data)).unwrap();
+      if (response.status && response.data) {
+        const d = response.data;
+        
+        const mappedFormData = {
+          customer_id: Array.isArray(d.customer_id) ? d.customer_id.map(id => id.toString()) : [],
+          service_id: Array.isArray(d.service_id) ? d.service_id.map(id => id.toString()) : [],
+          job_type_id: Array.isArray(d.job_type_id) ? d.job_type_id.map(id => id.toString()) : [],
+          client_type_id: Array.isArray(d.client_type_id) ? d.client_type_id.join(",") : "",
+          check_list_name: d.check_list_name || "",
+          work_flow_type: d.work_flow_type || "",
+          status: (d.status !== undefined && d.status !== null) ? d.status.toString() : "1",
+        };
 
-            getJobTypeData(checklistData.service_id);
+        setFormData(mappedFormData);
+        if (Array.isArray(d.client_type_id)) {
+          setSelectedClientType(d.client_type_id.map(id => id.toString()));
+        }
+        setTasks(d.task || []);
+        
+        if (Array.isArray(d.service_id) && d.service_id.length > 0) {
+          getJobTypeData(d.service_id);
+        }
+      }
+    } catch (error) {
+      console.error("fetchChecklistDetails error", error);
+    }
+    setIsLoaded(true);
+  };
 
+  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
+    if (loadingCustomers) return;
+    const cacheKey = `${searchValue}_${pageNo}`;
 
-            console.log(checklistData.service_id, "checklistData.service_id");
-            setFormData({
-              customer_id: location.state?.id || "",
-              service_id: checklistData.service_id,
-              job_type_id: checklistData.job_type_id,
-              client_type_id: checklistData.client_type_id,
-              check_list_name: checklistData.check_list_name,
-              status: checklistData.status,
-            });
-            if (checklistData.task) {
-              setTasks(
-                checklistData.task.map((task) => ({
-                  task_id: task.task_id,
-                  task_name: task.task_name,
-                  budgeted_hour: task.budgeted_hour,
-                  checklist_tasks_id: task.checklist_tasks_id,
-                }))
-              );
-            }
-            setData(true);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+    if (customerCache.current[cacheKey]) {
+      const cached = customerCache.current[cacheKey];
+      setCustomerAllData((prev) => {
+        const combined = [...prev, ...cached];
+        return Array.from(new Map(combined.map((item) => [item.value, item])).values());
+      });
+      return;
     }
 
-    // if (formData.customer_id) {
-    //   let req = { customer_id: formData.customer_id };
-    //   let data = { req, authToken: token };
+    setLoadingCustomers(true);
+    const req = {
+      action: "get_customers_filter",
+      filters: { job_id: [], client_id: [] },
+      pagination: { search: searchValue, page: pageNo, limit: 100 },
+    };
 
-    //   dispatch(GetServicesByCustomers(data))
-    //     .unwrap()
-    //     .then((response) => {
-    //       if (response.status) {
-    //         setServiceList(response.data);
-    //         setFormData((prevData) => ({
-    //           ...prevData,
-    //           service_id: response.data.find(
-    //             (service) => service.service_id === prevData.service_id
-    //           )
-    //             ? prevData.service_id
-    //             : "",
-    //         }));
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       return;
-    //     });
-    // }
+    const data = { req, authToken: token };
+    try {
+      const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+      if (response.status) {
+        const formatted = response.data.map((item) => ({
+          value: item.id.toString(),
+          label: item.trading_name,
+        }));
+        customerCache.current[cacheKey] = formatted;
+        setCustomerAllData((prev) => {
+          const combined = append ? [...prev, ...formatted] : formatted;
+          return Array.from(new Map(combined.map((item) => [item.value, item])).values());
+        });
+        setCustomerHasMore(response.data.length === 100);
+        setCustomerPage(pageNo);
+      }
+    } catch (error) { }
+    setLoadingCustomers(false);
+  };
 
+  const handleCustomerSearch = (value) => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setCustomerSearch(value);
+      GetAllCustomer({ searchValue: value, pageNo: 1 });
+    }, 500);
+  };
+
+  const getAllServices = async () => {
     const req = { action: "get" };
     const data = { req, authToken: token };
-     dispatch(Get_Service(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          
+    try {
+      const response = await dispatch(Get_Service(data)).unwrap();
+      if (response.status) {
+        setServiceAllData(response.data);
+      }
+    } catch (error) { }
+  };
 
-             setServiceList(response.data);
-             setFormData((prevData) => ({
-               ...prevData,
-               service_id: response.data.find(
-                 (service) => service.id === prevData.service_id
-               )
-                 ? prevData.service_id
-                 : "",
-             }));
-        }
-      })
-      .catch((error) => {
-        return;
+  const getJobTypeData = async (service_ids) => {
+    if (!Array.isArray(service_ids) || service_ids.length === 0) {
+      setJobTypeOptions([]);
+      return;
+    }
+    try {
+      const calls = service_ids.map((service_id) => {
+        const req = { service_id, action: "get" };
+        const data = { req, authToken: token };
+        return dispatch(JobType(data)).unwrap();
       });
-
-    // Fetch client types
-    let reqClientType = { action: "getClientType" };
-    let dataClientType = { req: reqClientType, authToken: token };
-
-    dispatch(getList(dataClientType))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          setClientTypeList(response.data); // Store the list of client types
-          setFormData((prevData) => ({
-            ...prevData,
-            client_type_id: response.data.find(
-              (client) => client.id === prevData.client_type_id
-            )
-              ? prevData.client_type_id
-              : "",
-          }));
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  }, [formData.customer_id, location.state?.checklist_id, dispatch, token]);
+      const responses = await Promise.all(calls);
+      const allJobTypes = responses.filter((r) => r?.status).flatMap((r) => Array.isArray(r.data) ? r.data : []);
+      const uniqueJobTypes = Array.from(new Map(allJobTypes.map((item) => [item.id.toString(), item])).values());
+      setJobTypeOptions(uniqueJobTypes);
+    } catch (error) {
+      setJobTypeOptions([]);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-
-
     if (name === "hours" || name === "minutes") {
-
-      const existingBudgetedHour = newTasks[index].budgeted_hour || "00:00";
-      const [hours, minutes] = existingBudgetedHour.split(":");
-
-      if (name === "hours") {
-        const numericValue = Number(value);
-
-
-        if (!isNaN(numericValue) && numericValue >= 0) {
-          newTasks[index].budgeted_hour =
-            value === '' ? '' : numericValue.toString().padStart(2, "0") + ":" + minutes;
-        }
-      } else if (name === "minutes") {
-        const numericValue = Number(value);
-
-
-        if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
-          newTasks[index].budgeted_hour =
-            hours + ":" + (value === '' ? '' : numericValue.toString().padStart(2, "0"));
-        } else {
-
-          e.target.value = "59";
-          newTasks[index].budgeted_hour = hours + ":59";
-        }
-      }
+      const current = newTasks[index].budgeted_hour || "00:00";
+      let [h, m] = current.split(":");
+      if (name === "hours") h = value.padStart(2, "0");
+      else m = value.padStart(2, "0");
+      newTasks[index].budgeted_hour = `${h}:${m}`;
     } else {
-
       newTasks[index][name] = value;
     }
-
-
-
     setTasks(newTasks);
   };
 
-
-
   const addTask = () => {
-    setTasks([
-      ...tasks,
-      {
-        task_name: "",
-        budgeted_hour: "",
-        task_id: null,
-        checklist_tasks_id: null,
-      },
-    ]);
+    setTasks([...tasks, { task_name: "", budgeted_hour: "00:00", task_id: "", checklist_tasks_id: "" }]);
   };
 
   const removeTask = (index) => {
-    const newTasks = tasks.filter((_, i) => i !== index);
-    setTasks(newTasks);
-  };
-
-  const getJobTypeData = async (service_id) => {
-    const req = { service_id, action: "get" };
-    const data = { req, authToken: token };
-    await dispatch(JobType(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          setJobTypeList(response.data);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
+    setTasks(tasks.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
-    let validationErrors = {};
-
-    if (!formData.service_id)
-      validationErrors.service_id = "Service Type is required";
-    if (!formData.job_type_id)
-      validationErrors.job_type_id = "Job Type is required";
-    if (selectedClientType.length === 0)
-      validationErrors.client_type_id = "Please Select Client Type";
-    if (!formData?.check_list_name?.trim())
-      validationErrors.check_list_name = "Check List Name is required";
-    if (!formData.status) validationErrors.status = "Status is required";
-
-    tasks.forEach((task, index) => {
-      if (!task?.task_name?.trim())
-        validationErrors[`task_name_${index}`] = "Task Name is required";
-      if (!task.budgeted_hour)
-        validationErrors[`budgeted_hour_${index}`] =
-          "Budgeted Time is required";
-    });
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    // Validation logic similar to Create
+    if (!formData.check_list_name || !formData.work_flow_type || selectedClientType.length === 0) {
+      sweatalert.fire("Error", "Please fill required fields", "error");
       return;
     }
-
-    let ClienTypeArr = "";
-    selectedClientType.map((item) => {
-      ClienTypeArr += item + ",";
-    });
-
 
     const req = {
       checklists_id: location.state.checklist_id,
       ...formData,
-      client_type_id: ClienTypeArr.slice(0, -1),
-      task: tasks.map((task) => ({
-        task_name: task.task_name,
-        budgeted_hour: task.budgeted_hour,
-        task_id: task.task_id,
-        checklist_tasks_id: task.checklist_tasks_id,
-      })),
+      client_type_id: selectedClientType.join(","),
+      task: tasks.map(t => ({
+        task_id: t.task_id,
+        task_name: t.task_name,
+        budgeted_hour: t.budgeted_hour,
+        checklist_tasks_id: t.checklist_tasks_id
+      }))
     };
-    console.log( "req", req);
+    
     const data = { req, authToken: token };
-    await dispatch(UpdateChecklistData(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          sweatalert.fire({
-            title: "Success",
-            text: response.message,
-            icon: "success",
-            confirmButtonText: "Ok",
-          });
-          setFormData({
-            customer_id: location.state?.id || "",
-            service_id: "",
-            job_type_id: "",
-            client_type_id: "",
-            check_list_name: "",
-            status: "",
-          });
-          setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
-        
-            sessionStorage.setItem('settingTab', location?.state?.settingTab);
-           
-          window.history.back();
-        }
-      })
-      .catch((error) => {
-        return;
-      });
+    try {
+      const resp = await dispatch(UpdateChecklistData(data)).unwrap();
+      if (resp.status) {
+        sweatalert.fire("Success", resp.message, "success");
+        window.history.back();
+      }
+    } catch (err) {}
   };
 
   const handleMultipleSelect = (e) => {
-    if (e.length === 0) {
-      setErrors({ ...errors, client_type_id: "Please Select Client Type" });
-    } else {
-      const { client_type_id, ...rest } = errors;
-      setErrors(rest);
-    }
-
     setSelectedClientType(e);
   };
 
+  if (!isLoaded) return <div className="p-4 text-center">Loading...</div>;
 
   return (
     <div className="container-fluid">
       <div className="card mt-4">
-        <div className="card-header step-header-blue d-flex ">
-          <button
-            type="button"
-            className="btn p-0"
-            onClick={() =>{
-              sessionStorage.setItem('settingTab', location?.state?.settingTab);
-               window.history.back()}}
-            
-          >
-            <ArrowLeft size={16}/>
+        <div className="card-header d-flex step-header-blue">
+          <button type="button" className="btn p-0" onClick={() => window.history.back()}>
+            <ArrowLeft size={16} />
           </button>
           <h3 className="card-title mb-0">Update Checklist</h3>
         </div>
-
- 
-        {data && (
-          <div className="card-body">
-            <div className="row">
-              <div className="col-lg-4 mb-lg-0 mb-3">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <label className="form-label"> Select Service Type</label>
-                    <select
-                      className="default-select wide form-select"
-                      name="service_id"
-                      value={formData.service_id}
-                      onChange={(e) => {
-                        handleInputChange(e);
-                        getJobTypeData(e.target.value);
-                      }}
-                      disabled={true}
-                    >
-                      <option value="">Please Select Service Type</option>
-                      {serviceList.map((service) => (
-                        <option
-                          key={service.id}
-                          value={service.id}
-                        >
-                          {service.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.service_id && (
-                      <p className="text-danger">{errors.service_id}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-4 mb-lg-0 mb-3">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <label className="form-label"> Select Job Type</label>
-                    <select
-                      className="default-select wide form-select"
-                      name="job_type_id"
-                      value={formData.job_type_id}
-                      disabled={true}
-                      onChange={(e) => {
-                        handleInputChange(e);
-                        // getTaskData(e.target.value);
-                      }}
-                    >
-                      <option value="">Please Select Job Type</option>
-                      {jobTypeList &&
-                        jobTypeList.map((job) => (
-                          <option key={job.id} value={job.id}>
-                            {job.type}
-                          </option>
-                        ))}
-                    </select>
-                    {errors.job_type_id && (
-                      <p className="text-danger">{errors.job_type_id}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-4 ">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <label className="form-label">Client Type</label>
-                    <DropdownMultiselect
-                      options={options}
-                      name="client_type_id"
-                      handleOnChange={(e) => handleMultipleSelect(e)}
-                      selected={
-                        selectedClientType?.length > 0 ? selectedClientType : []
-                      } // Ensure it's an array
-                      placeholder="Select Client Type"
-                    />
-                    {errors.client_type_id && (
-                      <p className="error-text">{errors.client_type_id}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-4 mt-3">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <label className="form-label">Check List Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter Check List Name"
-                      name="check_list_name"
-                      value={formData.check_list_name}
-                      onChange={handleInputChange}
-                    />
-                    {errors.check_list_name && (
-                      <p className="text-danger">{errors.check_list_name}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-4 mt-3">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <label className="form-label">Status</label>
-                    <select
-                      className="default-select wide form-select"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Please Select Status</option>
-                      <option value="1">Active</option>
-                      <option value="0">Inactive</option>
-                    </select>
-                    {errors.status && (
-                      <p className="text-danger">{errors.status}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+        <div className="card-body">
+          <div className="row">
+            <div className="col-lg-4">
+              <label className="form-label">CheckList Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="check_list_name"
+                value={formData.check_list_name}
+                onChange={handleInputChange}
+              />
             </div>
-            <div className="row">
-              <div className="col-lg-12 mt-4">
-                <button
-                  type="button"
-                  className="btn btn-info ms-2"
-                  onClick={addTask}
-                >
-                  <Plus size={16}/> Add Task
-                </button>
-              </div>
+
+            <div className="col-lg-4">
+              <label className="form-label">Work Flow Type</label>
+              <select
+                className="form-select"
+                name="work_flow_type"
+                value={formData.work_flow_type}
+                onChange={handleInputChange}
+              >
+                <option value="">-- Select --</option>
+                <option value="3">Processing Type</option>
+                <option value="6">Reviewing Type</option>
+              </select>
             </div>
-            {tasks.map((task, index) => (
-              <div key={task.task_id} className="row mt-4 align-items-end">
-                <div className="col-lg-5 mb-lg-0 mb-3">
-                  <label className="form-label">Task Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Task Name"
-                    name="task_name"
-                    defaultValue={task.task_name}
-                    disabled={task.task_id}
-                    onChange={(e) => handleTaskChange(index, e)}
-                  />
-                  {errors[`task_name_${index}`] && (
-                    <p className="text-danger">
-                      {errors[`task_name_${index}`]}
-                    </p>
-                  )}
-                </div>
-                <div className="col-lg-5 mb-lg-0 mb-3">
-                  <label className="form-label">Budgeted Hours</label>
 
-                  <div className="input-group">
-                    {/* Hours Input */}
-                    <div className="hours-div w-50">
-                      <input
-                        type="number"
+            <div className="col-lg-4">
+              <label className="form-label">Customer Name</label>
+              <Select
+                isMulti
+                options={customerAllData}
+                value={customerAllData.filter(opt => formData.customer_id.includes(opt.value))}
+                onChange={(opts) => {
+                  const values = opts ? opts.map(o => o.value) : [];
+                  setFormData(p => ({ ...p, customer_id: values }));
+                }}
+                onInputChange={(v) => handleCustomerSearch(v)}
+                className="select-staff"
+              />
+            </div>
 
-                        className={errors[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
+            <div className="col-lg-4 mt-3">
+              <label className="form-label">Service Type</label>
+              <Select
+                isMulti
+                options={serviceAllData.map(s => ({ value: s.id.toString(), label: s.name }))}
+                value={serviceAllData
+                  .filter(s => formData.service_id.includes(s.id.toString()))
+                  .map(s => ({ value: s.id.toString(), label: s.name }))}
+                onChange={(opts) => {
+                  const values = opts ? opts.map(o => o.value) : [];
+                  setFormData(p => ({ ...p, service_id: values, job_type_id: [] }));
+                  getJobTypeData(values);
+                }}
+              />
+            </div>
 
-                        placeholder="Hours"
-                        name="hours"
-                        defaultValue={task.budgeted_hour?.split(":")[0] || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      <span className="input-group-text">H</span>
-                    </div>
+            <div className="col-lg-4 mt-3">
+              <label className="form-label">Job Type</label>
+              <Select
+                isMulti
+                options={jobTypeOptions.map(j => ({ value: j.id.toString(), label: j.type }))}
+                value={jobTypeOptions
+                  .filter(j => formData.job_type_id.includes(j.id.toString()))
+                  .map(j => ({ value: j.id.toString(), label: j.type }))}
+                onChange={(opts) => {
+                  const values = opts ? opts.map(o => o.value) : [];
+                  setFormData(p => ({ ...p, job_type_id: values }));
+                }}
+              />
+            </div>
 
-                    {/* Minutes Input */}
-                    <div className="hours-div w-50">
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Minutes"
-                        name="minutes"
-                        min="0"
-                        max="59"
-                        defaultValue={task.budgeted_hour?.minutes || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      <span className="input-group-text">M</span>
-                    </div>
-                  </div>
+            <div className="col-lg-4 mt-3">
+              <label className="form-label">Client Type</label>
+              <DropdownMultiselect
+                options={options}
+                handleOnChange={handleMultipleSelect}
+                selected={selectedClientType}
+              />
+            </div>
 
-                   
-                    {/* Minutes Error */}
-                    {errors[`budgeted_hour_${index}`] && (
-                      <p className="text-danger">
-                        {errors[`budgeted_hour_${index}`]}
-                      </p>
-                    )}
-                 
-                </div>
-                <div className="col-lg-2 d-flex align-items-center">
-                  {tasks.length > 1 && (
-                    <button
-                      type="button"
-                      className="delete-icon"
-                      onClick={() => removeTask(index)}
-                    >
-                      <i className="ti-trash text-danger "></i>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-            <div className="row mt-4">
-              <div className="col-lg-12">
-                <button
-                  type="button"
-                  className="btn btn-outline-success"
-                  onClick={handleSubmit}
-                >
-                 <Save size={16}/>
-                  Submit
-                </button>
-              </div>
+            <div className="col-lg-4 mt-3">
+              <label className="form-label">Status</label>
+              <select
+                className="form-select"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+              >
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
             </div>
           </div>
-        )}
+
+          {/* <div className="mt-4">
+            <button className="btn btn-info" onClick={addTask}><Plus size={16} /> Add Task</button>
+          </div> */}
+
+          {/* {tasks.map((task, index) => (
+            <div key={index} className="row mt-3 align-items-end">
+              <div className="col-lg-5">
+                <label className="form-label">Task Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="task_name"
+                  value={task.task_name}
+                  onChange={(e) => handleTaskChange(index, e)}
+                  disabled={task.task_id}
+                />
+              </div>
+              <div className="col-lg-5">
+                <label className="form-label">Budgeted Time</label>
+                <div className="input-group">
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="hours"
+                    placeholder="HH"
+                    value={task.budgeted_hour?.split(":")[0] || ""}
+                    onChange={(e) => handleTaskChange(index, e)}
+                  />
+                  <span className="input-group-text">H</span>
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="minutes"
+                    placeholder="MM"
+                    max="59"
+                    value={task.budgeted_hour?.split(":")[1] || ""}
+                    onChange={(e) => handleTaskChange(index, e)}
+                  />
+                  <span className="input-group-text">M</span>
+                </div>
+              </div>
+              <div className="col-lg-2">
+                <button className="btn text-danger" onClick={() => removeTask(index)}><i className="ti-trash"></i></button>
+              </div>
+            </div>
+          ))} */}
+
+          <div className="mt-4">
+            <button className="btn btn-secondary" onClick={() => window.history.back()}><X size={16} /> Cancel</button>
+            <button className="btn btn-outline-success ms-2" onClick={handleSubmit}><Save size={16} /> Submit</button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default CreateCheckList;
+export default EditCheckList;
