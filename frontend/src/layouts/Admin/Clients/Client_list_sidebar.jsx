@@ -1118,7 +1118,7 @@ const ClientLists = () => {
   };
 
   const selectCustomerId = (id, name) => {
-    if (id != "") {
+    if (id && id != "") {
       sessionStorage.setItem("customer_id_sidebar", id);
       setCustomerId(id);
       setCustomerName(name);
@@ -1132,23 +1132,30 @@ const ClientLists = () => {
       setGetJobDetails([]);
       setCustomerId("");
       setCustomerName("");
-      setClientData([]);
       setHararchyData({ customer: { id: "", trading_name: "" } });
+      setActiveTab("client");
       setCurrentPage(1);
       setSearchTerm("");
+      GetAllClientData("", 1, pageSize, "");
     }
   };
 
-  const customerOptions = (CustomerData || [])
-    .filter((val) => Number(val.status) === 1 && Number(val.form_process) === 4)
-    .map((val) => ({
-      value: val.id,
-      label: val.trading_name,
-    }));
+  const customerOptions = [
+    { value: "", label: "All" },
+    ...(CustomerData || [])
+      .filter(
+        (val) => Number(val.status) === 1 && Number(val.form_process) === 4,
+      )
+      .map((val) => ({
+        value: val.id,
+        label: val.trading_name,
+      })),
+  ];
 
-  const selectedOption = customerOptions.find(
-    (opt) => Number(opt.value) === Number(customerId),
-  );
+  const selectedOption =
+    customerId === ""
+      ? { value: "", label: "All" }
+      : customerOptions.find((opt) => Number(opt.value) === Number(customerId));
 
   const handleExport = async () => {
     let exportData = [];
