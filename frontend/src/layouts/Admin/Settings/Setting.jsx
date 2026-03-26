@@ -1360,18 +1360,31 @@ const Setting = () => {
       sortable: true,
       width: "15%",
     },
-
-    {
-      cell: (row) => <div title={row.service_name}>{row.service_name}</div>,
-      name: "Service Type",
-      selector: (row) => row.service_name,
+{
+      cell: (row) => <div title={row.work_flow_name}>{row.work_flow_name}</div>,
+      name: "Work Flow Type",
+      selector: (row) => row.work_flow_name,
+      sortable: true,
+      width: "20%",
+    },
+     {
+      cell: (row) => <div title={row.customer_name || "All"}>{row.customer_name || "All"}</div>,
+      name: "Customer Name",
+      selector: (row) => row.customer_name || "All",
       sortable: true,
       width: "20%",
     },
     {
-      cell: (row) => <div title={row.job_type_type}>{row.job_type_type}</div>,
+      cell: (row) => <div title={row.service_name || "All"}>{row.service_name || "All"}</div>,
+      name: "Service Type",
+      selector: (row) => row.service_name || "All",
+      sortable: true,
+      width: "20%",
+    },
+    {
+      cell: (row) => <div title={row.job_type_type || "All"}>{row.job_type_type || "All"}</div>,
       name: "Job Type",
-      selector: (row) => row.job_type_type,
+      selector: (row) => row.job_type_type || "All",
       sortable: true,
       width: "15%",
     },
@@ -1384,20 +1397,8 @@ const Setting = () => {
       sortable: true,
       width: "15%",
     },
-    {
-      cell: (row) => <div title={row.customer_name}>{row.customer_name}</div>,
-      name: "Customer Name",
-      selector: (row) => row.customer_name,
-      sortable: true,
-      width: "20%",
-    },
-    {
-      cell: (row) => <div title={row.work_flow_name}>{row.work_flow_name}</div>,
-      name: "Workflow Name",
-      selector: (row) => row.work_flow_name,
-      sortable: true,
-      width: "20%",
-    },
+   
+    
     {
       name: "Status",
       cell: (row) => (
@@ -1406,7 +1407,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
