@@ -814,7 +814,7 @@ const ClientList = () => {
   };
 
   const selectCustomerId = (id, name) => {
-    if (id != "") {
+    if (id && id != "") {
       sessionStorage.setItem("cust_id_sidebar", id);
       sessionStorage.setItem("cust_id_sidebar_name", name);
       setCustomerData([]);
@@ -825,12 +825,9 @@ const ClientList = () => {
       });
       setClientDetailSingle({ id: "", client_name: "" });
       setActiveTab("NoOfJobs");
-      // CHANGED: GetAllClientData ab client auto-select nahi karega
-      // Sirf client list load karega aur customer ki saari jobs dikhayega
       GetAllClientData(id, name);
     } else {
-      GetAllJobListByCustomer("");
-      setCustomerData([]);
+      GetAllJobListByCustomer("", 1, pageSize, "");
       setClientData([]);
       setCustomerDetails({ id: "", trading_name: "" });
       setHararchyData({
@@ -898,16 +895,24 @@ const ClientList = () => {
   }));
 
   // Prepare customer options for the select dropdown
-  const customerOptions = (customerDataAll || [])
-    .filter((val) => Number(val.status) === 1 && Number(val.form_process) === 4)
-    .map((val) => ({
-      value: val.id,
-      label: val.trading_name,
-    }));
+  const customerOptions = [
+    { value: "", label: "All" },
+    ...(customerDataAll || [])
+      .filter(
+        (val) => Number(val.status) === 1 && Number(val.form_process) === 4,
+      )
+      .map((val) => ({
+        value: val.id,
+        label: val.trading_name,
+      })),
+  ];
 
-  const selectedOption = customerOptions.find(
-    (opt) => Number(opt.value) === Number(customerDetails.id),
-  );
+  const selectedOption =
+    customerDetails.id === ""
+      ? { value: "", label: "All" }
+      : customerOptions.find(
+          (opt) => Number(opt.value) === Number(customerDetails.id),
+        );
 
   // CHANGED: Client options mein "All" option sabse pehle add kiya
   const clientOptions = [
