@@ -1358,35 +1358,35 @@ const Setting = () => {
       ),
       selector: (row) => row.check_list_name,
       sortable: true,
-      width: "15%",
+      width: "12%",
     },
 {
       cell: (row) => <div title={row.work_flow_type == "3" ? "Processing Type": "Reviewing Type"}>{row.work_flow_type == "3" ? "Processing Type": "Reviewing Type"}</div>,
       name: "Work Flow Type",
       selector: (row) => row.work_flow_type,
       sortable: true,
-      width: "20%",
+      width: "12%",
     },
      {
       cell: (row) => <div title={row.customer_name || "All"}>{row.customer_name || "All"}</div>,
       name: "Customer Name",
       selector: (row) => row.customer_name || "All",
       sortable: true,
-      width: "20%",
+      width: "13%",
     },
     {
       cell: (row) => <div title={row.service_name || "All"}>{row.service_name || "All"}</div>,
       name: "Service Type",
       selector: (row) => row.service_name || "All",
       sortable: true,
-      width: "20%",
+      width: "13%",
     },
     {
       cell: (row) => <div title={row.job_type_type || "All"}>{row.job_type_type || "All"}</div>,
       name: "Job Type",
       selector: (row) => row.job_type_type || "All",
       sortable: true,
-      width: "15%",
+      width: "13%",
     },
     {
       cell: (row) => (
@@ -1395,7 +1395,7 @@ const Setting = () => {
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "15%",
+      width: "12%",
     },
    
     
@@ -1413,7 +1413,7 @@ const Setting = () => {
       ),
       selector: (row) => row.status,
       sortable: true,
-      width: "15%",
+      width: "10%",
     },
 
     {
@@ -1495,7 +1495,7 @@ const Setting = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "20%",
+      width: "15%",
     },
   ];
 
