@@ -14,7 +14,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
-import { Save,Plus ,ArrowLeft, X} from "lucide-react";
+import { Save, Plus, ArrowLeft, X } from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -29,6 +29,7 @@ const CreateJob = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+  console.log("AllJobData ", AllJobData)
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -125,6 +126,8 @@ const CreateJob = () => {
     InvoiceRemark: "",
     notes: "",
     job_priority: "normal",
+    processing_checkList: "",
+    reviewing_checkList: ""
     //Bookkeeping_Frequency_id_2: "Daily",
 
   });
@@ -178,13 +181,13 @@ const CreateJob = () => {
             const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
             setClientType(clientInfo?.client_client_type || "");
             if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-             
+
               if (response.data?.services?.[0]?.service_id == 1) {
-                
+
                 await get_information_company_number(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
               }
               else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
-                 
+
                 await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
               }
             }
@@ -253,7 +256,7 @@ const CreateJob = () => {
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
-    
+
     let due_date = getDueDate(client_type, service_id);
     if (!['', null, undefined].includes(due_date)) {
       setJobData((prevState) => ({
@@ -319,7 +322,7 @@ const CreateJob = () => {
         return `${y}-${m}-${d}`;
 
       }
-       // Service Personal Tax Return
+      // Service Personal Tax Return
       else if (Number(service_id) === 4) {
         //const d = new Date('2026-02-31'); // Example date
         const d = new Date(); // Example date
@@ -330,7 +333,7 @@ const CreateJob = () => {
         }
         return `${y}-01-31`;
       }
-      
+
       else {
         return null;
       }
@@ -506,9 +509,9 @@ const CreateJob = () => {
     const date = new Date();
     if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
       if (value == 1) {
-       
+
         const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
-        
+
         if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
           await get_information_company_number(clientInfo?.client_company_number, value);
         }
@@ -774,7 +777,7 @@ const CreateJob = () => {
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
-      Client_id : jobData.client_id,
+      Client_id: jobData.client_id,
       client_id:
         location?.state?.goto == "Customer"
           ? Number(jobData.Client)
@@ -2283,7 +2286,7 @@ const CreateJob = () => {
                     window.history.back();
                   }}
                 >
-                  <ArrowLeft size={16}/>{" "}
+                  <ArrowLeft size={16} />{" "}
                 </button>
                 <h3 className="card-title mb-0">Create New Job</h3>
               </div>
@@ -2792,7 +2795,7 @@ const CreateJob = () => {
                                     <label className="form-label">
                                       Allocated To
                                     </label>
-                                  
+
                                     <Select
                                       name="AllocatedTo"
                                       id="AllocatedTo"
@@ -2836,7 +2839,7 @@ const CreateJob = () => {
                                       }
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
-                                        min={new Date().toISOString().slice(0, 10)}  
+                                      min={new Date().toISOString().slice(0, 10)}
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
                                     />
@@ -2862,7 +2865,7 @@ const CreateJob = () => {
                                       }
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
-                                        min={new Date().toISOString().slice(0, 10)}  
+                                      min={new Date().toISOString().slice(0, 10)}
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn || new Date().toISOString().slice(0, 10)}
                                     />
@@ -3232,7 +3235,7 @@ const CreateJob = () => {
                                       //   ?.map((data) => {
                                       //     return { label: data.full_name, value: data.id };
                                       //   })}
-                                       options={allStaffData
+                                      options={allStaffData
                                         ?.map((data) => {
                                           return { label: data.full_name, value: data.id };
                                         })}
@@ -3247,7 +3250,6 @@ const CreateJob = () => {
                                       }}
                                       placeholder="Select options"
                                     />
-
                                   </div>
 
 
@@ -3278,6 +3280,56 @@ const CreateJob = () => {
                                             }
                                           </div>
                                         )}
+                                    </div>
+                                  </div>
+
+                                  {/* Checklist Work */}
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Processing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="processing_checkList"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.processing_checkList
+                                        }
+                                      > 
+                                        <option value={null}>-- Select --</option>
+                                        {AllJobData?.data?.processing_checklist_data?.map((item, index) => (
+                                          <option key={index} value={item.id}>
+                                            {item.check_list_name}
+                                          </option>
+                                        ))}
+                                      </select>
+
+                                    </div>
+                                  </div>
+
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Reviewing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="reviewing_checkList"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.reviewing_checkList
+                                        }
+                                      >
+                                        <option value={null}>-- Select --</option>
+                                        {AllJobData?.data?.reviewing_checklist_data?.map((item, index) => (
+                                          <option key={index} value={item.id}>
+                                            {item.check_list_name}
+                                          </option>
+                                        ))}
+                                      </select>
+
                                     </div>
                                   </div>
 
@@ -3406,7 +3458,7 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
                                         onChange={HandleChange}
                                         value={jobData.ExpectedDeliveryDate}
                                       />
@@ -3443,7 +3495,7 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
 
                                         onChange={HandleChange}
                                         value={jobData.SubmissionDeadline}
@@ -3463,7 +3515,7 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
 
                                         onChange={HandleChange}
                                         value={jobData.CustomerDeadlineDate}
@@ -3501,7 +3553,7 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
-                                                                                min={new Date().toISOString().slice(0, 10)}  
+                                        min={new Date().toISOString().slice(0, 10)}
 
                                         onChange={HandleChange}
                                         value={jobData.InternalDeadlineDate}
@@ -3762,7 +3814,7 @@ const CreateJob = () => {
                                         // disabled={getChecklistId == ""}
                                         onClick={() => setShowAddJobModal(true)}
                                       >
-                                        <Plus size={16}/> Add
+                                        <Plus size={16} /> Add
                                         Task
                                       </button>
                                     </div>
@@ -3925,14 +3977,14 @@ const CreateJob = () => {
                               setAddTaskArr([]);
                             }}
                           >
-                          < X size={16}/>
+                            < X size={16} />
                             Close
                           </Button>
                           <Button
                             variant="btn btn-outline-success float-end "
                             onClick={handleAddCheckList}
                           >
-                          <Save size={16}/>
+                            <Save size={16} />
                             Submit
                           </Button>
                         </Modal.Footer>
@@ -4040,14 +4092,14 @@ const CreateJob = () => {
                               HandleReset();
                             }}
                           >
-                            < X size={16}/>
+                            < X size={16} />
                             Close
                           </Button>
                           <Button
                             variant="btn btn-info text-white float-end blue-btn"
                             onClick={handleAddTask}
                           >
-                            <Plus size={16}/>
+                            <Plus size={16} />
                             Add
                           </Button>
                         </Modal.Footer>
@@ -4060,7 +4112,7 @@ const CreateJob = () => {
                         className="btn btn-info text-white float-end blue-btn"
                         onClick={handleSubmit}
                       >
-                         <Plus size={16}/> Add Job
+                        <Plus size={16} /> Add Job
                       </button>
                     </div>
                   </div>

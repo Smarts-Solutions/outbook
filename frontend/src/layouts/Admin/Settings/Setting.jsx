@@ -1361,9 +1361,9 @@ const Setting = () => {
       width: "15%",
     },
 {
-      cell: (row) => <div title={row.work_flow_name}>{row.work_flow_name}</div>,
+      cell: (row) => <div title={row.work_flow_type == "3" ? "Processing Type": "Reviewing Type"}>{row.work_flow_type == "3" ? "Processing Type": "Reviewing Type"}</div>,
       name: "Work Flow Type",
-      selector: (row) => row.work_flow_name,
+      selector: (row) => row.work_flow_type,
       sortable: true,
       width: "20%",
     },

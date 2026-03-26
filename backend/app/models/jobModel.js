@@ -125,6 +125,7 @@ const getAddJobData = async (job) => {
    ORDER BY 
     customers.id DESC;
   `;
+
     const [customerDetails] = await pool.execute(queryCustomerDetails, [
       customer_id,
       StaffUserId,
@@ -149,6 +150,7 @@ const getAddJobData = async (job) => {
       queryCustomerWithCustomerAccountManager,
       [customer_id]
     );
+
     let customer_account_manager = [];
     if (rows2.length > 0) {
       customer_account_manager = rows2.map((row) => ({
@@ -340,6 +342,35 @@ const getAddJobData = async (job) => {
          `;
     const [rowsStaff] = await pool.execute(allStaff);
 
+
+    // Check list data Processing type
+     const queryProcessingType = `
+    SELECT *
+    FROM checklists
+    WHERE 
+        (FIND_IN_SET(?, customer_id)
+        OR customer_id IS NULL) AND work_flow_type = "3"
+  `;
+
+  const [processing_checklist_data] = await pool.execute(queryProcessingType, [customer_id]);
+
+
+  // Check list data reviewing type
+     const queryReviewingType = `
+    SELECT *
+    FROM checklists
+    WHERE 
+        (FIND_IN_SET(?, customer_id)
+        OR customer_id IS NULL) AND work_flow_type = "6"
+  `;
+
+  const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
+
+   
+  console.log("processing_checklist_data ",processing_checklist_data)
+  console.log("reviewing_checklist_data ",reviewing_checklist_data)
+
+
     return {
       status: true,
       message: "success.",
@@ -356,6 +387,9 @@ const getAddJobData = async (job) => {
         Manager: AccountManagerArr,
         allStaff: rowsStaff,
         customerDetails: customerDetails,
+        processing_checklist_data : processing_checklist_data,
+        reviewing_checklist_data : reviewing_checklist_data
+
       },
     };
   } catch (err) {
