@@ -3298,11 +3298,31 @@ const CreateJob = () => {
                                         }
                                       >
                                         <option value={null}>-- Select --</option>
-                                        {AllJobData?.data?.processing_checklist_data?.map((item, index) => (
-                                          <option key={index} value={item.id}>
-                                            {item.check_list_name}
-                                          </option>
-                                        ))}
+                                       
+                                        {AllJobData?.data?.processing_checklist_data
+                                          ?.filter((item) => {
+
+                                            // Service Filter
+                                            let serviceMatch = true
+                                            if (item.service_id) {
+                                              const serviceIds = item.service_id.split(",").map(Number)
+                                              serviceMatch = serviceIds.includes(jobData.Service)
+                                            }
+
+                                            // Job Type Filter
+                                            let jobTypeMatch = true
+                                            if (item.job_type_id) {
+                                              const jobTypeIds = item.job_type_id.split(",").map(Number)
+                                              jobTypeMatch = jobTypeIds.includes(jobData.JobType)
+                                            }
+
+                                            return serviceMatch && jobTypeMatch
+                                          })
+                                          ?.map((item, index) => (
+                                            <option key={index} value={item.id}>
+                                              {item.check_list_name}
+                                            </option>
+                                          ))}
                                       </select>
 
                                     </div>
