@@ -9,6 +9,7 @@ import JobInformation from "./JobInformation";
 import { useLocation } from "react-router-dom";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import {
+  Info,
   ArrowLeft,
   Circle,
   Clock,
@@ -76,7 +77,7 @@ const JobLogs = () => {
                           );
                         }}
                       >
-                        <Circle />
+                        <Info size={18} className="me-1"/>
                         Job Information
                       </button>
                     </li>
@@ -123,7 +124,7 @@ const JobLogs = () => {
                           sessionStorage.setItem("activeTab2", "job timeline");
                         }}
                       >
-                        <Table size={18} />
+                        <Table size={18} className="me-1" />
                         Job Timeline
                       </button>
                     </li>
@@ -145,7 +146,7 @@ const JobLogs = () => {
                           sessionStorage.setItem("activeTab2", "missing logs");
                         }}
                       >
-                        <AlertTriangle size={18} />
+                        <AlertTriangle size={18} className="me-1" />
                         Missing Logs
                       </button>
                     </li>
@@ -167,7 +168,7 @@ const JobLogs = () => {
                           sessionStorage.setItem("activeTab2", "queries");
                         }}
                       >
-                        <HelpCircle size={18} />
+                        <HelpCircle size={18} className="me-1"/>
                         Queries
                       </button>
                     </li>
@@ -189,7 +190,7 @@ const JobLogs = () => {
                           sessionStorage.setItem("activeTab2", "drafts");
                         }}
                       >
-                        <File />
+                        <File size={18} className="me-1" />
                         Drafts
                       </button>
                     </li>
@@ -211,7 +212,7 @@ const JobLogs = () => {
                           sessionStorage.setItem("activeTab2", "documents");
                         }}
                       >
-                        <Folder size={18} />
+                        <Folder  size={18} className="me-1" />
                         Documents
                       </button>
                     </li>
