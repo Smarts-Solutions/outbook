@@ -7,6 +7,8 @@ const {
   QueryRoleHelperFunction,
 } = require("../../app/utils/helper");
 
+const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
+
 const getAddJobData = async (job) => {
   const { customer_id, StaffUserId } = job;
 
@@ -344,7 +346,7 @@ const getAddJobData = async (job) => {
 
 
     // Check list data Processing type
-     const queryProcessingType = `
+    const queryProcessingType = `
     SELECT *
     FROM checklists
     WHERE 
@@ -352,11 +354,11 @@ const getAddJobData = async (job) => {
         OR customer_id IS NULL) AND work_flow_type = "3"
   `;
 
-  const [processing_checklist_data] = await pool.execute(queryProcessingType, [customer_id]);
+    const [processing_checklist_data] = await pool.execute(queryProcessingType, [customer_id]);
 
 
-  // Check list data reviewing type
-     const queryReviewingType = `
+    // Check list data reviewing type
+    const queryReviewingType = `
     SELECT *
     FROM checklists
     WHERE 
@@ -364,11 +366,11 @@ const getAddJobData = async (job) => {
         OR customer_id IS NULL) AND work_flow_type = "6"
   `;
 
-  const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
+    const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
 
-   
-  console.log("processing_checklist_data ",processing_checklist_data)
-  console.log("reviewing_checklist_data ",reviewing_checklist_data)
+
+    // console.log("processing_checklist_data ",processing_checklist_data)
+    // console.log("reviewing_checklist_data ",reviewing_checklist_data)
 
 
     return {
@@ -387,8 +389,8 @@ const getAddJobData = async (job) => {
         Manager: AccountManagerArr,
         allStaff: rowsStaff,
         customerDetails: customerDetails,
-        processing_checklist_data : processing_checklist_data,
-        reviewing_checklist_data : reviewing_checklist_data
+        processing_checklist_data: processing_checklist_data,
+        reviewing_checklist_data: reviewing_checklist_data
 
       },
     };
@@ -2930,7 +2932,7 @@ const getJobById = async (job) => {
       );
 
       result = {
-        timesheet_job_id:rows[0].timesheet_job_id,
+        timesheet_job_id: rows[0].timesheet_job_id,
         job_id: rows[0].job_id,
         staff_created_id: rows[0].staff_created_id,
         job_code_id: rows[0].job_code_id,
@@ -3250,7 +3252,7 @@ const jobUpdate = async (job) => {
     // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
     // console.log("ExistJob?.job_type_id ",job_type_id)
 
-   // return
+    // return
 
     // console.log("ExistJob", ExistJob);
     // console.log("expected_delivery_date", expected_delivery_date);
@@ -3604,12 +3606,12 @@ const jobUpdate = async (job) => {
       if (tasks.task.length > 0) {
         // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
         // console.log("ExistJob?.job_type_id ",job_type_id)
-        if(Number(ExistJob?.job_type_id) != Number(job_type_id)){
-            const deleteQuery = `
+        if (Number(ExistJob?.job_type_id) != Number(job_type_id)) {
+          const deleteQuery = `
               DELETE FROM client_job_task 
               WHERE job_id = ? AND client_id = ?
           `;
-          await pool.execute(deleteQuery, [job_id,client_id]);
+          await pool.execute(deleteQuery, [job_id, client_id]);
         }
 
 
@@ -3620,7 +3622,7 @@ const jobUpdate = async (job) => {
           .filter((tsk) => tsk.task_id !== null && tsk.task_id !== "")
           .map((tsk) => tsk.task_id);
 
-      
+
         // Get existing task IDs for the checklist
         const getExistingTasksQuery = `
             SELECT task_id FROM client_job_task WHERE job_id = ?
@@ -3641,8 +3643,8 @@ const jobUpdate = async (job) => {
           const deleteQuery = `
               DELETE FROM client_job_task 
               WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
-                        .map(() => "?")
-                        .join(",")})
+              .map(() => "?")
+              .join(",")})
           `;
           await pool.execute(deleteQuery, [
             job_id,
@@ -4291,113 +4293,262 @@ const copy_job = async (job) => {
   const { row, StaffUserId, ip } = job;
   console.log("job -->>>>", row.job_id);
 
-  try{
+  try {
 
-  let id = row.job_id;
-  // find job 
-  const [[data]] = await pool.execute(
-    `SELECT * FROM jobs WHERE id = ?`,
-    [id]
-  );
-
-  if (!data) {
-    return { status: false, message: "Job not found" };
-  }
-
-  delete data.id;
-
-   let input = {
-    table: "jobs",
-    field: "job_id",
-  };
-  //CUS_CLI_00001
-  const job_id = await generateNextUniqueCode(input);
-
-  data.created_at = new Date();
-  data.updated_at = new Date();
-  data.date_received_on = new Date();
-  data.allocated_on = new Date();
-  data.status_type = 1 ;
-  data.job_id = job_id ;
-  data.status_updation_date = null ;
-  
-  
-
-  const columns = Object.keys(data).join(",");
-  const values = Object.values(data);
-
-  const placeholders = Object.keys(data).map(() => "?").join(",");
-
-  const [result] = await pool.execute(
-    `INSERT INTO jobs (${columns}) VALUES (${placeholders})`,
-    values
-  );
-
-  // last insert id
-  const insertId = result.insertId;
-
-  // insert job tasks
-  const [tasks] = await pool.execute(
-    `SELECT * FROM client_job_task WHERE job_id = ?`,
-    [id]
-  );
-
-  for (const task of tasks) {
-   
-    let job_id = insertId;
-    let client_id = task.client_id;
-    let task_id  = task.task_id;
-    let task_status = task.task_status;
-    let time = task.time;
-    await pool.execute(
-      `INSERT INTO client_job_task SET job_id = ?, client_id = ?, task_id = ?, task_status = ?, time = ?`,
-      [job_id, client_id, task_id, task_status, time]
+    let id = row.job_id;
+    // find job 
+    const [[data]] = await pool.execute(
+      `SELECT * FROM jobs WHERE id = ?`,
+      [id]
     );
-  }
 
-  // insert job allocated staff
-  const [allocatedStaff] = await pool.execute(
-    `SELECT * FROM job_allowed_staffs WHERE job_id = ?`,
-    [id]
-  );
+    if (!data) {
+      return { status: false, message: "Job not found" };
+    }
 
-  for (const staff of allocatedStaff) {
-    let job_id = insertId;
-    let staff_id = staff.staff_id;
+    const [[clientInfo]] = await pool.execute(
+      `
+    SELECT 
+    clients.client_type,
+    client_company_information.company_number
+    FROM jobs
+    JOIN clients ON jobs.client_id = clients.id
+    LEFT JOIN client_company_information ON client_company_information.client_id = clients.id
+    WHERE jobs.id = ?
+    `,
+      [id]
+    );
+
+    console.log("service id -->>", data?.service_id)
+    console.log("clientInfo -->>", clientInfo?.client_type)
+    console.log("clientInfo company_number -->>", clientInfo?.company_number)
+
+
+
+    delete data.id;
+
+    let input = {
+      table: "jobs",
+      field: "job_id",
+    };
+    //CUS_CLI_00001
+    const job_id = await generateNextUniqueCode(input);
+
+    data.created_at = new Date();
+    data.updated_at = new Date();
+    data.date_received_on = new Date();
+    data.allocated_on = new Date();
+    data.status_type = 1;
+    data.job_id = job_id;
+    data.status_updation_date = null;
+
+    // Due Date Logic
+    let Year_Ending_id_1 = null;
+    let due_on = null
+
+    if ([2, 5].includes(Number(clientInfo?.client_type)) && Number(data?.service_id) == 1) {
+      const compayDetails = await getCompanyOfficerDetailsFun(clientInfo?.company_number)
+      // console.log("compayDetails", JSON.stringify(compayDetails , null ,2))
+      if (compayDetails.status) {
+        Year_Ending_id_1 = compayDetails?.data?.accounts?.next_accounts?.period_end_on;
+        due_on = compayDetails?.data?.accounts?.next_accounts?.due_on;
+      }
+    } else {
+      due_on = await getDueDate(clientInfo?.client_type, data?.service_id);
+    }
+
     
-    await pool.execute(
-      `INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`,
-      [job_id, staff_id]
+    data.Year_Ending_id_1 = Year_Ending_id_1
+    data.due_on = due_on
+
+
+
+
+
+
+
+    return
+
+
+
+
+
+    const columns = Object.keys(data).join(",");
+    const values = Object.values(data);
+
+    const placeholders = Object.keys(data).map(() => "?").join(",");
+
+    const [result] = await pool.execute(
+      `INSERT INTO jobs (${columns}) VALUES (${placeholders})`,
+      values
     );
+
+    // last insert id
+    const insertId = result.insertId;
+
+    // insert job tasks
+    const [tasks] = await pool.execute(
+      `SELECT * FROM client_job_task WHERE job_id = ?`,
+      [id]
+    );
+
+    for (const task of tasks) {
+
+      let job_id = insertId;
+      let client_id = task.client_id;
+      let task_id = task.task_id;
+      let task_status = task.task_status;
+      let time = task.time;
+      await pool.execute(
+        `INSERT INTO client_job_task SET job_id = ?, client_id = ?, task_id = ?, task_status = ?, time = ?`,
+        [job_id, client_id, task_id, task_status, time]
+      );
+    }
+
+    // insert job allocated staff
+    const [allocatedStaff] = await pool.execute(
+      `SELECT * FROM job_allowed_staffs WHERE job_id = ?`,
+      [id]
+    );
+
+    for (const staff of allocatedStaff) {
+      let job_id = insertId;
+      let staff_id = staff.staff_id;
+
+      await pool.execute(
+        `INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`,
+        [job_id, staff_id]
+      );
+    }
+
+
+
+
+
+
+    const currentDate = new Date();
+    await SatffLogUpdateOperation({
+      staff_id: StaffUserId,
+      ip: ip,
+      date: currentDate.toISOString().split("T")[0],
+      module_name: "job",
+      log_message: `Copied job code:`,
+      permission_type: "copied",
+      module_id: insertId,
+    });
+
+
+
+    return { status: true, message: "Job copied successfully" };
   }
- 
-
-
-
-
-
-  const currentDate = new Date();
-  await SatffLogUpdateOperation({
-    staff_id: StaffUserId,
-    ip: ip,
-    date: currentDate.toISOString().split("T")[0],
-    module_name: "job",
-    log_message: `Copied job code:`,
-    permission_type: "copied",
-    module_id: insertId,
-  });
-
-
-
-  return { status: true, message: "Job copied successfully" };
-}
-catch(err){
-  console.log(err);
-  return { status: false, message: "Error copying job" };
-}
-
+  catch (err) {
+    console.log(err);
+    return { status: false, message: "Error copying job" };
+  }
 
 }
+
+async function getDueDate(client_type, service_id) {
+
+  if (["1", "3", "7"].includes(client_type)) {
+    // Service Account Production
+    if (Number(service_id) === 1) {
+      const d = new Date();
+      const year = d.getFullYear();
+      let dueYear = year;
+      // If created date is AFTER Jan 31 → next year's Jan 31
+      if (d > new Date(`${year}-01-31`)) {
+        dueYear = year + 1;
+      }
+      return `${dueYear}-01-31`;
+    }
+    // Service Personal Tax Return
+    else if (Number(service_id) === 4) {
+
+      //const d = new Date('2026-02-31'); // Example date
+      const d = new Date(); // Example date
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      if (m >= 4 || m <= 1) {
+        return `${m >= 4 ? y + 1 : y}-01-31`;
+      }
+      return `${y}-01-31`;
+    }
+
+    // 1 month + 7 day added for this service
+    else if (Number(service_id) === 8) {
+
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+      nextNextMonth.setDate(nextNextMonth.getDate() + 6);
+      const y = nextNextMonth.getFullYear();
+      const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
+      const d = String(nextNextMonth.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+
+    } else {
+      return null;
+    }
+  }
+  else {
+    // 1 month + 7 day added for this service
+    if (Number(service_id) === 8) {
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+      nextNextMonth.setDate(nextNextMonth.getDate() + 6);
+      const y = nextNextMonth.getFullYear();
+      const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
+      const d = String(nextNextMonth.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+
+    }
+    // Service Personal Tax Return
+    else if (Number(service_id) === 4) {
+      //const d = new Date('2026-02-31'); // Example date
+      const d = new Date(); // Example date
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      if (m >= 4 || m <= 1) {
+        return `${m >= 4 ? y + 1 : y}-01-31`;
+      }
+      return `${y}-01-31`;
+    }
+
+    else {
+      return null;
+    }
+
+  }
+
+}
+
+const get_information_company_number = async (company_number, service_id) => {
+  //  const data = { company_number: company_number, type: 'company_info' };
+  const data = await getCompanyOfficerDetails('', '', '125', 'company_info')
+  //  await dispatch(GetOfficerDetails(data))
+  //    .unwrap()
+  //    .then((res) => {
+  //      if (res.status) {
+
+  //        if (!['', null, undefined].includes(service_id) && Number(service_id) == 1) {
+
+  //           //  Year_Ending_id_1: res.data?.accounts?.next_accounts?.period_end_on,
+  //           //  DueOn: res.data?.accounts?.next_accounts?.due_on,
+
+  //        }
+
+  //      } else {
+
+
+  //      }
+  //    })
+  //    .catch((err) => {
+  //      return;
+  //    }
+  //    );
+};
 
 module.exports = {
   getAddJobData,

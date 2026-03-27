@@ -230,6 +230,7 @@ const CreateJob = () => {
 
 
   const get_information_company_number = async (company_number, service_id) => {
+  
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()

@@ -54,10 +54,8 @@ const seachCompany = async (req, res) => {
 
 const getCompanyOfficerDetails = async (req, res) => {
   try {
+
     let type = req.body.type;
-
-    console.log("type", type);
-
     if (type != undefined && type == "company_info") {
       if (!["", null, undefined].includes(req.body.company_number)) {
         let config = {
@@ -117,9 +115,39 @@ const getCompanyOfficerDetails = async (req, res) => {
   }
 }
 
+const getCompanyOfficerDetailsFun = async (company_number) => {
+  try {
+    
+    if (!["", null, undefined].includes(company_number)) {
+
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: 'https://api.companieshouse.gov.uk/company/' + company_number,
+        headers: {
+          'Authorization': 'Basic bm9uT2Y4Snk5X2thX2ZnRzJndEZ5TkxwYThsSm1zVkd2ekZadlRiRjo='
+        }
+      };
+
+      const response = await axios.request(config);
+
+      return { status: true, data: response.data };
+
+    } else {
+      return { status: false, data: [] };
+    }
+
+  } catch (error) {
+    console.log("API Error", error.message);
+    return { status: false, data: [] };
+  }
+};
+
 
 
 module.exports = {
   seachCompany,
-  getCompanyOfficerDetails
+  getCompanyOfficerDetails,
+  getCompanyOfficerDetailsFun
+
 };
