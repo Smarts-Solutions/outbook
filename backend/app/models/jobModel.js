@@ -4524,31 +4524,7 @@ async function getDueDate(client_type, service_id) {
 
 }
 
-const get_information_company_number = async (company_number, service_id) => {
-  //  const data = { company_number: company_number, type: 'company_info' };
-  const data = await getCompanyOfficerDetails('', '', '125', 'company_info')
-  //  await dispatch(GetOfficerDetails(data))
-  //    .unwrap()
-  //    .then((res) => {
-  //      if (res.status) {
 
-  //        if (!['', null, undefined].includes(service_id) && Number(service_id) == 1) {
-
-  //           //  Year_Ending_id_1: res.data?.accounts?.next_accounts?.period_end_on,
-  //           //  DueOn: res.data?.accounts?.next_accounts?.due_on,
-
-  //        }
-
-  //      } else {
-
-
-  //      }
-  //    })
-  //    .catch((err) => {
-  //      return;
-  //    }
-  //    );
-};
 
 module.exports = {
   getAddJobData,
