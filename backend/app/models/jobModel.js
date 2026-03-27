@@ -4340,11 +4340,12 @@ const copy_job = async (job) => {
     data.allocated_on = new Date();
     data.status_type = 1;
     data.job_id = job_id;
-    data.status_updation_date = null;
+    
 
     // Due Date Logic
     let Year_Ending_id_1 = null;
     let due_on = null
+    let sla_deadline_date = new Date().toISOString().split("T")[0]
 
     if ([2, 5].includes(Number(clientInfo?.client_type)) && Number(data?.service_id) == 1) {
       const compayDetails = await getCompanyOfficerDetailsFun(clientInfo?.company_number)
@@ -4356,10 +4357,17 @@ const copy_job = async (job) => {
     } else {
       due_on = await getDueDate(clientInfo?.client_type, data?.service_id);
     }
-
+   
     
     data.Year_Ending_id_1 = Year_Ending_id_1
     data.due_on = due_on
+
+
+
+    /// SLA Dead Line Logic ////
+
+
+    console.log("data.sla_deadline_date;",sla_deadline_date)
 
 
 
@@ -4522,6 +4530,58 @@ async function getDueDate(client_type, service_id) {
 
   }
 
+}
+
+async function getSlaDeadline(value ,Bookkeeping_Frequency_id_2) {
+   const date = new Date();
+    let value = data?.service_id
+    let Bookkeeping_Frequency_id_2 = data?.Bookkeeping_Frequency_id_2
+    if ([1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+      if (value == 1) {
+        date.setDate(date.getDate() + 28);
+        return date.toISOString().split("T")[0];
+      } 
+      else if (value == 4) {
+        
+        date.setDate(date.getDate() + 5);
+        return date.toISOString().split("T")[0];
+
+      } 
+      
+      else if (value == 3) {
+        date.setDate(date.getDate() + 5);
+        return date.toISOString().split("T")[0];
+      } 
+      
+      else if (value == 8) {
+        date.setDate(date.getDate() + 10);
+        return date.toISOString().split("T")[0];
+      }
+     
+      ////// 
+
+      else if(value == 2){
+         if (Bookkeeping_Frequency_id_2 == "Daily") {
+        date.setDate(date.getDate() + 1);
+        return date.toISOString().split("T")[0];
+        
+      } else if (Bookkeeping_Frequency_id_2 == "Weekly") {
+        date.setDate(date.getDate() + 3);
+        return date.toISOString().split("T")[0];
+      } else if (Bookkeeping_Frequency_id_2 == "Monthly") {
+        date.setDate(date.getDate() + 10);
+        return date.toISOString().split("T")[0];
+      } else if (Bookkeeping_Frequency_id_2 == "Quarterly") {
+        date.setDate(date.getDate() + 15);
+        return date.toISOString().split("T")[0];
+      } else if (Bookkeeping_Frequency_id_2 == "Yearly") {
+        date.setDate(date.getDate() + 30);
+        return date.toISOString().split("T")[0];
+       }
+      }
+
+    }
+  
 }
 
 
