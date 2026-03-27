@@ -649,7 +649,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label">Upload File (CSV / Excel)</label>
+                  <label className="form-label">Upload File (CSV / Excel) <a href="/sample_checklist.csv" download className="ms-2 text-primary" style={{ fontSize: "12px", textDecoration: "underline" }}>Download Sample File</a></label>
 
                   <input
                     type="file"
