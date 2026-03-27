@@ -14,6 +14,8 @@ import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { Save, Plus, ArrowLeft, X } from "lucide-react";
 import Select from "react-select";
+import * as XLSX from "xlsx";
+
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -71,15 +73,145 @@ const CreateCheckList = () => {
         "text/csv",
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel.sheet.macroEnabled.12",
       ];
 
       if (!allowedTypes.includes(file.type)) {
-        alert("Only CSV or Excel files allowed");
+        sweatalert.fire({
+          icon: "error",
+          title: "Invalid File Type",
+          text: "Only CSV or Excel files allowed",
+        });
         e.target.value = null;
+        setSelectedFile(null);
         return;
       }
 
-      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const binaryData = event.target.result;
+          const workbook = XLSX.read(binaryData, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (rows.length === 0) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid File",
+              text: "The uploaded file is empty.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          const expectedHeaders = ["Questions", "Yes", "No", "Not Applicable", "Comment", "Date"];
+          const headers = rows[0].map(h => (h ? h.toString().trim() : ""));
+
+          // 1. Check if headers count matches (no extra, no less)
+          if (headers.length !== expectedHeaders.length) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid Format",
+              text: "The file format is invalid. Please ensure there are exactly 6 columns: Questions, Yes, No, Not Applicable, Comment, Date.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          // 2. Check if header names match exactly
+          const isHeaderValid = expectedHeaders.every((val, index) => val === headers[index]);
+          if (!isHeaderValid) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid Format",
+              text: "Column headers do not match the required format. Please don't change any heading.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          const dataRows = rows.slice(1);
+          // Filter out truly empty rows
+          const nonEmptyDataRows = dataRows.filter(row => row && row.some(cell => cell !== null && cell !== undefined && cell.toString().trim() !== ""));
+
+          if (nonEmptyDataRows.length === 0) {
+            sweatalert.fire({
+              icon: "error",
+              title: "No Data found",
+              text: "The file must contain at least one question and should not be empty.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          let isDataFormatValid = true;
+          let errorMessage = "";
+
+          for (let i = 0; i < dataRows.length; i++) {
+            const row = dataRows[i];
+            // Skip completely empty rows
+            if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) continue;
+
+            // 3. Check data in Question column (index 0)
+            const questionVal = row[0];
+            if (!questionVal || questionVal.toString().trim() === "") {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'Questions' column should have data.`;
+              break;
+            }
+
+            // 4. Check if other columns have data (index 1 to 5) or extra columns (index >= 6)
+            for (let j = 1; j < row.length; j++) {
+              if (row[j] !== null && row[j] !== undefined && row[j].toString().trim() !== "") {
+                isDataFormatValid = false;
+                errorMessage = `Invalid data at row ${i + 2}. Data should only be in the 'Questions' column. All other columns must remain empty.`;
+                break;
+              }
+            }
+            if (!isDataFormatValid) break;
+          }
+
+          if (!isDataFormatValid) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid Format",
+              text: errorMessage,
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          setSelectedFile(file);
+        } catch (error) {
+          console.error("File processing error:", error);
+          sweatalert.fire({
+            icon: "error",
+            title: "Error",
+            text: "Could not process the file. Please use a valid CSV or Excel file.",
+          });
+          e.target.value = null;
+          setSelectedFile(null);
+        }
+      };
+
+      reader.onerror = () => {
+        sweatalert.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to read the file.",
+        });
+        e.target.value = null;
+        setSelectedFile(null);
+      };
+
+      reader.readAsBinaryString(file);
     }
   };
 
@@ -649,7 +781,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label">Upload File (CSV / Excel)</label>
+                  <label className="form-label">Upload File (CSV / Excel) <a href="/sample_checklist.csv" download className="ms-2 text-primary" style={{ fontSize: "12px", textDecoration: "underline" }}>Download Sample File</a></label>
 
                   <input
                     type="file"
