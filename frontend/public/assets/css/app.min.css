@@ -4951,3 +4951,13 @@ button.secondary-icon,
 /* .css-b62m3t-container {
   z-index: 2;
 } */
+ /*
+
+.icon-fix .me-1 {  
+    margin-top: -3px;
+}*/
+img, svg {
+    vertical-align: middle;
+    position: relative;
+    top: -2px; /* tweak this value */
+}

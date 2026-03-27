@@ -2397,7 +2397,7 @@ const Setting = () => {
                   <div className="col-md-12">
                     <>
                       <ul
-                        className="nav nav-pills  rounded-tabs"
+                        className="nav nav-pills  rounded-tabs icon-fix"
                         id="pills-tab"
                         role="tablist"
                       >
