@@ -1121,7 +1121,7 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => setActiveTab(tab.id)}
                       >
-                        <i className={tab.icon}></i>
+                        {tab.icon}{" "}
                         {tab.label}
                       </button>
                     </li>

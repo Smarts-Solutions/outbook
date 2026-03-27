@@ -348,6 +348,41 @@ const JobStatus = () => {
     });
   };
 
+  const maxManagers = allLinkedData && allLinkedData.length > 0
+    ? Math.max(...allLinkedData.map((row) => (row.account_managers || []).length))
+    : 0;
+
+  const dynamicManagerColumns = Array.from({ length: maxManagers }).flatMap(
+    (_, index) => [
+      {
+        name: `Individual Account Manager`,
+        cell: (row) => {
+          const manager = row.account_managers?.[index];
+          return (
+            <div title={manager?.full_name || "-"}>
+              {manager?.full_name || "-"}
+            </div>
+          );
+        },
+        selector: (row) => row.account_managers?.[index]?.full_name || "-",
+        sortable: true,
+      },
+      {
+        name: `Employee ID`,
+        cell: (row) => {
+          const manager = row.account_managers?.[index];
+          return (
+            <div title={manager?.employee_number || "-"}>
+              {manager?.employee_number || "-"}
+            </div>
+          );
+        },
+        selector: (row) => row.account_managers?.[index]?.employee_number || "-",
+        sortable: true,
+      },
+    ]
+  );
+
   const JobColumns = [
 
 
@@ -398,6 +433,27 @@ const JobStatus = () => {
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
     },
+    {
+      name: "Account Manager",
+      cell: (row) => (
+        <div title={row.account_manager_name || "-"}>
+          {row.account_manager_name || "-"}
+        </div>
+      ),
+      selector: (row) => row.account_manager_name || "-",
+      sortable: true,
+    },
+    {
+      name: "Employee ID",
+      cell: (row) => (
+        <div title={row.account_manager_employee_number || "-"}>
+          {row.account_manager_employee_number || "-"}
+        </div>
+      ),
+      selector: (row) => row.account_manager_employee_number || "-",
+      sortable: true,
+    },
+    ...dynamicManagerColumns,
     {
       name: "Job Type",
       cell: (row) => (
@@ -1006,44 +1062,64 @@ const JobStatus = () => {
         }));
         downloadCSV(data, "Staff.csv");
       } else {
-        const data = allData.map((item) => {
-          const status = statusDataAll.find(
-            (s) => Number(s.id) === Number(item.status_type),
-          );
-          return {
-            "Job ID": item.job_code_id || "-",
-            "Job Priority": item.job_priority
-              ? item.job_priority.charAt(0).toUpperCase() +
-              item.job_priority.slice(1).toLowerCase()
-              : "-",
-            "Client Name": item.client_trading_name || "-",
-            "Job Type": item.job_type_name || "-",
-            Status: status ? status.name : "-",
-            "Client Contact Person":
-              (item.account_manager_officer_first_name || "") +
-              " " +
-              (item.account_manager_officer_last_name || ""),
-            "Client Job Code": item.client_job_code || "-",
-            "Outbook Account Manager":
-              (item.outbooks_acount_manager_first_name || "") +
-              " " +
-              (item.outbooks_acount_manager_last_name || ""),
-            "Allocated To": item.allocated_first_name
-              ? item.allocated_first_name + " " + item.allocated_last_name
-              : "-",
-            Timesheet:
-              item.total_hours_status == "1" && item.total_hours
-                ? item.total_hours.split(":")[0] +
-                "h " +
-                item.total_hours.split(":")[1] +
-                "m"
-                : "-",
-            Invoicing: item.invoiced == "1" ? "YES" : "NO",
-            "Created By": item.job_created_by || "-",
-            "Created At": item.created_at || "-",
-          };
-        });
-        downloadCSV(data, `Jobs_${key || "all"}.csv`);
+            const exportMaxManagers = allData && allData.length > 0
+                ? Math.max(...allData.map((row) => (row.account_managers || []).length))
+                : 0;
+            
+            const data = allData.map((item) => {
+                const status = statusDataAll.find(
+                    (s) => Number(s.id) === Number(item.status_type)
+                );
+                
+                const rowData = {
+                    "Job ID": item.job_code_id || "-",
+                    "Job Priority": item.job_priority
+                        ? item.job_priority.charAt(0).toUpperCase() +
+                        item.job_priority.slice(1).toLowerCase()
+                        : "-",
+                    "Client Name": item.client_trading_name || "-",
+                    "Account Manager": item.account_manager_name || "-",
+                    "Employee ID": item.account_manager_employee_number || "-",
+                };
+
+                // Add dynamic managers to export
+                for (let i = 0; i < exportMaxManagers; i++) {
+                    const manager = item.account_managers?.[i];
+                    rowData[`Individual Account Manager ${i + 1}`] = manager?.full_name || "-";
+                    rowData[`Employee ID ${i + 1}`] = manager?.employee_number || "-";
+                }
+
+                // Add remaining fields
+                Object.assign(rowData, {
+                    "Job Type": item.job_type_name || "-",
+                    Status: status ? status.name : "-",
+                    "Client Contact Person":
+                        (item.account_manager_officer_first_name || "") +
+                        " " +
+                        (item.account_manager_officer_last_name || ""),
+                    "Client Job Code": item.client_job_code || "-",
+                    "Outbook Account Manager":
+                        (item.outbooks_acount_manager_first_name || "") +
+                        " " +
+                        (item.outbooks_acount_manager_last_name || ""),
+                    "Allocated To": item.allocated_first_name
+                        ? item.allocated_first_name + " " + item.allocated_last_name
+                        : "-",
+                    Timesheet:
+                        item.total_hours_status == "1" && item.total_hours
+                            ? item.total_hours.split(":")[0] +
+                            "h " +
+                            item.total_hours.split(":")[1] +
+                            "m"
+                            : "-",
+                    Invoicing: item.invoiced == "1" ? "YES" : "NO",
+                    "Created By": item.job_created_by || "-",
+                    "Created At": item.created_at || "-",
+                });
+
+                return rowData;
+            });
+            downloadCSV(data, `Jobs_${key || "all"}.csv`);
       }
     } catch (error) {
       Swal.fire({ title: "Error", text: "Export failed.", icon: "error" });

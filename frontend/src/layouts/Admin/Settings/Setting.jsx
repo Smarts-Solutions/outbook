@@ -2457,10 +2457,10 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={roleDataAll.data.map((data) => ({
-                        id: data.id,
-                        role_name: data.role_name,
-                        hourminute: data.hourminute,
-                        status: data.status == 1 ? "Active" : "Inactive",
+                        "Role Name": data.role_name,
+                        "Hours": data.hourminute?.split(":")[0] || "0",
+                        "Minutes": data.hourminute?.split(":")[1] || "0",
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName={`Role Data`}
                     />
@@ -2505,9 +2505,8 @@ const Setting = () => {
                         className="btn btn-outline-info fw-bold float-end border-3 "
                         apiData={personRoleDataAll?.data?.map((data) => {
                           return {
-                            id: data.id,
-                            name: data.name,
-                            status: data.status == 1 ? "Active" : "Inactive",
+                            "Role Name": data.name,
+                            "Status": data.status == "1" ? "Active" : "Deactive",
                           };
                         })}
                         fileName={`Customer Contact Person Role Data`}
@@ -2550,9 +2549,8 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={statusTypeDataAll.data.map((data) => ({
-                        id: data.id,
-                        type: data.type,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Status Name": data.type,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Status Data"
                     />
@@ -2594,9 +2592,8 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={serviceDataAll.data.map((data) => ({
-                        id: data.id,
-                        name: data.name,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Service Name": data.name,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Service Data"
                     />
@@ -2638,9 +2635,8 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={clientIndustryDataAll.data.map((data) => ({
-                        id: data.id,
-                        name: data.business_type,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Client Industry Name": data.business_type,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Client Industry Data"
                     />
@@ -2682,11 +2678,10 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={countryDataAll.data.map((data) => ({
-                        id: data.id,
-                        name: data.name,
-                        code: data.code,
-                        currency: data.currency,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Country Code": data.code,
+                        "Country Name": data.name,
+                        "Currency": data.currency,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Country Data"
                     />
@@ -2728,9 +2723,8 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={incorporationDataAll.map((data) => ({
-                        id: data.id,
-                        name: data.name,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Incorporation Name": data.name,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Incorporation Data"
                     />
@@ -2772,9 +2766,8 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={customerSourceDataDataAll.map((data) => ({
-                        id: data.id,
-                        name: data.name,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Source Name": data.name,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Customer Source Data"
                     />
@@ -2816,9 +2809,13 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={getCheckList.map((data) => ({
-                        id: data.checklists_id,
-                        name: data.checklist_name,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Checklist Name": data.check_list_name,
+                        "Work Flow Type": data.work_flow_type == "3" ? "Processing Type": "Reviewing Type",
+                        "Customer Name": data.customer_name || "All",
+                        "Service Type": data.service_name || "All",
+                        "Job Type": data.job_type_type || "All",
+                        "Client Type": data.client_type_type,
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="CheckList Data"
                     />
@@ -2860,9 +2857,8 @@ const Setting = () => {
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={InternalAllData.map((data) => ({
-                        id: data.id,
-                        name: data.name,
-                        status: data.status === 1 ? "Active" : "Inactive",
+                        "Internal Job/Project Name": data.name,
+                        "Status": data.status == "1" ? "Active" : "Deactive",
                       }))}
                       fileName="Internal Job/Project Data"
                     />

@@ -807,11 +807,45 @@ const getByAllClient = async (dashboard) => {
       offset,
     ]);
 
+    
+    let finalResult = result;
     if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+
       return {
         status: true,
         message: "success.",
-        data: result,
+        data: finalResult,
         pagination: {
           total,
           page,
@@ -940,11 +974,45 @@ const getByAllCustomer = async (dashboard) => {
       offset,
     ]);
 
+    
+    let finalResult = result;
     if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+
       return {
         status: true,
         message: "success.",
-        data: result,
+        data: finalResult,
         pagination: {
           total,
           page,
@@ -1047,6 +1115,12 @@ const getByAllJob = async (dashboard) => {
         staffs2.id AS reviewer_id,
         staffs2.first_name AS reviewer_first_name,
         staffs2.last_name AS reviewer_last_name,
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        jobs.service_id AS job_service_id,
+        staffs3.id AS account_manager_id,
+        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+        staffs3.employee_number AS account_manager_employee_number,
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
@@ -1077,11 +1151,45 @@ const getByAllJob = async (dashboard) => {
       offset,
     ]);
 
+    
+    let finalResult = result;
     if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+
       return {
         status: true,
         message: "success.",
-        data: result,
+        data: finalResult,
         pagination: {
           total,
           page,
@@ -1184,6 +1292,12 @@ const getByAllCompletedJob = async (dashboard) => {
         staffs2.id AS reviewer_id,
         staffs2.first_name AS reviewer_first_name,
         staffs2.last_name AS reviewer_last_name,
+                customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        jobs.service_id AS job_service_id,
+        staffs3.id AS account_manager_id,
+        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+        staffs3.employee_number AS account_manager_employee_number,
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
@@ -1214,11 +1328,45 @@ const getByAllCompletedJob = async (dashboard) => {
       offset,
     ]);
 
+    
+    let finalResult = result;
     if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+
       return {
         status: true,
         message: "success.",
-        data: result,
+        data: finalResult,
         pagination: {
           total,
           page,
@@ -1321,6 +1469,12 @@ const getByAllPendingJob = async (dashboard) => {
         staffs2.id AS reviewer_id,
         staffs2.first_name AS reviewer_first_name,
         staffs2.last_name AS reviewer_last_name,
+                customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        jobs.service_id AS job_service_id,
+        staffs3.id AS account_manager_id,
+        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+        staffs3.employee_number AS account_manager_employee_number,
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
@@ -1351,11 +1505,45 @@ const getByAllPendingJob = async (dashboard) => {
       offset,
     ]);
 
+    
+    let finalResult = result;
     if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+
       return {
         status: true,
         message: "success.",
-        data: result,
+        data: finalResult,
         pagination: {
           total,
           page,

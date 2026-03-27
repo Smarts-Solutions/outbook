@@ -374,14 +374,14 @@ const JobStatus = () => {
       sortable: true,
     },
     {
-      name: "FromDate",
+      name: "From Date",
       cell: (row) => <> {row.service_name == "Bookkeeping" ? <div title={row.Other_FromDate_id_2}>{row.Other_FromDate_id_2 ? convertDate(row.Other_FromDate_id_2) : "-"}</div> : "-"}</>,
       selector: (row) => row.Other_FromDate_id_2,
       reorder: false,
       sortable: true,
     },
     {
-      name: "ToDate",
+      name: "To Date",
       cell: (row) => <> {row.service_name == "Bookkeeping" ? <div title={row.Other_ToDate_id_2}>{row.Other_ToDate_id_2 ? convertDate(row.Other_ToDate_id_2) : "-"}</div> : "-"}</>,
       selector: (row) => row.Other_ToDate_id_2,
       reorder: false,
