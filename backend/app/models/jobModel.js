@@ -4345,7 +4345,7 @@ const copy_job = async (job) => {
     // Due Date Logic START //
     let Year_Ending_id_1 = null;
     let due_on = null
-    let sla_deadline_date = new Date().toISOString().split("T")[0]
+    let sla_deadline_date = new Date().toISOString().split("T")[0];
 
     if ([2, 5].includes(Number(clientInfo?.client_type)) && Number(data?.service_id) == 1) {
       const compayDetails = await getCompanyOfficerDetailsFun(clientInfo?.company_number)
