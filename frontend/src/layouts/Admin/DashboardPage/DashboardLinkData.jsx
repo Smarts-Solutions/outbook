@@ -528,28 +528,28 @@ const JobStatus = () => {
       selector: (row) => row.client_job_code || "-",
       sortable: true,
     },
-    {
-      name: "Outbook Account Manager",
-      cell: (row) => (
-        <div
-          title={
-            row.outbooks_acount_manager_first_name +
-            " " +
-            row.outbooks_acount_manager_last_name || "-"
-          }
-        >
-          {row.outbooks_acount_manager_first_name +
-            " " +
-            row.outbooks_acount_manager_last_name || "-"}
-        </div>
-      ),
+    // {
+    //   name: "Outbook Account Manager",
+    //   cell: (row) => (
+    //     <div
+    //       title={
+    //         row.outbooks_acount_manager_first_name +
+    //         " " +
+    //         row.outbooks_acount_manager_last_name || "-"
+    //       }
+    //     >
+    //       {row.outbooks_acount_manager_first_name +
+    //         " " +
+    //         row.outbooks_acount_manager_last_name || "-"}
+    //     </div>
+    //   ),
 
-      selector: (row) =>
-        row.outbooks_acount_manager_first_name +
-        " " +
-        row.outbooks_acount_manager_last_name || "-",
-      sortable: true,
-    },
+    //   selector: (row) =>
+    //     row.outbooks_acount_manager_first_name +
+    //     " " +
+    //     row.outbooks_acount_manager_last_name || "-",
+    //   sortable: true,
+    // },
     {
       name: "Allocated To",
       cell: (row) => (
@@ -1021,10 +1021,10 @@ const JobStatus = () => {
                 : item.customer_type === "3"
                   ? "Partnership"
                   : "-",
-          "Account Manager":
-            (item.account_manager_firstname || "") +
-            " " +
-            (item.account_manager_lastname || ""),
+          // "Account Manager":
+          //   (item.account_manager_firstname || "") +
+          //   " " +
+          //   (item.account_manager_lastname || ""),
           "Employee ID": item.employee_number || "-",
           "Created by": item.customer_created_by || "",
           "Created At": item.created_at || "",
