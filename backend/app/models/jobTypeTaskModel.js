@@ -402,6 +402,7 @@ SELECT
     checklists.job_type_id,
     checklists.client_type_id,
     checklists.check_list_name,
+    checklists.upload_checklist_name,
     checklists.status,
     checklists.created_at,
     checklists.updated_at,
@@ -494,7 +495,8 @@ const getByIdChecklist = async (checklist) => {
     customer_id,
     service_id,
     job_type_id,
-    work_flow_type
+    work_flow_type,
+    upload_checklist_name
     FROM checklists 
     WHERE id = ?
     `;

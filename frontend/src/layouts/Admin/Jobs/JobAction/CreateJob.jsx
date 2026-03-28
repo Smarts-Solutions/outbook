@@ -9,12 +9,15 @@ import {
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import { Modal, Button } from "react-bootstrap";
+import axios from "axios";
+import * as XLSX from "xlsx";
+import { base_url } from "../../../../Utils/Config";
+import { Modal, Button, Table, Form } from "react-bootstrap";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
-import { Save, Plus, ArrowLeft, X } from "lucide-react";
+import { Save, Plus, ArrowLeft, X, ExternalLink } from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -64,6 +67,55 @@ const CreateJob = () => {
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
+  const [checklistModal, setChecklistModal] = useState({
+    show: false,
+    data: [],
+    title: "",
+    loading: false
+  });
+
+  const handleViewChecklist = async (fileName, title) => {
+    if (!fileName) return;
+
+    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title }));
+
+    try {
+      const response = await axios.get(`${base_url}checklist_pdf/${fileName}`, {
+        responseType: 'arraybuffer'
+      });
+      const data = new Uint8Array(response.data);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      const dataRows = json.slice(1);
+
+      const formattedRows = dataRows
+        .filter(row => row && row[1]) // Filter empty rows or rows without questions
+        .map((row) => ({
+          s_no: row[0],
+          question: row[1],
+          answer: '',
+          comment: '',
+          date: new Date().toISOString().split('T')[0]
+        }));
+
+      setChecklistModal(prev => ({
+        ...prev,
+        data: formattedRows,
+        loading: false
+      }));
+    } catch (error) {
+      console.error("Error loading checklist file:", error);
+      sweatalert.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load checklist file'
+      });
+      setChecklistModal(prev => ({ ...prev, show: false, loading: false }));
+    }
+  };
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [allStaffData, setAllStaffData] = useState([]);
@@ -230,7 +282,7 @@ const CreateJob = () => {
 
 
   const get_information_company_number = async (company_number, service_id) => {
-  
+
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
@@ -3299,7 +3351,7 @@ const CreateJob = () => {
                                         }
                                       >
                                         <option value={null}>-- Select --</option>
-                                       
+                                        <option value={0}>Not Required</option>
                                         {AllJobData?.data?.processing_checklist_data
                                           ?.filter((item) => {
 
@@ -3325,7 +3377,26 @@ const CreateJob = () => {
                                             </option>
                                           ))}
                                       </select>
-
+                                      {jobData.processing_checkList && jobData.processing_checkList !== "0" && (
+                                        <div className="mt-1">
+                                          {(() => {
+                                            const selected = AllJobData?.data?.processing_checklist_data?.find(
+                                              (item) => Number(item.id) === Number(jobData.processing_checkList)
+                                            );
+                                            return selected?.upload_checklist_name ? (
+                                              <button
+                                                type="button"
+                                                className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
+                                                onClick={() => handleViewChecklist(selected.upload_checklist_name, selected.check_list_name)}
+                                              >
+                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                              </button>
+                                            ) : (
+                                              <span className="text-muted fs-12">PDF Not Available</span>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 
@@ -3344,6 +3415,7 @@ const CreateJob = () => {
                                         }
                                       >
                                         <option value={null}>-- Select --</option>
+                                        <option value={0}>Not Required</option>
                                         {AllJobData?.data?.reviewing_checklist_data
                                           ?.filter((item) => {
 
@@ -3369,7 +3441,26 @@ const CreateJob = () => {
                                             </option>
                                           ))}
                                       </select>
-
+                                      {jobData.reviewing_checkList && jobData.reviewing_checkList !== "0" && (
+                                        <div className="mt-1">
+                                          {(() => {
+                                            const selected = AllJobData?.data?.reviewing_checklist_data?.find(
+                                              (item) => Number(item.id) === Number(jobData.reviewing_checkList)
+                                            );
+                                            return selected?.upload_checklist_name ? (
+                                              <button
+                                                type="button"
+                                                className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
+                                                onClick={() => handleViewChecklist(selected.upload_checklist_name, selected.check_list_name)}
+                                              >
+                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                              </button>
+                                            ) : (
+                                              <span className="text-muted fs-12">PDF Not Available</span>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 
@@ -4083,15 +4174,29 @@ const CreateJob = () => {
                                           : "form-control"
                                       }
                                       placeholder="Hours"
-                                      name="budgeted_hour"
                                       onChange={(e) => {
-                                        handleChange1(e);
+                                        const value = e.target.value;
+                                        if (
+                                          value === "" ||
+                                          /^[0-9]*$/.test(value)
+                                        ) {
+                                          setBudgetedHoursAddTask({
+                                            ...BudgetedHoursAddTask,
+                                            hours: value,
+                                          });
+                                          setBudgetedHourError("");
+                                        }
                                       }}
                                       value={BudgetedHoursAddTask.hours}
                                     />
-                                    <span className="input-group-text">H</span>
+                                    <span
+                                      className="input-group-text"
+                                      id="basic-addon2"
+                                    >
+                                      H
+                                    </span>
                                   </div>
-                                  <div className="hours-div ">
+                                  <div className="hours-div">
                                     <input
                                       type="text"
                                       className={
@@ -4100,25 +4205,39 @@ const CreateJob = () => {
                                           : "form-control"
                                       }
                                       placeholder="Minutes"
-                                      name="budgeted_minute"
                                       onChange={(e) => {
-                                        handleChange1(e);
+                                        const value = e.target.value;
+                                        if (
+                                          value === "" ||
+                                          (Number(value) >= 0 &&
+                                            Number(value) <= 59)
+                                        ) {
+                                          setBudgetedHoursAddTask({
+                                            ...BudgetedHoursAddTask,
+                                            minutes: value,
+                                          });
+                                          setBudgetedMinuteError("");
+                                        }
                                       }}
                                       value={BudgetedHoursAddTask.minutes}
                                     />
-                                    <span className="input-group-text">M</span>
+                                    <span
+                                      className="input-group-text"
+                                      id="basic-addon2"
+                                    >
+                                      M
+                                    </span>
                                   </div>
                                 </div>
-                                {BudgetedHoureError ? (
-                                  <div className="error-text text-danger">
+                                {BudgetedHoureError && (
+                                  <div className="error-text">
                                     {BudgetedHoureError}
                                   </div>
-                                ) : BudgetedMinuteError ? (
-                                  <div className="error-text text-danger">
+                                )}
+                                {BudgetedMinuteError && (
+                                  <div className="error-text">
                                     {BudgetedMinuteError}
                                   </div>
-                                ) : (
-                                  ""
                                 )}
                               </div>
                             </div>
@@ -4126,25 +4245,111 @@ const CreateJob = () => {
                         </Modal.Body>
                         <Modal.Footer>
                           <Button
-                            variant="secondary"
+                            variant="label-danger"
+                            className="btn btn-outline-danger float-end"
                             onClick={() => {
                               setShowAddJobModal(false);
                               HandleReset();
                             }}
                           >
-                            < X size={16} />
-                            Close
+                            < X size={16} /> Close
                           </Button>
                           <Button
-                            variant="btn btn-info text-white float-end blue-btn"
+                            variant="btn btn-outline-success float-end "
                             onClick={handleAddTask}
-                          >
-                            <Plus size={16} />
-                            Add
+                                                          >
+                            <Save size={16} /> Submit
                           </Button>
                         </Modal.Footer>
                       </Modal>
                     )}
+
+                    {/* Checklist Preview Modal */}
+                    <Modal
+                      show={checklistModal.show}
+                      onHide={() => setChecklistModal(prev => ({ ...prev, show: false }))}
+                      size="xl"
+                      centered
+                      scrollable
+                    >
+                      <Modal.Header closeButton className="bg-light">
+                        <Modal.Title className="fs-16">{checklistModal.title}</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        {checklistModal.loading ? (
+                          <div className="text-center p-5">
+                            <div className="spinner-border text-primary" role="status">
+                              <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <p className="mt-2 text-muted">Loading checklist data...</p>
+                          </div>
+                        ) : (
+                          <div className="table-responsive">
+                            <Table bordered hover className="align-middle fs-13">
+                              <thead className="table-light text-nowrap">
+                                <tr>
+                                  <th style={{ width: '50px' }}>S.No</th>
+                                  <th>Question</th>
+                                  <th className="text-center" style={{ width: '250px' }}>Options</th>
+                                  <th style={{ width: '200px' }}>Comment</th>
+                                  <th style={{ width: '120px' }}>Date</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {checklistModal.data.length > 0 ? (
+                                  checklistModal.data.map((row, index) => (
+                                    <tr key={index}>
+                                      <td className="text-center">{row.s_no || index + 1}</td>
+                                      <td>{row.question}</td>
+                                      <td>
+                                        <div className="d-flex justify-content-around">
+                                          <Form.Check
+                                            type="radio"
+                                            label="Yes"
+                                            name={`ans-${index}`}
+                                            id={`yes-${index}`}
+                                            className="fs-12"
+                                          />
+                                          <Form.Check
+                                            type="radio"
+                                            label="No"
+                                            name={`ans-${index}`}
+                                            id={`no-${index}`}
+                                            className="fs-12"
+                                          />
+                                          <Form.Check
+                                            type="radio"
+                                            label="N/A"
+                                            name={`ans-${index}`}
+                                            id={`na-${index}`}
+                                            className="fs-12"
+                                          />
+                                        </div>
+                                      </td>
+                                      <td>
+                                        <textarea className="form-control form-control-sm" rows="1" placeholder="Add comment"></textarea>
+                                      </td>
+                                      <td>
+                                        <input type="date" className="form-control form-control-sm" defaultValue={row.date} readOnly />
+                                      </td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td colSpan="5" className="text-center py-4 text-muted">No questions found in this file.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </Table>
+                          </div>
+                        )}
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setChecklistModal(prev => ({ ...prev, show: false }))}>
+                          Close
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
 
                     <div className="hstack gap-2 justify-content-end">
                       <button
