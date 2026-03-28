@@ -1990,6 +1990,8 @@ const CreateJob = () => {
 
 
   useEffect(() => {
+
+    
     setServiceFieldsData(
       //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
       serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
