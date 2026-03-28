@@ -2011,21 +2011,18 @@ const CreateJob = () => {
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
     }
-
     else if (Number(jobData?.Service) == 4) {
       date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-
     } else if (Number(jobData?.Service) == 3) {
       date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-
     } else if (Number(jobData?.Service) == 8) {
       date.setDate(date.getDate() + 10);
       setJobData((prevState) => ({
