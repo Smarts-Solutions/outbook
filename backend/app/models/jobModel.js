@@ -1017,6 +1017,7 @@ const getJobByCustomer = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
@@ -1110,6 +1111,7 @@ const getJobByCustomer = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -1307,6 +1309,7 @@ async function getAllJobsSidebar(
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
@@ -1436,6 +1439,7 @@ async function getAllJobsSidebar(
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -1572,6 +1576,7 @@ const getJobByClient = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
         master_status.name AS status,
 
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
@@ -1643,6 +1648,7 @@ const getJobByClient = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -1766,6 +1772,7 @@ const getAllJobsBYCustomerfilter = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -1931,6 +1938,7 @@ async function getAllJobsSidebarFilter(
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
@@ -1998,6 +2006,7 @@ async function getAllJobsSidebarFilter(
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -2106,6 +2115,7 @@ async function getJobByClientId(data) {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
         master_status.name AS status,
 
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
@@ -2177,6 +2187,7 @@ async function getJobByClientId(data) {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -2300,6 +2311,7 @@ async function getJobByCustomerId(data) {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
         master_status.name AS status,
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
@@ -2353,6 +2365,7 @@ async function getJobByCustomerId(data) {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -2524,6 +2537,7 @@ async function getJobByClientIdAndCustomerId(data) {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
 
         jobs.staff_created_id AS staff_created_id,
 
@@ -2620,6 +2634,7 @@ const getByJobStaffId = async (job) => {
   staffs3.id AS outbooks_acount_manager_id,
   staffs3.first_name AS outbooks_acount_manager_first_name,
   staffs3.last_name AS outbooks_acount_manager_last_name,
+  staffs3.employee_number AS account_manager_employee_number,
 
   master_status.name AS status,
   CONCAT(
@@ -2680,6 +2695,7 @@ const getJobById = async (job) => {
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
+     staffs3.employee_number AS account_manager_employee_number,
      customers.id AS customer_id,
      customers.trading_name AS customer_trading_name,
      customers.staff_id AS customer_staff_id,

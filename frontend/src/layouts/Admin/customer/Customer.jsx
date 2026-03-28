@@ -165,7 +165,12 @@ const Customer = () => {
         </div>
       ),
     },
-
+{
+  name:"Employee Id",
+  selector: (row) => row.account_manager_employee_number,
+  cell: (row) => <div title={row.account_manager_employee_number}>{row.account_manager_employee_number}</div>,
+  sortable: true,
+},
     {
       name: "Created by",
       selector: (row) => row.customer_created_by,
@@ -563,6 +568,7 @@ const Customer = () => {
               : "-",
       "Account Manager":
         item.account_manager_firstname + " " + item.account_manager_lastname,
+      "Employee Id": item.account_manager_employee_number,
       "Created by": item.customer_created_by,
       "Created At": item.created_at,
       Status: item.status == 1 ? "Active" : "Deactive",
