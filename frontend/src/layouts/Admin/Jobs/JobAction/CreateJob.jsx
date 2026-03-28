@@ -1995,7 +1995,6 @@ const CreateJob = () => {
       serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
     );
 
-
     if (jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily") {
       const date = new Date();
       date.setDate(date.getDate() + 1);
@@ -2004,7 +2003,6 @@ const CreateJob = () => {
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
     }
-
     const date = new Date();
     if (Number(jobData?.Service) == 1) {
       date.setDate(date.getDate() + 28);
