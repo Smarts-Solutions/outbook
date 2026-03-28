@@ -4564,6 +4564,9 @@ async function getSLADeadline(value, Bookkeeping_Frequency_id_2) {
     } else if (Bookkeeping_Frequency_id_2 == "Yearly") {
       date.setDate(date.getDate() + 30);
       return date.toISOString().split("T")[0];
+    }else{
+      date.setDate(date.getDate() + 1);
+      return date.toISOString().split("T")[0];
     }
   }
 
