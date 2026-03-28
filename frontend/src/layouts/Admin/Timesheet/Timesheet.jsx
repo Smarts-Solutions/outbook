@@ -2092,7 +2092,6 @@ const Timesheet = () => {
                   <Download size={16} />
                   <span> Export Timesheet Data</span>
 
-                  <Download size={16} />
                 </button>
               </div>
             ) : (
