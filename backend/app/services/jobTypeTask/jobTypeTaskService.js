@@ -37,8 +37,8 @@ const getTask = async (task) => {
 
  
 
-const addChecklist = async (checklist) => {
-  return jobTypeTaskModel.addChecklist(checklist);
+const addChecklist = async (checklist, file) => {
+  return jobTypeTaskModel.addChecklist(checklist, file);
 };
 
 const checklistAction = async (checklist) => {

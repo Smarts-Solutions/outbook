@@ -158,10 +158,14 @@ export async function getListAction(data, token) {
 
 export async function addChecklist(data, token) {
     try {
+        const isFormData = data instanceof FormData;
+        const headers = { ...header(token) };
+        if (isFormData) {
+            delete headers['Content-Type'];
+        }
         const res = await axios.post(`${Config.base_url}addChecklist`, data, {
-            headers: header(token),
-            data: {}
-        })
+            headers: headers
+        });
         return await res?.data;
     }
     catch (err) {

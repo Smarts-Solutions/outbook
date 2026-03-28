@@ -87,8 +87,9 @@ const getTask = async (req, res) => {
 const addChecklist = async (req, res) => {
   try {
     const { ...checklist } = req.body;
+    const file = req.file;
 
-    const result = await jobTypeTaskService.addChecklist(checklist);
+    const result = await jobTypeTaskService.addChecklist(checklist, file);
     if (!result.status) {
       return res.status(200).json({ status: false, message: result.message });
     } else {

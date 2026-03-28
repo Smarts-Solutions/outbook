@@ -315,7 +315,10 @@ const getTask = async (task) => {
   }
 };
 
-const addChecklist = async (checklist) => {
+const fs = require('fs');
+const path = require('path');
+
+const addChecklist = async (checklist, file) => {
   let {
     customer_id,
     service_id,
@@ -328,9 +331,9 @@ const addChecklist = async (checklist) => {
     StaffUserId,
   } = checklist;
 
-  customer_id = customer_id.length == 0 ? null : customer_id?.join(",");
-  service_id = service_id.length == 0 ? null : service_id?.join(",");
-  job_type_id = job_type_id.length == 0 ? null : job_type_id?.join(",");
+  customer_id = (Array.isArray(customer_id) ? customer_id.join(",") : customer_id) || null;
+  service_id = (Array.isArray(service_id) ? service_id.join(",") : service_id) || null;
+  job_type_id = (Array.isArray(job_type_id) ? job_type_id.join(",") : job_type_id) || null;
 
   try {
     const query = `
@@ -348,6 +351,22 @@ const addChecklist = async (checklist) => {
       status,
     ]);
     const checklist_id = result.insertId;
+
+    let finalFileName = null;
+    if (file) {
+      // Format: checklist_pdf_{checklist_id}.zip
+      finalFileName = `checklist_pdf_${checklist_id}.zip`;
+      const oldPath = file.path;
+      const newPath = path.join(file.destination, finalFileName);
+
+      // Rename the temp file to the formal name
+      fs.renameSync(oldPath, newPath);
+
+      // Update the record with the final filename
+      const updateQuery = `UPDATE checklists SET upload_checklist_name = ? WHERE id = ?`;
+      await pool.execute(updateQuery, [finalFileName, checklist_id]);
+    }
+
     const currentDate = new Date();
 
     await SatffLogUpdateOperation({

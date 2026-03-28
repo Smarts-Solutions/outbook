@@ -505,12 +505,21 @@ const CreateCheckList = () => {
       ClienTypeArr += item + ",";
     });
 
-    const req = {
-      ...formData,
-      client_type_id: ClienTypeArr.slice(0, -1),
-    };
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append("check_list_name", formData.check_list_name);
+    formDataToSubmit.append("work_flow_type", formData.work_flow_type);
+    formDataToSubmit.append("client_type_id", ClienTypeArr.slice(0, -1));
+    formDataToSubmit.append("status", formData.status);
 
-    const data = { req, authToken: token };
+    formDataToSubmit.append("customer_id", formData.customer_id?.join(","));
+    formDataToSubmit.append("service_id", formData.service_id?.join(","));
+    formDataToSubmit.append("job_type_id", formData.job_type_id?.join(","));
+
+    if (selectedFile) {
+      formDataToSubmit.append("checklist_pdf", selectedFile);
+    }
+
+    const data = { req: formDataToSubmit, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
       .then((response) => {
@@ -524,7 +533,7 @@ const CreateCheckList = () => {
             timerProgressBar: true,
           });
 
-          // Reset form and tasks after successful submission
+          // Reset form, tasks, and files after successful submission
           setFormData({
             customer_id: [],
             service_id: [],
@@ -536,6 +545,7 @@ const CreateCheckList = () => {
           });
           setJobTypeOptions([]);
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
+          setSelectedFile(null);
 
           sessionStorage.setItem("settingTab", location?.state?.settingTab);
           window.history.back();
@@ -835,6 +845,8 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
+
+
 
 
 
