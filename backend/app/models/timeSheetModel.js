@@ -884,9 +884,9 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 };
 
-const saveTimesheet = async (Timesheet) => {
+const saveTimesheet2 = async (Timesheet) => {
   try {
-    const { staff_id, data, deleteRows , ip } = Timesheet;
+    const { staff_id, data, deleteRows, ip } = Timesheet;
     const timesheet_log_msg = [];
     let checkStringEvent = [];
 
@@ -1129,6 +1129,313 @@ const saveTimesheet = async (Timesheet) => {
   }
 }
 
+
+const saveTimesheet = async (Timesheet) => {
+  try {
+    const { staff_id, data, deleteRows, ip } = Timesheet;
+    const timesheet_log_msg = [];
+    let checkStringEvent = [];
+
+    const formatTime = (input) => {
+      if (input == null) return null;
+      const [hours, minutes = "0"] = input.toString().split(".");
+      const formattedMinutes =
+        minutes.length === 1 ? `${minutes}0` : minutes == "" ? `00` : minutes;
+      return `${hours}:${formattedMinutes}`;
+    };
+
+    const getNoteValue = (val) =>
+      ["", null, undefined].includes(val) ? null : val;
+
+    const getTaskTypeName = (type) =>
+      parseInt(type) === 2 ? "External" : "Internal";
+
+    // ======================
+    // INSERT / UPDATE
+    // ======================
+
+    if (data.length > 0) {
+      await Promise.all(
+        data.map(async (row) => {
+          let task_type_name = getTaskTypeName(row.task_type);
+
+          const customer_id = row.customer_id ?? 0;
+          const client_id = row.client_id ?? 0;
+
+          const remark = getNoteValue(row.remark);
+          const final_remark = getNoteValue(row.final_remark);
+
+          const monday_note = getNoteValue(row.monday_note);
+          const tuesday_note = getNoteValue(row.tuesday_note);
+          const wednesday_note = getNoteValue(row.wednesday_note);
+          const thursday_note = getNoteValue(row.thursday_note);
+          const friday_note = getNoteValue(row.friday_note);
+          const saturday_note = getNoteValue(row.saturday_note);
+          const sunday_note = getNoteValue(row.sunday_note);
+
+          const monday_hours = formatTime(row.monday_hours);
+          const tuesday_hours = formatTime(row.tuesday_hours);
+          const wednesday_hours = formatTime(row.wednesday_hours);
+          const thursday_hours = formatTime(row.thursday_hours);
+          const friday_hours = formatTime(row.friday_hours);
+          const saturday_hours = formatTime(row.saturday_hours);
+          const sunday_hours = formatTime(row.sunday_hours);
+
+          const days = [
+            { day: "monday", date: row.monday_date, hours: monday_hours },
+            { day: "tuesday", date: row.tuesday_date, hours: tuesday_hours },
+            { day: "wednesday", date: row.wednesday_date, hours: wednesday_hours },
+            { day: "thursday", date: row.thursday_date, hours: thursday_hours },
+            { day: "friday", date: row.friday_date, hours: friday_hours },
+            { day: "saturday", date: row.saturday_date, hours: saturday_hours },
+            { day: "sunday", date: row.sunday_date, hours: sunday_hours },
+          ];
+
+          let DateTimeString = "";
+
+          days.forEach((d) => {
+            if (d?.date !== null) {
+              DateTimeString += ` Date: ${d?.date}, Hours : ${d?.hours}`;
+            }
+          });
+
+          let JobTaskName = await JobTaskNameWithId({
+            job_id: row.job_id,
+            task_id: row.task_id,
+            TaskType: parseInt(row.task_type),
+          });
+
+          // ======================
+          // INSERT
+          // ======================
+
+          if (row.id === null) {
+            const insertQuery = `
+            INSERT INTO timesheet (
+            staff_id, task_type, customer_id, client_id, job_id, task_id,
+            monday_date, monday_hours, tuesday_date, tuesday_hours,
+            wednesday_date, wednesday_hours, thursday_date, thursday_hours,
+            friday_date, friday_hours, saturday_date, saturday_hours,
+            sunday_date, sunday_hours,remark,final_remark,submit_status,
+            monday_note, tuesday_note, wednesday_note, thursday_note,
+            friday_note, saturday_note, sunday_note
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+
+            const insertValues = [
+              staff_id,
+              row.task_type,
+              customer_id,
+              client_id,
+              row.job_id,
+              row.task_id,
+              row.monday_date,
+              monday_hours,
+              row.tuesday_date,
+              tuesday_hours,
+              row.wednesday_date,
+              wednesday_hours,
+              row.thursday_date,
+              thursday_hours,
+              row.friday_date,
+              friday_hours,
+              row.saturday_date,
+              saturday_hours,
+              row.sunday_date,
+              sunday_hours,
+              remark,
+              final_remark,
+              row.submit_status,
+              monday_note,
+              tuesday_note,
+              wednesday_note,
+              thursday_note,
+              friday_note,
+              saturday_note,
+              sunday_note,
+            ];
+
+            await pool.query(insertQuery, insertValues);
+
+            if (DateTimeString !== "") {
+              const eventType =
+                parseInt(row.submit_status) === 1 ? "submit" : "insert";
+
+              if (!checkStringEvent.includes(eventType)) {
+                checkStringEvent.push(eventType);
+
+                timesheet_log_msg.push(
+                  `${eventType === "submit" ? "submitted" : "created"
+                  } a timesheet entry. Task type:${task_type_name},
+                ${DateTimeString} ,Job code:${JobTaskName.job_name},
+                Task name:${JobTaskName.task_name}`
+                );
+              } else {
+                timesheet_log_msg.push(
+                  `Task type:${task_type_name}, ${DateTimeString},
+                Job code:${JobTaskName.job_name},
+                Task name:${JobTaskName.task_name}`
+                );
+              }
+            }
+          }
+
+          // ======================
+          // UPDATE
+          // ======================
+
+          else {
+            const [[existData]] = await pool.execute(
+              `SELECT monday_hours,tuesday_hours,wednesday_hours,
+              thursday_hours,friday_hours,saturday_hours,sunday_hours
+              FROM timesheet WHERE id=?`,
+              [row.id]
+            );
+
+            let updateString = "";
+
+            days.forEach(({ day, date, hours }) => {
+              if (hours !== existData[`${day}_hours`]) {
+                updateString += ` Date:${date}, Updated hours:${hours}`;
+              }
+            });
+
+            const updateQuery = `
+            UPDATE timesheet SET
+            task_type=?,customer_id=?,client_id=?,job_id=?,task_id=?,
+            monday_date=?,monday_hours=?,tuesday_date=?,tuesday_hours=?,
+            wednesday_date=?,wednesday_hours=?,thursday_date=?,thursday_hours=?,
+            friday_date=?,friday_hours=?,saturday_date=?,saturday_hours=?,
+            sunday_date=?,sunday_hours=?,remark=?,final_remark=?,submit_status=?,
+            monday_note=?,tuesday_note=?,wednesday_note=?,thursday_note=?,
+            friday_note=?,saturday_note=?,sunday_note=?
+            WHERE id=?`;
+
+            const updateValues = [
+              row.task_type,
+              customer_id,
+              client_id,
+              row.job_id,
+              row.task_id,
+              row.monday_date,
+              monday_hours,
+              row.tuesday_date,
+              tuesday_hours,
+              row.wednesday_date,
+              wednesday_hours,
+              row.thursday_date,
+              thursday_hours,
+              row.friday_date,
+              friday_hours,
+              row.saturday_date,
+              saturday_hours,
+              row.sunday_date,
+              sunday_hours,
+              remark,
+              final_remark,
+              row.submit_status,
+              monday_note,
+              tuesday_note,
+              wednesday_note,
+              thursday_note,
+              friday_note,
+              saturday_note,
+              sunday_note,
+              row.id,
+            ];
+
+            await pool.query(updateQuery, updateValues);
+
+            if (updateString !== "") {
+              if (!checkStringEvent.includes("update")) {
+                checkStringEvent.push("update");
+
+                timesheet_log_msg.push(
+                  `edited a timesheet entry. Task type:${task_type_name},
+                ${updateString}, Job code:${JobTaskName.job_name},
+                Task name:${JobTaskName.task_name}`
+                );
+              }
+            }
+          }
+        })
+      );
+    }
+
+    // ======================
+    // DELETE
+    // ======================
+
+    if (deleteRows.length > 0) {
+      await Promise.all(
+        deleteRows.map(async (id) => {
+          const [[existData]] = await pool.execute(
+            `SELECT job_id,task_id,task_type FROM timesheet WHERE id=?`,
+            [id]
+          );
+
+          let JobTaskName = await JobTaskNameWithId({
+            job_id: existData.job_id,
+            task_id: existData.task_id,
+            TaskType: parseInt(existData.task_type),
+          });
+
+          let task_type_name = getTaskTypeName(existData.task_type);
+
+          if (!checkStringEvent.includes("delete")) {
+            checkStringEvent.push("delete");
+
+            timesheet_log_msg.push(
+              `deleted a timesheet entry. Task type:${task_type_name},
+              Job code:${JobTaskName.job_name},
+              Task name:${JobTaskName.task_name}`
+            );
+          }
+
+          await pool.query(`DELETE FROM timesheet WHERE id=?`, [id]);
+        })
+      );
+    }
+
+    // ======================
+    // LOG SAVE
+    // ======================
+
+    if (timesheet_log_msg.length > 0) {
+      const msgLog =
+        timesheet_log_msg.length > 1
+          ? timesheet_log_msg.slice(0, -1).join(", ") +
+          " and " +
+          timesheet_log_msg.slice(-1)
+          : timesheet_log_msg[0];
+
+      await SatffLogUpdateOperation({
+        staff_id,
+        ip,
+        date: new Date().toISOString().split("T")[0],
+        module_name: "timesheet",
+        log_message: msgLog,
+        permission_type: "updated",
+        module_id: 0,
+      });
+    }
+
+    return {
+      status: true,
+      message: "Timesheet data saved successfully.",
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      status: false,
+      message: "Error saving timesheet data.",
+      error: err.message,
+    };
+  }
+};
+
+
+
+
 const formatTime = (input) => {
   if (input == null) return null;
   const [hours, minutes = "0"] = input.toString().split(".");
@@ -1339,8 +1646,8 @@ const saveTimesheet1 = async (Timesheet) => {
       const msgLog =
         timesheet_log_msg.length > 1
           ? timesheet_log_msg.slice(0, -1).join(", ") +
-            " and " +
-            timesheet_log_msg.slice(-1)
+          " and " +
+          timesheet_log_msg.slice(-1)
           : timesheet_log_msg[0];
 
       const currentDate = new Date();
