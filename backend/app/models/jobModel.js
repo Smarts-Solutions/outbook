@@ -3636,10 +3636,7 @@ const jobUpdate = async (job) => {
           (id) => !providedTaskIds.includes(id)
         );
         if (tasksToDelete.length > 0) {
-          // const deleteQuery = `
-          //     DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
-          //   `;
-          // await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
+          
           const deleteQuery = `
               DELETE FROM client_job_task 
               WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
