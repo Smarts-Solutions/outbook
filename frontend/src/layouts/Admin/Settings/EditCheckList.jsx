@@ -42,6 +42,9 @@ const EditCheckList = () => {
     { key: "2", label: "Company" },
     { key: "3", label: "Partnership" },
     { key: "4", label: "Individual" },
+    { key: "5", label: "Charity Incorporated Organisation" },
+    { key: "6", label: "Unincorporated Association" },
+    { key: "7", label: "Trust" },
   ];
 
   // For Customer Search
