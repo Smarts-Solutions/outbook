@@ -259,16 +259,16 @@ const CreateJob = () => {
   const dueOn_date_set = async (client_type, service_id) => {
 
     let due_date = getDueDate(client_type, service_id);
-    if (!['', null, undefined].includes(due_date)) {
-      setJobData((prevState) => ({
+    due_date = ['', null, undefined].includes(due_date) ? null : due_date;
+    setJobData((prevState) => ({
         ...prevState,
         DueOn: due_date,
       }));
-    }
-  }
+   }
 
   function getDueDate(client_type, service_id) {
-
+     console.log("client_type === ",client_type)
+     console.log("service_id === ",service_id)
     if (["1", "3", "7"].includes(client_type)) {
       // Service Account Production
       if (Number(service_id) === 1) {
@@ -341,9 +341,6 @@ const CreateJob = () => {
     }
 
   }
-
-  console.log("due_on --- ", jobData.DueOn);
-
 
   const getAllChecklist = async () => {
     if (
@@ -2033,7 +2030,9 @@ const CreateJob = () => {
       }));
     }
 
-  }, [jobData?.Service]);
+     dueOn_date_set(clientType, jobData?.Service);
+
+  }, [jobData?.Service ,clientType]);
 
 
 
