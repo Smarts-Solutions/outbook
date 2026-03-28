@@ -230,7 +230,7 @@ const CreateJob = () => {
 
 
   const get_information_company_number = async (company_number, service_id) => {
-  
+
     const data = { company_number: company_number, type: 'company_info' };
     await dispatch(GetOfficerDetails(data))
       .unwrap()
@@ -334,7 +334,6 @@ const CreateJob = () => {
         }
         return `${y}-01-31`;
       }
-
       else {
         return null;
       }
@@ -2004,8 +2003,41 @@ const CreateJob = () => {
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-
     }
+
+    const date = new Date();
+    if (Number(jobData?.Service) == 1) {
+      date.setDate(date.getDate() + 28);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+
+    else if (Number(jobData?.Service) == 4) {
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+
+    } else if (Number(jobData?.Service) == 3) {
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+
+    } else if (Number(jobData?.Service) == 8) {
+      date.setDate(date.getDate() + 10);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+
+
+
 
   }, [jobData?.Service]);
 
@@ -3299,7 +3331,7 @@ const CreateJob = () => {
                                         }
                                       >
                                         <option value={null}>-- Select --</option>
-                                       
+
                                         {AllJobData?.data?.processing_checklist_data
                                           ?.filter((item) => {
 
