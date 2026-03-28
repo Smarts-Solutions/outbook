@@ -1994,14 +1994,16 @@ const CreateJob = () => {
       serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
     );
 
-    if (jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily") {
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    }
+    // if (jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily") {
+    //   const date = new Date();
+    //   date.setDate(date.getDate() + 1);
+    //   setJobData((prevState) => ({
+    //     ...prevState,
+    //     SLADeadlineDate: date.toISOString().split("T")[0],
+    //   }));
+    // }
+
+
     const date = new Date();
     if (Number(jobData?.Service) == 1) {
       date.setDate(date.getDate() + 28);
@@ -2010,13 +2012,21 @@ const CreateJob = () => {
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
     }
+    else if (Number(jobData?.Service) == 2) {
+      date.setDate(date.getDate() + 1);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } 
     else if (Number(jobData?.Service) == 4) {
       date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-    } else if (Number(jobData?.Service) == 3) {
+    } 
+    else if (Number(jobData?.Service) == 3) {
       date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
         ...prevState,
