@@ -110,7 +110,7 @@ const CreateCheckList = () => {
             return;
           }
 
-          const expectedHeaders = ["Questions", "Yes", "No", "Not Applicable", "Comment", "Date"];
+          const expectedHeaders = ["S.No", "Questions", "Yes", "No", "Not Applicable", "Comment", "Date"];
           const headers = rows[0].map(h => (h ? h.toString().trim() : ""));
 
           // 1. Check if headers count matches (no extra, no less)
@@ -118,7 +118,7 @@ const CreateCheckList = () => {
             sweatalert.fire({
               icon: "error",
               title: "Invalid Format",
-              text: "The file format is invalid. Please ensure there are exactly 6 columns: Questions, Yes, No, Not Applicable, Comment, Date.",
+              text: `The file format is invalid. Please ensure there are exactly ${expectedHeaders.length} columns: ${expectedHeaders.join(", ")}.`,
             });
             e.target.value = null;
             setSelectedFile(null);
@@ -139,10 +139,17 @@ const CreateCheckList = () => {
           }
 
           const dataRows = rows.slice(1);
-          // Filter out truly empty rows
-          const nonEmptyDataRows = dataRows.filter(row => row && row.some(cell => cell !== null && cell !== undefined && cell.toString().trim() !== ""));
+          // Find the last row index that has any data
+          let lastNonEmptyIndex = -1;
+          for (let i = dataRows.length - 1; i >= 0; i--) {
+            const row = dataRows[i];
+            if (row && row.some(cell => cell !== null && cell !== undefined && cell.toString().trim() !== "")) {
+              lastNonEmptyIndex = i;
+              break;
+            }
+          }
 
-          if (nonEmptyDataRows.length === 0) {
+          if (lastNonEmptyIndex === -1) {
             sweatalert.fire({
               icon: "error",
               title: "No Data found",
@@ -155,29 +162,59 @@ const CreateCheckList = () => {
 
           let isDataFormatValid = true;
           let errorMessage = "";
+          let expectedSNo = 1;
 
-          for (let i = 0; i < dataRows.length; i++) {
+          // Only validate up to the last non-empty row to allow trailing empty rows
+          for (let i = 0; i <= lastNonEmptyIndex; i++) {
             const row = dataRows[i];
-            // Skip completely empty rows
-            if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) continue;
+            
+            // 3. Check if row is empty (in the middle of data)
+            if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: This row is empty. Please don't leave blank rows between data.`;
+              break;
+            }
 
-            // 3. Check data in Question column (index 0)
-            const questionVal = row[0];
+            // 4. Check S.No (index 0)
+            const sNoVal = row[0];
+            if (sNoVal === null || sNoVal === undefined || sNoVal.toString().trim() === "") {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'S.No' column should have data.`;
+              break;
+            }
+
+            const currentSNo = parseInt(sNoVal.toString().trim());
+            if (isNaN(currentSNo)) {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'S.No' must be a number.`;
+              break;
+            }
+
+            if (currentSNo !== expectedSNo) {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'S.No' must be in increasing order starting from 1 with no gaps. Expected ${expectedSNo} but found ${currentSNo}.`;
+              break;
+            }
+
+            // 5. Check data in Question column (index 1)
+            const questionVal = row[1];
             if (!questionVal || questionVal.toString().trim() === "") {
               isDataFormatValid = false;
               errorMessage = `Error at row ${i + 2}: The 'Questions' column should have data.`;
               break;
             }
 
-            // 4. Check if other columns have data (index 1 to 5) or extra columns (index >= 6)
-            for (let j = 1; j < row.length; j++) {
+            // 6. Check if other columns have data (index 2 to end)
+            for (let j = 2; j < row.length; j++) {
               if (row[j] !== null && row[j] !== undefined && row[j].toString().trim() !== "") {
                 isDataFormatValid = false;
-                errorMessage = `Invalid data at row ${i + 2}. Data should only be in the 'Questions' column. All other columns must remain empty.`;
+                errorMessage = `Invalid data at row ${i + 2}. Data should only be in 'S.No' and 'Questions' columns. All other columns must remain empty.`;
                 break;
               }
             }
             if (!isDataFormatValid) break;
+
+            expectedSNo++;
           }
 
           if (!isDataFormatValid) {
@@ -471,12 +508,21 @@ const CreateCheckList = () => {
       ClienTypeArr += item + ",";
     });
 
-    const req = {
-      ...formData,
-      client_type_id: ClienTypeArr.slice(0, -1),
-    };
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append("check_list_name", formData.check_list_name);
+    formDataToSubmit.append("work_flow_type", formData.work_flow_type);
+    formDataToSubmit.append("client_type_id", ClienTypeArr.slice(0, -1));
+    formDataToSubmit.append("status", formData.status);
 
-    const data = { req, authToken: token };
+    formDataToSubmit.append("customer_id", formData.customer_id?.join(","));
+    formDataToSubmit.append("service_id", formData.service_id?.join(","));
+    formDataToSubmit.append("job_type_id", formData.job_type_id?.join(","));
+
+    if (selectedFile) {
+      formDataToSubmit.append("checklist_pdf", selectedFile);
+    }
+
+    const data = { req: formDataToSubmit, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
       .then((response) => {
@@ -490,7 +536,7 @@ const CreateCheckList = () => {
             timerProgressBar: true,
           });
 
-          // Reset form and tasks after successful submission
+          // Reset form, tasks, and files after successful submission
           setFormData({
             customer_id: [],
             service_id: [],
@@ -502,6 +548,7 @@ const CreateCheckList = () => {
           });
           setJobTypeOptions([]);
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
+          setSelectedFile(null);
 
           sessionStorage.setItem("settingTab", location?.state?.settingTab);
           window.history.back();
@@ -801,6 +848,8 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
+
+
 
 
 

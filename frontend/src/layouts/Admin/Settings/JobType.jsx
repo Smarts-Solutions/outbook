@@ -525,7 +525,7 @@ const Setting = () => {
                 window.history.back();
               }}
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={16} className="text-white me-1"/>
             </button>
             <h4 className="card-title">Job Type</h4>
           </div>

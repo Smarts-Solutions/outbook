@@ -503,6 +503,16 @@ const ClientList = () => {
       width: "325px",
     },
     {
+      name: "Employee ID",
+      selector: (row) => row.account_manager_employee_number,
+      cell: (row) => (
+        <div title={row.account_manager_employee_number}>
+          {row.account_manager_employee_number}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
       name: "Allocated To",
       selector: (row) =>
         row.allocated_id != null
@@ -976,6 +986,7 @@ const ClientList = () => {
         item.outbooks_acount_manager_first_name +
           " " +
           item.outbooks_acount_manager_last_name || "-",
+      "Employee ID": item.account_manager_employee_number || "-",
       "Allocated To":
         item.allocated_id != null
           ? item.allocated_first_name + " " + item.allocated_last_name

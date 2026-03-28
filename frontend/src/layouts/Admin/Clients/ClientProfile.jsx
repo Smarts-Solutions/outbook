@@ -388,6 +388,16 @@ const ClientList = () => {
       width: "325px",
     },
     {
+      name: "Employee ID",
+      selector: (row) => row.account_manager_employee_number,
+      cell: (row) => (
+        <div title={row.account_manager_employee_number}>
+          {row.account_manager_employee_number}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
       name: "Allocated To",
       selector: (row) =>
         row.allocated_id != null
@@ -1049,7 +1059,7 @@ const ClientList = () => {
 
       "Outbooks Account Manager Name":
         `${item.outbooks_acount_manager_first_name || ""} ${item.outbooks_acount_manager_last_name || ""}`.trim(),
-
+      "Employee ID": item.account_manager_employee_number || "-",
       Invoicing: item.invoiced == 1 ? "Yes" : "No",
       "Job Created By": item.job_created_by,
       "Created At": item.created_at,

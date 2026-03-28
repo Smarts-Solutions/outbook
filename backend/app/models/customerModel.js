@@ -455,6 +455,7 @@ const getCustomer = async (customer) => {
                 customers.status,
                 staff2.first_name AS account_manager_firstname,
                 staff2.last_name AS account_manager_lastname,
+                staff2.employee_number AS account_manager_employee_number,
                 CONCAT(
                     'cust_',
                     SUBSTRING(customers.trading_name,1,3),'_',
