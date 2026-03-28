@@ -1265,7 +1265,23 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
 
-        
+        //checklist submit customer
+        const QueryCustomerAssign = `
+        UPDATE checklists 
+SET is_all_customer = 
+IF(
+    is_all_customer IS NULL, 
+    JSON_ARRAY(${customer_id}), 
+    IF(
+        JSON_CONTAINS(is_all_customer, JSON_ARRAY(${customer_id}), '$'), 
+        is_all_customer, 
+        JSON_ARRAY_APPEND(is_all_customer, '$', ${customer_id})
+    )
+) 
+WHERE service_id = ${service_id} AND customer_id = 0;
+        `
+        const [QueryCustomerAssignData] = await pool.execute(QueryCustomerAssign);
+
         try {
             // Process 1 table
             const checkQuery = `
@@ -1375,6 +1391,74 @@ const updateProcessCustomerServices = async (customerProcessData) => {
             console.error('Error inserting data:', err);
             throw err;
         }
+    }
+
+
+    if (Task.length > 0) {
+        const checklistName = Task[0].checklistName;
+        const JobTypeId = Task[0].JobTypeId;
+        const serviceId = Task[0].serviceId;
+
+        const client_type_id = customer_type
+        const checkQueryChecklist = `
+    SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
+    `;
+        const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
+        if (existingChecklist.length === 0) {
+            const insertChecklistQuery = `
+        INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name)
+        VALUES (?, ?, ?, ?, ?)
+        `;
+            const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
+            const checklist_id = result.insertId;
+
+            if (Task[0].Task.length > 0) {
+                for (const tsk_name of Task[0].Task) {
+                    const TaskName = tsk_name.TaskName;
+                    const BudgetHour = tsk_name.BudgetHour;
+                    const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
+                    const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
+                    ]);
+                    if (existing.length === 0) {
+                        const InsertTaskquery = `
+              INSERT INTO task (name,service_id,job_type_id)
+              VALUES (?, ?, ?)
+              `;
+                        const [result] = await pool.execute(InsertTaskquery, [
+                            TaskName,
+                            serviceId,
+                            JobTypeId,
+                        ]);
+                        const task_id = result.insertId;
+                        const checklistTasksQuery = `
+              INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
+              VALUES (?, ?, ?, ?)
+              `;
+                        const [result1] = await pool.execute(checklistTasksQuery, [
+                            checklist_id,
+                            task_id,
+                            TaskName,
+                            BudgetHour,
+                        ]);
+                    } else {
+                        const task_id = existing[0].id;
+                        const checklistTasksQuery = `
+                INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
+                VALUES (?, ?, ?, ?)
+                `;
+                        const [result1] = await pool.execute(checklistTasksQuery, [
+                            checklist_id,
+                            task_id,
+                            TaskName,
+                            BudgetHour,
+                        ]);
+
+                    }
+
+                }
+            }
+        }
+
     }
 
     // Update customer process page
