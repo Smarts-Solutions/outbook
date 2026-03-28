@@ -2833,23 +2833,6 @@ const customerUpdate = async (customer) => {
         for (const serVal of services) {
             let service_id = serVal.service_id;
 
-            //checklist submit customer
-            const QueryCustomerAssign = `
-            UPDATE checklists 
-SET is_all_customer = 
-    IF(
-        is_all_customer IS NULL, 
-        JSON_ARRAY(${customer_id}), 
-        IF(
-            JSON_CONTAINS(is_all_customer, JSON_ARRAY(${customer_id}), '$'), 
-            is_all_customer, 
-            JSON_ARRAY_APPEND(is_all_customer, '$', ${customer_id})
-        )
-    ) 
-WHERE service_id = ${service_id} AND customer_id = 0;
-            `
-            const [QueryCustomerAssignData] = await pool.execute(QueryCustomerAssign);
-
             let account_manager_ids = serVal.account_manager_ids;
             arrayInterId.push(service_id)
             try {
