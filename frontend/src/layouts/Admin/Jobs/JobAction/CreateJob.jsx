@@ -2036,9 +2036,6 @@ const CreateJob = () => {
       }));
     }
 
-
-
-
   }, [jobData?.Service]);
 
 
