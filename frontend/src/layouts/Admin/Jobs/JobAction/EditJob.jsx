@@ -578,13 +578,12 @@ const EditJob = () => {
 
   const dueOn_date_set = async (client_type, service_id) => {
     let due_date = getDueDate(client_type, service_id);
+    due_date = ['', null, undefined].includes(due_date) ? null : due_date;
+    setJobData((prevState) => ({
+      ...prevState,
+      DueOn: due_date,
+    }));
 
-    if (!["", null, undefined].includes(due_date)) {
-      setJobData((prevState) => ({
-        ...prevState,
-        DueOn: due_date,
-      }));
-    }
   };
 
   function getDueDate(client_type, service_id) {
@@ -631,7 +630,8 @@ const EditJob = () => {
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-      } else {
+      } 
+      else {
         return null;
       }
     } else {
@@ -664,7 +664,8 @@ const EditJob = () => {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
-      } else {
+      } 
+      else {
         return null;
       }
     }
@@ -2528,7 +2529,11 @@ const EditJob = () => {
       serviceFields?.find((item) => item.id === jobData?.Service)?.fields ||
       serviceFields?.[0]?.fields,
     );
-  }, [jobData?.Service]);
+
+
+    dueOn_date_set(clientType, jobData?.Service);
+
+  }, [jobData?.Service, clientType]);
 
   // Select options for Customer Account Manager
   const customerAccountManagerOptions = [

@@ -323,8 +323,6 @@ const CreateJob = () => {
    }
 
   function getDueDate(client_type, service_id) {
-     console.log("client_type === ",client_type)
-     console.log("service_id === ",service_id)
     if (["1", "3", "7"].includes(client_type)) {
       // Service Account Production
       if (Number(service_id) === 1) {
@@ -362,7 +360,8 @@ const CreateJob = () => {
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
 
-      } else {
+      } 
+      else {
         return null;
       }
     }
