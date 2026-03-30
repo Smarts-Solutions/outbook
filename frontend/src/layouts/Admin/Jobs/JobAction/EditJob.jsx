@@ -141,10 +141,9 @@ const EditJob = () => {
     notes: "",
   });
 
-  console.log("jobData?.timesheet_job_id ", jobData?.timesheet_job_id);
 
   useEffect(() => {
-    
+
     setJobData((prevState) => ({
       ...prevState,
       Turnover_Period_id_0: "Monthly",
@@ -155,7 +154,7 @@ const EditJob = () => {
       Who_Did_The_Bookkeeping_id_1: "Outbooks",
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
-      // Bookkeeping_Frequency_id_2: "Daily",
+      Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
       Number_of_Purchase_Invoices_id_2: 0,
@@ -184,7 +183,7 @@ const EditJob = () => {
       If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
       Management_Accounts_Frequency_id_6: "Quarterly",
 
-      
+
       Year_Ending_id_1: null,
 
       Day_Date_id_2: null,
@@ -327,9 +326,8 @@ const EditJob = () => {
             setJobData((prevState) => ({
               ...prevState,
               timesheet_job_id: response.data.timesheet_job_id ?? null,
-              AccountManager: `${
-                response.data.outbooks_acount_manager_first_name ?? ""
-              } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
+              AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
+                } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
               Customer: response.data.customer_trading_name ?? "",
               Client:
                 location.state.goto == "Customer"
@@ -917,13 +915,13 @@ const EditJob = () => {
       setJobData((prevState) => ({
         ...prevState,
         ...nulledFields,
-        JobType: "", 
+        JobType: "",
       }));
 
-      setAddTaskArr([]); 
-      setTempTaskArr([]); 
-      setChecklistId(""); 
-      setTempChecklistId(""); 
+      setAddTaskArr([]);
+      setTempTaskArr([]);
+      setChecklistId("");
+      setTempChecklistId("");
     }
 
     if (name === "Bookkeeping_Frequency_id_2") {
@@ -978,54 +976,76 @@ const EditJob = () => {
     }
 
     const date = new Date();
-    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
-      if (value == 1) {
-        const clientInfo = allClientDetails?.find(
-          (client) => Number(client.id) === Number(jobData.client_id),
-        );
-        if (
-          clientInfo != "" &&
-          clientInfo?.client_company_number != undefined &&
-          clientInfo?.client_client_type == "2"
-        ) {
-          await get_information_company_number(
-            clientInfo.client_company_number,
+    if (name == "Service") {
+
+      if ([1, 2, 3, 4, 8].includes(Number(value))) {
+
+        if (value == 1) {
+          const clientInfo = allClientDetails?.find(
+            (client) => Number(client.id) === Number(jobData.client_id),
           );
-        } else if (
-          clientInfo != "" &&
-          ["5"].includes(clientInfo?.client_client_type)
-        ) {
-          await get_information_company_number(clientInfo.company_number);
-        } else {
-          await dueOn_date_set(clientType, value);
+          if (
+            clientInfo != "" &&
+            clientInfo?.client_company_number != undefined &&
+            clientInfo?.client_client_type == "2"
+          ) {
+            await get_information_company_number(
+              clientInfo.client_company_number,
+            );
+          } else if (
+            clientInfo != "" &&
+            ["5"].includes(clientInfo?.client_client_type)
+          ) {
+            await get_information_company_number(clientInfo.company_number);
+          } else {
+            await dueOn_date_set(clientType, value);
+          }
+
+          date.setDate(date.getDate() + 28);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 2) {
+          date.setDate(date.getDate() + 1);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 3) {
+          date.setDate(date.getDate() + 5);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 4) {
+          dueOn_date_set(clientType, value);
+          date.setDate(date.getDate() + 5);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 8) {
+          dueOn_date_set(clientType, value);
+          date.setDate(date.getDate() + 10);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
         }
 
-        date.setDate(date.getDate() + 28);
+      } else {
         setJobData((prevState) => ({
           ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 4) {
-        dueOn_date_set(clientType, value);
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 3) {
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 8) {
-        dueOn_date_set(clientType, value);
-        date.setDate(date.getDate() + 10);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
+          SLADeadlineDate: null,
         }));
       }
+
+
     }
 
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
@@ -1330,22 +1350,22 @@ const EditJob = () => {
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-        .reduce((obj, key) => {
-          const keyMapping = {
-            fte_dedicated_staffing: "FTE Dedicated Staffing",
-            percentage_model: "Percentage Model",
-            adhoc_payg_hourly: "Adhoc Payg Hourly",
-            customised_pricing: "Customised Pricing",
-          };
+      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+      .reduce((obj, key) => {
+        const keyMapping = {
+          fte_dedicated_staffing: "FTE Dedicated Staffing",
+          percentage_model: "Percentage Model",
+          adhoc_payg_hourly: "Adhoc Payg Hourly",
+          customised_pricing: "Customised Pricing",
+        };
 
-          if (keyMapping[key]) {
-            RearrangeEngagementOptionArr.push(keyMapping[key]);
-          }
+        if (keyMapping[key]) {
+          RearrangeEngagementOptionArr.push(keyMapping[key]);
+        }
 
-          obj[key] = AllJobData.data.engagement_model[0][key];
-          return obj;
-        }, {})
+        obj[key] = AllJobData.data.engagement_model[0][key];
+        return obj;
+      }, {})
     : {};
 
   const openJobModal = (e) => {
@@ -1419,8 +1439,8 @@ const EditJob = () => {
           : "Required",
       budgetedMinuteError:
         BudgetedHoursAddTask.minutes &&
-        BudgetedHoursAddTask.minutes >= 0 &&
-        BudgetedHoursAddTask.minutes <= 59
+          BudgetedHoursAddTask.minutes >= 0 &&
+          BudgetedHoursAddTask.minutes <= 59
           ? ""
           : "Required",
     };
@@ -2506,7 +2526,7 @@ const EditJob = () => {
     setServiceFieldsData(
       // serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
       serviceFields?.find((item) => item.id === jobData?.Service)?.fields ||
-        serviceFields?.[0]?.fields,
+      serviceFields?.[0]?.fields,
     );
   }, [jobData?.Service]);
 
@@ -2659,7 +2679,7 @@ const EditJob = () => {
                     window.history.back();
                   }}
                 >
-                  <ArrowLeft size={18} color="blue" className="me-2"/>
+                  <ArrowLeft size={18} color="blue" className="me-2" />
                 </button>
                 <h3 className="card-title mb-0">Update Job</h3>
               </div>
@@ -3031,12 +3051,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.hours || ""}
-                                            // value={
-                                            //   budgeted_hour_totalTime !=
-                                            //     undefined
-                                            //     ? budgeted_hour_totalTime.hours
-                                            //     : "0"
-                                            // }
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.hours
+                                          //     : "0"
+                                          // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -3064,12 +3084,12 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.minutes || ""}
-                                            // value={
-                                            //   budgeted_hour_totalTime !=
-                                            //     undefined
-                                            //     ? budgeted_hour_totalTime.minutes
-                                            //     : "0"
-                                            // }
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.minutes
+                                          //     : "0"
+                                          // }
                                           />
                                           <span
                                             className="input-group-text"
@@ -3237,9 +3257,9 @@ const EditJob = () => {
                                       min={minDateAllocatedOn}
                                       onChange={HandleChange}
                                       value={jobData.AllocatedOn}
-                                      // max={
-                                      //   new Date().toISOString().split("T")[0]
-                                      // }
+                                    // max={
+                                    //   new Date().toISOString().split("T")[0]
+                                    // }
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -3261,9 +3281,9 @@ const EditJob = () => {
                                       min={minDateRecivedOn}
                                       onChange={HandleChange}
                                       value={jobData.DateReceivedOn}
-                                      // max={
-                                      //   new Date().toISOString().split("T")[0]
-                                      // }
+                                    // max={
+                                    //   new Date().toISOString().split("T")[0]
+                                    // }
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
@@ -3593,7 +3613,7 @@ const EditJob = () => {
                                           <option key={key} value={key}>
                                             {
                                               RearrangeEngagementOptionArr[
-                                                index
+                                              index
                                               ]
                                             }
                                           </option>
@@ -3839,14 +3859,14 @@ const EditJob = () => {
                                         {errors[
                                           "FilingWithCompaniesHouseRequired"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "FilingWithCompaniesHouseRequired"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -3934,14 +3954,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentRequired"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "OpeningBalanceAdjustmentRequired"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                     <div className="col-lg-4">
@@ -3961,14 +3981,14 @@ const EditJob = () => {
                                         {errors[
                                           "OpeningBalanceAdjustmentDate"
                                         ] && (
-                                          <div className="error-text">
-                                            {
-                                              errors[
+                                            <div className="error-text">
+                                              {
+                                                errors[
                                                 "OpeningBalanceAdjustmentDate"
-                                              ]
-                                            }
-                                          </div>
-                                        )}
+                                                ]
+                                              }
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                   </div>
@@ -4435,11 +4455,11 @@ const EditJob = () => {
                                                               <td>
                                                                 <div className="add">
                                                                   {AddTaskArr &&
-                                                                  AddTaskArr.find(
-                                                                    (task) =>
-                                                                      task.task_id ==
-                                                                      checklist.task_id,
-                                                                  ) ? (
+                                                                    AddTaskArr.find(
+                                                                      (task) =>
+                                                                        task.task_id ==
+                                                                        checklist.task_id,
+                                                                    ) ? (
                                                                     ""
                                                                   ) : (
                                                                     <button
@@ -4536,8 +4556,8 @@ const EditJob = () => {
                                                             ).split(":");
                                                             const error =
                                                               errorsBudgetTimeTask[
-                                                                checklist
-                                                                  .task_id
+                                                              checklist
+                                                                .task_id
                                                               ];
 
                                                             return (
