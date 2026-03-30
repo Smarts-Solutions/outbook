@@ -69,20 +69,18 @@ const CreateJob = () => {
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
   const [checklistModal, setChecklistModal] = useState({
     show: false,
-    data:[],
+    data: [],
     title: "",
     loading: false,
-    type:""
+    type: ""
   });
 
-  console.log("checklistModal --->> ",checklistModal)
+  console.log("checklistModal --->> ", checklistModal)
 
   const handleViewChecklist = async (checklistId, title, type) => {
     if (!checklistId) return;
 
-
-
-    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title , type : type}));
+    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
 
     try {
       const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
@@ -107,41 +105,11 @@ const CreateJob = () => {
           date: ""
         }));
 
-        setChecklistModal(prev => ({
+      setChecklistModal(prev => ({
         ...prev,
         [type]: formattedRows,
         loading: false
       }));
-
-
-
-      // if(type === "processing"){
-      //   setChecklistModal(prev => ({
-      //   ...prev,
-      //   [type]: formattedRows,
-      //   data: formattedRows,
-      //   loading: false
-      // }));
-
-      // }
-      // else if(type === "reviewing"){
-      //   setChecklistModal(prev => ({
-      //   ...prev,
-      //   reviewingData: formattedRows,
-      //   loading: false
-      // }));
-
-      // }
-      // else{
-      //   setChecklistModal(prev => ({
-      //   ...prev,
-      //   data: [],
-      //   reviewingData: [],
-      //   loading: false
-      // }));
-
-      // }
-
 
 
     } catch (error) {
@@ -155,14 +123,12 @@ const CreateJob = () => {
     }
   };
 
-  const handleChecklistAnswerChange = (index, answer ,type ) => {
-    // alert(type)
-
+  const handleChecklistAnswerChange = (index, answer, type, attribute) => {
     setChecklistModal(prev => {
       const newData = [...prev[type]];
       newData[index] = {
         ...newData[index],
-        answer: answer,
+        [attribute]: answer,
         date: new Date().toISOString().split('T')[0] // Set today's date when clicked
       };
       return { ...prev, [type]: newData };
@@ -170,13 +136,7 @@ const CreateJob = () => {
 
   };
 
-  const handleChecklistCommentChange = (index, comment) => {
-    setChecklistModal(prev => {
-      const newData = [...prev.data];
-      newData[index] = { ...newData[index], comment: comment };
-      return { ...prev, data: newData };
-    });
-  };
+
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [allStaffData, setAllStaffData] = useState([]);
@@ -3517,7 +3477,7 @@ const CreateJob = () => {
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
-                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name ,"processing")}
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "processing")}
                                               >
                                                 <ExternalLink size={12} className="me-1" /> checklist_excel
                                               </button>
@@ -3581,7 +3541,7 @@ const CreateJob = () => {
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
-                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name , "reviewing")}
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "reviewing")}
                                               >
                                                 <ExternalLink size={12} className="me-1" /> checklist_excel
                                               </button>
@@ -4427,67 +4387,66 @@ const CreateJob = () => {
                               </thead>
                               <tbody>
                                 {
-                                checklistModal[checklistModal.type]?.length > 0 ? (
-                                  checklistModal[checklistModal.type]?.map((row, index) => (
-                                    <tr key={index}>
-                                      <td className="text-center">{row.s_no || index + 1}</td>
-                                      <td>{row.question}</td>
-                                      <td>
-                                        <div className="d-flex justify-content-around">
-                                          <Form.Check
-                                            type="radio"
-                                            label="Yes"
-                                            name={`ans-${index}`}
-                                            id={`yes-${index}`}
-                                            className="fs-12"
-                                            checked={row.answer === 'Yes'}
-                                            onChange={() => handleChecklistAnswerChange(index, 'Yes' ,checklistModal.type)}
+                                  checklistModal[checklistModal.type]?.length > 0 ? (
+                                    checklistModal[checklistModal.type]?.map((row, index) => (
+                                      <tr key={index}>
+                                        <td className="text-center">{row.s_no || index + 1}</td>
+                                        <td>{row.question}</td>
+                                        <td>
+                                          <div className="d-flex justify-content-around">
+                                            <Form.Check
+                                              type="radio"
+                                              label="Yes"
+                                              name={`ans-${index}`}
+                                              id={`yes-${index}`}
+                                              className="fs-12"
+                                              checked={row.answer === 'Yes'}
+                                              onChange={() => handleChecklistAnswerChange(index, 'Yes', checklistModal.type, "answer")}
+                                            />
+                                            <Form.Check
+                                              type="radio"
+                                              label="No"
+                                              name={`ans-${index}`}
+                                              id={`no-${index}`}
+                                              className="fs-12"
+                                              checked={row.answer === 'No'}
+                                              onChange={() => handleChecklistAnswerChange(index, 'No', checklistModal.type, "answer")}
+                                            />
+                                            <Form.Check
+                                              type="radio"
+                                              label="N/A"
+                                              name={`ans-${index}`}
+                                              id={`na-${index}`}
+                                              className="fs-12"
+                                              checked={row.answer === 'N/A'}
+                                              onChange={() => handleChecklistAnswerChange(index, 'N/A', checklistModal.type, "answer")}
+                                            />
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <textarea
+                                            className="form-control form-control-sm"
+                                            rows="1"
+                                            placeholder="Add comment"
+                                            value={row.comment}
+                                            onChange={(e) => handleChecklistAnswerChange(index, e.target.value, checklistModal.type, "comment")}
+                                          ></textarea>
+                                        </td>
+                                        <td>
+                                          <input
+                                            type="date"
+                                            className="form-control form-control-sm"
+                                            value={row.date}
+                                            readOnly
                                           />
-                                          <Form.Check
-                                            type="radio"
-                                            label="No"
-                                            name={`ans-${index}`}
-                                            id={`no-${index}`}
-                                            className="fs-12"
-                                            checked={row.answer === 'No'}
-                                            onChange={() => handleChecklistAnswerChange(index, 'No' ,checklistModal.type)}
-                                          />
-                                          <Form.Check
-                                            type="radio"
-                                            label="N/A"
-                                            name={`ans-${index}`}
-                                            id={`na-${index}`}
-                                            className="fs-12"
-                                            checked={row.answer === 'N/A'}
-                                            onChange={() => handleChecklistAnswerChange(index, 'N/A' ,checklistModal.type)}
-                                          />
-                                        </div>
-                                      </td>
-                                      <td>
-                                        <textarea
-                                          className="form-control form-control-sm"
-                                          rows="1"
-                                          placeholder="Add comment"
-                                          value={row.comment}
-                                         // onChange={(e) => handleChecklistCommentChange(index, e.target.value)}
-                                          onChange={(e) => handleChecklistAnswerChange(index, e.target.value ,checklistModal.type)}
-                                        ></textarea>
-                                      </td>
-                                      <td>
-                                        <input
-                                          type="date"
-                                          className="form-control form-control-sm"
-                                          value={row.date}
-                                          readOnly
-                                        />
-                                      </td>
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan="5" className="text-center py-4 text-muted">No questions found in this file.</td>
                                     </tr>
-                                  ))
-                                ) : (
-                                  <tr>
-                                    <td colSpan="5" className="text-center py-4 text-muted">No questions found in this file.</td>
-                                  </tr>
-                                )}
+                                  )}
                               </tbody>
                             </Table>
                           </div>
