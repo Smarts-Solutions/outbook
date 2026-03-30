@@ -159,12 +159,14 @@ const CreateJob = () => {
     CustomerDeadlineDate: null,
     SLADeadlineDate: null,
     InternalDeadlineDate: null,
+
     FilingWithCompaniesHouseRequired: "0",
     CompaniesHouseFilingDate: null,
     FilingWithHMRCRequired: "0",
     HMRCFilingDate: null,
     OpeningBalanceAdjustmentRequired: "0",
     OpeningBalanceAdjustmentDate: null,
+
     NumberOfTransactions: "",
     NumberOfTrialBalanceItems: "",
     Turnover: "",
@@ -891,14 +893,15 @@ const CreateJob = () => {
       //   ? jobData?.SLADeadlineDate
       //   : new Date().toISOString().split("T")[0],
       sla_deadline_date: jobData?.SLADeadlineDate,
-
       internal_deadline_date: jobData.InternalDeadlineDate,
+
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
       filing_hmrc_required: jobData.FilingWithHMRCRequired,
       filing_hmrc_date: jobData.HMRCFilingDate,
       opening_balance_required: jobData.OpeningBalanceAdjustmentRequired,
       opening_balance_date: jobData.OpeningBalanceAdjustmentDate,
+
       number_of_transaction: Number(jobData.NumberOfTransactions),
       number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems),
       turnover: Number(jobData.Turnover),

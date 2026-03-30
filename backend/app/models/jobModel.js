@@ -4354,6 +4354,14 @@ const copy_job = async (job) => {
     data.status_type = 1;
     data.job_id = job_id;
 
+    //Other Data Field
+    data.filing_Companies_required = "0";
+    data.filing_Companies_date = null;
+    data.filing_hmrc_required = "0" 
+    data.filing_hmrc_date = null
+    data.opening_balance_required = "0"
+    data.opening_balance_date = null
+
 
     // Due Date Logic START //
     let Year_Ending_id_1 = null;
