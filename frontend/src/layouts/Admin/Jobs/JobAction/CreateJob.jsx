@@ -2134,7 +2134,7 @@ const CreateJob = () => {
 
  
   useEffect(() => {
-    console.log("UPDATE ALL DEFAULT FEILDS");
+   
     setJobData((prevState) => ({
       ...prevState,
       Turnover_Period_id_0: "Monthly",
