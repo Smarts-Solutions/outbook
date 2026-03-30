@@ -1616,32 +1616,46 @@ const Setting = () => {
   ];
 
   const ChecklistDelete = async (row) => {
-    const req = { action: "delete", checklist_id: row.checklists_id };
-    const data = { req: req, authToken: token };
-    await dispatch(getList(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          sweatalert.fire({
-            title: "Deleted",
-            icon: "success",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          getCheckListData();
-        } else {
-          sweatalert.fire({
-            title: "Failed",
-            icon: "error",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "You want to delete this checklist!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
       })
-      .catch((error) => {
-        return;
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          const req = { action: "delete", checklist_id: row.checklists_id };
+          const data = { req: req, authToken: token };
+          await dispatch(getList(data))
+            .unwrap()
+            .then(async (response) => {
+              if (response.status) {
+                sweatalert.fire({
+                  title: "Deleted",
+                  icon: "success",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                getCheckListData();
+              } else {
+                sweatalert.fire({
+                  title: "Failed",
+                  icon: "error",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+              }
+            })
+            .catch((error) => {
+              return;
+            });
+        }
       });
   };
 
