@@ -175,9 +175,13 @@ export async function addChecklist(data, token) {
 
 export async function UpdateChecklist(data, token) {
     try {
+        const isFormData = data instanceof FormData;
+        const headers = { ...header(token) };
+        if (isFormData) {
+            delete headers['Content-Type'];
+        }
         const res = await axios.post(`${Config.base_url}updateChecklist`, data, {
-            headers: header(token),
-            data: {}
+            headers: headers
         })
         return await res?.data;
     }

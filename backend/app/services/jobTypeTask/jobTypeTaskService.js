@@ -69,8 +69,8 @@ const checklistAction = async (checklist) => {
 
 };
 
-const updateChecklist = async (checklist) => {
-  return jobTypeTaskModel.updateChecklist(checklist);
+const updateChecklist = async (checklist, file) => {
+  return jobTypeTaskModel.updateChecklist(checklist, file);
 };
 
 const customerGetService = async (task) => {

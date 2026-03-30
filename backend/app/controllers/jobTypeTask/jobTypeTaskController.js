@@ -124,8 +124,9 @@ const checklistAction = async (req, res) => {
 const updateChecklist = async (req, res) => {
   try {
     const { ...checklist } = req.body;
+    const file = req.file;
 
-    const result = await jobTypeTaskService.updateChecklist(checklist);
+    const result = await jobTypeTaskService.updateChecklist(checklist, file);
     if (!result.status) {
       return res.status(200).json({ status: false, message: result.message });
     } else {
@@ -158,15 +159,16 @@ const customerGetService = async (req, res) => {
 const getChecklistFile = async (req, res) => {
   const { checklist_id } = req.params;
   try {
-    const filename = await jobTypeTaskService.getFilenameById(checklist_id);
-    if (!filename) {
+    const filenameFromDB = await jobTypeTaskService.getFilenameById(checklist_id);
+    if (!filenameFromDB) {
       return res.status(404).json({ status: false, message: 'Checklist record not found' });
     }
 
-    const filePath = path.join(__dirname, '../../../checklist_excel', filename);
+    const diskFileName = `checklist_excel_${checklist_id}.zip`;
+    const filePath = path.join(__dirname, '../../../checklist_excel', diskFileName);
     
     if (fs.existsSync(filePath)) {
-      res.download(filePath, (err) => {
+      res.download(filePath, filenameFromDB, (err) => {
         if (err) {
           console.error('Error downloading file:', err);
           if (!res.headersSent) {
