@@ -1021,10 +1021,10 @@ const JobStatus = () => {
                 : item.customer_type === "3"
                   ? "Partnership"
                   : "-",
-          // "Account Manager":
-          //   (item.account_manager_firstname || "") +
-          //   " " +
-          //   (item.account_manager_lastname || ""),
+          "Account Manager":
+            (item.account_manager_firstname || "") +
+            " " +
+            (item.account_manager_lastname || ""),
           "Employee ID": item.employee_number || "-",
           "Created by": item.customer_created_by || "",
           "Created At": item.created_at || "",
@@ -1098,10 +1098,10 @@ const JobStatus = () => {
                         " " +
                         (item.account_manager_officer_last_name || ""),
                     "Client Job Code": item.client_job_code || "-",
-                    "Outbook Account Manager":
-                        (item.outbooks_acount_manager_first_name || "") +
-                        " " +
-                        (item.outbooks_acount_manager_last_name || ""),
+                    // "Outbook Account Manager":
+                    //     (item.outbooks_acount_manager_first_name || "") +
+                    //     " " +
+                    //     (item.outbooks_acount_manager_last_name || ""),
                     "Allocated To": item.allocated_first_name
                         ? item.allocated_first_name + " " + item.allocated_last_name
                         : "-",
