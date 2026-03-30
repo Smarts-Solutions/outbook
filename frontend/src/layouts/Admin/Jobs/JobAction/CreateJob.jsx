@@ -884,8 +884,6 @@ const CreateJob = () => {
 
  
 
-    return
-
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
         icon: "error",
@@ -981,7 +979,17 @@ const CreateJob = () => {
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr,
-      }
+      },
+
+     processing_checkList: jobData?.processing_checkList,
+     reviewing_checkList: jobData?.reviewing_checkList,
+     processing_checklist_status : processing_checklist_status,
+     processing_checklist_data : processing_checklist_data,
+     reviewing_checklist_status : reviewing_checklist_status,
+     reviewing_checklist_data : reviewing_checklist_data,
+
+
+
     };
 
 
