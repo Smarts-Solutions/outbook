@@ -140,9 +140,9 @@ const ClientList = () => {
           role === "SUPERADMIN"
           ? "client"
           : (getAccessDataJob &&
-                (getAccessDataJob.job == 1 ||
-                  getAccessDataJob.all_jobs == 1)) ||
-              role === "SUPERADMIN"
+            (getAccessDataJob.job == 1 ||
+              getAccessDataJob.all_jobs == 1)) ||
+            role === "SUPERADMIN"
             ? "job"
             : "documents",
       );
@@ -150,8 +150,8 @@ const ClientList = () => {
   }, [getAccessDataJob, getAccessDataClient]);
 
   const initialTabs = [
-    { id: "documents", label: "Documents", icon: <File size={16}/> },
-    { id: "status", label: "Status", icon:  <Circle size={16}/> },
+    { id: "documents", label: "Documents", icon: <File size={16} /> },
+    { id: "status", label: "Status", icon: <Circle size={16} /> },
     // { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
@@ -271,7 +271,7 @@ const ClientList = () => {
         (getAccessDataJob.job == 1 || getAccessDataJob.all_jobs == 1)) ||
       role === "SUPERADMIN"
     ) {
-      tabsData.push({ id: "job", label: "Job", icon: <Briefcase size={16}/> });
+      tabsData.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
     }
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
@@ -282,8 +282,8 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {getAccessDataJob.job === 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -511,8 +511,8 @@ const ClientList = () => {
         <div
           title={
             row.account_manager_officer_first_name +
-              " " +
-              row.account_manager_officer_last_name || "-"
+            " " +
+            row.account_manager_officer_last_name || "-"
           }
         >
           {row.account_manager_officer_first_name +
@@ -522,8 +522,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-",
+        " " +
+        row.account_manager_officer_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -544,8 +544,8 @@ const ClientList = () => {
         <div
           title={
             row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
+            " " +
+            row.outbooks_acount_manager_last_name || "-"
           }
         >
           {row.outbooks_acount_manager_first_name +
@@ -555,8 +555,8 @@ const ClientList = () => {
       ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
+        " " +
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
       reorder: false,
     },
@@ -576,26 +576,26 @@ const ClientList = () => {
           title={
             row.total_hours_status == "1" && row.total_hours != null
               ? row.total_hours.split(":")[0] +
-                "h " +
-                row.total_hours.split(":")[1] +
-                "m"
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
               : "-"
           }
         >
           {row.total_hours_status == "1" && row.total_hours != null
             ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
             : "-"}
         </div>
       ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null
           ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
+          "h " +
+          row.total_hours.split(":")[1] +
+          "m"
           : "-",
       sortable: true,
       reorder: false,
@@ -633,21 +633,28 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {getAccessDataJob.update === 1 || role === "SUPERADMIN" ? (
-            <button
-              className="edit-icon"
-              onClick={() =>
-                navigate("/admin/job/edit", {
-                  state: {
-                    job_id: row.job_id,
-                    goto: "Customer",
-                    activeTab: activeTab,
-                    jab: row,
-                  },
-                })
-              }
-            >
-              <i className="ti-pencil" />
-            </button>
+            <>
+              <button
+                className="edit-icon"
+                onClick={() =>
+                  navigate("/admin/job/edit", {
+                    state: {
+                      job_id: row.job_id,
+                      goto: "Customer",
+                      activeTab: activeTab,
+                      jab: row,
+                    },
+                  })
+                }
+              >
+                <i className="ti-pencil" />
+              </button>
+
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            </>
+
           ) : null}
           {row.timesheet_job_id == null ? (
             getAccessDataJob.delete === 1 || role === "SUPERADMIN" ? (
@@ -663,10 +670,14 @@ const ClientList = () => {
           )}
         </div>
       ),
+      // ignoreRowClick: true,
+      // allowOverflow: true,
+      // button: true,
+      // reorder: false,
+      width: "180px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      reorder: false,
     },
   ];
 
@@ -1036,8 +1047,8 @@ const ClientList = () => {
         <div>
           <a
             title={row.check_list_name}
-            // onClick={() => HandleClientView(row)}
-            // style={{ cursor: "pointer", color: "#26bdf0" }}
+          // onClick={() => HandleClientView(row)}
+          // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.check_list_name}
           </a>
@@ -1369,6 +1380,56 @@ const ClientList = () => {
       });
   };
 
+  const copyRow = async (row) => {
+      sweatalert
+        .fire({
+          title: "Are you sure?",
+          text: "You want to copy this job ?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes",
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            const req = {
+              action: "copy_job",
+              row: row,
+            };
+            const data = { req: req, authToken: token };
+            await dispatch(JobAction(data))
+              .unwrap()
+              .then(async (response) => {
+                if (response.status) {
+                  sweatalert.fire({
+                    title: "Job copied successfully",
+                    icon: "success",
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    timer: 1500,
+                  });
+                  JobDetails();
+                } else {
+                  sweatalert.fire({
+                    title: "Failed",
+                    icon: "error",
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    message: response.message,
+                    timer: 1500,
+                  });
+                }
+              })
+              .catch((error) => {
+                return;
+              });
+          } else {
+            return;
+          }
+        });
+    };
+
   const HandleClientView = (row) => {
     setHararchyData((prevState) => {
       const updatedData = {
@@ -1527,9 +1588,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1539,7 +1599,7 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => SetTab(tab.id)}
                       >
-                       {tab.icon}{" "}
+                        {tab.icon}{" "}
                         {tab.label}
                       </button>
                     </li>
@@ -1548,9 +1608,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
@@ -1562,7 +1622,7 @@ const ClientList = () => {
                     </div>
                     {(getAccessDataClient.insert === 1 ||
                       role === "SUPERADMIN") &&
-                    activeTab === "client" ? (
+                      activeTab === "client" ? (
                       <>
                         <div
                           className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
@@ -1598,7 +1658,7 @@ const ClientList = () => {
                         </div>
                       </>
                     ) : (getAccessDataCustomer.insert === 1 ||
-                        role === "SUPERADMIN") &&
+                      role === "SUPERADMIN") &&
                       activeTab === "checklist" ? (
                       <>
                         <div
@@ -1663,9 +1723,8 @@ const ClientList = () => {
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${
-              activeTab == tab.key ? "show active" : ""
-            }`}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
