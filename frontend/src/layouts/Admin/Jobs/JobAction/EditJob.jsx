@@ -144,7 +144,7 @@ const EditJob = () => {
   console.log("jobData?.timesheet_job_id ", jobData?.timesheet_job_id);
 
   useEffect(() => {
-    console.log("UPDATE ALL DEFAULT FEILDS");
+    
     setJobData((prevState) => ({
       ...prevState,
       Turnover_Period_id_0: "Monthly",
