@@ -354,17 +354,18 @@ const addChecklist = async (checklist, file) => {
 
     let finalFileName = null;
     if (file) {
-      // Format: checklist_excel_{checklist_id}.zip
-      finalFileName = `checklist_excel_${checklist_id}.zip`;
+      const extension = path.extname(file.originalname);
+      const dbFileName = `checklist_excel_${checklist_id}${extension}`;
+      const diskFileName = `checklist_excel_${checklist_id}.zip`;
       const oldPath = file.path;
-      const newPath = path.join(file.destination, finalFileName);
+      const newPath = path.join(file.destination, diskFileName);
 
-      // Rename the temp file to the formal name
+      // Rename the temp file to the formal name on disk
       fs.renameSync(oldPath, newPath);
 
-      // Update the record with the final filename
+      // Update the record with the extended metadata filename for downloads
       const updateQuery = `UPDATE checklists SET upload_checklist_name = ? WHERE id = ?`;
-      await pool.execute(updateQuery, [finalFileName, checklist_id]);
+      await pool.execute(updateQuery, [dbFileName, checklist_id]);
     }
 
     const currentDate = new Date();
@@ -513,6 +514,7 @@ const getByIdChecklist = async (checklist) => {
       check_list_name: row.check_list_name,
       status: row.status,
       work_flow_type: row.work_flow_type,
+      upload_checklist_name: row.upload_checklist_name,
       // Convert comma-separated strings to arrays
       customer_id: row.customer_id ? row.customer_id.toString().split(",") : [],
       service_id: row.service_id ? row.service_id.toString().split(",") : [],
@@ -560,7 +562,7 @@ const deleteChecklist = async (checklist) => {
   }
 };
 
-const updateChecklist = async (checklist) => {
+const updateChecklist = async (checklist, file) => {
   let {
     checklists_id,
     work_flow_type,
@@ -577,6 +579,23 @@ const updateChecklist = async (checklist) => {
   job_type_id = (job_type_id == null || job_type_id?.length == 0) ? null : (Array.isArray(job_type_id) ? job_type_id.join(",") : job_type_id);
 
   try {
+    let finalFileName = null;
+    if (file) {
+      // Process and rename the file
+      const extension = path.extname(file.originalname);
+      const dbFileName = `checklist_excel_${checklists_id}${extension}`;
+      const diskFileName = `checklist_excel_${checklists_id}.zip`;
+      const oldPath = file.path;
+      const newPath = path.join(file.destination, diskFileName);
+
+      // Overwrite the existing file if it exists
+      if (fs.existsSync(newPath)) {
+        fs.unlinkSync(newPath);
+      }
+      fs.renameSync(oldPath, newPath);
+      finalFileName = dbFileName;
+    }
+
     // Update query for checklists table
     const updateChecklistQuery = `
     UPDATE checklists 
@@ -587,9 +606,11 @@ const updateChecklist = async (checklist) => {
         client_type_id = ?, 
         check_list_name = ?, 
         status = ?
+        ${file ? ', upload_checklist_name = ?' : ''}
     WHERE id = ?
     `;
-    const [checklistResult] = await pool.execute(updateChecklistQuery, [
+
+    const queryParams = [
       work_flow_type,
       customer_id,
       service_id,
@@ -597,8 +618,14 @@ const updateChecklist = async (checklist) => {
       client_type_id,
       check_list_name,
       status,
-      checklists_id,
-    ]);
+    ];
+
+    if (file) {
+      queryParams.push(finalFileName);
+    }
+    queryParams.push(checklists_id);
+
+    const [checklistResult] = await pool.execute(updateChecklistQuery, queryParams);
 
     if (checklistResult.affectedRows > 0) {
       const currentDate = new Date();

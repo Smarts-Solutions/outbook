@@ -29,7 +29,7 @@ router.post('/addTask', verifyToken, jobTypeTaskController.addTask);
 router.post('/getTask', verifyToken, jobTypeTaskController.getTask);
 router.post('/addChecklist', verifyToken, upload.single('checklist_excel'), jobTypeTaskController.addChecklist);
 router.post('/checklistAction', verifyToken, jobTypeTaskController.checklistAction);
-router.post('/updateChecklist', verifyToken, jobTypeTaskController.updateChecklist);
+router.post('/updateChecklist', verifyToken, upload.single('checklist_excel'), jobTypeTaskController.updateChecklist);
 router.post('/customerGetService', verifyToken, jobTypeTaskController.customerGetService);
 router.get('/downloadChecklist/:checklist_id', jobTypeTaskController.getChecklistFile); // Route updated to use ID
 

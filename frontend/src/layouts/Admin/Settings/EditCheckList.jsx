@@ -13,6 +13,8 @@ import {
 import { Save, ArrowLeft, X } from "lucide-react";
 import Select from "react-select";
 import sweatalert from "sweetalert2";
+import * as XLSX from "xlsx";
+import { base_url } from "../../../Utils/Config";
 
 const EditCheckList = () => {
   const location = useLocation();
@@ -36,6 +38,8 @@ const EditCheckList = () => {
   const [serviceAllData, setServiceAllData] = useState([]);
   const [jobTypeOptions, setJobTypeOptions] = useState([]);
   const [selectedClientType, setSelectedClientType] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [existingFile, setExistingFile] = useState("");
 
   const options = [
     { key: "1", label: "Sole Trader" },
@@ -97,6 +101,7 @@ const EditCheckList = () => {
         };
 
         setFormData(mappedFormData);
+        setExistingFile(d.upload_checklist_name || "");
         if (Array.isArray(d.client_type_id)) {
           setSelectedClientType(d.client_type_id.map(id => id.toString()));
         }
@@ -190,6 +195,185 @@ const EditCheckList = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const allowedTypes = [
+        "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel.sheet.macroEnabled.12",
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Invalid File Type",
+          text: "Only CSV or Excel files allowed",
+        });
+        e.target.value = null;
+        setSelectedFile(null);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const binaryData = event.target.result;
+          const workbook = XLSX.read(binaryData, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (rows.length === 0) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid File",
+              text: "The uploaded file is empty.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          const expectedHeaders = ["S.No", "Questions", "Yes", "No", "Not Applicable", "Comment", "Date"];
+          const headers = rows[0].map(h => (h ? h.toString().trim() : ""));
+
+          if (headers.length !== expectedHeaders.length) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid Format",
+              text: `The file format is invalid. Please ensure there are exactly ${expectedHeaders.length} columns: ${expectedHeaders.join(", ")}.`,
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          const isHeaderValid = expectedHeaders.every((val, index) => val === headers[index]);
+          if (!isHeaderValid) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid Format",
+              text: "Column headers do not match the required format. Please don't change any heading.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          const dataRows = rows.slice(1);
+          let lastNonEmptyIndex = -1;
+          for (let i = dataRows.length - 1; i >= 0; i--) {
+            const row = dataRows[i];
+            if (row && row.some(cell => cell !== null && cell !== undefined && cell.toString().trim() !== "")) {
+              lastNonEmptyIndex = i;
+              break;
+            }
+          }
+
+          if (lastNonEmptyIndex === -1) {
+            sweatalert.fire({
+              icon: "error",
+              title: "No Data found",
+              text: "The file must contain at least one question and should not be empty.",
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          let isDataFormatValid = true;
+          let errorMessage = "";
+          let expectedSNo = 1;
+
+          for (let i = 0; i <= lastNonEmptyIndex; i++) {
+            const row = dataRows[i];
+            
+            if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: This row is empty. Please don't leave blank rows between data.`;
+              break;
+            }
+
+            const sNoVal = row[0];
+            if (sNoVal === null || sNoVal === undefined || sNoVal.toString().trim() === "") {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'S.No' column should have data.`;
+              break;
+            }
+
+            const currentSNo = parseInt(sNoVal.toString().trim());
+            if (isNaN(currentSNo)) {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'S.No' must be a number.`;
+              break;
+            }
+
+            if (currentSNo !== expectedSNo) {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'S.No' must be in increasing order starting from 1 with no gaps. Expected ${expectedSNo} but found ${currentSNo}.`;
+              break;
+            }
+
+            const questionVal = row[1];
+            if (!questionVal || questionVal.toString().trim() === "") {
+              isDataFormatValid = false;
+              errorMessage = `Error at row ${i + 2}: The 'Questions' column should have data.`;
+              break;
+            }
+
+            for (let j = 2; j < row.length; j++) {
+              if (row[j] !== null && row[j] !== undefined && row[j].toString().trim() !== "") {
+                isDataFormatValid = false;
+                errorMessage = `Invalid data at row ${i + 2}. Data should only be in 'S.No' and 'Questions' columns. All other columns must remain empty.`;
+                break;
+              }
+            }
+            if (!isDataFormatValid) break;
+
+            expectedSNo++;
+          }
+
+          if (!isDataFormatValid) {
+            sweatalert.fire({
+              icon: "error",
+              title: "Invalid Format",
+              text: errorMessage,
+            });
+            e.target.value = null;
+            setSelectedFile(null);
+            return;
+          }
+
+          setSelectedFile(file);
+        } catch (error) {
+          console.error("File processing error:", error);
+          sweatalert.fire({
+            icon: "error",
+            title: "Error",
+            text: "Could not process the file. Please use a valid CSV or Excel file.",
+          });
+          e.target.value = null;
+          setSelectedFile(null);
+        }
+      };
+
+      reader.onerror = () => {
+        sweatalert.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to read the file.",
+        });
+        e.target.value = null;
+        setSelectedFile(null);
+      };
+
+      reader.readAsBinaryString(file);
+    }
+  };
+
   const fieldErrors = {
     work_flow_type: "Please Select Work Flow Type",
     check_list_name: "Please Enter CheckList Name",
@@ -256,13 +440,22 @@ const EditCheckList = () => {
       return;
     }
 
-    const req = {
-      checklists_id: location.state?.checklist_id || location.state?.id,
-      ...formData,
-      client_type_id: selectedClientType.join(","),
-    };
+    const checklist_id = location.state?.checklist_id || location.state?.id;
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append("checklists_id", checklist_id);
+    formDataToSubmit.append("check_list_name", formData.check_list_name);
+    formDataToSubmit.append("work_flow_type", formData.work_flow_type);
+    formDataToSubmit.append("client_type_id", selectedClientType.join(","));
+    formDataToSubmit.append("status", formData.status);
+    formDataToSubmit.append("customer_id", formData.customer_id?.join(","));
+    formDataToSubmit.append("service_id", formData.service_id?.join(","));
+    formDataToSubmit.append("job_type_id", formData.job_type_id?.join(","));
 
-    const data = { req, authToken: token };
+    if (selectedFile) {
+      formDataToSubmit.append("checklist_excel", selectedFile);
+    }
+
+    const data = { req: formDataToSubmit, authToken: token };
     try {
       const resp = await dispatch(UpdateChecklistData(data)).unwrap();
       if (resp.status) {
@@ -502,6 +695,36 @@ const EditCheckList = () => {
                   </select>
                   {errors.status && (
                     <p className="mb-0 error-text">{errors.status}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-12 mt-3">
+              <label className="form-label">Upload File (CSV / Excel) </label>
+              <div className="d-flex align-items-center">
+                <input
+                  type="file"
+                  className="form-control w-50"
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                  onChange={handleFileChange}
+                />
+                
+                <div className="ms-3">
+                  {existingFile ? (
+                    <div className="d-flex flex-column">
+                      <span className="text-muted small">Previously Uploaded:</span>
+                      <a 
+                         href={`${base_url}downloadChecklist/${location.state?.checklist_id || location.state?.id}`}
+                         className="text-primary text-decoration-none fw-bold"
+                         target="_blank" 
+                         rel="noopener noreferrer"
+                      >
+                        {existingFile}
+                      </a>
+                    </div>
+                  ) : (
+                    <span className="text-danger small">No file uploaded previously</span>
                   )}
                 </div>
               </div>

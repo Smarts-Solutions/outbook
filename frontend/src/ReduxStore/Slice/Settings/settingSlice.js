@@ -274,12 +274,21 @@ export const UpdateChecklistData = createAsyncThunk(
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-      const updatedReq = {
-        ...req,
-        ip: IP_Data,
-        StaffUserId: StaffUserId.id,
-      };
-      const res = await UpdateChecklist(updatedReq, authToken);
+
+      let finalReq;
+      if (req instanceof FormData) {
+        finalReq = req;
+        if (IP_Data) finalReq.append("ip", JSON.stringify(IP_Data));
+        if (StaffUserId?.id) finalReq.append("StaffUserId", StaffUserId.id);
+      } else {
+        finalReq = {
+          ...req,
+          ip: IP_Data,
+          StaffUserId: StaffUserId.id,
+        };
+      }
+
+      const res = await UpdateChecklist(finalReq, authToken);
 
       return await res;
     } catch (err) {
