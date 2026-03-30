@@ -83,6 +83,7 @@ const CreateJob = () => {
       const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
         responseType: 'arraybuffer'
       });
+
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
@@ -175,14 +176,16 @@ const CreateJob = () => {
     DueOn: null,
     SubmissionDeadline: null,
     CustomerDeadlineDate: null,
-    SLADeadlineDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0],
+    SLADeadlineDate: null,
     InternalDeadlineDate: null,
+
     FilingWithCompaniesHouseRequired: "0",
     CompaniesHouseFilingDate: null,
     FilingWithHMRCRequired: "0",
     HMRCFilingDate: null,
     OpeningBalanceAdjustmentRequired: "0",
     OpeningBalanceAdjustmentDate: null,
+
     NumberOfTransactions: "",
     NumberOfTrialBalanceItems: "",
     Turnover: "",
@@ -199,8 +202,8 @@ const CreateJob = () => {
     notes: "",
     job_priority: "normal",
     processing_checkList: "",
-    reviewing_checkList: ""
-    //Bookkeeping_Frequency_id_2: "Daily",
+    reviewing_checkList: "",
+    Bookkeeping_Frequency_id_2: "Daily",
 
   });
 
@@ -333,14 +336,12 @@ const CreateJob = () => {
     let due_date = getDueDate(client_type, service_id);
     due_date = ['', null, undefined].includes(due_date) ? null : due_date;
     setJobData((prevState) => ({
-        ...prevState,
-        DueOn: due_date,
-      }));
-   }
+      ...prevState,
+      DueOn: due_date,
+    }));
+  }
 
   function getDueDate(client_type, service_id) {
-     console.log("client_type === ",client_type)
-     console.log("service_id === ",service_id)
     if (["1", "3", "7"].includes(client_type)) {
       // Service Account Production
       if (Number(service_id) === 1) {
@@ -378,7 +379,8 @@ const CreateJob = () => {
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
 
-      } else {
+      }
+      else {
         return null;
       }
     }
@@ -576,66 +578,89 @@ const CreateJob = () => {
     }
 
     const date = new Date();
-    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
-      if (value == 1) {
+    if (name == "Service") {
 
-        const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
+      if ([1, 2, 3, 4, 8].includes(Number(value))) {
 
-        if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-          await get_information_company_number(clientInfo?.client_company_number, value);
-        }
-        else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-          await get_information_company_number(clientInfo?.company_number, value);
-        } else {
-          await dueOn_date_set(clientType, value);
-        }
+        if (value == 1) {
 
-        date.setDate(date.getDate() + 28);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-        if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
+          const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
+
+          if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+            await get_information_company_number(clientInfo?.client_company_number, value);
+          }
+          else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+            await get_information_company_number(clientInfo?.company_number, value);
+          } else {
+            await dueOn_date_set(clientType, value);
+          }
+
+          date.setDate(date.getDate() + 28);
           setJobData((prevState) => ({
             ...prevState,
-            Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
-            DueOn: clientInfoCompanyDetails?.accounts?.next_accounts?.due_on,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+          if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
+            setJobData((prevState) => ({
+              ...prevState,
+              Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
+              DueOn: clientInfoCompanyDetails?.accounts?.next_accounts?.due_on,
+            }));
+          }
+        } else {
+          setJobData((prevState) => ({
+            ...prevState,
+            Year_Ending_id_1: null,
+            DueOn: null,
           }));
         }
+
+        if (value == 2) {
+          date.setDate(date.getDate() + 1);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 3) {
+          date.setDate(date.getDate() + 5);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 4) {
+          await dueOn_date_set(clientType, value);
+          date.setDate(date.getDate() + 5);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 8) {
+          await dueOn_date_set(clientType, value);
+          date.setDate(date.getDate() + 10);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+
       } else {
+
         setJobData((prevState) => ({
           ...prevState,
-          Year_Ending_id_1: null,
-          DueOn: null,
+          SLADeadlineDate: null,
         }));
       }
 
 
 
-      if (value == 4) {
-        await dueOn_date_set(clientType, value);
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 3) {
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 8) {
-        await dueOn_date_set(clientType, value);
-        date.setDate(date.getDate() + 10);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      }
     }
 
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+
+
 
       if (value == "Daily") {
         date.setDate(date.getDate() + 1);
@@ -882,17 +907,19 @@ const CreateJob = () => {
       customer_deadline_date: jobData.CustomerDeadlineDate,
 
 
-      sla_deadline_date: jobData?.SLADeadlineDate
-        ? jobData?.SLADeadlineDate
-        : new Date().toISOString().split("T")[0],
-
+      // sla_deadline_date: jobData?.SLADeadlineDate
+      //   ? jobData?.SLADeadlineDate
+      //   : new Date().toISOString().split("T")[0],
+      sla_deadline_date: jobData?.SLADeadlineDate,
       internal_deadline_date: jobData.InternalDeadlineDate,
+
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
       filing_hmrc_required: jobData.FilingWithHMRCRequired,
       filing_hmrc_date: jobData.HMRCFilingDate,
       opening_balance_required: jobData.OpeningBalanceAdjustmentRequired,
       opening_balance_date: jobData.OpeningBalanceAdjustmentDate,
+
       number_of_transaction: Number(jobData.NumberOfTransactions),
       number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems),
       turnover: Number(jobData.Turnover),
@@ -2060,7 +2087,7 @@ const CreateJob = () => {
 
   useEffect(() => {
 
-    
+
     setServiceFieldsData(
       //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
       serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
@@ -2090,38 +2117,45 @@ const CreateJob = () => {
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-    } 
-    else if (Number(jobData?.Service) == 4) {
-      date.setDate(date.getDate() + 5);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } 
+    }
     else if (Number(jobData?.Service) == 3) {
       date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-    } else if (Number(jobData?.Service) == 8) {
-      date.setDate(date.getDate() + 10);
+    }
+    else if (Number(jobData?.Service) == 4) {
+      date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
     }
 
-     dueOn_date_set(clientType, jobData?.Service);
+    else if (Number(jobData?.Service) == 8) {
+      date.setDate(date.getDate() + 10);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } else {
 
-  }, [jobData?.Service ,clientType]);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: null,
+      }));
+    }
 
+    dueOn_date_set(clientType, jobData?.Service);
+
+  }, [jobData?.Service, clientType]);
 
 
 
 
   useEffect(() => {
-    console.log("UPDATE ALL DEFAULT FEILDS");
+
     setJobData((prevState) => ({
       ...prevState,
       Turnover_Period_id_0: "Monthly",
@@ -2133,7 +2167,7 @@ const CreateJob = () => {
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
 
-      //  Bookkeeping_Frequency_id_2: "Daily",
+      Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
       Number_of_Purchase_Invoices_id_2: 0,
@@ -3723,7 +3757,7 @@ const CreateJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="SLADeadlineDate"
                                         onChange={HandleChange}
-                                        value={jobData.SLADeadlineDate}
+                                        defaultValue={jobData.SLADeadlineDate}
                                       />
                                       {errors["SLADeadlineDate"] && (
                                         <div className="error-text">
@@ -4313,7 +4347,7 @@ const CreateJob = () => {
                           <Button
                             variant="btn btn-outline-success float-end "
                             onClick={handleAddTask}
-                                                          >
+                          >
                             <Save size={16} /> Submit
                           </Button>
                         </Modal.Footer>
@@ -4389,20 +4423,20 @@ const CreateJob = () => {
                                         </div>
                                       </td>
                                       <td>
-                                        <textarea 
-                                          className="form-control form-control-sm" 
-                                          rows="1" 
+                                        <textarea
+                                          className="form-control form-control-sm"
+                                          rows="1"
                                           placeholder="Add comment"
                                           value={row.comment}
                                           onChange={(e) => handleChecklistCommentChange(index, e.target.value)}
                                         ></textarea>
                                       </td>
                                       <td>
-                                        <input 
-                                          type="date" 
-                                          className="form-control form-control-sm" 
-                                          value={row.date} 
-                                          readOnly 
+                                        <input
+                                          type="date"
+                                          className="form-control form-control-sm"
+                                          value={row.date}
+                                          readOnly
                                         />
                                       </td>
                                     </tr>
