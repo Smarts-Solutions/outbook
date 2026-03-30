@@ -69,15 +69,20 @@ const CreateJob = () => {
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
   const [checklistModal, setChecklistModal] = useState({
     show: false,
-    data: [],
+    data:[],
     title: "",
-    loading: false
+    loading: false,
+    type:""
   });
 
-  const handleViewChecklist = async (checklistId, title) => {
+  console.log("checklistModal --->> ",checklistModal)
+
+  const handleViewChecklist = async (checklistId, title, type) => {
     if (!checklistId) return;
 
-    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title }));
+
+
+    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title , type : type}));
 
     try {
       const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
@@ -102,11 +107,43 @@ const CreateJob = () => {
           date: ""
         }));
 
-      setChecklistModal(prev => ({
+        setChecklistModal(prev => ({
         ...prev,
-        data: formattedRows,
+        [type]: formattedRows,
         loading: false
       }));
+
+
+
+      // if(type === "processing"){
+      //   setChecklistModal(prev => ({
+      //   ...prev,
+      //   [type]: formattedRows,
+      //   data: formattedRows,
+      //   loading: false
+      // }));
+
+      // }
+      // else if(type === "reviewing"){
+      //   setChecklistModal(prev => ({
+      //   ...prev,
+      //   reviewingData: formattedRows,
+      //   loading: false
+      // }));
+
+      // }
+      // else{
+      //   setChecklistModal(prev => ({
+      //   ...prev,
+      //   data: [],
+      //   reviewingData: [],
+      //   loading: false
+      // }));
+
+      // }
+
+
+
     } catch (error) {
       console.error("Error loading checklist file:", error);
       sweatalert.fire({
@@ -118,16 +155,19 @@ const CreateJob = () => {
     }
   };
 
-  const handleChecklistAnswerChange = (index, answer) => {
+  const handleChecklistAnswerChange = (index, answer ,type ) => {
+    // alert(type)
+
     setChecklistModal(prev => {
-      const newData = [...prev.data];
+      const newData = [...prev[type]];
       newData[index] = {
         ...newData[index],
         answer: answer,
         date: new Date().toISOString().split('T')[0] // Set today's date when clicked
       };
-      return { ...prev, data: newData };
+      return { ...prev, [type]: newData };
     });
+
   };
 
   const handleChecklistCommentChange = (index, comment) => {
@@ -3477,7 +3517,7 @@ const CreateJob = () => {
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
-                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name)}
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name ,"processing")}
                                               >
                                                 <ExternalLink size={12} className="me-1" /> checklist_excel
                                               </button>
@@ -3541,7 +3581,7 @@ const CreateJob = () => {
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
-                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name)}
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name , "reviewing")}
                                               >
                                                 <ExternalLink size={12} className="me-1" /> checklist_excel
                                               </button>
@@ -4386,8 +4426,9 @@ const CreateJob = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {checklistModal.data.length > 0 ? (
-                                  checklistModal.data.map((row, index) => (
+                                {
+                                checklistModal[checklistModal.type]?.length > 0 ? (
+                                  checklistModal[checklistModal.type]?.map((row, index) => (
                                     <tr key={index}>
                                       <td className="text-center">{row.s_no || index + 1}</td>
                                       <td>{row.question}</td>
@@ -4400,7 +4441,7 @@ const CreateJob = () => {
                                             id={`yes-${index}`}
                                             className="fs-12"
                                             checked={row.answer === 'Yes'}
-                                            onChange={() => handleChecklistAnswerChange(index, 'Yes')}
+                                            onChange={() => handleChecklistAnswerChange(index, 'Yes' ,checklistModal.type)}
                                           />
                                           <Form.Check
                                             type="radio"
@@ -4409,7 +4450,7 @@ const CreateJob = () => {
                                             id={`no-${index}`}
                                             className="fs-12"
                                             checked={row.answer === 'No'}
-                                            onChange={() => handleChecklistAnswerChange(index, 'No')}
+                                            onChange={() => handleChecklistAnswerChange(index, 'No' ,checklistModal.type)}
                                           />
                                           <Form.Check
                                             type="radio"
@@ -4418,7 +4459,7 @@ const CreateJob = () => {
                                             id={`na-${index}`}
                                             className="fs-12"
                                             checked={row.answer === 'N/A'}
-                                            onChange={() => handleChecklistAnswerChange(index, 'N/A')}
+                                            onChange={() => handleChecklistAnswerChange(index, 'N/A' ,checklistModal.type)}
                                           />
                                         </div>
                                       </td>
@@ -4428,7 +4469,8 @@ const CreateJob = () => {
                                           rows="1"
                                           placeholder="Add comment"
                                           value={row.comment}
-                                          onChange={(e) => handleChecklistCommentChange(index, e.target.value)}
+                                         // onChange={(e) => handleChecklistCommentChange(index, e.target.value)}
+                                          onChange={(e) => handleChecklistAnswerChange(index, e.target.value ,checklistModal.type)}
                                         ></textarea>
                                       </td>
                                       <td>
