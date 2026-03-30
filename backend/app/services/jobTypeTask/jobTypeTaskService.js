@@ -78,6 +78,10 @@ const customerGetService = async (task) => {
 };
 
 
+const getFilenameById = async (checklist_id) => {
+  return jobTypeTaskModel.getFilenameById(checklist_id);
+};
+
 module.exports = {
     addJobType,
     removeJobType,
@@ -89,5 +93,5 @@ module.exports = {
     checklistAction,
     updateChecklist,
     customerGetService,
-     
+    getFilenameById,
 };

@@ -519,7 +519,7 @@ const CreateCheckList = () => {
     formDataToSubmit.append("job_type_id", formData.job_type_id?.join(","));
 
     if (selectedFile) {
-      formDataToSubmit.append("checklist_pdf", selectedFile);
+      formDataToSubmit.append("checklist_excel", selectedFile);
     }
 
     const data = { req: formDataToSubmit, authToken: token };

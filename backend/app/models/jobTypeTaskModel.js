@@ -354,8 +354,8 @@ const addChecklist = async (checklist, file) => {
 
     let finalFileName = null;
     if (file) {
-      // Format: checklist_pdf_{checklist_id}.zip
-      finalFileName = `checklist_pdf_${checklist_id}.zip`;
+      // Format: checklist_excel_{checklist_id}.zip
+      finalFileName = `checklist_excel_${checklist_id}.zip`;
       const oldPath = file.path;
       const newPath = path.join(file.destination, finalFileName);
 
@@ -738,6 +738,17 @@ const getByServiceWithJobType = async (checklist) => {
   }
 };
 
+const getFilenameById = async (checklist_id) => {
+  const query = `SELECT upload_checklist_name FROM checklists WHERE id = ?`;
+  try {
+    const [result] = await pool.execute(query, [checklist_id]);
+    return result.length > 0 ? result[0].upload_checklist_name : null;
+  } catch (err) {
+    console.error("Error in getFilenameById:", err);
+    throw err;
+  }
+};
+
 module.exports = {
   createJobType,
   deleteJobType,
@@ -755,4 +766,5 @@ module.exports = {
   customerGetService,
   getClientTypeChecklist,
   getByServiceWithJobType,
+  getFilenameById,
 };

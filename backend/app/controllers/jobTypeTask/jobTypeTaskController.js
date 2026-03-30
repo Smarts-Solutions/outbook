@@ -1,4 +1,6 @@
 const jobTypeTaskService = require("../../services/jobTypeTask/jobTypeTaskService");
+const path = require('path');
+const fs = require('fs');
 
 const handleJobType = async (req, res) => {
   const { action, ...JobType } = req.body;
@@ -153,6 +155,34 @@ const customerGetService = async (req, res) => {
   }
 };
 
+const getChecklistFile = async (req, res) => {
+  const { checklist_id } = req.params;
+  try {
+    const filename = await jobTypeTaskService.getFilenameById(checklist_id);
+    if (!filename) {
+      return res.status(404).json({ status: false, message: 'Checklist record not found' });
+    }
+
+    const filePath = path.join(__dirname, '../../../checklist_excel', filename);
+    
+    if (fs.existsSync(filePath)) {
+      res.download(filePath, (err) => {
+        if (err) {
+          console.error('Error downloading file:', err);
+          if (!res.headersSent) {
+            res.status(500).send('Error downloading file');
+          }
+        }
+      });
+    } else {
+      res.status(404).json({ status: false, message: 'File not found on server' });
+    }
+  } catch (error) {
+    console.error('Error in getChecklistFile:', error);
+    res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   handleJobType,
   addTask,
@@ -160,5 +190,6 @@ module.exports = {
   addChecklist,
   checklistAction,
   updateChecklist,
-  customerGetService, 
+  customerGetService,
+  getChecklistFile,
 };

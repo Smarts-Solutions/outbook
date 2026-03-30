@@ -74,13 +74,13 @@ const CreateJob = () => {
     loading: false
   });
 
-  const handleViewChecklist = async (fileName, title) => {
-    if (!fileName) return;
+  const handleViewChecklist = async (checklistId, title) => {
+    if (!checklistId) return;
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title }));
 
     try {
-      const response = await axios.get(`${base_url}checklist_pdf/${fileName}`, {
+      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
         responseType: 'arraybuffer'
       });
       const data = new Uint8Array(response.data);
@@ -98,7 +98,7 @@ const CreateJob = () => {
           question: row[1],
           answer: '',
           comment: '',
-          date: new Date().toISOString().split('T')[0]
+          date: ""
         }));
 
       setChecklistModal(prev => ({
@@ -115,6 +115,26 @@ const CreateJob = () => {
       });
       setChecklistModal(prev => ({ ...prev, show: false, loading: false }));
     }
+  };
+
+  const handleChecklistAnswerChange = (index, answer) => {
+    setChecklistModal(prev => {
+      const newData = [...prev.data];
+      newData[index] = {
+        ...newData[index],
+        answer: answer,
+        date: new Date().toISOString().split('T')[0] // Set today's date when clicked
+      };
+      return { ...prev, data: newData };
+    });
+  };
+
+  const handleChecklistCommentChange = (index, comment) => {
+    setChecklistModal(prev => {
+      const newData = [...prev.data];
+      newData[index] = { ...newData[index], comment: comment };
+      return { ...prev, data: newData };
+    });
   };
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
@@ -3423,7 +3443,7 @@ const CreateJob = () => {
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
-                                                onClick={() => handleViewChecklist(selected.upload_checklist_name, selected.check_list_name)}
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name)}
                                               >
                                                 <ExternalLink size={12} className="me-1" /> checklist_excel
                                               </button>
@@ -3487,7 +3507,7 @@ const CreateJob = () => {
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
-                                                onClick={() => handleViewChecklist(selected.upload_checklist_name, selected.check_list_name)}
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name)}
                                               >
                                                 <ExternalLink size={12} className="me-1" /> checklist_excel
                                               </button>
@@ -4345,6 +4365,8 @@ const CreateJob = () => {
                                             name={`ans-${index}`}
                                             id={`yes-${index}`}
                                             className="fs-12"
+                                            checked={row.answer === 'Yes'}
+                                            onChange={() => handleChecklistAnswerChange(index, 'Yes')}
                                           />
                                           <Form.Check
                                             type="radio"
@@ -4352,6 +4374,8 @@ const CreateJob = () => {
                                             name={`ans-${index}`}
                                             id={`no-${index}`}
                                             className="fs-12"
+                                            checked={row.answer === 'No'}
+                                            onChange={() => handleChecklistAnswerChange(index, 'No')}
                                           />
                                           <Form.Check
                                             type="radio"
@@ -4359,14 +4383,27 @@ const CreateJob = () => {
                                             name={`ans-${index}`}
                                             id={`na-${index}`}
                                             className="fs-12"
+                                            checked={row.answer === 'N/A'}
+                                            onChange={() => handleChecklistAnswerChange(index, 'N/A')}
                                           />
                                         </div>
                                       </td>
                                       <td>
-                                        <textarea className="form-control form-control-sm" rows="1" placeholder="Add comment"></textarea>
+                                        <textarea 
+                                          className="form-control form-control-sm" 
+                                          rows="1" 
+                                          placeholder="Add comment"
+                                          value={row.comment}
+                                          onChange={(e) => handleChecklistCommentChange(index, e.target.value)}
+                                        ></textarea>
                                       </td>
                                       <td>
-                                        <input type="date" className="form-control form-control-sm" defaultValue={row.date} readOnly />
+                                        <input 
+                                          type="date" 
+                                          className="form-control form-control-sm" 
+                                          value={row.date} 
+                                          readOnly 
+                                        />
                                       </td>
                                     </tr>
                                   ))

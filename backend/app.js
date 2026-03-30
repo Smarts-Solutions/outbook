@@ -16,8 +16,6 @@ const path = require('path');
 const app = express();
 app.use(cors());
 
-// Serve checklist files
-app.use('/checklist_pdf', express.static(path.join(__dirname, 'checklist_pdf')));
 
 
 // app.use(express.json({ limit: "50mb" }));
