@@ -989,7 +989,6 @@ const CreateJob = () => {
      reviewing_checklist_data : reviewing_checklist_data,
 
 
-
     };
 
 
