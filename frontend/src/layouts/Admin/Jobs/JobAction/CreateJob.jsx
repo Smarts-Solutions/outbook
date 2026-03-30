@@ -80,9 +80,11 @@ const CreateJob = () => {
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title }));
 
     try {
+
       const response = await axios.get(`${base_url}checklist_pdf/${fileName}`, {
         responseType: 'arraybuffer'
       });
+
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
@@ -155,7 +157,7 @@ const CreateJob = () => {
     DueOn: null,
     SubmissionDeadline: null,
     CustomerDeadlineDate: null,
-    SLADeadlineDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0],
+    SLADeadlineDate: null,
     InternalDeadlineDate: null,
     FilingWithCompaniesHouseRequired: "0",
     CompaniesHouseFilingDate: null,
@@ -179,8 +181,8 @@ const CreateJob = () => {
     notes: "",
     job_priority: "normal",
     processing_checkList: "",
-    reviewing_checkList: ""
-    //Bookkeeping_Frequency_id_2: "Daily",
+    reviewing_checkList: "",
+    Bookkeeping_Frequency_id_2: "Daily",
 
   });
 
@@ -556,7 +558,10 @@ const CreateJob = () => {
     }
 
     const date = new Date();
-    if (name == "Service" && [1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+    if (name == "Service") {
+
+     if([1, 2, 3, 4, 8].includes(Number(value))){
+
       if (value == 1) {
 
         const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
@@ -590,22 +595,29 @@ const CreateJob = () => {
         }));
       }
 
-
-
-      if (value == 4) {
+      if (value == 2) { 
+        date.setDate(date.getDate() + 1);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+      else if (value == 3) {
+        date.setDate(date.getDate() + 5);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } 
+      else if (value == 4) {
         await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 5);
         setJobData((prevState) => ({
           ...prevState,
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
-      } else if (value == 3) {
-        date.setDate(date.getDate() + 5);
-        setJobData((prevState) => ({
-          ...prevState,
-          SLADeadlineDate: date.toISOString().split("T")[0],
-        }));
-      } else if (value == 8) {
+      } 
+      else if (value == 8) {
         await dueOn_date_set(clientType, value);
         date.setDate(date.getDate() + 10);
         setJobData((prevState) => ({
@@ -613,9 +625,22 @@ const CreateJob = () => {
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
       }
+     
+    }else{
+ 
+      setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: null,
+        }));
+    }
+
+
+
     }
 
     if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+      
+     
 
       if (value == "Daily") {
         date.setDate(date.getDate() + 1);
@@ -862,9 +887,10 @@ const CreateJob = () => {
       customer_deadline_date: jobData.CustomerDeadlineDate,
 
 
-      sla_deadline_date: jobData?.SLADeadlineDate
-        ? jobData?.SLADeadlineDate
-        : new Date().toISOString().split("T")[0],
+      // sla_deadline_date: jobData?.SLADeadlineDate
+      //   ? jobData?.SLADeadlineDate
+      //   : new Date().toISOString().split("T")[0],
+      sla_deadline_date: jobData?.SLADeadlineDate,
 
       internal_deadline_date: jobData.InternalDeadlineDate,
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
@@ -2071,6 +2097,13 @@ const CreateJob = () => {
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
     } 
+    else if (Number(jobData?.Service) == 3) {
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
     else if (Number(jobData?.Service) == 4) {
       date.setDate(date.getDate() + 5);
       setJobData((prevState) => ({
@@ -2078,17 +2111,18 @@ const CreateJob = () => {
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
     } 
-    else if (Number(jobData?.Service) == 3) {
-      date.setDate(date.getDate() + 5);
-      setJobData((prevState) => ({
-        ...prevState,
-        SLADeadlineDate: date.toISOString().split("T")[0],
-      }));
-    } else if (Number(jobData?.Service) == 8) {
+     
+    else if (Number(jobData?.Service) == 8) {
       date.setDate(date.getDate() + 10);
       setJobData((prevState) => ({
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }else{
+      
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: null,
       }));
     }
 
@@ -2096,10 +2130,9 @@ const CreateJob = () => {
 
   }, [jobData?.Service ,clientType]);
 
+ 
 
-
-
-
+ 
   useEffect(() => {
     console.log("UPDATE ALL DEFAULT FEILDS");
     setJobData((prevState) => ({
@@ -2113,7 +2146,7 @@ const CreateJob = () => {
       PAYE_Registered_id_1: "No",
       Number_of_Trial_Balance_Items_id_1: "1 to 5",
 
-      //  Bookkeeping_Frequency_id_2: "Daily",
+      Bookkeeping_Frequency_id_2: "Daily",
       Number_of_Total_Transactions_id_2: 0,
       Number_of_Bank_Transactions_id_2: 0,
       Number_of_Purchase_Invoices_id_2: 0,
@@ -3703,7 +3736,7 @@ const CreateJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="SLADeadlineDate"
                                         onChange={HandleChange}
-                                        value={jobData.SLADeadlineDate}
+                                        defaultValue={jobData.SLADeadlineDate}
                                       />
                                       {errors["SLADeadlineDate"] && (
                                         <div className="error-text">
