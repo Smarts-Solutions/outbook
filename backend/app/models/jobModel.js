@@ -793,12 +793,12 @@ VALUES (
       job.Year_id_28,
       job_priority,
 
-      processing_checkList,
-      reviewing_checkList,
-      processing_checklist_status,
-      processing_checklist_data,
-      reviewing_checklist_status,
-      reviewing_checklist_data,
+      job.processing_checkList,
+      job.reviewing_checkList,
+      job.processing_checklist_status,
+      job.processing_checklist_data,
+      job.reviewing_checklist_status,
+      job.reviewing_checklist_data,
     ];
 
     // Apply the undefined check for each field
