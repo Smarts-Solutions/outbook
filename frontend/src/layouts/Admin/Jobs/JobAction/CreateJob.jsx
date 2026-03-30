@@ -75,7 +75,7 @@ const CreateJob = () => {
     type: ""
   });
 
-  console.log("checklistModal --->> ", checklistModal)
+  // console.log("checklistModal --->> ", checklistModal)
 
   const handleViewChecklist = async (checklistId, title, type) => {
     if (!checklistId) return;
@@ -201,9 +201,11 @@ const CreateJob = () => {
     InvoiceRemark: "",
     notes: "",
     job_priority: "normal",
-    processing_checkList: "",
-    reviewing_checkList: "",
+    
     Bookkeeping_Frequency_id_2: "Daily",
+
+    processing_checkList: null,
+    reviewing_checkList: null
 
   });
 
@@ -841,6 +843,48 @@ const CreateJob = () => {
 
 
 
+    console.log("checklistModal --->", checklistModal)
+    let processing_checklist_status = "2";
+    let processing_checklist_data = null;
+
+    let reviewing_checklist_status = "2";
+    let reviewing_checklist_data = null;
+    
+    // processing Type
+    if (Array.isArray(checklistModal?.processing) && checklistModal?.processing?.length) {
+      processing_checklist_data = JSON.stringify(checklistModal?.processing)
+      let isNotChecked = checklistModal?.processing?.find(val => val.answer == "")
+      if (isNotChecked) {
+        processing_checklist_status = "2"
+      }else{
+        processing_checklist_status = "1"
+      }
+    }
+
+
+    if (Array.isArray(checklistModal?.reviewing) && checklistModal?.reviewing?.length) {
+      reviewing_checklist_data = JSON.stringify(checklistModal?.reviewing)
+      let isNotChecked = checklistModal?.reviewing?.find(val => val.answer == "")
+      if (isNotChecked) {
+        reviewing_checklist_status = "2"
+      }else{
+        reviewing_checklist_status = "1"
+      }
+    }
+
+
+
+    if(jobData?.processing_checkList == 0){
+     processing_checklist_status = "0" 
+    }
+
+    if(jobData?.reviewing_checkList == 0){
+     reviewing_checklist_status = "0" 
+    }
+
+ 
+
+    return
 
     if (AddTaskArr.length === 0) {
       sweatalert.fire({
