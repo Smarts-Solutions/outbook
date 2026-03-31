@@ -17,7 +17,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import { use } from "react";
 import Select from 'react-select';
-import { Save, Plus, ArrowLeft, X, ExternalLink } from "lucide-react";
+import { Save, Plus, ArrowLeft, X, ExternalLink, RotateCcw } from "lucide-react";
 
 const CreateJob = () => {
   const location = useLocation();
@@ -146,7 +146,7 @@ const CreateJob = () => {
       newData[index] = {
         ...newData[index],
         [attribute]: answer,
-        date: new Date().toISOString().split('T')[0] // Set today's date when clicked
+        date: (attribute === "answer" && !answer) ? "" : new Date().toISOString().split('T')[0] 
       };
       return {
         ...prev,
@@ -4486,13 +4486,13 @@ const CreateJob = () => {
                                         <td className="text-center">{row.s_no || index + 1}</td>
                                         <td>{row.question}</td>
                                         <td>
-                                          <div className="d-flex justify-content-around">
+                                          <div className="d-flex justify-content-around align-items-center">
                                             <Form.Check
                                               type="radio"
                                               label="Yes"
                                               name={`ans-${index}`}
                                               id={`yes-${index}`}
-                                              className="fs-12"
+                                              className="fs-12 mb-0"
                                               checked={row.answer === 'Yes'}
                                               onChange={() => handleChecklistAnswerChange(index, 'Yes', checklistModal.type, "answer")}
                                             />
@@ -4501,7 +4501,7 @@ const CreateJob = () => {
                                               label="No"
                                               name={`ans-${index}`}
                                               id={`no-${index}`}
-                                              className="fs-12"
+                                              className="fs-12 mb-0"
                                               checked={row.answer === 'No'}
                                               onChange={() => handleChecklistAnswerChange(index, 'No', checklistModal.type, "answer")}
                                             />
@@ -4510,10 +4510,18 @@ const CreateJob = () => {
                                               label="N/A"
                                               name={`ans-${index}`}
                                               id={`na-${index}`}
-                                              className="fs-12"
+                                              className="fs-12 mb-0"
                                               checked={row.answer === 'N/A'}
                                               onChange={() => handleChecklistAnswerChange(index, 'N/A', checklistModal.type, "answer")}
                                             />
+                                            <button
+                                              type="button"
+                                              className="btn btn-link p-0 text-danger ms-2"
+                                              onClick={() => handleChecklistAnswerChange(index, '', checklistModal.type, "answer")}
+                                              title="Clear selection"
+                                            >
+                                              <RotateCcw size={14} />
+                                            </button>
                                           </div>
                                         </td>
                                         <td>
