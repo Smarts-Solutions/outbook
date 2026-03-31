@@ -77,7 +77,7 @@ const jobUpdate = async (req, res) => {
 
     const result = await jobService.jobUpdate(job);
     if (!result.status) {
-      return res.status(200).json({ status: false, message: result.message });
+      return res.status(200).json({ status: false, message: result.message , data: result.data });
     } else {
       return res.status(200).json({ status: true, message: result.message, data: result.data });
     }

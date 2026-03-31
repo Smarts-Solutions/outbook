@@ -481,7 +481,7 @@ const jobAdd = async (job) => {
   } = job;
 
   // console.log("selectedStaffData", selectedStaffData);
-  console.log("job", job.processing_checklist_status);
+  // console.log("job", job.processing_checklist_status);
 
   let notes = job.notes == undefined ? "" : job.notes;
 
@@ -3282,6 +3282,34 @@ const jobUpdate = async (job) => {
   let invoice_hours = job.invoice_hours == "" ? null : job.invoice_hours;
   let invoice_remark = job.invoice_remark == "" ? null : job.invoice_remark;
   let notes = job.notes == "" ? null : job.notes;
+
+
+
+
+  if (reviewer > 0) {
+    if (Number(job?.reviewing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the reviewing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+
+  if (allocated_to > 0) {
+    if (Number(job?.processing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the processing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+  
+
+
 
   const ExistJobQuery = `
  SELECT 
