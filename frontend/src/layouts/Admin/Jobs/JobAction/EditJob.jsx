@@ -103,10 +103,10 @@ const EditJob = () => {
     loading: false,
     type: ""
   });
-    console.log("checklistModal --->> ", checklistModal)
+  console.log("checklistModal --->> ", checklistModal)
   const handleViewChecklist = async (checklistId, title, type) => {
     console.log("checklistId, title, type", checklistId, "-", title, "-", type)
-    
+
     if (!checklistId) return;
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
@@ -446,8 +446,8 @@ const EditJob = () => {
               );
             }
 
-           console.log("response.data.processing_checklist_data", response.data.checklist_modal_data)
-           let  checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
+            console.log("response.data.processing_checklist_data", response.data.checklist_modal_data)
+            let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
               show: false,
               data: [],
               title: "",
@@ -1283,6 +1283,46 @@ const EditJob = () => {
     // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
     // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
 
+
+    let checklist_modal_data = null;
+    let processing_checklist_status = "2";
+    let reviewing_checklist_status = "2";
+
+    // processing Type
+    if (Array.isArray(checklistModal?.processing) && checklistModal?.processing?.length) {
+      checklist_modal_data = JSON.stringify(checklistModal)
+      let isNotChecked = checklistModal?.processing?.find(val => val.answer == "")
+      if (isNotChecked) {
+        processing_checklist_status = "2"
+      } else {
+        processing_checklist_status = "1"
+      }
+    }
+
+
+    if (Array.isArray(checklistModal?.reviewing) && checklistModal?.reviewing?.length) {
+      checklist_modal_data = JSON.stringify(checklistModal)
+      let isNotChecked = checklistModal?.reviewing?.find(val => val.answer == "")
+      if (isNotChecked) {
+        reviewing_checklist_status = "2"
+      } else {
+        reviewing_checklist_status = "1"
+      }
+    }
+
+
+
+    if (jobData?.processing_checkList == 0) {
+      processing_checklist_status = "0"
+    }
+
+    if (jobData?.reviewing_checkList == 0) {
+      reviewing_checklist_status = "0"
+    }
+
+
+
+
     let due_on = jobData?.DueOn;
     let Year_Ending_id_1 = jobData?.Year_Ending_id_1;
 
@@ -1457,6 +1497,12 @@ const EditJob = () => {
         checklist_id: getChecklistId,
         task: AddTaskArr,
       },
+
+      processing_checkList: jobData?.processing_checkList,
+      reviewing_checkList: jobData?.reviewing_checkList,
+      processing_checklist_status: processing_checklist_status,
+      reviewing_checklist_status: reviewing_checklist_status,
+      checklist_modal_data: checklist_modal_data,
     };
 
     const data = { req: req, authToken: token };

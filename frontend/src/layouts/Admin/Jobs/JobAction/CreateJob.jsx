@@ -888,8 +888,8 @@ const CreateJob = () => {
 
 
     console.log("checklistModal --->", checklistModal)
+    
     let checklist_modal_data = null;
-
     let processing_checklist_status = "2";
     let reviewing_checklist_status = "2";
     
