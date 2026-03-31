@@ -119,7 +119,7 @@ const CreateJob = () => {
         ...prev,
         loading: false,
         [type]: formattedRows,  // Set the main data
-        data: formattedRows     // Also set as backup
+        data: formattedRows // Backup for cancel action
       }));
 
 
@@ -149,6 +149,8 @@ const CreateJob = () => {
     });
   };
 
+  
+
   const handleCancelChecklist = () => {
     const type = checklistModal.type;
     const backup = checklistModal.data;
@@ -168,7 +170,7 @@ const CreateJob = () => {
     sweatalert.fire({
       icon: 'success',
       title: 'Success',
-      text: 'Checklist answers saved locally.',
+      text: 'Checklist saved.',
       timer: 1500,
       showConfirmButton: false
     });
