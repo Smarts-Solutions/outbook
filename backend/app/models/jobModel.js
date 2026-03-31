@@ -481,16 +481,38 @@ const jobAdd = async (job) => {
   } = job;
 
   // console.log("selectedStaffData", selectedStaffData);
-  // console.log("job", job);
+  // console.log("job", job.processing_checklist_status);
 
   let notes = job.notes == undefined ? "" : job.notes;
 
   // Set Status type
   let status_type = 1; // To Be Started
 
+ /// validation for reviewing checklist status
+  if (reviewer > 0) {
+    if (Number(job?.reviewing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the reviewing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+
   if (allocated_to > 0) {
+
+    if (Number(job?.processing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the processing checklist first.",
+        data: "W",
+      };
+    }
     status_type = 3;
   }
+
+
 
   if (reviewer > 0 && allocated_to == 0) {
     status_type = 5;
@@ -3186,11 +3208,11 @@ const getJobById = async (job) => {
         Year_id_28: rows[0].Year_id_28,
         job_priority: rows[0].job_priority,
 
-        processing_checklist : rows[0].processing_checklist,
-        reviewing_checklist : rows[0].reviewing_checklist,
-        processing_checklist_status : rows[0].processing_checklist_status,
-        reviewing_checklist_status : rows[0].reviewing_checklist_status,
-        checklist_modal_data : rows[0].checklist_modal_data,
+        processing_checklist: rows[0].processing_checklist,
+        reviewing_checklist: rows[0].reviewing_checklist,
+        processing_checklist_status: rows[0].processing_checklist_status,
+        reviewing_checklist_status: rows[0].reviewing_checklist_status,
+        checklist_modal_data: rows[0].checklist_modal_data,
 
         tasks: {
           checklist_id: rows[0].checklist_id,
@@ -3260,6 +3282,34 @@ const jobUpdate = async (job) => {
   let invoice_hours = job.invoice_hours == "" ? null : job.invoice_hours;
   let invoice_remark = job.invoice_remark == "" ? null : job.invoice_remark;
   let notes = job.notes == "" ? null : job.notes;
+
+
+
+
+  if (reviewer > 0) {
+    if (Number(job?.reviewing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the reviewing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+
+  if (allocated_to > 0) {
+    if (Number(job?.processing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the processing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+  
+
+
 
   const ExistJobQuery = `
  SELECT 
