@@ -82,6 +82,16 @@ const CreateJob = () => {
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
 
+    // If we already have data for this type, use it instead of fetching and resetting
+    if (checklistModal[type] && checklistModal[type].length > 0) {
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        data: [...prev[type]] // Backup current data
+      }));
+      return;
+    }
+
     try {
       const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
         responseType: 'arraybuffer'
@@ -107,8 +117,9 @@ const CreateJob = () => {
 
       setChecklistModal(prev => ({
         ...prev,
-        [type]: formattedRows,
-        loading: false
+        loading: false,
+        [type]: formattedRows,  // Set the main data
+        data: formattedRows     // Also set as backup
       }));
 
 
@@ -131,9 +142,36 @@ const CreateJob = () => {
         [attribute]: answer,
         date: new Date().toISOString().split('T')[0] // Set today's date when clicked
       };
-      return { ...prev, [type]: newData };
+      return {
+        ...prev,
+        [type]: newData
+      };
     });
+  };
 
+  const handleCancelChecklist = () => {
+    const type = checklistModal.type;
+    const backup = checklistModal.data;
+    setChecklistModal(prev => ({
+      ...prev,
+      [type]: backup,
+      show: false
+    }));
+  };
+
+  const handleSubmitChecklist = () => {
+    setChecklistModal(prev => ({
+      ...prev,
+      show: false
+    }));
+
+    sweatalert.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Checklist answers saved locally.',
+      timer: 1500,
+      showConfirmButton: false
+    });
   };
 
 
@@ -4408,7 +4446,7 @@ const CreateJob = () => {
                     {/* Checklist Preview Modal */}
                     <Modal
                       show={checklistModal.show}
-                      onHide={() => setChecklistModal(prev => ({ ...prev, show: false }))}
+                      onHide={handleCancelChecklist}
                       size="xl"
                       centered
                       scrollable
@@ -4504,8 +4542,11 @@ const CreateJob = () => {
                         )}
                       </Modal.Body>
                       <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setChecklistModal(prev => ({ ...prev, show: false }))}>
+                        <Button variant="secondary" onClick={handleCancelChecklist}>
                           Close
+                        </Button>
+                        <Button variant="success" onClick={handleSubmitChecklist}>
+                          Submit
                         </Button>
                       </Modal.Footer>
                     </Modal>
