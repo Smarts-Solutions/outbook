@@ -271,7 +271,10 @@ const getAddJobData = async (job) => {
     }
 
     // Services
-    const queryCustomerWithServices = `
+
+
+
+    let queryCustomerWithServices = `
      SELECT  
          services.id AS service_id,
          services.name AS service_name
@@ -287,9 +290,36 @@ const getAddJobData = async (job) => {
      services.id DESC;
    `;
 
+    if (roleData?.length > 0 && (roleData[0]?.role_name != "SUPERADMIN")) {
+      queryCustomerWithServices = `
+     SELECT  
+         services.id AS service_id,
+         services.name AS service_name
+    FROM 
+         customers
+    JOIN 
+         customer_services ON customers.id = customer_services.customer_id  
+    JOIN 
+         services ON services.id = customer_services.service_id
+    JOIN 
+         customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+    JOIN 
+         staffs ON staffs.id = customer_service_account_managers.account_manager_id          
+    WHERE  
+     customer_services.customer_id = ? AND staffs.id IN (${LineManageStaffId})     
+    ORDER BY 
+     services.id DESC;
+   `;
+    }
+
+
+
+
     const [rows7] = await pool.execute(queryCustomerWithServices, [
       customer_id,
     ]);
+
+
     let services = [];
     if (rows7.length > 0) {
       services = rows7.map((row) => ({
@@ -3665,7 +3695,7 @@ const jobUpdate = async (job) => {
           (id) => !providedTaskIds.includes(id)
         );
         if (tasksToDelete.length > 0) {
-          
+
           const deleteQuery = `
               DELETE FROM client_job_task 
               WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
@@ -4370,7 +4400,7 @@ const copy_job = async (job) => {
     //Other Data Field
     data.filing_Companies_required = "0";
     data.filing_Companies_date = null;
-    data.filing_hmrc_required = "0" 
+    data.filing_hmrc_required = "0"
     data.filing_hmrc_date = null
     data.opening_balance_required = "0"
     data.opening_balance_date = null
@@ -4402,7 +4432,7 @@ const copy_job = async (job) => {
 
     /// SLA Dead Line Logic START ////
     let getSLAData = await getSLADeadline(data?.service_id, data?.Bookkeeping_Frequency_id_2)
-    sla_deadline_date = ['',null,undefined].includes(getSLAData)? null: getSLAData
+    sla_deadline_date = ['', null, undefined].includes(getSLAData) ? null : getSLAData
     data.sla_deadline_date = sla_deadline_date
     /// SLA Dead Line Logic END ////
 
@@ -4601,7 +4631,7 @@ async function getSLADeadline(value, Bookkeeping_Frequency_id_2) {
     } else if (Bookkeeping_Frequency_id_2 == "Yearly") {
       date.setDate(date.getDate() + 30);
       return date.toISOString().split("T")[0];
-    }else{
+    } else {
       date.setDate(date.getDate() + 1);
       return date.toISOString().split("T")[0];
     }
