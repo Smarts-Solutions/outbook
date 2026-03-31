@@ -3526,7 +3526,7 @@ const CreateJob = () => {
                                       </label>
                                       <select
                                         className="form-select"
-                                        name="processing_checkList"
+                                        name="processing_checklist"
                                         onChange={HandleChange}
                                         value={
                                           jobData.processing_checklist
@@ -3591,7 +3591,7 @@ const CreateJob = () => {
                                       </label>
                                       <select
                                         className="form-select"
-                                        name="reviewing_checkList"
+                                        name="reviewing_checklist"
                                         onChange={HandleChange}
                                         value={
                                           jobData.reviewing_checklist

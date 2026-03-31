@@ -3883,7 +3883,7 @@ const EditJob = () => {
                                       </label>
                                       <select
                                         className="form-select"
-                                        name="processing_checkList"
+                                        name="processing_checklist"
                                         onChange={HandleChange}
                                         value={
                                           jobData.processing_checklist
@@ -3940,7 +3940,7 @@ const EditJob = () => {
                                     </div>
                                   </div>
                                  
-                                 {console.log("jobData.reviewing_checkList", jobData.reviewing_checklist)}
+                                 
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
@@ -3949,7 +3949,7 @@ const EditJob = () => {
                                       </label>
                                       <select
                                         className="form-select"
-                                        name="reviewing_checkList"
+                                        name="reviewing_checklist"
                                         onChange={HandleChange}
                                         value={
                                           jobData.reviewing_checklist
