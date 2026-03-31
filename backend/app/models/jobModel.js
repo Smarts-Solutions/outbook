@@ -3478,7 +3478,12 @@ const jobUpdate = async (job) => {
              Period_Ending_Date_id_8 = ?,
              Filing_Date_id_8 = ?,
              Year_id_28 = ?,
-             job_priority = ?
+             job_priority = ?,
+             processing_checkList = ?,
+             reviewing_checkList = ?,
+             processing_checklist_status = ?,
+             reviewing_checklist_status = ?,
+             checklist_modal_data = ?
 
 
          WHERE id = ?
@@ -3635,6 +3640,12 @@ const jobUpdate = async (job) => {
       job.Filing_Date_id_8,
       job.Year_id_28,
       job.job_priority,
+
+      job.processing_checkList,
+      job.reviewing_checkList,
+      job.processing_checklist_status,
+      job.reviewing_checklist_status,
+      job.checklist_modal_data,
 
       job_id,
     ];
