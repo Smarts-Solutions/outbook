@@ -4553,11 +4553,23 @@ const CreateJob = () => {
                           </div>
                         )}
                       </Modal.Body>
-                      <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCancelChecklist}>
-                          Close
+                      <Modal.Footer className="justify-content-end gap-2">
+                        <Button
+                          variant="outline-danger"
+                          className="rounded-pill px-4"
+                          style={{ borderWidth: '2px', fontWeight: '600' }}
+                          onClick={handleCancelChecklist}
+                        >
+                          <X size={18} className="me-1" />
+                          Cancel
                         </Button>
-                        <Button variant="success" onClick={handleSubmitChecklist}>
+                        <Button
+                          variant="outline-success"
+                          className="rounded-pill px-4"
+                          style={{ borderWidth: '2px', fontWeight: '600' }}
+                          onClick={handleSubmitChecklist}
+                        >
+                          <Save size={18} className="me-1" />
                           Submit
                         </Button>
                       </Modal.Footer>
