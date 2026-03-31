@@ -248,8 +248,8 @@ const CreateJob = () => {
     
     Bookkeeping_Frequency_id_2: "Daily",
 
-    processing_checkList: null,
-    reviewing_checkList: null
+    processing_checklist: null,
+    reviewing_checklist: null
 
   });
 
@@ -888,7 +888,7 @@ const CreateJob = () => {
 
 
     console.log("checklistModal --->", checklistModal)
-    
+
     let checklist_modal_data = null;
     let processing_checklist_status = "2";
     let reviewing_checklist_status = "2";
@@ -917,11 +917,11 @@ const CreateJob = () => {
 
 
 
-    if(jobData?.processing_checkList == 0){
+    if(jobData?.processing_checklist == 0){
      processing_checklist_status = "0" 
     }
 
-    if(jobData?.reviewing_checkList == 0){
+    if(jobData?.reviewing_checklist == 0){
      reviewing_checklist_status = "0" 
     }
 
@@ -1024,8 +1024,8 @@ const CreateJob = () => {
         task: AddTaskArr,
       },
 
-     processing_checkList: jobData?.processing_checkList,
-     reviewing_checkList: jobData?.reviewing_checkList,
+     processing_checklist: jobData?.processing_checklist,
+     reviewing_checklist: jobData?.reviewing_checklist,
      processing_checklist_status : processing_checklist_status,
      reviewing_checklist_status : reviewing_checklist_status,
      checklist_modal_data : checklist_modal_data,
@@ -3529,7 +3529,7 @@ const CreateJob = () => {
                                         name="processing_checkList"
                                         onChange={HandleChange}
                                         value={
-                                          jobData.processing_checkList
+                                          jobData.processing_checklist
                                         }
                                       >
                                         <option value={null}>-- Select --</option>
@@ -3560,11 +3560,11 @@ const CreateJob = () => {
                                             </option>
                                           ))}
                                       </select>
-                                      {jobData.processing_checkList && jobData.processing_checkList !== "0" && (
+                                      {jobData.processing_checklist && jobData.processing_checklist !== "0" && (
                                         <div className="mt-1">
                                           {(() => {
                                             const selected = AllJobData?.data?.processing_checklist_data?.find(
-                                              (item) => Number(item.id) === Number(jobData.processing_checkList)
+                                              (item) => Number(item.id) === Number(jobData.processing_checklist)
                                             );
                                             return selected?.upload_checklist_name ? (
                                               <button
@@ -3594,7 +3594,7 @@ const CreateJob = () => {
                                         name="reviewing_checkList"
                                         onChange={HandleChange}
                                         value={
-                                          jobData.reviewing_checkList
+                                          jobData.reviewing_checklist
                                         }
                                       >
                                         <option value={null}>-- Select --</option>
@@ -3624,11 +3624,11 @@ const CreateJob = () => {
                                             </option>
                                           ))}
                                       </select>
-                                      {jobData.reviewing_checkList && jobData.reviewing_checkList !== "0" && (
+                                      {jobData.reviewing_checklist && jobData.reviewing_checklist !== "0" && (
                                         <div className="mt-1">
                                           {(() => {
                                             const selected = AllJobData?.data?.reviewing_checklist_data?.find(
-                                              (item) => Number(item.id) === Number(jobData.reviewing_checkList)
+                                              (item) => Number(item.id) === Number(jobData.reviewing_checklist)
                                             );
                                             return selected?.upload_checklist_name ? (
                                               <button

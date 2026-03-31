@@ -456,12 +456,12 @@ const EditJob = () => {
             }
 
             setChecklistModal(checklisModalData);
-
+                 console.log("response.data.reviewing_checkList-->>",response.data.reviewing_checklist)
             setJobData((prevState) => ({
               ...prevState,
 
               processing_checkList: response.data.processing_checklist ?? null,
-              reviewing_checkList: response.data.reviewing_checkList ?? null,
+              reviewing_checklist: response.data.reviewing_checklist ?? null,
 
               timesheet_job_id: response.data.timesheet_job_id ?? null,
               AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
@@ -1498,8 +1498,8 @@ const EditJob = () => {
         task: AddTaskArr,
       },
 
-      processing_checkList: jobData?.processing_checkList,
-      reviewing_checkList: jobData?.reviewing_checkList,
+      processing_checklist: jobData?.processing_checklist,
+      reviewing_checklist: jobData?.reviewing_checklist,
       processing_checklist_status: processing_checklist_status,
       reviewing_checklist_status: reviewing_checklist_status,
       checklist_modal_data: checklist_modal_data,
@@ -3939,7 +3939,8 @@ const EditJob = () => {
                                       )}
                                     </div>
                                   </div>
-
+                                 
+                                 {console.log("jobData.reviewing_checkList", jobData.reviewing_checkList)}
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
