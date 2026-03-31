@@ -32,7 +32,7 @@ const CreateJob = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
-  console.log("AllJobData ", AllJobData)
+  // console.log("AllJobData ", AllJobData)
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -75,7 +75,7 @@ const CreateJob = () => {
     type: ""
   });
 
-  // console.log("checklistModal --->> ", checklistModal)
+   console.log("checklistModal --->> ", checklistModal)
 
   const handleViewChecklist = async (checklistId, title, type) => {
     if (!checklistId) return;
@@ -148,7 +148,7 @@ const CreateJob = () => {
 
 
 
-  console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
+  // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
 
 
   const [jobData, setJobData] = useState({
