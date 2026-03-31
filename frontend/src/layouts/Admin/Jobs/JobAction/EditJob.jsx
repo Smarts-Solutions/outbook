@@ -15,7 +15,7 @@ import { Modal, Button, Table, Form } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink } from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw } from "lucide-react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../../Utils/Config";
@@ -171,7 +171,8 @@ const EditJob = () => {
       newData[index] = {
         ...newData[index],
         [attribute]: answer,
-        date: new Date().toISOString().split('T')[0] // Set today's date when clicked
+        //date: new Date().toISOString().split('T')[0] // Set today's date when clicked
+        date: (attribute === "answer" && !answer) ? "" : new Date().toISOString().split('T')[0]
       };
       return {
         ...prev,
@@ -1292,7 +1293,7 @@ const EditJob = () => {
     // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
     // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
 
-   
+
     let checklist_modal_data = null;
     let processing_checklist_status = jobData?.processing_checklist_status ?? "0";
     let reviewing_checklist_status = jobData?.reviewing_checklist_status ?? "0";
@@ -5211,6 +5212,14 @@ const EditJob = () => {
                                                     checked={row.answer === 'N/A'}
                                                     onChange={() => handleChecklistAnswerChange(index, 'N/A', checklistModal.type, "answer")}
                                                   />
+                                                  <button
+                                                    type="button"
+                                                    className="btn btn-link p-0 text-danger ms-2"
+                                                    onClick={() => handleChecklistAnswerChange(index, '', checklistModal.type, "answer")}
+                                                    title="Clear selection"
+                                                  >
+                                                    <RotateCcw size={14} />
+                                                  </button>
                                                 </div>
                                               </td>
                                               <td>
@@ -5242,11 +5251,23 @@ const EditJob = () => {
                                 </div>
                               )}
                             </Modal.Body>
-                            <Modal.Footer>
-                              <Button variant="secondary" onClick={handleCancelChecklist}>
-                                Close
+                            <Modal.Footer className="justify-content-end gap-2">
+                              <Button
+                                variant="outline-danger"
+                                className="rounded-pill px-4"
+                                style={{ borderWidth: '2px', fontWeight: '600' }}
+                                onClick={handleCancelChecklist}
+                              >
+                                <X size={18} className="me-1" />
+                                Cancel
                               </Button>
-                              <Button variant="success" onClick={handleSubmitChecklist}>
+                              <Button
+                                variant="outline-success"
+                                className="rounded-pill px-4"
+                                style={{ borderWidth: '2px', fontWeight: '600' }}
+                                onClick={handleSubmitChecklist}
+                              >
+                                <Save size={18} className="me-1" />
                                 Submit
                               </Button>
                             </Modal.Footer>
