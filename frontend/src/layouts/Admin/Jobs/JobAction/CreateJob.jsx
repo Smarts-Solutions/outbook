@@ -1052,6 +1052,7 @@ const CreateJob = () => {
               window.history.back();
             }, 1500);
           }
+
           else if (response.data === "W") {
             sweatalert.fire({
               title: "Warning",
@@ -1062,7 +1063,7 @@ const CreateJob = () => {
               timerProgressBar: true,
             });
           }
-
+          
           else {
             sweatalert.fire({
               icon: "error",

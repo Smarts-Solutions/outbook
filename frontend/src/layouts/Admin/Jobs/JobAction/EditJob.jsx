@@ -257,7 +257,10 @@ const EditJob = () => {
     notes: "",
 
     processing_checklist: null,
-    reviewing_checklist: null
+    reviewing_checklist: null,
+
+    processing_checklist_status: "0",
+    reviewing_checklist_status: "0",
   });
 
 
@@ -377,7 +380,10 @@ const EditJob = () => {
       Year_id_28: null,
 
       processing_checklist: null,
-      reviewing_checklist: null
+      reviewing_checklist: null,
+
+      processing_checklist_status: "0",
+      reviewing_checklist_status: "0",
 
     }));
   }, []);
@@ -456,12 +462,15 @@ const EditJob = () => {
             }
 
             setChecklistModal(checklisModalData);
-                 console.log("response.data.reviewing_checkList-->>",response.data.reviewing_checklist)
+            console.log("response.data.reviewing_checkList-->>", response.data.reviewing_checklist)
             setJobData((prevState) => ({
               ...prevState,
 
               processing_checklist: response.data.processing_checklist ?? null,
               reviewing_checklist: response.data.reviewing_checklist ?? null,
+
+              processing_checklist_status: response.data.processing_checklist_status ?? "0",
+              reviewing_checklist_status: response.data.reviewing_checklist_status ?? "0",
 
               timesheet_job_id: response.data.timesheet_job_id ?? null,
               AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
@@ -1283,11 +1292,10 @@ const EditJob = () => {
     // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
     // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
 
-
+   
     let checklist_modal_data = null;
-    let processing_checklist_status = "2";
-    let reviewing_checklist_status = "2";
-
+    let processing_checklist_status = jobData?.processing_checklist_status ?? "0";
+    let reviewing_checklist_status = jobData?.reviewing_checklist_status ?? "0";
     // processing Type
     if (Array.isArray(checklistModal?.processing) && checklistModal?.processing?.length) {
       checklist_modal_data = JSON.stringify(checklistModal)
@@ -1522,7 +1530,25 @@ const EditJob = () => {
               sessionStorage.setItem("activeTab", location.state.activeTab);
               window.history.back();
             }, 1500);
-          } else {
+          }
+          else if (response.data === "W") {
+            sweatalert.fire({
+              title: "Warning",
+              text: response.message,
+              icon: "warning",
+              confirmButtonText: "Ok",
+              timer: 3000,
+              timerProgressBar: true,
+            });
+          }
+          else {
+            sweatalert.fire({
+              icon: "error",
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500,
+            });
           }
         })
         .catch((error) => {
@@ -3939,8 +3965,8 @@ const EditJob = () => {
                                       )}
                                     </div>
                                   </div>
-                                 
-                                 
+
+
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
