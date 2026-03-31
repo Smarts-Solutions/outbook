@@ -67,6 +67,8 @@ const CreateJob = () => {
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
+
+ //// Checklist Modal State
   const [checklistModal, setChecklistModal] = useState({
     show: false,
     data: [],
@@ -74,10 +76,10 @@ const CreateJob = () => {
     loading: false,
     type: ""
   });
-
-   console.log("checklistModal --->> ", checklistModal)
-
+  //  console.log("checklistModal --->> ", checklistModal)
   const handleViewChecklist = async (checklistId, title, type) => {
+
+ 
     if (!checklistId) return;
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
@@ -97,6 +99,8 @@ const CreateJob = () => {
         responseType: 'arraybuffer'
       });
 
+      console.log("Checklist file response", response);
+
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
@@ -114,6 +118,8 @@ const CreateJob = () => {
           comment: '',
           date: ""
         }));
+
+        console.log("Formatted checklist data", formattedRows);
 
       setChecklistModal(prev => ({
         ...prev,
@@ -148,8 +154,6 @@ const CreateJob = () => {
       };
     });
   };
-
-  
 
   const handleCancelChecklist = () => {
     const type = checklistModal.type;
@@ -884,15 +888,14 @@ const CreateJob = () => {
 
 
     console.log("checklistModal --->", checklistModal)
-    let processing_checklist_status = "2";
-    let processing_checklist_data = null;
+    let checklist_modal_data = null;
 
+    let processing_checklist_status = "2";
     let reviewing_checklist_status = "2";
-    let reviewing_checklist_data = null;
     
     // processing Type
     if (Array.isArray(checklistModal?.processing) && checklistModal?.processing?.length) {
-      processing_checklist_data = JSON.stringify(checklistModal?.processing)
+      checklist_modal_data = JSON.stringify(checklistModal)
       let isNotChecked = checklistModal?.processing?.find(val => val.answer == "")
       if (isNotChecked) {
         processing_checklist_status = "2"
@@ -903,7 +906,7 @@ const CreateJob = () => {
 
 
     if (Array.isArray(checklistModal?.reviewing) && checklistModal?.reviewing?.length) {
-      reviewing_checklist_data = JSON.stringify(checklistModal?.reviewing)
+      checklist_modal_data = JSON.stringify(checklistModal)
       let isNotChecked = checklistModal?.reviewing?.find(val => val.answer == "")
       if (isNotChecked) {
         reviewing_checklist_status = "2"
@@ -1024,9 +1027,8 @@ const CreateJob = () => {
      processing_checkList: jobData?.processing_checkList,
      reviewing_checkList: jobData?.reviewing_checkList,
      processing_checklist_status : processing_checklist_status,
-     processing_checklist_data : processing_checklist_data,
      reviewing_checklist_status : reviewing_checklist_status,
-     reviewing_checklist_data : reviewing_checklist_data,
+     checklist_modal_data : checklist_modal_data,
 
 
     };

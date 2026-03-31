@@ -11,11 +11,14 @@ import {
 import sweatalert from "sweetalert2";
 import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Table, Form } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import { Save, Plus, ArrowLeft, Pencil, X } from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink } from "lucide-react";
+import axios from "axios";
+import * as XLSX from "xlsx";
+import { base_url } from "../../../../Utils/Config";
 
 const EditJob = () => {
   const location = useLocation();
@@ -91,6 +94,119 @@ const EditJob = () => {
   // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
   //  console.log("CustomerDetails", CustomerDetails);
 
+
+  //// Checklist Modal State
+  const [checklistModal, setChecklistModal] = useState({
+    show: false,
+    data: [],
+    title: "",
+    loading: false,
+    type: ""
+  });
+    console.log("checklistModal --->> ", checklistModal)
+  const handleViewChecklist = async (checklistId, title, type) => {
+    console.log("checklistId, title, type", checklistId, "-", title, "-", type)
+    
+    if (!checklistId) return;
+
+    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
+
+    // If we already have data for this type, use it instead of fetching and resetting
+    if (checklistModal[type] && checklistModal[type].length > 0) {
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        data: [...prev[type]] // Backup current data
+      }));
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
+        responseType: 'arraybuffer'
+      });
+
+      console.log("Checklist file response", response);
+
+      const data = new Uint8Array(response.data);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      const dataRows = json.slice(1);
+
+      const formattedRows = dataRows
+        .filter(row => row && row[1]) // Filter empty rows or rows without questions
+        .map((row) => ({
+          s_no: row[0],
+          question: row[1],
+          answer: '',
+          comment: '',
+          date: ""
+        }));
+
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        [type]: formattedRows,  // Set the main data
+        data: formattedRows // Backup for cancel action
+      }));
+
+
+    } catch (error) {
+      console.error("Error loading checklist file:", error);
+      sweatalert.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load checklist file'
+      });
+      setChecklistModal(prev => ({ ...prev, show: false, loading: false }));
+    }
+  };
+
+  const handleChecklistAnswerChange = (index, answer, type, attribute) => {
+    setChecklistModal(prev => {
+      const newData = [...prev[type]];
+      newData[index] = {
+        ...newData[index],
+        [attribute]: answer,
+        date: new Date().toISOString().split('T')[0] // Set today's date when clicked
+      };
+      return {
+        ...prev,
+        [type]: newData
+      };
+    });
+  };
+
+  const handleCancelChecklist = () => {
+    const type = checklistModal.type;
+    const backup = checklistModal.data;
+    setChecklistModal(prev => ({
+      ...prev,
+      [type]: backup,
+      show: false
+    }));
+  };
+
+  const handleSubmitChecklist = () => {
+    setChecklistModal(prev => ({
+      ...prev,
+      show: false
+    }));
+
+    sweatalert.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Checklist saved.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  };
+
+
+
   const [jobData, setJobData] = useState({
     timesheet_job_id: null,
     AccountManager: "",
@@ -139,6 +255,9 @@ const EditJob = () => {
     InvoiceRemark: "",
     status_type: null,
     notes: "",
+
+    processing_checkList: null,
+    reviewing_checkList: null
   });
 
 
@@ -256,6 +375,10 @@ const EditJob = () => {
       Filing_Date_id_8: null,
 
       Year_id_28: null,
+
+      processing_checkList: null,
+      reviewing_checkList: null
+
     }));
   }, []);
 
@@ -323,8 +446,23 @@ const EditJob = () => {
               );
             }
 
+           console.log("response.data.processing_checklist_data", response.data.checklist_modal_data)
+           let  checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
+              show: false,
+              data: [],
+              title: "",
+              loading: false,
+              type: ""
+            }
+
+            setChecklistModal(checklisModalData);
+
             setJobData((prevState) => ({
               ...prevState,
+
+              processing_checkList: response.data.processing_checklist ?? null,
+              reviewing_checkList: response.data.reviewing_checkList ?? null,
+
               timesheet_job_id: response.data.timesheet_job_id ?? null,
               AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""
                 } ${response.data.outbooks_acount_manager_last_name ?? ""}`,
@@ -630,7 +768,7 @@ const EditJob = () => {
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-      } 
+      }
       else {
         return null;
       }
@@ -664,7 +802,7 @@ const EditJob = () => {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
-      } 
+      }
       else {
         return null;
       }
@@ -3690,6 +3828,138 @@ const EditJob = () => {
                                       )}
                                     </div>
                                   </div>
+
+                                  {/* Checklist Work */}
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Processing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="processing_checkList"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.processing_checkList
+                                        }
+                                      >
+                                        <option value={null}>-- Select --</option>
+
+                                        <option value={0}>Not Required</option>
+                                        {AllJobData?.data?.processing_checklist_data
+                                          ?.filter((item) => {
+
+                                            // Service Filter
+                                            let serviceMatch = true
+                                            if (item.service_id) {
+                                              const serviceIds = item.service_id.split(",").map(Number)
+                                              serviceMatch = serviceIds.includes(jobData.Service)
+                                            }
+
+                                            // Job Type Filter
+                                            let jobTypeMatch = true
+                                            if (item.job_type_id) {
+                                              const jobTypeIds = item.job_type_id.split(",").map(Number)
+                                              jobTypeMatch = jobTypeIds.includes(jobData.JobType)
+                                            }
+
+                                            return serviceMatch && jobTypeMatch
+                                          })
+                                          ?.map((item, index) => (
+                                            <option key={index} value={item.id}>
+                                              {item.check_list_name}
+                                            </option>
+                                          ))}
+                                      </select>
+                                      {jobData.processing_checkList && jobData.processing_checkList !== "0" && (
+                                        <div className="mt-1">
+                                          {(() => {
+                                            const selected = AllJobData?.data?.processing_checklist_data?.find(
+                                              (item) => Number(item.id) === Number(jobData.processing_checkList)
+                                            );
+                                            return selected?.upload_checklist_name ? (
+                                              <button
+                                                type="button"
+                                                className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "processing")}
+                                              >
+                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                              </button>
+                                            ) : (
+                                              <span className="text-muted fs-12">PDF Not Available</span>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Reviewing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="reviewing_checkList"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.reviewing_checkList
+                                        }
+                                      >
+                                        <option value={null}>-- Select --</option>
+                                        <option value={0}>Not Required</option>
+                                        {AllJobData?.data?.reviewing_checklist_data
+                                          ?.filter((item) => {
+
+                                            // Service Filter
+                                            let serviceMatch = true
+                                            if (item.service_id) {
+                                              const serviceIds = item.service_id.split(",").map(Number)
+                                              serviceMatch = serviceIds.includes(jobData.Service)
+                                            }
+
+                                            // Job Type Filter
+                                            let jobTypeMatch = true
+                                            if (item.job_type_id) {
+                                              const jobTypeIds = item.job_type_id.split(",").map(Number)
+                                              jobTypeMatch = jobTypeIds.includes(jobData.JobType)
+                                            }
+
+                                            return serviceMatch && jobTypeMatch
+                                          })
+                                          ?.map((item, index) => (
+                                            <option key={index} value={item.id}>
+                                              {item.check_list_name}
+                                            </option>
+                                          ))}
+                                      </select>
+                                      {jobData.reviewing_checkList && jobData.reviewing_checkList !== "0" && (
+                                        <div className="mt-1">
+                                          {(() => {
+                                            const selected = AllJobData?.data?.reviewing_checklist_data?.find(
+                                              (item) => Number(item.id) === Number(jobData.reviewing_checkList)
+                                            );
+                                            return selected?.upload_checklist_name ? (
+                                              <button
+                                                type="button"
+                                                className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "reviewing")}
+                                              >
+                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                              </button>
+                                            ) : (
+                                              <span className="text-muted fs-12">PDF Not Available</span>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+
+
                                 </div>
                               </div>
                             </div>
@@ -4799,6 +5069,115 @@ const EditJob = () => {
                               </Modal.Footer>
                             </Modal>
                           )}
+
+
+                          {/* Checklist Preview Modal */}
+                          <Modal
+                            show={checklistModal.show}
+                            onHide={handleCancelChecklist}
+                            size="xl"
+                            centered
+                            scrollable
+                          >
+                            <Modal.Header closeButton className="bg-light">
+                              <Modal.Title className="fs-16">{checklistModal.title}</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              {checklistModal.loading ? (
+                                <div className="text-center p-5">
+                                  <div className="spinner-border text-primary" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                  </div>
+                                  <p className="mt-2 text-muted">Loading checklist data...</p>
+                                </div>
+                              ) : (
+                                <div className="table-responsive">
+                                  <Table bordered hover className="align-middle fs-13">
+                                    <thead className="table-light text-nowrap">
+                                      <tr>
+                                        <th style={{ width: '50px' }}>S.No</th>
+                                        <th>Question</th>
+                                        <th className="text-center" style={{ width: '250px' }}>Options</th>
+                                        <th style={{ width: '200px' }}>Comment</th>
+                                        <th style={{ width: '120px' }}>Date</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {
+                                        checklistModal[checklistModal.type]?.length > 0 ? (
+                                          checklistModal[checklistModal.type]?.map((row, index) => (
+                                            <tr key={index}>
+                                              <td className="text-center">{row.s_no || index + 1}</td>
+                                              <td>{row.question}</td>
+                                              <td>
+                                                <div className="d-flex justify-content-around">
+                                                  <Form.Check
+                                                    type="radio"
+                                                    label="Yes"
+                                                    name={`ans-${index}`}
+                                                    id={`yes-${index}`}
+                                                    className="fs-12"
+                                                    checked={row.answer === 'Yes'}
+                                                    onChange={() => handleChecklistAnswerChange(index, 'Yes', checklistModal.type, "answer")}
+                                                  />
+                                                  <Form.Check
+                                                    type="radio"
+                                                    label="No"
+                                                    name={`ans-${index}`}
+                                                    id={`no-${index}`}
+                                                    className="fs-12"
+                                                    checked={row.answer === 'No'}
+                                                    onChange={() => handleChecklistAnswerChange(index, 'No', checklistModal.type, "answer")}
+                                                  />
+                                                  <Form.Check
+                                                    type="radio"
+                                                    label="N/A"
+                                                    name={`ans-${index}`}
+                                                    id={`na-${index}`}
+                                                    className="fs-12"
+                                                    checked={row.answer === 'N/A'}
+                                                    onChange={() => handleChecklistAnswerChange(index, 'N/A', checklistModal.type, "answer")}
+                                                  />
+                                                </div>
+                                              </td>
+                                              <td>
+                                                <textarea
+                                                  className="form-control form-control-sm"
+                                                  rows="1"
+                                                  placeholder="Add comment"
+                                                  value={row.comment}
+                                                  onChange={(e) => handleChecklistAnswerChange(index, e.target.value, checklistModal.type, "comment")}
+                                                ></textarea>
+                                              </td>
+                                              <td>
+                                                <input
+                                                  type="date"
+                                                  className="form-control form-control-sm"
+                                                  value={row.date}
+                                                  readOnly
+                                                />
+                                              </td>
+                                            </tr>
+                                          ))
+                                        ) : (
+                                          <tr>
+                                            <td colSpan="5" className="text-center py-4 text-muted">No questions found in this file.</td>
+                                          </tr>
+                                        )}
+                                    </tbody>
+                                  </Table>
+                                </div>
+                              )}
+                            </Modal.Body>
+                            <Modal.Footer>
+                              <Button variant="secondary" onClick={handleCancelChecklist}>
+                                Close
+                              </Button>
+                              <Button variant="success" onClick={handleSubmitChecklist}>
+                                Submit
+                              </Button>
+                            </Modal.Footer>
+                          </Modal>
 
                           <div className="col-lg-12">
                             <div className="card card_shadow">
