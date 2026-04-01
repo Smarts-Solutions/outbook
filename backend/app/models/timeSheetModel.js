@@ -816,6 +816,16 @@ const getTimesheetTaskType = async (Timesheet) => {
             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
+         
+        AND (
+        master_status.x_days IS NULL
+        OR 
+        CURDATE() <= DATE_ADD(
+            DATE(jobs.status_updation_date),
+            INTERVAL master_status.x_days DAY
+            )
+        )
+              
         GROUP BY 
         jobs.id 
         ORDER BY 
