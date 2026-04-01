@@ -574,7 +574,7 @@ const Sidebar = () => {
             )}
 
             {/* Coustomer users*/}
-            {/* {
+            {
             (
               role === "SUPERADMIN") && (
                 <li
@@ -594,7 +594,7 @@ const Sidebar = () => {
                   </Link>
                 </li>
               )
-              } */}
+              } 
           </ul>
         </div>
       </div>
