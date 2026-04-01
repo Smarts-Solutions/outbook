@@ -116,7 +116,7 @@ const Status = () => {
     {
       name: "X Days",
       selector: (row) => row.x_days,
-      cell: (row) => <div>{row.x_days}</div>,
+      cell: (row) => <div>{row.x_days || "-"}</div>,
       sortable: true,
     },
     {
@@ -368,7 +368,7 @@ const Status = () => {
     "Created Date": convertDate(item.created_at),
     "Last Update On": convertDate(item.updated_at),
     "Status": item.status_type,
-    "X Days": item.x_days,
+    "X Days": item.x_days || "-",
   }));
 
   const JobDetails = async () => {
