@@ -702,7 +702,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-
+         
           const query = `
         SELECT 
          job_types.id AS job_type_id,
@@ -744,6 +744,8 @@ const getTimesheetTaskType = async (Timesheet) => {
         ORDER BY 
          jobs.id DESC;
         `;
+
+            console.log("query -->>", query);
           const [rows] = await pool.execute(query);
           return { status: true, message: "Success.", data: rows };
         }
