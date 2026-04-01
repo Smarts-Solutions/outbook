@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { Briefcase, ChevronDown, ChevronRight ,PieChart,Shield,User,Users,File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid} from "lucide-react";
+import { Briefcase, ChevronDown, ChevronRight ,PieChart,Shield,User,Users,File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid ,UserCog ,FileSliders } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -373,7 +373,7 @@ const Sidebar = () => {
                 >
                   <div>
                     <span className="sidebar-icons">
-                      <Users />
+                      <FileSliders />
                     </span>
                     <span className="pe-4 pe-lg-4">Reports</span>
                   </div>
@@ -588,7 +588,8 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-user-cog"></i> 
+                      {/* <i className="fas fa-user-cog"></i>  */}
+                      <UserCog />{" "}
                     </span>
                     <span>Customer Details</span>
                   </Link>
