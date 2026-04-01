@@ -159,18 +159,18 @@ const updateStatusType = async (StatusType) => {
 
 // Master Status
 const createMasterStatus = async (masterStatus) => {
-  const { status_type_id, name } = masterStatus;
+  const { status_type_id, name, x_days } = masterStatus;
   const checkQuery = `SELECT 1 FROM master_status WHERE name = ?`;
   const query = `
-    INSERT INTO master_status (status_type_id, name)
-    VALUES (?, ?)
+    INSERT INTO master_status (status_type_id, name,x_days)
+    VALUES (?, ?,?)
     `;
   try {
     const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
       return { status: false, message: "Master Status already exists." };
     }
-    const [result] = await pool.execute(query, [status_type_id, name]);
+    const [result] = await pool.execute(query, [status_type_id, name,x_days]);
 
     const currentDate = new Date();
     await SatffLogUpdateOperation({
@@ -201,6 +201,7 @@ const getMasterStatus = async (masterStatus) => {
     master_status.name AS name,
     master_status.status_type_id AS status_type_id,
     master_status.is_disable AS is_disable,
+    master_status.x_days AS x_days,
     status_types.type AS status_type,
     status_types.type AS status_type,
     master_status.created_at AS created_at,
