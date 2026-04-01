@@ -740,6 +740,16 @@ const getTimesheetTaskType = async (Timesheet) => {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
         jobs.client_id = ${client_id}
+        
+        AND (
+        master_status.x_days IS NULL
+        OR 
+        CURDATE() <= DATE_ADD(
+            DATE(jobs.status_updation_date),
+            INTERVAL master_status.x_days DAY
+            )
+        )
+
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
