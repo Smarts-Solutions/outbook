@@ -755,7 +755,7 @@ const getTimesheetTaskType = async (Timesheet) => {
          jobs.id DESC;
         `;
 
-            console.log("query -->>", query);
+            
           const [rows] = await pool.execute(query);
           return { status: true, message: "Success.", data: rows };
         }
