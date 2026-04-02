@@ -247,7 +247,7 @@ const JobStatus = () => {
                     "Status": statusName,
                     "Client Contact Person": (item.account_manager_officer_first_name || "") + " " + (item.account_manager_officer_last_name || "") || "-",
                     "Client Job Code": item.client_job_code || "-",
-                    "Outbook Account Manager": (item.outbooks_acount_manager_first_name || "") + " " + (item.outbooks_acount_manager_last_name || "") || "-",
+                    // "Outbook Account Manager": (item.outbooks_acount_manager_first_name || "") + " " + (item.outbooks_acount_manager_last_name || "") || "-",
                     "Allocated To": item.allocated_name || "-",
                     "Timesheet": item.total_hours_status == "1" && item.total_hours != null
                         ? item.total_hours.split(":")[0] + "h " + item.total_hours.split(":")[1] + "m"
@@ -482,28 +482,28 @@ const JobStatus = () => {
       sortable: true,
       reorder: false,
     },
-    {
-      name: "Outbook Account Manager",
-      cell: (row) => (
-        <div
-          title={
-            row.outbooks_acount_manager_first_name +
-              " " +
-              row.outbooks_acount_manager_last_name || "-"
-          }
-        >
-          {row.outbooks_acount_manager_first_name +
-            " " +
-            row.outbooks_acount_manager_last_name || "-"}
-        </div>
-      ),
-      selector: (row) =>
-        row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-",
-      sortable: true,
-      reorder: false,
-    },
+    // {
+    //   name: "Outbook Account Manager",
+    //   cell: (row) => (
+    //     <div
+    //       title={
+    //         row.outbooks_acount_manager_first_name +
+    //           " " +
+    //           row.outbooks_acount_manager_last_name || "-"
+    //       }
+    //     >
+    //       {row.outbooks_acount_manager_first_name +
+    //         " " +
+    //         row.outbooks_acount_manager_last_name || "-"}
+    //     </div>
+    //   ),
+    //   selector: (row) =>
+    //     row.outbooks_acount_manager_first_name +
+    //       " " +
+    //       row.outbooks_acount_manager_last_name || "-",
+    //   sortable: true,
+    //   reorder: false,
+    // },
     {
       name: "Allocated To",
       cell: (row) => (

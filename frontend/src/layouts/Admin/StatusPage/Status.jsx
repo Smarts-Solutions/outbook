@@ -24,6 +24,7 @@ const Status = () => {
   const [getStatsAdd, setStatsAdd] = useState({
     statusname: "",
     statustype: "",
+    x_days: "",
   });
   const [editItem, setEditItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -49,10 +50,18 @@ const Status = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setStatsAdd((prevStatsAdd) => ({
-      ...prevStatsAdd,
-      [name]: value,
-    }));
+    if (name === "x_days") {
+      const sanitizedValue = value.replace(/[^0-9]/g, "");
+      setStatsAdd((prevStatsAdd) => ({
+        ...prevStatsAdd,
+        [name]: sanitizedValue,
+      }));
+    } else {
+      setStatsAdd((prevStatsAdd) => ({
+        ...prevStatsAdd,
+        [name]: value,
+      }));
+    }
   };
   const rows = [
     { id: 1, status_type: "completed" },
@@ -105,6 +114,12 @@ const Status = () => {
       sortable: true,
     },
     {
+      name: "X Days",
+      selector: (row) => row.x_days,
+      cell: (row) => <div>{row.x_days || "-"}</div>,
+      sortable: true,
+    },
+    {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex justify-content-end">
@@ -135,6 +150,7 @@ const Status = () => {
     setStatsAdd({
       statusname: row.name,
       statustype: row.status_type_id,
+      x_days: row.x_days || "",
     });
 
     // Show the modal
@@ -157,6 +173,7 @@ const Status = () => {
           id: editItem.id,
           name: getStatsAdd.statusname,
           status_type_id: getStatsAdd.statustype,
+          x_days: getStatsAdd.x_days === "" ? null : Number(getStatsAdd.x_days),
         },
         authToken: token,
       };
@@ -300,6 +317,7 @@ const Status = () => {
         id: editItem ? editItem.id : undefined,
         name: getStatsAdd.statusname,
         status_type_id: getStatsAdd.statustype,
+        x_days: getStatsAdd.x_days === "" ? null : Number(getStatsAdd.x_days),
       },
       authToken: token,
     };
@@ -347,9 +365,10 @@ const Status = () => {
 
   const exportData = statusDataAll.map((item) => ({
     "Detailed Status": item.name,
-    "Status": item.status_type,
     "Created Date": convertDate(item.created_at),
     "Last Update On": convertDate(item.updated_at),
+    "Status": item.status_type,
+    "X Days": item.x_days || "-",
   }));
 
   const JobDetails = async () => {
@@ -398,10 +417,11 @@ const Status = () => {
                           setStatsAdd({
                             statusname: "",
                             statustype: "",
+                            x_days: "",
                           });
                         }}
                       >
-                       <Plus size={16}/> Add Status
+                        <Plus size={16} /> Add Status
                       </button>
                     ) : (
                       <div className="mt-5"></div>
@@ -488,6 +508,22 @@ const Status = () => {
                   </select>
                 </div>
               </div>
+              <div className="col-lg-12">
+                <div className="mb-3">
+                  <label htmlFor="VAT_dropdown1" className="form-label">
+                    X Days
+                  </label>
+                  <input
+                    type="text"
+                    id="VAT_dropdown1"
+                    className="form-control"
+                    placeholder="Enter Days"
+                    name="x_days"
+                    value={getStatsAdd.x_days}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
             </form>
           </div>
         </CommanModal>
@@ -552,7 +588,7 @@ const Status = () => {
                 {JobData.length > 0 && (
                   <div className="mb-4">
                     <h6 className="fw-bold text-primary">
-                     <User2 size={16}/> Job Assigned:
+                      <User2 size={16} /> Job Assigned:
                     </h6>
                     <ul className="list-group">
                       <label className="">Job ID</label>

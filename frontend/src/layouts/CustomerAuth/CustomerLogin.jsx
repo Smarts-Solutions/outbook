@@ -16,6 +16,7 @@ import {
 } from "../../Utils/Common_Message";
 import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 import sweatalert from "sweetalert2";
+import { ArrowRight } from "lucide-react";
 
 const CustomerLogin = () => {
 
@@ -374,7 +375,7 @@ const CustomerLogin = () => {
                                 onClick={() => handleSubmitLogin()}
                                 onKeyPress={handleKeyPress}
                               >
-                                Sign In <i className="fas fa-sign-in-alt ml-1" />
+                                Sign In <ArrowRight size={16} />
                               </button>
                             </div>
 
