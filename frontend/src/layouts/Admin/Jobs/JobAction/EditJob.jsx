@@ -103,7 +103,7 @@ const EditJob = () => {
     loading: false,
     type: ""
   });
-  console.log("checklistModal --->> ", checklistModal)
+ 
   const handleViewChecklist = async (checklistId, title, type) => {
     console.log("checklistId, title, type", checklistId, "-", title, "-", type)
 
@@ -453,7 +453,7 @@ const EditJob = () => {
               );
             }
 
-            console.log("response.data.processing_checklist_data", response.data.checklist_modal_data)
+           
             let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
               show: false,
               data: [],
@@ -461,9 +461,8 @@ const EditJob = () => {
               loading: false,
               type: ""
             }
-
             setChecklistModal(checklisModalData);
-            console.log("response.data.reviewing_checkList-->>", response.data.reviewing_checklist)
+            
             setJobData((prevState) => ({
               ...prevState,
 
@@ -684,7 +683,8 @@ const EditJob = () => {
                 response.data.Period_Ending_Date_id_8 ?? null,
               Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
               Year_id_28: response.data.Year_id_28 ?? null,
-              job_priority: response.data.job_priority ?? null,
+              job_priority: response.data.job_priority ?? null
+
             }));
           }
 
@@ -731,7 +731,6 @@ const EditJob = () => {
       ...prevState,
       DueOn: due_date,
     }));
-
   };
 
   function getDueDate(client_type, service_id) {
