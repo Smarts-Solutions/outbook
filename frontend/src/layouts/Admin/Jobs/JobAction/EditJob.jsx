@@ -462,10 +462,10 @@ const EditJob = () => {
               type: ""
             }
             setChecklistModal(checklisModalData);
-            
+
             setJobData((prevState) => ({
               ...prevState,
-
+              
               processing_checklist: response.data.processing_checklist ?? null,
               reviewing_checklist: response.data.reviewing_checklist ?? null,
 
