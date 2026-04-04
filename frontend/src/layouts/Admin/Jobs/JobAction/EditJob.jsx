@@ -33,7 +33,6 @@ const EditJob = () => {
 
   const [CustomerDetails, setCustomerDetails] = useState([]);
 
-  // console.log("location EDIT -", location);
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState({
@@ -53,7 +52,6 @@ const EditJob = () => {
     data: [],
   });
 
-  // console.log("AllChecklistData", AllChecklistData);
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [existAddTaskArr, setExistAddTaskArr] = useState([]);
   const [existJobTypeId, setExistJobTypeId] = useState([]);
@@ -91,8 +89,7 @@ const EditJob = () => {
   const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
   const [clientType, setClientType] = useState("");
 
-  // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
-  //  console.log("CustomerDetails", CustomerDetails);
+
 
 
   //// Checklist Modal State
@@ -105,8 +102,7 @@ const EditJob = () => {
   });
  
   const handleViewChecklist = async (checklistId, title, type) => {
-    console.log("checklistId, title, type", checklistId, "-", title, "-", type)
-
+ 
     if (!checklistId) return;
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
@@ -126,7 +122,6 @@ const EditJob = () => {
         responseType: 'arraybuffer'
       });
 
-      console.log("Checklist file response", response);
 
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
@@ -860,7 +855,6 @@ const EditJob = () => {
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
       .then(async (response) => {
-        console.log("getChecklistData", response);
 
         if (response.status) {
           setAllChecklistData({
@@ -1288,9 +1282,7 @@ const EditJob = () => {
   }
 
   const handleSubmit = async () => {
-    // console.log("handleSubmit service", Number(jobData?.Service));
-    // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
-    // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
+
 
 
     let checklist_modal_data = null;
@@ -1787,7 +1779,6 @@ const EditJob = () => {
       );
     }
 
-    //  console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
     setBudgetedHours({
       ...budgetedHours,
       hours: budgeted_hour_totalTime.hours,
@@ -2774,7 +2765,6 @@ const EditJob = () => {
     (detail) => detail.assigned_source === "assign_customer_service",
   );
 
-  // console.log("assignDetails", assignDetails);
 
   let assignedServiceIds = assignDetails?.map((d) =>
     Number(d.service_id_assign),

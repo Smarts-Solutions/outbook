@@ -460,7 +460,6 @@ const Timesheet = () => {
       updateRecordSheet(null, "task_type", "1");
     } else {
       // Handle the error case as needed
-      console.log("API call failed:", res);
     }
   };
 
@@ -2622,7 +2621,6 @@ const Timesheet = () => {
                                             value: selectedOption?.value || "",
                                           },
                                         };
-                                        console.log("selectedOption");
                                         selectJobData(e, item.task_type, index);
                                       }}
                                     />
@@ -2707,7 +2705,6 @@ const Timesheet = () => {
                                             value: selectedOption?.value || "",
                                           },
                                         };
-                                        console.log("okk");
 
                                         selectTaskData(e, index);
                                       }}

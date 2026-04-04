@@ -103,7 +103,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   });
 
   const handleViewChecklist = async (checklistId, title, type) => {
-    console.log("checklistId, title, type", checklistId, "-", title, "-", type)
 
     if (!checklistId) return;
 
@@ -124,7 +123,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         responseType: 'arraybuffer'
       });
 
-      console.log("Checklist file response", response);
 
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
@@ -175,7 +173,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
 
 
-  // console.log("========", selectStatusIs);
 
 
   useEffect(() => {
@@ -2213,8 +2210,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         }
                       >
                         <option value={null}>-- Select --</option>
-                        {console.log("AllJobData?.data?.processing_checklist_data", AllJobData?.data?.processing_checklist_data)}
-                        <option value={0}>Not Required</option>
+                       <option value={0}>Not Required</option>
                         {AllJobData?.data?.processing_checklist_data
                           ?.filter((item) => {
 
@@ -2235,7 +2231,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             return serviceMatch && jobTypeMatch
                           })
                           ?.map((item, index) => (
-                            console.log("item in checklist filter", item),
                             <option key={index} value={item.id}>
                               {item.check_list_name}
                             </option>

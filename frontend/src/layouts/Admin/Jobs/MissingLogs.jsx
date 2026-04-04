@@ -26,8 +26,7 @@ import { Download, Plus, FileText, File, Eye } from "lucide-react";
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
-  console.log("State", location.state);
-  console.log("State", location.state.data.job.date_received_on);
+ 
 
   const fileInputRef = useRef(null);
   const role = JSON.parse(localStorage.getItem("role"));

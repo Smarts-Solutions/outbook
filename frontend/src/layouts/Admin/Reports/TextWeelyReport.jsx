@@ -63,7 +63,7 @@ const SlidingTable = () => {
         }
       })
       .catch((err) => {
-        console.log("err", err);
+  
         setTotalCount(0);
       })
   };
@@ -84,7 +84,7 @@ const SlidingTable = () => {
         }
       })
       .catch((err) => {
-        console.log("err", err);
+  
       })
   };
 

@@ -1548,9 +1548,7 @@ const ClientEdit = () => {
   const handleUpdate = async () => {
 
 
-    // console.log("getSoleTraderDetails.VATNumber", getSoleTraderDetails.VATNumber)
-    // console.log("selectClientType", selectClientType)
-    // console.log("validateAllFields(1)", validateAllFields(1))
+  
 
 
 

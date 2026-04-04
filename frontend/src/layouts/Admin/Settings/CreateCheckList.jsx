@@ -45,7 +45,6 @@ const CreateCheckList = () => {
     status: "1",
   });
 
-  console.log("formData ,", formData)
 
   const [formData1, setFormData1] = useState({
     customer_id: location.state?.id || "",
@@ -570,7 +569,6 @@ const CreateCheckList = () => {
     setSelectedClientType(e);
   };
 
-  // console.log("formData",formData)
 
   return (
     <div className="container-fluid">

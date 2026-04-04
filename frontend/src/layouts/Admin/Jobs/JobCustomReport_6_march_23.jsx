@@ -1689,28 +1689,8 @@ function JobCustomReport() {
         {filters?.groupBy?.includes("job_id") && (
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Job Name</label>
-            {/* <Select
-              options={[{ value: "", label: "Select..." }, ...jobAllData]}
-              value={
-                jobAllData && jobAllData.length > 0
-                  ? jobAllData.find(
-                      (opt) => Number(opt.value) === Number(filters.job_id),
-                    ) || null
-                  : null
-              }
-              onChange={(selected) =>
-                handleFilterChange({
-                  target: {
-                    key: "job_id",
-                    value: selected.value,
-                    label: selected.label,
-                  },
-                })
-              }
-              isSearchable
-              className="shadow-sm select-staff rounded-pill"
-            /> */}
-          {console.log("jobAllData -->",jobAllData)}
+         
+         
 
             <Select
               isMulti

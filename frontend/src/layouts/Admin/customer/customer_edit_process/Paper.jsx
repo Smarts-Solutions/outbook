@@ -35,7 +35,6 @@ const Paper = () => {
   const [folderPath, setFolderPath] = useState("");
 
 
-  //console.log("sharepoint_token", sharepoint_token);
 
   const handleFileChange = async (event) => {
     //  let customer_name = "DEMO"
@@ -119,7 +118,7 @@ const Paper = () => {
       .then((response) => {
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
-          console.log("existingFiles", existingFiles);
+          
           setCustomerDetails({
             loading: false,
             data: response.data,
@@ -163,18 +162,14 @@ const Paper = () => {
         setIsLoading(true);
         const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
 
-        // console.log("site_ID", site_ID);
-        //   console.log("drive_ID", drive_ID);
-        // console.log("folder_ID", folder_ID);
+      
 
         const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
 
-        //console.log("folderId", folderId);
 
         for (const file of newFiles) {
           const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
 
-          console.log("uploadDataUrl", uploadDataUrl);
 
 
 
@@ -245,7 +240,6 @@ const Paper = () => {
     if (type == 2) {
       fileName = file.original_name;
     }
-    console.log("fileName", fileName);
 
 
     if (fileName != undefined) {
@@ -300,8 +294,7 @@ const Paper = () => {
   };
 
   const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
-    console.log("sharePointFileUrl", sharePointFileUrl);
-    console.log("accessToken", accessToken);
+
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {

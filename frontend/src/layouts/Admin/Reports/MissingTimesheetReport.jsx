@@ -26,7 +26,7 @@ const MissingTimesheet = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          //console.log("MissingTimesheet Data:", res);
+     
           setMissingTimesheetReportData(res.data.result);
         }
         else {
@@ -34,7 +34,7 @@ const MissingTimesheet = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+    
       });
   }
 

@@ -39,7 +39,6 @@ const ClientList = () => {
     customer: location.state,
   });
 
-  // console.log("getJobDetails ", getJobDetails);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState("");
@@ -788,8 +787,7 @@ const ClientList = () => {
     accessToken,
     fileName,
   ) => {
-    console.log("sharePointFileUrl", sharePointFileUrl);
-    console.log("accessToken", accessToken);
+
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {

@@ -46,7 +46,6 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
       }
     }
   } catch (err) {
-    console.log("Error fetching site and drive info:", err);
     return "";
   }
 };
@@ -87,7 +86,6 @@ export const createFolderIfNotExists = async (site_ID, drive_ID, parentFolderId,
     );
     return existingFolder.id;
   } catch (err) {
-    console.log("Error creating folder:", err);
     return "";
   }
 };
@@ -111,7 +109,6 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID, file, acc
     return publicUrl
     return { webUrl: response.data.webUrl, publicUrl };
   } catch (err) {
-    console.log("Error uploading file:", err);
     return "";
   }
 };
@@ -198,7 +195,6 @@ export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, fileNam
 
     return response.data;
   } catch (err) {
-    console.log("Error deleting file:", err);
     return "";
   }
 };

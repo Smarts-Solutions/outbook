@@ -14,7 +14,6 @@ const Access = () => {
   const [accessData, setAccessData] = useState({ loading: true, data: [] });
   const [modalOpen, setOpenModalOpen] = useState(false);
 
-  console.log("checkboxState", checkboxState);
 
   const roleData = async () => {
     try {
@@ -35,11 +34,7 @@ const Access = () => {
     const handleChange = (event) => {
       const checked = event.target.checked;
 
-      // console.log("checked", checked);
-      // console.log("label", label);
-      // console.log("id", id);
-      // console.log("role_id", role_id);
-      // console.log("permission_name", permission_name);
+  
 
       // setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked , permission_name: permission_name}]);
 

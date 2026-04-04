@@ -119,10 +119,7 @@ const CreateJob = () => {
 
   });
 
-  console.log("CustomerDetails", jobData.CustomerDetails);
-  // console.log("Reviewer", jobData.Reviewer);
-  // console.log("staffCreatedId", staffCreatedId);
-  // console.log("selectedStaffData", selectedStaffData);
+
 
   useEffect(() => {
     setJobData((prevState) => ({
@@ -1656,8 +1653,7 @@ const CreateJob = () => {
   ];
 
 
-  // console.log("serviceFields", serviceFields);
-  // console.log("jobData?.Service", jobData?.Service);
+  
 
 
   useEffect(() => {
@@ -1684,7 +1680,7 @@ const CreateJob = () => {
 
 
   useEffect(() => {
-    console.log("UPDATE ALL DEFAULT FEILDS");
+   
     setJobData((prevState) => ({
       ...prevState,
       Turnover_Period_id_0: "Monthly",
@@ -1813,7 +1809,6 @@ const CreateJob = () => {
   }, []);
 
 
-  // console.log("jobData", jobData);
 
   // SELECT OPTION 
   // 1. Build service options
@@ -1830,7 +1825,6 @@ const CreateJob = () => {
     (detail) => detail.assigned_source === "assign_customer_service"
   );
   if (isAssignDetails != undefined) {
-    //console.log("isAssignDetails", isAssignDetails);
     serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
   }
 

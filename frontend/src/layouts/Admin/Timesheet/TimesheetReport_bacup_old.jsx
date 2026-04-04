@@ -19,7 +19,6 @@ function TimesheetReport() {
   const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
 
-  // console.log("showData ", showData);
 
   const [filters, setFilters] = useState({
     groupBy: "employee",
@@ -32,12 +31,10 @@ function TimesheetReport() {
     toDate: null,
   });
 
-  // console.log("staffDetails ", staffDetails);
 
 
 
   const staffData = async () => {
-    //  console.log("role ", role);
     if (role?.toUpperCase() === "SUPERADMIN") {
       await dispatch(Staff({ req: { action: "get" }, authToken: token }))
         .unwrap()
@@ -126,7 +123,6 @@ function TimesheetReport() {
         .then(async (response) => {
           if (response.status) {
 
-            console.log("Internal jobs response: ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: item.name
@@ -177,7 +173,6 @@ function TimesheetReport() {
         .then(async (response) => {
           if (response.status) {
 
-            console.log("Internal tasks response: ", response.data);
             const data = response?.data?.map((item) => ({
               value: item.id,
               label: item.name
@@ -285,7 +280,6 @@ function TimesheetReport() {
       // ye case sirf "groupBy" ke liye handle karte h
       const values = e.map((opt) => opt.value);
       const labels = e.map((opt) => opt.label);
-      // console.log("Filter changed (multi): ", "groupBy", values, labels);
       setOptions([]);
      let gropByArray = sortByReference(values)
 
@@ -348,7 +342,6 @@ function TimesheetReport() {
 
     if (key === "groupBy") {
       setOptions([])
-      //console.log("Group By changed: ", value);
       if (value == "employee") {
         staffData()
       }
@@ -379,7 +372,6 @@ function TimesheetReport() {
     }
     else if (key === "fieldsToDisplay") {
 
-      //console.log("Fields to Display changed field: ", value);
 
       if ([null, undefined, ""].includes(value)) {
         setFilters((prev) => ({

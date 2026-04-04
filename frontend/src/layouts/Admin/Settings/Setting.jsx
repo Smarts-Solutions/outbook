@@ -216,7 +216,7 @@ const Setting = () => {
         if (req.action == "getAll") {
           if (response.status) {
             setRoleDataAll({ loading: false, data: response.data });
-            console.log("Role Data", response);
+           
           } else {
             setRoleDataAll({ loading: false, data: [] });
           }
@@ -1702,8 +1702,7 @@ const Setting = () => {
       }),
     }));
 
-    // Log the updated HourMinut state for debugging
-    console.log("Updated HourMinut State:", HourMinut);
+  
   };
 
   const handleTaskAdd = (row) => {
@@ -2346,7 +2345,7 @@ const Setting = () => {
         setStaffRoleData([]);
       }
     } catch (error) {
-      console.log("error", error);
+      
     }
   };
 

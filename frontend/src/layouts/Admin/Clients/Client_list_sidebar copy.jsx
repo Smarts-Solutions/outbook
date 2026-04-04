@@ -268,7 +268,6 @@ const ClientLists = () => {
       }
     }
 
-    // console.log("tabsData", tabsData);
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData, customerId]);
 

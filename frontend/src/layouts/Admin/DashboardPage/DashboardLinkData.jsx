@@ -160,7 +160,6 @@ const JobStatus = () => {
     setAccessData(updatedAccess);
   }, []);
 
-  console.log("getAccessData", getAccessData);
 
   const GetStatus = async () => {
     setLoading(true);

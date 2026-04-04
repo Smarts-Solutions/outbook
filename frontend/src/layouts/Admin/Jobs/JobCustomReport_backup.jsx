@@ -27,12 +27,9 @@ function JobCustomReport() {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = staffDetails?.role;
 
-  // console.log("staffDetails ", staffDetails);
   const [showData, setShowData] = useState([]);
   const navigate = useNavigate();
-  // console.log("showData ", showData);
 
-  /////////PAGINATION/////////
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -110,7 +107,6 @@ function JobCustomReport() {
       .replace(/\b\w/g, (char) => char.toUpperCase()) // capitalize first letter of each word
       .trim();
   }
-  //  console.log("lastGroupValue ", lastGroupValue);
 
   // Get All Jobs
   const GetAllJobs = async (type, filter) => {
@@ -286,7 +282,6 @@ function JobCustomReport() {
       await dispatch(getAllCustomerDropDown(data))
         .unwrap()
         .then(async (response) => {
-          console.log("customer response ", response);
 
           if (response.status) {
             const data = response?.data?.map((item) => ({
@@ -307,7 +302,6 @@ function JobCustomReport() {
       await dispatch(getAllCustomerDropDown(data))
         .unwrap()
         .then(async (response) => {
-          // console.log("customer filter ---  ", response);
 
           if (response.status) {
             const data = response?.data?.map((item) => ({
@@ -380,7 +374,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -419,7 +412,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -458,7 +450,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -497,7 +488,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data?.map((item) => ({
                 value: item.id,
                 label: `${item.first_name} ${item.last_name} (${item.email})`,
@@ -532,7 +522,6 @@ function JobCustomReport() {
           .unwrap()
           .then(async (response) => {
             if (response.status) {
-              // console.log("response.data ", response.data);
               const data = response?.data
                 ?.filter(
                   (item) =>
@@ -761,7 +750,6 @@ function JobCustomReport() {
       setOptions([]);
       let gropByArray = sortByReference(values);
 
-      // console.log("gropByArray ", gropByArray);
       if (gropByArray.length == 0) {
         setIsAllSelected(false);
       }
@@ -999,12 +987,9 @@ function JobCustomReport() {
     }
   };
 
-  // console.log("filters ", filters);
 
   const callFilterApi = async (currentPage, pageSize, searchTerm) => {
     setLoading(true);
-    // Call your filter API here
-    // console.log("Calling filter API with filters: ", filters);
     const req = {
       action: "getJobCustomReport",
       filters: filters,
@@ -1017,7 +1002,6 @@ function JobCustomReport() {
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-        // console.log("filter response ", response);
         if (response.status) {
           setLoading(false);
           setShowData(response.data);
@@ -1071,7 +1055,6 @@ function JobCustomReport() {
     filters.employee_number,
   ]);
 
-  //console.log("filters ", filters);
 
   const resetFunction = () => {
     setFilters({
@@ -1224,7 +1207,6 @@ function JobCustomReport() {
     return selected.slice().sort((a, b) => orderMap[a] - orderMap[b]);
   }
 
-  //  console.log("Filters: ", filters);
 
   const saveFilterFunction = async () => {
     if (filters?.groupBy?.length == 0) {
@@ -1273,18 +1255,16 @@ function JobCustomReport() {
   const handleFilterSelect = async (selected) => {
     setFilterId(selected.value);
     // set filters from selected
-    // console.log("selected  1 --", selected);
+   
     let selectedFilter = getAllFilterData?.find(
       (opt) => Number(opt?.value) === Number(selected?.value),
     );
 
-    //console.log("selectedFilter  2 --", selectedFilter);
     if (selectedFilter != undefined && selectedFilter.filters) {
       let parsedFilters = {};
       try {
         parsedFilters = JSON.parse(selectedFilter.filters);
 
-        // console.log("parsedFilters ", parsedFilters?.job_id);
 
         if (parsedFilters?.groupBy?.includes("job_id")) {
           await GetAllJobs();
@@ -1439,7 +1419,7 @@ function JobCustomReport() {
   };
 
   const HandleJob = (jobData) => {
-    //console.log("jobData",jobData)
+   
     navigate("/admin/job/logs", {
       state: {
         job_id: jobData?.id,
@@ -1599,15 +1579,14 @@ function JobCustomReport() {
               filters.groupBy.includes(opt.value),
             )}
             onChange={(selectedOptions, actionMeta) => {
-              // console.log("Selected Options:", selectedOptions);
-              //console.log("Action Meta:", actionMeta);
+          
 
               if (actionMeta.action === "remove-value") {
-                // console.log("Removed value:", actionMeta.removedValue.value);
+                
                 addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
               }
               if (actionMeta.action === "select-option") {
-                //console.log("Added value:", actionMeta.option.value);
+              
                 addAndRemoveGroupBy(actionMeta.option.value, "add");
               }
               handleFilterChange(selectedOptions);
@@ -1617,23 +1596,7 @@ function JobCustomReport() {
           />
         </div>
 
-        {/* Additional Field */}
-        {/* <div className="col-lg-4 col-md-6">
-          <label className="form-label fw-medium">Additional Fields</label>
-
-          <Select
-            isMulti
-            options={optionAdditionalBy}
-            value={optionAdditionalBy?.filter((opt) => filters?.additionalField.includes(opt.value))}
-            onChange={(selectedOptions, actionMeta) => {
-              // console.log("Selected Options:", selectedOptions);
-              //console.log("Action Meta:", actionMeta);
-              handleFilterChange(selectedOptions, 'additionalField');
-            }}
-            className="basic-multi-select"
-            classNamePrefix="select"
-          />
-        </div> */}
+     
 
         {/* Field To Display Job */}
         {filters?.groupBy?.includes("job_id") && (
@@ -2310,10 +2273,7 @@ function JobCustomReport() {
 
       {/* Filtered Data Display */}
       <div className="datatable-container">
-        {/* <h6>Filtered Data:</h6> */}
-        {
-          //console.log("showData?.rows ", showData?.rows)
-        }
+     
         {showData?.rows == undefined || showData?.rows?.length === 0 ? (
           <div className="text-center">
             <img

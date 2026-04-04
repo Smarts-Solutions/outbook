@@ -31,7 +31,6 @@ const CreateCheckList = () => {
     { task_id: "", task_name: "", budgeted_hour: "", checklist_tasks_id: "" },
   ]);
 
-  console.log("tasks", tasks);
 
   const [data, setData] = useState(false);
   const [errors, setErrors] = useState({});
@@ -63,10 +62,6 @@ const CreateCheckList = () => {
         .then((response) => {
           if (response.status) {
             const checklistData = response.data;
-
-            console.log("checklistData", checklistData.task);
-
-            
 
             setSelectedClientType(checklistData.client_type_id);
 

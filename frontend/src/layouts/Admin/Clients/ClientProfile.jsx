@@ -50,7 +50,6 @@ const ClientList = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // console.log("customerData", customerData);
 
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({
@@ -79,7 +78,6 @@ const ClientList = () => {
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
 
-  //  console.log("getClientDetails", getClientDetails);
 
   const fetchSiteDetails = async () => {
     const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
@@ -611,7 +609,6 @@ const ClientList = () => {
           uploadedFiles: uploadedFilesArray,
         };
 
-        console.log("req", req);
         await dispatch(addClientDocument(req))
           .unwrap()
           .then((response) => {
@@ -746,8 +743,7 @@ const ClientList = () => {
     accessToken,
     fileName,
   ) => {
-    console.log("sharePointFileUrl", sharePointFileUrl);
-    console.log("accessToken", accessToken);
+
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {
@@ -826,7 +822,6 @@ const ClientList = () => {
         file_name: file.file_name,
         authToken: token,
       };
-      console.log("req", req);
 
       sweatalert
         .fire({
@@ -1290,8 +1285,7 @@ const ClientList = () => {
             </div>
           )}
 
-          {/* {console.log("getClientDetails sssss", getClientDetails?.data?.client?.client_type)} */}
-
+         
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">
               <div className="report-data">
@@ -1755,7 +1749,7 @@ const ClientList = () => {
                     // onSubmit={(values) => {
                     // }}
                     onSubmit={(values, { resetForm }) => {
-                      console.log("Uploaded files:", values.files);
+                      
                       resetForm(); // Reset Formik form state
                       resetFileInput(); // Reset file input
                     }}

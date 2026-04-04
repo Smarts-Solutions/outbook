@@ -443,8 +443,7 @@ const Documents = ({ getAccessDataJob }) => {
     accessToken,
     fileName,
   ) => {
-    console.log("sharePointFileUrl", sharePointFileUrl);
-    console.log("accessToken", accessToken);
+
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {

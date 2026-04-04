@@ -144,8 +144,7 @@ const Status = () => {
   ];
 
   const handleEdit = async (row) => {
-    // Set the item to be edited
-    console.log("row", row);
+  
     setEditItem(row);
     setStatsAdd({
       statusname: row.name,
@@ -377,7 +376,6 @@ const Status = () => {
     await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
-        console.log("JobData -- ", response);
         if (response.status) {
           setJobData(response.data);
         } else {

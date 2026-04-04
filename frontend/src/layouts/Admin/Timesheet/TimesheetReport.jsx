@@ -1749,7 +1749,6 @@ function TimesheetReport() {
                 isSearchable
                 className="shadow-sm select-staff rounded-pill"
               /> */}
-              {console.log("jobOptions", jobOptions)}
               <Select
                 closeMenuOnSelect={false}
                 // options={jobOptions}
