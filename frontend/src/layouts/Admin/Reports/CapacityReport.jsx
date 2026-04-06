@@ -28,7 +28,6 @@ const CapacityReport = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          console.log("Capacity Data:", res);
           setCapacityReportData(res.data);
         }
         else {

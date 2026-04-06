@@ -107,7 +107,7 @@ const Paper = () => {
 
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
-          console.log("existingFiles", existingFiles);
+        
           setCustomerDetails({
             loading: false,
             data: response.data,

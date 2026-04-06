@@ -22,7 +22,6 @@ const JobTimeline = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          console.log(res.data);
           setJobTimelineData(res.data);
         } else {
           setJobTimelineData([]);

@@ -26,7 +26,7 @@ const TeamMonthlyReport = () => {
             }
           })
           .catch((err) => {
-            console.log(err);
+           
           });
       }
 

@@ -114,7 +114,7 @@ const Status = () => {
       sortable: true,
     },
     {
-      name: "X Days",
+      name: "Hide Jobs from Timesheet After (Days)",
       selector: (row) => row.x_days,
       cell: (row) => <div>{row.x_days || "-"}</div>,
       sortable: true,
@@ -144,8 +144,7 @@ const Status = () => {
   ];
 
   const handleEdit = async (row) => {
-    // Set the item to be edited
-    console.log("row", row);
+  
     setEditItem(row);
     setStatsAdd({
       statusname: row.name,
@@ -368,7 +367,7 @@ const Status = () => {
     "Created Date": convertDate(item.created_at),
     "Last Update On": convertDate(item.updated_at),
     "Status": item.status_type,
-    "X Days": item.x_days || "-",
+    "Hide Jobs from Timesheet After (Days)": item.x_days || "-",
   }));
 
   const JobDetails = async () => {
@@ -377,7 +376,6 @@ const Status = () => {
     await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
-        console.log("JobData -- ", response);
         if (response.status) {
           setJobData(response.data);
         } else {
@@ -511,7 +509,7 @@ const Status = () => {
               <div className="col-lg-12">
                 <div className="mb-3">
                   <label htmlFor="VAT_dropdown1" className="form-label">
-                    X Days
+                    Hide Jobs from Timesheet After (Days)
                   </label>
                   <input
                     type="text"

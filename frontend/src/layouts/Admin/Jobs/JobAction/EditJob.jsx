@@ -33,7 +33,6 @@ const EditJob = () => {
 
   const [CustomerDetails, setCustomerDetails] = useState([]);
 
-  // console.log("location EDIT -", location);
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState({
@@ -53,7 +52,6 @@ const EditJob = () => {
     data: [],
   });
 
-  // console.log("AllChecklistData", AllChecklistData);
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [existAddTaskArr, setExistAddTaskArr] = useState([]);
   const [existJobTypeId, setExistJobTypeId] = useState([]);
@@ -91,8 +89,7 @@ const EditJob = () => {
   const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
   const [clientType, setClientType] = useState("");
 
-  // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
-  //  console.log("CustomerDetails", CustomerDetails);
+
 
 
   //// Checklist Modal State
@@ -103,10 +100,9 @@ const EditJob = () => {
     loading: false,
     type: ""
   });
-  console.log("checklistModal --->> ", checklistModal)
+ 
   const handleViewChecklist = async (checklistId, title, type) => {
-    console.log("checklistId, title, type", checklistId, "-", title, "-", type)
-
+ 
     if (!checklistId) return;
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
@@ -126,7 +122,6 @@ const EditJob = () => {
         responseType: 'arraybuffer'
       });
 
-      console.log("Checklist file response", response);
 
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
@@ -453,7 +448,7 @@ const EditJob = () => {
               );
             }
 
-            console.log("response.data.processing_checklist_data", response.data.checklist_modal_data)
+           
             let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
               show: false,
               data: [],
@@ -461,12 +456,11 @@ const EditJob = () => {
               loading: false,
               type: ""
             }
-
             setChecklistModal(checklisModalData);
-            console.log("response.data.reviewing_checkList-->>", response.data.reviewing_checklist)
+
             setJobData((prevState) => ({
               ...prevState,
-
+              
               processing_checklist: response.data.processing_checklist ?? null,
               reviewing_checklist: response.data.reviewing_checklist ?? null,
 
@@ -684,7 +678,8 @@ const EditJob = () => {
                 response.data.Period_Ending_Date_id_8 ?? null,
               Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
               Year_id_28: response.data.Year_id_28 ?? null,
-              job_priority: response.data.job_priority ?? null,
+              job_priority: response.data.job_priority ?? null
+
             }));
           }
 
@@ -725,13 +720,13 @@ const EditJob = () => {
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
+
     let due_date = getDueDate(client_type, service_id);
     due_date = ['', null, undefined].includes(due_date) ? null : due_date;
     setJobData((prevState) => ({
       ...prevState,
       DueOn: due_date,
     }));
-
   };
 
   function getDueDate(client_type, service_id) {
@@ -861,7 +856,6 @@ const EditJob = () => {
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
       .then(async (response) => {
-        console.log("getChecklistData", response);
 
         if (response.status) {
           setAllChecklistData({
@@ -1126,9 +1120,8 @@ const EditJob = () => {
 
     const date = new Date();
     if (name == "Service") {
-
       if ([1, 2, 3, 4, 8].includes(Number(value))) {
-
+       
         if (value == 1) {
           const clientInfo = allClientDetails?.find(
             (client) => Number(client.id) === Number(jobData.client_id),
@@ -1155,8 +1148,15 @@ const EditJob = () => {
             ...prevState,
             SLADeadlineDate: date.toISOString().split("T")[0],
           }));
+        }else {
+          setJobData((prevState) => ({
+            ...prevState,
+            Year_Ending_id_1: null,
+            DueOn: null,
+          }));
         }
-        else if (value == 2) {
+
+        if (value == 2) {
           date.setDate(date.getDate() + 1);
           setJobData((prevState) => ({
             ...prevState,
@@ -1188,6 +1188,7 @@ const EditJob = () => {
         }
 
       } else {
+        await dueOn_date_set(clientType, value);
         setJobData((prevState) => ({
           ...prevState,
           SLADeadlineDate: null,
@@ -1289,9 +1290,7 @@ const EditJob = () => {
   }
 
   const handleSubmit = async () => {
-    // console.log("handleSubmit service", Number(jobData?.Service));
-    // console.log("jobData Year_Ending_id_1 ", jobData?.Year_Ending_id_1);
-    // console.log("jobData Year_Ending_id_1 ", jobData?.DueOn);
+
 
 
     let checklist_modal_data = null;
@@ -1788,7 +1787,6 @@ const EditJob = () => {
       );
     }
 
-    //  console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
     setBudgetedHours({
       ...budgetedHours,
       hours: budgeted_hour_totalTime.hours,
@@ -2742,9 +2740,8 @@ const EditJob = () => {
     );
 
 
-    dueOn_date_set(clientType, jobData?.Service);
+  }, [jobData?.Service]);
 
-  }, [jobData?.Service, clientType]);
 
   // Select options for Customer Account Manager
   const customerAccountManagerOptions = [
@@ -2775,7 +2772,6 @@ const EditJob = () => {
     (detail) => detail.assigned_source === "assign_customer_service",
   );
 
-  // console.log("assignDetails", assignDetails);
 
   let assignedServiceIds = assignDetails?.map((d) =>
     Number(d.service_id_assign),
@@ -4080,7 +4076,7 @@ const EditJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="DueOn"
                                         onChange={HandleChange}
-                                        value={jobData.DueOn}
+                                        defaultValue={jobData.DueOn}
                                       />
                                       {errors["DueOn"] && (
                                         <div className="error-text">
@@ -4140,7 +4136,7 @@ const EditJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="SLADeadlineDate"
                                         onChange={HandleChange}
-                                        value={jobData.SLADeadlineDate}
+                                        defaultValue={jobData.SLADeadlineDate}
                                       />
                                       {errors["SLADeadlineDate"] && (
                                         <div className="error-text">

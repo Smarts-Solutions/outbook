@@ -86,7 +86,6 @@ const Service = () => {
     fetchData();
   }, [dispatch, token]);
 
-  console.log(" staffDataAll.data", staffDataAll.data);
   useEffect(() => {
     if (getCustomerService.data.services) {
       setServices(
@@ -442,8 +441,7 @@ const Service = () => {
     });
   };
 
-  console.log("getManager", getManager);
-  console.log("tempServices", tempServices);
+
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   DashboardData,
   ActivityLog,
 } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import qs from "qs";
-import jwtDecode from "jwt-decode";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Select from "react-select";
-import { Circle, CircleAlert, Download } from "lucide-react";
+import { CircleAlert, Download } from "lucide-react";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -276,12 +273,7 @@ const Dashboard = () => {
 
   // const [newAccessToken, setNewAccessToken] = useState("");
   // const refreshToken = async () => {
-  //   let data = qs.stringify({
-  //     grant_type: "refresh_token",
-  //     client_id: process.env.REACT_APP_SHAREPOINT_CLIENT_ID,
-  //     client_secret: process.env.REACT_APP_SHAREPOINT_CLIENT_SECRET,
-  //     refresh_token: process.env.REACT_APP_SHAREPOINT_REFRESH_TOKEN,
-  //   });
+
 
   //   let config = {
   //     method: "post",
@@ -547,7 +539,7 @@ const Dashboard = () => {
                         </>
                       ) : (
                         <>
-                         <Download size={16}/> Export All
+                          <Download size={16} /> Export All
                         </>
                       )}
                     </button>
@@ -650,7 +642,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.customer &&
-                                      dashboard.customer.count,
+                                    dashboard.customer.count,
                                   )}
                                 </h3>
                                 <img
@@ -789,7 +781,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.pending_job &&
-                                      dashboard.pending_job.count,
+                                    dashboard.pending_job.count,
                                   )}
                                 </h3>
                                 <img
@@ -827,7 +819,7 @@ const Dashboard = () => {
                                 <h3 className="my-4">
                                   {formatNumberSafe(
                                     dashboard.completed_job &&
-                                      dashboard.completed_job.count,
+                                    dashboard.completed_job.count,
                                   )}
                                 </h3>
                                 <img
@@ -960,7 +952,7 @@ const Dashboard = () => {
                           getActiviyLog.map((item, index) => (
                             <div className="activity-info" key={index}>
                               <div className="icon-info-activity">
-                               <CircleAlert size={14}/>
+                                <CircleAlert size={14} />
                               </div>
                               <div className="activity-info-text">
                                 <small>{formatDate(item?.created_at)}</small>
@@ -977,7 +969,7 @@ const Dashboard = () => {
                             />
                             <p className="text-center">
                               {activityRange === "custom" &&
-                              (!selectedFromDate || !selectedToDate)
+                                (!selectedFromDate || !selectedToDate)
                                 ? "Please select both From Date and To Date to view activity logs"
                                 : "No Activity Logs Found"}
                             </p>

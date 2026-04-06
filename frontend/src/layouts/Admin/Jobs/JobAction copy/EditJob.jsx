@@ -29,7 +29,6 @@ const EditJob = () => {
   const [CustomerDetails, setCustomerDetails] = useState([]);
 
 
-  // console.log("location EDIT -", location);
 
   const [serviceFieldsData, setServiceFieldsData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState({
@@ -81,8 +80,6 @@ const EditJob = () => {
   const [selectedStaffData, setSelectedStaffData] = useState([]);
 
 
-  // console.log("selectedStaffData", selectedStaffData);
-   console.log("CustomerDetails", CustomerDetails);
 
 
   const [jobData, setJobData] = useState({
@@ -134,7 +131,7 @@ const EditJob = () => {
   });
 
   useEffect(() => {
-    console.log("UPDATE ALL DEFAULT FEILDS");
+    
     setJobData((prevState) => ({
       ...prevState,
       Turnover_Period_id_0: "Monthly",
@@ -1992,7 +1989,7 @@ const EditJob = () => {
     (detail) => detail.assigned_source === "assign_customer_service"
   );
   if (isAssignDetails != undefined) {
-    //console.log("isAssignDetails", isAssignDetails);
+    
     serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
   }
 

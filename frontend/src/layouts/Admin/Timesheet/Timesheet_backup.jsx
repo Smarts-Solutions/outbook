@@ -135,7 +135,7 @@ const Timesheet = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          console.log(`response`, response);
+         
           setLineMangerData(response.data);
         } else {
           setLineMangerData([]);
@@ -346,7 +346,6 @@ const Timesheet = () => {
   const [selectedTab, setSelectedTab] = useState("this-week");
 
 
-  // console.log(`timeSheetRows`, timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -446,8 +445,7 @@ const Timesheet = () => {
 
       updateRecordSheet(null, "task_type", "1");
     } else {
-      // Handle the error case as needed
-      console.log("API call failed:", res);
+      
     }
   };
 
@@ -830,7 +828,6 @@ const Timesheet = () => {
     }
 
 
-    // console.log(`final_value`, final_value);
 
     const updatedRows = [...timeSheetRows];
     if (updatedRows[index][name] == null) {
@@ -1095,8 +1092,7 @@ const Timesheet = () => {
 
 
       let staff_hourminute = (parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5) || null;
-      //console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
-      //console.log(`staff_hourminute`, staff_hourminute);
+     
       if (staff_hourminute != null) {
 
         const converted = updatedTimeSheetRows && updatedTimeSheetRows?.map(item => {
@@ -1118,18 +1114,7 @@ const Timesheet = () => {
         const totalHours = Math.floor(total.totalMinutes / 60);
         const totalMins = total.totalMinutes % 60;
         const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-        // console.log(`finalTotalHours`, finalTotalHours);
 
-        // if (staff_hourminute > parseFloat(finalTotalHours)) {
-        //   sweatalert.fire({
-        //     icon: "warning",
-        //     title: "Please enter the minimum required hourly time in the timesheet before submitting.",
-        //     timerProgressBar: true,
-        //     showConfirmButton: true,
-        //     timer: 3000,
-        //   });
-        //   return;
-        // }
 
       }
 
@@ -1257,7 +1242,6 @@ const Timesheet = () => {
       //let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
       let staff_hourminute = (updatedTimeSheetRows1?.[0]?.staffs_hourminute) || null;
 
-      //  console.log(`staff_hourminute 111 `, staff_hourminute);
 
       if (staff_hourminute != null && staff_hourminute?.includes(":")) {
         const [hours, minutes] = staff_hourminute.split(":").map(Number);
@@ -1289,8 +1273,7 @@ const Timesheet = () => {
         // const totalHours = Math.floor(total.totalMinutes / 60);
         // const totalMins = total.totalMinutes % 60;
         // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-        // console.log(`finalTotalHours`, finalTotalHours);
-
+        
 
         const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
           const val = parseFloat(item.total_hours || 0);
@@ -1300,8 +1283,6 @@ const Timesheet = () => {
         let finalTotalHours = await convertHoursMinutes(totalHours)
 
 
-        // console.log(`finalTotalHours`, finalTotalHours);
-        // console.log(`staff_hourminute`, staff_hourminute);
 
 
         if (staff_hourminute > parseFloat(finalTotalHours)) {
@@ -1391,10 +1372,7 @@ const Timesheet = () => {
       //   return acc;
       // }, { totalMinutes: 0 });
 
-      // const totalHours = Math.floor(total.totalMinutes / 60);
-      // const totalMins = total.totalMinutes % 60;
-      // const finalTotalHours = `${totalHours}.${totalMins.toString().padStart(2, '0')}`;
-      // console.log(`finalTotalHours`, finalTotalHours);
+
 
 
       const totalHours = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
@@ -1405,8 +1383,6 @@ const Timesheet = () => {
       let finalTotalHours = await convertHoursMinutes(totalHours)
 
 
-      // console.log(`finalTotalHours 1 `, finalTotalHours);
-      // console.log(`staff_hourminute 1 `, staff_hourminute);
 
 
       if (staff_hourminute > parseFloat(finalTotalHours)) {
@@ -1629,8 +1605,7 @@ const Timesheet = () => {
 
 
   const handleSaveNote = (e) => {
-    // console.log("modalText ",modalText);
-    // console.log("activeField ",activeField);
+  
     const updatedRows = [...timeSheetRows];
     let key = activeField + "_note";
     updatedRows[selectedRowIndex][key] = modalText;
@@ -1681,7 +1656,7 @@ const Timesheet = () => {
   ];
 
   const selectLineManager = async (e) => {
-    // console.log("e ", e); 
+
     let name = e.target.name;
     let value = e.target.value;
 
@@ -2711,11 +2686,7 @@ const Timesheet = () => {
                               </td>
                               
                               */}
-                                {/* <td>
-                                  {console.log("item.weekly_hours", item)}
-                                  <span className="fs-6 text-dark"> {totalWeeklyHoursMinutes(item)}</span>
-
-                                </td> */}
+                               
 
 
                                 <td className="d-flex ps-0">

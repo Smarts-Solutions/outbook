@@ -31,7 +31,6 @@ const DiscrepancyReportProcessor = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          console.log("Discrepancy discrepancyReportProcessor:", res);
           setDiscrepancyReportData(res.data);
         }
         else {
@@ -71,7 +70,7 @@ const DiscrepancyReportProcessor = () => {
 
 
   const handleClickTimesheet = (row) => {
-    // console.log("Timesheet clicked:", row);
+   
     setSelectedRow(row);
     setShowModal(true);
   }

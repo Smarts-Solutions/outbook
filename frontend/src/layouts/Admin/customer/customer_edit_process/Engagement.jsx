@@ -62,7 +62,6 @@ const Engagement = () => {
     feePerAdmin: null,
   });
 
-  console.log("formValues1", formValues1);
 
   const [formValues2, setFormValues2] = useState({
     total_outsourcing: null,

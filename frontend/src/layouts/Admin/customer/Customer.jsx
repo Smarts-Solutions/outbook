@@ -449,8 +449,7 @@ const Customer = () => {
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
     setLoading(true);
-    console.log("limit", limit);
-    console.log("page", page);
+
     const req = {
       action: "get",
       staff_id: staffDetails.id,

@@ -7,7 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import qs from 'qs';
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Dashboard = () => {
   const [visibleLogs, setVisibleLogs] = useState(4); // Initially show 5 logs
@@ -230,7 +230,6 @@ const Dashboard = () => {
           
           if(folderResponse.data.value != undefined && folderResponse.data.value != null && folderResponse.data.value != ""){
 
-            console.log("folderResponse - ",folderResponse.data);
 
             const jobManagementObject = folderResponse.data.value.find((item) => item.name === "JobManagement");
 
@@ -238,9 +237,7 @@ const Dashboard = () => {
               folder_ID = jobManagementObject.id;
             }
 
-             console.log("site - ID ", site_ID);
-             console.log("drive_ID - ID ", drive_ID);
-             console.log("folder_ID", folder_ID);
+          
 
 
             return {site_ID: site_ID,drive_ID :drive_ID,folder_ID:folder_ID};
@@ -330,7 +327,7 @@ const Dashboard = () => {
             },
         });
 
-        console.log("Image uploaded successfully:", response.data);
+        
     } catch (error) {
         console.error("Error uploading image:", error);
     }

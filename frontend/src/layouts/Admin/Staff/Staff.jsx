@@ -92,7 +92,6 @@ const StaffPage = () => {
     data: [],
   });
 
-  console.log("staffDataAll --- ", staffDataAll);
 
   const [loading, setLoading] = useState(false);
 
@@ -367,7 +366,7 @@ const StaffPage = () => {
           }
         })
         .catch((error) => {
-          console.log(error);
+         
         });
     } catch (error) {
       return;
@@ -1027,7 +1026,6 @@ const StaffPage = () => {
           }
         })
         .catch((err) => {
-          console.log(err);
         });
     } catch (error) {
       console.error("Error fetching staff tasks:", error);
@@ -1094,7 +1092,7 @@ const StaffPage = () => {
           }
         })
         .catch((err) => {
-          console.log(err);
+         
         });
     } catch (error) {
       console.error("Error fetching staff tasks:", error);

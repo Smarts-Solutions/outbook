@@ -702,7 +702,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-
+         
           const query = `
         SELECT 
          job_types.id AS job_type_id,
@@ -740,10 +740,22 @@ const getTimesheetTaskType = async (Timesheet) => {
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
         jobs.client_id = ${client_id}
+        
+        AND (
+        master_status.x_days IS NULL
+        OR 
+        CURDATE() <= DATE_ADD(
+            DATE(jobs.status_updation_date),
+            INTERVAL master_status.x_days DAY
+            )
+        )
+
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
+
+            
           const [rows] = await pool.execute(query);
           return { status: true, message: "Success.", data: rows };
         }
@@ -804,6 +816,16 @@ const getTimesheetTaskType = async (Timesheet) => {
             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
+         
+        AND (
+        master_status.x_days IS NULL
+        OR 
+        CURDATE() <= DATE_ADD(
+            DATE(jobs.status_updation_date),
+            INTERVAL master_status.x_days DAY
+            )
+        )
+              
         GROUP BY 
         jobs.id 
         ORDER BY 

@@ -32,7 +32,7 @@ const CreateJob = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
-  // console.log("AllJobData ", AllJobData)
+ 
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -76,7 +76,7 @@ const CreateJob = () => {
     loading: false,
     type: ""
   });
-  //  console.log("checklistModal --->> ", checklistModal)
+
   const handleViewChecklist = async (checklistId, title, type) => {
 
 
@@ -99,7 +99,6 @@ const CreateJob = () => {
         responseType: 'arraybuffer'
       });
 
-      console.log("Checklist file response", response);
 
       const data = new Uint8Array(response.data);
       const workbook = XLSX.read(data, { type: 'array' });
@@ -119,7 +118,6 @@ const CreateJob = () => {
           date: ""
         }));
 
-      console.log("Formatted checklist data", formattedRows);
 
       setChecklistModal(prev => ({
         ...prev,
@@ -192,8 +190,6 @@ const CreateJob = () => {
 
 
 
-  // console.log("clientInfoCompanyDetails", clientInfoCompanyDetails);
-
 
   const [jobData, setJobData] = useState({
     CustomerDetails: [],
@@ -255,10 +251,6 @@ const CreateJob = () => {
 
 
 
-  // console.log("CustomerDetails", jobData.CustomerDetails);
-  // console.log("Reviewer", jobData.Reviewer);
-  // console.log("staffCreatedId", staffCreatedId);
-  // console.log("selectedStaffData", selectedStaffData);
 
   useEffect(() => {
     setJobData((prevState) => ({
@@ -517,7 +509,6 @@ const CreateJob = () => {
     getAllChecklist();
   }, [jobData.JobType, AllJobData?.data]);
 
-  //console.log("AllChecklistData", AllChecklistData);
 
   const GetJobType = async () => {
     const req = { action: "get", service_id: jobData.Service };
@@ -625,7 +616,7 @@ const CreateJob = () => {
 
     const date = new Date();
     if (name == "Service") {
-
+       
       if ([1, 2, 3, 4, 8].includes(Number(value))) {
 
         if (value == 1) {
@@ -1272,7 +1263,6 @@ const CreateJob = () => {
 
     const isValid = validateBudgetedHours(AddTaskArr);
     if (!isValid) {
-      console.log("Invalid inputs found");
       return;
     }
 
@@ -2192,8 +2182,7 @@ const CreateJob = () => {
   ];
 
 
-  // console.log("serviceFields", serviceFields);
-  // console.log("jobData?.Service", jobData?.Service);
+
 
 
   useEffect(() => {
@@ -2250,7 +2239,8 @@ const CreateJob = () => {
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-    } else {
+    } 
+    else {
 
       setJobData((prevState) => ({
         ...prevState,
@@ -2395,7 +2385,6 @@ const CreateJob = () => {
   }, []);
 
 
-  // console.log("jobData", jobData);
 
   // SELECT OPTION 
   // 1. Build service options
