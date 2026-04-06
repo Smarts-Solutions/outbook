@@ -1194,6 +1194,7 @@ const EditJob = () => {
         }
 
       } else {
+        await dueOn_date_set(clientType, value);
         setJobData((prevState) => ({
           ...prevState,
           SLADeadlineDate: null,
@@ -2748,9 +2749,7 @@ const EditJob = () => {
     );
 
 
-    dueOn_date_set(clientType, jobData?.Service);
-
-  }, [jobData?.Service, clientType]);
+  }, [jobData?.Service]);
 
 
   // Select options for Customer Account Manager
