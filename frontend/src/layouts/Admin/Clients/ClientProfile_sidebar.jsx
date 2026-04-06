@@ -687,42 +687,77 @@ const ClientList = () => {
       })
       .then(async (result) => {
         if (result.isConfirmed) {
-          const req = {
-            action: "copy_job",
-            row: row,
-          };
-          const data = { req: req, authToken: token };
-          await dispatch(JobAction(data))
-            .unwrap()
-            .then(async (response) => {
-              if (response.status) {
-                sweatalert.fire({
-                  title: "Job copied successfully",
-                  icon: "success",
-                  showCancelButton: false,
-                  showConfirmButton: false,
-                  timer: 1500,
-                });
-                window.location.reload();
-              } else {
-                sweatalert.fire({
-                  title: "Failed",
-                  icon: "error",
-                  showCancelButton: false,
-                  showConfirmButton: false,
-                  message: response.message,
-                  timer: 1500,
-                });
-              }
-            })
-            .catch((error) => {
-              return;
-            });
+
+
+          if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
+            sweatalert
+              .fire({
+                title: "Are you sure?",
+                text: "While copying this job, do you want to include the Processor, Reviewer, and Checklist details ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+              })
+              .then(async (result) => {
+                if (result.isConfirmed) {
+                  copyJobRequest(row, true);
+                  return
+                } else {
+                  copyJobRequest(row, false);
+                  return;
+                }
+              });
+          } else {
+            copyJobRequest(row, true);
+            return;
+          }
+
+
         } else {
           return;
         }
       });
   };
+
+  const copyJobRequest = async (row, field = true) => {
+
+    const req = {
+      action: "copy_job",
+      row: row,
+      field: field
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Job copied successfully",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          window.location.reload();
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            message: response.message,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+
+  }
 
   const GetAllJobList = async (
     client_id,

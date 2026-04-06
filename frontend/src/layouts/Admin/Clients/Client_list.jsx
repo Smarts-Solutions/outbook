@@ -778,7 +778,7 @@ const ClientList = () => {
     accessToken,
     fileName,
   ) => {
-    
+
     try {
       // Make a GET request to SharePoint to get the file as a blob
       const response = await fetch(sharePointFileUrl, {
@@ -1380,54 +1380,88 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-      sweatalert
-        .fire({
-          title: "Are you sure?",
-          text: "You want to copy this job ?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Yes",
-        })
-        .then(async (result) => {
-          if (result.isConfirmed) {
-            const req = {
-              action: "copy_job",
-              row: row,
-            };
-            const data = { req: req, authToken: token };
-            await dispatch(JobAction(data))
-              .unwrap()
-              .then(async (response) => {
-                if (response.status) {
-                  sweatalert.fire({
-                    title: "Job copied successfully",
-                    icon: "success",
-                    showCancelButton: false,
-                    showConfirmButton: false,
-                    timer: 1500,
-                  });
-                  JobDetails();
-                } else {
-                  sweatalert.fire({
-                    title: "Failed",
-                    icon: "error",
-                    showCancelButton: false,
-                    showConfirmButton: false,
-                    message: response.message,
-                    timer: 1500,
-                  });
-                }
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "You want to copy this job ?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+
+          if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
+            sweatalert
+              .fire({
+                title: "Are you sure?",
+                text: "While copying this job, do you want to include the Processor, Reviewer, and Checklist details ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
               })
-              .catch((error) => {
-                return;
+              .then(async (result) => {
+                if (result.isConfirmed) {
+                  copyJobRequest(row, true);
+                  return
+                } else {
+                  copyJobRequest(row, false);
+                  return;
+                }
               });
           } else {
+            copyJobRequest(row, true);
             return;
           }
-        });
+
+
+        } else {
+          return;
+        }
+      });
+  };
+
+  const copyJobRequest = async (row, field = true) => {
+
+    const req = {
+      action: "copy_job",
+      row: row,
+      field: field
     };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Job copied successfully",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          JobDetails();
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            message: response.message,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+
+  }
 
   const HandleClientView = (row) => {
     setHararchyData((prevState) => {
