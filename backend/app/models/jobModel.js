@@ -3961,7 +3961,12 @@ const jobUpdate = async (job) => {
             );
           }
         } else {
-          if (reviewer != ExistJob.reviewer) {
+          if(reviewer == 0){
+            job_heading_name.push(
+              "has removed the reviewer from the job"
+            );
+          }
+         else if (reviewer != ExistJob.reviewer) {
             const [[getStaff]] = await pool.execute(
               'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
               [reviewer]
@@ -3971,7 +3976,7 @@ const jobUpdate = async (job) => {
             );
           }
         }
-
+        
         // allocated_to,
         if (parseInt(ExistJob.allocated_to) == 0) {
           if (allocated_to > 0) {
@@ -3984,7 +3989,12 @@ const jobUpdate = async (job) => {
             );
           }
         } else {
-          if (allocated_to != ExistJob.allocated_to) {
+          if(allocated_to == 0){
+            job_heading_name.push(
+              "has removed the processor from the job"
+            );  
+          }
+         else if (allocated_to != ExistJob.allocated_to) {
             const [[getStaff]] = await pool.execute(
               'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
               [allocated_to]
@@ -3993,6 +4003,8 @@ const jobUpdate = async (job) => {
               "changed the job to the processor, " + getStaff.name
             );
           }
+
+
         }
 
         //console.log("job_heading_name ", job_heading_name)
