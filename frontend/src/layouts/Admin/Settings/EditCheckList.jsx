@@ -292,11 +292,11 @@ const EditCheckList = () => {
             const row = dataRows[i];
             
             if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) {
-              isDataFormatValid = false;
-              errorMessage = `Error at row ${i + 2}: This row is empty. Please don't leave blank rows between data.`;
-              break;
+              continue;
             }
 
+            // Comment out S.No (index 0) validation as requested
+            /*
             const sNoVal = row[0];
             if (sNoVal === null || sNoVal === undefined || sNoVal.toString().trim() === "") {
               isDataFormatValid = false;
@@ -316,6 +316,7 @@ const EditCheckList = () => {
               errorMessage = `Error at row ${i + 2}: The 'S.No' must be in increasing order starting from 1 with no gaps. Expected ${expectedSNo} but found ${currentSNo}.`;
               break;
             }
+            */
 
             const questionVal = row[1];
             if (!questionVal || questionVal.toString().trim() === "") {
