@@ -962,6 +962,7 @@ const ClientList = () => {
             timer: 1000,
             timerProgressBar: true,
           });
+          return;
         }
       });
 
