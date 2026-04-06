@@ -4429,9 +4429,8 @@ const GetJobStatus = async (job) => {
 };
 
 const copy_job = async (job) => {
-  const { row, StaffUserId, ip } = job;
-  console.log("job -->>>>", row.job_id);
-
+  const {field, row, StaffUserId, ip } = job;
+ 
   try {
 
     let id = row.job_id;
@@ -4479,6 +4478,7 @@ const copy_job = async (job) => {
     data.allocated_on = new Date();
     data.status_type = 1;
     data.job_id = job_id;
+    data.status_updation_date = new Date();
 
     //Other Data Field
     data.filing_Companies_required = "0";
@@ -4518,6 +4518,25 @@ const copy_job = async (job) => {
     sla_deadline_date = ['', null, undefined].includes(getSLAData) ? null : getSLAData
     data.sla_deadline_date = sla_deadline_date
     /// SLA Dead Line Logic END ////
+
+    
+
+    ///--- field false logic allocated_to and reviewer chekclist status and checklist modal data set to default value START ----////
+
+   
+    if(field == false){
+      data.reviewer = null;
+      data.allocated_to = null;
+      data.processing_checklist = null;
+      data.reviewing_checklist = null;
+      data.processing_checklist_status = "0";
+      data.reviewing_checklist_status = "0";
+      data.checklist_modal_data = null;
+    }
+
+
+    //// ---- field false logic allocated_to and reviewer chekclist status and checklist modal data set to default value END ---////
+
 
 
 

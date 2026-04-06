@@ -256,8 +256,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -450,13 +450,13 @@ const ClientList = () => {
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "job")}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-              )
+              <button
+                className="delete-icon"
+                onClick={() => handleDelete(row, "job")}
+              >
+                <i className="ti-trash text-danger" />
+              </button>
+            )
             : ""}
         </div>
       ),
@@ -909,40 +909,66 @@ const ClientList = () => {
   }
 
   const handleDelete = async (row, type) => {
-    const req = {
-      action: "delete",
-      ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
-    };
-    const data = { req: req, authToken: token };
-    await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          sweatalert.fire({
-            title: "Deleted",
-            icon: "success",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
 
-          type === "job" ? GetAllJobList() : GetClientDetails();
-        } else {
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this " + type + "?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+
+          const req = {
+            action: "delete",
+            ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
+          };
+          const data = { req: req, authToken: token };
+          await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
+            .unwrap()
+            .then(async (response) => {
+              if (response.status) {
+                sweatalert.fire({
+                  title: "Deleted",
+                  icon: "success",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+
+                type === "job" ? GetAllJobList() : GetClientDetails();
+              } else {
+                sweatalert.fire({
+                  title: "Failed",
+                  icon: "error",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+              }
+            })
+            .catch((error) => {
+              return;
+            });
+        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
           sweatalert.fire({
-            title: "Failed",
+            title: "Cancelled",
+            text: type + " was not deleted",
             icon: "error",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
           });
         }
-      })
-      .catch((error) => {
-        return;
       });
+
   };
 
   const copyRow = async (row) => {
+
     sweatalert
       .fire({
         title: "Are you sure?",
@@ -952,45 +978,78 @@ const ClientList = () => {
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Yes",
+
       })
       .then(async (result) => {
         if (result.isConfirmed) {
-          const req = {
-            action: "copy_job",
-            row: row,
-          };
-          const data = { req: req, authToken: token };
-          await dispatch(JobAction(data))
-            .unwrap()
-            .then(async (response) => {
-              if (response.status) {
-                sweatalert.fire({
-                  title: "Job copied successfully",
-                  icon: "success",
-                  showCancelButton: false,
-                  showConfirmButton: false,
-                  timer: 1500,
-                });
-                GetAllJobList();
-              } else {
-                sweatalert.fire({
-                  title: "Failed",
-                  icon: "error",
-                  showCancelButton: false,
-                  showConfirmButton: false,
-                  message: response.message,
-                  timer: 1500,
-                });
-              }
-            })
-            .catch((error) => {
-              return;
-            });
+
+          if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
+            sweatalert
+              .fire({
+                title: "Are you sure?",
+                text: "While copying this job, do you want to include the Processor, Reviewer, and Checklist details ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+              })
+              .then(async (result) => {
+                if (result.isConfirmed) {
+                  copyJobRequest(row, true);
+                  return
+                } else {
+                  copyJobRequest(row, false);
+                  return;
+                }
+              });
+          } else {
+            copyJobRequest(row, true);
+            return;
+          }
+
         } else {
           return;
         }
       });
   };
+
+
+  const copyJobRequest = async (row, field = true) => {
+    const req = {
+      action: "copy_job",
+      row: row,
+      field: field
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Job copied successfully",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          GetAllJobList();
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            message: response.message,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  }
 
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.Client_id };
@@ -1114,9 +1173,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -1151,13 +1209,13 @@ const ClientList = () => {
                     </button>
                     {(getAccessDataJob.insert == 1 ||
                       role === "SUPERADMIN") && (
-                      <div
-                        className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
-                        onClick={handleCreateJob}
-                      >
-                        <Plus size={16} /> Create Job
-                      </div>
-                    )}
+                        <div
+                          className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                          onClick={handleCreateJob}
+                        >
+                          <Plus size={16} /> Create Job
+                        </div>
+                      )}
                   </div>
                 </>
               )}
@@ -1217,9 +1275,8 @@ const ClientList = () => {
         <div className="mt-4">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${
-                activeTab == "NoOfJobs" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
+                }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1285,7 +1342,7 @@ const ClientList = () => {
             </div>
           )}
 
-         
+
           {activeTab == "view client" && clientInformationData && (
             <div className="tab-content" id="pills-tabContent">
               <div className="report-data">
@@ -1303,22 +1360,22 @@ const ClientList = () => {
                             <h5 className="dastyle-user-name">
                               {getClientDetails?.data?.client?.client_type ==
                                 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
+                                getClientDetails?.data?.client?.client_type == 6
                                 ? getClientDetails?.data?.member_details?.[0]
-                                    .first_name +
-                                  " " +
-                                  getClientDetails?.data?.member_details?.[0]
-                                    .last_name
+                                  .first_name +
+                                " " +
+                                getClientDetails?.data?.member_details?.[0]
+                                  .last_name
                                 : getClientDetails?.data?.client?.client_type ==
-                                    7
+                                  7
                                   ? getClientDetails?.data
-                                      ?.beneficiaries_details?.[0].first_name +
-                                    " " +
-                                    getClientDetails?.data
-                                      ?.beneficiaries_details?.[0].last_name
+                                    ?.beneficiaries_details?.[0].first_name +
+                                  " " +
+                                  getClientDetails?.data
+                                    ?.beneficiaries_details?.[0].last_name
                                   : clientInformationData.first_name +
-                                    " " +
-                                    clientInformationData.last_name}
+                                  " " +
+                                  clientInformationData.last_name}
                             </h5>
                             <p className="mb-0 dastyle-user-name-post">
                               Client Code: {informationData.client_code}
@@ -1335,21 +1392,21 @@ const ClientList = () => {
                             />
                             <b>Phone : </b>
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                            getClientDetails?.data?.client?.client_type == 6
+                              getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                  .phone_code +
-                                  " " +
-                                  getClientDetails?.data?.member_details?.[0]
-                                    .phone || "NA"
+                                .phone_code +
+                              " " +
+                              getClientDetails?.data?.member_details?.[0]
+                                .phone || "NA"
                               : getClientDetails?.data?.client?.client_type == 7
                                 ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].phone_code +
-                                    " " +
-                                    getClientDetails?.data
-                                      ?.beneficiaries_details?.[0].phone || "NA"
+                                  ?.beneficiaries_details?.[0].phone_code +
+                                " " +
+                                getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].phone || "NA"
                                 : clientInformationData.phone_code +
-                                    " " +
-                                    clientInformationData.phone || "NA"}
+                                " " +
+                                clientInformationData.phone || "NA"}
                           </li>
                           <li className="mt-2">
                             <Mail
@@ -1358,12 +1415,12 @@ const ClientList = () => {
                             />
                             <b>Email : </b>{" "}
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                            getClientDetails?.data?.client?.client_type == 6
+                              getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                  .email || "NA"
+                                .email || "NA"
                               : getClientDetails?.data?.client?.client_type == 7
                                 ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].email || "NA"
+                                  ?.beneficiaries_details?.[0].email || "NA"
                                 : clientInformationData.email || "NA"}
                           </li>
                         </ul>
@@ -1409,10 +1466,10 @@ const ClientList = () => {
                               : getClientDetails?.data?.client?.client_type == 5
                                 ? "Charity Incorporated Organisation Information"
                                 : getClientDetails?.data?.client?.client_type ==
-                                    6
+                                  6
                                   ? "Charity Unincorporated Association Information"
                                   : getClientDetails?.data?.client
-                                        ?.client_type == 7
+                                    ?.client_type == 7
                                     ? "Trust"
                                     : ""}
                       </h4>
@@ -1520,7 +1577,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1564,7 +1621,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1608,7 +1665,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1652,7 +1709,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1696,7 +1753,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
@@ -1735,9 +1792,8 @@ const ClientList = () => {
 
           {activeTab == "documents" && (
             <div
-              className={`tab-pane fade ${
-                activeTab == "documents" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == "documents" ? "show active" : ""
+                }`}
               id={"documents"}
               role="tabpanel"
               aria-labelledby={`documents-tab`}
@@ -1749,7 +1805,7 @@ const ClientList = () => {
                     // onSubmit={(values) => {
                     // }}
                     onSubmit={(values, { resetForm }) => {
-                      
+
                       resetForm(); // Reset Formik form state
                       resetFileInput(); // Reset file input
                     }}
@@ -1863,7 +1919,7 @@ const ClientList = () => {
                                                               <img
                                                                 src={
                                                                   previews[
-                                                                    index
+                                                                  index
                                                                   ]
                                                                 }
                                                                 alt="preview"
@@ -1894,19 +1950,19 @@ const ClientList = () => {
                                                           </td>
                                                           <td className="size">
                                                             {file.size <
-                                                            1024 * 1024
+                                                              1024 * 1024
                                                               ? `${(
-                                                                  file.size /
-                                                                  1024
-                                                                ).toFixed(
-                                                                  2,
-                                                                )} KB`
+                                                                file.size /
+                                                                1024
+                                                              ).toFixed(
+                                                                2,
+                                                              )} KB`
                                                               : `${(
-                                                                  file.size /
-                                                                  (1024 * 1024)
-                                                                ).toFixed(
-                                                                  2,
-                                                                )} MB`}
+                                                                file.size /
+                                                                (1024 * 1024)
+                                                              ).toFixed(
+                                                                2,
+                                                              )} MB`}
                                                           </td>
 
                                                           <td className="action">

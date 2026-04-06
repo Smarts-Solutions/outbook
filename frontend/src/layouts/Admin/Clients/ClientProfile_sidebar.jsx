@@ -381,8 +381,8 @@ const ClientList = () => {
       cell: (row) => (
         <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
-          getAccessDataJob.all_jobs == 1 ||
-          role === "SUPERADMIN" ? (
+            getAccessDataJob.all_jobs == 1 ||
+            role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -565,13 +565,13 @@ const ClientList = () => {
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "job")}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-              )
+              <button
+                className="delete-icon"
+                onClick={() => handleDelete(row, "job")}
+              >
+                <i className="ti-trash text-danger" />
+              </button>
+            )
             : ""}
         </div>
       ),
@@ -612,39 +612,65 @@ const ClientList = () => {
   }
 
   const handleDelete = async (row, type) => {
-    const req = {
-      action: "delete",
-      ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
-    };
-    const data = { req: req, authToken: token };
-    await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          sweatalert.fire({
-            title: "Deleted",
-            icon: "success",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this " + type + "?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          const req = {
+            action: "delete",
+            ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
+          };
+          const data = { req: req, authToken: token };
+          await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
+            .unwrap()
+            .then(async (response) => {
+              if (response.status) {
+                sweatalert.fire({
+                  title: "Deleted",
+                  icon: "success",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
 
-          type === "job"
-            ? GetAllJobList(clientDetailSingle.id)
-            : GetClientDetails(clientDetailSingle.id);
-        } else {
+                type === "job"
+                  ? GetAllJobList(clientDetailSingle.id)
+                  : GetClientDetails(clientDetailSingle.id);
+              } else {
+                sweatalert.fire({
+                  title: "Failed",
+                  icon: "error",
+                  showCancelButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+              }
+            })
+            .catch((error) => {
+              return;
+            });
+
+        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
           sweatalert.fire({
-            title: "Failed",
+            title: "Cancelled",
+            text: type + " was not deleted",
             icon: "error",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
           });
         }
-      })
-      .catch((error) => {
-        return;
       });
+
+
+
   };
 
   const copyRow = async (row) => {
@@ -921,8 +947,8 @@ const ClientList = () => {
     customerDetails.id === ""
       ? { value: "", label: "All" }
       : customerOptions.find(
-          (opt) => Number(opt.value) === Number(customerDetails.id),
-        );
+        (opt) => Number(opt.value) === Number(customerDetails.id),
+      );
 
   // CHANGED: Client options mein "All" option sabse pehle add kiya
   const clientOptions = [
@@ -938,8 +964,8 @@ const ClientList = () => {
     clientDetailSingle.id === ""
       ? { value: "", label: "All" }
       : clientOptions.find(
-          (opt) => Number(opt.value) === Number(clientDetailSingle.id),
-        );
+        (opt) => Number(opt.value) === Number(clientDetailSingle.id),
+      );
 
   const handleExport = async () => {
     setLoading(true);
@@ -977,15 +1003,15 @@ const ClientList = () => {
       //   item.account_manager_officer_last_name||"-",
       "Client Contact Person":
         item.account_manager_officer_first_name &&
-        item.account_manager_officer_last_name
+          item.account_manager_officer_last_name
           ? item.account_manager_officer_first_name +
-            " " +
-            item.account_manager_officer_last_name
+          " " +
+          item.account_manager_officer_last_name
           : "-",
       "Outbooks Account Manager":
         item.outbooks_acount_manager_first_name +
-          " " +
-          item.outbooks_acount_manager_last_name || "-",
+        " " +
+        item.outbooks_acount_manager_last_name || "-",
       "Employee ID": item.account_manager_employee_number || "-",
       "Allocated To":
         item.allocated_id != null
@@ -1110,9 +1136,8 @@ const ClientList = () => {
                           key={tab.id}
                         >
                           <button
-                            className={`nav-link ${
-                              activeTab === tab.id ? "active" : ""
-                            }`}
+                            className={`nav-link ${activeTab === tab.id ? "active" : ""
+                              }`}
                             id={`${tab.id}-tab`}
                             data-bs-toggle="pill"
                             data-bs-target={`#${tab.id}`}
@@ -1172,9 +1197,8 @@ const ClientList = () => {
         <div className="mt-2">
           {activeTab == "NoOfJobs" && (
             <div
-              className={`tab-pane fade ${
-                activeTab == "NoOfJobs" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
+                }`}
               id={"NoOfJobs"}
               role="tabpanel"
               aria-labelledby={`NoOfJobs-tab`}
@@ -1322,8 +1346,8 @@ const ClientList = () => {
                             {(clientInformationData &&
                               clientInformationData.phone &&
                               clientInformationData.phone_code +
-                                " " +
-                                clientInformationData.phone) ||
+                              " " +
+                              clientInformationData.phone) ||
                               "NA"}
                           </li>
                           <li className="mt-2">
@@ -1464,7 +1488,7 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">VAT Registered :</b>{" "}
                               {informationData &&
-                              informationData.vat_registered == "0"
+                                informationData.vat_registered == "0"
                                 ? "No"
                                 : "Yes"}
                             </li>
