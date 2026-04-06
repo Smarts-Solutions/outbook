@@ -1070,12 +1070,14 @@ const Timesheet = () => {
       }
 
       if (duplicateItem) {
+        
         let fieldName = `${currentDay}_hours`;
         if (
           checkDuplicateRowForSave(duplicateItem, duplicateIndex, fieldName)
         ) {
           return;
         }
+
       }
     }
 
@@ -2044,6 +2046,9 @@ const Timesheet = () => {
 
     return false;
   };
+
+  console.log("timeSheetRows", timeSheetRows);
+  console.log("totalHoursMinute()", totalHoursMinute());
 
   return (
     <div className="container-fluid">
