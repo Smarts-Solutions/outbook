@@ -616,7 +616,7 @@ const CreateJob = () => {
 
     const date = new Date();
     if (name == "Service") {
-
+       
       if ([1, 2, 3, 4, 8].includes(Number(value))) {
 
         if (value == 1) {
@@ -2239,7 +2239,8 @@ const CreateJob = () => {
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-    } else {
+    } 
+    else {
 
       setJobData((prevState) => ({
         ...prevState,

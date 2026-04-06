@@ -720,6 +720,7 @@ const EditJob = () => {
   };
 
   const dueOn_date_set = async (client_type, service_id) => {
+
     let due_date = getDueDate(client_type, service_id);
     due_date = ['', null, undefined].includes(due_date) ? null : due_date;
     setJobData((prevState) => ({
@@ -1119,9 +1120,8 @@ const EditJob = () => {
 
     const date = new Date();
     if (name == "Service") {
-
       if ([1, 2, 3, 4, 8].includes(Number(value))) {
-
+       
         if (value == 1) {
           const clientInfo = allClientDetails?.find(
             (client) => Number(client.id) === Number(jobData.client_id),
@@ -1148,8 +1148,15 @@ const EditJob = () => {
             ...prevState,
             SLADeadlineDate: date.toISOString().split("T")[0],
           }));
+        }else {
+          setJobData((prevState) => ({
+            ...prevState,
+            Year_Ending_id_1: null,
+            DueOn: null,
+          }));
         }
-        else if (value == 2) {
+
+        if (value == 2) {
           date.setDate(date.getDate() + 1);
           setJobData((prevState) => ({
             ...prevState,
@@ -1181,6 +1188,7 @@ const EditJob = () => {
         }
 
       } else {
+        await dueOn_date_set(clientType, value);
         setJobData((prevState) => ({
           ...prevState,
           SLADeadlineDate: null,
@@ -2732,9 +2740,8 @@ const EditJob = () => {
     );
 
 
-    dueOn_date_set(clientType, jobData?.Service);
+  }, [jobData?.Service]);
 
-  }, [jobData?.Service, clientType]);
 
   // Select options for Customer Account Manager
   const customerAccountManagerOptions = [
@@ -4069,7 +4076,7 @@ const EditJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="DueOn"
                                         onChange={HandleChange}
-                                        value={jobData.DueOn}
+                                        defaultValue={jobData.DueOn}
                                       />
                                       {errors["DueOn"] && (
                                         <div className="error-text">
@@ -4129,7 +4136,7 @@ const EditJob = () => {
                                         placeholder="DD-MM-YYYY"
                                         name="SLADeadlineDate"
                                         onChange={HandleChange}
-                                        value={jobData.SLADeadlineDate}
+                                        defaultValue={jobData.SLADeadlineDate}
                                       />
                                       {errors["SLADeadlineDate"] && (
                                         <div className="error-text">
