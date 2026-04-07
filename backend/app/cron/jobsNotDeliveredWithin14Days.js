@@ -53,7 +53,7 @@ parentPort.on("message", async (rows) => {
           DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
           DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
           DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-          DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
         FROM 
         jobs
@@ -83,8 +83,8 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE 
-        jobs.date_received_on >= NOW() - INTERVAL 14 DAY
-        AND jobs.date_received_on <= NOW()
+         DATE(jobs.date_received_on) <= NOW() - INTERVAL 14 DAY
+        AND DATE(jobs.date_received_on) <= NOW()
         AND jobs.status_type NOT IN (6,7,17,18,19,20)
         GROUP BY jobs.id
         ORDER BY 
