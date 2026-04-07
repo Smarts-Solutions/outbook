@@ -1035,9 +1035,7 @@ const EditJob = () => {
   const HandleChange = async (e) => {
     const { name, value } = e.target;
 
-    console.log("handle change called name", name, " valuee ", value);
-    alert("handle change called name " + name + " valuee " + value);
-
+ 
     if (name === "Service") {
       if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
