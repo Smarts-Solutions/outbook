@@ -115,15 +115,15 @@ parentPort.on("message", async (rows) => {
   }
   
 
-  rows = [
-  {
-    id: 20,
-    staff_fullname: 'Vikas Patidar',
-    staff_email: 'vikaspnpinfotech@gmail.com',
-    staff_role: 'MANAGEMENT',
-    role_id: 8
-  },
-]
+//   rows = [
+//   {
+//     id: 20,
+//     staff_fullname: 'Vikas Patidar',
+//     staff_email: 'vikaspnpinfotech@gmail.com',
+//     staff_role: 'MANAGEMENT',
+//     role_id: 8
+//   },
+// ]
 
  
 

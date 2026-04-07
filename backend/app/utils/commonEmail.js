@@ -3,7 +3,7 @@ let nodemailer = require("nodemailer");
 const commonEmail = async (toEmail, subjectEmail, htmlEmail, cc = '', bcc = '', dynamic_attachment = "",filename = "") => {
     try {
 
-        return false
+        
 
         let smtpHost = process.env.SMTP_HOST;
         let smtpPort = process.env.SMTP_PORT;
