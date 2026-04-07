@@ -100,9 +100,9 @@ const EditJob = () => {
     loading: false,
     type: ""
   });
- 
+
   const handleViewChecklist = async (checklistId, title, type) => {
- 
+
     if (!checklistId) return;
 
     setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
@@ -448,7 +448,7 @@ const EditJob = () => {
               );
             }
 
-           
+
             let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
               show: false,
               data: [],
@@ -460,7 +460,7 @@ const EditJob = () => {
 
             setJobData((prevState) => ({
               ...prevState,
-              
+
               processing_checklist: response.data.processing_checklist ?? null,
               reviewing_checklist: response.data.reviewing_checklist ?? null,
 
@@ -1035,6 +1035,9 @@ const EditJob = () => {
   const HandleChange = async (e) => {
     const { name, value } = e.target;
 
+    console.log("handle change called name", name, " valuee ", value);
+    alert("handle change called name " + name + " valuee " + value);
+
     if (name === "Service") {
       if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
@@ -1121,7 +1124,7 @@ const EditJob = () => {
     const date = new Date();
     if (name == "Service") {
       if ([1, 2, 3, 4, 8].includes(Number(value))) {
-       
+
         if (value == 1) {
           const clientInfo = allClientDetails?.find(
             (client) => Number(client.id) === Number(jobData.client_id),
@@ -1148,7 +1151,7 @@ const EditJob = () => {
             ...prevState,
             SLADeadlineDate: date.toISOString().split("T")[0],
           }));
-        }else {
+        } else {
           setJobData((prevState) => ({
             ...prevState,
             Year_Ending_id_1: null,
@@ -1320,11 +1323,11 @@ const EditJob = () => {
 
 
 
-    if (jobData?.processing_checklist == 0) {
+    if (["", null, undefined ,0].includes(jobData?.processing_checklist)) {
       processing_checklist_status = "0"
     }
 
-    if (jobData?.reviewing_checklist == 0) {
+    if (["", null, undefined ,0].includes(jobData?.reviewing_checklist)) {
       reviewing_checklist_status = "0"
     }
 
@@ -3907,12 +3910,21 @@ const EditJob = () => {
                                       <select
                                         className="form-select"
                                         name="processing_checklist"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.processing_checklist
+                                        onChange={(e) =>
+                                          HandleChange({
+                                            target: {
+                                              name: e.target.name,
+                                              value: e.target.value === "" ? null : e.target.value
+                                            }
+                                          })
                                         }
+                                        value={jobData.processing_checklist ?? ""}
+                                      // onChange={HandleChange}
+                                      // value={
+                                      //   jobData.processing_checklist
+                                      // }
                                       >
-                                        <option value={null}>-- Select --</option>
+                                        <option value={""}>-- Select --</option>
 
                                         <option value={0}>Not Required</option>
                                         {AllJobData?.data?.processing_checklist_data
@@ -3973,12 +3985,21 @@ const EditJob = () => {
                                       <select
                                         className="form-select"
                                         name="reviewing_checklist"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.reviewing_checklist
+                                        onChange={(e) =>
+                                          HandleChange({
+                                            target: {
+                                              name: e.target.name,
+                                              value: e.target.value === "" ? null : e.target.value
+                                            }
+                                          })
                                         }
+                                        value={jobData.reviewing_checklist ?? ""}
+                                        // onChange={HandleChange}
+                                        // value={
+                                        //   jobData.reviewing_checklist
+                                        // }
                                       >
-                                        <option value={null}>-- Select --</option>
+                                        <option value={""}>-- Select --</option>
                                         <option value={0}>Not Required</option>
                                         {AllJobData?.data?.reviewing_checklist_data
                                           ?.filter((item) => {

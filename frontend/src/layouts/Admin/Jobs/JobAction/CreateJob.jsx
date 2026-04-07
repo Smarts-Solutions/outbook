@@ -906,11 +906,11 @@ const CreateJob = () => {
 
 
 
-    if (jobData?.processing_checklist == 0) {
+    if (["", null, undefined ,0].includes(jobData?.processing_checklist)) {
       processing_checklist_status = "0"
     }
 
-    if (jobData?.reviewing_checklist == 0) {
+    if (["", null, undefined ,0].includes(jobData?.reviewing_checklist)) {
       reviewing_checklist_status = "0"
     }
 
@@ -3534,12 +3534,21 @@ const CreateJob = () => {
                                       <select
                                         className="form-select"
                                         name="processing_checklist"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.processing_checklist
+                                        onChange={(e) =>
+                                          HandleChange({
+                                            target: {
+                                              name: e.target.name,
+                                              value: e.target.value === "" ? null : e.target.value
+                                            }
+                                          })
                                         }
+                                        value={jobData.processing_checklist ?? ""}
+                                        // onChange={HandleChange}
+                                        // value={
+                                        //   jobData.processing_checklist
+                                        // }
                                       >
-                                        <option value={null}>-- Select --</option>
+                                        <option value={""}>-- Select --</option>
 
                                         <option value={0}>Not Required</option>
                                         {AllJobData?.data?.processing_checklist_data
@@ -3599,12 +3608,21 @@ const CreateJob = () => {
                                       <select
                                         className="form-select"
                                         name="reviewing_checklist"
-                                        onChange={HandleChange}
-                                        value={
-                                          jobData.reviewing_checklist
+                                        onChange={(e) =>
+                                          HandleChange({
+                                            target: {
+                                              name: e.target.name,
+                                              value: e.target.value === "" ? null : e.target.value
+                                            }
+                                          })
                                         }
+                                        value={jobData.reviewing_checklist ?? ""}
+                                        // onChange={HandleChange}
+                                        // value={
+                                        //   jobData.reviewing_checklist
+                                        // }
                                       >
-                                        <option value={null}>-- Select --</option>
+                                        <option value={""}>-- Select --</option>
                                         <option value={0}>Not Required</option>
                                         {AllJobData?.data?.reviewing_checklist_data
                                           ?.filter((item) => {
