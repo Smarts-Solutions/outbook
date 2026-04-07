@@ -132,7 +132,7 @@ parentPort.on("message", async (rows) => {
         let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
         let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
         const dynamic_attachment = csvContent;
-        const filename = `Jobs_Not_Updated_7Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+       const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
@@ -153,7 +153,7 @@ parentPort.on("message", async (rows) => {
           let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
           let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
           const dynamic_attachment = res.csvContent;
-          const filename = `Jobs_Not_Updated_7Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+          const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
 
           const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
           if (emailSent) {

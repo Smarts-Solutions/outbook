@@ -137,7 +137,7 @@ parentPort.on("message", async (rows) => {
           <p>Regards,<br>Your Automation System</p>
         `;
           const dynamic_attachment = csvContent;
-          const filename = `Jobs_Missing_Paperwork_Max2Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+         const filename = `Jobs that haven’t been updated within 2 days of receiving. We should sent out missing paperwork in max 2 days -${new Date().toISOString().slice(0, 10)}.csv`;
 
 
           //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
@@ -163,7 +163,7 @@ parentPort.on("message", async (rows) => {
               <p>Regards,<br>Your Automation System</p>
             `;
               const dynamic_attachment = res.csvContent;
-              const filename = `Jobs_Missing_Paperwork_Max2Days_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+              const filename = `Jobs that haven’t been updated within 2 days of receiving. We should sent out missing paperwork in max 2 days -${new Date().toISOString().slice(0, 10)}.csv`;
               const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
               if (emailSent) {
                 parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);

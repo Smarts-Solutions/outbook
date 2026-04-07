@@ -140,7 +140,7 @@ parentPort.on("message", async (rows) => {
                 <p>Regards,<br>Your Automation System</p>
               `;
         const dynamic_attachment = csvContent;
-        const filename = `Jobs_Changed_Expected_Delivery_Dates_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+        const filename = `Jobs where Expected delivery date has changed. This field had some data before and now has been changed - ${new Date().toISOString().slice(0, 10)}.csv`;
 
         const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
         if (emailSent) {
@@ -166,7 +166,7 @@ parentPort.on("message", async (rows) => {
                     <p>Regards,<br>Your Automation System</p>
                   `;
             const dynamic_attachment = res.csvContent;
-            const filename = `Jobs_Changed_Expected_Delivery_Dates_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+            const filename = `Jobs where Expected delivery date has changed. This field had some data before and now has been changed - ${new Date().toISOString().slice(0, 10)}.csv`;
             const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
             if (emailSent) {
              

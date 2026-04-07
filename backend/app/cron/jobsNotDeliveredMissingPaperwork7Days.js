@@ -148,7 +148,7 @@ parentPort.on("message", async (rows) => {
         </p>
       `;
 
-          const filename = `Jobs_Not_Delivered_Within_7_Days_Of_Missing_Paperwork_${new Date()
+          const filename = `Jobs that haven’t been delivered within 7 days of receiving the missing paperwork - ${new Date()
             .toISOString()
             .slice(0, 10)}.csv`;
           const dynamic_attachment = csvContent;
@@ -184,9 +184,9 @@ parentPort.on("message", async (rows) => {
         </p>
       `;
 
-              const filename = `Jobs_Not_Delivered_Within_7_Days_Of_Missing_Paperwork_${new Date()
-                .toISOString()
-                .slice(0, 10)}.csv`;
+              const filename = `Jobs that haven’t been delivered within 7 days of receiving the missing paperwork - ${new Date()
+            .toISOString()
+            .slice(0, 10)}.csv`;
               const dynamic_attachment = res.csvContent;
               const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
               if (emailSent) {

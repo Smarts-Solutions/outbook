@@ -136,7 +136,7 @@ parentPort.on("message", async (rows) => {
           <p>Regards,<br>Your Automation System</p>
         `;
           const dynamic_attachment = csvContent;
-          const filename = `Jobs_Sitting_With_Us_OverMonth_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+           const filename = `Jobs that have been sitting with us for over a month - ${new Date().toISOString().slice(0, 10)}.csv`;
 
 
 
@@ -165,7 +165,7 @@ parentPort.on("message", async (rows) => {
               <p>Regards,<br>Your Automation System</p>
             `;
               const dynamic_attachment = res.csvContent;
-              const filename = `Jobs_Sitting_With_Us_OverMonth_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+               const filename = `Jobs that have been sitting with us for over a month - ${new Date().toISOString().slice(0, 10)}.csv`;
               const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
               if (emailSent) {
                 parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
