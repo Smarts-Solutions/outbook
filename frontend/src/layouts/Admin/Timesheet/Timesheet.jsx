@@ -40,6 +40,14 @@ const Timesheet = () => {
   // copy timesheet modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
+  const [timesheetLogs, setTimesheetLogs] = useState([]);
+
+
+
+useEffect(() => {
+  console.log("Current Logs:", timesheetLogs);
+}, [timesheetLogs]);
+
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -1706,6 +1714,30 @@ const Timesheet = () => {
             total_hours: parseFloat(sum).toFixed(2),
           };
         }),
+      ]);
+
+      // Logging Copy Action
+      const copiedHours = copyTimeSheetRows?.reduce((acc, row) => {
+        const sum =
+          (parseFloat(row.monday_hours) || 0) +
+          (parseFloat(row.tuesday_hours) || 0) +
+          (parseFloat(row.wednesday_hours) || 0) +
+          (parseFloat(row.thursday_hours) || 0) +
+          (parseFloat(row.friday_hours) || 0) +
+          (parseFloat(row.saturday_hours) || 0) +
+          (parseFloat(row.sunday_hours) || 0);
+        return acc + sum;
+      }, 0);
+
+      setTimesheetLogs((prev) => [
+        ...prev,
+        {
+          action: "Copy Timesheet",
+          timestamp: new Date().toLocaleString(),
+          addedHours: copiedHours.toFixed(2),
+          rowCount: copyTimeSheetRows.length,
+          copiedRows: [...copyTimeSheetRows],
+        },
       ]);
     }
     setCopyTimeSheetRows([]);
