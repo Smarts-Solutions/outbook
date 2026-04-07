@@ -1404,13 +1404,23 @@ const ClientList = () => {
                 cancelButtonColor: "#d33",
                 confirmButtonText: "Yes",
                 cancelButtonText: "No",
+                showCancelButton: true,
+                showCloseButton: true,
+                // allowOutsideClick: false
               })
               .then(async (result) => {
                 if (result.isConfirmed) {
                   copyJobRequest(row, true);
                   return
-                } else {
+                }
+               else if (result.dismiss === Swal.DismissReason.cancel) {
                   copyJobRequest(row, false);
+                  return;
+                }
+               else if (result.dismiss === Swal.DismissReason.close) {
+                  return;
+                }
+                else{
                   return;
                 }
               });
