@@ -113,8 +113,22 @@ parentPort.on("message", async (rows) => {
       csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
   }
+  
+
+  rows = [
+  {
+    id: 20,
+    staff_fullname: 'Vikas Patidar',
+    staff_email: 'vikaspnpinfotech@gmail.com',
+    staff_role: 'MANAGEMENT',
+    role_id: 8
+  },
+]
+
+ 
 
   for (const row of rows) {
+    console.log(`Processing for staff: ${row.staff_email} (ID: ${row.id})`);
     try {
 
       if (result && result.length > 0) {

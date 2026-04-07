@@ -30,7 +30,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 
 require("./app/routes")(app);
-//require("./app/cron/cron")(app);
+require("./app/cron/cron")(app);
 
 
 // Get Token Process

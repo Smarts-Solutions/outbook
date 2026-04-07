@@ -234,7 +234,7 @@ module.exports = (app) => {
 };
 
 // cron.schedule("* * * * *", async () => {
-
+ 
 // const JobsNotDeliveredMissingPaperwork7Days_query = `
 //         SELECT 
 //         staffs.id AS id,
