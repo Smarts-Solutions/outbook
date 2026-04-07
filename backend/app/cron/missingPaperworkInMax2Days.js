@@ -83,7 +83,8 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN 
         missing_logs ON jobs.id = missing_logs.job_id
         WHERE 
-        (jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,17,18,19,20)
+        jobs.created_at < CURDATE() - INTERVAL 2 DAY
+        AND jobs.status_type = 2
         AND missing_logs.job_id IS NULL
         GROUP BY jobs.id
         ORDER BY 
