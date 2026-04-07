@@ -245,7 +245,7 @@ async function otherUserDataGet(row) {
         DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
         DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
         DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-        DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names,
         assigned_jobs_staff_view.source AS assigned_source,
         assigned_jobs_staff_view.service_id_assign AS service_id_assign,
@@ -269,14 +269,9 @@ async function otherUserDataGet(row) {
         LEFT JOIN drafts ON drafts.job_id = jobs.id
 
       WHERE 
-        (jobs.status_type NOT IN (6,7,17,18,19,20)
-        AND EXISTS (
-          SELECT 1
-          FROM missing_logs 
-          WHERE missing_logs.job_id = jobs.id
-            AND missing_logs.status = '1'
-            AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
-        )
+        (
+        jobs.status_updation_date < CURDATE() - INTERVAL 7 DAY
+        AND jobs.status_type = 2
         )
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
         assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
