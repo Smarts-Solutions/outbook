@@ -4623,6 +4623,9 @@ const getJobsDeleteService = async (job) => {
   const [results] = await pool.execute(
       `
     SELECT 
+    jobs.id AS job_id,
+    customers.trading_name AS customer_name,
+    clients.trading_name AS client_name,
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
       SUBSTRING(clients.trading_name, 1, 3), '_',

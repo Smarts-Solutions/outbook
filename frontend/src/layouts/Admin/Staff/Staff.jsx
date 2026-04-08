@@ -1664,28 +1664,7 @@ const StaffPage = () => {
             </button>
           </div>
 
-          {/* {deleteStaffCustomer.length > 0 && (
-            <div className="mb-4">
-              <h6 className="fw-bold text-primary">
-               <User2 size={16}/> Customers Assigned:
-              </h6>
-              <ul className="list-group">
-                {deleteStaffCustomer.map((customer) => (
-                  <li
-                    key={customer.id}
-                    className="list-group-item d-flex justify-content-between align-items-center"
-                  >
-                    <span className="text-dark">
-                      {customer?.trading_name}{" "}
-                      <span className="badge bg-secondary">
-                        {customer?.customer_code}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )} */}
+
 
           {deleteStaffCustomer.length > 0 && (
             <div className="mb-4">

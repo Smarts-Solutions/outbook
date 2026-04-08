@@ -40,6 +40,9 @@ import {
   Save,
   User2,
   MoreVertical,
+  Trash,
+  HandPlatter,
+  BriefcaseBusiness
 } from "lucide-react";
 
 const Setting = () => {
@@ -54,8 +57,15 @@ const Setting = () => {
   const [viewData, setViewData] = useState({});
   const [deleteStatus, setDeleteStatus] = useState();
   const [StaffRoleDAta, setStaffRoleData] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [allJobsData, setAllJobsData] = useState([]);
+  const [deleteServiceModal, setDeleteServiceModal] = useState(false);
+  const [deleteServiceInfo, setDeleteServiceInfo] = useState({});
+
+  console.log("🚀 ~ file: Setting.jsx:48 ~ Setting ~ deleteServiceInfo:", deleteServiceInfo)
+
+  console.log("🚀 ~ file: Setting.jsx:49 ~ Setting ~ allJobsData:", allJobsData)
 
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data,
@@ -141,14 +151,15 @@ const Setting = () => {
     )?.items || [];
 
 
-  const GetAllJobsName = async (service_id) => {
+  const GetAllJobsName = async (serviceData) => {
+    setDeleteServiceInfo(serviceData.data);
     setLoading(true);
     const req = {
       action: "getJobsDeleteService",
       page: 1,
       limit: 100000,
       search: "",
-      service_id,
+      service_id : serviceData.id,
     };
 
     const data = { req, authToken: token };
@@ -157,8 +168,10 @@ const Setting = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
+          setDeleteServiceModal(true);
           setAllJobsData(response.data || []);
         } else {
+          setDeleteServiceModal(false);
           setAllJobsData([]);
         }
       })
@@ -317,9 +330,9 @@ const Setting = () => {
 
     if (req.action == "delete") {
       console.log("serviceData called with req:", req);
-      if (req.job_service_exists == true) {
+      if (req.data.job_service_exists == true) {
         alert("This service is associated with existing job(s). Please update or remove those jobs before deleting this service.");
-        await GetAllJobsName(req.id);
+        await GetAllJobsName(req);
         return; // Exit the function to prevent the dispatch from being called
       }
     }
@@ -2288,7 +2301,7 @@ const Setting = () => {
               statusTypeData(req);
               break;
             case "4":
-              req.job_service_exists = data.job_service_exists;
+              req.data = data;
               serviceData(req);
               break;
             case "5":
@@ -3017,6 +3030,7 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
+        
         <CommonModal
           isOpen={deleteStatus}
           backdrop="static"
@@ -3045,45 +3059,7 @@ const Setting = () => {
                   >
                     Select Role to Replace
                   </label>
-                  {/* <select
-                      id="staff-select"
-                      value={replaceStatue || ""}
-                      onChange={(e) => setReplaceStatue(e.target.value)}
-                      className="form-select"
-                    >
-                      <option value="" disabled>
-                        Choose Role
-                      </option>
-                      {roleDataAll.data
-                        .filter(
-                          (staff) =>
-                            staff.id !== deleteStatus?.id &&
-                            staff.role !== "ADMIN" &&
-                            staff.role !== "SUPERADMIN",
-                        )
-                        .map((staff) => (
-                          <option key={staff.id} value={staff.id}>
-                            {staff.role_name}
-                          </option>
-                        ))}
 
-                        {roleDataAll.data
-    .filter(
-      (staff) =>
-        staff.id !== deleteStatus?.id &&
-        staff.role !== "ADMIN" &&
-        staff.role !== "SUPERADMIN"
-    )
-    .sort((a, b) =>
-      a.role_name.localeCompare(b.role_name)
-    )
-    .map((staff) => (
-      <option key={staff.id} value={staff.id}>
-        {staff.role_name}
-      </option>
-    ))}
-
-                    </select> */}
                   <Select
                     options={roleOptions}
                     value={
@@ -3158,6 +3134,136 @@ const Setting = () => {
                 >
                   Cancel
                 </button>
+              </div>
+            )}
+          </div>
+        </CommonModal>
+
+        <CommonModal
+          isOpen={deleteServiceModal}
+          backdrop="static"
+          size="ms-5"
+          title="Delete Service"
+          hideBtn={true}
+          handleClose={() => {
+            setDeleteServiceModal(false);
+            //setSelectedStaff(null);
+          }}
+        >
+          <div className="modal-body">
+            <div className="text-start mb-3">
+              <h5 className="text-danger fw-bold">
+                <Trash size={18} /> Delete Service {" "}
+                <span className="text-dark">
+                  {deleteServiceInfo?.name}
+                </span>
+              </h5>
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label fw-semibold">
+                <HandPlatter  size={16} /> Service to Replace:
+              </label>
+
+              {/* <Select
+                isSearchable
+                className="shadow-sm select-staff "
+                classNamePrefix="select"
+                placeholder="Choose Staff"
+                options={staffDataAll?.data
+                  ?.filter((staff) => {
+                    if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
+                      return (
+                        staff.role?.toUpperCase() === "MANAGER" &&
+                        staff.id !== deleteStaff?.id &&
+                        staff.id !== 1 &&
+                        staff.id !== 2
+                      );
+                    }
+                    return (
+                      staff.id !== deleteStaff?.id &&
+                      staff.id !== 1 &&
+                      staff.id !== 2
+                    );
+                  })
+                  .map((staff) => ({
+                    value: staff.id,
+                    label: `${staff.first_name} ${staff.last_name}`,
+                    staffData: staff, // 👈 pura staff object store
+                  }))}
+                value={
+                  selectedStaff
+                    ? {
+                      value: selectedStaff.id,
+                      label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                    }
+                    : null
+                }
+                onChange={(selectedOption) => {
+                  setSelectedStaff(selectedOption?.staffData || null);
+                }}
+                menuPortalTarget={document.body}
+                styles={{
+                  menuPortal: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                  }),
+                }}
+              /> */}
+            </div>
+
+            {/* </div> */}
+
+            <div className="d-grid gap-2">
+              {/* {selectedStaff && (
+                <button onClick={handleDeleteClick} className="btn btn-danger">
+                  <Trash size={16} /> Delete
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setDeleteStaff(false);
+                  setSelectedStaff(null);
+                }}
+                className="btn btn-secondary"
+              >
+                <X size={16} /> Cancel
+              </button> */}
+            </div>
+
+
+
+            {allJobsData?.length > 0 && (
+              <div className="mb-4">
+                <h6 className="fw-bold text-primary">
+                  <BriefcaseBusiness  size={16} /> Jobs Assigned:
+                </h6>
+
+                <ul className="list-group">
+                  {[...allJobsData]
+                    .sort((a, b) =>
+                      (a?.job_code_id || "").localeCompare(
+                        b?.job_code_id || "",
+                        "en",
+                        {
+                          sensitivity: "base",
+                        },
+                      ),
+                    )
+                    .map((job) => (
+                      <li
+                        key={job.id}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span className="text-dark">
+                          {job?.job_code_id}
+                          {/* <span className="badge bg-secondary ms-2">
+                            {job?.job_code}
+                          </span> */}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
               </div>
             )}
           </div>
