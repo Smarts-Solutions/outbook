@@ -59,7 +59,7 @@ const createServices = async (Services) => {
 
 const getServices = async () => { 
     const query = `
-    SELECT * FROM services WHERE status = '1'
+    SELECT * FROM services WHERE status = '1' AND deleted = '0'
     ORDER BY id DESC 
     `;
 
@@ -75,6 +75,7 @@ const getServices = async () => {
 const getServicesAll = async () => { 
     const query = `
     SELECT * FROM services
+    WHERE deleted = '0'
     ORDER BY id DESC 
     `;
 
@@ -104,10 +105,8 @@ const deleteServices = async (ServicesId) => {
             }
         );
     }
-    const query = `
-    DELETE FROM services WHERE id = ?
-    `;
-   
+   // const query = `DELETE FROM services WHERE id = ? `;
+    const query = `UPDATE services SET deleted = '1' WHERE id = ?`;
 
     try {
         await pool.execute(query, [ServicesId.id]);
