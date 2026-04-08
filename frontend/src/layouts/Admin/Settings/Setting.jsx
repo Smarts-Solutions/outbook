@@ -42,7 +42,8 @@ import {
   MoreVertical,
   Trash,
   HandPlatter,
-  BriefcaseBusiness
+  BriefcaseBusiness,
+  X
 } from "lucide-react";
 
 const Setting = () => {
@@ -62,6 +63,7 @@ const Setting = () => {
   const [allJobsData, setAllJobsData] = useState([]);
   const [deleteServiceModal, setDeleteServiceModal] = useState(false);
   const [deleteServiceInfo, setDeleteServiceInfo] = useState({});
+  const [selectedService, setSelectedService] = useState(null);
 
   console.log("🚀 ~ file: Setting.jsx:48 ~ Setting ~ deleteServiceInfo:", deleteServiceInfo)
 
@@ -152,6 +154,7 @@ const Setting = () => {
 
 
   const GetAllJobsName = async (serviceData) => {
+    setSelectedService(null);
     setDeleteServiceInfo(serviceData.data);
     setLoading(true);
     const req = {
@@ -159,7 +162,7 @@ const Setting = () => {
       page: 1,
       limit: 100000,
       search: "",
-      service_id : serviceData.id,
+      service_id: serviceData.id,
     };
 
     const data = { req, authToken: token };
@@ -179,6 +182,61 @@ const Setting = () => {
         setLoading(false);
       });
   };
+  
+  const getJobTypeSelectedService = async (serviceData) => {
+    
+  }
+
+    const handleDeleteServiceClick = async () => {
+      console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
+      console.log("handleDeleteServiceClick called with selectedService:", selectedService);
+      let data = {
+        delete_service: deleteServiceInfo,
+        update_service: selectedService,
+      };
+
+
+      // const res = await DELETESTAFF(data);
+      // if (res?.status) {
+      //   await dispatch(
+      //     Staff({
+      //       req: { action: "delete", id: deleteStaff.id },
+      //       authToken: token,
+      //     }),
+      //   )
+      //     .unwrap()
+      //     .then(async (response) => {
+      //       if (response.status) {
+      //         sweatalert.fire({
+      //           icon: "success",
+      //           title: "Success",
+      //           text: response.message,
+      //           timer: 2000,
+      //         });
+      //         setSelectedStaff(null);
+      //         SetRefresh(!refresh);
+      //         setDeleteStaff(false);
+      //       } else {
+      //         sweatalert.fire({
+      //           icon: "error",
+      //           title: "Oops...",
+      //           text: response.message,
+      //         });
+      //         setDeleteStaff(false);
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       return;
+      //     });
+      // } else {
+      //   sweatalert.fire({
+      //     icon: "error",
+      //     title: "Oops...",
+      //     text: res.message,
+      //   });
+      //   setDeleteStaff("");
+      // }
+    };
 
 
 
@@ -331,7 +389,6 @@ const Setting = () => {
     if (req.action == "delete") {
       console.log("serviceData called with req:", req);
       if (req.data.job_service_exists == true) {
-        alert("This service is associated with existing job(s). Please update or remove those jobs before deleting this service.");
         await GetAllJobsName(req);
         return; // Exit the function to prevent the dispatch from being called
       }
@@ -3030,7 +3087,7 @@ const Setting = () => {
             </CommonModal>
           )}
         </>
-        
+
         <CommonModal
           isOpen={deleteStatus}
           backdrop="static"
@@ -3147,7 +3204,7 @@ const Setting = () => {
           hideBtn={true}
           handleClose={() => {
             setDeleteServiceModal(false);
-            //setSelectedStaff(null);
+            setSelectedService(null);
           }}
         >
           <div className="modal-body">
@@ -3162,45 +3219,36 @@ const Setting = () => {
 
             <div className="mb-4">
               <label className="form-label fw-semibold">
-                <HandPlatter  size={16} /> Service to Replace:
+                <HandPlatter size={16} /> Service to Replace:
               </label>
 
-              {/* <Select
+              <Select
                 isSearchable
-                className="shadow-sm select-staff "
+                className="shadow-sm select-service "
                 classNamePrefix="select"
-                placeholder="Choose Staff"
-                options={staffDataAll?.data
-                  ?.filter((staff) => {
-                    if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
-                      return (
-                        staff.role?.toUpperCase() === "MANAGER" &&
-                        staff.id !== deleteStaff?.id &&
-                        staff.id !== 1 &&
-                        staff.id !== 2
-                      );
-                    }
+                placeholder="Choose Service"
+                options={serviceDataAll?.data
+                  ?.filter((service) => {
                     return (
-                      staff.id !== deleteStaff?.id &&
-                      staff.id !== 1 &&
-                      staff.id !== 2
+                      service.id !== deleteServiceInfo?.id
                     );
                   })
-                  .map((staff) => ({
-                    value: staff.id,
-                    label: `${staff.first_name} ${staff.last_name}`,
-                    staffData: staff, // 👈 pura staff object store
+                  .map((service) => ({
+                    value: service.id,
+                    label: `${service.name}`,
+                    serviceData: service, // 👈 pura service object store
                   }))}
                 value={
-                  selectedStaff
+                  selectedService
                     ? {
-                      value: selectedStaff.id,
-                      label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                      value: selectedService?.id,
+                      label: `${selectedService?.name}`,
                     }
                     : null
                 }
                 onChange={(selectedOption) => {
-                  setSelectedStaff(selectedOption?.staffData || null);
+                  setSelectedService(selectedOption?.serviceData || null);
+                  getJobTypeSelectedService(selectedOption?.serviceData);
                 }}
                 menuPortalTarget={document.body}
                 styles={{
@@ -3209,26 +3257,26 @@ const Setting = () => {
                     zIndex: 9999,
                   }),
                 }}
-              /> */}
+              />
             </div>
 
             {/* </div> */}
 
             <div className="d-grid gap-2">
-              {/* {selectedStaff && (
-                <button onClick={handleDeleteClick} className="btn btn-danger">
+              {selectedService && (
+                <button onClick={handleDeleteServiceClick} className="btn btn-danger">
                   <Trash size={16} /> Delete
                 </button>
               )}
               <button
                 onClick={() => {
-                  setDeleteStaff(false);
-                  setSelectedStaff(null);
+                  setDeleteServiceModal(false);
+                  setSelectedService(null);
                 }}
                 className="btn btn-secondary"
               >
                 <X size={16} /> Cancel
-              </button> */}
+              </button>
             </div>
 
 
@@ -3236,7 +3284,7 @@ const Setting = () => {
             {allJobsData?.length > 0 && (
               <div className="mb-4">
                 <h6 className="fw-bold text-primary">
-                  <BriefcaseBusiness  size={16} /> Jobs Assigned:
+                  <BriefcaseBusiness size={16} /> Jobs Assigned:
                 </h6>
 
                 <ul className="list-group">
