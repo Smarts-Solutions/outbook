@@ -38,6 +38,9 @@ const jobAction = async (job) => {
   else if(action === "copy_job"){
     return jobModel.copy_job(job);
   }
+   else if(action === "getJobsDeleteService"){
+    return jobModel.getJobsDeleteService(job);
+  }
   else{
     return { status: false, message: 'Error getting job.' };
   }

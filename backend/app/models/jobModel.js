@@ -4615,6 +4615,34 @@ const copy_job = async (job) => {
 
 }
 
+const getJobsDeleteService = async (job) => {
+
+  const { service_id } = job;
+  console.log("job---> get Service", job)
+
+  const [results] = await pool.execute(
+      `
+    SELECT 
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    ) AS job_code_id
+    FROM jobs
+    JOIN customers ON jobs.customer_id = customers.id
+    JOIN clients ON customers.id = clients.customer_id
+    JOIN job_types ON jobs.job_type_id = job_types.id
+    WHERE jobs.service_id = ?
+    `,
+      [service_id]
+    );
+    
+   return { status: true, message: "Success", data: results };
+
+}
+
+
 async function getDueDate(client_type, service_id) {
 
   if (["1", "3", "7"].includes(client_type)) {
@@ -4756,5 +4784,6 @@ module.exports = {
   updateJobStatus,
   GetJobStatus,
   get_jobs_filter,
-  copy_job
+  copy_job,
+  getJobsDeleteService
 };

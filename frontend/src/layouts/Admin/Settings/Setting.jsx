@@ -19,6 +19,9 @@ import sweatalert from "sweetalert2";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { GetStaffByRole } from "../../../ReduxStore/Slice/Auth/authSlice";
+import {
+  JobAction
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { use } from "react";
 import Select from "react-select";
 import {
@@ -51,6 +54,8 @@ const Setting = () => {
   const [viewData, setViewData] = useState({});
   const [deleteStatus, setDeleteStatus] = useState();
   const [StaffRoleDAta, setStaffRoleData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [allJobsData, setAllJobsData] = useState([]);
 
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data,
@@ -135,6 +140,35 @@ const Setting = () => {
       (item) => item.permission_name === "setting",
     )?.items || [];
 
+
+  const GetAllJobsName = async (service_id) => {
+    setLoading(true);
+    const req = {
+      action: "getJobsDeleteService",
+      page: 1,
+      limit: 100000,
+      search: "",
+      service_id,
+    };
+
+    const data = { req, authToken: token };
+
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setAllJobsData(response.data || []);
+        } else {
+          setAllJobsData([]);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+
+
   useEffect(() => {
     if (accessDataSetting.length === 0) return;
     const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
@@ -216,7 +250,7 @@ const Setting = () => {
         if (req.action == "getAll") {
           if (response.status) {
             setRoleDataAll({ loading: false, data: response.data });
-           
+
           } else {
             setRoleDataAll({ loading: false, data: [] });
           }
@@ -281,11 +315,12 @@ const Setting = () => {
 
   const serviceData = async (req) => {
 
-    if(req.action == "delete"){
-      console.log("serviceData called with req:", req); 
-      if(req.job_service_exists == true){
-       alert("This service is associated with existing job(s). Please update or remove those jobs before deleting this service.");
-       return; // Exit the function to prevent the dispatch from being called
+    if (req.action == "delete") {
+      console.log("serviceData called with req:", req);
+      if (req.job_service_exists == true) {
+        alert("This service is associated with existing job(s). Please update or remove those jobs before deleting this service.");
+        await GetAllJobsName(req.id);
+        return; // Exit the function to prevent the dispatch from being called
       }
     }
 
@@ -1369,14 +1404,14 @@ const Setting = () => {
       sortable: true,
       width: "12%",
     },
-{
-      cell: (row) => <div title={row.work_flow_type == "3" ? "Processing Type": "Reviewing Type"}>{row.work_flow_type == "3" ? "Processing Type": "Reviewing Type"}</div>,
+    {
+      cell: (row) => <div title={row.work_flow_type == "3" ? "Processing Type" : "Reviewing Type"}>{row.work_flow_type == "3" ? "Processing Type" : "Reviewing Type"}</div>,
       name: "Work Flow Type",
       selector: (row) => row.work_flow_type,
       sortable: true,
       width: "12%",
     },
-     {
+    {
       cell: (row) => <div title={row.customer_name || "All"}>{row.customer_name || "All"}</div>,
       name: "Customer Name",
       selector: (row) => row.customer_name || "All",
@@ -1406,8 +1441,8 @@ const Setting = () => {
       sortable: true,
       width: "12%",
     },
-   
-    
+
+
     {
       name: "Status",
       cell: (row) => (
@@ -1711,7 +1746,7 @@ const Setting = () => {
       }),
     }));
 
-  
+
   };
 
   const handleTaskAdd = (row) => {
@@ -2355,7 +2390,7 @@ const Setting = () => {
         setStaffRoleData([]);
       }
     } catch (error) {
-      
+
     }
   };
 
@@ -2413,6 +2448,11 @@ const Setting = () => {
     <>
       <div>
         <div className="container-fluid">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <div className="row ">
             <div className="col-sm-12">
               <div className="page-title-box">
@@ -2833,7 +2873,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={getCheckList.map((data) => ({
                         "Checklist Name": data.check_list_name,
-                        "Work Flow Type": data.work_flow_type == "3" ? "Processing Type": "Reviewing Type",
+                        "Work Flow Type": data.work_flow_type == "3" ? "Processing Type" : "Reviewing Type",
                         "Customer Name": data.customer_name || "All",
                         "Service Type": data.service_name || "All",
                         "Job Type": data.job_type_type || "All",
