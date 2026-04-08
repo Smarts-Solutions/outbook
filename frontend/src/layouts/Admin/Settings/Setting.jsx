@@ -283,6 +283,18 @@ const Setting = () => {
   };
 
   const handleDeleteServiceClick = async () => {
+   
+      //console.log("errorsBudgetTimeTask called",errorsBudgetTimeTask);
+      if(Object.keys(errorsBudgetTimeTask).length > 0){
+        sweatalert.fire({
+          icon: "error",
+          title: "Error",
+          text: "Please enter valid hours or minutes.",
+          timer: 2000,
+        });
+        return  
+      }
+
     console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
     console.log("handleDeleteServiceClick called with selectedService:", selectedService);
     let data = {
