@@ -42,11 +42,9 @@ const Timesheet = () => {
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
   const [timesheetLogs, setTimesheetLogs] = useState([]);
 
+   
+ console.log("Current Logs:--->>>", timesheetLogs);
 
-
-useEffect(() => {
-  console.log("Current Logs:", timesheetLogs);
-}, [timesheetLogs]);
 
 
   const getFormattedDate = (type, date) => {
