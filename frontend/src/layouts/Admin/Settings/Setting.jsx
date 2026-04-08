@@ -11,7 +11,8 @@ import {
   customerSourceApi,
   getList,
   InternalApi,
-  JobType
+  JobType,
+  GETTASKDATA
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -69,10 +70,13 @@ const Setting = () => {
   const [jobTypeData, setJobTypeData] = useState([]);
   const [selectedJobType, setSelectedJobType] = useState(null);
 
+  const [taskData, setTaskData] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [errorsBudgetTimeTask, setErrorsBudgetTimeTask] = useState({});
 
-  console.log("🚀 ~ file: Setting.jsx:48 ~ Setting ~ deleteServiceInfo:", deleteServiceInfo)
+  console.log("selectedTasks -->> ", selectedTasks);
 
-  console.log("🚀 ~ file: Setting.jsx:49 ~ Setting ~ allJobsData:", allJobsData)
 
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data,
@@ -161,6 +165,9 @@ const Setting = () => {
   const GetAllJobsName = async (serviceData) => {
     setSelectedService(null);
     setSelectedJobType(null);
+    setSelectedTask(null);
+    setSelectedTasks([]);
+
     setDeleteServiceInfo(serviceData.data);
     setLoading(true);
     const req = {
@@ -206,6 +213,74 @@ const Setting = () => {
         return;
       });
   }
+
+  const getTaskSelectedJobType = async (jobTypeData) => {
+    const req = { service_id: selectedService?.id, job_type_id: jobTypeData?.id };
+
+    const data = { req: req, authToken: token };
+    await dispatch(GETTASKDATA(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setTaskData(response.data);
+        } else {
+          setTaskData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+ 
+
+  const handleBudgetTime = (e, index, type) => {
+    const { value } = e.target;
+    const isValid = /^\d*$/.test(value);
+    if (!isValid) {
+      return;
+    }
+
+    setSelectedTasks((prev) => {
+      const updated = [...prev];
+      const budgetedValue = updated[index]?.budgeted_hour || "0:0";
+      let [hour, minute] = budgetedValue?.split(":");
+
+      if (type === "hour") {
+        hour = value;
+      } else if (type === "minute") {
+        let numValue = Number(value);
+        if (isNaN(numValue) || numValue < 0) numValue = 0;
+        if (numValue > 59) numValue = 59;
+        minute = numValue.toString();
+      }
+
+      const newValue = `${hour}:${minute}`;
+
+      updated[index] = {
+        ...updated[index],
+        budgeted_hour: newValue,
+      };
+
+      // ✅ Validation logic
+      const h = Number(hour) || 0;
+      const m = Number(minute) || 0;
+
+      setErrorsBudgetTimeTask((prevErrors) => {
+        const newErrors = { ...prevErrors };
+
+        if (h === 0 && m === 0) {
+          newErrors[updated[index].id] =
+            "Please enter valid hours or minutes.";
+        } else {
+          delete newErrors[updated[index].id];
+        }
+
+        return newErrors;
+      });
+
+      return updated;
+    });
+  };
 
   const handleDeleteServiceClick = async () => {
     console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
@@ -3268,6 +3343,7 @@ const Setting = () => {
                 onChange={(selectedOption) => {
                   setSelectedService(selectedOption?.serviceData || null);
                   setSelectedJobType(null);
+                  setSelectedTasks([]);
                   getJobTypeSelectedService(selectedOption?.serviceData);
                 }}
                 menuPortalTarget={document.body}
@@ -3307,7 +3383,8 @@ const Setting = () => {
                     }
                     onChange={(selectedOption) => {
                       setSelectedJobType(selectedOption?.jobTypeData || null);
-                      //getJobTypeSelectedService(selectedOption?.jobTypeData);
+                      setSelectedTasks([]);
+                      getTaskSelectedJobType(selectedOption?.jobTypeData);
                     }}
                     menuPortalTarget={document.body}
                     styles={{
@@ -3319,7 +3396,178 @@ const Setting = () => {
                   />
                 </div>
               )
-            };
+            }
+
+            {/* {
+              selectedJobType && taskData?.length > 0 && (
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    <HandPlatter size={16} /> Task to Replace:
+                  </label>
+                  <Select
+                    isSearchable
+                    className="shadow-sm select-service "
+                    classNamePrefix="select"
+                    placeholder="Choose Job Type"
+                    options={taskData?.map((task) => ({
+                      value: task.id,
+                      label: `${task?.name}`,
+                      taskData: task, // 👈 pura job type object store
+                    }))}
+                    value={
+                      selectedTask
+                        ? {
+                          value: selectedTask?.id,
+                          label: `${selectedTask?.name}`,
+                        }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      setSelectedTask(selectedOption?.taskData || null);
+                      
+                    }}
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                    }}
+                  />
+                </div>
+              )
+            } */}
+
+            {
+              selectedJobType && taskData?.length > 0 && (
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    <HandPlatter size={16} /> Task to Replace:
+                  </label>
+
+                  <Select
+                    isMulti
+                    isSearchable
+                    className="shadow-sm select-service"
+                    classNamePrefix="select"
+                    placeholder="Choose Task"
+
+                    options={taskData?.map((task) => ({
+                      value: task.id,
+                      label: task.name,
+                      ...task
+                    }))}
+
+                    value={selectedTasks}
+
+                    onChange={(selectedOption) => {
+                      setSelectedTasks(selectedOption || []);
+                    }}
+
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                    }}
+                  />
+                </div>
+              )
+            }
+
+            {
+              selectedTasks?.length > 0 && (
+                <div className="mt-3">
+                  <label className="fw-semibold mb-2">
+                    Selected Tasks
+                  </label>
+
+                  <div className="table-responsive">
+                    <table className="table table-bordered table-sm align-middle">
+                      <thead className="table-light">
+                        <tr>
+                          <th style={{ width: "60px" }}>#</th>
+                          <th>Task Name</th>
+                          <th style={{ width: "180px" }}>Budgeted Hour</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {selectedTasks?.map((task, index) => {
+
+                          const [hours, minutes] = task?.budgeted_hour
+                            ? task.budgeted_hour.split(":")
+                            : ["", ""];
+
+                          const error = errorsBudgetTimeTask[task.value];
+
+                          return (
+                            <tr key={task?.value}>
+
+                              <td>{index + 1}</td>
+
+                              <td className="fw-semibold">
+                                {task?.label}
+                              </td>
+
+                              {/* <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                placeholder="HH:MM"
+                                value={task?.budgeted_hour || ""}
+                                onChange={(e) => {
+                                  const updated = [...selectedTasks];
+                                  updated[index].budgeted_hour = e.target.value;
+                                  setSelectedTasks(updated);
+                                }}
+                              />
+                            </td> */}
+
+                              <td>
+                                <div className="input-group">
+                                  {/* Hours */}
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={hours}
+                                    onChange={(e) => handleBudgetTime(e, index, "hour")}
+                                    style={{ width: "80px", marginRight: "5px" }}
+                                  />
+                                  <span className="input-group-text">h</span>
+
+                                  {/* Minutes */}
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={minutes}
+                                    onChange={(e) => handleBudgetTime(e, index, "minute")}
+                                    style={{ width: "80px", marginRight: "5px" }}
+
+
+                                  />
+                                  <span className="input-group-text">m</span>
+                                </div>
+                                {error && (
+                                  <div className="error-text text-danger">
+                                    {error}
+                                  </div>
+                                )}
+                              </td>
+
+                            </tr>
+                          )
+                        }
+
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              )
+            }
 
 
             {/* </div> */}
@@ -3334,6 +3582,9 @@ const Setting = () => {
                 onClick={() => {
                   setDeleteServiceModal(false);
                   setSelectedService(null);
+                  setSelectedJobType(null);
+                  setTaskData([]);
+                  setSelectedTask(null);
                 }}
                 className="btn btn-secondary"
               >
