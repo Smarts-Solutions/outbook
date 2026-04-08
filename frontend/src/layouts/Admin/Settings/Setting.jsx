@@ -231,7 +231,7 @@ const Setting = () => {
         return;
       });
   };
- 
+
 
   const handleBudgetTime = (e, index, type) => {
     const { value } = e.target;
@@ -283,17 +283,17 @@ const Setting = () => {
   };
 
   const handleDeleteServiceClick = async () => {
-   
-      //console.log("errorsBudgetTimeTask called",errorsBudgetTimeTask);
-      if(Object.keys(errorsBudgetTimeTask).length > 0){
-        sweatalert.fire({
-          icon: "error",
-          title: "Error",
-          text: "Please enter valid hours or minutes.",
-          timer: 2000,
-        });
-        return  
-      }
+
+    //console.log("errorsBudgetTimeTask called",errorsBudgetTimeTask);
+    if (Object.keys(errorsBudgetTimeTask).length > 0) {
+      sweatalert.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please enter valid hours or minutes.",
+        timer: 2000,
+      });
+      return
+    }
 
     console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
     console.log("handleDeleteServiceClick called with selectedService:", selectedService);
@@ -302,47 +302,31 @@ const Setting = () => {
       update_service: selectedService,
     };
 
-
-    // const res = await DELETESTAFF(data);
-    // if (res?.status) {
-    //   await dispatch(
-    //     Staff({
-    //       req: { action: "delete", id: deleteStaff.id },
-    //       authToken: token,
-    //     }),
-    //   )
-    //     .unwrap()
-    //     .then(async (response) => {
-    //       if (response.status) {
-    //         sweatalert.fire({
-    //           icon: "success",
-    //           title: "Success",
-    //           text: response.message,
-    //           timer: 2000,
-    //         });
-    //         setSelectedStaff(null);
-    //         SetRefresh(!refresh);
-    //         setDeleteStaff(false);
-    //       } else {
-    //         sweatalert.fire({
-    //           icon: "error",
-    //           title: "Oops...",
-    //           text: response.message,
-    //         });
-    //         setDeleteStaff(false);
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       return;
-    //     });
-    // } else {
-    //   sweatalert.fire({
-    //     icon: "error",
-    //     title: "Oops...",
-    //     text: res.message,
-    //   });
-    //   setDeleteStaff("");
-    // }
+    const req = { action: "deletExistingJob", data: data }; 
+    await dispatch(Service({ req: req, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+          if (response.status) {
+            sweatalert.fire({
+              title: response.message,
+              icon: "success",
+              timer: 2000,
+            });
+            setTimeout(() => {
+              serviceData({ action: "getAll" });
+            }, 2000);
+          } else {
+            sweatalert.fire({
+              title: response.message,
+              icon: "error",
+              timer: 2000,
+            });
+          }
+        
+      })
+      .catch((error) => {
+        return;
+      });
   };
 
 

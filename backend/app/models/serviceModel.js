@@ -118,9 +118,7 @@ const deleteServices = async (ServicesId) => {
             }
         );
     }
-   // const query = `DELETE FROM services WHERE id = ? `;
-    const query = `UPDATE services SET deleted = '1' WHERE id = ?`;
-
+    const query = `DELETE FROM services WHERE id = ? `;
     try {
         await pool.execute(query, [ServicesId.id]);
         
@@ -130,6 +128,10 @@ const deleteServices = async (ServicesId) => {
     }
 };
 
+const deletExistingJob = async (Services) => {
+    console.log("delete Services --->>>",Services)
+
+}
 
 const updateServices = async (Services) => {
     const { id, ...fields } = Services;
@@ -199,6 +201,7 @@ module.exports = {
     deleteServices,
     updateServices,
     getServices,
-    getServicesAll
+    getServicesAll,
+    deletExistingJob
   
 };

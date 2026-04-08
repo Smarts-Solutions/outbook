@@ -18,6 +18,10 @@ const removeServices = async (ServicesId) => {
   return serviceModel.deleteServices(ServicesId);
 };
 
+const deletExistingJob = async (Services) => {
+  return serviceModel.deletExistingJob(Services);
+}
+
 const modifyServices = async (Services) => {
   return serviceModel.updateServices(Services);
 };
@@ -28,5 +32,6 @@ module.exports = {
     removeServices,
     modifyServices,
     getServices,
-    getServicesAll
+    getServicesAll,
+    deletExistingJob
 };
