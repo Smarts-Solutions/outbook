@@ -16,6 +16,18 @@ const convertDate = (date) => {
   return "-";
 }
 
+const formatCSV = (value) => {
+  if (!value) return ' - ';
+  value = value.toString();
+
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    value = value.replace(/"/g, '""');
+    return `"${value}"`;
+  }
+
+  return value;
+};
+
 
 
 // Missing Timesheet Report Email Worker
@@ -85,15 +97,15 @@ parentPort.on("message", async (rows) => {
     result?.forEach(val => {
 
       let job_received_on = convertDate(val.job_received_on);
-      customer_trading_name = val.customer_trading_name || ' - ';
-      let account_manager_name = val.account_manager_name || ' - ';
-      let client_trading_name = val.client_trading_name || ' - ';
-      let service_name = val.service_name || ' - ';
-      let job_type_name = val.job_type_name || ' - ';
-      let status = val.status || ' - ';
-      let allocated_name = val.allocated_name || ' - ';
-      let multiple_staff_names = val.multiple_staff_names || ' - ';
-      let reviewer_name = val.reviewer_name || ' - ';
+      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
+      let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
+      let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
+      let service_name = formatCSV(val.service_name) || ' - ';
+      let job_type_name = formatCSV(val.job_type_name) || ' - ';
+      let status = formatCSV(val.status) || ' - ';
+      let allocated_name = formatCSV(val.allocated_name) || ' - ';
+      let multiple_staff_names = formatCSV(val.multiple_staff_names) || ' - ';
+      let reviewer_name = formatCSV(val.reviewer_name) || ' - ';
       let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
       let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
       let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
@@ -291,15 +303,15 @@ async function otherUserDataGet(row) {
     result?.forEach(val => {
 
       let job_received_on = convertDate(val.job_received_on);
-      customer_trading_name = val.customer_trading_name || ' - ';
-      let account_manager_name = val.account_manager_name || ' - ';
-      let client_trading_name = val.client_trading_name || ' - ';
-      let service_name = val.service_name || ' - ';
-      let job_type_name = val.job_type_name || ' - ';
-      let status = val.status || ' - ';
-      let allocated_name = val.allocated_name || ' - ';
-      let multiple_staff_names = val.multiple_staff_names || ' - ';
-      let reviewer_name = val.reviewer_name || ' - ';
+      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
+      let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
+      let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
+      let service_name = formatCSV(val.service_name) || ' - ';
+      let job_type_name = formatCSV(val.job_type_name) || ' - ';
+      let status = formatCSV(val.status) || ' - ';
+      let allocated_name = formatCSV(val.allocated_name) || ' - ';
+      let multiple_staff_names = formatCSV(val.multiple_staff_names) || ' - ';
+      let reviewer_name = formatCSV(val.reviewer_name) || ' - ';
       let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
       let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
       let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
