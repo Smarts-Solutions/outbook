@@ -4618,8 +4618,6 @@ const copy_job = async (job) => {
 const getJobsDeleteService = async (job) => {
 
   const { service_id } = job;
-  console.log("job---> get Service", job)
-
   const [results] = await pool.execute(
       `
     SELECT 
