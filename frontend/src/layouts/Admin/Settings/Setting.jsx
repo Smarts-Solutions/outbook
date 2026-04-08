@@ -11,6 +11,7 @@ import {
   customerSourceApi,
   getList,
   InternalApi,
+  JobType
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -64,6 +65,10 @@ const Setting = () => {
   const [deleteServiceModal, setDeleteServiceModal] = useState(false);
   const [deleteServiceInfo, setDeleteServiceInfo] = useState({});
   const [selectedService, setSelectedService] = useState(null);
+
+  const [jobTypeData, setJobTypeData] = useState([]);
+  const [selectedJobType, setSelectedJobType] = useState(null);
+
 
   console.log("🚀 ~ file: Setting.jsx:48 ~ Setting ~ deleteServiceInfo:", deleteServiceInfo)
 
@@ -155,6 +160,7 @@ const Setting = () => {
 
   const GetAllJobsName = async (serviceData) => {
     setSelectedService(null);
+    setSelectedJobType(null);
     setDeleteServiceInfo(serviceData.data);
     setLoading(true);
     const req = {
@@ -182,61 +188,75 @@ const Setting = () => {
         setLoading(false);
       });
   };
-  
+
   const getJobTypeSelectedService = async (serviceData) => {
-    
+    const req = { action: "get", service_id: serviceData.id };
+    const data = { req: req, authToken: token };
+    await dispatch(JobType(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setJobTypeData(response.data);
+        } else {
+          setJobTypeData([]);
+        }
+      })
+      .catch((error) => {
+        setJobTypeData([]);
+        return;
+      });
   }
 
-    const handleDeleteServiceClick = async () => {
-      console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
-      console.log("handleDeleteServiceClick called with selectedService:", selectedService);
-      let data = {
-        delete_service: deleteServiceInfo,
-        update_service: selectedService,
-      };
-
-
-      // const res = await DELETESTAFF(data);
-      // if (res?.status) {
-      //   await dispatch(
-      //     Staff({
-      //       req: { action: "delete", id: deleteStaff.id },
-      //       authToken: token,
-      //     }),
-      //   )
-      //     .unwrap()
-      //     .then(async (response) => {
-      //       if (response.status) {
-      //         sweatalert.fire({
-      //           icon: "success",
-      //           title: "Success",
-      //           text: response.message,
-      //           timer: 2000,
-      //         });
-      //         setSelectedStaff(null);
-      //         SetRefresh(!refresh);
-      //         setDeleteStaff(false);
-      //       } else {
-      //         sweatalert.fire({
-      //           icon: "error",
-      //           title: "Oops...",
-      //           text: response.message,
-      //         });
-      //         setDeleteStaff(false);
-      //       }
-      //     })
-      //     .catch((error) => {
-      //       return;
-      //     });
-      // } else {
-      //   sweatalert.fire({
-      //     icon: "error",
-      //     title: "Oops...",
-      //     text: res.message,
-      //   });
-      //   setDeleteStaff("");
-      // }
+  const handleDeleteServiceClick = async () => {
+    console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
+    console.log("handleDeleteServiceClick called with selectedService:", selectedService);
+    let data = {
+      delete_service: deleteServiceInfo,
+      update_service: selectedService,
     };
+
+
+    // const res = await DELETESTAFF(data);
+    // if (res?.status) {
+    //   await dispatch(
+    //     Staff({
+    //       req: { action: "delete", id: deleteStaff.id },
+    //       authToken: token,
+    //     }),
+    //   )
+    //     .unwrap()
+    //     .then(async (response) => {
+    //       if (response.status) {
+    //         sweatalert.fire({
+    //           icon: "success",
+    //           title: "Success",
+    //           text: response.message,
+    //           timer: 2000,
+    //         });
+    //         setSelectedStaff(null);
+    //         SetRefresh(!refresh);
+    //         setDeleteStaff(false);
+    //       } else {
+    //         sweatalert.fire({
+    //           icon: "error",
+    //           title: "Oops...",
+    //           text: response.message,
+    //         });
+    //         setDeleteStaff(false);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       return;
+    //     });
+    // } else {
+    //   sweatalert.fire({
+    //     icon: "error",
+    //     title: "Oops...",
+    //     text: res.message,
+    //   });
+    //   setDeleteStaff("");
+    // }
+  };
 
 
 
@@ -3221,7 +3241,6 @@ const Setting = () => {
               <label className="form-label fw-semibold">
                 <HandPlatter size={16} /> Service to Replace:
               </label>
-
               <Select
                 isSearchable
                 className="shadow-sm select-service "
@@ -3248,6 +3267,7 @@ const Setting = () => {
                 }
                 onChange={(selectedOption) => {
                   setSelectedService(selectedOption?.serviceData || null);
+                  setSelectedJobType(null);
                   getJobTypeSelectedService(selectedOption?.serviceData);
                 }}
                 menuPortalTarget={document.body}
@@ -3260,10 +3280,52 @@ const Setting = () => {
               />
             </div>
 
+
+            {
+              selectedService && jobTypeData?.length > 0 && (
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    <HandPlatter size={16} /> Job Type to Replace:
+                  </label>
+                  <Select
+                    isSearchable
+                    className="shadow-sm select-service "
+                    classNamePrefix="select"
+                    placeholder="Choose Job Type"
+                    options={jobTypeData?.map((type) => ({
+                      value: type.id,
+                      label: `${type.type}`,
+                      jobTypeData: type, // 👈 pura job type object store
+                    }))}
+                    value={
+                      selectedJobType
+                        ? {
+                          value: selectedJobType?.id,
+                          label: `${selectedJobType?.type}`,
+                        }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      setSelectedJobType(selectedOption?.jobTypeData || null);
+                      //getJobTypeSelectedService(selectedOption?.jobTypeData);
+                    }}
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                    }}
+                  />
+                </div>
+              )
+            };
+
+
             {/* </div> */}
 
             <div className="d-grid gap-2">
-              {selectedService && (
+              {selectedJobType && (
                 <button onClick={handleDeleteServiceClick} className="btn btn-danger">
                   <Trash size={16} /> Delete
                 </button>
