@@ -382,6 +382,7 @@ const Timesheet = () => {
     }
 
     const newSheetRow = {
+      tempId: Date.now() + Math.random(),
       id: null,
       task_type: null,
       customer_id: null,
@@ -472,7 +473,11 @@ const Timesheet = () => {
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
     const newSheetRows = [...timeSheetRows];
-    const id = newSheetRows[index].id;
+    const rowToDelete = newSheetRows[index];
+
+    const id = rowToDelete.id;
+    const tempId = rowToDelete.tempId;
+
     if (id != null) {
       setDeleteRows((prevRows) => {
         const existingIds = new Set(prevRows);
@@ -481,6 +486,13 @@ const Timesheet = () => {
         }
         return prevRows;
       });
+    }
+
+    // Remove the log for this particular row
+    if (tempId) {
+      setTimesheetLogs((prevLogs) =>
+        prevLogs.filter((log) => log.tempId !== tempId),
+      );
     }
 
     newSheetRows.splice(index, 1);
@@ -1659,65 +1671,7 @@ const Timesheet = () => {
 
   const handleCopyTimeSheetAutoFill = async () => {
     if (copyTimeSheetRows && copyTimeSheetRows.length > 0) {
-      setTimeSheetRows((prev) => [
-        ...prev, // previous state retained
-        ...copyTimeSheetRows.map((row) => {
-          const sum =
-            (parseFloat(row.monday_hours) || 0) +
-            (parseFloat(row.tuesday_hours) || 0) +
-            (parseFloat(row.wednesday_hours) || 0) +
-            (parseFloat(row.thursday_hours) || 0) +
-            (parseFloat(row.friday_hours) || 0) +
-            (parseFloat(row.saturday_hours) || 0) +
-            (parseFloat(row.sunday_hours) || 0);
-
-          return {
-            ...row,
-            id: null,
-            submit_status: "0",
-            monday_date: convertDateFormatForCopy(weekDays.monday),
-            tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
-            wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
-            thursday_date: convertDateFormatForCopy(weekDays.thursday),
-            friday_date: convertDateFormatForCopy(weekDays.friday),
-            saturday_date: convertDateFormatForCopy(weekDays.saturday),
-            sunday_date: convertDateFormatForCopy(weekDays.sunday),
-            total_hours: parseFloat(sum).toFixed(2),
-          };
-        }),
-      ]);
-
-      setUpdateTimeSheetRows((prev) => [
-        ...prev,
-        ...copyTimeSheetRows.map((row) => {
-          const sum =
-            (parseFloat(row.monday_hours) || 0) +
-            (parseFloat(row.tuesday_hours) || 0) +
-            (parseFloat(row.wednesday_hours) || 0) +
-            (parseFloat(row.thursday_hours) || 0) +
-            (parseFloat(row.friday_hours) || 0) +
-            (parseFloat(row.saturday_hours) || 0) +
-            (parseFloat(row.sunday_hours) || 0);
-
-          return {
-            ...row,
-            id: null,
-            submit_status: "0",
-            monday_date: convertDateFormatForCopy(weekDays.monday),
-            tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
-            wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
-            thursday_date: convertDateFormatForCopy(weekDays.thursday),
-            friday_date: convertDateFormatForCopy(weekDays.friday),
-            saturday_date: convertDateFormatForCopy(weekDays.saturday),
-            sunday_date: convertDateFormatForCopy(weekDays.sunday),
-
-            total_hours: parseFloat(sum).toFixed(2),
-          };
-        }),
-      ]);
-
-      // Logging Copy Action
-      const copiedHours = copyTimeSheetRows?.reduce((acc, row) => {
+      const newCopiedRows = copyTimeSheetRows.map((row) => {
         const sum =
           (parseFloat(row.monday_hours) || 0) +
           (parseFloat(row.tuesday_hours) || 0) +
@@ -1726,19 +1680,43 @@ const Timesheet = () => {
           (parseFloat(row.friday_hours) || 0) +
           (parseFloat(row.saturday_hours) || 0) +
           (parseFloat(row.sunday_hours) || 0);
-        return acc + sum;
-      }, 0);
 
-      setTimesheetLogs((prev) => [
-        ...prev,
-        {
-          action: "Copy Timesheet",
-          timestamp: new Date().toLocaleString(),
-          addedHours: copiedHours.toFixed(2),
-          rowCount: copyTimeSheetRows.length,
-          copiedRows: [...copyTimeSheetRows],
-        },
+        return {
+          ...row,
+          tempId: Date.now() + Math.random() + Math.random(),
+          id: null,
+          submit_status: "0",
+          monday_date: convertDateFormatForCopy(weekDays.monday),
+          tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
+          wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
+          thursday_date: convertDateFormatForCopy(weekDays.thursday),
+          friday_date: convertDateFormatForCopy(weekDays.friday),
+          saturday_date: convertDateFormatForCopy(weekDays.saturday),
+          sunday_date: convertDateFormatForCopy(weekDays.sunday),
+          total_hours: parseFloat(sum).toFixed(2),
+        };
+      });
+
+      setTimeSheetRows((prev) => [
+        ...prev, // previous state retained
+        ...newCopiedRows,
       ]);
+
+      setUpdateTimeSheetRows((prev) => [
+        ...prev,
+        ...newCopiedRows,
+      ]);
+
+      // Logging Copy Action per row
+      const newLogs = newCopiedRows.map((row) => ({
+        action: "Copy Timesheet",
+        timestamp: new Date().toLocaleString(),
+        tempId: row.tempId,
+        addedHours: row.total_hours,
+        taskName: row.task_name || row.sub_internal_name,
+      }));
+
+      setTimesheetLogs((prev) => [...prev, ...newLogs]);
     }
     setCopyTimeSheetRows([]);
     setIsCopyModalOpen(false);
