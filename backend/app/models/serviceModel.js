@@ -73,10 +73,23 @@ const getServices = async () => {
 }
 
 const getServicesAll = async () => { 
-    const query = `
-    SELECT * FROM services
-    WHERE deleted = '0'
-    ORDER BY id DESC 
+    // const query = `
+    // SELECT * FROM services
+    // WHERE deleted = '0'
+    // ORDER BY id DESC 
+    // `;
+    const query = `SELECT 
+    services.*,
+    CASE 
+        WHEN jobs.service_id IS NOT NULL THEN TRUE
+        ELSE NULL
+    END AS job_service_exists
+
+    FROM services
+    LEFT JOIN jobs ON jobs.service_id = services.id
+    WHERE services.deleted = '0'
+    GROUP BY services.id
+    ORDER BY services.id DESC
     `;
 
     try {

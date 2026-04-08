@@ -43,7 +43,7 @@ const Timesheet = () => {
   const [timesheetLogs, setTimesheetLogs] = useState([]);
 
    
- console.log("Current Logs:--->>>", timesheetLogs);
+ 
 
 
 
@@ -2077,8 +2077,7 @@ const Timesheet = () => {
     return false;
   };
 
-  console.log("timeSheetRows", timeSheetRows);
-  console.log("totalHoursMinute()", totalHoursMinute());
+ 
 
   return (
     <div className="container-fluid">

@@ -280,6 +280,15 @@ const Setting = () => {
   };
 
   const serviceData = async (req) => {
+
+    if(req.action == "delete"){
+      console.log("serviceData called with req:", req); 
+      if(req.job_service_exists == true){
+       alert("This service is associated with existing job(s). Please update or remove those jobs before deleting this service.");
+       return; // Exit the function to prevent the dispatch from being called
+      }
+    }
+
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -2231,7 +2240,7 @@ const Setting = () => {
         if (result.isConfirmed) {
           const req = {
             action: "delete",
-            id: data.id,
+            id: data.id
           };
           switch (tabStatus) {
             case "1":
@@ -2244,6 +2253,7 @@ const Setting = () => {
               statusTypeData(req);
               break;
             case "4":
+              req.job_service_exists = data.job_service_exists;
               serviceData(req);
               break;
             case "5":
