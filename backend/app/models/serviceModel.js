@@ -184,8 +184,8 @@ const deletExistingJob = async (Services) => {
 
 
     }
-
-     const query = `UPDATE services SET deleted = '1' WHERE id = ? `;
+   
+     const query = `UPDATE services SET name = CONCAT(name,'_'${deleted_service_info.id}), deleted = '1' WHERE id = ? `;
      await pool.execute(query, [deleted_service_info.id]);
      return { status: true, message: 'Service deleted successfully.', data: get_job_id };
 

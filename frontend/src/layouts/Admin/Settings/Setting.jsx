@@ -3297,7 +3297,7 @@ const Setting = () => {
         <CommonModal
           isOpen={deleteServiceModal}
           backdrop="static"
-          size="ms-5"
+          size="ms-12"
           title="Delete Service"
           hideBtn={true}
           handleClose={() => {
@@ -3400,46 +3400,6 @@ const Setting = () => {
                 </div>
               )
             }
-
-            {/* {
-              selectedJobType && taskData?.length > 0 && (
-                <div className="mb-4">
-                  <label className="form-label fw-semibold">
-                    <HandPlatter size={16} /> Task to Replace:
-                  </label>
-                  <Select
-                    isSearchable
-                    className="shadow-sm select-service "
-                    classNamePrefix="select"
-                    placeholder="Choose Job Type"
-                    options={taskData?.map((task) => ({
-                      value: task.id,
-                      label: `${task?.name}`,
-                      taskData: task, // 👈 pura job type object store
-                    }))}
-                    value={
-                      selectedTask
-                        ? {
-                          value: selectedTask?.id,
-                          label: `${selectedTask?.name}`,
-                        }
-                        : null
-                    }
-                    onChange={(selectedOption) => {
-                      setSelectedTask(selectedOption?.taskData || null);
-                      
-                    }}
-                    menuPortalTarget={document.body}
-                    styles={{
-                      menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                      }),
-                    }}
-                  />
-                </div>
-              )
-            } */}
 
             {
               selectedJobType && taskData?.length > 0 && (
