@@ -3466,23 +3466,18 @@ const Setting = () => {
                                 className="shadow-sm select-service "
                                 classNamePrefix="select"
                                 placeholder="Choose Job Type"
-                                options={jobTypeData?.map((type) => ({
-                                  value: type.id,
-                                  label: `${type.type}`,
+                                options={item?.jobTypes
+                                  ?.filter(
+                                    (type, index, self) =>
+                                      index === self.findIndex((s) => s.job_type_id === type.job_type_id)
+                                  )
+                                  ?.map((type) => ({
+                                  value: type?.job_type_id,
+                                  label: `${type?.job_type_name}`,
                                   jobTypeData: type, // 👈 pura job type object store
                                 }))}
-                                value={
-                                  selectedJobType
-                                    ? {
-                                      value: selectedJobType?.id,
-                                      label: `${selectedJobType?.type}`,
-                                    }
-                                    : null
-                                }
+                                value={""}
                                 onChange={(selectedOption) => {
-                                  setSelectedJobType(selectedOption?.jobTypeData || null);
-                                  setSelectedTasks([]);
-                                  getTaskSelectedJobType(selectedOption?.jobTypeData);
                                 }}
                                 menuPortalTarget={document.body}
                                 styles={{
@@ -3492,7 +3487,6 @@ const Setting = () => {
                                   }),
                                 }}
                               />
-
                             </td>
 
                             <td>
@@ -3503,10 +3497,14 @@ const Setting = () => {
                                 className="shadow-sm select-service"
                                 classNamePrefix="select"
                                 placeholder="Choose Task"
-
-                                options={taskData?.map((task) => ({
-                                  value: task.id,
-                                  label: task.name,
+                                options={item?.tasks
+                                  ?.filter(
+                                    (task, index, self) =>
+                                      index === self.findIndex((s) => s.task_id === task.task_id)
+                                  )
+                                  ?.map((task) => ({
+                                  value: task.task_id,
+                                  label: task.task_name,
                                   ...task
                                 }))}
 

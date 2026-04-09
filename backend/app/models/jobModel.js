@@ -4669,7 +4669,7 @@ const getJobsDeleteService = async (job) => {
     JSON_ARRAYAGG(
         JSON_OBJECT(
             'task_id', task.id,
-            'task_name', task.id,
+            'task_name', task.name,
             'service_id', task.service_id,
             'job_type_id', task.job_type_id,
             'budgeted_hour', task.budgeted_hour
