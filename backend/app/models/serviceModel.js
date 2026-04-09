@@ -3,7 +3,7 @@ const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createServices = async (Services) => {
     const { name } = Services;
-    const checkQuery = `SELECT 1 FROM services WHERE name = ?`
+    const checkQuery = `SELECT 1 FROM services WHERE name = ? AND deleted = '0'`;
     const query = `
     INSERT INTO services (name)
     VALUES (?)
