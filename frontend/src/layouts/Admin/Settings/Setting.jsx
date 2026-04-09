@@ -305,31 +305,31 @@ const Setting = () => {
       update_job_type: selectedJobType,
       update_tasks: selectedTasks
     };
-     
+
     setLoading(true);
-    const req = { action: "deletExistingJob", data: data }; 
+    const req = { action: "deletExistingJob", data: data };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
-          setLoading(false);
-          if (response.status) {
-            setDeleteServiceModal(false);
-            sweatalert.fire({
-              title: response.message,
-              icon: "success",
-              timer: 2000,
-            });
-            setTimeout(() => {
-              serviceData({ action: "getAll" });
-            }, 2000);
-          } else {
-            sweatalert.fire({
-              title: response.message,
-              icon: "error",
-              timer: 2000,
-            });
-          }
-        
+        setLoading(false);
+        if (response.status) {
+          setDeleteServiceModal(false);
+          sweatalert.fire({
+            title: response.message,
+            icon: "success",
+            timer: 2000,
+          });
+          setTimeout(() => {
+            serviceData({ action: "getAll" });
+          }, 2000);
+        } else {
+          sweatalert.fire({
+            title: response.message,
+            icon: "error",
+            timer: 2000,
+          });
+        }
+
       })
       .catch((error) => {
         return;
@@ -3297,7 +3297,7 @@ const Setting = () => {
         <CommonModal
           isOpen={deleteServiceModal}
           backdrop="static"
-          size="ms-12"
+          size="xl"
           title="Delete Service"
           hideBtn={true}
           handleClose={() => {
@@ -3314,130 +3314,6 @@ const Setting = () => {
                 </span>
               </h5>
             </div>
-
-            <div className="mb-4">
-              <label className="form-label fw-semibold">
-                <HandPlatter size={16} /> Service to Replace:
-              </label>
-              <Select
-                isSearchable
-                className="shadow-sm select-service "
-                classNamePrefix="select"
-                placeholder="Choose Service"
-                options={serviceDataAll?.data
-                  ?.filter((service) => {
-                    return (
-                      service.id !== deleteServiceInfo?.id
-                    );
-                  })
-                  .map((service) => ({
-                    value: service.id,
-                    label: `${service.name}`,
-                    serviceData: service, // 👈 pura service object store
-                  }))}
-                value={
-                  selectedService
-                    ? {
-                      value: selectedService?.id,
-                      label: `${selectedService?.name}`,
-                    }
-                    : null
-                }
-                onChange={(selectedOption) => {
-                  setSelectedService(selectedOption?.serviceData || null);
-                  setSelectedJobType(null);
-                  setSelectedTasks([]);
-                  getJobTypeSelectedService(selectedOption?.serviceData);
-                }}
-                menuPortalTarget={document.body}
-                styles={{
-                  menuPortal: (base) => ({
-                    ...base,
-                    zIndex: 9999,
-                  }),
-                }}
-              />
-            </div>
-
-
-            {
-              selectedService && jobTypeData?.length > 0 && (
-                <div className="mb-4">
-                  <label className="form-label fw-semibold">
-                    <HandPlatter size={16} /> Job Type to Replace:
-                  </label>
-                  <Select
-                    isSearchable
-                    className="shadow-sm select-service "
-                    classNamePrefix="select"
-                    placeholder="Choose Job Type"
-                    options={jobTypeData?.map((type) => ({
-                      value: type.id,
-                      label: `${type.type}`,
-                      jobTypeData: type, // 👈 pura job type object store
-                    }))}
-                    value={
-                      selectedJobType
-                        ? {
-                          value: selectedJobType?.id,
-                          label: `${selectedJobType?.type}`,
-                        }
-                        : null
-                    }
-                    onChange={(selectedOption) => {
-                      setSelectedJobType(selectedOption?.jobTypeData || null);
-                      setSelectedTasks([]);
-                      getTaskSelectedJobType(selectedOption?.jobTypeData);
-                    }}
-                    menuPortalTarget={document.body}
-                    styles={{
-                      menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                      }),
-                    }}
-                  />
-                </div>
-              )
-            }
-
-            {
-              selectedJobType && taskData?.length > 0 && (
-                <div className="mb-4">
-                  <label className="form-label fw-semibold">
-                    <HandPlatter size={16} /> Task to Replace:
-                  </label>
-
-                  <Select
-                    isMulti
-                    isSearchable
-                    className="shadow-sm select-service"
-                    classNamePrefix="select"
-                    placeholder="Choose Task"
-
-                    options={taskData?.map((task) => ({
-                      value: task.id,
-                      label: task.name,
-                      ...task
-                    }))}
-
-                    value={selectedTasks}
-
-                    onChange={(selectedOption) => {
-                      setSelectedTasks(selectedOption || []);
-                    }}
-
-                    menuPortalTarget={document.body}
-                    styles={{
-                      menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                      }),
-                    }}
-                  />
-                </div>
-              )
-            }
 
             {
               selectedTasks?.length > 0 && (
@@ -3473,21 +3349,6 @@ const Setting = () => {
                               <td className="fw-semibold">
                                 {task?.label}
                               </td>
-
-                              {/* <td>
-                              <input
-                                type="text"
-                                className="form-control form-control-sm"
-                                placeholder="HH:MM"
-                                value={task?.budgeted_hour || ""}
-                                onChange={(e) => {
-                                  const updated = [...selectedTasks];
-                                  updated[index].budgeted_hour = e.target.value;
-                                  setSelectedTasks(updated);
-                                }}
-                              />
-                            </td> */}
-
                               <td>
                                 <div className="input-group">
                                   {/* Hours */}
@@ -3533,65 +3394,181 @@ const Setting = () => {
             }
 
 
-            {/* </div> */}
-
-            <div className="d-grid gap-2">
-              {selectedJobType && (
-                <button onClick={handleDeleteServiceClick} className="btn btn-danger">
-                  <Trash size={16} /> Delete
-                </button>
-              )}
-              <button
-                onClick={() => {
-                  setDeleteServiceModal(false);
-                  setSelectedService(null);
-                  setSelectedJobType(null);
-                  setTaskData([]);
-                  setSelectedTask(null);
-                }}
-                className="btn btn-secondary"
-              >
-                <X size={16} /> Cancel
-              </button>
-            </div>
-
-
-
             {allJobsData?.length > 0 && (
-              <div className="mb-4">
-                <h6 className="fw-bold text-primary">
-                  <BriefcaseBusiness size={16} /> Jobs Assigned:
-                </h6>
+              <>
 
-                <ul className="list-group">
-                  {[...allJobsData]
-                    .sort((a, b) =>
-                      (a?.job_code_id || "").localeCompare(
-                        b?.job_code_id || "",
-                        "en",
-                        {
-                          sensitivity: "base",
-                        },
-                      ),
-                    )
-                    .map((job) => (
-                      <li
-                        key={job.id}
-                        className="list-group-item d-flex justify-content-between align-items-center"
-                      >
-                        <span className="text-dark">
-                          {job?.job_code_id}
-                          {/* <span className="badge bg-secondary ms-2">
-                            {job?.job_code}
-                          </span> */}
-                        </span>
-                      </li>
-                    ))}
-                </ul>
-              </div>
+                <div className="table-responsive">
+                  <table
+                    className="table table-bordered table-sm align-middle w-100 table-equal"
+                    style={{ tableLayout: "fixed" }}
+                  > <thead className="table-light">
+                      <tr>
+                        <th className="col-id">#</th>
+                        <th >Jobs Name</th>
+                        <th >Service</th>
+                        <th >Job Type</th>
+                        <th >Task</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {allJobsData?.map((item, index) => {
+                        return (
+                          <tr key={item?.id}>
+
+                            <td>{index + 1}</td>
+
+                            <td>
+                              {item?.job_code_id}
+                            </td>
+
+                            <td>
+
+                              <Select
+                                isSearchable
+                                className="shadow-sm select-service "
+                                classNamePrefix="select"
+                                placeholder="Choose Service"
+                                options={serviceDataAll?.data
+                                  ?.filter((service) => {
+                                    return (
+                                      service.id !== deleteServiceInfo?.id
+                                    );
+                                  })
+                                  .map((service) => ({
+                                    value: service.id,
+                                    label: `${service.name}`,
+                                    serviceData: service, // 👈 pura service object store
+                                  }))}
+                                value={
+                                  selectedService
+                                    ? {
+                                      value: selectedService?.id,
+                                      label: `${selectedService?.name}`,
+                                    }
+                                    : null
+                                }
+                                onChange={(selectedOption) => {
+                                  setSelectedService(selectedOption?.serviceData || null);
+                                  setSelectedJobType(null);
+                                  setSelectedTasks([]);
+                                  getJobTypeSelectedService(selectedOption?.serviceData);
+                                }}
+                                menuPortalTarget={document.body}
+                                styles={{
+                                  menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 9999,
+                                  }),
+                                }}
+                              />
+
+                            </td>
+
+                            <td>
+
+                              <Select
+                                isSearchable
+                                className="shadow-sm select-service "
+                                classNamePrefix="select"
+                                placeholder="Choose Job Type"
+                                options={jobTypeData?.map((type) => ({
+                                  value: type.id,
+                                  label: `${type.type}`,
+                                  jobTypeData: type, // 👈 pura job type object store
+                                }))}
+                                value={
+                                  selectedJobType
+                                    ? {
+                                      value: selectedJobType?.id,
+                                      label: `${selectedJobType?.type}`,
+                                    }
+                                    : null
+                                }
+                                onChange={(selectedOption) => {
+                                  setSelectedJobType(selectedOption?.jobTypeData || null);
+                                  setSelectedTasks([]);
+                                  getTaskSelectedJobType(selectedOption?.jobTypeData);
+                                }}
+                                menuPortalTarget={document.body}
+                                styles={{
+                                  menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 9999,
+                                  }),
+                                }}
+                              />
+
+                            </td>
+
+                            <td>
+
+                              <Select
+                                isMulti
+                                isSearchable
+                                className="shadow-sm select-service"
+                                classNamePrefix="select"
+                                placeholder="Choose Task"
+
+                                options={taskData?.map((task) => ({
+                                  value: task.id,
+                                  label: task.name,
+                                  ...task
+                                }))}
+
+                                value={selectedTasks}
+
+                                onChange={(selectedOption) => {
+                                  setSelectedTasks(selectedOption || []);
+                                }}
+
+                                menuPortalTarget={document.body}
+                                styles={{
+                                  menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 9999,
+                                  }),
+                                }}
+                              />
+
+                            </td>
+
+                          </tr>
+                        )
+                      }
+
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+
             )}
+
+
+            <button
+              onClick={() => {
+                setDeleteServiceModal(false);
+                setSelectedService(null);
+                setSelectedJobType(null);
+                setTaskData([]);
+                setSelectedTask(null);
+              }}
+              className="btn btn-secondary"
+            >
+              <X size={16} /> Cancel
+            </button>
+
+            {selectedJobType && (
+              <button onClick={handleDeleteServiceClick} className="btn btn-btn btn-outline-success float-end">
+                <Save size={16} /> Confirm
+              </button>
+            )}
+
           </div>
         </CommonModal>
+
+
       </div>
     </>
   );

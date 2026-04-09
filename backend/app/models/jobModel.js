@@ -488,7 +488,7 @@ const jobAdd = async (job) => {
   // Set Status type
   let status_type = 1; // To Be Started
 
- /// validation for reviewing checklist status
+  /// validation for reviewing checklist status
   if (reviewer > 0) {
     if (Number(job?.reviewing_checklist_status) === 2) {
       return {
@@ -3307,7 +3307,7 @@ const jobUpdate = async (job) => {
     }
   }
 
-  
+
 
 
 
@@ -3961,12 +3961,12 @@ const jobUpdate = async (job) => {
             );
           }
         } else {
-          if(reviewer == 0){
+          if (reviewer == 0) {
             job_heading_name.push(
               "has removed the reviewer from the job"
             );
           }
-         else if (reviewer != ExistJob.reviewer) {
+          else if (reviewer != ExistJob.reviewer) {
             const [[getStaff]] = await pool.execute(
               'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
               [reviewer]
@@ -3976,7 +3976,7 @@ const jobUpdate = async (job) => {
             );
           }
         }
-        
+
         // allocated_to,
         if (parseInt(ExistJob.allocated_to) == 0) {
           if (allocated_to > 0) {
@@ -3989,12 +3989,12 @@ const jobUpdate = async (job) => {
             );
           }
         } else {
-          if(allocated_to == 0){
+          if (allocated_to == 0) {
             job_heading_name.push(
               "has removed the processor from the job"
-            );  
+            );
           }
-         else if (allocated_to != ExistJob.allocated_to) {
+          else if (allocated_to != ExistJob.allocated_to) {
             const [[getStaff]] = await pool.execute(
               'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
               [allocated_to]
@@ -4429,8 +4429,8 @@ const GetJobStatus = async (job) => {
 };
 
 const copy_job = async (job) => {
-  const {field, row, StaffUserId, ip } = job;
- 
+  const { field, row, StaffUserId, ip } = job;
+
   try {
 
     let id = row.job_id;
@@ -4519,12 +4519,12 @@ const copy_job = async (job) => {
     data.sla_deadline_date = sla_deadline_date
     /// SLA Dead Line Logic END ////
 
-    
+
 
     ///--- field false logic allocated_to and reviewer chekclist status and checklist modal data set to default value START ----////
 
-   
-    if(field == false){
+
+    if (field == false) {
       data.reviewer = null;
       data.allocated_to = null;
       data.processing_checklist = null;
@@ -4617,29 +4617,86 @@ const copy_job = async (job) => {
 
 const getJobsDeleteService = async (job) => {
 
+  // SELECT 
+  //   jobs.id AS job_id,
+  //   customers.trading_name AS customer_name,
+  //   clients.trading_name AS client_name,
+  //   CONCAT(
+  //     SUBSTRING(customers.trading_name, 1, 3), '_',
+  //     SUBSTRING(clients.trading_name, 1, 3), '_',
+  //     SUBSTRING(job_types.type, 1, 4), '_',
+  //     SUBSTRING(jobs.job_id, 1, 15)
+  //   ) AS job_code_id
+  //   FROM jobs
+  //   JOIN customers ON jobs.customer_id = customers.id
+  //   JOIN clients ON customers.id = clients.customer_id
+  //   JOIN job_types ON jobs.job_type_id = job_types.id
+  //   WHERE jobs.service_id = ?
+
   const { service_id } = job;
   const [results] = await pool.execute(
-      `
-    SELECT 
-    jobs.id AS job_id,
-    customers.trading_name AS customer_name,
-    clients.trading_name AS client_name,
-    CONCAT(
-      SUBSTRING(customers.trading_name, 1, 3), '_',
-      SUBSTRING(clients.trading_name, 1, 3), '_',
-      SUBSTRING(job_types.type, 1, 4), '_',
-      SUBSTRING(jobs.job_id, 1, 15)
-    ) AS job_code_id
-    FROM jobs
-    JOIN customers ON jobs.customer_id = customers.id
-    JOIN clients ON customers.id = clients.customer_id
-    JOIN job_types ON jobs.job_type_id = job_types.id
-    WHERE jobs.service_id = ?
+    `
+      SELECT 
+      jobs.id AS job_id,
+      customers.trading_name AS customer_name,
+      clients.trading_name AS client_name,
+
+      CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+      ) AS job_code_id,
+
+      JSON_ARRAYAGG(
+          JSON_OBJECT(
+              'service_id', services.id,
+              'service_name', services.name
+          )
+      ) AS services,
+
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'job_type_id', job_types.id,
+            'job_type_name', job_types.type,
+            'service_id', job_types.service_id
+        )
+    ) AS jobTypes,
+
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'task_id', task.id,
+            'task_name', task.id,
+            'service_id', task.service_id,
+            'job_type_id', task.job_type_id,
+            'budgeted_hour', task.budgeted_hour
+        )
+    ) AS tasks
+
+      FROM jobs
+      JOIN customers ON jobs.customer_id = customers.id
+      JOIN clients ON customers.id = clients.customer_id
+
+      JOIN customer_services ON customer_services.customer_id = customers.id
+      JOIN services ON services.id = customer_services.service_id
+
+      JOIN job_types ON job_types.service_id = services.id
+
+      JOIN task ON task.service_id = services.id
+      
+      WHERE jobs.service_id = ?
+      GROUP BY 
+          jobs.id,
+          customers.trading_name,
+          clients.trading_name,
+          jobs.job_id
+
+      ORDER BY jobs.id DESC
     `,
-      [service_id]
-    );
-    
-   return { status: true, message: "Success", data: results };
+    [service_id]
+  );
+
+  return { status: true, message: "Success", data: results };
 
 }
 
