@@ -295,18 +295,25 @@ const Setting = () => {
       return
     }
 
-    console.log("handleDeleteServiceClick called with deleteServiceInfo:", deleteServiceInfo);
-    console.log("handleDeleteServiceClick called with selectedService:", selectedService);
+    console.log("deleteServiceInfo:", deleteServiceInfo);
+    console.log("selectedService:", selectedService);
+    console.log("selectedJobType:", selectedJobType);
+    console.log("selectedTasks:", selectedTasks);
     let data = {
       delete_service: deleteServiceInfo,
       update_service: selectedService,
+      update_job_type: selectedJobType,
+      update_tasks: selectedTasks
     };
-
+     
+    setLoading(true);
     const req = { action: "deletExistingJob", data: data }; 
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
+          setLoading(false);
           if (response.status) {
+            setDeleteServiceModal(false);
             sweatalert.fire({
               title: response.message,
               icon: "success",

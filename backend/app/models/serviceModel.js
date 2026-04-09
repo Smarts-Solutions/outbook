@@ -2,7 +2,7 @@ const pool = require('../config/database');
 const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createServices = async (Services) => {
-    const {name} = Services;
+    const { name } = Services;
     const checkQuery = `SELECT 1 FROM services WHERE name = ?`
     const query = `
     INSERT INTO services (name)
@@ -12,7 +12,7 @@ const createServices = async (Services) => {
     try {
         const [check] = await pool.query(checkQuery, [name]);
         if (check.length > 0) {
-            return {status: false , message: 'Service already exists.'};
+            return { status: false, message: 'Service already exists.' };
         }
         const [result] = await pool.execute(query, [name]);
         const currentDate = new Date();
@@ -24,11 +24,11 @@ const createServices = async (Services) => {
                 module_name: "services",
                 log_message: `created services ${name}`,
                 permission_type: "created",
-                module_id:result.insertId
+                module_id: result.insertId
             }
         );
 
-       if(result.insertId > 0){
+        if (result.insertId > 0) {
             const service_id = result.insertId
             const type = name
             const queryJobType = `
@@ -45,19 +45,19 @@ const createServices = async (Services) => {
                     module_name: "job_types",
                     log_message: `created job type ${type}`,
                     permission_type: "created",
-                    module_id:resultJobType.insertId
+                    module_id: resultJobType.insertId
                 }
             );
         }
 
-        return {status: true ,message: 'Service created successfully.' , data : result.insertId};
+        return { status: true, message: 'Service created successfully.', data: result.insertId };
     } catch (err) {
         console.log('Error inserting data:', err);
         throw err;
     }
 };
 
-const getServices = async () => { 
+const getServices = async () => {
     const query = `
     SELECT * FROM services WHERE status = '1' AND deleted = '0'
     ORDER BY id DESC 
@@ -72,7 +72,7 @@ const getServices = async () => {
     }
 }
 
-const getServicesAll = async () => { 
+const getServicesAll = async () => {
     // const query = `
     // SELECT * FROM services
     // WHERE deleted = '0'
@@ -103,8 +103,8 @@ const getServicesAll = async () => {
 
 const deleteServices = async (ServicesId) => {
     const [[existName]] = await pool.execute(`SELECT name FROM services WHERE id = ?`, [ServicesId.id]);
-    
-    if(parseInt(ServicesId.id) > 0){
+
+    if (parseInt(ServicesId.id) > 0) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
             {
@@ -114,14 +114,14 @@ const deleteServices = async (ServicesId) => {
                 module_name: "services",
                 log_message: `deleted services ${existName.name}`,
                 permission_type: "deleted",
-                module_id:ServicesId.id
+                module_id: ServicesId.id
             }
         );
     }
     const query = `DELETE FROM services WHERE id = ? `;
     try {
         await pool.execute(query, [ServicesId.id]);
-        
+
     } catch (err) {
         console.log('Error deleting data:', err);
         throw err;
@@ -129,7 +129,69 @@ const deleteServices = async (ServicesId) => {
 };
 
 const deletExistingJob = async (Services) => {
-    console.log("delete Services --->>>",Services)
+    let { data, ip, StaffUserId } = Services
+    console.log("delete data --->>>", data)
+    console.log("delete ip --->>>", ip)
+    console.log("delete StaffUserId --->>>", StaffUserId)
+    let deleted_service_info = data.delete_service
+    let update_service_info = data.update_service
+    let update_job_type_info = data.update_job_type
+    let update_tasks_info = data.update_tasks
+
+    let [get_job_id] = await pool.execute(`SELECT id , client_id FROM jobs WHERE service_id = ?`, [deleted_service_info.id]);
+
+    
+    for (let index = 0; index < get_job_id.length; index++) {
+        const element = get_job_id[index];
+        console.log("element --->>>", element)
+
+        //// find job 
+        let query = `
+            UPDATE jobs SET
+            service_id = ${update_service_info.id},job_type_id = ${update_job_type_info.id}
+            WHERE id=${element.id}
+        `;
+
+        await pool.query(query);
+
+ 
+        // Task Insert
+        // Delete job tasks
+        await pool.execute(`DELETE FROM client_job_task WHERE job_id = ?`, [element.id]);
+        for (let index = 0; index < update_tasks_info.length; index++) {
+            // insert client_job_task this tasks
+            const task = update_tasks_info[index];
+            const insertQuery = `
+            INSERT INTO 
+            client_job_task 
+            (
+                job_id,
+                client_id,
+                task_id,
+                time
+            ) VALUES 
+             (?,?,?,?)`;
+
+            const insertValues = [
+                element.id,
+                element.client_id,
+                task.id,
+                task.budgeted_hour 
+            ];
+
+            await pool.query(insertQuery, insertValues);
+        }
+
+
+    }
+
+     const query = `UPDATE services SET deleted = '1' WHERE id = ? `;
+     await pool.execute(query, [deleted_service_info.id]);
+     return { status: true, message: 'Service deleted successfully.', data: get_job_id };
+
+
+
+
 
 }
 
@@ -144,7 +206,7 @@ const updateServices = async (Services) => {
         if (key != "ip" && key != "StaffUserId") {
             setClauses.push(`${key} = ?`);
             values.push(value);
-          }
+        }
     }
     // Add the id to the values array for the WHERE clause
     values.push(id);
@@ -155,26 +217,26 @@ const updateServices = async (Services) => {
     WHERE id = ?
     `;
 
-     // Check if the record exists
-     const checkQuery = `SELECT 1 FROM services WHERE name = ? AND id != ?`;
+    // Check if the record exists
+    const checkQuery = `SELECT 1 FROM services WHERE name = ? AND id != ?`;
     try {
         const [check] = await pool.execute(checkQuery, [name, id]);
         if (check.length > 0) {
-            return {status: false , message: 'Service already exists.'};
+            return { status: false, message: 'Service already exists.' };
         }
         const [[existStatus]] = await pool.execute(`SELECT status FROM services WHERE id = ?`, [id]);
         let status_change = "Deactivate"
-        if(Services.status == "1"){
-          status_change = "Activate"
+        if (Services.status == "1") {
+            status_change = "Activate"
         }
         let log_message = existStatus.status === Services.status ?
             // `edited services ${type}`:
-            `edited services `:
+            `edited services ` :
 
             `changes the services status ${status_change} ${name}`
 
         const [result] = await pool.execute(query, values);
-        if(result.changedRows){
+        if (result.changedRows) {
             const currentDate = new Date();
             await SatffLogUpdateOperation(
                 {
@@ -184,11 +246,11 @@ const updateServices = async (Services) => {
                     module_name: "services",
                     log_message: log_message,
                     permission_type: "updated",
-                    module_id:Services.id
+                    module_id: Services.id
                 }
             );
         }
-        return {status: true ,message: 'Service updated successfully.' , data : result.affectedRows};
+        return { status: true, message: 'Service updated successfully.', data: result.affectedRows };
     } catch (err) {
         console.log('Error updating data:', err);
         throw err;
@@ -203,5 +265,5 @@ module.exports = {
     getServices,
     getServicesAll,
     deletExistingJob
-  
+
 };
