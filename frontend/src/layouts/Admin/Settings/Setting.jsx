@@ -75,7 +75,7 @@ const Setting = () => {
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [errorsBudgetTimeTask, setErrorsBudgetTimeTask] = useState({});
 
-  console.log("selectedTasks -->> ", selectedTasks);
+  console.log("allJobsData -->> ", allJobsData);
 
 
   const accessData = useSelector(
@@ -3429,30 +3429,24 @@ const Setting = () => {
                                 className="shadow-sm select-service "
                                 classNamePrefix="select"
                                 placeholder="Choose Service"
-                                options={serviceDataAll?.data
+                                options={item?.services
+                                  ?.filter(
+                                    (service, index, self) =>
+                                      index === self.findIndex((s) => s.service_id === service.service_id)
+                                  )
                                   ?.filter((service) => {
                                     return (
-                                      service.id !== deleteServiceInfo?.id
+                                      service.service_id !== deleteServiceInfo?.id
                                     );
                                   })
                                   .map((service) => ({
-                                    value: service.id,
-                                    label: `${service.name}`,
+                                    value: service?.service_id,
+                                    label: `${service?.service_name}`,
                                     serviceData: service, // 👈 pura service object store
                                   }))}
-                                value={
-                                  selectedService
-                                    ? {
-                                      value: selectedService?.id,
-                                      label: `${selectedService?.name}`,
-                                    }
-                                    : null
-                                }
+                                value={""}
                                 onChange={(selectedOption) => {
-                                  setSelectedService(selectedOption?.serviceData || null);
-                                  setSelectedJobType(null);
-                                  setSelectedTasks([]);
-                                  getJobTypeSelectedService(selectedOption?.serviceData);
+
                                 }}
                                 menuPortalTarget={document.body}
                                 styles={{

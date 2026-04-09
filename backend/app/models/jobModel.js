@@ -4634,9 +4634,12 @@ const getJobsDeleteService = async (job) => {
   //   WHERE jobs.service_id = ?
 
   const { service_id } = job;
-  const [results] = await pool.execute(
-    `
-      SELECT 
+
+  try {
+    
+  
+     const [results] = await pool.execute(
+    ` SELECT 
       jobs.id AS job_id,
       customers.trading_name AS customer_name,
       clients.trading_name AS client_name,
@@ -4697,6 +4700,10 @@ const getJobsDeleteService = async (job) => {
   );
 
   return { status: true, message: "Success", data: results };
+
+  } catch (error) {
+    console.log(error);
+  }
 
 }
 
