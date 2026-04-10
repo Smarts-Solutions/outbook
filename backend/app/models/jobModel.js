@@ -11,7 +11,7 @@ const {
 const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
 
 const getAddJobData = async (job) => {
-  const { customer_id, StaffUserId } = job;
+  const { customer_id, StaffUserId, job_id } = job;
 
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   const roleData = await QueryRoleHelperFunction(StaffUserId);
@@ -403,6 +403,24 @@ const getAddJobData = async (job) => {
     // console.log("processing_checklist_data ",processing_checklist_data)
     // console.log("reviewing_checklist_data ",reviewing_checklist_data)
 
+    let status_history = [];
+    if (job_id) {
+      const historyQuery = `
+        SELECT 
+          jsu.id,
+          jsu.job_id,
+          jsu.status_type,
+          ms.name AS status_name,
+          jsu.status_update_date
+        FROM job_status_updation jsu
+        LEFT JOIN master_status ms ON jsu.status_type = ms.id
+        WHERE jsu.job_id = ?
+        ORDER BY jsu.id ASC;
+      `;
+      const [historyRows] = await pool.execute(historyQuery, [job_id]);
+      status_history = historyRows;
+    }
+
 
     return {
       status: true,
@@ -421,8 +439,8 @@ const getAddJobData = async (job) => {
         allStaff: rowsStaff,
         customerDetails: customerDetails,
         processing_checklist_data: processing_checklist_data,
-        reviewing_checklist_data: reviewing_checklist_data
-
+        reviewing_checklist_data: reviewing_checklist_data,
+        status_history: status_history
       },
     };
   } catch (err) {

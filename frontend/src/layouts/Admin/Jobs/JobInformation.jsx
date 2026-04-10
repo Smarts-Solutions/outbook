@@ -3,15 +3,15 @@ import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  GetAllJabData,
-  Update_Status,
-  GET_ALL_CHECKLIST,
-} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+   GetAllJabData,
+   Update_Status,
+   GET_ALL_CHECKLIST,
+ } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from 'react-select';
-import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw } from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, AlertCircle, Info, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../Utils/Config";
@@ -101,6 +101,57 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     loading: false,
     type: ""
   });
+
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusHistory, setStatusHistory] = useState([]);
+  const [showHistoryInline, setShowHistoryInline] = useState(false);
+
+  const handleShowStatusHistory = () => {
+    setShowHistoryInline(!showHistoryInline);
+    setStatusHistory(AllJobData.data?.status_history || []);
+  };
+
+  const getDurationData = () => {
+    const history = AllJobData.data?.status_history || [];
+    if (history.length === 0) return { items: [], total: "" };
+    
+    let processed = [];
+    let totalMs = 0;
+    
+    const formatPreciseDuration = (ms) => {
+      const totalMinutes = Math.floor(ms / (1000 * 60));
+      const days = Math.floor(totalMinutes / (24 * 60));
+      const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+      const minutes = totalMinutes % 60;
+      
+      let result = [];
+      if (days > 0) result.push(`${days}d`);
+      if (hours > 0) result.push(`${hours}h`);
+      if (minutes > 0 || result.length === 0) result.push(`${minutes}m`);
+      
+      return result.join(" ");
+    };
+    
+    for (let i = 0; i < history.length; i++) {
+      const current = history[i];
+      const next = history[i + 1];
+      
+      const startDate = new Date(current.status_update_date);
+      const endDate = next ? new Date(next.status_update_date) : new Date();
+      
+      const diffMs = endDate - startDate;
+      totalMs += diffMs;
+      
+      processed.push({
+        status: current.status_name,
+        from: startDate,
+        to: next ? endDate : null,
+        duration: formatPreciseDuration(diffMs)
+      });
+    }
+    
+    return { items: processed, total: formatPreciseDuration(totalMs) };
+  };
 
   const handleViewChecklist = async (checklistId, title, type) => {
 
@@ -433,7 +484,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   };
 
   const GetJobData = async () => {
-    const req = { customer_id: JobInformationData?.Customer_id };
+    const req = { customer_id: JobInformationData?.Customer_id, job_id: location.state.job_id };
     const data = { req: req, authToken: token };
     await dispatch(GetAllJabData(data))
       .unwrap()
@@ -1546,6 +1597,15 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     </div>
                   )}
 
+                {selectStatusIs && (
+                  <span className="text-muted fs-12 d-flex align-items-center px-3 py-1 rounded-pill border bg-light ms-2" style={{ minWidth: 'fit-content', height: '38px' }}>
+                    <Clock size={14} className="me-2 text-primary" />
+                    <span className="fw-semibold" style={{ color: '#495057' }}>
+                      {getDurationData().items[getDurationData().items.length - 1]?.duration || "0m"}
+                    </span>
+                  </span>
+                )}
+
                 {(getAccessDataJob.update === 1 ||
 
                   role === "SUPERADMIN") && (
@@ -2190,7 +2250,16 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         <option value="normal">Normal</option>
                         <option value="urgent">Urgent</option>
                       </select>
-
+                      <div className="mt-2 text-start">
+                        <button
+                          type="button"
+                          className={`${showHistoryInline ? 'bg-primary text-white' : 'text-primary'} btn btn-link p-1 px-2 fs-12 d-flex align-items-center rounded-pill border border-primary text-decoration-none`}
+                          onClick={handleShowStatusHistory}
+                          style={{ transition: 'all 0.3s ease' }}
+                        >
+                          <Clock size={14} className="me-1" /> {showHistoryInline ? 'Hide Duration History' : 'Status Duration History'}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2324,6 +2393,73 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       )}
                     </div>
                   </div>
+
+                  {showHistoryInline && (
+                    <div className="col-lg-12 mt-4">
+                      <div className="card border-0 shadow-sm" style={{ background: '#f8fafd', borderRadius: '15px' }}>
+                        <div className="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
+                          <h5 className="fs-15 fw-bold text-dark mb-0 d-flex align-items-center">
+                            <Clock size={18} className="text-primary me-2" />
+                            Status Duration History
+                          </h5>
+                        </div>
+                        <div className="card-body px-4 py-4">
+                          <div className="timeline-container ps-2">
+                            {getDurationData().items.length > 0 ? (
+                              getDurationData().items.map((item, index, array) => (
+                                <div className="timeline-item position-relative mb-4" key={index}>
+                                  {/* Timeline Line */}
+                                  {index !== array.length - 1 && (
+                                    <div className="position-absolute h-100 border-start border-2 border-dashed border-primary-subtle" 
+                                         style={{ left: '11px', top: '24px', zIndex: 1 }}></div>
+                                  )}
+                                  
+                                  <div className="d-flex align-items-start position-relative" style={{ zIndex: 2 }}>
+                                    <div className="timeline-icon bg-white p-1 rounded-circle border border-2 border-primary d-flex align-items-center justify-content-center"
+                                         style={{ width: '24px', height: '24px' }}>
+                                      {index === array.length - 1 ? (
+                                        <Clock size={12} className="text-primary" />
+                                      ) : (
+                                        <CheckCircle2 size={12} className="text-primary" />
+                                      )}
+                                    </div>
+                                    
+                                    <div className="ms-3 flex-grow-1">
+                                      <div className="d-flex justify-content-between align-items-center">
+                                        <h6 className="fs-13 fw-semibold text-dark mb-1">{item.status || "Status Update"}</h6>
+                                        <span className="badge bg-soft-info text-info rounded-pill px-3 py-1 fs-11 fw-bold">
+                                          {item.duration}
+                                        </span>
+                                      </div>
+                                      <p className="fs-12 text-muted mb-0">
+                                        {item.from.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} 
+                                        {item.to ? ` → ${item.to.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ' → Present'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center py-4 bg-white rounded-3 border border-dashed">
+                                <div className="avatar-md mx-auto mb-3">
+                                  <div className="avatar-title bg-light text-primary rounded-circle fs-24">
+                                    <Clock size={24} />
+                                  </div>
+                                </div>
+                                <h5 className="fs-14 fw-bold text-dark">No History Available</h5>
+                                <p className="text-muted fs-12 mb-0">There are no status duration logs recorded for this job yet.</p>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* <div className="border-top border-light-subtle mt-4 pt-3 d-flex justify-content-between align-items-center">
+                            <span className="fs-13 text-muted fw-medium">Total Duration</span>
+                            <span className="fs-16 fw-bold text-dark">{getDurationData().total}</span>
+                          </div> */}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -3010,6 +3146,15 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .bg-soft-info {
+          background-color: rgba(53, 119, 241, 0.1);
+        }
+        .border-dashed {
+          border-style: dashed !important;
+        }
+      `}</style>
     </div>
   );
 };
