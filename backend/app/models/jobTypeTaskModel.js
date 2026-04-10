@@ -502,13 +502,13 @@ const getByIdChecklist = async (checklist) => {
 
   try {
     const [checklistRows] = await pool.execute(query, [checklist_id]);
-    
+
     if (checklistRows.length === 0) {
       return { status: false, message: "Checklist not found." };
     }
 
     const row = checklistRows[0];
-    
+
     const result = {
       checklists_id: row.checklists_id,
       check_list_name: row.check_list_name,
@@ -522,10 +522,34 @@ const getByIdChecklist = async (checklist) => {
       client_type_id: row.client_type_id ? row.client_type_id.toString().split(",") : [],
     };
 
+    /// get jobs Exist check data
+    const queryJobs = `
+    SELECT
+    id,
+    job_type_id,
+    service_id,
+    customer_id
+    FROM 
+    jobs
+    WHERE processing_checklist = ? OR reviewing_checklist = ?
+    ORDER BY jobs.id DESC
+    `;
+    const [existJobsChecklist] = await pool.execute(queryJobs, [checklist_id, checklist_id]);
+
+    console.log("existJobsChecklist", existJobsChecklist);
+
+    const allExistIds = {
+      customer_ids: [...new Set(existJobsChecklist?.map(i => String(i.customer_id)))],
+      job_type_ids: [...new Set(existJobsChecklist?.map(i => String(i.job_type_id)))],
+      service_ids: [...new Set(existJobsChecklist?.map(i => String(i.service_id)))]
+    };
+
+    
+
     return {
       status: true,
       message: "checklist get successfully.",
-      data: result,
+      data: {result ,allExistIds},
     };
   } catch (err) {
     console.error("Error in getByIdChecklist:", err);

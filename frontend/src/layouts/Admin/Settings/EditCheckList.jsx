@@ -40,6 +40,9 @@ const EditCheckList = () => {
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [existingFile, setExistingFile] = useState("");
+  const [allExistIds, setAllExistIds] = useState({}); 
+
+  console.log("allExistIds", allExistIds);
 
   const options = [
     { key: "1", label: "Sole Trader" },
@@ -87,8 +90,9 @@ const EditCheckList = () => {
     const data = { req, authToken: token };
     try {
       const response = await dispatch(getList(data)).unwrap();
-      if (response.status && response.data) {
-        const d = response.data;
+      console.log("response", response);
+      if (response.status && response?.data?.result) {
+        const d = response?.data?.result;
 
         const mappedFormData = {
           customer_id: Array.isArray(d.customer_id) ? d.customer_id.map(id => id.toString()) : [],
@@ -109,6 +113,8 @@ const EditCheckList = () => {
         if (Array.isArray(d.service_id) && d.service_id.length > 0) {
           getJobTypeData(d.service_id);
         }
+
+        setAllExistIds(response?.data?.allExistIds || {});
       }
     } catch (error) {
       console.error("fetchChecklistDetails error", error);
@@ -290,7 +296,7 @@ const EditCheckList = () => {
 
           for (let i = 0; i <= lastNonEmptyIndex; i++) {
             const row = dataRows[i];
-            
+
             if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) {
               continue;
             }
@@ -533,7 +539,7 @@ const EditCheckList = () => {
                     value={formData.work_flow_type}
                     onChange={handleInputChange}
                   >
-          
+
                     <option value="3">Processing Type</option>
                     <option value="6">Reviewing Type</option>
                   </select>
@@ -548,7 +554,7 @@ const EditCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Customer Name</label>
-                  <Select
+                  {/* <Select
                     isMulti
                     closeMenuOnSelect={false}
                     options={customerAllData}
@@ -560,7 +566,6 @@ const EditCheckList = () => {
                         ? selectedOptions.map((opt) => opt.value)
                         : [];
                       setFormData((p) => ({ ...p, customer_id: values }));
-
                       if (values.length === 0) {
                         setCustomerHasMore(true);
                         setCustomerPage(1);
@@ -584,6 +589,77 @@ const EditCheckList = () => {
                     className="shadow-sm select-staff rounded-pill"
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                  /> */}
+
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={customerAllData}
+                    value={customerAllData.filter((opt) =>
+                      formData?.customer_id?.includes(opt.value),
+                    )}
+
+                    onChange={(selectedOptions) => {
+
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+
+                      let finalValues = values;
+
+                      // Agar koi customer select hua
+                      if (values.length > 0) {
+
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this customer?"
+                        );
+
+                        if (confirmSelect && allExistIds?.customer_ids?.length > 0) {
+                          finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
+                        }
+                      }
+
+                      console.log("finalValues", finalValues);
+
+                      setFormData((p) => ({
+                        ...p,
+                        customer_id: finalValues
+                      }));
+
+
+                      // Reset logic
+                      if (finalValues.length === 0) {
+                        setCustomerHasMore(true);
+                        setCustomerPage(1);
+                        setCustomerSearch("");
+                        setCustomerAllData([]);
+                        customerCache.current = {};
+                        GetAllCustomer({ searchValue: "", pageNo: 1 });
+                      }
+
+                    }}
+
+                    onInputChange={(value) => handleCustomerSearch(value)}
+
+                    onMenuScrollToBottom={() => {
+                      if (customerHasMore) {
+                        GetAllCustomer({
+                          searchValue: customerSearch,
+                          pageNo: customerPage + 1,
+                          append: true,
+                        });
+                      }
+                    }}
+
+                    isSearchable
+                    className="shadow-sm select-staff rounded-pill"
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: base => ({
+                        ...base,
+                        zIndex: 9999
+                      })
+                    }}
                   />
                 </div>
               </div>
@@ -710,16 +786,16 @@ const EditCheckList = () => {
                   accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                   onChange={handleFileChange}
                 />
-                
+
                 <div className="ms-3">
                   {existingFile ? (
                     <div className="d-flex flex-column">
                       <span className="text-muted small">Previously Uploaded:</span>
-                      <a 
-                         href={`${base_url}downloadChecklist/${location.state?.checklist_id || location.state?.id}`}
-                         className="text-primary text-decoration-none fw-bold"
-                         target="_blank" 
-                         rel="noopener noreferrer"
+                      <a
+                        href={`${base_url}downloadChecklist/${location.state?.checklist_id || location.state?.id}`}
+                        className="text-primary text-decoration-none fw-bold"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {existingFile}
                       </a>
