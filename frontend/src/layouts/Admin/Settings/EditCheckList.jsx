@@ -5,6 +5,7 @@ import {
   JobType,
   getList,
   UpdateChecklistData,
+  GetServicesByCustomers
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import {
   getAllCustomerDropDown,
@@ -114,6 +115,12 @@ const EditCheckList = () => {
           getJobTypeData(d.service_id);
         }
 
+        console.log("customer_id ---- ", d.customer_id);
+
+        if (Array.isArray(d.customer_id) && d.customer_id.length > 0) {
+          getServiceData(d.customer_id);
+         }
+
         setAllExistIds(response?.data?.allExistIds || {});
       }
     } catch (error) {
@@ -200,6 +207,40 @@ const EditCheckList = () => {
       setJobTypeOptions([]);
     }
   };
+
+  const getServiceData = async (customer_ids) => {
+
+    customer_ids = Array.isArray(customer_ids) ? customer_ids.map(String) : [];
+     
+    if (!Array.isArray(customer_ids) || customer_ids.length === 0) {
+      getAllServices();
+      return;
+    }
+
+    try {
+      const calls = customer_ids.map((customer_id) => {
+        const req = { customer_id, action: "customerGetServiceCheckList" };
+        const data = { req, authToken: token };
+        return dispatch(GetServicesByCustomers(data)).unwrap();
+      });
+
+      const responses = await Promise.all(calls);
+      const allServices = responses
+        .filter((r) => r?.status)
+        .flatMap((r) => Array.isArray(r.data) ? r.data : []);
+
+      const uniqueServices = Array.from(
+        new Map(allServices.map((item) => [item.id, item])).values(),
+      );
+
+      setServiceAllData(uniqueServices);
+     
+    } catch (error) {
+      console.error("getServicesByCustomers error", error);
+      setServiceAllData([]);
+     
+    }
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -390,6 +431,13 @@ const EditCheckList = () => {
   const handleInputChange = (e) => {
     let name = e.target.name;
     let value = e.target.value;
+
+
+    if (name === "customer_id") {
+      getServiceData(value);
+    }
+
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
@@ -614,9 +662,9 @@ const EditCheckList = () => {
                         );
 
                         if (confirmSelect) {
-                          if(allExistIds?.customer_ids?.length > 0){
+                          if (allExistIds?.customer_ids?.length > 0) {
                             finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
-                          }else{
+                          } else {
                             finalValues = values
                           }
                         } else {
@@ -629,6 +677,7 @@ const EditCheckList = () => {
                         ...p,
                         customer_id: finalValues
                       }));
+                      getServiceData(finalValues);
 
 
                       // Reset logic
@@ -801,7 +850,7 @@ const EditCheckList = () => {
 
                       const values = selectedOptions ? selectedOptions.map((opt) => opt.value) : [];
 
-                
+
                       let finalValues = values;
                       if (values.length > 0) {
 

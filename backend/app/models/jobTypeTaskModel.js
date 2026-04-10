@@ -698,6 +698,28 @@ const customerGetService = async (task) => {
     return { status: false, message: "Error get service." };
   }
 };
+const customerGetServiceCheckList = async (task) => {
+  const { customer_id } = task;
+  const query = `
+    SELECT 
+    services.id,
+    services.name,
+    services.is_disable,
+    services.status,
+    services.deleted
+    FROM customer_services
+    JOIN
+    services ON services.id = customer_services.service_id
+    WHERE customer_services.customer_id = ?
+    ORDER BY customer_services.id DESC
+    `;
+  try {
+    const [result] = await pool.execute(query, [customer_id]);
+    return { status: true, message: "service get successfully.", data: result };
+  } catch (err) {
+    return { status: false, message: "Error get service." };
+  }
+};
 
 const getClientTypeChecklist = async (checklist) => {
   const query = `
@@ -822,4 +844,5 @@ module.exports = {
   getClientTypeChecklist,
   getByServiceWithJobType,
   getFilenameById,
+  customerGetServiceCheckList
 };
