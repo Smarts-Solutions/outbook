@@ -3558,7 +3558,7 @@ const Setting = () => {
 
                                 value={item?.selectedTasks || []}
                                 onChange={(selectedOption) =>
-                                  handleSelectChange(selectedOption, index, "task")
+                                  handleSelectChangeDeleteService(selectedOption, index, "task")
                                 }
 
                                 menuPortalTarget={document.body}
