@@ -2396,7 +2396,7 @@ const CreateJob = () => {
     }))
   ];
 
-
+ 
   // let isAssignDetails = jobData?.CustomerDetails.find(
   //   (detail) => detail.assigned_source === "assign_customer_service"
   // );
@@ -2405,6 +2405,10 @@ const CreateJob = () => {
   //   serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
   // }
 
+
+
+
+  /////////////////////////////////
   let assignDetails = jobData?.CustomerDetails?.filter(
     (detail) => detail.assigned_source === "assign_customer_service"
   );
