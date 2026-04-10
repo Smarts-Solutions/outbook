@@ -480,7 +480,7 @@ const EditCheckList = () => {
   };
 
   const handleMultipleSelect = (e) => {
-    
+
     if (e.length === 0) {
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
     } else {
@@ -615,7 +615,7 @@ const EditCheckList = () => {
 
                         if (confirmSelect && allExistIds?.customer_ids?.length > 0) {
                           finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
-                        }else{
+                        } else {
                           return
                         }
                       }
@@ -694,7 +694,7 @@ const EditCheckList = () => {
 
                         if (confirmSelect && allExistIds?.service_ids?.length > 0) {
                           finalValues = [...new Set([...values, ...allExistIds?.service_ids])];
-                        }else{
+                        } else {
                           return
                         }
                       }
@@ -737,8 +737,8 @@ const EditCheckList = () => {
                         formData.job_type_id.includes(j.id.toString()),
                       )
                       .map((j) => ({ value: j.id.toString(), label: j.type }))}
-                    
-                     onChange={(opts) => {
+
+                    onChange={(opts) => {
 
                       const values = opts ? opts.map((o) => o.value) : [];
                       let finalValues = values;
@@ -748,9 +748,13 @@ const EditCheckList = () => {
                           "Are you sure you want to select this job type?"
                         );
 
-                        if (confirmSelect && allExistIds?.job_type_ids?.length > 0) {
-                          finalValues = [...new Set([...values, ...allExistIds?.job_type_ids])];
-                        }else{
+                        if (confirmSelect) {
+                          if (allExistIds?.job_type_ids?.length > 0) {
+                            finalValues = [...new Set([...values, ...allExistIds?.job_type_ids])];
+                          } else {
+                            finalValues = [...new Set([...values])];
+                          }
+                        } else {
                           return
                         }
                       }
@@ -785,39 +789,39 @@ const EditCheckList = () => {
                     value={options
                       .filter((opt) => selectedClientType.includes(opt.key))
                       .map((opt) => ({ value: opt.key, label: opt.label }))}
-                      onChange={(selectedOptions) => {
+                    onChange={(selectedOptions) => {
 
-                       const values = selectedOptions  ? selectedOptions.map((opt) => opt.value) : [];
+                      const values = selectedOptions ? selectedOptions.map((opt) => opt.value) : [];
 
-                       alert(values)
-                       let finalValues = values;
-                       if (values.length > 0) {
+                      alert(values)
+                      let finalValues = values;
+                      if (values.length > 0) {
 
-                         const confirmSelect = window.confirm(
-                           "Are you sure you want to select this client type?"
-                         );
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this client type?"
+                        );
 
-                        
 
-                         if (confirmSelect) {
-                           if(allExistIds?.client_type_ids?.length > 0){
-                           finalValues = [...new Set([...values, ...allExistIds?.client_type_ids])];
-                           }else{
+
+                        if (confirmSelect) {
+                          if (allExistIds?.client_type_ids?.length > 0) {
+                            finalValues = [...new Set([...values, ...allExistIds?.client_type_ids])];
+                          } else {
                             finalValues = [...new Set([...values])];
-                           }
-                         }else{
-                           return
-                         }
-                       }
+                          }
+                        } else {
+                          return
+                        }
+                      }
 
-                       handleMultipleSelect(finalValues);
+                      handleMultipleSelect(finalValues);
 
 
-                        // const values = selectedOptions
-                        //   ? selectedOptions.map((opt) => opt.value)
-                        //   : [];
-                        // handleMultipleSelect(values);
-                      }}
+                      // const values = selectedOptions
+                      //   ? selectedOptions.map((opt) => opt.value)
+                      //   : [];
+                      // handleMultipleSelect(values);
+                    }}
                     className={errors.client_type_id ? "error-field" : ""}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
