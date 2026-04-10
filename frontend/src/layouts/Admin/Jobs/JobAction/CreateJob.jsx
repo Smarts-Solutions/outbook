@@ -3665,7 +3665,7 @@ const CreateJob = () => {
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
                                                 onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "reviewing")}
                                               >
-                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                                <ExternalLink size={12} className="me-1" /> Fill checklist
                                               </button>
                                             ) : (
                                               <span className="text-muted fs-12">PDF Not Available</span>

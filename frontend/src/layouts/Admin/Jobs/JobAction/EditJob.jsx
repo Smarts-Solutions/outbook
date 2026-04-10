@@ -3950,19 +3950,24 @@ const EditJob = () => {
                                             </option>
                                           ))}
                                       </select>
-                                      {jobData.processing_checklist && jobData.processing_checklist !== "0" && (
+                                      
+                                      {jobData.processing_checklist !== null && Number(jobData.processing_checklist) !== 0 && (
                                         <div className="mt-1">
                                           {(() => {
+                                             
                                             const selected = AllJobData?.data?.processing_checklist_data?.find(
                                               (item) => Number(item.id) === Number(jobData.processing_checklist)
                                             );
+
+                                            
                                             return selected?.upload_checklist_name ? (
                                               <button
                                                 type="button"
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
                                                 onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "processing")}
                                               >
-                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                                
+                                                <ExternalLink size={12} className="me-1" /> Fill checklist
                                               </button>
                                             ) : (
                                               <span className="text-muted fs-12">PDF Not Available</span>
@@ -3970,6 +3975,7 @@ const EditJob = () => {
                                           })()}
                                         </div>
                                       )}
+                                      
                                     </div>
                                   </div>
 
@@ -4024,7 +4030,7 @@ const EditJob = () => {
                                             </option>
                                           ))}
                                       </select>
-                                      {jobData.reviewing_checklist && jobData.reviewing_checklist !== "0" && (
+                                      {jobData.reviewing_checklist !== null && Number(jobData.reviewing_checklist) !== 0 && (
                                         <div className="mt-1">
                                           {(() => {
                                             const selected = AllJobData?.data?.reviewing_checklist_data?.find(
@@ -4036,7 +4042,7 @@ const EditJob = () => {
                                                 className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
                                                 onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "reviewing")}
                                               >
-                                                <ExternalLink size={12} className="me-1" /> checklist_excel
+                                                <ExternalLink size={12} className="me-1" /> Fill checklist
                                               </button>
                                             ) : (
                                               <span className="text-muted fs-12">PDF Not Available</span>
