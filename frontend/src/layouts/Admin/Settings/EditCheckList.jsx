@@ -785,11 +785,29 @@ const EditCheckList = () => {
                       .filter((opt) => selectedClientType.includes(opt.key))
                       .map((opt) => ({ value: opt.key, label: opt.label }))}
                       onChange={(selectedOptions) => {
-                        const values = selectedOptions
-                          ? selectedOptions.map((opt) => opt.value)
-                          : [];
-                        handleMultipleSelect(values);
-                    }}
+
+                       const values = selectedOptions  ? selectedOptions.map((opt) => opt.value) : [];
+                       let finalValues = values;
+                       if (values.length > 0) {
+
+                         const confirmSelect = window.confirm(
+                           "Are you sure you want to select this client type?"
+                         );
+
+                         if (confirmSelect && allExistIds?.client_type_ids?.length > 0) {
+                           finalValues = [...new Set([...values, ...allExistIds?.client_type_ids])];
+                         }else{
+                           return
+                         }
+                       }
+                       handleMultipleSelect(finalValues);
+
+
+                        // const values = selectedOptions
+                        //   ? selectedOptions.map((opt) => opt.value)
+                        //   : [];
+                        // handleMultipleSelect(values);
+                      }}
                     className={errors.client_type_id ? "error-field" : ""}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}

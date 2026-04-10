@@ -525,13 +525,17 @@ const getByIdChecklist = async (checklist) => {
     /// get jobs Exist check data
     const queryJobs = `
     SELECT
-    id,
-    job_type_id,
-    service_id,
-    customer_id
+    jobs.id,
+    jobs.job_type_id,
+    jobs.service_id,
+    jobs.customer_id,
+    clients.client_type,
+    clients.id AS client_id
     FROM 
     jobs
-    WHERE processing_checklist = ? OR reviewing_checklist = ?
+    JOIN clients ON clients.id = jobs.client_id
+    WHERE jobs.processing_checklist = ? OR jobs.reviewing_checklist = ?
+    GROUP BY jobs.id
     ORDER BY jobs.id DESC
     `;
     const [existJobsChecklist] = await pool.execute(queryJobs, [checklist_id, checklist_id]);
@@ -541,7 +545,8 @@ const getByIdChecklist = async (checklist) => {
     const allExistIds = {
       customer_ids: [...new Set(existJobsChecklist?.map(i => String(i.customer_id)))],
       job_type_ids: [...new Set(existJobsChecklist?.map(i => String(i.job_type_id)))],
-      service_ids: [...new Set(existJobsChecklist?.map(i => String(i.service_id)))]
+      service_ids: [...new Set(existJobsChecklist?.map(i => String(i.service_id)))],
+      client_type_ids: [...new Set(existJobsChecklist?.map(i => String(i.client_type)))]
     };
 
     
