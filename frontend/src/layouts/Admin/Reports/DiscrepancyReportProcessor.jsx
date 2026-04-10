@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Select from 'react-select';
 import { Modal } from "react-bootstrap";
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 
 const DiscrepancyReportProcessor = () => {
@@ -77,13 +78,13 @@ const DiscrepancyReportProcessor = () => {
 
 
   const columns = [
-   {
+    {
       name: 'Job Name',
       selector: row => row.job_code_id, sortable: true
     },
     {
       name: 'Timesheet Total Hours',
-       selector: row => (convertTimeFormatString(convertTimeFormat(row.total_spent_hours))),
+      selector: row => (convertTimeFormatString(convertTimeFormat(row.total_spent_hours))),
       // cell: (row) => (
       //   <span
       //     onClick={() => handleClickTimesheet(row)}
@@ -105,6 +106,17 @@ const DiscrepancyReportProcessor = () => {
 
   ]
 
+  const headers = [
+    { label: 'Job Name', key: 'job_code_id' },
+    { label: 'Timesheet Total Hours', key: 'timesheet_total_hours' },
+    { label: 'Job Total Hours', key: 'job_total_time_processor' }
+  ];
+
+  const exportData = discrepancyReportData.map(row => ({
+    job_code_id: row.job_code_id,
+    timesheet_total_hours: convertTimeFormatString(convertTimeFormat(row.total_spent_hours)),
+    job_total_time_processor: convertTimeFormatString(row.job_total_time_processor)
+  }));
 
 
   return (
@@ -115,6 +127,9 @@ const DiscrepancyReportProcessor = () => {
             <div className='tab-title'>
               <h3>Discrepancy Report</h3>
             </div>
+          </div>
+          <div className='col-md-5'>
+             <ExportToExcel apiData={exportData} fileName={'Discrepancy_Report_Processor'} headers={headers} />
           </div>
         </div>
 
@@ -182,4 +197,4 @@ const DiscrepancyReportProcessor = () => {
   )
 }
 
-export default DiscrepancyReportProcessor
+export default DiscrepancyReportProcessor

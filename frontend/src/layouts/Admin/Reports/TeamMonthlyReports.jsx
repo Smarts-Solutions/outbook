@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import {teamMonthlyReports} from '../../../ReduxStore/Slice/Report/ReportSlice'
 import { useDispatch } from 'react-redux';
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 const TeamMonthlyReport = () => {
     const dispatch = useDispatch();
@@ -37,6 +38,11 @@ const TeamMonthlyReport = () => {
    
   ]
 
+  const headers = [
+    { label: 'Staff Name', key: 'staff_name' },
+    { label: 'No.Of Jobs Completed', key: 'number_of_job_completed' },
+  ];
+
   return (
     <div>
           <div className='report-data'>
@@ -46,6 +52,9 @@ const TeamMonthlyReport = () => {
                   <h3>Team Performance Report by Month</h3>
                 </div>
               
+              </div>
+              <div className='col-md-5'>
+                <ExportToExcel apiData={getMonthlyReport} fileName={'Team_Performance_Report'} headers={headers} />
               </div>
             </div>
             <div className='datatable-wrapper mt-minus'>
@@ -58,4 +67,4 @@ const TeamMonthlyReport = () => {
   )
 }
 
-export default TeamMonthlyReport
+export default TeamMonthlyReport

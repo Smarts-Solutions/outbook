@@ -4,6 +4,7 @@ import { dueByReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
 import { json, useNavigate } from "react-router-dom";
 import { Filter, FileSpreadsheet } from "lucide-react";
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 
 const DueByReport = () => {
   const dispatch = useDispatch();
@@ -22,8 +23,7 @@ const DueByReport = () => {
       .then((res) => {
         if (res.status) {
           setDueByReport(res.data);
-          const jsonString = res.data[0].due_within_1_months.toString();
-          const jsonObject = JSON.parse(jsonString);
+         
         } else {
           setDueByReport([]);
         }
@@ -52,7 +52,7 @@ const DueByReport = () => {
             style={{ color: "rgb(38, 189, 240)", cursor: "pointer" }}
             onClick={() => handleOnClick(row.due_within_1_months.job_ids)}
           >
-            {JSON.parse(row.due_within_1_months.count)}
+            {row.due_within_1_months.count}
           </div>
         ) : (
           <div>{row.due_within_1_months.count}</div>
@@ -297,6 +297,40 @@ const DueByReport = () => {
     },
   ];
 
+  const headers = [
+    { label: "Count Of Customer", key: "customer_name" },
+    { label: "Due Date Within 1 Month(s)", key: "due_within_1_months" },
+    { label: "Due Date Within 2 Month(s)", key: "due_within_2_months" },
+    { label: "Due Date Within 3 Month(s)", key: "due_within_3_months" },
+    { label: "Due Date Within 4 Month(s)", key: "due_within_4_months" },
+    { label: "Due Date Within 5 Month(s)", key: "due_within_5_months" },
+    { label: "Due Date Within 6 Month(s)", key: "due_within_6_months" },
+    { label: "Due Date Within 7 Month(s)", key: "due_within_7_months" },
+    { label: "Due Date Within 8 Month(s)", key: "due_within_8_months" },
+    { label: "Due Date Within 9 Month(s)", key: "due_within_9_months" },
+    { label: "Due Date Within 10 Month(s)", key: "due_within_10_months" },
+    { label: "Due Date Within 11 Month(s)", key: "due_within_11_months" },
+    { label: "Due Date Within 12 Month(s)", key: "due_within_12_months" },
+    { label: "Due Date Passed", key: "due_passed" },
+  ];
+
+  const exportData = getDueByReport.map(row => ({
+    customer_name: row.customer_name,
+    due_within_1_months: row.due_within_1_months.count,
+    due_within_2_months: row.due_within_2_months.count,
+    due_within_3_months: row.due_within_3_months.count,
+    due_within_4_months: row.due_within_4_months.count,
+    due_within_5_months: row.due_within_5_months.count,
+    due_within_6_months: row.due_within_6_months.count,
+    due_within_7_months: row.due_within_7_months.count,
+    due_within_8_months: row.due_within_8_months.count,
+    due_within_9_months: row.due_within_9_months.count,
+    due_within_10_months: row.due_within_10_months.count,
+    due_within_11_months: row.due_within_11_months.count,
+    due_within_12_months: row.due_within_12_months.count,
+    due_passed: row.due_passed.count,
+  }));
+
   return (
     <div>
       <div className="report-data">
@@ -305,10 +339,9 @@ const DueByReport = () => {
             <div className="tab-title mb-5">
               <h3>Due By Report</h3>
             </div>
-            {/* <div className='job-filter-btn '>
-                            <button className='filter btn btn-info text-white fw-normal'><Filter size={18} className="pe-2" />Filters</button>
-                            <button className='xl-sheet btn btn-info text-white fw-normal'><FileSpreadsheet size={18} /></button>
-                        </div> */}
+          </div>
+          <div className="col-md-5">
+             <ExportToExcel apiData={exportData} fileName={'Due_By_Report'} headers={headers} />
           </div>
         </div>
         <div className="datatable-wrapper mt-minus">
@@ -324,3 +357,4 @@ const DueByReport = () => {
 };
 
 export default DueByReport;
+
