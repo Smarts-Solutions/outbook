@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { getWeeklyReport, weeklyReportFilter } from '../../../ReduxStore/Slice/Report/ReportSlice';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 const SlidingTable = () => {
   const navigate = useNavigate();
@@ -140,6 +141,24 @@ const SlidingTable = () => {
     
 
   };
+
+  const headers = [
+    { label: 'Customer Name', key: 'customer_name' },
+    ...Array.from({ length: 52 }, (_, i) => ({ label: `Week ${i + 1}`, key: `week_${i + 1}` }))
+  ];
+
+  const exportData = weeklyReportData.map(row => {
+    const weekData = {};
+    if (row.weeks && row.weeks[0]) {
+      Object.values(row.weeks[0]).forEach((week, index) => {
+        weekData[`week_${index + 1}`] = week.count === 0 ? "-" : week.count;
+      });
+    }
+    return {
+      customer_name: row.customer_name,
+      ...weekData
+    };
+  });
 
 
 
@@ -285,6 +304,9 @@ const SlidingTable = () => {
                 Reset
               </button>
             </div>
+            <div className='col-md-3'>
+              <ExportToExcel apiData={exportData} fileName={'Weekly_Report'} headers={headers} />
+            </div>
           </div>
         </div>
         <div className='row'>
@@ -359,3 +381,4 @@ const SlidingTable = () => {
 };
 
 export default SlidingTable;
+

@@ -3,6 +3,7 @@ import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { averageTatReport } from '../../../ReduxStore/Slice/Report/ReportSlice'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
 const AverageTatReport = () => {
   const dispatch = useDispatch();
@@ -56,6 +57,12 @@ const AverageTatReport = () => {
 
   ]
 
+  const headers = [
+    { label: 'Month', key: 'month' },
+    { label: 'Average TAT Per Day', key: 'average_tat_per_day' }
+  ];
+
+
   return (
     <div>
       <div className='report-data'>
@@ -65,6 +72,9 @@ const AverageTatReport = () => {
               <h3>Average TAT Report</h3>
             </div>
            
+          </div>
+          <div className='col-md-5'>
+             <ExportToExcel apiData={getAverageTatReport} fileName={'Average_TAT_Report'} headers={headers} />
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
@@ -77,4 +87,4 @@ const AverageTatReport = () => {
   )
 }
 
-export default AverageTatReport
+export default AverageTatReport
