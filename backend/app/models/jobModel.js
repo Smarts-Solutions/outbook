@@ -4,7 +4,7 @@ const {
   generateNextUniqueCode,
   getAllCustomerIds,
   LineManageStaffIdHelperFunction,
-  QueryRoleHelperFunction,
+  QueryRoleHelperFunction
 } = require("../../app/utils/helper");
 
 const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
@@ -858,7 +858,8 @@ VALUES (
     //console.log("query", query);
 
     //  return
-
+     
+    
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
     if (result.insertId > 0) {

@@ -411,4 +411,6 @@ async function QueryRoleHelperFunction(staff_id) {
   return rows;
 }
 
+
+
 module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds ,LineManageStaffIdHelperFunction ,QueryRoleHelperFunction };
