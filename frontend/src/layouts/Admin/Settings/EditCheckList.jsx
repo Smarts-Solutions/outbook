@@ -701,10 +701,6 @@ const EditCheckList = () => {
                       getJobTypeData(finalValues);
 
 
-
-
-
-
                       // const values = opts ? opts.map((o) => o.value) : [];
                       // setFormData((p) => ({
                       //   ...p,
