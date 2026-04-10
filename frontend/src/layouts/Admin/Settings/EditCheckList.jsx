@@ -801,7 +801,7 @@ const EditCheckList = () => {
 
                       const values = selectedOptions ? selectedOptions.map((opt) => opt.value) : [];
 
-                      alert(values)
+                
                       let finalValues = values;
                       if (values.length > 0) {
 
