@@ -480,6 +480,7 @@ const EditCheckList = () => {
   };
 
   const handleMultipleSelect = (e) => {
+    
     if (e.length === 0) {
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
     } else {
@@ -787,6 +788,8 @@ const EditCheckList = () => {
                       onChange={(selectedOptions) => {
 
                        const values = selectedOptions  ? selectedOptions.map((opt) => opt.value) : [];
+
+                       alert(values)
                        let finalValues = values;
                        if (values.length > 0) {
 
@@ -794,12 +797,19 @@ const EditCheckList = () => {
                            "Are you sure you want to select this client type?"
                          );
 
-                         if (confirmSelect && allExistIds?.client_type_ids?.length > 0) {
+                        
+
+                         if (confirmSelect) {
+                           if(allExistIds?.client_type_ids?.length > 0){
                            finalValues = [...new Set([...values, ...allExistIds?.client_type_ids])];
+                           }else{
+                            finalValues = [...new Set([...values])];
+                           }
                          }else{
                            return
                          }
                        }
+
                        handleMultipleSelect(finalValues);
 
 

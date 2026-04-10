@@ -529,8 +529,7 @@ const getByIdChecklist = async (checklist) => {
     jobs.job_type_id,
     jobs.service_id,
     jobs.customer_id,
-    clients.client_type,
-    clients.id AS client_id
+    clients.client_type
     FROM 
     jobs
     JOIN clients ON clients.id = jobs.client_id
@@ -540,7 +539,7 @@ const getByIdChecklist = async (checklist) => {
     `;
     const [existJobsChecklist] = await pool.execute(queryJobs, [checklist_id, checklist_id]);
 
-    console.log("existJobsChecklist", existJobsChecklist);
+   // console.log("existJobsChecklist", existJobsChecklist);
 
     const allExistIds = {
       customer_ids: [...new Set(existJobsChecklist?.map(i => String(i.customer_id)))],
