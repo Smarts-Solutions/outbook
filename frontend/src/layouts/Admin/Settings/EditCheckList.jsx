@@ -784,11 +784,11 @@ const EditCheckList = () => {
                     value={options
                       .filter((opt) => selectedClientType.includes(opt.key))
                       .map((opt) => ({ value: opt.key, label: opt.label }))}
-                    onChange={(selectedOptions) => {
-                      const values = selectedOptions
-                        ? selectedOptions.map((opt) => opt.value)
-                        : [];
-                      handleMultipleSelect(values);
+                      onChange={(selectedOptions) => {
+                        const values = selectedOptions
+                          ? selectedOptions.map((opt) => opt.value)
+                          : [];
+                        handleMultipleSelect(values);
                     }}
                     className={errors.client_type_id ? "error-field" : ""}
                     menuPortalTarget={document.body}
