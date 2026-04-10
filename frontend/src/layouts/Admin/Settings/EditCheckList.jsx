@@ -614,6 +614,8 @@ const EditCheckList = () => {
 
                         if (confirmSelect && allExistIds?.customer_ids?.length > 0) {
                           finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
+                        }else{
+                          return
                         }
                       }
 
@@ -691,6 +693,8 @@ const EditCheckList = () => {
 
                         if (confirmSelect && allExistIds?.service_ids?.length > 0) {
                           finalValues = [...new Set([...values, ...allExistIds?.service_ids])];
+                        }else{
+                          return
                         }
                       }
                       setFormData((p) => ({
@@ -745,6 +749,8 @@ const EditCheckList = () => {
 
                         if (confirmSelect && allExistIds?.job_type_ids?.length > 0) {
                           finalValues = [...new Set([...values, ...allExistIds?.job_type_ids])];
+                        }else{
+                          return
                         }
                       }
                       setFormData((p) => ({
