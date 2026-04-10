@@ -11,6 +11,7 @@
     "@mui/x-data-grid": "^7.7.1",
     "@react-google-maps/api": "^2.19.3",
     "@reduxjs/toolkit": "^2.2.5",
+    "@rolldown/binding-win32-x64-msvc": "^1.0.0-rc.15",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
