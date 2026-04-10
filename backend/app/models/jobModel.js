@@ -859,14 +859,14 @@ VALUES (
     //console.log("query", query);
 
     //  return
-     
-    
-    
+
+
+
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
 
-const status_update_date = new Date().toLocaleString('sv-SE');
-    await JobStatusUpdate(result.insertId,status_type,status_update_date);
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(result.insertId, status_type, status_update_date);
 
     if (result.insertId > 0) {
       const currentDate = new Date();
@@ -3717,7 +3717,7 @@ const jobUpdate = async (job) => {
     const sanitizedParams = sanitizeParams(params);
 
     const status_update_date = new Date().toLocaleString('sv-SE');
-    await JobStatusUpdate(job_id,status_type_update,status_update_date);
+    await JobStatusUpdate(job_id, status_type_update, status_update_date);
 
     // Execute the query with sanitized parameters
     const [result] = await pool.execute(query, sanitizedParams);
@@ -4364,7 +4364,7 @@ const updateJobStatus = async (job) => {
     }
 
     const status_update_date = new Date().toLocaleString('sv-SE');
-    await JobStatusUpdate(job_id,status_type,status_update_date);
+    await JobStatusUpdate(job_id, status_type, status_update_date);
 
     const [result] = await pool.execute(query, [status_type, job_id]);
 
@@ -4652,10 +4652,10 @@ const getJobsDeleteService = async (job) => {
   const { service_id } = job;
 
   try {
-    
-  
-     const [results] = await pool.execute(
-    ` SELECT 
+
+
+    const [results] = await pool.execute(
+      ` SELECT 
       jobs.id AS job_id,
       customers.trading_name AS customer_name,
       clients.trading_name AS client_name,
@@ -4712,10 +4712,10 @@ const getJobsDeleteService = async (job) => {
 
       ORDER BY jobs.id DESC
     `,
-    [service_id]
-  );
+      [service_id]
+    );
 
-  return { status: true, message: "Success", data: results };
+    return { status: true, message: "Success", data: results };
 
   } catch (error) {
     console.log(error);
