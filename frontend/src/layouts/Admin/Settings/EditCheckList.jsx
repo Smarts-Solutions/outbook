@@ -613,8 +613,12 @@ const EditCheckList = () => {
                           "Are you sure you want to select this customer?"
                         );
 
-                        if (confirmSelect && allExistIds?.customer_ids?.length > 0) {
-                          finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
+                        if (confirmSelect) {
+                          if(allExistIds?.customer_ids?.length > 0){
+                            finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
+                          }else{
+                            finalValues = values
+                          }
                         } else {
                           return
                         }
@@ -692,8 +696,12 @@ const EditCheckList = () => {
                           "Are you sure you want to select this service?"
                         );
 
-                        if (confirmSelect && allExistIds?.service_ids?.length > 0) {
-                          finalValues = [...new Set([...values, ...allExistIds?.service_ids])];
+                        if (confirmSelect) {
+                          if (allExistIds?.service_ids?.length > 0) {
+                            finalValues = [...new Set([...values, ...allExistIds?.service_ids])];
+                          } else {
+                            finalValues = [...new Set([...values])];
+                          }
                         } else {
                           return
                         }
