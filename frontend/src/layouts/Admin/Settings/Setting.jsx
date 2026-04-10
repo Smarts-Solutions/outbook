@@ -196,6 +196,39 @@ const Setting = () => {
       });
   };
 
+  const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
+
+    setAllJobsData((prev) => {
+      const updated = [...prev];
+
+      if (type === "service") {
+        updated[rowIndex] = {
+          ...updated[rowIndex],
+          service_id: selectedOption?.value || null,
+          selectedService: selectedOption?.serviceData || null
+        };
+      }
+
+      if (type === "jobType") {
+        updated[rowIndex] = {
+          ...updated[rowIndex],
+          job_type_id: selectedOption?.value || null,
+          selectedJobType: selectedOption?.jobTypeData || null
+        };
+      }
+
+      if (type === "task") {
+        updated[rowIndex] = {
+          ...updated[rowIndex],
+          task_id: selectedOption?.map((item) => item.value) || [],
+          selectedTasks: selectedOption || []
+        };
+      }
+
+      return updated;
+    });
+  };
+
   const getJobTypeSelectedService = async (serviceData) => {
     const req = { action: "get", service_id: serviceData.id };
     const data = { req: req, authToken: token };
@@ -3444,10 +3477,17 @@ const Setting = () => {
                                     label: `${service?.service_name}`,
                                     serviceData: service, // 👈 pura service object store
                                   }))}
-                                value={""}
-                                onChange={(selectedOption) => {
-
-                                }}
+                                value={
+                                  item?.service_id
+                                    ? {
+                                      value: item?.service_id,
+                                      label: item?.selectedService?.service_name
+                                    }
+                                    : null
+                                }
+                                onChange={(selectedOption) =>
+                                  handleSelectChangeDeleteService(selectedOption, index, "service")
+                                }
                                 menuPortalTarget={document.body}
                                 styles={{
                                   menuPortal: (base) => ({
@@ -3472,13 +3512,21 @@ const Setting = () => {
                                       index === self.findIndex((s) => s.job_type_id === type.job_type_id)
                                   )
                                   ?.map((type) => ({
-                                  value: type?.job_type_id,
-                                  label: `${type?.job_type_name}`,
-                                  jobTypeData: type, // 👈 pura job type object store
-                                }))}
-                                value={""}
-                                onChange={(selectedOption) => {
-                                }}
+                                    value: type?.job_type_id,
+                                    label: `${type?.job_type_name}`,
+                                    jobTypeData: type, // 👈 pura job type object store
+                                  }))}
+                                value={
+                                  item?.job_type_id
+                                    ? {
+                                      value: item?.job_type_id,
+                                      label: item?.selectedJobType?.job_type_name
+                                    }
+                                    : null
+                                }
+                                onChange={(selectedOption) =>
+                                  handleSelectChangeDeleteService(selectedOption, index, "jobType")
+                                }
                                 menuPortalTarget={document.body}
                                 styles={{
                                   menuPortal: (base) => ({
@@ -3503,16 +3551,15 @@ const Setting = () => {
                                       index === self.findIndex((s) => s.task_id === task.task_id)
                                   )
                                   ?.map((task) => ({
-                                  value: task.task_id,
-                                  label: task.task_name,
-                                  ...task
-                                }))}
+                                    value: task.task_id,
+                                    label: task.task_name,
+                                    ...task
+                                  }))}
 
-                                value={selectedTasks}
-
-                                onChange={(selectedOption) => {
-                                  setSelectedTasks(selectedOption || []);
-                                }}
+                                value={item?.selectedTasks || []}
+                                onChange={(selectedOption) =>
+                                  handleSelectChange(selectedOption, index, "task")
+                                }
 
                                 menuPortalTarget={document.body}
                                 styles={{
