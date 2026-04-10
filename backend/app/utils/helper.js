@@ -414,10 +414,10 @@ async function QueryRoleHelperFunction(staff_id) {
 async function JobStatusUpdate(job_id, status_type, status_update_date) {
   try {
 
-
-     
-
-
+    const [rows] = await pool.execute(`SELECT status_type FROM job_status_updation WHERE job_id = ? ORDER BY id DESC LIMIT 1`, [job_id]);
+    if (rows.length > 0 && rows[0].status_type == status_type) {
+      return { status: true, message: 'Status already updated', data: rows[0] };
+    }
 
     const query = `
      INSERT INTO job_status_updation (job_id,status_type,status_update_date)
