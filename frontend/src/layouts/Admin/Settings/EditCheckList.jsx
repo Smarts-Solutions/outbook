@@ -43,7 +43,7 @@ const EditCheckList = () => {
   const [existingFile, setExistingFile] = useState("");
   const [allExistIds, setAllExistIds] = useState({});
 
-  console.log("allExistIds", allExistIds);
+
 
   const options = [
     { key: "1", label: "Sole Trader" },
@@ -91,7 +91,7 @@ const EditCheckList = () => {
     const data = { req, authToken: token };
     try {
       const response = await dispatch(getList(data)).unwrap();
-      console.log("response", response);
+     
       if (response.status && response?.data?.result) {
         const d = response?.data?.result;
 
@@ -115,7 +115,7 @@ const EditCheckList = () => {
           getJobTypeData(d.service_id);
         }
 
-        console.log("customer_id ---- ", d.customer_id);
+       
 
         if (Array.isArray(d.customer_id) && d.customer_id.length > 0) {
           getServiceData(d.customer_id);
