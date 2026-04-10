@@ -179,6 +179,8 @@ const addMissingLog = async (missingLog) => {
 
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id]);
+
+
     }
 
 
@@ -850,11 +852,14 @@ const addDraft = async (draft) => {
   
   if([1, 2, 3].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [21, job_id]);
+
   }
   else if([4].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, job_id]);
+
   }else{
     const [DraftSentStatus] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [7, job_id]);
+
   }
 
 
@@ -947,6 +952,8 @@ const addDraft = async (draft) => {
         if (rowsDraftProcess.status_check === 1) {
           let update_status = 6;
           const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id]);
+
+
         }
       }
 
@@ -970,9 +977,11 @@ const editDraft = async (draft) => {
 
     if([1, 2, 3].includes(Number(updated_amendment))){
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [21, rowJob.job_id]);
+
     }
     else if([4].includes(Number(updated_amendment))){
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, rowJob.job_id]);
+      
     }
 
 
