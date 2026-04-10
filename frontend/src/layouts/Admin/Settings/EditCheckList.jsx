@@ -40,7 +40,7 @@ const EditCheckList = () => {
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [existingFile, setExistingFile] = useState("");
-  const [allExistIds, setAllExistIds] = useState({}); 
+  const [allExistIds, setAllExistIds] = useState({});
 
   console.log("allExistIds", allExistIds);
 
@@ -606,8 +606,6 @@ const EditCheckList = () => {
                         : [];
 
                       let finalValues = values;
-
-                      // Agar koi customer select hua
                       if (values.length > 0) {
 
                         const confirmSelect = window.confirm(
@@ -619,7 +617,6 @@ const EditCheckList = () => {
                         }
                       }
 
-                      console.log("finalValues", finalValues);
 
                       setFormData((p) => ({
                         ...p,
@@ -681,14 +678,40 @@ const EditCheckList = () => {
                         formData.service_id.includes(s.id.toString()),
                       )
                       .map((s) => ({ value: s.id.toString(), label: s.name }))}
+
                     onChange={(opts) => {
+
                       const values = opts ? opts.map((o) => o.value) : [];
+                      let finalValues = values;
+                      if (values.length > 0) {
+
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this service?"
+                        );
+
+                        if (confirmSelect && allExistIds?.service_ids?.length > 0) {
+                          finalValues = [...new Set([...values, ...allExistIds?.service_ids])];
+                        }
+                      }
                       setFormData((p) => ({
                         ...p,
-                        service_id: values,
+                        service_id: finalValues,
                         job_type_id: [],
                       }));
-                      getJobTypeData(values);
+                      getJobTypeData(finalValues);
+
+
+
+
+
+
+                      // const values = opts ? opts.map((o) => o.value) : [];
+                      // setFormData((p) => ({
+                      //   ...p,
+                      //   service_id: values,
+                      //   job_type_id: [],
+                      // }));
+                      // getJobTypeData(values);
                     }}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
