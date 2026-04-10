@@ -122,7 +122,7 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 const addMissingLog = async (missingLog) => {
 
 
-  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, last_chaser ,status } = missingLog.body;
+  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, last_chaser, status } = missingLog.body;
   let log_message = `sent the missing logs for job code:`
   let data = {
     table: 'missing_logs',
@@ -287,7 +287,7 @@ const getMissingLog = async (missingLog) => {
 }
 
 const editMissingLog = async (missingLog) => {
-  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by,last_chaser,status  } = missingLog.body;
+  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by, last_chaser, status } = missingLog.body;
 
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
@@ -298,12 +298,12 @@ const editMissingLog = async (missingLog) => {
 
   const [job_id] = await pool.execute('SELECT missing_logs.job_id, jobs.service_id ,jobs.Bookkeeping_Frequency_id_2 FROM `missing_logs` JOIN `jobs` ON jobs.id = missing_logs.job_id  WHERE missing_logs.id = ?', [id]);
 
-  
+
   // console.log("missing_log_reviewed_date", missing_log_reviewed_date)
   // console.log("job_id[0].service_id", job_id[0].service_id)
   // console.log("job_id[0].Bookkeeping_Frequency_id_2", job_id[0].Bookkeeping_Frequency_id_2)
 
-  
+
 
   const date = new Date(missing_log_reviewed_date);
   if ([1, 3, 4, 5, 6, 7, 8].includes(Number(job_id[0].service_id))) {
@@ -317,7 +317,7 @@ const editMissingLog = async (missingLog) => {
       date.setDate(date.getDate() + 10);
     }
   }
- 
+
 
 
   if (Number(job_id[0].service_id) == 2) {
@@ -334,11 +334,11 @@ const editMissingLog = async (missingLog) => {
     }
   }
 
-    
-    let date_new_sla_deadline = new Date(date).toISOString().split("T")[0];
+
+  let date_new_sla_deadline = new Date(date).toISOString().split("T")[0];
   // console.log("date_new", date_new)
   // SLA Deadline Update date
-   await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new_sla_deadline, job_id[0].job_id]);
+  await pool.execute(`UPDATE jobs SET sla_deadline_date = ?  WHERE id = ?`, [date_new_sla_deadline, job_id[0].job_id]);
 
 
   const [[existMissingLog]] = await pool.execute(
@@ -362,7 +362,7 @@ const editMissingLog = async (missingLog) => {
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, last_chaser,status, id]);
+    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, last_chaser, status, id]);
 
     if (rows.changedRows > 0) {
 
@@ -399,7 +399,7 @@ const editMissingLog = async (missingLog) => {
     }
 
     if (missing_log_document.length > 0) {
-     
+
 
 
       for (let file of missing_log_document) {
@@ -413,33 +413,33 @@ const editMissingLog = async (missingLog) => {
         }
 
 
-       else{
+        else {
 
-        const file_name = file.filename;
-        const original_name = file.originalname;
-        const file_type = file.mimetype;
-        const file_size = file.size;
+          const file_name = file.filename;
+          const original_name = file.originalname;
+          const file_type = file.mimetype;
+          const file_size = file.size;
 
 
-        const insertQuery = `
+          const insertQuery = `
             INSERT INTO missing_logs_documents (
                 missing_log_id, file_name, original_name, file_type, file_size
             ) VALUES (?, ?, ?, ?, ?)
         `;
 
-        try {
-          const [result] = await pool.execute(insertQuery, [
-            id,
-            file_name,
-            original_name,
-            file_type,
-            file_size
-          ]);
+          try {
+            const [result] = await pool.execute(insertQuery, [
+              id,
+              file_name,
+              original_name,
+              file_type,
+              file_size
+            ]);
 
-        } catch (error) {
-          console.log('Error inserting file:', error);
+          } catch (error) {
+            console.log('Error inserting file:', error);
+          }
         }
-      }
 
 
 
@@ -454,22 +454,22 @@ const editMissingLog = async (missingLog) => {
 }
 
 const uploadDocumentMissingLogAndQuery = async (missingLog) => {
-  const { id, type , uploadedFiles} = missingLog.body;
-   
+  const { id, type, uploadedFiles } = missingLog.body;
+
   if (uploadedFiles && uploadedFiles.length > 0) {
 
     for (let file of uploadedFiles) {
-        const web_url = file.web_url;
-        const update = type === 'missing_log' ? `UPDATE missing_logs_documents SET web_url = ? WHERE missing_log_id = ?` : `UPDATE queries_documents SET web_url = ? WHERE query_id = ?`
+      const web_url = file.web_url;
+      const update = type === 'missing_log' ? `UPDATE missing_logs_documents SET web_url = ? WHERE missing_log_id = ?` : `UPDATE queries_documents SET web_url = ? WHERE query_id = ?`
 
-        try {
-          const [result] = await pool.execute(update, [
-            web_url,
-            id
-            ]);
-          } catch (error) {
-            console.log('Error inserting file:', error);
-          }      
+      try {
+        const [result] = await pool.execute(update, [
+          web_url,
+          id
+        ]);
+      } catch (error) {
+        console.log('Error inserting file:', error);
+      }
     }
   }
 
@@ -505,10 +505,10 @@ const getMissingLogSingleView = async (missingLog) => {
 
 //Queries
 const addQuerie = async (querie) => {
-  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received, last_chaser,status } = querie.body;
+  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received, last_chaser, status } = querie.body;
 
   const query_document = querie.files;
-  let log_message =  `sent the queries for job code:`
+  let log_message = `sent the queries for job code:`
   let data = {
     table: 'queries',
     field: 'query_title',
@@ -533,7 +533,7 @@ const addQuerie = async (querie) => {
       `;
     const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, last_chaser]);
 
-    if(status === "1"){
+    if (status === "1") {
       log_message = `Sent and completed the queries for the job code:`
     }
 
@@ -688,7 +688,7 @@ const getQuerieSingleView = async (querie) => {
 }
 
 const editQuerie = async (query) => {
-  const { id, queries_remaining, reviewed_by, query_sent_date, response_received,last_chaser, status } = query.body;
+  const { id, queries_remaining, reviewed_by, query_sent_date, response_received, last_chaser, status } = query.body;
   const query_document = query.files;
 
   let missing_queries_prepared_date = query.body.missing_queries_prepared_date == 'null' ? null : query.body.missing_queries_prepared_date
@@ -717,7 +717,7 @@ const editQuerie = async (query) => {
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query_table, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date,last_chaser ,id]);
+    const [rows] = await pool.execute(query_table, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, last_chaser, id]);
 
     if (rows.changedRows > 0) {
       let querie_log_msg = []
@@ -770,13 +770,13 @@ const editQuerie = async (query) => {
           const [result] = await pool.execute(`UPDATE queries_documents SET file_name = ?, original_name
           = ?, file_type = ?, file_size = ? WHERE query_id = ?`, [file_name, original_name, file_type, file_size, id]);
         } else {
-        const insertQuery = `
+          const insertQuery = `
             INSERT INTO queries_documents (
                 query_id, file_name , original_name, file_type, file_size 
             ) VALUES (?, ?, ?, ?, ?)
         `;
-        const [rows] = await pool.execute(insertQuery, [id, file_name, original_name
-          , file_type, file_size]);
+          const [rows] = await pool.execute(insertQuery, [id, file_name, original_name
+            , file_type, file_size]);
 
         }
       }
@@ -855,24 +855,24 @@ const getDraftSingleView = async (req, res) => {
 
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
-  
-  if([1, 2, 3].includes(Number(updated_amendment))){
+
+  if ([1, 2, 3].includes(Number(updated_amendment))) {
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [21, job_id]);
     const status_update_date = new Date().toLocaleString('sv-SE');
     await JobStatusUpdate(job_id, 21, status_update_date);
   }
-  else if([4].includes(Number(updated_amendment))){
+  else if ([4].includes(Number(updated_amendment))) {
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, job_id]);
     const status_update_date = new Date().toLocaleString('sv-SE');
     await JobStatusUpdate(job_id, 6, status_update_date);
-  }else{
+  } else {
     const [DraftSentStatus] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [7, job_id]);
     const status_update_date = new Date().toLocaleString('sv-SE');
     await JobStatusUpdate(job_id, 7, status_update_date);
   }
 
 
-  let log_message= `sent the draft for job code:`
+  let log_message = `sent the draft for job code:`
   if (parseInt(was_it_complete) === 1) {
     const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
     CASE
@@ -910,7 +910,7 @@ const addDraft = async (draft) => {
       return { status: false, message: 'Please complete the queries first.', data: "W" };
     }
 
-    log_message= `completed the draft for job code:`
+    log_message = `completed the draft for job code:`
   }
 
   let data = {
@@ -984,12 +984,12 @@ const editDraft = async (draft) => {
     const [[rowJob]] = await pool.execute("SELECT job_id,DATE_FORMAT(draft_sent_on, '%Y-%m-%d') AS draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete,DATE_FORMAT(final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on FROM `drafts` WHERE id = ?", [id]);
 
 
-    if([1, 2, 3].includes(Number(updated_amendment))){
+    if ([1, 2, 3].includes(Number(updated_amendment))) {
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [21, rowJob.job_id]);
       const status_update_date = new Date().toLocaleString('sv-SE');
       await JobStatusUpdate(rowJob.job_id, 21, status_update_date);
     }
-    else if([4].includes(Number(updated_amendment))){
+    else if ([4].includes(Number(updated_amendment))) {
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, rowJob.job_id]);
       const status_update_date = new Date().toLocaleString('sv-SE');
       await JobStatusUpdate(rowJob.job_id, 6, status_update_date);
@@ -1110,51 +1110,51 @@ const editDraft = async (draft) => {
 
 // JobDocument
 const addedJobDocument = async (jobDocument) => {
- const { job_id, uploadedFiles , StaffUserId } = jobDocument;
- try {
-   if (uploadedFiles && uploadedFiles.length > 0) {
+  const { job_id, uploadedFiles, StaffUserId } = jobDocument;
+  try {
+    if (uploadedFiles && uploadedFiles.length > 0) {
 
-     for (let file of uploadedFiles) {
-         const file_name = file.filename;
-         const original_name = file.originalname;
-         const file_type = file.mimetype;
-         const file_size = file.size;
-         const web_url = file.web_url;
-        
-         const checkQuery = `SELECT id FROM job_documents WHERE job_id = ? AND original_name = ?`;
-         const [rows] = await pool.execute(checkQuery, [job_id, original_name]);
-         if (rows.length > 0) {
-           continue;
-         }
-         
-         const insertQuery = `
+      for (let file of uploadedFiles) {
+        const file_name = file.filename;
+        const original_name = file.originalname;
+        const file_type = file.mimetype;
+        const file_size = file.size;
+        const web_url = file.web_url;
+
+        const checkQuery = `SELECT id FROM job_documents WHERE job_id = ? AND original_name = ?`;
+        const [rows] = await pool.execute(checkQuery, [job_id, original_name]);
+        if (rows.length > 0) {
+          continue;
+        }
+
+        const insertQuery = `
              INSERT INTO job_documents (
                  job_id, file_name, original_name, file_type, file_size , web_url
              ) VALUES (?, ?, ?, ?, ?, ?)
          `;
 
-         try {
-             const [result] = await pool.execute(insertQuery, [
-                 job_id,
-                 file_name,
-                 original_name,
-                 file_type,
-                 file_size,
-                 web_url
-             ]);
+        try {
+          const [result] = await pool.execute(insertQuery, [
+            job_id,
+            file_name,
+            original_name,
+            file_type,
+            file_size,
+            web_url
+          ]);
 
-         } catch (error) {
-             console.log('Error inserting file:', error);
-             return { status: false, message: "Error inserting file - 1" };
-         }
-     }
-     return { status: true, message: "job document uploaded successfully.", data: job_id };
- }else{
-     return { status: true, message: "job document uploaded successfully.", data: job_id };
- }
- } catch (error) {
-   return { status: false, message: "Error inserting file - 2" };
- } 
+        } catch (error) {
+          console.log('Error inserting file:', error);
+          return { status: false, message: "Error inserting file - 1" };
+        }
+      }
+      return { status: true, message: "job document uploaded successfully.", data: job_id };
+    } else {
+      return { status: true, message: "job document uploaded successfully.", data: job_id };
+    }
+  } catch (error) {
+    return { status: false, message: "Error inserting file - 2" };
+  }
 }
 
 const addJobDocument = async (jobDocument) => {
@@ -1257,6 +1257,6 @@ module.exports = {
   editDraft,
   addedJobDocument,
   uploadDocumentMissingLogAndQuery
-  
+
 
 };

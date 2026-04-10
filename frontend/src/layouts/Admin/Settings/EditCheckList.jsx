@@ -40,6 +40,9 @@ const EditCheckList = () => {
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [existingFile, setExistingFile] = useState("");
+  const [allExistIds, setAllExistIds] = useState({});
+
+  console.log("allExistIds", allExistIds);
 
   const options = [
     { key: "1", label: "Sole Trader" },
@@ -87,8 +90,9 @@ const EditCheckList = () => {
     const data = { req, authToken: token };
     try {
       const response = await dispatch(getList(data)).unwrap();
-      if (response.status && response.data) {
-        const d = response.data;
+      console.log("response", response);
+      if (response.status && response?.data?.result) {
+        const d = response?.data?.result;
 
         const mappedFormData = {
           customer_id: Array.isArray(d.customer_id) ? d.customer_id.map(id => id.toString()) : [],
@@ -109,6 +113,8 @@ const EditCheckList = () => {
         if (Array.isArray(d.service_id) && d.service_id.length > 0) {
           getJobTypeData(d.service_id);
         }
+
+        setAllExistIds(response?.data?.allExistIds || {});
       }
     } catch (error) {
       console.error("fetchChecklistDetails error", error);
@@ -290,7 +296,7 @@ const EditCheckList = () => {
 
           for (let i = 0; i <= lastNonEmptyIndex; i++) {
             const row = dataRows[i];
-            
+
             if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) {
               continue;
             }
@@ -474,6 +480,7 @@ const EditCheckList = () => {
   };
 
   const handleMultipleSelect = (e) => {
+
     if (e.length === 0) {
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
     } else {
@@ -533,7 +540,7 @@ const EditCheckList = () => {
                     value={formData.work_flow_type}
                     onChange={handleInputChange}
                   >
-          
+
                     <option value="3">Processing Type</option>
                     <option value="6">Reviewing Type</option>
                   </select>
@@ -548,7 +555,7 @@ const EditCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Customer Name</label>
-                  <Select
+                  {/* <Select
                     isMulti
                     closeMenuOnSelect={false}
                     options={customerAllData}
@@ -560,7 +567,6 @@ const EditCheckList = () => {
                         ? selectedOptions.map((opt) => opt.value)
                         : [];
                       setFormData((p) => ({ ...p, customer_id: values }));
-
                       if (values.length === 0) {
                         setCustomerHasMore(true);
                         setCustomerPage(1);
@@ -584,6 +590,80 @@ const EditCheckList = () => {
                     className="shadow-sm select-staff rounded-pill"
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                  /> */}
+
+                  <Select
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={customerAllData}
+                    value={customerAllData.filter((opt) =>
+                      formData?.customer_id?.includes(opt.value),
+                    )}
+
+                    onChange={(selectedOptions) => {
+
+                      const values = selectedOptions
+                        ? selectedOptions.map((opt) => opt.value)
+                        : [];
+
+                      let finalValues = values;
+                      if (values.length > 0) {
+
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this customer?"
+                        );
+
+                        if (confirmSelect) {
+                          if(allExistIds?.customer_ids?.length > 0){
+                            finalValues = [...new Set([...values, ...allExistIds?.customer_ids])];
+                          }else{
+                            finalValues = values
+                          }
+                        } else {
+                          return
+                        }
+                      }
+
+
+                      setFormData((p) => ({
+                        ...p,
+                        customer_id: finalValues
+                      }));
+
+
+                      // Reset logic
+                      if (finalValues.length === 0) {
+                        setCustomerHasMore(true);
+                        setCustomerPage(1);
+                        setCustomerSearch("");
+                        setCustomerAllData([]);
+                        customerCache.current = {};
+                        GetAllCustomer({ searchValue: "", pageNo: 1 });
+                      }
+
+                    }}
+
+                    onInputChange={(value) => handleCustomerSearch(value)}
+
+                    onMenuScrollToBottom={() => {
+                      if (customerHasMore) {
+                        GetAllCustomer({
+                          searchValue: customerSearch,
+                          pageNo: customerPage + 1,
+                          append: true,
+                        });
+                      }
+                    }}
+
+                    isSearchable
+                    className="shadow-sm select-staff rounded-pill"
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: base => ({
+                        ...base,
+                        zIndex: 9999
+                      })
+                    }}
                   />
                 </div>
               </div>
@@ -605,14 +685,42 @@ const EditCheckList = () => {
                         formData.service_id.includes(s.id.toString()),
                       )
                       .map((s) => ({ value: s.id.toString(), label: s.name }))}
+
                     onChange={(opts) => {
+
                       const values = opts ? opts.map((o) => o.value) : [];
+                      let finalValues = values;
+                      if (values.length > 0) {
+
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this service?"
+                        );
+
+                        if (confirmSelect) {
+                          if (allExistIds?.service_ids?.length > 0) {
+                            finalValues = [...new Set([...values, ...allExistIds?.service_ids])];
+                          } else {
+                            finalValues = [...new Set([...values])];
+                          }
+                        } else {
+                          return
+                        }
+                      }
                       setFormData((p) => ({
                         ...p,
-                        service_id: values,
+                        service_id: finalValues,
                         job_type_id: [],
                       }));
-                      getJobTypeData(values);
+                      getJobTypeData(finalValues);
+
+
+                      // const values = opts ? opts.map((o) => o.value) : [];
+                      // setFormData((p) => ({
+                      //   ...p,
+                      //   service_id: values,
+                      //   job_type_id: [],
+                      // }));
+                      // getJobTypeData(values);
                     }}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -637,9 +745,36 @@ const EditCheckList = () => {
                         formData.job_type_id.includes(j.id.toString()),
                       )
                       .map((j) => ({ value: j.id.toString(), label: j.type }))}
+
                     onChange={(opts) => {
+
                       const values = opts ? opts.map((o) => o.value) : [];
-                      setFormData((p) => ({ ...p, job_type_id: values }));
+                      let finalValues = values;
+                      if (values.length > 0) {
+
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this job type?"
+                        );
+
+                        if (confirmSelect) {
+                          if (allExistIds?.job_type_ids?.length > 0) {
+                            finalValues = [...new Set([...values, ...allExistIds?.job_type_ids])];
+                          } else {
+                            finalValues = [...new Set([...values])];
+                          }
+                        } else {
+                          return
+                        }
+                      }
+                      setFormData((p) => ({
+                        ...p,
+                        job_type_id: finalValues
+                      }));
+
+
+                      // const values = opts ? opts.map((o) => o.value) : [];
+                      // setFormData((p) => ({ ...p, job_type_id: values }));
+
                     }}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -663,10 +798,37 @@ const EditCheckList = () => {
                       .filter((opt) => selectedClientType.includes(opt.key))
                       .map((opt) => ({ value: opt.key, label: opt.label }))}
                     onChange={(selectedOptions) => {
-                      const values = selectedOptions
-                        ? selectedOptions.map((opt) => opt.value)
-                        : [];
-                      handleMultipleSelect(values);
+
+                      const values = selectedOptions ? selectedOptions.map((opt) => opt.value) : [];
+
+                
+                      let finalValues = values;
+                      if (values.length > 0) {
+
+                        const confirmSelect = window.confirm(
+                          "Are you sure you want to select this client type?"
+                        );
+
+
+
+                        if (confirmSelect) {
+                          if (allExistIds?.client_type_ids?.length > 0) {
+                            finalValues = [...new Set([...values, ...allExistIds?.client_type_ids])];
+                          } else {
+                            finalValues = [...new Set([...values])];
+                          }
+                        } else {
+                          return
+                        }
+                      }
+
+                      handleMultipleSelect(finalValues);
+
+
+                      // const values = selectedOptions
+                      //   ? selectedOptions.map((opt) => opt.value)
+                      //   : [];
+                      // handleMultipleSelect(values);
                     }}
                     className={errors.client_type_id ? "error-field" : ""}
                     menuPortalTarget={document.body}
@@ -710,16 +872,16 @@ const EditCheckList = () => {
                   accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                   onChange={handleFileChange}
                 />
-                
+
                 <div className="ms-3">
                   {existingFile ? (
                     <div className="d-flex flex-column">
                       <span className="text-muted small">Previously Uploaded:</span>
-                      <a 
-                         href={`${base_url}downloadChecklist/${location.state?.checklist_id || location.state?.id}`}
-                         className="text-primary text-decoration-none fw-bold"
-                         target="_blank" 
-                         rel="noopener noreferrer"
+                      <a
+                        href={`${base_url}downloadChecklist/${location.state?.checklist_id || location.state?.id}`}
+                        className="text-primary text-decoration-none fw-bold"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {existingFile}
                       </a>
