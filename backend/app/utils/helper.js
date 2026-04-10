@@ -411,6 +411,24 @@ async function QueryRoleHelperFunction(staff_id) {
   return rows;
 }
 
+async function JobStatusUpdate(job_id, status_type, status_update_date) {
+  try {
 
 
-module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds ,LineManageStaffIdHelperFunction ,QueryRoleHelperFunction };
+     
+
+
+
+    const query = `
+     INSERT INTO job_status_updation (job_id,status_type,status_update_date)
+      VALUES (?, ?, ?)
+    `;
+    const [result] = await pool.execute(query, [job_id, status_type, status_update_date]);
+    return { status: true, message: 'Status inserted successfully', data: result };
+  } catch (err) {
+    console.error('Error executing query JobStatusUpdate:', err);
+    return { status: false, message: 'Error executing query', data: err };
+  }
+}
+
+module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate };

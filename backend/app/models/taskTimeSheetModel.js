@@ -1,6 +1,6 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-const { SatffLogUpdateOperation, generateNextUniqueCodeJobLogTitle } = require('../../app/utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCodeJobLogTitle, JobStatusUpdate } = require('../../app/utils/helper');
 
 const getTaskTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
@@ -179,6 +179,8 @@ const addMissingLog = async (missingLog) => {
 
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id]);
+      const status_update_date = new Date().toLocaleString('sv-SE');
+      await JobStatusUpdate(job_id, update_status, status_update_date);
     }
 
 
@@ -392,6 +394,8 @@ const editMissingLog = async (missingLog) => {
 
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id[0].job_id]);
+      const status_update_date = new Date().toLocaleString('sv-SE');
+      await JobStatusUpdate(job_id[0].job_id, update_status, status_update_date);
     }
 
     if (missing_log_document.length > 0) {
@@ -548,6 +552,8 @@ const addQuerie = async (querie) => {
       );
       let update_status = 4;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [update_status, job_id]);
+      const status_update_date = new Date().toLocaleString('sv-SE');
+      await JobStatusUpdate(job_id, update_status, status_update_date);
     }
 
 
@@ -744,6 +750,8 @@ const editQuerie = async (query) => {
       const [job_id] = await pool.execute('SELECT job_id FROM  `queries` WHERE id = ?', [id]);
       let update_status = 4;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id[0].job_id]);
+      const status_update_date = new Date().toLocaleString('sv-SE');
+      await JobStatusUpdate(job_id[0].job_id, update_status, status_update_date);
     }
 
 
@@ -850,11 +858,17 @@ const addDraft = async (draft) => {
   
   if([1, 2, 3].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [21, job_id]);
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, 21, status_update_date);
   }
   else if([4].includes(Number(updated_amendment))){
     const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, job_id]);
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, 6, status_update_date);
   }else{
     const [DraftSentStatus] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [7, job_id]);
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, 7, status_update_date);
   }
 
 
@@ -947,6 +961,8 @@ const addDraft = async (draft) => {
         if (rowsDraftProcess.status_check === 1) {
           let update_status = 6;
           const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [update_status, job_id]);
+          const status_update_date = new Date().toLocaleString('sv-SE');
+          await JobStatusUpdate(job_id, update_status, status_update_date);
         }
       }
 
@@ -970,9 +986,13 @@ const editDraft = async (draft) => {
 
     if([1, 2, 3].includes(Number(updated_amendment))){
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW()  WHERE id = ?`, [21, rowJob.job_id]);
+      const status_update_date = new Date().toLocaleString('sv-SE');
+      await JobStatusUpdate(rowJob.job_id, 21, status_update_date);
     }
     else if([4].includes(Number(updated_amendment))){
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [6, rowJob.job_id]);
+      const status_update_date = new Date().toLocaleString('sv-SE');
+      await JobStatusUpdate(rowJob.job_id, 6, status_update_date);
     }
 
 
@@ -1052,7 +1072,8 @@ const editDraft = async (draft) => {
         if (rowsDraftProcess.status_check === 1) {
           let update_status = 6;
           const [result] = await pool.execute(`UPDATE jobs SET status_type = ? ,status_updation_date = NOW() WHERE id = ?`, [update_status, rowJob.job_id]);
-
+          const status_update_date = new Date().toLocaleString('sv-SE');
+          await JobStatusUpdate(rowJob.job_id, update_status, status_update_date);
         }
 
       }

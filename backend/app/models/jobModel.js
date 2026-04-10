@@ -4,7 +4,8 @@ const {
   generateNextUniqueCode,
   getAllCustomerIds,
   LineManageStaffIdHelperFunction,
-  QueryRoleHelperFunction
+  QueryRoleHelperFunction,
+  JobStatusUpdate
 } = require("../../app/utils/helper");
 
 const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
@@ -860,8 +861,13 @@ VALUES (
     //  return
      
     
+    
     // Execute the query with the cleaned values
     const [result] = await pool.execute(query, cleanedValues);
+
+const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(result.insertId,status_type,status_update_date);
+
     if (result.insertId > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({
@@ -3710,6 +3716,9 @@ const jobUpdate = async (job) => {
     // Sanitize the parameters
     const sanitizedParams = sanitizeParams(params);
 
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id,status_type_update,status_update_date);
+
     // Execute the query with sanitized parameters
     const [result] = await pool.execute(query, sanitizedParams);
 
@@ -4354,6 +4363,9 @@ const updateJobStatus = async (job) => {
       `;
     }
 
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id,status_type,status_update_date);
+
     const [result] = await pool.execute(query, [status_type, job_id]);
 
     if (result.changedRows > 0) {
@@ -4553,6 +4565,9 @@ const copy_job = async (job) => {
 
     // last insert id
     const insertId = result.insertId;
+
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(insertId, data.status_type, status_update_date);
 
     // insert job tasks
     const [tasks] = await pool.execute(
