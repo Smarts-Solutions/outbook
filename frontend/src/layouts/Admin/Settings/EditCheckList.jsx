@@ -732,10 +732,7 @@ const EditCheckList = () => {
                         formData.job_type_id.includes(j.id.toString()),
                       )
                       .map((j) => ({ value: j.id.toString(), label: j.type }))}
-                    // onChange={(opts) => {
-                    //   const values = opts ? opts.map((o) => o.value) : [];
-                    //   setFormData((p) => ({ ...p, job_type_id: values }));
-                    // }}
+                    
                      onChange={(opts) => {
 
                       const values = opts ? opts.map((o) => o.value) : [];
@@ -754,6 +751,11 @@ const EditCheckList = () => {
                         ...p,
                         job_type_id: finalValues
                       }));
+
+
+                      // const values = opts ? opts.map((o) => o.value) : [];
+                      // setFormData((p) => ({ ...p, job_type_id: values }));
+
                     }}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
