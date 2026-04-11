@@ -1212,8 +1212,10 @@ const saveTimesheet = async (Timesheet) => {
 
           duplicate_entry = JSON.stringify(duplicate_entry);
 
-          let save_date = row?.save_date ?? null;
-          let submit_date = row?.submit_date ?? null;
+         // let save_date = row?.save_date ?? null;
+          let save_date = row?.save_date ? new Date(row?.save_date): null;
+         // let submit_date = row?.submit_date ?? null;
+          let submit_date = row?.submit_date  ? new Date(row.submit_date): null;
 
           if(Number(row?.submit_status) === 1){
             //current date
