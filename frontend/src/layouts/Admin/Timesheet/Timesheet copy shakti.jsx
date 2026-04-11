@@ -42,6 +42,8 @@ const Timesheet = () => {
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
   const [timesheetLogs, setTimesheetLogs] = useState([]);
 
+   
+ 
 
 
 
@@ -364,8 +366,6 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
-
-  console.log("timeSheetRows", timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -1174,8 +1174,6 @@ const Timesheet = () => {
       // const res = await dispatch(
       //   saveTimesheetData({ req, authToken: token })
       // ).unwrap();
-
-      req.timesheetLogs = timesheetLogs;
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
@@ -1345,7 +1343,6 @@ const Timesheet = () => {
       }
 
       // const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
-      req.timesheetLogs = timesheetLogs;
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
@@ -1426,7 +1423,6 @@ const Timesheet = () => {
     // const res = await dispatch(
     //   saveTimesheetData({ req, authToken: token })
     // ).unwrap();
-    req.timesheetLogs = timesheetLogs;
     const res = await SAVE_TIMESHEET({ req, authToken: token });
     if (res.status) {
       setRemarkText(null);
@@ -1905,18 +1901,6 @@ const Timesheet = () => {
       } else {
         // This is a duplicate. Sum hours into the first occurrence.
         const firstRow = uniqueRowsMap.get(key);
-
-        if (!firstRow.merged_data) {
-          firstRow.merged_data = [];
-        }
-
-        const rowToMerge = JSON.parse(JSON.stringify(row));
-        if (Array.isArray(rowToMerge.merged_data)) {
-          firstRow.merged_data.push(...rowToMerge.merged_data);
-          delete rowToMerge.merged_data;
-        }
-        firstRow.merged_data.push(rowToMerge);
-
         const days = [
           "monday",
           "tuesday",
@@ -1983,9 +1967,6 @@ const Timesheet = () => {
             updateRecordSheet(row.id, hKey, row[hKey]);
           });
           updateRecordSheet(row.id, "total_hours", row.total_hours);
-          if (row.merged_data) {
-            updateRecordSheet(row.id, "merged_data", row.merged_data);
-          }
         }
       });
 
@@ -2036,7 +2017,6 @@ const Timesheet = () => {
       }
 
       setTimeSheetRows(filteredRows);
-      console.log("timeSheetRows after merge", filteredRows);
 
       sweatalert
         .fire({
