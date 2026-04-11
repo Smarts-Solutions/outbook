@@ -4145,7 +4145,7 @@ const EditJob = () => {
                                             {/* Vertical Line */}
                                             {getDurationData().items.length > 1 && (
                                               <div className="position-absolute border-start" 
-                                                   style={{ left: '11px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
+                                                   style={{ left: '15px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
                                             )}
 
                                             {getDurationData().items.length > 0 ? (
