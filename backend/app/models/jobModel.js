@@ -4782,9 +4782,32 @@ const copy_job = async (job) => {
     }
 
 
+    const queryOldJob = `
+        SELECT 
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+          ) AS job_code_id
+
+        FROM 
+        jobs
+        JOIN 
+        clients ON jobs.client_id = clients.id
+        JOIN 
+        customers ON jobs.customer_id = customers.id
+        JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        WHERE
+        jobs.id = ${id};
+        `;    
+    const [[oldJob]] = await pool.execute(queryOldJob);
 
 
+    // old job copy log
 
+    let log_message = `Copied job code: From ${oldJob?.job_code_id} To `
 
     const currentDate = new Date();
     await SatffLogUpdateOperation({
@@ -4792,7 +4815,7 @@ const copy_job = async (job) => {
       ip: ip,
       date: currentDate.toISOString().split("T")[0],
       module_name: "job",
-      log_message: `Copied job code:`,
+      log_message: log_message,
       permission_type: "copied",
       module_id: insertId,
     });
@@ -4807,6 +4830,8 @@ const copy_job = async (job) => {
   }
 
 }
+
+
 
 const getJobsDeleteService = async (job) => {
 
