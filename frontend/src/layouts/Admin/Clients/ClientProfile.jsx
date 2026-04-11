@@ -969,7 +969,7 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-    
+      
     sweatalert
       .fire({
         title: "Are you sure?",
@@ -1028,6 +1028,9 @@ const ClientList = () => {
 
 
   const copyJobRequest = async (row, field = true) => {
+
+    
+
     const req = {
       action: "copy_job",
       row: row,
