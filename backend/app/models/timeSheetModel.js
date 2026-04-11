@@ -1337,7 +1337,7 @@ const saveTimesheet = async (Timesheet) => {
             friday_date=?,friday_hours=?,saturday_date=?,saturday_hours=?,
             sunday_date=?,sunday_hours=?,remark=?,final_remark=?,submit_status=?,
             monday_note=?,tuesday_note=?,wednesday_note=?,thursday_note=?,
-            friday_note=?,saturday_note=?,sunday_note=?
+            friday_note=?,saturday_note=?,sunday_note=? ,duplicate_entry=?
             WHERE id=?`;
 
             const updateValues = [
@@ -1370,6 +1370,7 @@ const saveTimesheet = async (Timesheet) => {
               friday_note,
               saturday_note,
               sunday_note,
+              duplicate_entry,
               row.id,
             ];
 
