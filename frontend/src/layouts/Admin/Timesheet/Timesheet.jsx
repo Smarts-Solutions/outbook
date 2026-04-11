@@ -1905,6 +1905,18 @@ const Timesheet = () => {
       } else {
         // This is a duplicate. Sum hours into the first occurrence.
         const firstRow = uniqueRowsMap.get(key);
+
+        if (!firstRow.merged_data) {
+          firstRow.merged_data = [];
+        }
+
+        const rowToMerge = JSON.parse(JSON.stringify(row));
+        if (Array.isArray(rowToMerge.merged_data)) {
+          firstRow.merged_data.push(...rowToMerge.merged_data);
+          delete rowToMerge.merged_data;
+        }
+        firstRow.merged_data.push(rowToMerge);
+
         const days = [
           "monday",
           "tuesday",
@@ -1971,6 +1983,9 @@ const Timesheet = () => {
             updateRecordSheet(row.id, hKey, row[hKey]);
           });
           updateRecordSheet(row.id, "total_hours", row.total_hours);
+          if (row.merged_data) {
+            updateRecordSheet(row.id, "merged_data", row.merged_data);
+          }
         }
       });
 
@@ -2021,6 +2036,7 @@ const Timesheet = () => {
       }
 
       setTimeSheetRows(filteredRows);
+      console.log("timeSheetRows after merge", filteredRows);
 
       sweatalert
         .fire({
