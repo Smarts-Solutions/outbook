@@ -1239,6 +1239,10 @@ const saveTimesheet = async (Timesheet) => {
           // ======================
 
           if (row.id === null) {
+
+
+            
+
             const insertQuery = `
             INSERT INTO timesheet (
             staff_id, task_type, customer_id, client_id, job_id, task_id,
