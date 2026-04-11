@@ -119,15 +119,15 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     let totalMs = 0;
     
     const formatPreciseDuration = (ms) => {
-      if (isNaN(ms) || ms < 0) return "0d";
+      if (isNaN(ms) || ms < 0) return "0 Day";
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-      return `${days} day${days !== 1 ? 's' : ''}`;
+      return `${days} Day${days > 1 ? 's' : ''}`;
     };
 
     const formatFullDuration = (ms) => {
-      if (isNaN(ms) || ms < 0) return "0 days";
+      if (isNaN(ms) || ms < 0) return "0 Day";
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-      return `${days} day${days !== 1 ? 's' : ''}`;
+      return `${days} Day${days > 1 ? 's' : ''}`;
     }
     
     for (let i = 0; i < history.length; i++) {
@@ -1599,7 +1599,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                   <span className="text-muted fs-12 d-flex align-items-center px-3 py-1 rounded-pill border bg-light ms-2" style={{ minWidth: 'fit-content', height: '38px' }}>
                     <Clock size={14} className="me-2 text-primary" />
                     <span className="fw-semibold" style={{ color: '#495057' }}>
-                      {getDurationData().items[getDurationData().items.length - 1]?.duration || "0 day"}
+                      {getDurationData().items[getDurationData().items.length - 1]?.duration || "0 Day"}
                     </span>
                   </span>
                 )}
