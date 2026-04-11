@@ -1437,12 +1437,12 @@ const ClientList = () => {
   };
 
   const copyJobRequest = async (row, field = true) => {
-
     const req = {
       action: "copy_job",
       row: row,
       field: field
     };
+   
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
