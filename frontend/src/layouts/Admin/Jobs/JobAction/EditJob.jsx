@@ -263,29 +263,20 @@ const EditJob = () => {
   const getDurationData = () => {
     const history = AllJobData.data?.status_history || [];
     if (!Array.isArray(history) || history.length === 0) return { items: [], total: "" };
-    
+
     let processed = [];
     let totalMs = 0;
-    
+
     const formatPreciseDuration = (ms) => {
-      if (isNaN(ms) || ms < 0) return "0m";
-      const totalMinutes = Math.floor(ms / (1000 * 60));
-      const days = Math.floor(totalMinutes / (24 * 60));
-      const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-      const minutes = totalMinutes % 60;
-      
-      let result = [];
-      if (days > 0) result.push(`${days}d`);
-      if (hours > 0) result.push(`${hours}h`);
-      if (minutes > 0 || result.length === 0) result.push(`${minutes}m`);
-      
-      return result.join(" ");
+      if (isNaN(ms) || ms < 0) return "0 Days";
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+      return `${days} Day${days !== 1 ? 's' : ''}`;
     };
-    
+
     for (let i = 0; i < history.length; i++) {
       const current = history[i];
       const next = history[i + 1];
-      
+
       if (!current?.status_update_date) continue;
 
       const startDate = new Date(current.status_update_date);
@@ -293,10 +284,10 @@ const EditJob = () => {
 
       const endDate = next ? new Date(next.status_update_date) : new Date();
       if (isNaN(endDate.getTime())) continue;
-      
+
       const diffMs = endDate.getTime() - startDate.getTime();
       totalMs += diffMs;
-      
+
       processed.push({
         status: current.status_name || "Status Update",
         from: startDate,
@@ -304,7 +295,7 @@ const EditJob = () => {
         duration: formatPreciseDuration(diffMs)
       });
     }
-    
+
     return { items: processed, total: formatPreciseDuration(totalMs) };
   };
 
@@ -1085,7 +1076,7 @@ const EditJob = () => {
   const HandleChange = async (e) => {
     const { name, value } = e.target;
 
- 
+
     if (name === "Service") {
       if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
@@ -1371,11 +1362,11 @@ const EditJob = () => {
 
 
 
-    if (["", null, undefined ,0].includes(jobData?.processing_checklist)) {
+    if (["", null, undefined, 0].includes(jobData?.processing_checklist)) {
       processing_checklist_status = "0"
     }
 
-    if (["", null, undefined ,0].includes(jobData?.reviewing_checklist)) {
+    if (["", null, undefined, 0].includes(jobData?.reviewing_checklist)) {
       reviewing_checklist_status = "0"
     }
 
@@ -3956,7 +3947,7 @@ const EditJob = () => {
                                           {errors["job_priority"]}
                                         </div>
                                       )}
-                                      <div className="mt-2 text-start">
+                                      {/* <div className="mt-2 text-start">
                                         <button
                                           type="button"
                                           className={`${showHistoryInline ? 'bg-primary text-white' : 'text-primary'} btn btn-link p-1 px-2 fs-12 d-flex align-items-center rounded-pill border border-primary text-decoration-none`}
@@ -3965,7 +3956,24 @@ const EditJob = () => {
                                         >
                                           <Clock size={14} className="me-1" /> {showHistoryInline ? 'Hide Duration History' : 'Status Duration History'}
                                         </button>
+                                      </div> */}
+
+
+                                      <div className="mt-2 text-start">
+                                        <ul className="nav nav-pills rounded-tabs">
+                                          <li className="nav-item">
+                                            <button
+                                              className={`nav-link ${showHistoryInline ? "active" : ""}`}
+                                              type="button"
+                                              onClick={() => setShowHistoryInline(!showHistoryInline)}
+                                            >
+                                              <Clock size={16} className="me-1" />
+                                              Status Duration History
+                                            </button>
+                                          </li>
+                                        </ul>
                                       </div>
+
                                     </div>
                                   </div>
 
@@ -4062,10 +4070,10 @@ const EditJob = () => {
                                           })
                                         }
                                         value={jobData.reviewing_checklist ?? ""}
-                                        // onChange={HandleChange}
-                                        // value={
-                                        //   jobData.reviewing_checklist
-                                        // }
+                                      // onChange={HandleChange}
+                                      // value={
+                                      //   jobData.reviewing_checklist
+                                      // }
                                       >
                                         <option value={""}>-- Select --</option>
                                         <option value={0}>Not Required</option>
@@ -4132,20 +4140,20 @@ const EditJob = () => {
                                                 <div className="timeline-item position-relative mb-4" key={index}>
                                                   {/* Timeline Line */}
                                                   {index !== array.length - 1 && (
-                                                    <div className="position-absolute h-100 border-start border-2 border-dashed border-primary-subtle" 
-                                                         style={{ left: '11px', top: '24px', zIndex: 1 }}></div>
+                                                    <div className="position-absolute h-100 border-start border-2 border-dashed border-primary-subtle"
+                                                      style={{ left: '11px', top: '24px', zIndex: 1 }}></div>
                                                   )}
-                                                  
+
                                                   <div className="d-flex align-items-start position-relative" style={{ zIndex: 2 }}>
                                                     <div className="timeline-icon bg-white p-1 rounded-circle border border-2 border-primary d-flex align-items-center justify-content-center"
-                                                         style={{ width: '24px', height: '24px' }}>
+                                                      style={{ width: '24px', height: '24px' }}>
                                                       {index === array.length - 1 ? (
                                                         <Clock size={12} className="text-primary" />
                                                       ) : (
                                                         <CheckCircle2 size={12} className="text-primary" />
                                                       )}
                                                     </div>
-                                                    
+
                                                     <div className="ms-3 flex-grow-1">
                                                       <div className="d-flex justify-content-between align-items-center">
                                                         <h6 className="fs-13 fw-semibold text-dark mb-1">{item.status || "Status Update"}</h6>
@@ -4154,7 +4162,7 @@ const EditJob = () => {
                                                         </span>
                                                       </div>
                                                       <p className="fs-12 text-muted mb-0">
-                                                        {item.from.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} 
+                                                        {item.from.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                         {item.to ? ` → ${item.to.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ' → Present'}
                                                       </p>
                                                     </div>

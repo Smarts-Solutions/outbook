@@ -119,17 +119,9 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     let totalMs = 0;
     
     const formatPreciseDuration = (ms) => {
-      const totalMinutes = Math.floor(ms / (1000 * 60));
-      const days = Math.floor(totalMinutes / (24 * 60));
-      const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-      const minutes = totalMinutes % 60;
-      
-      let result = [];
-      if (days > 0) result.push(`${days}d`);
-      if (hours > 0) result.push(`${hours}h`);
-      if (minutes > 0 || result.length === 0) result.push(`${minutes}m`);
-      
-      return result.join(" ");
+      if (isNaN(ms) || ms < 0) return "0 Days";
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+      return `${days} Day${days !== 1 ? 's' : ''}`;
     };
     
     for (let i = 0; i < history.length; i++) {
@@ -2251,14 +2243,21 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         <option value="urgent">Urgent</option>
                       </select>
                       <div className="mt-2 text-start">
-                        <button
-                          type="button"
-                          className={`${showHistoryInline ? 'bg-primary text-white' : 'text-primary'} btn btn-link p-1 px-2 fs-12 d-flex align-items-center rounded-pill border border-primary text-decoration-none`}
-                          onClick={handleShowStatusHistory}
-                          style={{ transition: 'all 0.3s ease' }}
-                        >
-                          <Clock size={14} className="me-1" /> {showHistoryInline ? 'Hide Duration History' : 'Status Duration History'}
-                        </button>
+                        <ul className="nav nav-pills rounded-tabs" role="tablist">
+                          <li className="nav-item" role="presentation">
+                            <button
+                              className={`nav-link ${showHistoryInline ? "active" : ""}`}
+                              id="status-history-tab"
+                              type="button"
+                              role="tab"
+                              aria-selected={showHistoryInline}
+                              onClick={handleShowStatusHistory}
+                            >
+                              <Clock size={16} className="me-1" />
+                              Status Duration History
+                            </button>
+                          </li>
+                        </ul>
                       </div>
                     </div>
                   </div>
