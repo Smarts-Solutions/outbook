@@ -74,7 +74,11 @@ const updateChecklist = async (checklist, file) => {
 };
 
 const customerGetService = async (task) => {
+   if(task?.action != undefined &&  task?.action === "customerGetServiceCheckList"){
+    return jobTypeTaskModel.customerGetServiceCheckList(task);
+  }else{
   return jobTypeTaskModel.customerGetService(task);
+  }
 };
 
 

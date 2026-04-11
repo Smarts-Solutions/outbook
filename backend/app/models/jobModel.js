@@ -292,7 +292,9 @@ const getAddJobData = async (job) => {
    `;
 
     if (roleData?.length > 0 && (roleData[0]?.role_name != "SUPERADMIN")) {
-      queryCustomerWithServices = `
+
+      if (roleData[0]?.role_id == 4) {
+        queryCustomerWithServices = `
      SELECT  
          services.id AS service_id,
          services.name AS service_name
@@ -311,9 +313,24 @@ const getAddJobData = async (job) => {
     ORDER BY 
      services.id DESC;
    `;
+      } else {
+        queryCustomerWithServices = `
+     SELECT  
+         services.id AS service_id,
+         services.name AS service_name
+    FROM 
+         customers
+    JOIN 
+         customer_services ON customers.id = customer_services.customer_id  
+    JOIN 
+         services ON services.id = customer_services.service_id          
+    WHERE  
+     customer_services.customer_id = ?    
+    ORDER BY 
+     services.id DESC;
+   `;
+      }
     }
-
-
 
 
     const [rows7] = await pool.execute(queryCustomerWithServices, [

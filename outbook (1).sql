@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Apr 01, 2026 at 06:21 AM
+-- Generation Time: Apr 10, 2026 at 12:49 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -344,16 +344,19 @@ CREATE TABLE IF NOT EXISTS `checklists` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `client_type_id` (`client_type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `checklists`
 --
 
 INSERT INTO `checklists` (`id`, `work_flow_type`, `customer_id`, `is_all_customer`, `service_id`, `job_type_id`, `client_type_id`, `check_list_name`, `status`, `upload_checklist_name`, `created_at`, `updated_at`) VALUES
+(13, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'HYHYHY', '1', 'checklist_excel_13.csv', '2026-04-06 10:16:18', '2026-04-06 10:16:18'),
 (9, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'CH1', '1', 'checklist_excel_9.csv', '2026-03-30 09:44:13', '2026-03-30 11:36:52'),
 (10, '6', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'dbdgvd', '1', NULL, '2026-03-30 11:38:13', '2026-03-30 11:38:42'),
-(11, '6', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'RE-CHI', '1', 'checklist_excel_11.csv', '2026-03-30 11:50:16', '2026-03-30 11:50:16');
+(11, '6', '13,14', NULL, '32,5', '8,14', '1,2,3,4,5,6,7', 'RE-CHI', '1', 'checklist_excel_11.csv', '2026-03-30 11:50:16', '2026-04-10 11:19:29'),
+(12, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'FFFFFFF', '1', 'checklist_excel_12.csv', '2026-04-06 06:59:14', '2026-04-10 06:50:18'),
+(14, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'Short', '1', 'checklist_excel_14.csv', '2026-04-07 05:37:43', '2026-04-07 05:37:43');
 
 -- --------------------------------------------------------
 
@@ -440,7 +443,7 @@ CREATE TABLE IF NOT EXISTS `clients` (
   UNIQUE KEY `client_code` (`client_code`),
   KEY `customer_id` (`customer_id`),
   KEY `client_industry_id` (`client_industry_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `clients`
@@ -466,7 +469,8 @@ INSERT INTO `clients` (`id`, `client_type`, `customer_id`, `staff_created_id`, `
 (17, '2', 6, 1, 3, 'AFROFRING ENTERTAINMENT LIMITED', '000017', '10 Salvesen Grove, Edinburgh, Scotland, EH4 5JP', NULL, NULL, '0', '', '', '', '1', NULL, '2025-11-24 13:40:15', '2025-11-24 13:40:15'),
 (18, '5', 12, 1, 0, 'DFD', '000018', 'sss', '', '21616', '0', '', '', '', '1', '05202396', '2025-11-25 10:55:15', '2025-11-25 11:31:29'),
 (19, '2', 12, 1, 3, 'AQUATECH SURFACING LTD', '000019', '1a Kingsburys Lane, Ringwood, Hampshire, United Kingdom, BH24 1EL', NULL, NULL, '0', '', '', '', '1', NULL, '2026-03-27 06:26:24', '2026-03-27 06:26:24'),
-(20, '1', 14, 1, 3, 'WWWWW', '000020', 'sfgdgd', NULL, NULL, '0', '', '', '', '1', NULL, '2026-03-28 10:16:39', '2026-03-28 10:16:39');
+(20, '1', 14, 1, 3, 'WWWWW', '000020', 'sfgdgd', NULL, NULL, '0', '', '', '', '1', NULL, '2026-03-28 10:16:39', '2026-03-28 10:16:39'),
+(21, '1', 13, 1, 3, 'oooooooooooooo', '000021', 'gjng', NULL, NULL, '0', '', '', '', '1', NULL, '2026-04-09 11:17:26', '2026-04-09 11:17:26');
 
 -- --------------------------------------------------------
 
@@ -526,7 +530,7 @@ CREATE TABLE IF NOT EXISTS `client_contact_details` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   KEY `role` (`role`)
-) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_contact_details`
@@ -552,7 +556,8 @@ INSERT INTO `client_contact_details` (`id`, `client_id`, `role`, `first_name`, `
 (36, 17, 2, 'Olasunkanmi Jide', 'OJO', '', NULL, '+44', '', NULL, NULL, NULL, '0', '2025-11-24 13:40:15', '2025-11-24 13:40:15'),
 (37, 18, 2, 'ss', 'ss', '', '', '+44', '', '+44', '', NULL, '0', '2025-11-25 10:55:16', '2025-11-25 10:55:16'),
 (38, 19, 11, 'fef', 'fef', '', NULL, '+44', '', NULL, NULL, NULL, '0', '2026-03-27 06:26:24', '2026-03-27 06:26:24'),
-(39, 20, 0, 'ghng', 'ghngn', 'h@gmail.com', NULL, '+44', '', NULL, NULL, 'ghfbhh', '0', '2026-03-28 10:16:39', '2026-03-28 10:16:39');
+(39, 20, 0, 'ghng', 'ghngn', 'h@gmail.com', NULL, '+44', '', NULL, NULL, 'ghfbhh', '0', '2026-03-28 10:16:39', '2026-03-28 10:16:39'),
+(40, 21, 0, 'd', 'd', '', NULL, '+44', '', NULL, NULL, '', '0', '2026-04-09 11:17:26', '2026-04-09 11:17:26');
 
 -- --------------------------------------------------------
 
@@ -620,7 +625,7 @@ CREATE TABLE IF NOT EXISTS `client_job_task` (
   UNIQUE KEY `job_id` (`job_id`,`client_id`,`task_id`),
   KEY `client_id` (`client_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=105 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_job_task`
@@ -692,8 +697,19 @@ INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_sta
 (75, 69, 20, 8, NULL, '10:0', '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
 (76, 70, 20, 34, NULL, '1:10', '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
 (77, 71, 20, 34, NULL, '1:10', '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
-(78, 72, 20, 32, NULL, '1:10', '2026-03-31 09:27:37', '2026-03-31 09:27:37'),
-(79, 73, 20, 34, NULL, '1:10', '2026-03-31 11:56:51', '2026-03-31 11:56:51');
+(82, 72, 20, 36, NULL, '15:10', '2026-04-06 06:35:39', '2026-04-06 06:35:39'),
+(81, 73, 20, 36, NULL, '10:10', '2026-04-06 06:20:10', '2026-04-06 06:20:10'),
+(83, 74, 20, 34, NULL, '1:10', '2026-04-06 07:05:14', '2026-04-06 07:05:14'),
+(88, 79, 20, 34, NULL, '1:10', '2026-04-06 09:25:22', '2026-04-06 09:25:22'),
+(102, 80, 20, 35, NULL, '10:0', '2026-04-10 06:27:31', '2026-04-10 06:27:31'),
+(90, 81, 17, 30, NULL, '2:10', '2026-04-06 11:11:04', '2026-04-06 11:11:04'),
+(91, 82, 20, 36, NULL, '15:10', '2026-04-06 11:11:23', '2026-04-06 11:11:23'),
+(92, 83, 20, 34, NULL, '1:10', '2026-04-07 05:38:14', '2026-04-07 05:38:14'),
+(100, 85, 20, 40, NULL, '10:10', '2026-04-09 07:14:15', '2026-04-09 07:14:15'),
+(99, 86, 20, 38, NULL, '15:0', '2026-04-09 07:13:50', '2026-04-09 07:13:50'),
+(101, 87, 21, 40, NULL, '10:0', '2026-04-09 11:18:23', '2026-04-09 11:18:23'),
+(103, 88, 19, 28, NULL, '10:0', '2026-04-10 09:09:04', '2026-04-10 09:09:04'),
+(104, 89, 20, 40, NULL, '10:0', '2026-04-10 11:20:44', '2026-04-10 11:20:44');
 
 -- --------------------------------------------------------
 
@@ -1181,7 +1197,7 @@ CREATE TABLE IF NOT EXISTS `customer_services` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `customer_id` (`customer_id`,`service_id`),
   KEY `service_id` (`service_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=127 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=134 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `customer_services`
@@ -1200,8 +1216,6 @@ INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `c
 (53, 5, 7, '1', '2025-07-12 10:10:40', '2025-07-12 10:10:40'),
 (54, 6, 2, '1', '2025-07-12 12:11:36', '2025-07-12 12:11:36'),
 (55, 6, 1, '1', '2025-07-12 12:11:36', '2025-07-12 12:11:36'),
-(97, 13, 7, '1', '2026-01-01 12:16:51', '2026-01-01 12:16:51'),
-(98, 13, 8, '1', '2026-01-01 12:16:51', '2026-01-01 12:16:51'),
 (61, 8, 1, '1', '2025-07-14 10:20:44', '2025-07-14 10:20:44'),
 (60, 8, 2, '1', '2025-07-14 10:20:44', '2025-07-14 10:20:44'),
 (62, 9, 3, '1', '2025-07-24 11:34:21', '2025-07-24 11:34:21'),
@@ -1235,9 +1249,8 @@ INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `c
 (90, 3, 5, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
 (91, 3, 6, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
 (92, 3, 7, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
-(99, 13, 26, '1', '2026-01-01 12:16:51', '2026-01-01 12:16:51'),
+(133, 13, 36, '1', '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
 (95, 12, 8, '1', '2025-11-24 09:36:20', '2025-11-24 09:36:20'),
-(100, 13, 6, '1', '2026-01-01 12:16:51', '2026-01-01 12:16:51'),
 (101, 12, 26, '1', '2026-03-11 09:19:51', '2026-03-11 09:19:51'),
 (102, 12, 7, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
 (103, 12, 6, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
@@ -1246,11 +1259,8 @@ INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `c
 (106, 12, 3, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
 (107, 12, 2, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
 (108, 12, 1, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
-(109, 13, 5, '1', '2026-03-28 06:46:21', '2026-03-28 06:46:21'),
-(110, 13, 4, '1', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
 (111, 13, 3, '1', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
 (112, 13, 2, '1', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(113, 13, 1, '1', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
 (118, 14, 2, '1', '2026-03-28 10:35:07', '2026-03-28 10:35:07'),
 (119, 14, 1, '1', '2026-03-28 10:35:28', '2026-03-28 10:35:28'),
 (120, 14, 3, '1', '2026-03-28 11:44:33', '2026-03-28 11:44:33'),
@@ -1259,7 +1269,12 @@ INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `c
 (123, 14, 6, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
 (124, 14, 7, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
 (125, 14, 8, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
-(126, 14, 26, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08');
+(126, 14, 26, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(127, 14, 34, '1', '2026-04-08 06:18:42', '2026-04-08 06:18:42'),
+(128, 14, 35, '1', '2026-04-08 06:54:36', '2026-04-08 06:54:36'),
+(129, 14, 37, '1', '2026-04-09 05:07:45', '2026-04-09 05:07:45'),
+(132, 13, 35, '1', '2026-04-09 11:16:53', '2026-04-09 11:16:53'),
+(131, 14, 36, '1', '2026-04-09 07:13:25', '2026-04-09 07:13:25');
 
 -- --------------------------------------------------------
 
@@ -1302,10 +1317,7 @@ INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account
 (51, 14, '2025-08-22 06:58:38', '2025-08-22 06:58:38'),
 (54, 13, '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
 (55, 13, '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
-(98, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(100, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(99, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(97, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
+(133, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
 (60, 11, '2025-07-14 11:07:04', '2025-07-14 11:07:04'),
 (61, 11, '2025-07-14 11:07:04', '2025-07-14 11:07:04'),
 (62, 15, '2025-08-13 09:47:39', '2025-08-13 09:47:39'),
@@ -1354,22 +1366,24 @@ INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account
 (106, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
 (107, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
 (108, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
-(109, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(110, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(111, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(112, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(113, 11, '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
-(126, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(125, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(124, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(123, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(122, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(121, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(120, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(119, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(118, 14, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(118, 15, '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
-(124, 15, '2026-03-31 05:10:56', '2026-03-31 05:10:56');
+(111, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(112, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(126, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(125, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(124, 15, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(123, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(122, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(121, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(120, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(119, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(118, 15, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(118, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(124, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(127, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(128, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(129, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(132, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(131, 14, '2026-04-09 07:22:52', '2026-04-09 07:22:52');
 
 -- --------------------------------------------------------
 
@@ -1571,7 +1585,7 @@ CREATE TABLE IF NOT EXISTS `drafts` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `drafts`
@@ -1587,7 +1601,9 @@ INSERT INTO `drafts` (`id`, `job_id`, `draft_sent_on`, `draft_title`, `final_dra
 (16, 25, '2025-11-13', 'D_00001', '2025-11-19', '1', '1', 'uyuju', '1', '2025-11-13 11:37:25', '2025-11-19 08:48:24'),
 (17, 25, '2025-11-13', 'D_00002', '2025-11-19', '1', '1', 'erhr', '1', '2025-11-13 11:55:07', '2025-11-19 08:47:45'),
 (18, 34, '2025-11-14', 'D_00001', NULL, '0', '1', NULL, '0', '2025-11-14 06:42:38', '2025-11-14 06:42:38'),
-(19, 73, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'jkl,ikl', '1', '2026-04-01 06:15:45', '2026-04-01 06:15:45');
+(19, 73, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'jkl,ikl', '1', '2026-04-01 06:15:45', '2026-04-01 06:15:45'),
+(20, 62, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'n,', '1', '2026-04-01 07:21:45', '2026-04-01 07:21:45'),
+(21, 61, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'j', '1', '2026-04-01 07:30:41', '2026-04-01 07:30:41');
 
 -- --------------------------------------------------------
 
@@ -1820,7 +1836,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`),
   KEY `currency` (`currency`)
-) ENGINE=MyISAM AUTO_INCREMENT=74 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=90 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `jobs`
@@ -1871,7 +1887,7 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (41, 1, '000041', 13, 10, 15, '', 44, 4, 12, '01:10', 0, '0', '2025-11-27', '2025-11-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-27 14:23:40', NULL, NULL, '0', '0', NULL, '2025-11-27 08:53:40', '2025-11-27 08:53:40'),
 (42, 1, '000042', 15, 12, 18, '', 46, 8, 13, '01:10', 0, '0', '2025-11-28', '2025-11-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-07', NULL, NULL, '2025-11-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-28 11:39:38', NULL, NULL, '0', '0', NULL, '2025-11-28 06:09:38', '2025-12-27 12:09:00');
 INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `expected_delivery_date_old`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Year_Ending_id_1`, `Bookkeeping_Frequency_id_2`, `Day_Date_id_2`, `Week_Year_id_2`, `Week_Month_id_2`, `Week_id_2`, `Fortnight_Year_id_2`, `Fortnight_Month_id_2`, `Fortnight_id_2`, `Month_Year_id_2`, `Month_id_2`, `Quarter_Year_id_2`, `Quarter_id_2`, `Year_id_2`, `Other_FromDate_id_2`, `Other_ToDate_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Payroll_Week_Year_id_3`, `Payroll_Week_Month_id_3`, `Payroll_Week_id_3`, `Payroll_Fortnight_Year_id_3`, `Payroll_Fortnight_Month_id_3`, `Payroll_Fortnight_id_3`, `Payroll_Month_Year_id_3`, `Payroll_Month_id_3`, `Payroll_Quarter_Year_id_3`, `Payroll_Quarter_id_3`, `Payroll_Year_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Tax_Year_id_4`, `Management_Accounts_Frequency_id_6`, `Management_Accounts_FromDate_id_6`, `Management_Accounts_ToDate_id_6`, `Year_id_33`, `Period_id_32`, `Day_Date_id_32`, `Week_Year_id_32`, `Week_Month_id_32`, `Week_id_32`, `Fortnight_Year_id_32`, `Fortnight_Month_id_32`, `Fortnight_id_32`, `Month_Year_id_32`, `Month_id_32`, `Quarter_Year_id_32`, `Quarter_id_32`, `Year_id_32`, `Other_FromDate_id_32`, `Other_ToDate_id_32`, `Payroll_Frequency_id_31`, `Payroll_Week_Year_id_31`, `Payroll_Week_Month_id_31`, `Payroll_Week_id_31`, `Payroll_Fortnight_Year_id_31`, `Payroll_Fortnight_Month_id_31`, `Payroll_Fortnight_id_31`, `Payroll_Month_Year_id_31`, `Payroll_Month_id_31`, `Payroll_Quarter_Year_id_31`, `Payroll_Quarter_id_31`, `Payroll_Year_id_31`, `Audit_Year_Ending_id_27`, `Filing_Frequency_id_8`, `Period_Ending_Date_id_8`, `Filing_Date_id_8`, `Year_id_28`, `job_priority`, `status_updation_date`, `processing_checklist`, `reviewing_checklist`, `processing_checklist_status`, `reviewing_checklist_status`, `checklist_modal_data`, `created_at`, `updated_at`) VALUES
-(43, 1, '000043', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2025-12-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 10:25:19', NULL, NULL, '0', '0', NULL, '2025-12-01 04:55:19', '2025-12-01 04:55:38'),
+(43, 1, '000043', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2025-12-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 4, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 12:38:15', NULL, NULL, '0', '0', NULL, '2025-12-01 04:55:19', '2026-04-10 07:08:15'),
 (44, 1, '000044', 15, 12, 18, '', 46, 8, 13, '01:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-02-07', NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:00:20', NULL, NULL, '0', '0', NULL, '2025-12-01 05:30:20', '2025-12-01 05:31:07'),
 (45, 1, '000045', 13, 10, 13, '', 44, 33, 9, '01:01', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:02:11', NULL, NULL, '0', '0', NULL, '2025-12-01 05:32:11', '2025-12-01 05:32:24'),
 (46, 1, '000046', 13, 10, 14, '', 44, 1, 11, '01:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2025-12-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:12:41', NULL, NULL, '0', '0', NULL, '2025-12-01 05:42:41', '2025-12-01 05:42:41'),
@@ -1886,10 +1902,10 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (54, 1, '000054', 13, 6, 17, '', 40, 2, 4, '02:00', 0, '0', '2026-03-16', '2026-03-16', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-16 11:50:42', '2026-03-16 11:50:42'),
 (55, 1, '000055', 13, 6, 17, '', 40, 2, 4, '02:00', 0, '0', '2026-03-16', '2026-03-16', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-16 11:50:47', '2026-03-16 11:50:47'),
 (56, 1, '000056', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '0', '2026-03-16', '2026-03-16', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-04-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-16 11:55:48', '2026-03-28 06:32:08'),
-(61, 22, '000061', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2026-04-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-28 12:02:57', NULL, NULL, '0', '0', NULL, '2026-03-28 06:32:57', '2026-03-28 06:32:57'),
+(61, 22, '000061', 13, 6, 17, '', 40, 1, 11, '01:10', 12, '21', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2026-04-25', NULL, '1', '2026-04-01', '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 19, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-26 13:00:53', NULL, NULL, '0', '0', NULL, '2026-03-28 06:32:57', '2026-04-01 07:31:44'),
 (58, 1, '000058', 15, 12, 19, '', 46, 2, 4, '01:00', 0, '0', '2026-03-27', '2026-03-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-06', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Monthly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 14:19:39', NULL, NULL, '0', '0', NULL, '2026-03-27 08:49:39', '2026-03-27 08:50:09'),
 (59, 1, '000059', 15, 12, 19, '', 46, 1, 11, '01:10', 0, '0', '2026-03-27', '2026-03-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2027-03-24', NULL, NULL, '2026-04-24', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2026-06-30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 12:10:59', NULL, NULL, '0', '0', NULL, '2026-03-27 08:56:34', '2026-03-27 08:56:34'),
-(62, 22, '000062', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2026-04-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-28 12:02:57', NULL, NULL, '0', '0', NULL, '2026-03-28 06:33:16', '2026-03-28 06:33:16'),
+(62, 22, '000062', 13, 6, 17, '', 40, 1, 11, '01:10', 13, '13', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2026-04-25', NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 12:51:57', NULL, NULL, '0', '0', NULL, '2026-03-28 06:33:16', '2026-04-01 07:22:40'),
 (63, 1, '000063', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', '2026-03-20', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-30 12:30:04', NULL, NULL, '0', '0', NULL, '2026-03-30 07:00:04', '2026-03-30 07:00:04'),
 (64, 1, '000064', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', '2026-03-20', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-30 12:30:04', NULL, NULL, '0', '0', NULL, '2026-03-30 07:00:23', '2026-03-30 07:00:23'),
 (65, 1, '000065', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '24', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:49:37', NULL, NULL, '0', '0', NULL, '2026-03-30 07:16:14', '2026-03-31 12:19:37'),
@@ -1899,8 +1915,20 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (69, 1, '000069', 14, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 12:15:47', 9, NULL, '2', '2', NULL, '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
 (70, 1, '000070', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 12:24:37', 9, NULL, '1', '2', NULL, '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
 (71, 1, '000071', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 14:34:35', 9, NULL, '2', '2', NULL, '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
-(72, 1, '000072', 14, 14, 20, '', 48, 4, 12, '01:10', 13, '21', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2026-04-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:34:37', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"zsfgsdgdgbdsg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 09:27:37', '2026-03-31 12:19:13'),
-(73, 1, '000073', 14, 14, 20, '', 48, 8, 13, '01:10', 13, '22', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-01 11:47:11', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 11:56:51', '2026-04-01 06:17:11');
+(72, 1, '000072', 14, 14, 20, '', 48, 5, 14, '15:10', 13, '21', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:34:37', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"zsfgsdgdgbdsg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 09:27:37', '2026-04-06 06:35:39'),
+(73, 1, '000073', 14, 14, 20, '', 48, 5, 14, '10:10', 13, '22', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, '', '', 0, '', '', '', '', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'urgent', '2026-04-01 11:47:11', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 11:56:51', '2026-04-06 06:20:20'),
+(74, 1, '000074', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '21', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-16', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 12:35:14', 12, NULL, '1', '2', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"FFFFFFF\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"}]}', '2026-04-06 07:05:14', '2026-04-06 08:42:21'),
+(79, 1, '000075', 14, 14, 20, '', 48, 8, 13, '01:10', NULL, NULL, '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-16', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 14:55:22', NULL, NULL, '0', '0', NULL, '2026-04-06 09:25:22', '2026-04-06 09:25:22'),
+(80, 1, '000076', 14, 14, 20, '', 48, 2, 5, '10:00', 0, '21', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-11', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 11:57:31', 12, NULL, '1', '0', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"FFFFFFF\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"}]}', '2026-04-06 09:25:36', '2026-04-10 06:27:31'),
+(88, 1, '000083', 15, 12, 19, '', 46, 3, 3, '10:00', 0, '0', '2026-04-10', '2026-04-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 14:39:04', 12, NULL, '2', '0', NULL, '2026-04-10 09:09:04', '2026-04-10 09:09:04');
+INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `expected_delivery_date_old`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Year_Ending_id_1`, `Bookkeeping_Frequency_id_2`, `Day_Date_id_2`, `Week_Year_id_2`, `Week_Month_id_2`, `Week_id_2`, `Fortnight_Year_id_2`, `Fortnight_Month_id_2`, `Fortnight_id_2`, `Month_Year_id_2`, `Month_id_2`, `Quarter_Year_id_2`, `Quarter_id_2`, `Year_id_2`, `Other_FromDate_id_2`, `Other_ToDate_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Payroll_Week_Year_id_3`, `Payroll_Week_Month_id_3`, `Payroll_Week_id_3`, `Payroll_Fortnight_Year_id_3`, `Payroll_Fortnight_Month_id_3`, `Payroll_Fortnight_id_3`, `Payroll_Month_Year_id_3`, `Payroll_Month_id_3`, `Payroll_Quarter_Year_id_3`, `Payroll_Quarter_id_3`, `Payroll_Year_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Tax_Year_id_4`, `Management_Accounts_Frequency_id_6`, `Management_Accounts_FromDate_id_6`, `Management_Accounts_ToDate_id_6`, `Year_id_33`, `Period_id_32`, `Day_Date_id_32`, `Week_Year_id_32`, `Week_Month_id_32`, `Week_id_32`, `Fortnight_Year_id_32`, `Fortnight_Month_id_32`, `Fortnight_id_32`, `Month_Year_id_32`, `Month_id_32`, `Quarter_Year_id_32`, `Quarter_id_32`, `Year_id_32`, `Other_FromDate_id_32`, `Other_ToDate_id_32`, `Payroll_Frequency_id_31`, `Payroll_Week_Year_id_31`, `Payroll_Week_Month_id_31`, `Payroll_Week_id_31`, `Payroll_Fortnight_Year_id_31`, `Payroll_Fortnight_Month_id_31`, `Payroll_Fortnight_id_31`, `Payroll_Month_Year_id_31`, `Payroll_Month_id_31`, `Payroll_Quarter_Year_id_31`, `Payroll_Quarter_id_31`, `Payroll_Year_id_31`, `Audit_Year_Ending_id_27`, `Filing_Frequency_id_8`, `Period_Ending_Date_id_8`, `Filing_Date_id_8`, `Year_id_28`, `job_priority`, `status_updation_date`, `processing_checklist`, `reviewing_checklist`, `processing_checklist_status`, `reviewing_checklist_status`, `checklist_modal_data`, `created_at`, `updated_at`) VALUES
+(81, 1, '000077', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '0', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-04', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 16:41:03', NULL, NULL, '0', '0', NULL, '2026-04-06 11:11:03', '2026-04-06 11:11:03'),
+(82, 1, '000078', 14, 14, 20, '', 48, 5, 14, '15:10', NULL, NULL, '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 16:41:24', NULL, NULL, '0', '0', NULL, '2026-04-06 11:11:24', '2026-04-06 11:11:24'),
+(83, 1, '000079', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '23', '2026-04-07', '2026-04-07', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-17', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-07 11:08:37', NULL, NULL, '0', '0', '{\"show\":false,\"data\":[{\"question\":\"Please check/confirm that all necessary documents has been taken into considration\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Please read all related email and confirm that all is updated as requested by client.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"question\":\"Compare/check comparative figures with filed account copy of last year\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Check year end date, directors, shareholders and nature of business on Companies House\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"question\":\"Please check/confirm that all necessary documents has been taken into considration\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Please read all related email and confirm that all is updated as requested by client.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"question\":\"Compare/check comparative figures with filed account copy of last year\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Check year end date, directors, shareholders and nature of business on Companies House\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"}]}', '2026-04-07 05:38:14', '2026-04-07 06:19:33'),
+(85, 1, '000080', 14, 14, 20, '', 48, 36, 17, '10:10', 0, '0', '2026-04-08', '2026-04-08', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-08 12:24:57', NULL, NULL, '0', '0', NULL, '2026-04-08 06:54:57', '2026-04-09 07:14:15'),
+(87, 1, '000082', 11, 13, 21, '', 47, 36, 17, '10:00', 0, '0', '2026-04-09', '2026-04-09', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-09 16:48:23', NULL, NULL, '0', '0', NULL, '2026-04-09 11:18:23', '2026-04-09 11:18:23'),
+(86, 1, '000081', 14, 14, 20, '', 48, 35, 16, '15:00', 0, '24', '2026-04-09', '2026-04-09', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, '', '', 0, '', '', '', '', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 15:36:22', NULL, NULL, '0', '0', NULL, '2026-04-09 05:08:17', '2026-04-10 10:06:22'),
+(89, 1, '000084', 14, 14, 20, '', 48, 36, 17, '10:00', 0, '0', '2026-04-10', '2026-04-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 16:50:44', 0, 0, '0', '0', NULL, '2026-04-10 11:20:44', '2026-04-10 11:23:16');
 
 -- --------------------------------------------------------
 
@@ -1916,7 +1944,7 @@ CREATE TABLE IF NOT EXISTS `job_allowed_staffs` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=67 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=69 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `job_allowed_staffs`
@@ -1943,7 +1971,9 @@ INSERT INTO `job_allowed_staffs` (`id`, `job_id`, `staff_id`, `created_at`, `upd
 (53, 51, 24, '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
 (54, 51, 22, '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
 (66, 56, 22, '2026-03-28 06:32:08', '2026-03-28 06:32:08'),
-(65, 56, 24, '2026-03-28 06:32:08', '2026-03-28 06:32:08');
+(65, 56, 24, '2026-03-28 06:32:08', '2026-03-28 06:32:08'),
+(67, 81, 22, '2026-04-06 11:11:04', '2026-04-06 11:11:04'),
+(68, 81, 24, '2026-04-06 11:11:04', '2026-04-06 11:11:04');
 
 -- --------------------------------------------------------
 
@@ -1969,6 +1999,23 @@ CREATE TABLE IF NOT EXISTS `job_documents` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `job_status_updation`
+--
+
+DROP TABLE IF EXISTS `job_status_updation`;
+CREATE TABLE IF NOT EXISTS `job_status_updation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `status_type` int(11) NOT NULL,
+  `status_update_date` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `job_types`
 --
 
@@ -1982,7 +2029,7 @@ CREATE TABLE IF NOT EXISTS `job_types` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `service_id` (`service_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `job_types`
@@ -2001,7 +2048,12 @@ INSERT INTO `job_types` (`id`, `service_id`, `type`, `status`, `created_at`, `up
 (10, 33, 'compileince job type 2', '1', '2025-10-04 10:43:05', '2025-10-04 10:43:05'),
 (11, 1, 'JAP', '1', '2025-11-25 05:18:10', '2025-11-25 05:18:10'),
 (12, 4, 'DDD', '1', '2025-11-27 08:24:07', '2025-11-27 08:24:07'),
-(13, 8, 'aa', '1', '2025-11-28 05:34:57', '2025-11-28 05:34:57');
+(13, 8, 'aa', '1', '2025-11-28 05:34:57', '2025-11-28 05:34:57'),
+(14, 5, 'DDD', '1', '2026-04-06 06:15:18', '2026-04-06 06:15:18'),
+(15, 34, 'demo', '1', '2026-04-08 06:14:41', '2026-04-08 06:14:41'),
+(16, 35, 'Demo', '1', '2026-04-08 06:41:04', '2026-04-08 06:41:04'),
+(17, 36, 'DEEE', '1', '2026-04-08 07:28:17', '2026-04-08 07:28:17'),
+(18, 37, 'demooooo', '1', '2026-04-09 05:07:22', '2026-04-09 05:07:22');
 
 -- --------------------------------------------------------
 
@@ -2050,7 +2102,7 @@ CREATE TABLE IF NOT EXISTS `master_status` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `status_type_id` (`status_type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `master_status`
@@ -2071,8 +2123,8 @@ INSERT INTO `master_status` (`id`, `name`, `status_type_id`, `status`, `is_disab
 (12, 'Bookkeeping Not Completed', 7, '1', '1', NULL, '2024-11-10 22:50:12', '2025-11-11 12:44:48'),
 (15, 'Not Progressing - Customer Processing', 3, '1', '1', NULL, '2024-11-10 22:52:24', '2025-11-11 12:44:51'),
 (17, 'Completed - Update Sent', 2, '1', '1', NULL, '2024-11-10 22:53:06', '2025-11-11 12:44:55'),
-(18, 'Completed - Filed with Companies House and HMRC', 2, '1', '1', NULL, '2024-11-10 22:53:20', '2025-11-11 12:44:59'),
-(19, 'Completed - Filed with Companies House', 2, '1', '1', NULL, '2024-11-10 22:53:35', '2025-11-11 12:45:02'),
+(18, 'Completed - Filed with Companies House and HMRC', 2, '1', '1', 3, '2024-11-10 22:53:20', '2026-04-01 07:29:38'),
+(19, 'Completed - Filed with Companies House', 2, '1', '1', 0, '2024-11-10 22:53:35', '2026-04-01 07:29:47'),
 (20, 'Completed - Filed with HMRC', 2, '1', '1', NULL, '2024-11-10 22:53:48', '2025-11-11 12:45:05'),
 (21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '1', NULL, '2025-02-01 12:10:19', '2025-02-06 13:17:37');
 
@@ -2101,7 +2153,7 @@ CREATE TABLE IF NOT EXISTS `missing_logs` (
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`),
   KEY `missing_log_reviewed_by` (`missing_log_reviewed_by`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `missing_logs`
@@ -2111,7 +2163,9 @@ INSERT INTO `missing_logs` (`id`, `job_id`, `missing_log`, `missing_paperwork`, 
 (2, 31, '1', '0', '2025-11-11', NULL, 'M_00001', 1, NULL, NULL, '2025-11-11', '0', '2025-11-11 16:53:39', '2025-11-11 16:53:39'),
 (3, 9, '1', '0', '2025-11-13', NULL, 'M_00001', 1, NULL, NULL, '2025-11-13', '0', '2025-11-13 06:04:16', '2025-11-13 06:04:16'),
 (4, 25, '1', '0', '2025-11-19', NULL, 'M_00001', 1, '2025-11-11', NULL, '2025-11-20', '1', '2025-11-19 06:09:49', '2025-11-19 08:46:27'),
-(5, 25, '1', '0', '2025-11-19', NULL, 'M_00002', 1, '2025-11-20', NULL, '2025-11-20', '1', '2025-11-19 08:32:31', '2025-11-19 08:45:55');
+(5, 25, '1', '0', '2025-11-19', NULL, 'M_00002', 1, '2025-11-20', NULL, '2025-11-20', '1', '2025-11-19 08:32:31', '2025-11-19 08:45:55'),
+(6, 86, '1', '0', '2026-04-10', NULL, 'M_00001', 1, NULL, NULL, '2026-04-10', '1', '2026-04-10 05:14:28', '2026-04-10 05:14:28'),
+(7, 43, '1', '0', '2026-04-10', NULL, 'M_00001', 1, NULL, NULL, '2026-04-10', '1', '2026-04-10 07:02:10', '2026-04-10 07:02:10');
 
 -- --------------------------------------------------------
 
@@ -2215,7 +2269,7 @@ CREATE TABLE IF NOT EXISTS `queries` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `queries`
@@ -2223,7 +2277,8 @@ CREATE TABLE IF NOT EXISTS `queries` (
 
 INSERT INTO `queries` (`id`, `job_id`, `queries_remaining`, `query_title`, `reviewed_by`, `missing_queries_prepared_date`, `query_sent_date`, `response_received`, `response`, `final_query_response_received_date`, `last_chaser`, `status`, `created_at`, `updated_at`) VALUES
 (3, 8, '0', 'Q_00001', '0', NULL, '2025-11-13', '0', NULL, NULL, '2025-11-13', '0', '2025-11-13 05:54:11', '2025-11-13 05:54:11'),
-(4, 27, '1', 'Q_00001', '1', NULL, '2025-11-13', '1', NULL, '2025-11-14', '2025-11-13', '1', '2025-11-13 05:55:20', '2025-11-13 05:57:40');
+(4, 27, '1', 'Q_00001', '1', NULL, '2025-11-13', '1', NULL, '2025-11-14', '2025-11-13', '1', '2025-11-13 05:55:20', '2025-11-13 05:57:40'),
+(5, 43, '0', 'Q_00001', '0', NULL, '2026-04-10', '0', NULL, NULL, '2026-04-10', '1', '2026-04-10 07:08:15', '2026-04-10 07:08:15');
 
 -- --------------------------------------------------------
 
@@ -2431,33 +2486,36 @@ CREATE TABLE IF NOT EXISTS `services` (
   `name` varchar(100) NOT NULL,
   `is_disable` enum('0','1') NOT NULL COMMENT '0: deactive, 1: active',
   `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `deleted` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0:not_delete, 1:deleted',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `services`
 --
 
-INSERT INTO `services` (`id`, `name`, `is_disable`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Accounts Production', '1', '1', '2025-01-28 03:38:45', '2025-01-28 03:40:47'),
-(2, 'Bookkeeping', '1', '1', '2025-01-28 03:39:00', '2025-01-28 03:40:43'),
-(3, 'Payroll', '1', '1', '2025-01-28 03:39:18', '2025-01-28 11:20:06'),
-(4, 'Personal Tax Return', '1', '1', '2025-01-28 03:39:26', '2025-01-28 11:20:27'),
-(5, 'Admin Support', '1', '1', '2025-01-28 03:39:08', '2025-01-28 11:20:21'),
-(6, 'Management Accounts', '1', '1', '2025-01-28 03:39:40', '2025-01-28 03:40:11'),
-(7, 'Company Secretarial', '1', '1', '2025-01-28 03:39:46', '2025-01-28 03:39:54'),
-(8, 'VAT Returns', '1', '1', '2025-01-28 09:23:31', '2025-02-01 06:57:36'),
-(27, 'Audit ', '1', '1', '2025-06-24 14:01:13', '2025-09-17 05:51:20'),
-(32, 'Aus - Bookkeeping', '1', '1', '2025-07-18 10:16:20', '2025-09-17 05:50:35'),
-(30, 'Aus - Admin Support', '1', '1', '2025-07-18 10:15:52', '2025-09-17 05:52:22'),
-(31, 'Aus - Payroll', '1', '1', '2025-07-18 10:16:07', '2025-09-17 05:50:42'),
-(26, 'Reporting', '1', '1', '2025-06-18 14:50:13', '2025-09-17 05:51:42'),
-(28, 'Aus - SMSF', '1', '1', '2025-07-18 09:32:05', '2025-09-17 05:51:12'),
-(29, 'Aus - Company Secretarial (ASIC)', '1', '1', '2025-07-18 10:15:20', '2025-09-17 05:52:18'),
-(33, 'Aus - Compliance ', '1', '1', '2025-07-18 10:16:29', '2025-09-17 05:50:26');
+INSERT INTO `services` (`id`, `name`, `is_disable`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
+(1, 'Accounts Production', '1', '1', '0', '2025-01-28 03:38:45', '2025-01-28 03:40:47'),
+(2, 'Bookkeeping', '1', '1', '0', '2025-01-28 03:39:00', '2025-01-28 03:40:43'),
+(3, 'Payroll', '1', '1', '0', '2025-01-28 03:39:18', '2025-01-28 11:20:06'),
+(4, 'Personal Tax Return', '1', '1', '0', '2025-01-28 03:39:26', '2025-01-28 11:20:27'),
+(5, 'Admin Support', '1', '1', '0', '2025-01-28 03:39:08', '2025-01-28 11:20:21'),
+(6, 'Management Accounts', '1', '1', '0', '2025-01-28 03:39:40', '2025-01-28 03:40:11'),
+(7, 'Company Secretarial', '1', '1', '0', '2025-01-28 03:39:46', '2025-01-28 03:39:54'),
+(8, 'VAT Returns', '1', '1', '0', '2025-01-28 09:23:31', '2025-02-01 06:57:36'),
+(27, 'Audit ', '1', '1', '0', '2025-06-24 14:01:13', '2025-09-17 05:51:20'),
+(32, 'Aus - Bookkeeping', '1', '1', '0', '2025-07-18 10:16:20', '2025-09-17 05:50:35'),
+(30, 'Aus - Admin Support', '1', '1', '0', '2025-07-18 10:15:52', '2025-09-17 05:52:22'),
+(31, 'Aus - Payroll', '1', '1', '0', '2025-07-18 10:16:07', '2025-09-17 05:50:42'),
+(26, 'Reporting', '1', '1', '0', '2025-06-18 14:50:13', '2025-09-17 05:51:42'),
+(28, 'Aus - SMSF', '1', '1', '0', '2025-07-18 09:32:05', '2025-09-17 05:51:12'),
+(29, 'Aus - Company Secretarial (ASIC)', '1', '1', '0', '2025-07-18 10:15:20', '2025-09-17 05:52:18'),
+(33, 'Aus - Compliance ', '1', '1', '0', '2025-07-18 10:16:29', '2025-09-17 05:50:26'),
+(35, 'Demo', '0', '1', '0', '2026-04-08 06:41:04', '2026-04-09 07:10:28'),
+(36, 'DEEE', '0', '1', '0', '2026-04-08 07:28:17', '2026-04-09 07:10:33');
 
 -- --------------------------------------------------------
 
@@ -2519,7 +2577,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
-(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-04-01 04:56:55', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NTAxOTQxNSwiZXhwIjoxNzc1MDU1NDE1fQ.XhHio6yqAXZDdbHsjdrMt3giWo8uFNUIS0g_cbjS7ck'),
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-04-10 05:59:16', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NTgwMDc1NiwiZXhwIjoxNzc1ODM2NzU2fQ.6aYR9OKe3XH0TCrwyoJA8KZXXzmKEsjWHZKWW5Ji6ds'),
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2528,7 +2586,7 @@ INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phon
 (7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 1, NULL, '2025-02-07 12:50:36', '2025-08-11 10:03:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc1NDkwNjYwMSwiZXhwIjoxNzU0OTQyNjAxfQ.HdhwmS5nBwiYQI8t--vxdl3Ki42iJYnUU2z30bEU9k4'),
 (10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, NULL, '2025-02-08 11:36:28', '2025-10-06 07:12:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTk3MzQ3MzcsImV4cCI6MTc1OTc3MDczN30.luIo8TYrG2_9Eu3yel9cakru6lg_GzFmJJ0s964l6_c'),
 (12, 6, 'BBBBBB 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, 'fff', '2025-04-17 05:56:18', '2026-02-26 04:56:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NzIwODE4MDksImV4cCI6MTc3MjExNzgwOX0.v28brufOpivVZ6gnWclW3H4nKtNfSVqRO48qTsGpvE0'),
-(13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, 'SHK13', '2025-06-11 09:18:34', '2026-03-31 05:09:20', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NzQ5MzM3NjAsImV4cCI6MTc3NDk2OTc2MH0.CDIXh20KiQ9TgHDPi81hu9Ue42g7GdvIDQkDpibUtig'),
+(13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, 'SHK13', '2025-06-11 09:18:34', '2026-04-02 12:28:41', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NzUxMzI5MjEsImV4cCI6MTc3NTE2ODkyMX0.-wGnhO5dqq8GD9UE7Ii8CsqjMbRR8HB9Jhf0wkhL10g'),
 (14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-27 09:57:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjQyMzc0NzQsImV4cCI6MTc2NDI3MzQ3NH0.SZb46VVMoRuMm_K1O3thNUZUGwPOxr0i4m5kKg2iRcs'),
 (15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, 'SS9', '2025-07-11 10:48:30', '2025-11-24 11:44:36', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NjM5ODQ2NzYsImV4cCI6MTc2NDAyMDY3Nn0.RFGkiNKzyV-vYOLMVogyRyAHynH8jUGu_82Fp3wjzSM'),
 (16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '42:00', '1', '0', 1, NULL, '2025-08-13 11:32:32', '2025-11-27 12:21:56', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NjQyNDE5NTgsImV4cCI6MTc2NDI3Nzk1OH0.53U2CISui6IjiWdpiVjRnUrU8UNmwuM34YbH1s4k_jI'),
@@ -2537,7 +2595,7 @@ INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phon
 (21, 3, 'fvedgv', 'gvddvd', 'f@gmail.com', '+44', '', '$2a$10$rnnx7UQnvlGmXKjGUthJbu0a9/qYz.0BKz4y6n8OaN9R8NPo4FMRa', '232:59', '1', '0', 1, NULL, '2025-11-03 10:12:49', '2025-11-03 10:12:49', NULL),
 (22, 3, 'GGGG', 'wff', 's111@gmail.com', '+44', NULL, '$2a$10$cBR2xNM//0aITVICasUBfO.FF2U2HtoeuwiDtKBOUjIWaIZPEHMM6', '40:59', '1', '0', 1, 'f', '2025-11-03 10:13:49', '2026-03-28 06:31:09', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIyLCJpYXQiOjE3NzQ2Nzk0NjksImV4cCI6MTc3NDcxNTQ2OX0.5dzFostfzJQL7yBmnoah8JYpKZCU1UwNPIdnpBfzWN8'),
 (23, 3, 'DDDDDD55', 'DD', 'DDss@gmail.com', '+44', NULL, '$2a$10$tcnXTmD9q4DyCNlf3K7hH.XQnSLenLSxqXP3HIaLaf4vhbB85fCXO', '42:06', '1', '0', 1, 'DREOO', '2025-11-14 13:10:31', '2026-03-28 06:30:30', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIzLCJpYXQiOjE3NzQ2Nzk0MzAsImV4cCI6MTc3NDcxNTQzMH0.vxsgsDrOxuRCgM3u04k_UWshm-BRKMOjmNhdqA38g74'),
-(24, 3, 'FFFFFFFF', 'hhhhh', 'hhhhhhh@gmail.com', '+44', '', '$2a$10$MWRcrqM45a7lktHrdwW3LO1.acU/klFC8Hb/y/LHJuw18PNLrJueG', '232:59', '1', '0', 1, 'ffff', '2025-11-17 05:29:30', '2025-12-01 08:49:00', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJpYXQiOjE3NjQ1Nzg5NDAsImV4cCI6MTc2NDYxNDk0MH0.xf99oJcR0MGK_eYhwQf83K9IN1TQY2eZT7GGEroOkYQ');
+(24, 3, 'FFFFFFFF', 'hhhhh', 'hhhhhhh@gmail.com', '+44', '', '$2a$10$MWRcrqM45a7lktHrdwW3LO1.acU/klFC8Hb/y/LHJuw18PNLrJueG', '232:59', '1', '0', 1, 'ffff', '2025-11-17 05:29:30', '2026-04-10 10:07:09', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJpYXQiOjE3NzU4MTU2MjksImV4cCI6MTc3NTg1MTYyOX0.ABEQSDYKDfRsHwfx9ScwBH1wKgh9rujY6FJM3YiqMjo');
 
 -- --------------------------------------------------------
 
@@ -2576,7 +2634,7 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1463 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1577 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `staff_logs`
@@ -4051,7 +4109,121 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1459, 1, '2026-03-31', 'job', 73, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-03-31 12:39:21', '2026-03-31 12:39:21'),
 (1460, 1, '2026-04-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-01 04:56:55', '2026-04-01 04:56:55'),
 (1461, 1, '2026-04-01', 'job', 73, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: wrw_WWW_aa_000073', 'created', '122.168.114.106', '2026-04-01 06:15:45', '2026-04-01 06:15:45'),
-(1462, 1, '2026-04-01', 'job', 73, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-01 06:17:11', '2026-04-01 06:17:11');
+(1462, 1, '2026-04-01', 'job', 73, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-01 06:17:11', '2026-04-01 06:17:11'),
+(1463, 1, '2026-04-01', 'master status', 22, 'created master status shsikd', 'Super Admin System Super Super Admin created master status shsikd ', 'created', '122.168.114.106', '2026-04-01 06:26:52', '2026-04-01 06:26:52'),
+(1464, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:03:15', '2026-04-01 07:03:15'),
+(1465, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:03:44', '2026-04-01 07:03:44'),
+(1466, 1, '2026-04-01', 'job', 62, 'edited the job information, has assigned the job to the reviewer, shk sss and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information, has assigned the job to the reviewer, shk sss and has assigned the job to the processor, shk sss job code: DDD_AFR_JAP_000062', 'updated', '122.168.114.106', '2026-04-01 07:21:21', '2026-04-01 07:21:21'),
+(1467, 1, '2026-04-01', 'job', 62, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: DDD_AFR_JAP_000062', 'created', '122.168.114.106', '2026-04-01 07:21:45', '2026-04-01 07:21:45'),
+(1468, 1, '2026-04-01', 'job', 62, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: DDD_AFR_JAP_000062', 'updated', '122.168.114.106', '2026-04-01 07:21:57', '2026-04-01 07:21:57'),
+(1469, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:23:12', '2026-04-01 07:23:12'),
+(1470, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:23:27', '2026-04-01 07:23:27'),
+(1471, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:23:40', '2026-04-01 07:23:40'),
+(1472, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:28:06', '2026-04-01 07:28:06'),
+(1473, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:28:45', '2026-04-01 07:28:45'),
+(1474, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:29:38', '2026-04-01 07:29:38'),
+(1475, 1, '2026-04-01', 'master status', 19, 'edited master status Completed - Filed with Companies House', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House ', 'updated', '122.168.114.106', '2026-04-01 07:29:47', '2026-04-01 07:29:47'),
+(1476, 1, '2026-04-01', 'job', 61, 'edited the job information, has assigned the job to the reviewer, BBBBBB 7 hv and has assigned the job to the processor, fvedgv gvddvd job code:', 'Super Admin System Super Super Admin edited the job information, has assigned the job to the reviewer, BBBBBB 7 hv and has assigned the job to the processor, fvedgv gvddvd job code: DDD_AFR_JAP_000061', 'updated', '122.168.114.106', '2026-04-01 07:30:24', '2026-04-01 07:30:24'),
+(1477, 1, '2026-04-01', 'job', 61, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: DDD_AFR_JAP_000061', 'created', '122.168.114.106', '2026-04-01 07:30:41', '2026-04-01 07:30:41'),
+(1478, 1, '2026-04-01', 'job', 61, 'updated the job status from Completed - Completed to Completed - Filed with Companies House. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House. job code: DDD_AFR_JAP_000061', 'updated', '122.168.114.106', '2026-04-01 07:30:53', '2026-04-01 07:30:53'),
+(1479, 1, '2026-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-02 04:41:10', '2026-04-02 04:41:10'),
+(1480, 1, '2026-04-02', 'job', 73, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-02 10:35:32', '2026-04-02 10:35:32'),
+(1481, 13, '2026-04-02', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2026-04-02 12:28:41', '2026-04-02 12:28:41'),
+(1482, 1, '2026-04-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-06 04:41:44', '2026-04-06 04:41:44'),
+(1483, 1, '2026-04-06', 'job', 73, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_JAP_000073', 'updated', '122.168.114.106', '2026-04-06 06:12:17', '2026-04-06 06:12:17'),
+(1484, 1, '2026-04-06', 'job types', 14, 'created job types DDD', 'Super Admin System Super Super Admin created job types DDD ', 'created', '122.168.114.106', '2026-04-06 06:15:18', '2026-04-06 06:15:18'),
+(1485, 1, '2026-04-06', 'task', 0, 'created task ghg,', 'Super Admin System Super Super Admin created task ghg, ', 'created', '122.168.114.106', '2026-04-06 06:15:38', '2026-04-06 06:15:38'),
+(1486, 1, '2026-04-06', 'job', 73, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_DDD_000073', 'updated', '122.168.114.106', '2026-04-06 06:20:10', '2026-04-06 06:20:10'),
+(1487, 1, '2026-04-06', 'job', 73, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DDD_000073', 'updated', '122.168.114.106', '2026-04-06 06:20:20', '2026-04-06 06:20:20'),
+(1488, 1, '2026-04-06', 'job', 72, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-04-06 06:35:39', '2026-04-06 06:35:39'),
+(1489, 1, '2026-04-06', 'checklist', 12, 'created checklist FFFFFFF', 'Super Admin System Super Super Admin created checklist FFFFFFF ', 'created', '\"122.168.114.106\"', '2026-04-06 06:59:14', '2026-04-06 06:59:14'),
+(1490, 1, '2026-04-06', 'job', 74, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000074', 'created', '122.168.114.106', '2026-04-06 07:05:14', '2026-04-06 07:05:14'),
+(1491, 1, '2026-04-06', 'job', 75, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000075', 'copied', '122.168.114.106', '2026-04-06 07:08:03', '2026-04-06 07:08:03'),
+(1492, 1, '2026-04-06', 'job', 74, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 07:08:52', '2026-04-06 07:08:52'),
+(1493, 1, '2026-04-06', 'job', 76, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000076', 'copied', '122.168.114.106', '2026-04-06 07:09:02', '2026-04-06 07:09:02'),
+(1494, 1, '2026-04-06', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 14:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-04-06, Hours : 6:00 Date: 2026-04-07, Hours : 4:00 Date: 2026-04-08, Hours : 8:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 9:00 Date: 2026-04-07, Hours : 8:00 Date: 2026-04-08, Hours : 6:00 Date: 2026-04-09, Hours : 6:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 14:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-04-06, Hours : 6:00 Date: 2026-04-07, Hours : 4:00 Date: 2026-04-08, Hours : 8:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 9:00 Date: 2026-04-07, Hours : 8:00 Date: 2026-04-08, Hours : 6:00 Date: 2026-04-09, Hours : 6:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-06 07:12:56', '2026-04-06 07:12:56'),
+(1495, 1, '2026-04-06', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:xyz,\n                Task name:x', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:xyz,\n                Task name:x ', 'updated', '122.168.114.106', '2026-04-06 07:14:18', '2026-04-06 07:14:18'),
+(1496, 1, '2026-04-06', 'job', 74, 'edited the job information and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, shk sss job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 07:27:20', '2026-04-06 07:27:20'),
+(1497, 1, '2026-04-06', 'job', 74, 'edited the job information and has removed the processor from the job job code:', 'Super Admin System Super Super Admin edited the job information and has removed the processor from the job job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 07:27:33', '2026-04-06 07:27:33'),
+(1498, 1, '2026-04-06', 'job', 74, 'edited the job information and has assigned the job to the processor, fvedgv gvddvd job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, fvedgv gvddvd job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 08:42:21', '2026-04-06 08:42:21'),
+(1499, 1, '2026-04-06', 'job', 77, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000077', 'copied', '122.168.114.106', '2026-04-06 08:49:18', '2026-04-06 08:49:18'),
+(1500, 1, '2026-04-06', 'job', 78, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000078', 'copied', '122.168.114.106', '2026-04-06 09:24:54', '2026-04-06 09:24:54'),
+(1501, 1, '2026-04-06', 'job', 78, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000078', 'deleted', '122.168.114.106', '2026-04-06 09:25:06', '2026-04-06 09:25:06'),
+(1502, 1, '2026-04-06', 'job', 77, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000077', 'deleted', '122.168.114.106', '2026-04-06 09:25:09', '2026-04-06 09:25:09'),
+(1503, 1, '2026-04-06', 'job', 76, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000076', 'deleted', '122.168.114.106', '2026-04-06 09:25:11', '2026-04-06 09:25:11'),
+(1504, 1, '2026-04-06', 'job', 75, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000075', 'deleted', '122.168.114.106', '2026-04-06 09:25:14', '2026-04-06 09:25:14'),
+(1505, 1, '2026-04-06', 'job', 79, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000075', 'copied', '122.168.114.106', '2026-04-06 09:25:22', '2026-04-06 09:25:22'),
+(1506, 1, '2026-04-06', 'job', 80, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000076', 'copied', '122.168.114.106', '2026-04-06 09:25:36', '2026-04-06 09:25:36'),
+(1507, 1, '2026-04-06', 'checklist', 13, 'created checklist HYHYHY', 'Super Admin System Super Super Admin created checklist HYHYHY ', 'created', '\"122.168.114.106\"', '2026-04-06 10:16:18', '2026-04-06 10:16:18'),
+(1508, 1, '2026-04-06', 'job', 81, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: DDD_AFR_JAP_000077', 'copied', '122.168.114.106', '2026-04-06 11:11:04', '2026-04-06 11:11:04'),
+(1509, 1, '2026-04-06', 'job', 82, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_DDD_000078', 'copied', '122.168.114.106', '2026-04-06 11:11:23', '2026-04-06 11:11:23'),
+(1510, 1, '2026-04-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-07 04:40:32', '2026-04-07 04:40:32'),
+(1511, 1, '2026-04-07', 'timesheet', 0, 'edited a timesheet entry. Task type:External,\n                 Date:2026-04-06, Updated hours:18:00 Date:2026-04-07, Updated hours:16:00 Date:2026-04-08, Updated hours:12:00 Date:2026-04-09, Updated hours:12:00, Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,\n                 Date:2026-04-06, Updated hours:18:00 Date:2026-04-07, Updated hours:16:00 Date:2026-04-08, Updated hours:12:00 Date:2026-04-09, Updated hours:12:00, Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-07 05:06:44', '2026-04-07 05:06:44'),
+(1512, 1, '2026-04-07', 'checklist', 14, 'created checklist Short', 'Super Admin System Super Super Admin created checklist Short ', 'created', '\"122.168.114.106\"', '2026-04-07 05:37:43', '2026-04-07 05:37:43'),
+(1513, 1, '2026-04-07', 'job', 83, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000079', 'created', '122.168.114.106', '2026-04-07 05:38:14', '2026-04-07 05:38:14'),
+(1514, 1, '2026-04-07', 'job', 83, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:38:37', '2026-04-07 05:38:37'),
+(1515, 1, '2026-04-07', 'job', 83, 'edited the job information and has removed the processor from the job job code:', 'Super Admin System Super Super Admin edited the job information and has removed the processor from the job job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:38:48', '2026-04-07 05:38:48'),
+(1516, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:39:03', '2026-04-07 05:39:03'),
+(1517, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:55:50', '2026-04-07 05:55:50'),
+(1518, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:00:24', '2026-04-07 06:00:24'),
+(1519, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:00:34', '2026-04-07 06:00:34'),
+(1520, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:01:01', '2026-04-07 06:01:01'),
+(1521, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:01:38', '2026-04-07 06:01:38'),
+(1522, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:02:16', '2026-04-07 06:02:16'),
+(1523, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:08:44', '2026-04-07 06:08:44'),
+(1524, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:09:06', '2026-04-07 06:09:06'),
+(1525, 1, '2026-04-07', 'job', 83, 'edited the job information and has assigned the job to the processor, DDDDDD55 DD job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, DDDDDD55 DD job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:19:33', '2026-04-07 06:19:33'),
+(1526, 1, '2026-04-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-08 05:24:38', '2026-04-08 05:24:38'),
+(1527, 1, '2026-04-08', 'services', 34, 'created services demo', 'Super Admin System Super Super Admin created services demo ', 'created', '122.168.114.106', '2026-04-08 06:14:41', '2026-04-08 06:14:41'),
+(1528, 1, '2026-04-08', 'job_types', 15, 'created job type demo', 'Super Admin System Super Super Admin created job type demo ', 'created', '122.168.114.106', '2026-04-08 06:14:41', '2026-04-08 06:14:41'),
+(1529, 1, '2026-04-08', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-08 06:18:42', '2026-04-08 06:18:42'),
+(1530, 1, '2026-04-08', 'task', 0, 'created task iii,', 'Super Admin System Super Super Admin created task iii, ', 'created', '122.168.114.106', '2026-04-08 06:19:29', '2026-04-08 06:19:29'),
+(1531, 1, '2026-04-08', 'job', 84, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_demo_000080', 'created', '122.168.114.106', '2026-04-08 06:19:47', '2026-04-08 06:19:47'),
+(1532, 1, '2026-04-08', 'services', 34, 'deleted services demo', 'Super Admin System Super Super Admin deleted services demo ', 'deleted', '122.168.114.106', '2026-04-08 06:22:28', '2026-04-08 06:22:28'),
+(1533, 1, '2026-04-08', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-08 06:22:40', '2026-04-08 06:22:40'),
+(1534, 1, '2026-04-08', 'job', 84, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_demo_000080', 'deleted', '122.168.114.106', '2026-04-08 06:37:54', '2026-04-08 06:37:54'),
+(1535, 1, '2026-04-08', 'services', 35, 'created services Demo', 'Super Admin System Super Super Admin created services Demo ', 'created', '122.168.114.106', '2026-04-08 06:41:04', '2026-04-08 06:41:04'),
+(1536, 1, '2026-04-08', 'job_types', 16, 'created job type Demo', 'Super Admin System Super Super Admin created job type Demo ', 'created', '122.168.114.106', '2026-04-08 06:41:04', '2026-04-08 06:41:04'),
+(1537, 1, '2026-04-08', 'services', 35, 'deleted services Demo', 'Super Admin System Super Super Admin deleted services Demo ', 'deleted', '122.168.114.106', '2026-04-08 06:52:58', '2026-04-08 06:52:58'),
+(1538, 1, '2026-04-08', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-08 06:54:36', '2026-04-08 06:54:36'),
+(1539, 1, '2026-04-08', 'job', 85, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_Demo_000080', 'created', '122.168.114.106', '2026-04-08 06:54:57', '2026-04-08 06:54:57'),
+(1540, 1, '2026-04-08', 'services', 36, 'created services DEEE', 'Super Admin System Super Super Admin created services DEEE ', 'created', '122.168.114.106', '2026-04-08 07:28:17', '2026-04-08 07:28:17'),
+(1541, 1, '2026-04-08', 'job_types', 17, 'created job type DEEE', 'Super Admin System Super Super Admin created job type DEEE ', 'created', '122.168.114.106', '2026-04-08 07:28:17', '2026-04-08 07:28:17'),
+(1542, 1, '2026-04-08', 'services', 36, 'deleted services DEEE', 'Super Admin System Super Super Admin deleted services DEEE ', 'deleted', '122.168.114.106', '2026-04-08 07:29:42', '2026-04-08 07:29:42'),
+(1543, 1, '2026-04-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-09 04:58:51', '2026-04-09 04:58:51'),
+(1544, 1, '2026-04-09', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 5:00 ,Job code:wrw_WWW_Demo_000080,\n                Task name:jj', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 5:00 ,Job code:wrw_WWW_Demo_000080,\n                Task name:jj ', 'updated', '122.168.114.106', '2026-04-09 05:06:42', '2026-04-09 05:06:42'),
+(1545, 1, '2026-04-09', 'services', 37, 'created services demooooo', 'Super Admin System Super Super Admin created services demooooo ', 'created', '122.168.114.106', '2026-04-09 05:07:22', '2026-04-09 05:07:22'),
+(1546, 1, '2026-04-09', 'job_types', 18, 'created job type demooooo', 'Super Admin System Super Super Admin created job type demooooo ', 'created', '122.168.114.106', '2026-04-09 05:07:22', '2026-04-09 05:07:22'),
+(1547, 1, '2026-04-09', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 05:07:45', '2026-04-09 05:07:45'),
+(1548, 1, '2026-04-09', 'job', 86, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_demo_000081', 'created', '122.168.114.106', '2026-04-09 05:08:17', '2026-04-09 05:08:17'),
+(1549, 1, '2026-04-09', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_demo_000081,\n                Task name:pp', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_demo_000081,\n                Task name:pp ', 'updated', '122.168.114.106', '2026-04-09 05:08:59', '2026-04-09 05:08:59'),
+(1550, 1, '2026-04-09', 'services', 37, 'deleted services demooooo', 'Super Admin System Super Super Admin deleted services demooooo ', 'deleted', '122.168.114.106', '2026-04-09 06:40:39', '2026-04-09 06:40:39'),
+(1551, 1, '2026-04-09', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 06:47:01', '2026-04-09 06:47:01'),
+(1552, 1, '2026-04-09', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 07:13:25', '2026-04-09 07:13:25'),
+(1553, 1, '2026-04-09', 'job', 86, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_Demo_000081', 'updated', '122.168.114.106', '2026-04-09 07:13:50', '2026-04-09 07:13:50'),
+(1554, 1, '2026-04-09', 'job', 85, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DEEE_000080', 'updated', '122.168.114.106', '2026-04-09 07:14:15', '2026-04-09 07:14:15'),
+(1555, 1, '2026-04-09', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(1556, 1, '2026-04-09', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_Demo_000081,\n                Task name:jj', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_Demo_000081,\n                Task name:jj ', 'updated', '122.168.114.106', '2026-04-09 07:29:17', '2026-04-09 07:29:17'),
+(1557, 1, '2026-04-09', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-04-09 11:16:53', '2026-04-09 11:16:54'),
+(1558, 1, '2026-04-09', 'client', 21, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_HGH_ooo_000021(oooooooooooooo)', 'created', '122.168.114.106', '2026-04-09 11:17:26', '2026-04-09 11:17:26'),
+(1559, 1, '2026-04-09', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(1560, 1, '2026-04-09', 'job', 87, 'created job code:', 'Super Admin System Super Super Admin created job code: HGH_ooo_DEEE_000082', 'created', '122.168.114.106', '2026-04-09 11:18:23', '2026-04-09 11:18:23'),
+(1561, 1, '2026-04-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-10 04:40:18', '2026-04-10 04:40:18'),
+(1562, 1, '2026-04-10', 'job', 86, 'Sent and completed the missing logs for job code:', 'Super Admin System Super Super Admin Sent and completed the missing logs for job code: wrw_WWW_Demo_000081', 'created', '122.168.114.106', '2026-04-10 05:14:28', '2026-04-10 05:14:28'),
+(1563, 1, '2026-04-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-10 05:52:10', '2026-04-10 05:52:10'),
+(1564, 1, '2026-04-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-04-10 05:59:16', '2026-04-10 05:59:16'),
+(1565, 1, '2026-04-10', 'job', 80, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_V4_4_000076', 'updated', '122.168.114.106', '2026-04-10 06:27:31', '2026-04-10 06:27:31'),
+(1566, 1, '2026-04-10', 'checklist', 12, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '\"122.168.114.106\"', '2026-04-10 06:49:57', '2026-04-10 06:49:57'),
+(1567, 1, '2026-04-10', 'checklist', 12, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '\"122.168.114.106\"', '2026-04-10 06:50:18', '2026-04-10 06:50:18'),
+(1568, 1, '2026-04-10', 'checklist', 12, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '\"122.168.114.106\"', '2026-04-10 06:58:40', '2026-04-10 06:58:40'),
+(1569, 1, '2026-04-10', 'job', 43, 'Sent and completed the missing logs for job code:', 'Super Admin System Super Super Admin Sent and completed the missing logs for job code: DDD_AFR_JAP_000043', 'created', '122.168.114.106', '2026-04-10 07:02:10', '2026-04-10 07:02:10'),
+(1570, 1, '2026-04-10', 'job', 43, 'Sent and completed the queries for the job code:', 'Super Admin System Super Super Admin Sent and completed the queries for the job code: DDD_AFR_JAP_000043', 'created', '122.168.114.106', '2026-04-10 07:08:15', '2026-04-10 07:08:15'),
+(1571, 1, '2026-04-10', 'job', 88, 'created job code:', 'Super Admin System Super Super Admin created job code: IGA_AQU_V3_000083', 'created', '122.168.114.106', '2026-04-10 09:09:04', '2026-04-10 09:09:04'),
+(1572, 1, '2026-04-10', 'job', 86, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_Demo_000081', 'updated', '122.168.114.106', '2026-04-10 10:06:22', '2026-04-10 10:06:22'),
+(1573, 24, '2026-04-10', '-', 0, ' Logged In', 'Processor FFFFFFFF hhhhh  Logged In ', '-', NULL, '2026-04-10 10:07:09', '2026-04-10 10:07:09'),
+(1574, 1, '2026-04-10', 'checklist', 11, 'edited checklist RE-CHI', 'Super Admin System Super Super Admin edited checklist RE-CHI ', 'updated', '\"122.168.114.106\"', '2026-04-10 11:19:30', '2026-04-10 11:19:30'),
+(1575, 1, '2026-04-10', 'job', 89, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_DEEE_000084', 'created', '122.168.114.106', '2026-04-10 11:20:44', '2026-04-10 11:20:44'),
+(1576, 1, '2026-04-10', 'job', 89, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DEEE_000084', 'updated', '122.168.114.106', '2026-04-10 11:23:16', '2026-04-10 11:23:16');
 
 -- --------------------------------------------------------
 
@@ -4205,7 +4377,7 @@ CREATE TABLE IF NOT EXISTS `task` (
   UNIQUE KEY `name` (`name`,`service_id`,`job_type_id`),
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `task`
@@ -4245,7 +4417,12 @@ INSERT INTO `task` (`id`, `name`, `service_id`, `job_type_id`, `budgeted_hour`, 
 (32, 'DGGGF', 4, 12, '1:10', '1', '2025-11-27 08:24:25', '2025-11-27 08:24:25'),
 (33, 'ddddddddd', 8, 13, '1:10', '1', '2025-11-28 05:35:20', '2025-11-28 05:35:20'),
 (34, 'fffffffff', 8, 13, '1:10', '1', '2025-11-28 05:35:20', '2025-11-28 05:35:20'),
-(35, 'yy', 2, 5, NULL, '1', '2026-03-28 05:20:37', '2026-03-28 05:20:37');
+(35, 'yy', 2, 5, NULL, '1', '2026-03-28 05:20:37', '2026-03-28 05:20:37'),
+(36, 'ghg', 5, 14, '10:10', '1', '2026-04-06 06:15:38', '2026-04-06 06:15:38'),
+(37, 'iii', 34, 15, '10:00', '1', '2026-04-08 06:19:29', '2026-04-08 06:19:29'),
+(38, 'jj', 35, 16, NULL, '1', '2026-04-08 06:54:57', '2026-04-08 06:54:57'),
+(39, 'pp', 37, 18, NULL, '1', '2026-04-09 05:08:17', '2026-04-09 05:08:17'),
+(40, 'ppp', 36, 17, NULL, '1', '2026-04-09 07:14:15', '2026-04-09 07:14:15');
 
 -- --------------------------------------------------------
 
@@ -4313,7 +4490,7 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
   KEY `client_id` (`client_id`),
   KEY `job_id` (`job_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=61 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `timesheet`
@@ -4368,7 +4545,12 @@ INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_i
 (50, 1, '1', 0, 0, 1, 1, '2026-03-09', NULL, '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-03-14 10:58:45', '2026-03-14 10:58:45'),
 (51, 1, '1', 0, 0, 1, 1, '2026-03-23', NULL, '23:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kljhl', '1', '1', '2026-03-27 11:57:57', '2026-03-27 12:33:17'),
 (52, 1, '1', 0, 0, 1, 1, '2026-03-30', NULL, '12:00', '2026-03-31', '21:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-03-27 12:31:52', '2026-03-27 12:31:52'),
-(53, 1, '1', 0, 0, 7, 10, '2026-03-23', NULL, '2:00', '2026-03-24', '12:00', NULL, '2026-03-25', '12:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kljhl', '1', '1', '2026-03-27 12:33:17', '2026-03-27 12:33:17');
+(53, 1, '1', 0, 0, 7, 10, '2026-03-23', NULL, '2:00', '2026-03-24', '12:00', NULL, '2026-03-25', '12:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kljhl', '1', '1', '2026-03-27 12:33:17', '2026-03-27 12:33:17'),
+(54, 1, '1', 0, 0, 1, 1, '2026-04-06', NULL, '14:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-04-06 07:12:56', '2026-04-06 07:12:56'),
+(55, 1, '1', 0, 0, 1, 3, '2026-04-06', NULL, '12:00', '2026-04-07', '8:00', NULL, '2026-04-08', '16:00', 'WEDDDDDDD', '2026-04-09', NULL, NULL, '2026-04-10', NULL, NULL, '2026-04-11', NULL, NULL, NULL, NULL, NULL, NULL, 'dcsc', '1', '0', '2026-04-06 07:12:56', '2026-04-07 05:06:44'),
+(56, 1, '2', 10, 15, 38, 25, '2026-04-06', 'FFFFFFFFFFF', '18:00', '2026-04-07', '16:00', NULL, '2026-04-08', '12:00', 'WEEEDDDDDFIRSTTTT', '2026-04-09', '12:00', NULL, '2026-04-10', NULL, NULL, '2026-04-11', NULL, NULL, NULL, NULL, NULL, NULL, 'dcsc', '1', '0', '2026-04-06 07:12:56', '2026-04-07 05:06:44'),
+(57, 1, '1', 0, 0, 2, 4, '2026-04-06', NULL, '10:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-04-06 07:14:18', '2026-04-06 07:14:18'),
+(60, 1, '2', 14, 20, 86, 38, '2026-04-06', NULL, '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-04-09 07:29:17', '2026-04-09 07:29:17');
 
 -- --------------------------------------------------------
 

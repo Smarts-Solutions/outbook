@@ -1013,8 +1013,8 @@ const CreateJob = () => {
         task: AddTaskArr,
       },
 
-      processing_checklist: jobData?.processing_checklist,
-      reviewing_checklist: jobData?.reviewing_checklist,
+      processing_checklist: jobData?.processing_checklist == null ? 0 : jobData?.processing_checklist,
+      reviewing_checklist: jobData?.reviewing_checklist == null ? 0 : jobData?.reviewing_checklist,
       processing_checklist_status: processing_checklist_status,
       reviewing_checklist_status: reviewing_checklist_status,
       checklist_modal_data: checklist_modal_data,
@@ -2396,7 +2396,7 @@ const CreateJob = () => {
     }))
   ];
 
-
+ 
   // let isAssignDetails = jobData?.CustomerDetails.find(
   //   (detail) => detail.assigned_source === "assign_customer_service"
   // );
@@ -2405,6 +2405,10 @@ const CreateJob = () => {
   //   serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
   // }
 
+
+
+
+  /////////////////////////////////
   let assignDetails = jobData?.CustomerDetails?.filter(
     (detail) => detail.assigned_source === "assign_customer_service"
   );

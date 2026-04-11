@@ -9,6 +9,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
+import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
@@ -751,7 +752,8 @@ const ClientList = () => {
             showConfirmButton: false,
             timer: 1500,
           });
-          window.location.reload();
+          GetAllJobListByCustomer("", 1, pageSize, "");
+          
         } else {
           sweatalert.fire({
             title: "Failed",

@@ -969,7 +969,7 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-    alert("okkk")
+    
     sweatalert
       .fire({
         title: "Are you sure?",

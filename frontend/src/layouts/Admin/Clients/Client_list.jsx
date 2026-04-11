@@ -1392,7 +1392,7 @@ const ClientList = () => {
       })
       .then(async (result) => {
         if (result.isConfirmed) {
-
+          
           if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
             sweatalert
               .fire({
@@ -1413,14 +1413,14 @@ const ClientList = () => {
                   copyJobRequest(row, true);
                   return
                 }
-               else if (result.dismiss === Swal.DismissReason.cancel) {
+                else if (result.dismiss === Swal.DismissReason.cancel) {
                   copyJobRequest(row, false);
                   return;
                 }
-               else if (result.dismiss === Swal.DismissReason.close) {
+                else if (result.dismiss === Swal.DismissReason.close) {
                   return;
                 }
-                else{
+                else {
                   return;
                 }
               });

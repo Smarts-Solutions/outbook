@@ -6,6 +6,7 @@ import {
   GETTASKDATA,
   getList,
   addChecklists,
+  GetServicesByCustomers
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import {
   getAllCustomerDropDown
@@ -34,6 +35,8 @@ const CreateCheckList = () => {
   const [serviceAllData, setServiceAllData] = useState([]);
   const [jobTypeOptions, setJobTypeOptions] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+
+ 
 
   const [formData, setFormData] = useState({
     customer_id: [],
@@ -387,9 +390,15 @@ const CreateCheckList = () => {
     client_type_id: "Please Select Client Type",
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     let name = e.target.name;
     let value = e.target.value;
+
+   if( name === "customer_id"){
+     getServiceData(value);
+   }
+
+
     setFormData((prevState) => ({
       ...prevState,
       // [name]: value?.trim(),
@@ -460,7 +469,7 @@ const CreateCheckList = () => {
     }
 
     try {
-      const calls = service_ids.map((service_id) => {
+       const calls = service_ids.map((service_id) => {
         const req = { service_id, action: "get" };
         const data = { req, authToken: token };
         return dispatch(JobType(data)).unwrap();
@@ -484,8 +493,42 @@ const CreateCheckList = () => {
     }
   };
 
+  const getServiceData = async (customer_ids) => {
+
+     customer_ids = Array.isArray(customer_ids) ? customer_ids.map(String) : [];
+     if (!Array.isArray(customer_ids) || customer_ids.length === 0) {
+      getAllServices();
+      return;
+    }
+
+     try {
+       const calls = customer_ids.map((customer_id) => {
+        const req = { customer_id, action: "customerGetServiceCheckList" };
+        const data = { req, authToken: token };
+        return dispatch(GetServicesByCustomers(data)).unwrap();
+      });
+
+      const responses = await Promise.all(calls);
+      const allServices = responses
+        .filter((r) => r?.status)
+        .flatMap((r) => Array.isArray(r.data) ? r.data : []);
+
+      const uniqueServices = Array.from(
+        new Map(allServices.map((item) => [item.id, item])).values(),
+      );
+
+      setServiceAllData(uniqueServices);
+      // setFormData((data) => ({ ...data, service_id: [], job_type_id: [] }));
+    } catch (error) {
+      console.error("getServicesByCustomers error", error);
+      setServiceAllData([]);
+      // setFormData((data) => ({ ...data, service_id: [], job_type_id: [] }));
+    }
+  }
+
 
   const handleSubmit = async () => {
+    
     let validationErrors = {};
 
     const isValid = validateAllFields();
@@ -522,6 +565,8 @@ const CreateCheckList = () => {
     }
 
     const data = { req: formDataToSubmit, authToken: token };
+
+
     await dispatch(addChecklists(data))
       .unwrap()
       .then((response) => {
