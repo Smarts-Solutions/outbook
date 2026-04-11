@@ -121,7 +121,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     const formatPreciseDuration = (ms) => {
       if (isNaN(ms) || ms < 0) return "0d";
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-      return `${days}d`;
+      return `${days} day${days !== 1 ? 's' : ''}`;
     };
 
     const formatFullDuration = (ms) => {
@@ -1599,7 +1599,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                   <span className="text-muted fs-12 d-flex align-items-center px-3 py-1 rounded-pill border bg-light ms-2" style={{ minWidth: 'fit-content', height: '38px' }}>
                     <Clock size={14} className="me-2 text-primary" />
                     <span className="fw-semibold" style={{ color: '#495057' }}>
-                      {getDurationData().items[getDurationData().items.length - 1]?.duration || "0m"}
+                      {getDurationData().items[getDurationData().items.length - 1]?.duration || "0 day"}
                     </span>
                   </span>
                 )}
