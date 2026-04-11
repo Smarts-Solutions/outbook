@@ -1212,6 +1212,18 @@ const saveTimesheet = async (Timesheet) => {
 
           duplicate_entry = JSON.stringify(duplicate_entry);
 
+          let save_date = row?.save_date ?? null;
+          let submit_date = row?.submit_date ?? null;
+
+          if(Number(row?.submit_status) === 1){
+            //current date
+            submit_date = new Date().toISOString().slice(0, 10); 
+          }else{
+            save_date = new Date().toISOString().slice(0, 10);
+          }
+
+
+
           const days = [
             { day: "monday", date: row.monday_date, hours: monday_hours },
             { day: "tuesday", date: row.tuesday_date, hours: tuesday_hours },
@@ -1253,8 +1265,8 @@ const saveTimesheet = async (Timesheet) => {
             friday_date, friday_hours, saturday_date, saturday_hours,
             sunday_date, sunday_hours,remark,final_remark,submit_status,
             monday_note, tuesday_note, wednesday_note, thursday_note,
-            friday_note, saturday_note, sunday_note,duplicate_entry
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            friday_note, saturday_note, sunday_note, save_date , submit_date,duplicate_entry
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
             const insertValues = [
               staff_id,
@@ -1287,6 +1299,8 @@ const saveTimesheet = async (Timesheet) => {
               friday_note,
               saturday_note,
               sunday_note,
+              save_date,
+              submit_date,
               duplicate_entry
             ];
 
@@ -1345,7 +1359,7 @@ const saveTimesheet = async (Timesheet) => {
             friday_date=?,friday_hours=?,saturday_date=?,saturday_hours=?,
             sunday_date=?,sunday_hours=?,remark=?,final_remark=?,submit_status=?,
             monday_note=?,tuesday_note=?,wednesday_note=?,thursday_note=?,
-            friday_note=?,saturday_note=?,sunday_note=? ,duplicate_entry=?
+            friday_note=?,saturday_note=?,sunday_note=? , save_date =?, submit_date=?,duplicate_entry=?
             WHERE id=?`;
 
             const updateValues = [
@@ -1378,6 +1392,8 @@ const saveTimesheet = async (Timesheet) => {
               friday_note,
               saturday_note,
               sunday_note,
+              save_date,
+              submit_date,
               duplicate_entry,
               row.id,
             ];
