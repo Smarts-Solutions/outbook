@@ -676,8 +676,23 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-    console.log("row", row)
-    return
+   
+
+    if(row?.has_client_job_task === 0){
+      sweatalert.fire({
+        title: "warning",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: false,
+        showConfirmButton: false,
+        confirmButtonText: "Ok",
+        timerProgressBar: true,
+        text: "Please add task first",
+        timer: 1500,
+      });
+      return
+    }
+    
     sweatalert
       .fire({
         title: "Are you sure?",
