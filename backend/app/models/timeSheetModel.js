@@ -1154,7 +1154,8 @@ const saveTimesheet2 = async (Timesheet) => {
 
 const saveTimesheet = async (Timesheet) => {
   try {
-    const { staff_id, data, deleteRows, ip } = Timesheet;
+    const { staff_id, data, deleteRows, ip  } = Timesheet;
+    let timesheetLogsDuplicate = Timesheet?.timesheetLogs;
     const timesheet_log_msg = [];
     let checkStringEvent = [];
 
@@ -1422,6 +1423,8 @@ const saveTimesheet = async (Timesheet) => {
     // LOG SAVE
     // ======================
 
+    let timesheetDuplicateLog = "";
+
     if (timesheet_log_msg.length > 0) {
       const msgLog =
         timesheet_log_msg.length > 1
@@ -1429,6 +1432,8 @@ const saveTimesheet = async (Timesheet) => {
           " and " +
           timesheet_log_msg.slice(-1)
           : timesheet_log_msg[0];
+
+
 
       await SatffLogUpdateOperation({
         staff_id,

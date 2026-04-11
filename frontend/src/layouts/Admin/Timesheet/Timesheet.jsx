@@ -42,8 +42,6 @@ const Timesheet = () => {
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
   const [timesheetLogs, setTimesheetLogs] = useState([]);
 
-   
- 
 
 
 
@@ -366,6 +364,8 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
+
+  console.log("timeSheetRows", timeSheetRows);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -1174,6 +1174,8 @@ const Timesheet = () => {
       // const res = await dispatch(
       //   saveTimesheetData({ req, authToken: token })
       // ).unwrap();
+
+      req.timesheetLogs = timesheetLogs;
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
@@ -1343,6 +1345,7 @@ const Timesheet = () => {
       }
 
       // const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+      req.timesheetLogs = timesheetLogs;
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
@@ -1423,6 +1426,7 @@ const Timesheet = () => {
     // const res = await dispatch(
     //   saveTimesheetData({ req, authToken: token })
     // ).unwrap();
+    req.timesheetLogs = timesheetLogs;
     const res = await SAVE_TIMESHEET({ req, authToken: token });
     if (res.status) {
       setRemarkText(null);
