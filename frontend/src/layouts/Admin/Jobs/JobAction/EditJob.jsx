@@ -270,7 +270,7 @@ const EditJob = () => {
     const formatPreciseDuration = (ms) => {
       if (isNaN(ms) || ms < 0) return "0d";
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-      return `${days}d`;
+      return `${days} day${days !== 1 ? 's' : ''}`;
     };
 
     const formatFullDuration = (ms) => {
@@ -2942,7 +2942,7 @@ const EditJob = () => {
                     <span className="text-muted fs-12 d-flex align-items-center px-3 py-1 rounded-pill border bg-light" style={{ minWidth: 'fit-content', height: '38px' }}>
                       <Clock size={14} className="me-2 text-primary" />
                       <span className="fw-semibold" style={{ color: '#495057' }}>
-                        {getDurationData().items[getDurationData().items.length - 1]?.duration || "0m"}
+                        {getDurationData().items[getDurationData().items.length - 1]?.duration || "0 day"}
                       </span>
                     </span>
                   )}
@@ -4145,7 +4145,7 @@ const EditJob = () => {
                                             {/* Vertical Line */}
                                             {getDurationData().items.length > 1 && (
                                               <div className="position-absolute border-start" 
-                                                   style={{ left: '11px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
+                                                   style={{ left: '15px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
                                             )}
 
                                             {getDurationData().items.length > 0 ? (
