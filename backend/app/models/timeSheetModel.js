@@ -193,6 +193,7 @@ const getTimesheet = async (Timesheet) => {
       timesheet.final_remark AS final_remark,
       timesheet.status AS status,
       timesheet.submit_status AS submit_status,
+      timesheet.duplicate_entry AS duplicate_entry,
       timesheet.created_at AS created_at,
       timesheet.updated_at AS updated_at,
       internal.name AS internal_name,
@@ -1155,6 +1156,8 @@ const saveTimesheet2 = async (Timesheet) => {
 const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows, ip  } = Timesheet;
+
+    
     let timesheetLogsDuplicate = Timesheet?.timesheetLogs;
     const timesheet_log_msg = [];
     let checkStringEvent = [];
@@ -1203,6 +1206,9 @@ const saveTimesheet = async (Timesheet) => {
           const friday_hours = formatTime(row.friday_hours);
           const saturday_hours = formatTime(row.saturday_hours);
           const sunday_hours = formatTime(row.sunday_hours);
+          let duplicate_entry = row?.duplicate_entry ?? [];
+
+          duplicate_entry = JSON.stringify(duplicate_entry);
 
           const days = [
             { day: "monday", date: row.monday_date, hours: monday_hours },
@@ -1241,8 +1247,8 @@ const saveTimesheet = async (Timesheet) => {
             friday_date, friday_hours, saturday_date, saturday_hours,
             sunday_date, sunday_hours,remark,final_remark,submit_status,
             monday_note, tuesday_note, wednesday_note, thursday_note,
-            friday_note, saturday_note, sunday_note
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            friday_note, saturday_note, sunday_note,duplicate_entry
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
             const insertValues = [
               staff_id,
@@ -1275,6 +1281,7 @@ const saveTimesheet = async (Timesheet) => {
               friday_note,
               saturday_note,
               sunday_note,
+              duplicate_entry
             ];
 
             await pool.query(insertQuery, insertValues);

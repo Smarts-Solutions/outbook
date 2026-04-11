@@ -220,7 +220,11 @@ const Timesheet = () => {
             (parseFloat(row.friday_hours) || 0) +
             (parseFloat(row.saturday_hours) || 0) +
             (parseFloat(row.sunday_hours) || 0);
-          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+          return { 
+            ...row, 
+            total_hours: parseFloat(sum).toFixed(2) ,
+            duplicate_entry: row?.duplicate_entry && JSON.parse(row?.duplicate_entry) 
+          };
         }),
       );
     } else {
@@ -1906,16 +1910,16 @@ const Timesheet = () => {
         // This is a duplicate. Sum hours into the first occurrence.
         const firstRow = uniqueRowsMap.get(key);
 
-        if (!firstRow.merged_data) {
-          firstRow.merged_data = [];
+        if (!firstRow.duplicate_entry) {
+          firstRow.duplicate_entry = [];
         }
 
         const rowToMerge = JSON.parse(JSON.stringify(row));
-        if (Array.isArray(rowToMerge.merged_data)) {
-          firstRow.merged_data.push(...rowToMerge.merged_data);
-          delete rowToMerge.merged_data;
+        if (Array.isArray(rowToMerge.duplicate_entry)) {
+          firstRow.duplicate_entry.push(...rowToMerge.duplicate_entry);
+          delete rowToMerge.duplicate_entry;
         }
-        firstRow.merged_data.push(rowToMerge);
+        firstRow.duplicate_entry.push(rowToMerge);
 
         const days = [
           "monday",
@@ -1983,8 +1987,8 @@ const Timesheet = () => {
             updateRecordSheet(row.id, hKey, row[hKey]);
           });
           updateRecordSheet(row.id, "total_hours", row.total_hours);
-          if (row.merged_data) {
-            updateRecordSheet(row.id, "merged_data", row.merged_data);
+          if (row.duplicate_entry) {
+            updateRecordSheet(row.id, "duplicate_entry", row.duplicate_entry);
           }
         }
       });
