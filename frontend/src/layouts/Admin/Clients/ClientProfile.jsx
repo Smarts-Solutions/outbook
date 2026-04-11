@@ -969,7 +969,22 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-      
+
+    if (row?.has_client_job_task === 0) {
+      sweatalert.fire({
+        title: "warning",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: false,
+        showConfirmButton: false,
+        confirmButtonText: "Ok",
+        timerProgressBar: true,
+        text: "Please add task first",
+        timer: 1500,
+      });
+      return
+    }
+
     sweatalert
       .fire({
         title: "Are you sure?",
@@ -1004,14 +1019,14 @@ const ClientList = () => {
                   copyJobRequest(row, true);
                   return
                 }
-               else if (result.dismiss === Swal.DismissReason.cancel) {
+                else if (result.dismiss === Swal.DismissReason.cancel) {
                   copyJobRequest(row, false);
                   return;
                 }
-               else if (result.dismiss === Swal.DismissReason.close) {
+                else if (result.dismiss === Swal.DismissReason.close) {
                   return;
                 }
-                else{
+                else {
                   return;
                 }
               });
@@ -1029,7 +1044,7 @@ const ClientList = () => {
 
   const copyJobRequest = async (row, field = true) => {
 
-    
+
 
     const req = {
       action: "copy_job",

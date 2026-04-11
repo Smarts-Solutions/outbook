@@ -1380,6 +1380,23 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
+
+    if (row?.has_client_job_task === 0) {
+      sweatalert.fire({
+        title: "warning",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: false,
+        showConfirmButton: false,
+        confirmButtonText: "Ok",
+        timerProgressBar: true,
+        text: "Please add task first",
+        timer: 1500,
+      });
+      return
+    }
+
+
     sweatalert
       .fire({
         title: "Are you sure?",
@@ -1392,7 +1409,7 @@ const ClientList = () => {
       })
       .then(async (result) => {
         if (result.isConfirmed) {
-          
+
           if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
             sweatalert
               .fire({
@@ -1442,7 +1459,7 @@ const ClientList = () => {
       row: row,
       field: field
     };
-   
+
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
