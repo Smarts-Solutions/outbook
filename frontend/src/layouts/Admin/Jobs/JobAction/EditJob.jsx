@@ -274,7 +274,7 @@ const EditJob = () => {
     };
 
     const formatFullDuration = (ms) => {
-      if (isNaN(ms) || ms < 0) return "0 days";
+      if (isNaN(ms) || ms < 0) return "0 day";
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
       return `${days} day${days !== 1 ? 's' : ''}`;
     }
