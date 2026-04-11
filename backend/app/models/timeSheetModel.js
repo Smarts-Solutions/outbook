@@ -193,6 +193,8 @@ const getTimesheet = async (Timesheet) => {
       timesheet.final_remark AS final_remark,
       timesheet.status AS status,
       timesheet.submit_status AS submit_status,
+      timesheet.save_date AS save_date,
+      timesheet.submit_date AS submit_date,
       timesheet.duplicate_entry AS duplicate_entry,
       timesheet.created_at AS created_at,
       timesheet.updated_at AS updated_at,
@@ -1318,6 +1320,8 @@ const saveTimesheet = async (Timesheet) => {
           // ======================
 
           else {
+
+
             const [[existData]] = await pool.execute(
               `SELECT monday_hours,tuesday_hours,wednesday_hours,
               thursday_hours,friday_hours,saturday_hours,sunday_hours
