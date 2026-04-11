@@ -15,7 +15,7 @@ import { Modal, Button, Table, Form } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, CheckCircle2, Info } from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, CheckCircle2, Info, AlertCircle, PlayCircle } from "lucide-react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../../Utils/Config";
@@ -262,50 +262,42 @@ const EditJob = () => {
 
   const getDurationData = () => {
     const history = AllJobData.data?.status_history || [];
-    if (!Array.isArray(history) || history.length === 0) return { items: [], total: "" };
+    if (history.length === 0) return { items: [], total: "" };
     
     let processed = [];
     let totalMs = 0;
     
     const formatPreciseDuration = (ms) => {
-      if (isNaN(ms) || ms < 0) return "0m";
-      const totalMinutes = Math.floor(ms / (1000 * 60));
-      const days = Math.floor(totalMinutes / (24 * 60));
-      const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-      const minutes = totalMinutes % 60;
-      
-      let result = [];
-      if (days > 0) result.push(`${days}d`);
-      if (hours > 0) result.push(`${hours}h`);
-      if (minutes > 0 || result.length === 0) result.push(`${minutes}m`);
-      
-      return result.join(" ");
+      if (isNaN(ms) || ms < 0) return "0d";
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+      return `${days}d`;
     };
+
+    const formatFullDuration = (ms) => {
+      if (isNaN(ms) || ms < 0) return "0 days";
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+      return `${days} day${days !== 1 ? 's' : ''}`;
+    }
     
     for (let i = 0; i < history.length; i++) {
       const current = history[i];
       const next = history[i + 1];
       
-      if (!current?.status_update_date) continue;
-
       const startDate = new Date(current.status_update_date);
-      if (isNaN(startDate.getTime())) continue;
-
       const endDate = next ? new Date(next.status_update_date) : new Date();
-      if (isNaN(endDate.getTime())) continue;
       
-      const diffMs = endDate.getTime() - startDate.getTime();
+      const diffMs = endDate - startDate;
       totalMs += diffMs;
       
       processed.push({
-        status: current.status_name || "Status Update",
+        status: current.status_name,
         from: startDate,
         to: next ? endDate : null,
         duration: formatPreciseDuration(diffMs)
       });
     }
     
-    return { items: processed, total: formatPreciseDuration(totalMs) };
+    return { items: processed, total: formatFullDuration(totalMs) };
   };
 
 
@@ -1085,7 +1077,7 @@ const EditJob = () => {
   const HandleChange = async (e) => {
     const { name, value } = e.target;
 
- 
+
     if (name === "Service") {
       if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
         sweatalert.fire({
@@ -1371,11 +1363,11 @@ const EditJob = () => {
 
 
 
-    if (["", null, undefined ,0].includes(jobData?.processing_checklist)) {
+    if (["", null, undefined, 0].includes(jobData?.processing_checklist)) {
       processing_checklist_status = "0"
     }
 
-    if (["", null, undefined ,0].includes(jobData?.reviewing_checklist)) {
+    if (["", null, undefined, 0].includes(jobData?.reviewing_checklist)) {
       reviewing_checklist_status = "0"
     }
 
@@ -3956,7 +3948,7 @@ const EditJob = () => {
                                           {errors["job_priority"]}
                                         </div>
                                       )}
-                                      <div className="mt-2 text-start">
+                                      {/* <div className="mt-2 text-start">
                                         <button
                                           type="button"
                                           className={`${showHistoryInline ? 'bg-primary text-white' : 'text-primary'} btn btn-link p-1 px-2 fs-12 d-flex align-items-center rounded-pill border border-primary text-decoration-none`}
@@ -3965,7 +3957,24 @@ const EditJob = () => {
                                         >
                                           <Clock size={14} className="me-1" /> {showHistoryInline ? 'Hide Duration History' : 'Status Duration History'}
                                         </button>
+                                      </div> */}
+
+
+                                      <div className="mt-2 text-start">
+                                        <ul className="nav nav-pills rounded-tabs">
+                                          <li className="nav-item">
+                                            <button
+                                              className={`nav-link ${showHistoryInline ? "active" : ""}`}
+                                              type="button"
+                                              onClick={() => setShowHistoryInline(!showHistoryInline)}
+                                            >
+                                              <Clock size={16} className="me-1" />
+                                              Status Duration History
+                                            </button>
+                                          </li>
+                                        </ul>
                                       </div>
+
                                     </div>
                                   </div>
 
@@ -4068,10 +4077,10 @@ const EditJob = () => {
                                           })
                                         }
                                         value={jobData.reviewing_checklist ?? ""}
-                                        // onChange={HandleChange}
-                                        // value={
-                                        //   jobData.reviewing_checklist
-                                        // }
+                                      // onChange={HandleChange}
+                                      // value={
+                                      //   jobData.reviewing_checklist
+                                      // }
                                       >
                                         <option value={""}>-- Select --</option>
                                         <option value={0}>Not Required</option>
@@ -4123,61 +4132,79 @@ const EditJob = () => {
                                     </div>
                                   </div>
                                   {showHistoryInline && (
-                                    <div className="col-lg-12 mt-4 px-3 pb-3">
-                                      <div className="card border-0 shadow-sm" style={{ background: '#f8fafd', borderRadius: '15px' }}>
-                                        <div className="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
-                                          <h5 className="fs-15 fw-bold text-dark mb-0 d-flex align-items-center">
-                                            <Clock size={18} className="text-primary me-2" />
+                                    <div className="col-lg-12 mt-4">
+                                      <div className="card shadow-sm border" style={{ borderRadius: '15px', overflow: 'hidden', background: '#ffffff', borderColor: '#e4eef7' }}>
+                                        <div className="card-header border-0 bg-white pt-4 px-4 pb-2">
+                                           <h5 className="fs-15 fw-bold mb-0 d-flex align-items-center" style={{ color: '#313949' }}>
+                                            <Clock size={18} className="me-2" style={{ color: '#00bcd4' }} />
                                             Status Duration History
                                           </h5>
                                         </div>
-                                        <div className="card-body px-4 py-4">
-                                          <div className="timeline-container ps-2">
+                                        <div className="card-body px-3 pt-2 pb-4">
+                                          <div className="timeline-wrapper position-relative ps-1">
+                                            {/* Vertical Line */}
+                                            {getDurationData().items.length > 1 && (
+                                              <div className="position-absolute border-start" 
+                                                   style={{ left: '11px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
+                                            )}
+
                                             {getDurationData().items.length > 0 ? (
-                                              getDurationData().items.map((item, index, array) => (
-                                                <div className="timeline-item position-relative mb-4" key={index}>
-                                                  {/* Timeline Line */}
-                                                  {index !== array.length - 1 && (
-                                                    <div className="position-absolute h-100 border-start border-2 border-dashed border-primary-subtle" 
-                                                         style={{ left: '11px', top: '24px', zIndex: 1 }}></div>
-                                                  )}
-                                                  
-                                                  <div className="d-flex align-items-start position-relative" style={{ zIndex: 2 }}>
-                                                    <div className="timeline-icon bg-white p-1 rounded-circle border border-2 border-primary d-flex align-items-center justify-content-center"
-                                                         style={{ width: '24px', height: '24px' }}>
-                                                      {index === array.length - 1 ? (
-                                                        <Clock size={12} className="text-primary" />
-                                                      ) : (
-                                                        <CheckCircle2 size={12} className="text-primary" />
-                                                      )}
+                                              getDurationData().items.map((item, index) => {
+                                                // Dynamic Icon and Color based on Status Keywords
+                                                const statusName = (item.status || "").toLowerCase();
+                                                let StatusIcon = Clock;
+                                                let color = "#00bcd4"; // Default Blue
+                                                
+                                                if (statusName.includes("not") || statusName.includes("pending") || statusName.includes("started")) {
+                                                  StatusIcon = AlertCircle;
+                                                  color = "#ffa726"; // Orange
+                                                } else if (statusName.includes("progress") || statusName.includes("running") || statusName.includes("process")) {
+                                                  StatusIcon = PlayCircle;
+                                                  color = "#00bcd4"; 
+                                                } else if (statusName.includes("review") || statusName.includes("check")) {
+                                                  StatusIcon = Clock;
+                                                  color = "#00bcd4";
+                                                } else if (statusName.includes("complete") || statusName.includes("done")) {
+                                                  StatusIcon = CheckCircle2;
+                                                  color = "#27ae60"; 
+                                                }
+
+                                                return (
+                                                  <div className="mb-4 d-flex" key={index} style={{ zIndex: 2 }}>
+                                                    {/* Icon Column */}
+                                                    <div className="d-flex flex-column align-items-center" style={{ width: '22px' }}>
+                                                      <div className="d-flex align-items-center justify-content-center bg-white" style={{ width: '18px', height: '34px' }}>
+                                                        <StatusIcon size={22} color={color} strokeWidth={2} />
+                                                      </div>
                                                     </div>
                                                     
+                                                    {/* Content Column */}
                                                     <div className="ms-3 flex-grow-1">
-                                                      <div className="d-flex justify-content-between align-items-center">
-                                                        <h6 className="fs-13 fw-semibold text-dark mb-1">{item.status || "Status Update"}</h6>
-                                                        <span className="badge bg-soft-info text-info rounded-pill px-3 py-1 fs-11 fw-bold">
+                                                      <div className="d-flex justify-content-between align-items-center" style={{ height: '22px' }}>
+                                                        <h6 className="fs-14 fw-bold mb-0" style={{ color: '#313949' }}>{item.status || "Status Update"}</h6>
+                                                        <div className="px-2 py-0 rounded fs-11 fw-bold" 
+                                                             style={{ background: '#e1f5fe', color: '#039be5', minWidth: '40px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                           {item.duration}
-                                                        </span>
+                                                        </div>
                                                       </div>
-                                                      <p className="fs-12 text-muted mb-0">
-                                                        {item.from.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} 
-                                                        {item.to ? ` → ${item.to.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ' → Present'}
+                                                      <p className="fs-12 mb-0 mt-1" style={{ color: '#99a1ac' }}>
+                                                        {item.from.toLocaleDateString('en-GB')} → {item.to ? item.to.toLocaleDateString('en-GB') : 'Present'}
                                                       </p>
                                                     </div>
                                                   </div>
-                                                </div>
-                                              ))
+                                                );
+                                              })
                                             ) : (
-                                              <div className="text-center py-4 bg-white rounded-3 border border-dashed">
-                                                <div className="avatar-md mx-auto mb-3">
-                                                  <div className="avatar-title bg-light text-primary rounded-circle fs-24">
-                                                    <Clock size={24} />
-                                                  </div>
-                                                </div>
-                                                <h5 className="fs-14 fw-bold text-dark">No History Available</h5>
-                                                <p className="text-muted fs-12 mb-0">There are no status duration logs recorded for this job yet.</p>
-                                              </div>
+                                               <div className="text-center py-4 bg-light rounded-3 border border-dashed">
+                                                 <Info size={30} className="text-muted mb-2 opacity-50" />
+                                                 <p className="text-muted fs-13 mb-0">No history available</p>
+                                               </div>
                                             )}
+                                          </div>
+                                          
+                                          <div className="mt-2 pt-3 border-top d-flex justify-content-between align-items-center" style={{ borderColor: '#f1f3f5' }}>
+                                            <span className="fs-13 fw-semibold text-muted">Total Duration</span>
+                                            <span className="fs-16 fw-bold" style={{ color: '#313949' }}>{getDurationData().total}</span>
                                           </div>
                                         </div>
                                       </div>
@@ -5417,7 +5444,7 @@ const EditJob = () => {
                                 onClick={handleSubmitChecklist}
                               >
                                 <Save size={18} className="me-1" />
-                                Submit
+                                Save
                               </Button>
                             </Modal.Footer>
                           </Modal>
