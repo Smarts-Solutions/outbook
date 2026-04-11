@@ -1915,6 +1915,7 @@ const Timesheet = () => {
         }
 
         const rowToMerge = JSON.parse(JSON.stringify(row));
+        rowToMerge.merge_date_time = new Date().toLocaleString();
         if (Array.isArray(rowToMerge.duplicate_entry)) {
           firstRow.duplicate_entry.push(...rowToMerge.duplicate_entry);
           delete rowToMerge.duplicate_entry;
