@@ -4134,7 +4134,7 @@ const EditJob = () => {
                                             Status Duration History
                                           </h5>
                                         </div>
-                                        <div className="card-body px-4 pt-1 pb-4">
+                                        <div className="card-body px-3 pt-2 pb-4">
                                           <div className="timeline-wrapper position-relative ps-1">
                                             {/* Vertical Line */}
                                             {getDurationData().items.length > 1 && (
@@ -4167,7 +4167,7 @@ const EditJob = () => {
                                                   <div className="mb-4 d-flex" key={index} style={{ zIndex: 2 }}>
                                                     {/* Icon Column */}
                                                     <div className="d-flex flex-column align-items-center" style={{ width: '22px' }}>
-                                                      <div className="d-flex align-items-center justify-content-center bg-white" style={{ width: '22px', height: '22px' }}>
+                                                      <div className="d-flex align-items-center justify-content-center bg-white" style={{ width: '18px', height: '34px' }}>
                                                         <StatusIcon size={22} color={color} strokeWidth={2} />
                                                       </div>
                                                     </div>
