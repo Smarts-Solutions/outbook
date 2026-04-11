@@ -5419,7 +5419,7 @@ const EditJob = () => {
                                 onClick={handleSubmitChecklist}
                               >
                                 <Save size={18} className="me-1" />
-                                Submit
+                                Save
                               </Button>
                             </Modal.Footer>
                           </Modal>
