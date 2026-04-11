@@ -1217,9 +1217,9 @@ const saveTimesheet = async (Timesheet) => {
 
           if(Number(row?.submit_status) === 1){
             //current date
-            submit_date = new Date().toISOString().slice(0, 10); 
+            submit_date = new Date(); 
           }else{
-            save_date = new Date().toISOString().slice(0, 10);
+            save_date = new Date();
           }
 
 
