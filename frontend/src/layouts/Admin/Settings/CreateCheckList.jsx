@@ -496,7 +496,6 @@ const CreateCheckList = () => {
   const getServiceData = async (customer_ids) => {
 
      customer_ids = Array.isArray(customer_ids) ? customer_ids.map(String) : [];
-
      if (!Array.isArray(customer_ids) || customer_ids.length === 0) {
       getAllServices();
       return;

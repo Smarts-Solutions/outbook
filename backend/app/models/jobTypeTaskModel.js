@@ -38,6 +38,10 @@ const createJobType = async (JobType) => {
 
 const getJobType = async (JobType) => {
   const { service_id } = JobType;
+
+  
+
+
   if (service_id == undefined) {
     return [];
   }
