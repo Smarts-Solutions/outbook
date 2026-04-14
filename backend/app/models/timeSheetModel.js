@@ -1310,20 +1310,20 @@ const saveTimesheet = async (Timesheet) => {
 
             if (DateTimeString !== "") {
               const eventType =
-                parseInt(row.submit_status) === 1 ? "submit" : "insert";
+                parseInt(row.submit_status) === 1 ? "submit" : "save";
 
               if (!checkStringEvent.includes(eventType)) {
                 checkStringEvent.push(eventType);
 
                 timesheet_log_msg.push(
-                  `${eventType === "submit" ? "submitted" : "created"
+                  `${eventType === "submit" ? "submitted" : "save"
                   } a timesheet entry. Task type:${task_type_name},
                 ${DateTimeString} ,Job code:${JobTaskName.job_name},
                 Task name:${JobTaskName.task_name}`
                 );
               } else {
                 timesheet_log_msg.push(
-                  `Task type:${task_type_name}, ${DateTimeString},
+                `Task type:${task_type_name}, ${DateTimeString},
                 Job code:${JobTaskName.job_name},
                 Task name:${JobTaskName.task_name}`
                 );
