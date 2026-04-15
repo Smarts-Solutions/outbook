@@ -141,6 +141,10 @@ const ReusableForm = ({
                               formik.setFieldValue(field.name, selectedOption ? selectedOption.value : "")
                             }
                             onBlur={() => formik.setFieldTouched(field.name, true)}
+                            onMenuOpen={field.onMenuOpen}
+                            onInputChange={field.onInputChange}
+                            onMenuScrollToBottom={field.onMenuScrollToBottom}
+                            isLoading={field.isLoading}
                             styles={{
                               control: (provided, state) => ({
                                 ...provided,

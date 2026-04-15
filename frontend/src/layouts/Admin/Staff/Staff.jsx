@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Staff, Competency } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { Role } from "../../../ReduxStore/Slice/Settings/settingSlice";
@@ -78,40 +78,87 @@ const StaffPage = () => {
   const [changeRole, setChangeRole] = useState(false);
 
   const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+  const [managerOptions, setManagerOptions] = useState([]);
+  const [managerPage, setManagerPage] = useState(1);
+  const [managerHasMore, setManagerHasMore] = useState(true);
+  const [managerSearch, setManagerSearch] = useState("");
+  const [managerLoading, setManagerLoading] = useState(false);
+  const managerCacheRef = useRef({});
+  const managerDebounceTimeout = useRef(null);
 
   console.log("staffDataAll --- ", staffDataAll);
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    GetAllStaffData(1, 10000, "");
+    // GetAllStaffData(1, 10000, ""); // Removed this as we now fetch on click
   }, []);
 
-  const GetAllStaffData = async (page = 1, limit = 10, search = "") => {
-    setLoading(true);
-    //  setStaffDataAll({ loading: true, data: [] });
-    await dispatch(
-      Staff({
-        req: { action: "get", page, limit, search },
-        authToken: token,
-      }),
-    )
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          console.log("response", response);
-          setStaffDataAllRecords({ loading: false, data: response?.data?.data });
-        } else {
-          setStaffDataAllRecords({ loading: false, data: [] });
+  const GetLineManagerData = async ({ searchValue = "", pageNo = 1, append = false } = {}) => {
+    if (managerLoading) return;
 
-        }
-      })
-      .catch((error) => {
-        return;
-      })
-      .finally(() => {
-        setLoading(false);
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (managerCacheRef.current[cacheKey]) {
+      const cached = managerCacheRef.current[cacheKey];
+      setManagerOptions((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.value, item])).values(),
+        );
+        return unique;
       });
+      return;
+    }
+
+    setManagerLoading(true);
+    try {
+      const response = await dispatch(
+        Staff({
+          req: { action: "get", page: pageNo, limit: 20, search: searchValue },
+          authToken: token,
+        }),
+      ).unwrap();
+
+      if (response.status) {
+        const formatted = response.data.data
+          .filter((data) =>
+            data.role !== "ADMIN" &&
+            data.role !== "SUPERADMIN" &&
+            data.id !== editStaffData.id
+          )
+          .map((data) => ({
+            label: `${data.first_name} ${data.last_name}`,
+            value: data.id,
+          }));
+
+        managerCacheRef.current[cacheKey] = formatted;
+        setManagerOptions((prev) => {
+          const combined = append ? [...prev, ...formatted] : formatted;
+          const unique = Array.from(
+            new Map(combined.map((item) => [item.value, item])).values(),
+          );
+          return unique;
+        });
+        setManagerHasMore(response.data.data.length === 20);
+        setManagerPage(pageNo);
+      } else {
+        if (!append) setManagerOptions([]);
+      }
+    } catch (error) {
+      console.error("Manager Error:", error);
+      if (!append) setManagerOptions([]);
+    } finally {
+      setManagerLoading(false);
+    }
+  };
+
+  const handleManagerSearch = (value) => {
+    clearTimeout(managerDebounceTimeout.current);
+    managerDebounceTimeout.current = setTimeout(() => {
+      setManagerSearch(value);
+      setManagerPage(1);
+      GetLineManagerData({ searchValue: value, pageNo: 1 });
+    }, 500);
   };
 
   useEffect(() => {
@@ -775,25 +822,6 @@ const StaffPage = () => {
         { label: "Inactive", value: "0" },
       ],
     },
-    // {
-    //   type: "selectSearch",
-    //   name: "staff_to",
-    //   label: "Line Manager",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   options: staffDataAll?.data
-    //     .filter(
-    //       (data) =>
-    //         data.role !== "ADMIN" &&
-    //         data.role !== "SUPERADMIN" &&
-    //         data.id !== editStaffData.id,
-    //     )
-    //     .map((data) => ({
-    //       label: `${data.first_name} ${data.last_name}`,
-    //       value: data.id,
-    //     })),
-    // },
     {
       type: "selectSearch",
       name: "staff_to",
@@ -801,27 +829,23 @@ const StaffPage = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      options: staffDataAllRecords?.data
-        .filter(
-          (data) =>
-            data.role !== "ADMIN" &&
-            data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id
-        )
-        .map((data) => {
-          if (formik.values.staff_to == data.id) {
-            return {
-              label: `${data.first_name} ${data.last_name}`,
-              value: data.id,
-              selected: true, // ✅ selected row
-            };
-          } else {
-            return {
-              label: `${data.first_name} ${data.last_name}`,
-              value: data.id,
-            };
-          }
-        }),
+      options: managerOptions,
+      onMenuOpen: () => {
+        if (managerOptions.length === 0) {
+          GetLineManagerData({ searchValue: "", pageNo: 1 });
+        }
+      },
+      onInputChange: (value) => handleManagerSearch(value),
+      onMenuScrollToBottom: () => {
+        if (managerHasMore && !managerLoading) {
+          GetLineManagerData({
+            searchValue: managerSearch,
+            pageNo: managerPage + 1,
+            append: true,
+          });
+        }
+      },
+      isLoading: managerLoading,
     },
     {
       type: "text6",

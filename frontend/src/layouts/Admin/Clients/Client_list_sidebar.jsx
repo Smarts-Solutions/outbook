@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
@@ -30,36 +30,55 @@ const ClientLists = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Customer Pagination states
+  const [custPage, setCustPage] = useState(1);
+  const [custHasMore, setCustHasMore] = useState(true);
+  const [custLoading, setCustLoading] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
-  const GetAllCustomer = async () => {
-    setLoading(true);
-    const req = { action: "get_dropdown" };
+  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+    setCustLoading(true);
+    const req = {
+      action: "get",
+      page,
+      limit: 20,
+      search: search || "",
+      staff_id: staffDetails?.id,
+    };
     const data = { req: req, authToken: token };
     await dispatch(getAllCustomerDropDown(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerData(response.data);
+          const newData = response.data.data || [];
+          if (append) {
+            setCustomerData((prev) => [...prev, ...newData]);
+          } else {
+            setCustomerData(newData);
+          }
+          setCustHasMore(newData.length === 20);
+          setCustPage(page);
         } else {
-          setCustomerData([]);
+          if (!append) setCustomerData([]);
         }
       })
-      .catch((error) => {
-        return;
+      .catch(() => {
+        if (!append) setCustomerData([]);
       })
       .finally(() => {
-        setLoading(false);
+        setCustLoading(false);
       });
   };
 
   useEffect(() => {
-    GetAllCustomer();
+    // GetAllCustomer(1); // On-demand
   }, []);
 
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [ClientData, setClientData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
@@ -1267,6 +1286,17 @@ const ClientLists = () => {
                     selectedCustomer?.trading_name,
                   );
                 }}
+                onMenuOpen={() => {
+                  if (CustomerData.length === 0) {
+                    GetAllCustomer(1);
+                  }
+                }}
+                onMenuScrollToBottom={() => {
+                  if (custHasMore && !custLoading) {
+                    GetAllCustomer(custPage + 1, "", true);
+                  }
+                }}
+                isLoading={custLoading}
                 placeholder="Select Customer"
               />
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DashboardData,
@@ -28,7 +28,14 @@ const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState(getActiveTab || "this_week");
   const [activityRange, setActivityRange] = useState("this_week");
   const [selectedStaff, setSelectedStaff] = useState("");
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [staffOptions, setStaffOptions] = useState([]);
+  const [staffPage, setStaffPage] = useState(1);
+  const [staffHasMore, setStaffHasMore] = useState(true);
+  const [staffSearch, setStaffSearch] = useState("");
+  const [staffLoading, setStaffLoading] = useState(false);
+  const staffCacheRef = useRef({});
+  const staffDebounceTimeout = useRef(null);
+  
   const [selectedFromDate, setSelectedFromDate] = useState("");
   const [selectedToDate, setSelectedToDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,7 +69,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     GetDashboardData();
-    GetAllStaff();
   }, [selectedTab]);
 
   // ✅ FIXED: Custom date range logic
@@ -106,37 +112,66 @@ const Dashboard = () => {
     }
   };
 
-  const GetAllStaff = async () => {
+  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false } = {}) => {
+    if (staffLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (staffCacheRef.current[cacheKey]) {
+      const cached = staffCacheRef.current[cacheKey];
+      setStaffOptions((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.value, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
+    setStaffLoading(true);
+
     try {
       const response = await dispatch(
         Staff({
-          req: { action: "get", page: 1, limit: 100000, search: "" },
+          req: { action: "get", page: pageNo, limit: 20, search: searchValue },
           authToken: token,
         })
       ).unwrap();
 
       if (response.status) {
-        const filteredData = response?.data?.data;
-        setStaffDataAll({ loading: false, data: filteredData });
+        const formatted = response.data.data.map((val) => ({
+          value: val.id,
+          label: `${val.first_name} ${val.last_name}`,
+        }));
+        staffCacheRef.current[cacheKey] = formatted;
+        setStaffOptions((prev) => {
+          const combined = append ? [...prev, ...formatted] : formatted;
+          const unique = Array.from(
+            new Map(combined.map((item) => [item.value, item])).values(),
+          );
+          return unique;
+        });
+        setStaffHasMore(response.data.data.length === 20);
+        setStaffPage(pageNo);
       } else {
-        setStaffDataAll({ loading: false, data: [] });
+        if (!append) setStaffOptions([]);
       }
     } catch (error) {
       console.error("Staff Error:", error);
-      setStaffDataAll({ loading: false, data: [] });
+      if (!append) setStaffOptions([]);
+    } finally {
+      setStaffLoading(false);
     }
   };
 
-  const staffOptions =
-    staffDataAll.data?.map((val) => ({
-      value: val.id,
-      label: `${val.first_name} ${val.last_name}`,
-    })) || [];
-
-  const staffOptionPlaceholder = [
-    { value: "", label: "-- Select --" },
-    ...staffOptions,
-  ];
+  const handleStaffSearch = (value) => {
+    clearTimeout(staffDebounceTimeout.current);
+    staffDebounceTimeout.current = setTimeout(() => {
+      setStaffSearch(value);
+      setStaffPage(1);
+      GetAllStaff({ searchValue: value, pageNo: 1 });
+    }, 500);
+  };
 
   const ActivityLogData = async (pageNo = 1) => {
     try {
@@ -198,236 +233,6 @@ const Dashboard = () => {
     };
     navigate("/admin/dashboard/data", { state: { req: req } });
   };
-
-  // Start Process SharePoint Refresh Process Start //
-  // NOTE: This code is commented for security reasons
-  // Move to environment variables before using in production
-
-  // const [newAccessToken, setNewAccessToken] = useState("");
-  // const refreshToken = async () => {
-  //   let data = qs.stringify({
-  //     grant_type: "refresh_token",
-  //     client_id: process.env.REACT_APP_SHAREPOINT_CLIENT_ID,
-  //     client_secret: process.env.REACT_APP_SHAREPOINT_CLIENT_SECRET,
-  //     refresh_token: process.env.REACT_APP_SHAREPOINT_REFRESH_TOKEN,
-  //   });
-
-  //   let config = {
-  //     method: "post",
-  //     maxBodyLength: Infinity,
-  //     url: process.env.REACT_APP_SHAREPOINT_TOKEN_URL,
-  //     headers: {
-  //       "Content-Type": "application/x-www-form-urlencoded",
-  //     },
-  //     data: data,
-  //   };
-
-  //   axios
-  //     .request(config)
-  //     .then((response) => {
-  //       console.log("Token refreshed successfully");
-  //       setNewAccessToken(response.data.access_token);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Token refresh error:", error);
-  //       setError("Error refreshing token");
-  //     });
-  // };
-
-  // let site_ID = "";
-  // let folder_path = "/Shared Documents/Job Management";
-  // let drive_ID = "";
-  // let folder_ID = "";
-  // const [data, setData] = useState(null);
-
-  // const accessToken = process.env.REACT_APP_SHAREPOINT_ACCESS_TOKEN;
-  // const siteUrl = process.env.REACT_APP_SHAREPOINT_SITE_URL;
-
-  // const fetchData = async () => {
-  //   try {
-  //     const response = await axios.get(siteUrl, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-
-  //     if (response.data.id) {
-  //       const parts = response.data.id.split(",");
-  //       site_ID = parts[1];
-
-  //       const driveUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives`;
-  //       const driveResponse = await axios.get(driveUrl, {
-  //         headers: {
-  //           Authorization: `Bearer ${accessToken}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-
-  //       if (driveResponse.data.value) {
-  //         drive_ID = driveResponse.data.value[0].id;
-
-  //         const folderUrl = `https://graph.microsoft.com/v1.0/drives/${drive_ID}/root/children`;
-  //         const folderResponse = await axios.get(folderUrl, {
-  //           headers: {
-  //             Authorization: `Bearer ${accessToken}`,
-  //             "Content-Type": "application/json",
-  //           },
-  //         });
-
-  //         if (folderResponse.data.value) {
-  //           const jobManagementObject = folderResponse.data.value.find(
-  //             (item) => item.name === "JobManagement"
-  //           );
-
-  //           if (jobManagementObject) {
-  //             folder_ID = jobManagementObject.id;
-  //           }
-
-  //           return {
-  //             site_ID: site_ID,
-  //             drive_ID: drive_ID,
-  //             folder_ID: folder_ID,
-  //           };
-  //         }
-  //       }
-  //     }
-
-  //     setData(response.data);
-  //   } catch (err) {
-  //     console.error("Fetch data error:", err);
-  //     setError(err.message);
-  //   }
-  // };
-
-  // const uploadImage = async (file) => {
-  //   try {
-  //     const val = await fetchData();
-  //     let userName = "JohnDoe";
-  //     let site_ID = val.site_ID;
-  //     let drive_ID = val.drive_ID;
-  //     let folder_ID = val.folder_ID;
-
-  //     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
-
-  //     const response = await axios.put(uploadUrl, file, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //         "Content-Type": file.type,
-  //       },
-  //     });
-
-  //     console.log("Image uploaded successfully:", response.data);
-  //   } catch (error) {
-  //     console.error("Error uploading image:", error);
-  //   }
-  // };
-
-  // const createFolderIfNotExists = async (folderName) => {
-  //   try {
-  //     const val = await fetchData();
-  //     let site_ID = val.site_ID;
-  //     let drive_ID = val.drive_ID;
-  //     let parentFolderId = val.folder_ID;
-
-  //     const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
-
-  //     const response = await axios.get(folderUrl, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
-
-  //     const folderExists = response.data.value.some(
-  //       (item) => item.name === folderName && item.folder
-  //     );
-
-  //     if (!folderExists) {
-  //       const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
-  //       const folderData = {
-  //         name: folderName,
-  //         folder: {},
-  //         "@microsoft.graph.conflictBehavior": "rename",
-  //       };
-
-  //       await axios.post(createFolderUrl, folderData, {
-  //         headers: {
-  //           Authorization: `Bearer ${accessToken}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-
-  //       console.log(`Folder '${folderName}' created successfully.`);
-  //     } else {
-  //       console.log(`Folder '${folderName}' already exists.`);
-  //     }
-
-  //     const folderResponse = await axios.get(folderUrl, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
-
-  //     const createdFolder = folderResponse.data.value.find(
-  //       (item) => item.name === folderName
-  //     );
-  //     return createdFolder.id;
-  //   } catch (error) {
-  //     console.error("Error checking or creating folder:", error);
-  //     throw error;
-  //   }
-  // };
-
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     uploadImage(file);
-  //   } else {
-  //     console.error("No file selected.");
-  //   }
-  // };
-
-  // const deleteImage = async () => {
-  //   try {
-  //     const val = await fetchData();
-  //     let fileName = "example.png";
-  //     let site_ID = val.site_ID;
-  //     let drive_ID = val.drive_ID;
-  //     let folder_ID = val.folder_ID;
-
-  //     const filePath = `${folder_path}/${fileName}`;
-  //     const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
-
-  //     const response = await axios.delete(deleteUrl, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
-
-  //     console.log("Image deleted successfully:", response.data);
-  //   } catch (error) {
-  //     console.error("Error deleting image:", error);
-  //   }
-  // };
-
-  // const SharePointToken = async (token) => {
-  //   if (token) {
-  //     try {
-  //       const decodedToken = JSON.parse(atob(token.split(".")[1]));
-  //       const currentTime = Math.floor(Date.now() / 1000);
-
-  //       if (decodedToken.exp && decodedToken.exp < currentTime) {
-  //         console.log("Token Expired");
-  //       } else {
-  //         console.log("Token Valid");
-  //       }
-  //     } catch (error) {
-  //       console.error("Token validation error:", error);
-  //     }
-  //   }
-  // };
-
-  // End Process SharePoint Refresh Process End //
 
   const exportData = getActiviyLog?.map((item) => ({
     staff_name: item.staff_name,
@@ -510,23 +315,6 @@ const Dashboard = () => {
                     </select>
                   </div>
                 </div>
-
-                {/* SharePoint Controls - Uncomment to use */}
-                {/* <div className="col-lg-4 col-md-6 col-sm-6">
-                  <div className="form-group">
-                    <button className="form-control" onClick={refreshToken}>Refresh Token</button>
-                    {newAccessToken && <p>New Access Token: {newAccessToken}</p>}
-                    {error && <p style={{ color: "red" }}>{error}</p>}
-                  </div>
-
-                  <div>
-                    <input className="form-control" type="file" onChange={handleFileChange} />
-                  </div>
-
-                  <div>
-                    <button className="form-control" onClick={deleteImage}>Delete Image</button>
-                  </div>
-                </div> */}
               </div>
 
               <div className="tab-content mt-5">
@@ -786,8 +574,8 @@ const Dashboard = () => {
                           id="tabSelect"
                           name="staff"
                           className="basic-multi-select"
-                          options={staffOptionPlaceholder}
-                          value={staffOptionPlaceholder.find(
+                          options={[{ value: "", label: "-- Select --" }, ...staffOptions]}
+                          value={[{ value: "", label: "-- Select --" }, ...staffOptions].find(
                             (obj) => Number(obj.value) === Number(selectedStaff)
                           )}
                           placeholder="-- Select --"
@@ -795,13 +583,36 @@ const Dashboard = () => {
                             const e = {
                               target: {
                                 name: "staff",
-                                value: selectedOption.value,
+                                value: selectedOption ? selectedOption.value : "",
                               },
                             };
                             selectFilterValue(e);
+                            if (!selectedOption || selectedOption.value === "") {
+                              setStaffHasMore(true);
+                              setStaffPage(1);
+                              setStaffSearch("");
+                              setStaffOptions([]);
+                              staffCacheRef.current = {};
+                            }
+                          }}
+                          onMenuOpen={() => {
+                            if (staffOptions.length === 0) {
+                              GetAllStaff({ searchValue: "", pageNo: 1 });
+                            }
+                          }}
+                          onInputChange={(value) => handleStaffSearch(value)}
+                          onMenuScrollToBottom={() => {
+                            if (staffHasMore && !staffLoading) {
+                              GetAllStaff({
+                                searchValue: staffSearch,
+                                pageNo: staffPage + 1,
+                                append: true,
+                              });
+                            }
                           }}
                           classNamePrefix="react-select"
                           isSearchable
+                          isLoading={staffLoading}
                         />
                       </div>
 

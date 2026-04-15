@@ -30,6 +30,11 @@ const ClientList = () => {
     trading_name: "",
   });
 
+  // Customer Pagination states
+  const [custPage, setCustPage] = useState(1);
+  const [custHasMore, setCustHasMore] = useState(true);
+  const [custLoading, setCustLoading] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -81,31 +86,38 @@ const ClientList = () => {
       });
   };
 
-  const GetAllCustomer = async () => {
-    const req = { action: "get_dropdown" };
-    const data = { req: req, authToken: token };
+  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+    setCustLoading(true);
+    const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+    const req = {
+      action: "get",
+      page,
+      limit: 20,
+      search: search || "",
+      staff_id: staffDetails?.id,
+    };
+    const data = { req, authToken: token };
     await dispatch(getAllCustomerDropDown(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerDataAll(response.data);
-          // if (response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
-
-          //   const FilterCustomer = response.data.filter((item) => item.status === "1" && item.form_process === "4");
-          //   if(FilterCustomer.length > 0){
-          //   selectCustomerId(FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   setCustomerDetails({ id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name });
-          //   setHararchyData({ customer: { id: cust_id_sidebar || FilterCustomer[0]?.id, trading_name: FilterCustomer[0]?.trading_name }, client: { id: '', client_name: '' } });
-          //   GetAllClientData(cust_id_sidebar || FilterCustomer[0]?.id, FilterCustomer[0]?.trading_name);
-          //   }
-
-          // }
+          const newData = response.data.data || [];
+          if (append) {
+            setCustomerDataAll((prev) => [...prev, ...newData]);
+          } else {
+            setCustomerDataAll(newData);
+          }
+          setCustHasMore(newData.length === 20);
+          setCustPage(page);
         } else {
-          setCustomerDataAll(response.data);
+          if (!append) setCustomerDataAll([]);
         }
       })
-      .catch((error) => {
-        return;
+      .catch(() => {
+        if (!append) setCustomerDataAll([]);
+      })
+      .finally(() => {
+        setCustLoading(false);
       });
   };
 
@@ -998,8 +1010,19 @@ const ClientList = () => {
                   selectedCustomer?.trading_name,
                 );
               }}
+              onMenuOpen={() => {
+                if (customerDataAll.length === 0) {
+                  GetAllCustomer(1);
+                }
+              }}
+              onMenuScrollToBottom={() => {
+                if (custHasMore && !custLoading) {
+                  GetAllCustomer(custPage + 1, "", true);
+                }
+              }}
               classNamePrefix="react-select"
               isSearchable
+              isLoading={custLoading}
               placeholder="Select Customer"
             />
           </div>
