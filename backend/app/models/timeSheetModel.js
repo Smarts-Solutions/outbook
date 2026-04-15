@@ -1208,8 +1208,8 @@ const saveTimesheet = async (Timesheet) => {
           const friday_hours = formatTime(row.friday_hours);
           const saturday_hours = formatTime(row.saturday_hours);
           const sunday_hours = formatTime(row.sunday_hours);
-          let duplicate_entry = row?.duplicate_entry ?? [];
 
+          let duplicate_entry = row?.duplicate_entry ?? [];
           duplicate_entry = JSON.stringify(duplicate_entry);
 
          // let save_date = row?.save_date ?? null;
