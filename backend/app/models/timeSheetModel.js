@@ -1182,9 +1182,9 @@ const saveTimesheet = async (Timesheet) => {
     // INSERT / UPDATE
     // ======================
 
-    if (data.length > 0) {
+    if (data?.length > 0) {
       await Promise.all(
-        data.map(async (row) => {
+        data?.map(async (row) => {
           let task_type_name = getTaskTypeName(row.task_type);
 
           const customer_id = row.customer_id ?? 0;
