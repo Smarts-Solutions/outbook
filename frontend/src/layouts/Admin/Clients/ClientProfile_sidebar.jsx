@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
@@ -34,6 +34,9 @@ const ClientList = () => {
   const [custPage, setCustPage] = useState(1);
   const [custHasMore, setCustHasMore] = useState(true);
   const [custLoading, setCustLoading] = useState(false);
+  const [custSearch, setCustSearch] = useState("");
+  const custCacheRef = useRef({});
+  const custDebounceTimeout = useRef(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -86,14 +89,33 @@ const ClientList = () => {
       });
   };
 
-  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+  const GetAllCustomer = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
+    if (custLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (custCacheRef.current[cacheKey]) {
+      const cached = custCacheRef.current[cacheKey];
+      setCustomerDataAll((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.id, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
     setCustLoading(true);
     const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
     const req = {
       action: "get",
-      page,
+      page: pageNo,
       limit: 20,
-      search: search || "",
+      search: searchValue || "",
       staff_id: staffDetails?.id,
     };
     const data = { req, authToken: token };
@@ -102,13 +124,16 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           const newData = response.data.data || [];
-          if (append) {
-            setCustomerDataAll((prev) => [...prev, ...newData]);
-          } else {
-            setCustomerDataAll(newData);
-          }
+          custCacheRef.current[cacheKey] = newData;
+          setCustomerDataAll((prev) => {
+            const combined = append ? [...prev, ...newData] : newData;
+            const unique = Array.from(
+              new Map(combined.map((item) => [item.id, item])).values(),
+            );
+            return unique;
+          });
           setCustHasMore(newData.length === 20);
-          setCustPage(page);
+          setCustPage(pageNo);
         } else {
           if (!append) setCustomerDataAll([]);
         }
@@ -119,6 +144,16 @@ const ClientList = () => {
       .finally(() => {
         setCustLoading(false);
       });
+  };
+
+  const handleCustomerSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(custDebounceTimeout.current);
+    custDebounceTimeout.current = setTimeout(() => {
+      setCustSearch(value);
+      setCustPage(1);
+      GetAllCustomer({ searchValue: value, pageNo: 1 });
+    }, 500);
   };
 
   const [clientData, setClientData] = useState([]);
@@ -1003,21 +1038,33 @@ const ClientList = () => {
               value={selectedOption}
               onChange={(selected) => {
                 const selectedCustomer = customerDataAll.find(
-                  (customer) => customer.id == selected.value,
+                  (customer) => customer.id == selected?.value,
                 );
                 selectCustomerId(
-                  selected.value,
-                  selectedCustomer?.trading_name,
+                  selected?.value || "",
+                  selectedCustomer?.trading_name || "",
                 );
+                if (!selected || selected.value === "") {
+                  setCustHasMore(true);
+                  setCustPage(1);
+                  setCustSearch("");
+                  setCustomerDataAll([]);
+                  custCacheRef.current = {};
+                }
               }}
               onMenuOpen={() => {
                 if (customerDataAll.length === 0) {
-                  GetAllCustomer(1);
+                  GetAllCustomer({ searchValue: "", pageNo: 1 });
                 }
               }}
+              onInputChange={(value) => handleCustomerSearch(value)}
               onMenuScrollToBottom={() => {
                 if (custHasMore && !custLoading) {
-                  GetAllCustomer(custPage + 1, "", true);
+                  GetAllCustomer({
+                    searchValue: custSearch,
+                    pageNo: custPage + 1,
+                    append: true,
+                  });
                 }
               }}
               classNamePrefix="react-select"

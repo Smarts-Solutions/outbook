@@ -165,6 +165,7 @@ const Dashboard = () => {
   };
 
   const handleStaffSearch = (value) => {
+    if (value === "") return;
     clearTimeout(staffDebounceTimeout.current);
     staffDebounceTimeout.current = setTimeout(() => {
       setStaffSearch(value);
