@@ -4668,7 +4668,7 @@ i.exp_icon {
 }
 
 .dropdown-menu.custom-dropdown.show {
-  z-index: 999 !important;
+  z-index: 999999 !important;
 }
 
 .data-table-extensions>.data-table-extensions-filter>.icon {
