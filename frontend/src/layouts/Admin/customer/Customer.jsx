@@ -12,7 +12,6 @@ import {
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import { convertDate } from "../../../Utils/Comman_function";
-import { Download,Plus } from "lucide-react";
 
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { Plus , Download } from "lucide-react";

@@ -1,4 +1,4 @@
-import React, { useEffect, useState  ,useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
@@ -14,10 +14,9 @@ import Swal from "sweetalert2";
 import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
-import { Plus } from "lucide-react";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { Plus ,Download} from "lucide-react";
+import { Plus, Download } from "lucide-react";
 
 const CustomerUsers = () => {
 
@@ -66,94 +65,94 @@ const CustomerUsers = () => {
 
 
 
-// const [customerOptions, setCustomerOptions] = useState([]);
-// const [customerPage, setCustomerPage] = useState(1);
-// const [customerHasMore, setCustomerHasMore] = useState(true);
-// const [customerSearch, setCustomerSearch] = useState("");
-// const customerCache = useRef({});
-// const customerDebounce = useRef(null);
+  // const [customerOptions, setCustomerOptions] = useState([]);
+  // const [customerPage, setCustomerPage] = useState(1);
+  // const [customerHasMore, setCustomerHasMore] = useState(true);
+  // const [customerSearch, setCustomerSearch] = useState("");
+  // const customerCache = useRef({});
+  // const customerDebounce = useRef(null);
 
-// const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
-//   const cacheKey = `${searchValue}_${pageNo}`;
-//   if (customerCache.current[cacheKey]) {
-//     const cached = customerCache.current[cacheKey];
-//     setCustomerOptions(prev => {
-//       const combined = append ? [...prev, ...cached] : cached;
-//       return Array.from(
-//         new Map(combined.map(item => [item.value, item])).values()
-//       );
-//     });
-//     return;
-//   }
+  // const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
+  //   const cacheKey = `${searchValue}_${pageNo}`;
+  //   if (customerCache.current[cacheKey]) {
+  //     const cached = customerCache.current[cacheKey];
+  //     setCustomerOptions(prev => {
+  //       const combined = append ? [...prev, ...cached] : cached;
+  //       return Array.from(
+  //         new Map(combined.map(item => [item.value, item])).values()
+  //       );
+  //     });
+  //     return;
+  //   }
 
-//   const req = {
-//       action: "get_customers_filter",
-//       filters: 'all',
-//       pagination: {
-//         search: searchValue,
-//         page: pageNo,
-//         limit: 5
-//       }
-//     };
+  //   const req = {
+  //       action: "get_customers_filter",
+  //       filters: 'all',
+  //       pagination: {
+  //         search: searchValue,
+  //         page: pageNo,
+  //         limit: 5
+  //       }
+  //     };
 
-//     const data = { req: req, authToken: token };
+  //     const data = { req: req, authToken: token };
 
-//   const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+  //   const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
 
-//   if (response.status) {
-//     const formatted = response.data.map((item) => ({
-//       value: item.id,
-//       label: item.trading_name
-//     }));
+  //   if (response.status) {
+  //     const formatted = response.data.map((item) => ({
+  //       value: item.id,
+  //       label: item.trading_name
+  //     }));
 
-//     customerCache.current[cacheKey] = formatted;
-//     setCustomerOptions(prev => {
-//       const combined = append ? [...prev, ...formatted] : formatted;
-//       return Array.from(
-//         new Map(combined.map(item => [item.value, item])).values()
-//       );
-//     });
-//     setCustomerHasMore(response.data.length === 5);
-//     setCustomerPage(pageNo);
+  //     customerCache.current[cacheKey] = formatted;
+  //     setCustomerOptions(prev => {
+  //       const combined = append ? [...prev, ...formatted] : formatted;
+  //       return Array.from(
+  //         new Map(combined.map(item => [item.value, item])).values()
+  //       );
+  //     });
+  //     setCustomerHasMore(response.data.length === 5);
+  //     setCustomerPage(pageNo);
 
-//   }
+  //   }
 
-// };
+  // };
 
-// const handleCustomerSearch = (value) => {
-//   clearTimeout(customerDebounce.current);
-//   customerDebounce.current = setTimeout(() => {
-//     setCustomerSearch(value);
-//     setCustomerPage(1);
-//     GetAllCustomer({
-//       searchValue: value,
-//       pageNo: 1
-//     });
-//   }, 500);
+  // const handleCustomerSearch = (value) => {
+  //   clearTimeout(customerDebounce.current);
+  //   customerDebounce.current = setTimeout(() => {
+  //     setCustomerSearch(value);
+  //     setCustomerPage(1);
+  //     GetAllCustomer({
+  //       searchValue: value,
+  //       pageNo: 1
+  //     });
+  //   }, 500);
 
-// };
+  // };
 
 
-// const resetCustomerDropdown = () => {
-//   setCustomerHasMore(true);
-//   setCustomerPage(1);
-//   setCustomerSearch("");
-//   setCustomerOptions([]);
-//   customerCache.current = {};
-//   GetAllCustomer({
-//     searchValue: "",
-//     pageNo: 1
-//   });
-// };
+  // const resetCustomerDropdown = () => {
+  //   setCustomerHasMore(true);
+  //   setCustomerPage(1);
+  //   setCustomerSearch("");
+  //   setCustomerOptions([]);
+  //   customerCache.current = {};
+  //   GetAllCustomer({
+  //     searchValue: "",
+  //     pageNo: 1
+  //   });
+  // };
 
 
 
   useEffect(() => {
-     GetAllCustomer();
-  //   GetAllCustomer({
-  //   searchValue: "",
-  //   pageNo: 1
-  // });
+    GetAllCustomer();
+    //   GetAllCustomer({
+    //   searchValue: "",
+    //   pageNo: 1
+    // });
 
     CustomerPersonRoleData();
   }, []);
@@ -568,15 +567,15 @@ const CustomerUsers = () => {
         label: item.trading_name,
       }))
     },
-  //    {
-  //   type: "multiselect-pagination",
-  //   name: "allCustomerAccess",
-  //   label: "All Customer Access",
-  //   label_size: 12,
-  //   col_size: 6,
-  //   disable: false,
-  //   options: customerOptions
-  // },
+    //    {
+    //   type: "multiselect-pagination",
+    //   name: "allCustomerAccess",
+    //   label: "All Customer Access",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   disable: false,
+    //   options: customerOptions
+    // },
     {
       type: "select",
       name: "customer_contact_person_role_id",
@@ -750,7 +749,7 @@ const CustomerUsers = () => {
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                   onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
                 >
-                  <Plus size={16}/>
+                  <Plus size={16} />
                   Add Customer User
                 </button>
               </div>
@@ -796,7 +795,7 @@ const CustomerUsers = () => {
                           <div className="col-md-2">
 
                             <button className="btn btn-outline-info fw-bold float-end border-3 " onClick={handleExport}>
-                              <Download size={16}/>{" "}
+                              <Download size={16} />{" "}
                               Export Excel
                             </button>
                           </div>

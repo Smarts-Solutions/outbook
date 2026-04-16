@@ -35,9 +35,6 @@ import {
   EllipsisVertical
 } from "lucide-react";
 
-
-import { Plus ,Save ,Download ,EllipsisVertical } from "lucide-react";
-
 const StaffPage = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));

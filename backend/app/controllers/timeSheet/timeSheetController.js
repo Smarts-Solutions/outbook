@@ -1,10 +1,7 @@
 const limit = require("../../utils/limiter");
 const timeSheetService = require('../../services/timeSheet/timeSheetService');
-const limit = require("../../utils/limiter");
 
 const timesheetQueue = require("../../queues/timesheet.queue");
-
- const timesheetQueue = require("../../queues/timesheet.queue");
 
 const getTimesheet = async (req, res) => {
   try {
