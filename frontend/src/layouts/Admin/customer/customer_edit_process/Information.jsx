@@ -2025,7 +2025,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="btn btn-info text-white blue-btn"
                                 onClick={handleAddContact}
                               >
-                                <Plus size={16}/> Add Contact
+                               <Plus size={16} className="pe-1" /> Add Contact
                               </button>
                             </div>
                           </div>
@@ -2479,7 +2479,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="btn btn-info text-white blue-btn"
                                 onClick={handleAddContact1}
                               >
-                                <Plus size={16}/>
+                                <Plus size={16} className="pe-1" />
                                 Add Partner
                               </button>
                             </div>

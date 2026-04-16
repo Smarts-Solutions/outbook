@@ -35,6 +35,8 @@ import {
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
 
+import { Plus, ArrowLeft ,File , Info ,SquareCheck ,User ,Briefcase,FileText,Download} from "lucide-react";
+
 const ClientList = () => {
   const navigate = useNavigate();
   const location = useLocation();

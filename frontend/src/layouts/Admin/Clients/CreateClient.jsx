@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { PersonRole, Country, IncorporationApi } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm, convertDate } from '../../../Utils/Comman_function'
-import { Plus ,ArrowLeft} from "lucide-react";
+import { Plus ,Save ,X} from "lucide-react";
 
 const CreateClient = () => {
   const dispatch = useDispatch();
@@ -3072,7 +3072,7 @@ const CreateClient = () => {
                                               className="btn btn-info text-white blue-btn"
                                               onClick={handleAddContact}
                                             >
-                                               <Plus size={16}/>
+                                              <Plus size={16} className="pe-1" />
                                               Add Officer
                                             </button>
                                           </div>
@@ -3695,7 +3695,7 @@ const CreateClient = () => {
                                                 onClick={handleAddContact1}
                                               >
                                                 {" "}
-                                                <Plus size={16}/>
+                                                <Plus size={16} className="pe-1" />
                                                 Add Partner
                                               </button>
                                             </div>
@@ -4665,7 +4665,7 @@ const CreateClient = () => {
                                                     onClick={handleAddContactMemberDetails}
                                                   >
                                                     {" "}
-                                                     <Plus size={16}/>
+                                                   <Plus size={16} className="pe-1" />
                                                     Add Member
                                                   </button>
                                                 </div>
@@ -5064,7 +5064,7 @@ const CreateClient = () => {
                                                     onClick={handleAddContactTrusteeDetails}
                                                   >
                                                     {" "}
-                                                  <Plus size={16}/>
+                                                   <Plus size={16} className="pe-1" />
                                                     Add Trustee
                                                   </button>
                                                 </div>
@@ -5649,7 +5649,7 @@ const CreateClient = () => {
                                                       onClick={handleAddContactMemberDetailsUnincorporated}
                                                     >
                                                       {" "}
-                                                       <Plus size={16}/>
+                                                      <Plus size={16} className="pe-1" />
                                                       Add Member
                                                     </button>
                                                   </div>
@@ -6232,7 +6232,7 @@ const CreateClient = () => {
                                                         onClick={handleAddContactTrustMemberDetails}
                                                       >
                                                         {" "}
-                                                        <Plus size={16}/>
+                                                        <Plus size={16} className="pe-1" />
                                                         Add Beneficiary
                                                       </button>
                                                     </div>
@@ -6627,7 +6627,7 @@ const CreateClient = () => {
                                                         onClick={handleAddContactTrustTrusteeDetails}
                                                       >
                                                         {" "}
-                                                       <Plus size={16}/>
+                                                        <Plus size={16} className="pe-1" />
                                                         Add Trustee
                                                       </button>
                                                     </div>
@@ -6688,7 +6688,7 @@ const CreateClient = () => {
                           className="btn btn-info text-white blue-btn"
                           onClick={handleSubmit}
                         >
-                           <Plus size={16}/> Create Client
+                          <Plus size={16} className="pe-1" />Create Client
                         </button>
                       </div>
                     </div>

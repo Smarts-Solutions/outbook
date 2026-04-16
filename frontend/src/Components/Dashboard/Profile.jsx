@@ -93,6 +93,7 @@ const Profile = () => {
                     {/* <li className="">
                       <button className="btn btn-info">
                        <Pencil size={16}/>Edit{" "}
+                        Edit{" "}
                       </button>
                     </li> */}
                   </ul>

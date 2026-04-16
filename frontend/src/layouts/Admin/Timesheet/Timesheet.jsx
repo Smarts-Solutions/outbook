@@ -8,11 +8,18 @@ import {
   FileAxis3d,
   Eye,
   Pencil,
-  Save,
   Check,
-  Plus,
-  Minus,
+  Save,
   CalendarClock,
+  Briefcase,
+  User,
+  SquareCheck,
+  Info,
+  File,
+  ArrowLeft,
+  Plus,
+  Minus
+
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,6 +36,9 @@ import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
 const Timesheet = () => {
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [activeIndex, setActiveIndex] = useState(null); // row
   const [activeField, setActiveField] = useState(null); // field name
 
@@ -2084,6 +2094,11 @@ const Timesheet = () => {
 
   return (
     <div className="container-fluid">
+      {isLoading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="content-title">
         <div className="row">
           <div className="col-md-8">
@@ -2168,7 +2183,7 @@ const Timesheet = () => {
             )}
 
             {staffDataWeekDataAll.data &&
-            staffDataWeekDataAll.data.length > 0 ? (
+              staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4   pe-0">
                 <label className="form-label mb-2">Date</label>
                 <Select
@@ -2197,8 +2212,8 @@ const Timesheet = () => {
             )}
 
             {isExistStaffDataWeekDataAll?.data &&
-            isExistStaffDataWeekDataAll?.data.length > 0 &&
-            staffDataWeekDataAll?.data.length === 0 ? (
+              isExistStaffDataWeekDataAll?.data.length > 0 &&
+              staffDataWeekDataAll?.data.length === 0 ? (
               <div className="form-group col-md-4 pe-0">
                 <label className="form-label mb-2">Date</label>
                 <Select
@@ -2257,8 +2272,8 @@ const Timesheet = () => {
             )}
 
             {selectedLineManager != "" &&
-            staffDataWeekDataAll.data &&
-            staffDataWeekDataAll.data.length > 0 ? (
+              staffDataWeekDataAll.data &&
+              staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4  pe-0">
                 <label className="form-label mb-2">
                   Line Manager Select Week
@@ -2325,10 +2340,9 @@ const Timesheet = () => {
                             </th>
 
                             <th
-                              className={`pe-0 week-data ${
-                                isExpanded ? "expanded" : ""
-                              }`}
-                              // style={{ width: isExpanded ? "50%" : "100px" }}
+                              className={`pe-0 week-data ${isExpanded ? "expanded" : ""
+                                }`}
+                            // style={{ width: isExpanded ? "50%" : "100px" }}
                             >
                               <div className="d-flex align-items-center">
                                 <ChevronLeft
@@ -2467,7 +2481,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "100px" }}
@@ -2533,7 +2547,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "90px" }}
@@ -2575,7 +2589,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.clientData ||
-                                        item.clientData.length === 0
+                                          item.clientData.length === 0
                                           ? "No Client"
                                           : "Client"
                                       }
@@ -2646,7 +2660,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.jobData ||
-                                        item.jobData.length === 0
+                                          item.jobData.length === 0
                                           ? "No Job"
                                           : "Job"
                                       }
@@ -2686,7 +2700,7 @@ const Timesheet = () => {
                                       );
                                       return matchedJob &&
                                         matchedJob.job_type_name !==
-                                          undefined ? (
+                                        undefined ? (
                                         <div style={{ width: "100px" }}>
                                           {matchedJob.job_type_name}
                                         </div>
@@ -2730,7 +2744,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.taskData ||
-                                        item.taskData.length === 0
+                                          item.taskData.length === 0
                                           ? "No Task"
                                           : "Task"
                                       }
@@ -2788,7 +2802,7 @@ const Timesheet = () => {
                                             // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : false}
                                             disabled={
                                               staffDetails.id !=
-                                              multipleFilter.staff_id
+                                                multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
                                                   ? true
@@ -2839,7 +2853,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2849,10 +2863,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("tuesday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "tuesday" && (
@@ -2892,7 +2906,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2902,10 +2916,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("wednesday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "wednesday" && (
@@ -2945,7 +2959,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2955,10 +2969,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "thursday" && (
@@ -2998,7 +3012,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3008,10 +3022,10 @@ const Timesheet = () => {
                                             setActiveIndex(index);
                                             setActiveField("friday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "friday" && (
@@ -3051,7 +3065,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3102,7 +3116,7 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true

@@ -448,10 +448,10 @@ const Paper = () => {
                                                     />
                                                   ) : file.type === "application/pdf" ? (
 
-                                                   <FileText size={24} color="#FF0000" />
+                                                   <FileText size={24} style={{ color: "#FF0000" }} />
                                                   ) : (
 
-                                                   <File size={24} color="#000" />
+                                                   <File size={24} style={{ color: "#000" }} />
                                                   )}
                                                 </td>
 
@@ -599,10 +599,10 @@ const Paper = () => {
                                                 />
                                               ) : file.file_type === "application/pdf" ? (
 
-                                               <FileText size={24} color="#FF0000" />
+                                               <FileText size={24} style={{ color: "#FF0000" }} />
                                               ) : (
 
-                                             <File size={24} color="#000" />
+                                               <File size={24} style={{ color: "#000" }} />
                                               )}
                                             </td>
 

@@ -15,7 +15,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, ArrowLeft, Plus, User, Briefcase } from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Download} from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -30,37 +30,56 @@ const ClientLists = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Customer Pagination states
+  const [custPage, setCustPage] = useState(1);
+  const [custHasMore, setCustHasMore] = useState(true);
+  const [custLoading, setCustLoading] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
 
-  const GetAllCustomer = async () => {
-    setLoading(true);
-    const req = { action: "get_dropdown" };
+  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+    setCustLoading(true);
+    const req = {
+      action: "get",
+      page,
+      limit: 20,
+      search: search || "",
+      staff_id: staffDetails?.id,
+    };
     const data = { req: req, authToken: token };
     await dispatch(getAllCustomerDropDown(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerData(response.data);
+          const newData = response.data.data || [];
+          if (append) {
+            setCustomerData((prev) => [...prev, ...newData]);
+          } else {
+            setCustomerData(newData);
+          }
+          setCustHasMore(newData.length === 20);
+          setCustPage(page);
         } else {
-          setCustomerData([]);
+          if (!append) setCustomerData([]);
         }
       })
-      .catch((error) => {
-        return;
+      .catch(() => {
+        if (!append) setCustomerData([]);
       })
       .finally(() => {
-        setLoading(false);
+        setCustLoading(false);
       });
   };
 
   useEffect(() => {
-    GetAllCustomer();
+    // GetAllCustomer(1); // On-demand
   }, []);
 
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [ClientData, setClientData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
@@ -261,8 +280,8 @@ const ClientLists = () => {
     ) {
       tabsData.push({
         id: "client",
-        label: "Client ",
-        icon: <User size={16} />,
+        label: "Client",
+        icon: <User size={16} className="me-1" />,
       });
     }
     if (
@@ -274,7 +293,7 @@ const ClientLists = () => {
         tabsData.push({
           id: "job",
           label: "Job",
-          icon: <Briefcase size={16} />,
+          icon: <Briefcase size={16} className="me-1" />,
         });
       }
     }
@@ -1288,7 +1307,18 @@ const ClientLists = () => {
                     selectedCustomer?.trading_name,
                   );
                 }}
-                placeholder="All"
+                onMenuOpen={() => {
+                  if (CustomerData.length === 0) {
+                    GetAllCustomer(1);
+                  }
+                }}
+                onMenuScrollToBottom={() => {
+                  if (custHasMore && !custLoading) {
+                    GetAllCustomer(custPage + 1, "", true);
+                  }
+                }}
+                isLoading={custLoading}
+                placeholder="Select Customer"
               />
             </div>
 
@@ -1315,7 +1345,8 @@ const ClientLists = () => {
                           aria-selected={activeTab === tab.id}
                           onClick={() => SetTab(tab.id)}
                         >
-                          {tab.icon}{" "}
+                          {/* <i className={tab.icon}></i> */}
+                          {tab.icon}
                           {tab.label}
                         </button>
                       </li>
@@ -1341,7 +1372,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <Plus size={16} /> Add Client
+                           <Plus size={16}/> Add Client
                           </div>
                         </>
                       ) : ClientData?.length > 0 &&
@@ -1361,7 +1392,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <Plus size={16} /> Create Job
+                           <Plus size={16}/> Create Job
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
@@ -1376,7 +1407,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <Plus size={16} /> Add Checklist
+                           <Plus size={16}/> Add Checklist
                           </div>
                         </>
                       ) : null}
@@ -1389,7 +1420,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <ArrowLeft size={16} /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) : activeTab === "status" ? (
@@ -1400,7 +1431,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <ArrowLeft size={16} /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) : null}

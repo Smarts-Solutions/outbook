@@ -14,7 +14,7 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Download} from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
@@ -30,6 +30,11 @@ const ClientList = () => {
     id: cust_id_sidebar || "",
     trading_name: "",
   });
+
+  // Customer Pagination states
+  const [custPage, setCustPage] = useState(1);
+  const [custHasMore, setCustHasMore] = useState(true);
+  const [custLoading, setCustLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -118,20 +123,38 @@ const ClientList = () => {
       });
   };
 
-  const GetAllCustomer = async () => {
-    const req = { action: "get_dropdown" };
-    const data = { req: req, authToken: token };
+  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+    setCustLoading(true);
+    const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+    const req = {
+      action: "get",
+      page,
+      limit: 20,
+      search: search || "",
+      staff_id: staffDetails?.id,
+    };
+    const data = { req, authToken: token };
     await dispatch(getAllCustomerDropDown(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerDataAll(response.data);
+          const newData = response.data.data || [];
+          if (append) {
+            setCustomerDataAll((prev) => [...prev, ...newData]);
+          } else {
+            setCustomerDataAll(newData);
+          }
+          setCustHasMore(newData.length === 20);
+          setCustPage(page);
         } else {
-          setCustomerDataAll(response.data);
+          if (!append) setCustomerDataAll([]);
         }
       })
-      .catch((error) => {
-        return;
+      .catch(() => {
+        if (!append) setCustomerDataAll([]);
+      })
+      .finally(() => {
+        setCustLoading(false);
       });
   };
 
@@ -266,10 +289,11 @@ const ClientList = () => {
       });
   };
 
+
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} className="me-1" /> },
     ...(clientDetailSingle.id !== ""
-      ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
+      ? [{ id: "view client", label: "View Client", icon:<User size={16} className="me-1" /> }]
       : []),
   ];
 
@@ -1140,9 +1164,20 @@ const ClientList = () => {
                   selectedCustomer?.trading_name,
                 );
               }}
+              onMenuOpen={() => {
+                if (customerDataAll.length === 0) {
+                  GetAllCustomer(1);
+                }
+              }}
+              onMenuScrollToBottom={() => {
+                if (custHasMore && !custLoading) {
+                  GetAllCustomer(custPage + 1, "", true);
+                }
+              }}
               classNamePrefix="react-select"
               isSearchable
-              placeholder="All"
+              isLoading={custLoading}
+              placeholder="Select Customer"
             />
           </div>
 
@@ -1212,7 +1247,9 @@ const ClientList = () => {
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            {tab.icon}{" "} {tab.label}
+                            {/* <i className={tab.icon}></i> */}
+                            {tab.icon}
+                            {tab.label}
                           </button>
                         </li>
                       ))}
@@ -1230,7 +1267,7 @@ const ClientList = () => {
                               className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
                               onClick={handleCreateJob}
                             >
-                              <Plus size={16} /> Create Job
+                              <Plus size={16}/> Create Job
                             </div>
                           )}
                       </div>
@@ -1289,18 +1326,20 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                    {customerData && customerData.length > 0 && (
-                      <div className="col-md-2">
-                        <button
-                          className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
-                          onClick={handleExport}
-                        >
-                          <Download size={16} />
-
-                          <span>Export Excel</span>
-                        </button>
-                      </div>
-                    )}
+                    <div className="col-md-2">
+                      {/* <ExportToExcel
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        apiData={exportData}
+                        fileName={`Job Details`}
+                      /> */}
+                      <button
+                        className="btn btn-outline-info fw-bold float-end border-3 "
+                        onClick={handleExport}
+                      >
+                         <Download size={16}/>{" "}
+                        Export Excel
+                      </button>
+                    </div>
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div
