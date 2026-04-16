@@ -34,17 +34,39 @@ const ClientLists = () => {
   const [custPage, setCustPage] = useState(1);
   const [custHasMore, setCustHasMore] = useState(true);
   const [custLoading, setCustLoading] = useState(false);
+  const [custSearch, setCustSearch] = useState("");
+  const custCacheRef = useRef({});
+  const custDebounceTimeout = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
 
-  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+  const GetAllCustomer = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
+    if (custLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (custCacheRef.current[cacheKey]) {
+      const cached = custCacheRef.current[cacheKey];
+      setCustomerData((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.id, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
     setCustLoading(true);
     const req = {
       action: "get",
-      page,
+      page: pageNo,
       limit: 20,
-      search: search || "",
+      search: searchValue || "",
       staff_id: staffDetails?.id,
     };
     const data = { req: req, authToken: token };
@@ -53,13 +75,16 @@ const ClientLists = () => {
       .then(async (response) => {
         if (response.status) {
           const newData = response.data.data || [];
-          if (append) {
-            setCustomerData((prev) => [...prev, ...newData]);
-          } else {
-            setCustomerData(newData);
-          }
+          custCacheRef.current[cacheKey] = newData;
+          setCustomerData((prev) => {
+            const combined = append ? [...prev, ...newData] : newData;
+            const unique = Array.from(
+              new Map(combined.map((item) => [item.id, item])).values(),
+            );
+            return unique;
+          });
           setCustHasMore(newData.length === 20);
-          setCustPage(page);
+          setCustPage(pageNo);
         } else {
           if (!append) setCustomerData([]);
         }
@@ -70,6 +95,16 @@ const ClientLists = () => {
       .finally(() => {
         setCustLoading(false);
       });
+  };
+
+  const handleCustomerSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(custDebounceTimeout.current);
+    custDebounceTimeout.current = setTimeout(() => {
+      setCustSearch(value);
+      setCustPage(1);
+      GetAllCustomer({ searchValue: value, pageNo: 1 });
+    }, 500);
   };
 
   useEffect(() => {
@@ -1300,21 +1335,33 @@ const ClientLists = () => {
                 value={selectedOption}
                 onChange={(selected) => {
                   const selectedCustomer = CustomerData.find(
-                    (customer) => customer.id == selected.value,
+                    (customer) => customer.id == selected?.value,
                   );
                   selectCustomerId(
-                    selected.value,
-                    selectedCustomer?.trading_name,
+                    selected?.value || "",
+                    selectedCustomer?.trading_name || "",
                   );
+                  if (!selected || selected.value === "") {
+                    setCustHasMore(true);
+                    setCustPage(1);
+                    setCustSearch("");
+                    setCustomerData([]);
+                    custCacheRef.current = {};
+                  }
                 }}
                 onMenuOpen={() => {
                   if (CustomerData.length === 0) {
-                    GetAllCustomer(1);
+                    GetAllCustomer({ searchValue: "", pageNo: 1 });
                   }
                 }}
+                onInputChange={(value) => handleCustomerSearch(value)}
                 onMenuScrollToBottom={() => {
                   if (custHasMore && !custLoading) {
-                    GetAllCustomer(custPage + 1, "", true);
+                    GetAllCustomer({
+                      searchValue: custSearch,
+                      pageNo: custPage + 1,
+                      append: true,
+                    });
                   }
                 }}
                 isLoading={custLoading}

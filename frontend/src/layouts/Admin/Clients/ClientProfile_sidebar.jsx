@@ -9,7 +9,6 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
-import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Select from "react-select";
@@ -36,41 +35,20 @@ const ClientList = () => {
   const [custHasMore, setCustHasMore] = useState(true);
   const [custLoading, setCustLoading] = useState(false);
   const [custSearch, setCustSearch] = useState("");
+  const custCacheRef = useRef({});
+  const custDebounceTimeout = useRef(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const [jobLoading, setJobLoading] = useState(false);
-  const debounceRef = useRef(null);
-
-  // useEffect(() => {
-  //   GetAllJobListByCustomer("");
-  //   GetAllCustomer();
-  //   GetStatus();
-  //   if (
-  //     ![undefined, "", null].includes(cust_id_sidebar) &&
-  //     ![undefined, "", null].includes(cli_id_sidebar)
-  //   ) {
-  //     getAllClientData1(
-  //       cust_id_sidebar,
-  //       cust_id_sidebar_name,
-  //       cli_id_sidebar,
-  //       cli_id_sidebar_name,
-  //     );
-  //     setHararchyData({
-  //       customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
-  //       client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
-  //     });
-  //   }
-  // }, []);
 
   useEffect(() => {
+    GetAllJobListByCustomer("");
     GetAllCustomer();
     GetStatus();
-
     if (
       ![undefined, "", null].includes(cust_id_sidebar) &&
       ![undefined, "", null].includes(cli_id_sidebar)
@@ -85,22 +63,9 @@ const ClientList = () => {
         customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
         client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
       });
-    } else if (![undefined, "", null].includes(cust_id_sidebar)) {
-      setCustomerDetails({
-        id: cust_id_sidebar,
-        trading_name: cust_id_sidebar_name,
-      });
-      setHararchyData({
-        customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
-        client: { id: "", client_name: "" },
-      });
-      GetAllClientData(cust_id_sidebar, cust_id_sidebar_name);
-    } else {
-      GetAllJobListByCustomer("");
     }
   }, []);
 
-  // CHANGED: sidebar se aane par bhi specific client select rehta hai (ye flow same rakhte hain)
   const getAllClientData1 = async (
     customer_id,
     customer_name,
@@ -124,14 +89,33 @@ const ClientList = () => {
       });
   };
 
-  const GetAllCustomer = async (page = 1, search = "", append = false) => {
+  const GetAllCustomer = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
+    if (custLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (custCacheRef.current[cacheKey]) {
+      const cached = custCacheRef.current[cacheKey];
+      setCustomerDataAll((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.id, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
     setCustLoading(true);
     const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
     const req = {
       action: "get",
-      page,
+      page: pageNo,
       limit: 20,
-      search: search || "",
+      search: searchValue || "",
       staff_id: staffDetails?.id,
     };
     const data = { req, authToken: token };
@@ -140,13 +124,16 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           const newData = response.data.data || [];
-          if (append) {
-            setCustomerDataAll((prev) => [...prev, ...newData]);
-          } else {
-            setCustomerDataAll(newData);
-          }
+          custCacheRef.current[cacheKey] = newData;
+          setCustomerDataAll((prev) => {
+            const combined = append ? [...prev, ...newData] : newData;
+            const unique = Array.from(
+              new Map(combined.map((item) => [item.id, item])).values(),
+            );
+            return unique;
+          });
           setCustHasMore(newData.length === 20);
-          setCustPage(page);
+          setCustPage(pageNo);
         } else {
           if (!append) setCustomerDataAll([]);
         }
@@ -159,23 +146,24 @@ const ClientList = () => {
       });
   };
 
-  const [clientData, setClientData] = useState([]);
-  const custDebounceRef = useRef(null);
-  const handleCustSearch = (value) => {
-    setCustSearch(value);
-    if (custDebounceRef.current) clearTimeout(custDebounceRef.current);
-    custDebounceRef.current = setTimeout(() => {
-      GetAllCustomer(1, value, false);
+  const handleCustomerSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(custDebounceTimeout.current);
+    custDebounceTimeout.current = setTimeout(() => {
+      setCustSearch(value);
+      setCustPage(1);
+      GetAllCustomer({ searchValue: value, pageNo: 1 });
     }, 500);
   };
+
+  const [clientData, setClientData] = useState([]);
   const [clientDetailSingle, setClientDetailSingle] = useState({
     id: cli_id_sidebar || "",
     client_name: "",
   });
-
-  // CHANGED: Customer select hone par ab first client auto-select nahi hoga
-  // Instead: saare clients ki list load hogi aur customer ki saari jobs by default dikhegi
   const GetAllClientData = async (id, name) => {
+    // const req = { action: "get", customer_id: id };
+
     const req = {
       action: "get",
       customer_id: id,
@@ -190,17 +178,41 @@ const ClientList = () => {
         if (response.status) {
           setClientData(response.data);
 
-          // CHANGED: Client auto-select hataya, "All" by default
-          // Client dropdown mein "All" selected hoga aur customer ki saari jobs dikhegi
-          sessionStorage.removeItem("cli_id_sidebar");
-          setClientDetailSingle({ id: "", client_name: "" });
-          setHararchyData({
-            customer: { id: id, trading_name: name },
-            client: { id: "", client_name: "" },
-          });
-          // Customer ki saari jobs fetch karo (All clients)
-          GetAllJobListByCustomer(id, 1, pageSize, searchTerm);
-          setActiveTab("NoOfJobs");
+          if (
+            response?.data[0]?.id != undefined &&
+            response?.data[0]?.id != ""
+          ) {
+            sessionStorage.setItem("cli_id_sidebar", response?.data[0]?.id);
+            sessionStorage.setItem(
+              "cli_id_sidebar_name",
+              response?.data[0]?.client_name,
+            );
+
+            setClientDetailSingle({
+              id: response?.data[0]?.id,
+              client_name: response?.data[0]?.client_name,
+            });
+            setHararchyData({
+              customer: { id: id, trading_name: name },
+              client: {
+                id: response?.data[0]?.id,
+                client_name: response?.data[0]?.client_name,
+              },
+            });
+            GetAllJobList(response?.data[0]?.id);
+            GetClientDetails(response?.data[0]?.id);
+            setActiveTab("NoOfJobs");
+          }
+          if (response.data.length == 0) {
+            sessionStorage.remove("cli_id_sidebar");
+            setClientDetailSingle({ id: "", client_name: "" });
+            setHararchyData({
+              customer: { id: id, trading_name: name },
+              client: { id: "", client_name: "" },
+            });
+            GetAllJobList("");
+            GetClientDetails("");
+          }
         } else {
           setClientData([]);
           setClientDetailSingle({ id: "", client_name: "" });
@@ -224,6 +236,7 @@ const ClientList = () => {
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
+  // const [hararchyData, setHararchyData] = useState(location.state.data);
   const [hararchyData, setHararchyData] = useState({
     customer: {},
     client: {},
@@ -304,6 +317,7 @@ const ClientList = () => {
     ...(clientDetailSingle.id !== ""
       ? [{ id: "view client", label: "View Client", icon:<User size={16} className="me-1" /> }]
       : []),
+    // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
 
   const GetStatus = async () => {
@@ -351,22 +365,7 @@ const ClientList = () => {
               });
 
               setStatusId(Id);
-
-              if (clientDetailSingle.id) {
-                GetAllJobList(
-                  clientDetailSingle.id,
-                  currentPage,
-                  pageSize,
-                  searchTerm,
-                );
-              } else {
-                GetAllJobListByCustomer(
-                  customerDetails.id || "",
-                  currentPage,
-                  pageSize,
-                  searchTerm,
-                );
-              }
+              GetAllJobListByCustomer("");
             } else if (res.data === "W") {
               sweatalert.fire({
                 title: "Warning",
@@ -514,6 +513,16 @@ const ClientList = () => {
         row.account_manager_officer_last_name,
       sortable: true,
     },
+    // {
+    //   name: "Client",
+    //   cell: (row) => (
+    //     <div title={row.client_trading_name}>
+    //       {row.client_trading_name}
+    //     </div>
+    //   ),
+    //   selector: (row) => row.client_trading_name,
+    //   sortable: true,
+    // },
     {
       name: "Outbook Account Manager",
       cell: (row) => (
@@ -537,16 +546,6 @@ const ClientList = () => {
       width: "325px",
     },
     {
-      name: "Employee ID",
-      selector: (row) => row.account_manager_employee_number,
-      cell: (row) => (
-        <div title={row.account_manager_employee_number}>
-          {row.account_manager_employee_number}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
       name: "Allocated To",
       selector: (row) =>
         row.allocated_id != null
@@ -559,6 +558,7 @@ const ClientList = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
       sortFunction: (a, b) => {
+        // Sort YES before NO
         const aVal = a.invoiced == "1" ? "YES" : "NO";
         const bVal = b.invoiced == "1" ? "YES" : "NO";
         return aVal.localeCompare(bVal);
@@ -582,20 +582,15 @@ const ClientList = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
+
     {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
           {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
-            <>
-              <button className="edit-icon" onClick={() => handleEdit(row)}>
-                <i className="ti-pencil" />
-              </button>
-
-              <button className="copy-icon" onClick={() => copyRow(row)}>
-                <i className="ti-files"></i>
-              </button>
-            </>
+            <button className="edit-icon" onClick={() => handleEdit(row)}>
+              <i className="ti-pencil" />
+            </button>
           )}
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
@@ -609,7 +604,6 @@ const ClientList = () => {
             : ""}
         </div>
       ),
-      width: "180px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -646,171 +640,32 @@ const ClientList = () => {
   }
 
   const handleDelete = async (row, type) => {
-    sweatalert
-      .fire({
-        title: "Are you sure?",
-        text: "Do you want to delete this " + type + "?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "No, cancel",
-      })
-      .then(async (result) => {
-        if (result.isConfirmed) {
-          const req = {
-            action: "delete",
-            ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
-          };
-          const data = { req: req, authToken: token };
-          await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
-            .unwrap()
-            .then(async (response) => {
-              if (response.status) {
-                sweatalert.fire({
-                  title: "Deleted",
-                  icon: "success",
-                  showCancelButton: false,
-                  showConfirmButton: false,
-                  timer: 1500,
-                });
-
-                type === "job"
-                  ? GetAllJobList(clientDetailSingle.id)
-                  : GetClientDetails(clientDetailSingle.id);
-              } else {
-                sweatalert.fire({
-                  title: "Failed",
-                  icon: "error",
-                  showCancelButton: false,
-                  showConfirmButton: false,
-                  timer: 1500,
-                });
-              }
-            })
-            .catch((error) => {
-              return;
-            });
-
-        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
-          sweatalert.fire({
-            title: "Cancelled",
-            text: type + " was not deleted",
-            icon: "error",
-            confirmButtonText: "Ok",
-            timer: 1000,
-            timerProgressBar: true,
-          });
-          return;
-        }
-      });
-
-
-
-  };
-
-  const copyRow = async (row) => {
-   
-
-    if(row?.has_client_job_task === 0){
-      sweatalert.fire({
-        title: "warning",
-        icon: "warning",
-        showCloseButton: true,
-        showCancelButton: false,
-        showConfirmButton: false,
-        confirmButtonText: "Ok",
-        timerProgressBar: true,
-        text: "Please add task first",
-        timer: 1500,
-      });
-      return
-    }
-    
-    sweatalert
-      .fire({
-        title: "Are you sure?",
-        text: "You want to copy this job ?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes",
-      })
-      .then(async (result) => {
-        if (result.isConfirmed) {
-
-
-          if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
-            sweatalert
-              .fire({
-                title: "Are you sure?",
-                text: "While copying this job, do you want to include the Processor, Reviewer, and Checklist details ?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes",
-                cancelButtonText: "No",
-                showCancelButton: true,
-                showCloseButton: true,
-                // allowOutsideClick: false
-              })
-              .then(async (result) => {
-                if (result.isConfirmed) {
-                  copyJobRequest(row, true);
-                  return
-                }
-                else if (result.dismiss === Swal.DismissReason.cancel) {
-                  copyJobRequest(row, false);
-                  return;
-                }
-                else if (result.dismiss === Swal.DismissReason.close) {
-                  return;
-                }
-                else {
-                  return;
-                }
-              });
-          } else {
-            copyJobRequest(row, true);
-            return;
-          }
-
-
-        } else {
-          return;
-        }
-      });
-  };
-
-  const copyJobRequest = async (row, field = true) => {
-
     const req = {
-      action: "copy_job",
-      row: row,
-      field: field
+      action: "delete",
+      ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
     };
     const data = { req: req, authToken: token };
-    await dispatch(JobAction(data))
+    await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
           sweatalert.fire({
-            title: "Job copied successfully",
+            title: "Deleted",
             icon: "success",
             showCancelButton: false,
             showConfirmButton: false,
             timer: 1500,
           });
-          GetAllJobListByCustomer("", 1, pageSize, "");
-          
+
+          type === "job"
+            ? GetAllJobList(clientDetailSingle.id)
+            : GetClientDetails(clientDetailSingle.id);
         } else {
           sweatalert.fire({
             title: "Failed",
             icon: "error",
             showCancelButton: false,
             showConfirmButton: false,
-            message: response.message,
             timer: 1500,
           });
         }
@@ -818,8 +673,41 @@ const ClientList = () => {
       .catch((error) => {
         return;
       });
+  };
 
-  }
+  // const GetAllJobList = async (client_id) => {
+  //   const req = { action: "getByClient", client_id: client_id };
+  //   const data = { req: req, authToken: token };
+  //   await dispatch(JobAction(data))
+  //     .unwrap()
+  //     .then(async (response) => {
+  //       if (response.status) {
+  //         setCustomerData(response.data);
+  //       } else {
+  //         setCustomerData([]);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       return;
+  //     });
+  // };
+
+  // const GetAllJobListByCustomer = async (customer_id) => {
+  //   const req = { action: "getByCustomer", customer_id: customer_id };
+  //   const data = { req: req, authToken: token };
+  //   await dispatch(JobAction(data))
+  //     .unwrap()
+  //     .then(async (response) => {
+  //       if (response.status) {
+  //         setCustomerData(response.data);
+  //       } else {
+  //         setCustomerData([]);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       return;
+  //     });
+  // };
 
   const GetAllJobList = async (
     client_id,
@@ -921,17 +809,11 @@ const ClientList = () => {
     setSearchTerm(value);
     setCurrentPage(1);
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+    if (clientDetailSingle.id) {
+      GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
+    } else {
+      GetAllJobListByCustomer(customerDetails.id, 1, pageSize, value);
     }
-
-    debounceRef.current = setTimeout(() => {
-      if (clientDetailSingle.id) {
-        GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
-      } else {
-        GetAllJobListByCustomer(customerDetails.id, 1, pageSize, value);
-      }
-    }, 500);
   };
 
   const handleCreateJob = (row) => {
@@ -948,7 +830,7 @@ const ClientList = () => {
   };
 
   const selectCustomerId = (id, name) => {
-    if (id && id != "") {
+    if (id != "") {
       sessionStorage.setItem("cust_id_sidebar", id);
       sessionStorage.setItem("cust_id_sidebar_name", name);
       setCustomerData([]);
@@ -961,7 +843,9 @@ const ClientList = () => {
       setActiveTab("NoOfJobs");
       GetAllClientData(id, name);
     } else {
-      GetAllJobListByCustomer("", 1, pageSize, "");
+      // sessionStorage.remove('cust_id_sidebar');
+      GetAllJobListByCustomer("");
+      setCustomerData([]);
       setClientData([]);
       setCustomerDetails({ id: "", trading_name: "" });
       setHararchyData({
@@ -975,10 +859,8 @@ const ClientList = () => {
     }
   };
 
-  // CHANGED: "All" option (id="") select karne par customer ki saari jobs dikhao
   const selectClientId = (id, name) => {
     if (id != "") {
-      // Specific client selected
       sessionStorage.setItem("cli_id_sidebar", id);
       sessionStorage.setItem("cli_id_sidebar_name", name);
       GetAllJobList(id);
@@ -990,8 +872,7 @@ const ClientList = () => {
       });
       setActiveTab("NoOfJobs");
     } else {
-      // CHANGED: "All" selected - customer ki saari jobs dikhao
-      sessionStorage.removeItem("cli_id_sidebar");
+      sessionStorage.remove("cli_id_sidebar");
       setClientDetailSingle({ id: "", client_name: "" });
       setHararchyData({
         customer: customerDetails,
@@ -1001,10 +882,6 @@ const ClientList = () => {
       informationSetData([]);
       setClientInformationData([]);
       setCompanyDetails([]);
-      // CHANGED: Customer ki saari jobs fetch karo
-      GetAllJobListByCustomer(customerDetails.id, 1, pageSize, searchTerm);
-      setCurrentPage(1);
-      setActiveTab("NoOfJobs");
     }
   };
 
@@ -1029,135 +906,130 @@ const ClientList = () => {
   }));
 
   // Prepare customer options for the select dropdown
-  const customerOptions = [
-    { value: "", label: "All" },
-    ...(customerDataAll || [])
-      .filter(
-        (val) => Number(val.status) === 1 && Number(val.form_process) === 4,
-      )
-      .map((val) => ({
-        value: val.id,
-        label: val.trading_name,
-      })),
-  ];
+  const customerOptions = (customerDataAll || [])
+    .filter((val) => Number(val.status) === 1 && Number(val.form_process) === 4)
+    .map((val) => ({
+      value: val.id,
+      label: val.trading_name,
+    }));
 
-  const selectedOption =
-    customerDetails.id === ""
-      ? { value: "", label: "All" }
-      : customerOptions.find(
-        (opt) => Number(opt.value) === Number(customerDetails.id),
-      );
+  const selectedOption = customerOptions.find(
+    (opt) => Number(opt.value) === Number(customerDetails.id),
+  );
 
-  // CHANGED: Client options mein "All" option sabse pehle add kiya
-  const clientOptions = [
-    { value: "", label: "All" },
-    ...(clientData || []).map((client) => ({
-      value: client.id,
-      label: client.client_name,
-    })),
-  ];
+  // Prepare client options for the select dropdown
+  const clientOptions = (clientData || []).map((client) => ({
+    value: client.id,
+    label: client.client_name,
+  }));
 
-  // CHANGED: "All" select hone par selectedOptionClient = { value: "", label: "All" }
-  const selectedOptionClient =
-    clientDetailSingle.id === ""
-      ? { value: "", label: "All" }
-      : clientOptions.find(
-        (opt) => Number(opt.value) === Number(clientDetailSingle.id),
-      );
+  const selectedOptionClient = clientOptions.find(
+    (opt) => Number(opt.value) === Number(clientDetailSingle.id),
+  );
 
   const handleExport = async () => {
-    setLoading(true);
-    const req = {
+     const req = {
       action: "getByCustomer",
-      customer_id: customerDetails.id || "",
-      page: 1,
-      limit: 100000,
-      search: "",
+      customer_id : "",
+      page : 1,
+      limit : 100000,
+      search : "",
     };
 
     const data = { req, authToken: token };
-    const response = await dispatch(JobAction(data)).unwrap();
-    if (!response.status) {
-      alert("No data to export!");
-      setLoading(false);
-      return;
-    }
-    const apiData = response?.data;
-
-    if (!apiData || apiData.length === 0) {
-      alert("No data to export!");
-      setLoading(false);
-      return;
-    }
-
-    const exportData = apiData?.map((item) => ({
-      "Job Code Id": item.job_code_id || "-",
-      "Job Priority": item.job_priority || "-",
-      "Client Trading Name": item.client_trading_name || "-",
-      "Job Type Name": item.job_type_name || "-",
-      // "Account Manager":
-      //   item.account_manager_officer_first_name +
-      //   " " +
-      //   item.account_manager_officer_last_name||"-",
-      "Client Contact Person":
-        item.account_manager_officer_first_name &&
-          item.account_manager_officer_last_name
-          ? item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name
-          : "-",
-      "Outbooks Account Manager":
-        item.outbooks_acount_manager_first_name +
-        " " +
-        item.outbooks_acount_manager_last_name || "-",
-      "Employee ID": item.account_manager_employee_number || "-",
-      "Allocated To":
-        item.allocated_id != null
-          ? item.allocated_first_name + " " + item.allocated_last_name
-          : "-",
-      Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
-      "Created By": item.job_created_by || "-",
-      "Created At": item.created_at || "-",
-      Status: item.status || "-",
-    }));
-
-    setLoading(false);
-
-    downloadCSV(exportData, "Job Details.csv");
-  };
-
-  const downloadCSV = (data, filename) => {
-    const csvRows = [];
-
-    const headers = Object.keys(data[0]);
-    csvRows.push(headers.join(","));
-
-    data.forEach((row) => {
-      const values = headers.map((h) => `"${row[h] || ""}"`);
-      csvRows.push(values.join(","));
-    });
-
-    const csvString = csvRows.join("\n");
-
-    const blob = new Blob([csvString], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.setAttribute("href", url);
-    a.setAttribute("download", filename);
-    a.click();
-  };
+     const response = await dispatch(JobAction(data)).unwrap();
+     if (!response.status) {
+       alert("No data to export!");
+       return;
+     }
+     const apiData = response?.data;
+ 
+     if (!apiData || apiData.length === 0) {
+       alert("No data to export!");
+       return;
+     }
+ 
+     // export format
+     const exportData = apiData?.map((item) => ({
+    "Job Code Id": item.job_code_id,
+    "Job Priority": item.job_priority,
+    "Client Trading Name": item.client_trading_name,
+    "Job Type Name": item.job_type_name,
+    "Account Manager":
+      item.account_manager_officer_first_name +
+      " " +
+      item.account_manager_officer_last_name,
+    "Outbooks Account Manager":
+      item.outbooks_acount_manager_first_name +
+      " " +
+      item.outbooks_acount_manager_last_name,
+    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
+    Invoiced: item.invoiced == "1" ? "YES" : "NO",
+    "Created By": item.job_created_by,
+    "Created At": item.created_at,
+    Status: item.status,
+  }));
+ 
+     downloadCSV(exportData, "Job Details.csv");
+   };
+   const downloadCSV = (data, filename) => {
+     const csvRows = [];
+ 
+     // headers
+     const headers = Object.keys(data[0]);
+     csvRows.push(headers.join(","));
+ 
+     // rows
+     data.forEach((row) => {
+       const values = headers.map((h) => `"${row[h] || ""}"`);
+       csvRows.push(values.join(","));
+     });
+ 
+     const csvString = csvRows.join("\n");
+ 
+     const blob = new Blob([csvString], { type: "text/csv" });
+     const url = window.URL.createObjectURL(blob);
+     const a = document.createElement("a");
+     a.setAttribute("href", url);
+     a.setAttribute("download", filename);
+     a.click();
+   };
 
   return (
     <div className="container-fluid">
-      {loading && (
-        <div className="overlay">
-          <div className="loader"></div>
-        </div>
-      )}
       <div className="content-title">
         <div className="row">
           <div className="form-group col-md-4 mb-0">
-            <label className="form-label mb-2">Customer</label>
+            <label className="form-label mb-2">Select Customer</label>
+            {/* <select
+              name="staff_id"
+              className="form-select"
+              id="tabSelect"
+              defaultValue={customerDetails.id}
+              // onChange={(e) => selectCustomerId(e)}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
+                selectCustomerId(selectedId, selectedCustomer?.trading_name);
+              }}
+            >
+              <option value="">Select Customer</option>
+              {customerDataAll &&
+                customerDataAll.map((val, index) =>
+                  Number(val.status) === 1 && Number(val.form_process) === 4 ?
+                    (
+                      <option
+                        key={index}
+                        value={val.id}
+                        selected={Number(customerDetails.id) == Number(val.id)}
+                      >
+                        {val.trading_name}
+                      </option>
+                    )
+                    : null
+
+                )}
+            </select> */}
             <Select
               id="tabSelect"
               name="staff_id"
@@ -1166,22 +1038,33 @@ const ClientList = () => {
               value={selectedOption}
               onChange={(selected) => {
                 const selectedCustomer = customerDataAll.find(
-                  (customer) => customer.id == selected.value,
+                  (customer) => customer.id == selected?.value,
                 );
                 selectCustomerId(
-                  selected.value,
-                  selectedCustomer?.trading_name,
+                  selected?.value || "",
+                  selectedCustomer?.trading_name || "",
                 );
+                if (!selected || selected.value === "") {
+                  setCustHasMore(true);
+                  setCustPage(1);
+                  setCustSearch("");
+                  setCustomerDataAll([]);
+                  custCacheRef.current = {};
+                }
               }}
               onMenuOpen={() => {
                 if (customerDataAll.length === 0) {
-                  GetAllCustomer(1);
+                  GetAllCustomer({ searchValue: "", pageNo: 1 });
                 }
               }}
-              onInputChange={handleCustSearch}
+              onInputChange={(value) => handleCustomerSearch(value)}
               onMenuScrollToBottom={() => {
                 if (custHasMore && !custLoading) {
-                  GetAllCustomer(custPage + 1, custSearch, true);
+                  GetAllCustomer({
+                    searchValue: custSearch,
+                    pageNo: custPage + 1,
+                    append: true,
+                  });
                 }
               }}
               classNamePrefix="react-select"
@@ -1194,7 +1077,7 @@ const ClientList = () => {
           {customerDetails.id != "" ? (
             <>
               <div className="form-group col-md-4 mb-0">
-                <label className="form-label mb-2">Client</label>
+                <label className="form-label mb-2">Select Client</label>
                 {clientData.length == 0 ? (
                   <input
                     type="text"
@@ -1203,7 +1086,29 @@ const ClientList = () => {
                     value={"The customer's client is not available."}
                   />
                 ) : (
-                  // CHANGED: "All" option add kiya, aur value="" ho to "All" show karo
+                  // <select
+                  //   name="staff_id"
+                  //   className="form-select"
+                  //   id="tabSelect"
+                  //   defaultValue={clientDetailSingle.id}
+                  //   // onChange={(e) => selectCustomerId(e)}
+                  //   onChange={(e) => {
+                  //     const selectedId = e.target.value;
+                  //     const selectedClient = clientData.find(client => client.id == selectedId);
+                  //     selectClientId(selectedId, selectedClient?.client_name);
+                  //   }}
+                  // >
+                  //   {clientData &&
+                  //     clientData.map((val, index) => (
+                  //       <option
+                  //         key={index}
+                  //         value={val.id}
+                  //         selected={clientDetailSingle.id == val.id}
+                  //       >
+                  //         {val.client_name}
+                  //       </option>
+                  //     ))}
+                  // </select>
                   <Select
                     id="tabSelect"
                     name="staff_id"
@@ -1213,18 +1118,13 @@ const ClientList = () => {
                     options={clientOptions}
                     value={selectedOptionClient}
                     onChange={(selected) => {
-                      if (selected.value === "") {
-                        // "All" selected
-                        selectClientId("", "");
-                      } else {
-                        const selectedClient = clientData.find(
-                          (client) => client.id == selected.value,
-                        );
-                        selectClientId(
-                          selected.value,
-                          selectedClient?.client_name,
-                        );
-                      }
+                      const selectedClient = clientData.find(
+                        (client) => client.id == selected.value,
+                      );
+                      selectClientId(
+                        selected.value,
+                        selectedClient?.client_name,
+                      );
                     }}
                     placeholder="Select Client"
                   />
@@ -1268,10 +1168,8 @@ const ClientList = () => {
                   {activeTab == "NoOfJobs" && (
                     <>
                       <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                        {/* CHANGED: Create Job button sirf tab dikhega jab specific client select ho */}
                         {(getAccessDataJob.insert == 1 ||
                           role === "SUPERADMIN") &&
-                          clientDetailSingle.id !== "" &&
                           clientData.length > 0 && (
                             <div
                               className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
@@ -1298,7 +1196,9 @@ const ClientList = () => {
                 ]}
                 active={2}
                 data={hararchyData}
-                NumberOfActive={activeTab == "NoOfJobs" ? totalRecords : ""}
+                NumberOfActive={
+                  activeTab == "NoOfJobs" ? customerData.length : ""
+                }
               />
             </>
           ) : (
@@ -1407,7 +1307,8 @@ const ClientList = () => {
                               <option value={20}>20</option>
                               <option value={50}>50</option>
                               <option value={100}>100</option>
-                              <option value={500}>500</option>
+                            <option value={500}>500</option>
+                              {/* <option value={100000}>All</option> */}
                             </select>
                           </>
                         )}
@@ -1452,10 +1353,7 @@ const ClientList = () => {
                       <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li className="">
-                            <Phone
-                              size={22}
-                              className="me-2 text-secondary align-middle"
-                            />
+                            <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
                             <b>Phone : </b>
                             {(clientInformationData &&
                               clientInformationData.phone &&
@@ -1465,10 +1363,7 @@ const ClientList = () => {
                               "NA"}
                           </li>
                           <li className="mt-2">
-                            <Mail
-                              size={22}
-                              className="text-secondary align-middle me-2"
-                            />
+                            <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
                             <b>Email : </b>{" "}
                             {(clientInformationData &&
                               clientInformationData.email) ||
@@ -1517,6 +1412,21 @@ const ClientList = () => {
                               : ""}
                       </h4>
                     </div>
+                    {/* <div className="col-4">
+                <div className="float-end">
+                  <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
+                    <i className="fa-regular fa-pencil me-2" />
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-0 btn btn-danger text-white float-end fw-bold ms-1"
+                  >
+                    <i className="fa-regular fa-trash me-2" />
+                    Delete
+                  </button>
+                </div>  
+              </div> */}
                   </div>
 
                   {informationData.client_type == 1 ? (
@@ -1527,16 +1437,26 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b>Trading Name :</b>{" "}
                               {informationData.trading_name || "NA"}
+                              {/* <p className="font-14  ml-3">
+                            {informationData.trading_name}
+                          </p> */}
                             </li>
                             <li className="mb-4">
                               <b className="">VAT Registered : </b>
                               {informationData.vat_registered == 0
                                 ? "No"
                                 : "Yes"}
+                              {/* <p className="font-14  ml-3">
+                            {" "}
+                            
+                          </p> */}
                             </li>
                             <li className="mb-4">
                               <b className="">Website : </b>
                               {informationData.website || "NA"}
+                              {/* <p className="font-14  ml-3">
+                            
+                          </p> */}
                             </li>
                           </ul>
                         </div>
@@ -1545,10 +1465,18 @@ const ClientList = () => {
                             <li className="mb-4">
                               <b className="">Trading Address :</b>{" "}
                               {informationData.trading_address || "NA"}
+                              {/* <p className="font-14  ml-3">
+                            {" "}
+                            {informationData.trading_address}
+                          </p> */}
                             </li>
                             <li className="mb-4">
                               <b className="">VAT Number :</b>{" "}
                               {informationData.vat_number || "NA"}
+                              {/* <p className="font-14  ml-3">
+                            {" "}
+                            {informationData.vat_number}
+                          </p> */}
                             </li>
                           </ul>
                         </div>

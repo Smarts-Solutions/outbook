@@ -103,7 +103,11 @@ const StaffPage = () => {
     // GetAllStaffData(1, 10000, ""); // Removed this as we now fetch on click
   }, []);
 
-  const GetLineManagerData = async ({ searchValue = "", pageNo = 1, append = false } = {}) => {
+  const GetLineManagerData = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
     if (managerLoading) return;
 
     const cacheKey = `${searchValue}_${pageNo}`;
@@ -130,10 +134,11 @@ const StaffPage = () => {
 
       if (response.status) {
         const formatted = response.data.data
-          .filter((data) =>
-            data.role !== "ADMIN" &&
-            data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id
+          .filter(
+            (data) =>
+              data.role !== "ADMIN" &&
+              data.role !== "SUPERADMIN" &&
+              data.id !== editStaffData.id,
           )
           .map((data) => ({
             label: `${data.first_name} ${data.last_name}`,
@@ -162,6 +167,7 @@ const StaffPage = () => {
   };
 
   const handleManagerSearch = (value) => {
+    if (value === "") return;
     clearTimeout(managerDebounceTimeout.current);
     managerDebounceTimeout.current = setTimeout(() => {
       setManagerSearch(value);
