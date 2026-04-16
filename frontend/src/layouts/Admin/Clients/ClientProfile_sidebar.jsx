@@ -35,6 +35,7 @@ const ClientList = () => {
   const [custPage, setCustPage] = useState(1);
   const [custHasMore, setCustHasMore] = useState(true);
   const [custLoading, setCustLoading] = useState(false);
+  const [custSearch, setCustSearch] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -159,6 +160,14 @@ const ClientList = () => {
   };
 
   const [clientData, setClientData] = useState([]);
+  const custDebounceRef = useRef(null);
+  const handleCustSearch = (value) => {
+    setCustSearch(value);
+    if (custDebounceRef.current) clearTimeout(custDebounceRef.current);
+    custDebounceRef.current = setTimeout(() => {
+      GetAllCustomer(1, value, false);
+    }, 500);
+  };
   const [clientDetailSingle, setClientDetailSingle] = useState({
     id: cli_id_sidebar || "",
     client_name: "",
@@ -1169,9 +1178,10 @@ const ClientList = () => {
                   GetAllCustomer(1);
                 }
               }}
+              onInputChange={handleCustSearch}
               onMenuScrollToBottom={() => {
                 if (custHasMore && !custLoading) {
-                  GetAllCustomer(custPage + 1, "", true);
+                  GetAllCustomer(custPage + 1, custSearch, true);
                 }
               }}
               classNamePrefix="react-select"

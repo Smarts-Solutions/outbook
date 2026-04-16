@@ -181,6 +181,10 @@ const ReusableForm = ({
                                   : provided.borderColor,
                             }),
                           }}
+                          onMenuOpen={field.onMenuOpen}
+                          onInputChange={field.onInputChange}
+                          onMenuScrollToBottom={field.onMenuScrollToBottom}
+                          isLoading={field.isLoading}
                           placeholder={`Please Select ${field.label}`}
                         />
 
