@@ -28,10 +28,12 @@ exports.customerLogin = async (req, res) => {
   }
 
   const token = jwt.sign(
-    { id: customer.id, role: "CUSTOMER" },
+    { userId: customer.id, role: "CUSTOMER" },
     process.env.JWT_SECRET,
     { expiresIn: "30d" }
   );
+
+  await pool.query(`UPDATE customer_users SET login_auth_token = ? WHERE id = ?`, [token, customer.id]);
 
   res.cookie("customer_token", token, {
     httpOnly: true,
@@ -58,10 +60,12 @@ exports.customerUpdatePassword = async (req, res) => {
     const [[customer]] = await pool.query(`SELECT * FROM customer_users WHERE id = ?`, [customer_user_id]);
 
     const token = jwt.sign(
-      { id: customer.id, role: "CUSTOMER" },
+      { userId: customer.id, role: "CUSTOMER" },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
+
+    await pool.query(`UPDATE customer_users SET login_auth_token = ? WHERE id = ?`, [token, customer_user_id]);
 
     res.cookie("customer_token", token, {
       httpOnly: true,

@@ -76,9 +76,9 @@ const Main_Route = () => {
           location.pathname === "/login" ||
           location.pathname === "/customer/login" ||
           location.pathname === "/" ||
-          !location.pathname.startsWith("/admin")
+          !location.pathname.startsWith("/customer")
         ) {
-          navigate("/admin/dashboard");
+          navigate("/customer/dashboard");
           window.location.reload();
         }
         break;
