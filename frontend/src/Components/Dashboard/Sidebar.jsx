@@ -148,6 +148,44 @@ const Sidebar = () => {
                 <span>Dashboard</span>
               </Link>
             </li>
+
+            {role === "CUSTOMER" && (
+              <>
+                <li className={activeLink === "/customer/customer" ? "active" : ""}>
+                  <Link
+                    to="/customer/customer"
+                    onClick={(e) => handleLinkClick(e, "/customer/customer")}
+                  >
+                    <span className="sidebar-icons">
+                      <Users />
+                    </span>
+                    <span>Customer</span>
+                  </Link>
+                </li>
+                <li className={activeLink === "/customer/client" ? "active" : ""}>
+                  <Link
+                    to="/customer/client"
+                    onClick={(e) => handleLinkClick(e, "/customer/client")}
+                  >
+                    <span className="sidebar-icons">
+                      <User />
+                    </span>
+                    <span>Clients</span>
+                  </Link>
+                </li>
+                <li className={activeLink === "/customer/job" ? "active" : ""}>
+                  <Link
+                    to="/customer/job"
+                    onClick={(e) => handleLinkClick(e, "/customer/job")}
+                  >
+                    <span className="sidebar-icons">
+                      <Briefcase />
+                    </span>
+                    <span>Jobs</span>
+                  </Link>
+                </li>
+              </>
+            )}
             {role !== "CUSTOMER" && (
               <>
                 {/* Customer Dropdown */}
