@@ -13,6 +13,11 @@ import { jwtDecode } from "jwt-decode";
 import Admin_Route from "./Admin_Route";
 import ForgetPassword from "../layouts/Auth/ForgetPassword";
 
+
+// Coutomer Auth
+import CustomerLogin from "../layouts/CustomerAuth/CustomerLogin";
+
+
 const Main_Route = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,12 +30,19 @@ const Main_Route = () => {
     //   navigate("/login");
     //   return;
     // }
+    if (location.pathname.startsWith("/customer/login")) {
+      const params = new URLSearchParams(location.search);
+      const isExpirytoken = params.get("token");
+      navigate("/customer/login", { state: { isExpirytoken: isExpirytoken } });
+      return;
+    }
+
     if (role == null || token == null || staffDetails == null) {
-  if (location.pathname !== "/login1") {
-    navigate("/login");
-  }
-  return;
-}
+      if (location.pathname !== "/login1") {
+        navigate("/login");
+      }
+      return;
+    }
 
 
     if (location.pathname.startsWith("/updatepassword")) {
@@ -42,7 +54,7 @@ const Main_Route = () => {
       navigate("/login");
       return;
     }
-  
+
     if (location.pathname === "/forget") {
       navigate("/forget");
       return;
@@ -53,7 +65,7 @@ const Main_Route = () => {
           location.pathname === "/login" ||
           location.pathname === "/" ||
           !location.pathname.startsWith("/admin")
-        ) {  
+        ) {
           navigate("/admin/dashboard");
           window.location.reload();
         }
@@ -73,21 +85,21 @@ const Main_Route = () => {
   }, [navigate, location.pathname, role, staffDetails]);
 
   const ClearSession = async () => {
-        if(token){
-          var decoded = jwtDecode(token);
-          if (decoded.exp * 1000 < new Date().getTime()) {
-            localStorage.removeItem("user_role");
-            localStorage.removeItem("user_details");
-            localStorage.clear();
-            // window.location.reload();
-            setTimeout(() => {
-              navigate("/login");
-            }, 1000);
-          }
-        }
-    
-       
-      };
+    if (token) {
+      var decoded = jwtDecode(token);
+      if (decoded.exp * 1000 < new Date().getTime()) {
+        localStorage.removeItem("user_role");
+        localStorage.removeItem("user_details");
+        localStorage.clear();
+        // window.location.reload();
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      }
+    }
+
+
+  };
 
   useEffect(() => {
     ClearSession();
@@ -99,11 +111,15 @@ const Main_Route = () => {
       <Routes>
         <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
         <Route path="/login" element={<Login />} />
-         <Route path="/login1" element={<Login1 />} />
+        <Route path="/login1" element={<Login1 />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
+
+        <Route path="/customer/login" element={<CustomerLogin />} />
+
       </Routes>
     </div>
   );
 };
+
 
 export default Main_Route;
