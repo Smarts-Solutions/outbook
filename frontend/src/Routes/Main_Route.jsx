@@ -16,6 +16,7 @@ import ForgetPassword from "../layouts/Auth/ForgetPassword";
 
 // Coutomer Auth
 import CustomerLogin from "../layouts/CustomerAuth/CustomerLogin";
+import Customer_Route from "./Coustomer_Route";
 
 
 const Main_Route = () => {
@@ -70,6 +71,17 @@ const Main_Route = () => {
           window.location.reload();
         }
         break;
+      case "CUSTOMER":
+        if (
+          location.pathname === "/login" ||
+          location.pathname === "/customer/login" ||
+          location.pathname === "/" ||
+          !location.pathname.startsWith("/admin")
+        ) {
+          navigate("/admin/dashboard");
+          window.location.reload();
+        }
+        break;
       default:
         if (
           location.pathname === "/login" ||
@@ -105,6 +117,7 @@ const Main_Route = () => {
     ClearSession();
   }, []);
 
+  console.log("role", role)
 
   return (
     <div>
@@ -115,6 +128,8 @@ const Main_Route = () => {
         <Route path="/forgetpassword" element={<ForgetPassword />} />
 
         <Route path="/customer/login" element={<CustomerLogin />} />
+        <Route path="/customer/*" element={role === "CUSTOMER" ? <Customer_Route /> : <CustomerLogin />} />
+
 
       </Routes>
     </div>

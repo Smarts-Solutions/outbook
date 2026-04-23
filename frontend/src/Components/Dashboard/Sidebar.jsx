@@ -148,8 +148,9 @@ const Sidebar = () => {
                 <span>Dashboard</span>
               </Link>
             </li>
-
-            {/* Customer Dropdown */}
+            {role !== "CUSTOMER" && (
+              <>
+                {/* Customer Dropdown */}
             <li
               className={
                 activeLink.startsWith("/admin/customer") ||
@@ -596,6 +597,8 @@ const Sidebar = () => {
                 </li>
               )
               } 
+              </>
+            )}
           </ul>
         </div>
       </div>

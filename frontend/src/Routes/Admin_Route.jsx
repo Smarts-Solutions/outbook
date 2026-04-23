@@ -99,6 +99,10 @@ const Admin_Route = () => {
 
   const accessDataFetch = async () => {
     try {
+      if (role === "CUSTOMER") {
+        setUpdatePermission(true);
+        return;
+      }
 
       const response = await dispatch(
         RoleAccess({

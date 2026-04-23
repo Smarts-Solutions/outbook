@@ -4,7 +4,7 @@ import {
   SignIn,
   LoginAuthToken,
 } from "../../ReduxStore/Slice/Auth/authSlice";
-import { SIGN_IN_CUSTOMER } from "../../Services/CustomerUser/customerUserService";
+import { SIGN_IN_CUSTOMER, UPDATE_CUSTOMER_PASSWORD } from "../../Services/CustomerUser/customerUserService";
 import { useDispatch } from "react-redux";
 import { azureLogin } from "../AuthWithAzure/AuthProvider";
 import { Email_regex, Mobile_regex } from "../../Utils/Common_regex";
@@ -33,11 +33,11 @@ const CustomerLogin = () => {
   const [errorNewPassword, setErrorNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
+  const [customerUserId, setCustomerUserId] = useState(null);
 
   let isExpirytoken = location?.state?.isExpirytoken;
 
 
-  console.log("isExpirytoken", isExpirytoken);
 
 
   const handleSubmitLogin = async () => {
@@ -62,7 +62,29 @@ const CustomerLogin = () => {
     console.log("response customer login", response);
     if (response.status) {
       if (response.step === "CHANGE_PASSWORD") {
+        setCustomerUserId(response.customer_user_id);
         setIsFlipped(true);
+      } else {
+        // Normal Login Success
+        localStorage.setItem("staffDetails", JSON.stringify(response.customer));
+        localStorage.setItem("token", JSON.stringify(response.token)); // Wait, backend returned Success but no token?
+        localStorage.setItem("role", JSON.stringify("CUSTOMER"));
+        
+        // I should check if backend returns token. In customerAuthController.js it returns customer but token is in cookie.
+        // But frontend expects token in localStorage for many things.
+        
+        sweatalert.fire({
+          title: "Login Successfully",
+          icon: "success",
+          timer: 1000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
+
+        setTimeout(() => {
+          navigate("/customer/dashboard");
+          window.location.reload();
+        }, 1000);
       }
     } else {
       sweatalert.fire({
@@ -278,9 +300,35 @@ const CustomerLogin = () => {
       return;
     }
 
+    const req = { customer_user_id: customerUserId, newPassword: newPassword };
+    const response = await UPDATE_CUSTOMER_PASSWORD(req);
 
-    alert("Password updated successfully");
-  }
+    if (response.status) {
+      localStorage.setItem("staffDetails", JSON.stringify(response.customer));
+      localStorage.setItem("token", JSON.stringify(response.token));
+      localStorage.setItem("role", JSON.stringify("CUSTOMER"));
+
+      sweatalert.fire({
+        title: "Password updated successfully",
+        icon: "success",
+        timer: 1000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setTimeout(() => {
+        navigate("/admin/dashboard");
+        window.location.reload();
+      }, 1000);
+    } else {
+      sweatalert.fire({
+        title: response.message,
+        icon: "error",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    }
+  };
 
   return (
     <div className="account-body accountbg">
