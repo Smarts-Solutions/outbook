@@ -197,7 +197,6 @@ const Setting = () => {
   };
 
   const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
-
     setAllJobsData((prev) => {
       const updated = [...prev];
 
@@ -517,14 +516,15 @@ const Setting = () => {
 
   const serviceData = async (req) => {
 
-    // if (req.action == "delete") {
-    //   console.log("serviceData called with req:", req);
-    //   if (req.data.job_service_exists == true) {
-    //     await GetAllJobsName(req);
-    //     return; // Exit the function to prevent the dispatch from being called
-    //   }
-    // }
-
+    if (req.action == "delete") {
+      console.log("serviceData called with req:", req);
+      if (req.data.job_service_exists == true) {
+        await GetAllJobsName(req);
+        return; // Exit the function to prevent the dispatch from being called
+      }
+      
+    }
+   
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -3511,6 +3511,7 @@ const Setting = () => {
                                     (type, index, self) =>
                                       index === self.findIndex((s) => s.job_type_id === type.job_type_id)
                                   )
+                                  
                                   ?.map((type) => ({
                                     value: type?.job_type_id,
                                     label: `${type?.job_type_name}`,
