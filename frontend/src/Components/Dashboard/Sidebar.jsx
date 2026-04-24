@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { Briefcase, ChevronDown, ChevronRight ,PieChart,Shield,User,Users,File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid} from "lucide-react";
+import { Briefcase, ChevronDown, ChevronRight ,PieChart,Shield,User,Users,File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid ,UserCog ,FileSliders } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -149,7 +149,46 @@ const Sidebar = () => {
               </Link>
             </li>
 
-            {/* Customer Dropdown */}
+            {role === "CUSTOMER" && (
+              <>
+                <li className={activeLink === "/customer/customer" ? "active" : ""}>
+                  <Link
+                    to="/customer/customer"
+                    onClick={(e) => handleLinkClick(e, "/customer/customer")}
+                  >
+                    <span className="sidebar-icons">
+                      <Users />
+                    </span>
+                    <span>Customer</span>
+                  </Link>
+                </li>
+                <li className={activeLink === "/customer/client" ? "active" : ""}>
+                  <Link
+                    to="/customer/client"
+                    onClick={(e) => handleLinkClick(e, "/customer/client")}
+                  >
+                    <span className="sidebar-icons">
+                      <User />
+                    </span>
+                    <span>Clients</span>
+                  </Link>
+                </li>
+                <li className={activeLink === "/customer/job" ? "active" : ""}>
+                  <Link
+                    to="/customer/job"
+                    onClick={(e) => handleLinkClick(e, "/customer/job")}
+                  >
+                    <span className="sidebar-icons">
+                      <Briefcase />
+                    </span>
+                    <span>Jobs</span>
+                  </Link>
+                </li>
+              </>
+            )}
+            {role !== "CUSTOMER" && (
+              <>
+                {/* Customer Dropdown */}
             <li
               className={
                 activeLink.startsWith("/admin/customer") ||
@@ -373,7 +412,7 @@ const Sidebar = () => {
                 >
                   <div>
                     <span className="sidebar-icons">
-                      <Users />
+                      <FileSliders />
                     </span>
                     <span className="pe-4 pe-lg-4">Reports</span>
                   </div>
@@ -574,7 +613,7 @@ const Sidebar = () => {
             )}
 
             {/* Coustomer users*/}
-            {/* {
+            {
             (
               role === "SUPERADMIN") && (
                 <li
@@ -588,13 +627,16 @@ const Sidebar = () => {
                     onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
                   >
                     <span className="sidebar-icons">
-                      <i className="fas fa-user-cog"></i> 
+                      {/* <i className="fas fa-user-cog"></i>  */}
+                      <UserCog />{" "}
                     </span>
                     <span>Customer Details</span>
                   </Link>
                 </li>
               )
-              } */}
+              } 
+              </>
+            )}
           </ul>
         </div>
       </div>

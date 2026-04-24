@@ -3,7 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
+<<<<<<< HEAD
 -- Generation Time: Apr 11, 2026 at 10:49 AM
+=======
+-- Generation Time: Apr 01, 2026 at 06:21 AM
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -625,7 +629,11 @@ CREATE TABLE IF NOT EXISTS `client_job_task` (
   UNIQUE KEY `job_id` (`job_id`,`client_id`,`task_id`),
   KEY `client_id` (`client_id`),
   KEY `task_id` (`task_id`)
+<<<<<<< HEAD
 ) ENGINE=MyISAM AUTO_INCREMENT=111 DEFAULT CHARSET=latin1;
+=======
+) ENGINE=MyISAM AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 --
 -- Dumping data for table `client_job_task`
@@ -697,6 +705,7 @@ INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_sta
 (75, 69, 20, 8, NULL, '10:0', '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
 (76, 70, 20, 34, NULL, '1:10', '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
 (77, 71, 20, 34, NULL, '1:10', '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
+<<<<<<< HEAD
 (82, 72, 20, 36, NULL, '15:10', '2026-04-06 06:35:39', '2026-04-06 06:35:39'),
 (81, 73, 20, 36, NULL, '10:10', '2026-04-06 06:20:10', '2026-04-06 06:20:10'),
 (83, 74, 20, 34, NULL, '1:10', '2026-04-06 07:05:14', '2026-04-06 07:05:14'),
@@ -714,6 +723,10 @@ INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_sta
 (108, 91, 17, 29, NULL, '1:10', '2026-04-11 09:08:11', '2026-04-11 09:08:11'),
 (109, 92, 17, 29, NULL, '1:10', '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
 (110, 93, 17, 30, NULL, '2:10', '2026-04-11 09:09:48', '2026-04-11 09:09:48');
+=======
+(78, 72, 20, 32, NULL, '1:10', '2026-03-31 09:27:37', '2026-03-31 09:27:37'),
+(79, 73, 20, 34, NULL, '1:10', '2026-03-31 11:56:51', '2026-03-31 11:56:51');
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 -- --------------------------------------------------------
 
@@ -1589,7 +1602,11 @@ CREATE TABLE IF NOT EXISTS `drafts` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`)
+<<<<<<< HEAD
 ) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+=======
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 --
 -- Dumping data for table `drafts`
@@ -1605,9 +1622,13 @@ INSERT INTO `drafts` (`id`, `job_id`, `draft_sent_on`, `draft_title`, `final_dra
 (16, 25, '2025-11-13', 'D_00001', '2025-11-19', '1', '1', 'uyuju', '1', '2025-11-13 11:37:25', '2025-11-19 08:48:24'),
 (17, 25, '2025-11-13', 'D_00002', '2025-11-19', '1', '1', 'erhr', '1', '2025-11-13 11:55:07', '2025-11-19 08:47:45'),
 (18, 34, '2025-11-14', 'D_00001', NULL, '0', '1', NULL, '0', '2025-11-14 06:42:38', '2025-11-14 06:42:38'),
+<<<<<<< HEAD
 (19, 73, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'jkl,ikl', '1', '2026-04-01 06:15:45', '2026-04-01 06:15:45'),
 (20, 62, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'n,', '1', '2026-04-01 07:21:45', '2026-04-01 07:21:45'),
 (21, 61, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'j', '1', '2026-04-01 07:30:41', '2026-04-01 07:30:41');
+=======
+(19, 73, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'jkl,ikl', '1', '2026-04-01 06:15:45', '2026-04-01 06:15:45');
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 -- --------------------------------------------------------
 
@@ -1840,7 +1861,11 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`),
   KEY `currency` (`currency`)
+<<<<<<< HEAD
 ) ENGINE=MyISAM AUTO_INCREMENT=94 DEFAULT CHARSET=latin1;
+=======
+) ENGINE=MyISAM AUTO_INCREMENT=74 DEFAULT CHARSET=latin1;
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 --
 -- Dumping data for table `jobs`
@@ -1919,6 +1944,7 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (69, 1, '000069', 14, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 12:15:47', 9, NULL, '2', '2', NULL, '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
 (70, 1, '000070', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 12:24:37', 9, NULL, '1', '2', NULL, '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
 (71, 1, '000071', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 14:34:35', 9, NULL, '2', '2', NULL, '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
+<<<<<<< HEAD
 (72, 1, '000072', 14, 14, 20, '', 48, 5, 14, '15:10', 13, '21', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:34:37', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"zsfgsdgdgbdsg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 09:27:37', '2026-04-06 06:35:39'),
 (73, 1, '000073', 14, 14, 20, '', 48, 5, 14, '10:10', 13, '22', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, '', '', 0, '', '', '', '', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'urgent', '2026-04-01 11:47:11', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 11:56:51', '2026-04-06 06:20:20'),
 (74, 1, '000074', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '21', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-16', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 12:35:14', 12, NULL, '1', '2', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"FFFFFFF\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"}]}', '2026-04-06 07:05:14', '2026-04-06 08:42:21'),
@@ -1937,6 +1963,10 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (91, 1, '000086', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:38:11', 0, 0, '0', '0', NULL, '2026-04-11 09:08:11', '2026-04-11 09:08:11'),
 (92, 1, '000087', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:38:59', 0, 0, '0', '0', NULL, '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
 (93, 1, '000088', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '24', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:39:47', 0, 0, '0', '0', NULL, '2026-04-11 09:09:47', '2026-04-11 09:09:47');
+=======
+(72, 1, '000072', 14, 14, 20, '', 48, 4, 12, '01:10', 13, '21', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2026-04-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:34:37', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"zsfgsdgdgbdsg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 09:27:37', '2026-03-31 12:19:13'),
+(73, 1, '000073', 14, 14, 20, '', 48, 8, 13, '01:10', 13, '22', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-01 11:47:11', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 11:56:51', '2026-04-01 06:17:11');
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 -- --------------------------------------------------------
 
@@ -2147,8 +2177,13 @@ INSERT INTO `master_status` (`id`, `name`, `status_type_id`, `status`, `is_disab
 (12, 'Bookkeeping Not Completed', 7, '1', '1', NULL, '2024-11-10 22:50:12', '2025-11-11 12:44:48'),
 (15, 'Not Progressing - Customer Processing', 3, '1', '1', NULL, '2024-11-10 22:52:24', '2025-11-11 12:44:51'),
 (17, 'Completed - Update Sent', 2, '1', '1', NULL, '2024-11-10 22:53:06', '2025-11-11 12:44:55'),
+<<<<<<< HEAD
 (18, 'Completed - Filed with Companies House and HMRC', 2, '1', '1', 3, '2024-11-10 22:53:20', '2026-04-01 07:29:38'),
 (19, 'Completed - Filed with Companies House', 2, '1', '1', 0, '2024-11-10 22:53:35', '2026-04-01 07:29:47'),
+=======
+(18, 'Completed - Filed with Companies House and HMRC', 2, '1', '1', NULL, '2024-11-10 22:53:20', '2025-11-11 12:44:59'),
+(19, 'Completed - Filed with Companies House', 2, '1', '1', NULL, '2024-11-10 22:53:35', '2025-11-11 12:45:02'),
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 (20, 'Completed - Filed with HMRC', 2, '1', '1', NULL, '2024-11-10 22:53:48', '2025-11-11 12:45:05'),
 (21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '1', NULL, '2025-02-01 12:10:19', '2025-02-06 13:17:37');
 
@@ -2601,7 +2636,11 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`) VALUES
+<<<<<<< HEAD
 (1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-04-11 06:50:46', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NTg5MDI0NiwiZXhwIjoxNzc1OTI2MjQ2fQ.BNHi8l-Ww2EnU1jQ-S2kxjEO3ZcsYXBVAO4cey7d4_4'),
+=======
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-04-01 04:56:55', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NTAxOTQxNSwiZXhwIjoxNzc1MDU1NDE1fQ.XhHio6yqAXZDdbHsjdrMt3giWo8uFNUIS0g_cbjS7ck'),
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk'),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs'),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos'),
@@ -2658,7 +2697,11 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
+<<<<<<< HEAD
 ) ENGINE=MyISAM AUTO_INCREMENT=1585 DEFAULT CHARSET=latin1;
+=======
+) ENGINE=MyISAM AUTO_INCREMENT=1463 DEFAULT CHARSET=latin1;
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 --
 -- Dumping data for table `staff_logs`
@@ -4133,6 +4176,7 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1459, 1, '2026-03-31', 'job', 73, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-03-31 12:39:21', '2026-03-31 12:39:21'),
 (1460, 1, '2026-04-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-01 04:56:55', '2026-04-01 04:56:55'),
 (1461, 1, '2026-04-01', 'job', 73, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: wrw_WWW_aa_000073', 'created', '122.168.114.106', '2026-04-01 06:15:45', '2026-04-01 06:15:45'),
+<<<<<<< HEAD
 (1462, 1, '2026-04-01', 'job', 73, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-01 06:17:11', '2026-04-01 06:17:11'),
 (1463, 1, '2026-04-01', 'master status', 22, 'created master status shsikd', 'Super Admin System Super Super Admin created master status shsikd ', 'created', '122.168.114.106', '2026-04-01 06:26:52', '2026-04-01 06:26:52'),
 (1464, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:03:15', '2026-04-01 07:03:15'),
@@ -4256,6 +4300,9 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1582, 1, '2026-04-11', 'job', 90, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: DDD_AFR_JAP_000085', 'copied', '122.168.114.106', '2026-04-11 08:48:33', '2026-04-11 08:48:33'),
 (1583, 1, '2026-04-11', 'job', 92, 'Copied job code: From DDD_AFR_JAP_000047', 'Super Admin System Super Super Admin Copied job code: From DDD_AFR_JAP_000047 DDD_AFR_JAP_000087', 'copied', '122.168.114.106', '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
 (1584, 1, '2026-04-11', 'job', 93, 'Copied job code: From DDD_AFR_JAP_000056 To ', 'Super Admin System Super Super Admin Copied job code: From DDD_AFR_JAP_000056 To  DDD_AFR_JAP_000088', 'copied', '122.168.114.106', '2026-04-11 09:09:48', '2026-04-11 09:09:48');
+=======
+(1462, 1, '2026-04-01', 'job', 73, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-01 06:17:11', '2026-04-01 06:17:11');
+>>>>>>> 8fd29e93f12350736627a3955ea8a701c85a9b83
 
 -- --------------------------------------------------------
 
