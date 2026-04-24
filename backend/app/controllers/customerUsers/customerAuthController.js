@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 exports.customerLogin = async (req, res) => {
   const { email, password } = req.body;
 
-  const [[customer]] = await pool.query(`SELECT * FROM customer_users WHERE email = ? `, [email]);
+  const [[customer]] = await pool.query(`SELECT * FROM staffs WHERE email = ? AND role_id = 12`, [email]);
 
   if (!customer) {
     return res.json({ status: false, message: "Customer not found" });
@@ -33,7 +33,7 @@ exports.customerLogin = async (req, res) => {
     { expiresIn: "30d" }
   );
 
-  await pool.query(`UPDATE customer_users SET login_auth_token = ? WHERE id = ?`, [token, customer.id]);
+  await pool.query(`UPDATE staffs SET login_auth_token = ? WHERE id = ?`, [token, customer.id]);
 
   res.cookie("customer_token", token, {
     httpOnly: true,
@@ -55,9 +55,9 @@ exports.customerUpdatePassword = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query(`UPDATE customer_users SET password = ?, is_first_login = 1 WHERE id = ?`, [hashedPassword, customer_user_id]);
+    await pool.query(`UPDATE staffs SET password = ?, is_first_login = 1 WHERE id = ?`, [hashedPassword, customer_user_id]);
 
-    const [[customer]] = await pool.query(`SELECT * FROM customer_users WHERE id = ?`, [customer_user_id]);
+    const [[customer]] = await pool.query(`SELECT * FROM staffs WHERE id = ?`, [customer_user_id]);
 
     const token = jwt.sign(
       { userId: customer.id, role: "CUSTOMER" },
@@ -65,7 +65,7 @@ exports.customerUpdatePassword = async (req, res) => {
       { expiresIn: "30d" }
     );
 
-    await pool.query(`UPDATE customer_users SET login_auth_token = ? WHERE id = ?`, [token, customer_user_id]);
+    await pool.query(`UPDATE staffs SET login_auth_token = ? WHERE id = ?`, [token, customer_user_id]);
 
     res.cookie("customer_token", token, {
       httpOnly: true,
@@ -120,7 +120,7 @@ exports.getAssignedCustomers = async (req, res) => {
       JOIN customer_access ca ON c.id = ca.customer_id
       LEFT JOIN staffs s1 ON c.staff_id = s1.id
       LEFT JOIN staffs s2 ON c.account_manager_id = s2.id
-      WHERE ca.customer_user_id = ?
+      WHERE ca.staff_id = ?
     `;
 
     const [rows] = await pool.query(query, [userId]);
@@ -162,7 +162,7 @@ exports.getAssignedClients = async (req, res) => {
       JOIN customer_access ca ON c.id = ca.customer_id
       LEFT JOIN client_types ct ON cl.client_type = ct.id
       LEFT JOIN staffs s ON cl.staff_created_id = s.id
-      WHERE ca.customer_user_id = ?
+      WHERE ca.staff_id = ?
       GROUP BY cl.id
       ORDER BY cl.trading_name ASC
     `;
@@ -213,7 +213,7 @@ exports.getAssignedJobs = async (req, res) => {
       LEFT JOIN staffs s_am ON j.account_manager_id = s_am.id
       LEFT JOIN staffs s_at ON j.allocated_to = s_at.id
       LEFT JOIN staffs s_cb ON j.staff_created_id = s_cb.id
-      WHERE ca.customer_user_id = ?
+      WHERE ca.staff_id = ?
       GROUP BY j.id
       ORDER BY j.id DESC
     `;

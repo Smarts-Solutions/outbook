@@ -458,23 +458,13 @@ const getStaffById = async (id) => {
 const isLoginAuthTokenCheckmodel = async (staff) => {
   const { id, login_auth_token } = staff;
 
-  // First check staffs table
+  // Check staffs table
   const [staffRows] = await pool.query(
     "SELECT id, login_auth_token FROM staffs WHERE id = ? AND login_auth_token = ?",
     [id, login_auth_token]
   );
 
-  if (staffRows.length > 0) {
-    return staffRows[0];
-  }
-
-  // If not found in staffs, check customer_users table
-  const [customerRows] = await pool.query(
-    "SELECT id, login_auth_token FROM customer_users WHERE id = ? AND login_auth_token = ?",
-    [id, login_auth_token]
-  );
-
-  return customerRows[0];
+  return staffRows[0];
 };
 
 const profile = async (staff) => {

@@ -79,7 +79,6 @@ const Main_Route = () => {
           !location.pathname.startsWith("/customer")
         ) {
           navigate("/customer/dashboard");
-          window.location.reload();
         }
         break;
       default:
