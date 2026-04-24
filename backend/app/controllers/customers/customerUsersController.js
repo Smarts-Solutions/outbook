@@ -15,12 +15,9 @@ const getAllCustomerUsers = async (req, res) => {
 
   try {
     const { ...customerUsers } = req.body;
-
-
     // get data customer users table based on action direct pool used here
     const action = customerUsers.action;
     let result;
-    console.log("customerUsers", customerUsers);
 
     if (action === 'getCustomerUsers') {
       const page = customerUsers.page || 1;
