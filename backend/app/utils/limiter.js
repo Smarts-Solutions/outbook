@@ -1,6 +1,6 @@
-// const pLimit = require("p-limit").default;
-const pLimit = require("p-limit");
+const pLimitModule = require("p-limit");
+const pLimit = pLimitModule.default || pLimitModule;
 
 const limit = pLimit(10);
 
-module.exports = limit;
+module.exports = limit;
