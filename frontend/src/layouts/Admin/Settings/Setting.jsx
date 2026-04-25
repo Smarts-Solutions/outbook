@@ -197,7 +197,6 @@ const Setting = () => {
   };
 
   const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
-
     setAllJobsData((prev) => {
       const updated = [...prev];
 
@@ -523,8 +522,9 @@ const Setting = () => {
     //     await GetAllJobsName(req);
     //     return; // Exit the function to prevent the dispatch from being called
     //   }
+      
     // }
-
+   
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -1085,7 +1085,8 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
-                {row.is_disable == 0 && (
+                {row.is_disable == 0 && row.job_service_exists === null && (
+             
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row, "4")}
@@ -3511,6 +3512,7 @@ const Setting = () => {
                                     (type, index, self) =>
                                       index === self.findIndex((s) => s.job_type_id === type.job_type_id)
                                   )
+                                  
                                   ?.map((type) => ({
                                     value: type?.job_type_id,
                                     label: `${type?.job_type_name}`,

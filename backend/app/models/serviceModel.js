@@ -118,6 +118,16 @@ const deleteServices = async (ServicesId) => {
             }
         );
     }
+    
+    // delete customer services
+    const queryCustomerServices = `DELETE FROM customer_services WHERE service_id = ? `;
+    try {
+        await pool.execute(queryCustomerServices, [ServicesId.id]);
+    } catch (err) {
+        console.log('Error deleting data:', err);
+        throw err;
+    }
+
     const query = `DELETE FROM services WHERE id = ? `;
     try {
         await pool.execute(query, [ServicesId.id]);
