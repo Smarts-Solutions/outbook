@@ -1,6 +1,7 @@
 const express = require('express');
 const customerController = require('../../controllers/customers/customerController');
 const customerUsersController = require('../../controllers/customers/customerUsersController');
+const customerDashboardController = require('../../controllers/customers/customerDashboardController');
 const { verifyToken } = require('../../middlewares/authMiddleware');
 const uploadMultiple  = require('../../middlewares/uploadFile');
 
@@ -24,6 +25,14 @@ router.post('/getcustomerschecklist',verifyToken, customerController.getcustomer
 // Customer Users Routes Start
 router.post('/getAllCustomerUsers',verifyToken, customerUsersController.getAllCustomerUsers);
 // Customer Users Routes End
+
+// Customer Dashboard Routes Start
+router.post('/getCustomerDashboardData', verifyToken, customerDashboardController.getCustomerDashboardData);
+router.post('/getCustomerDashboardActivityLog', verifyToken, customerDashboardController.getCustomerDashboardActivityLog);
+router.post('/getCustomerCountLinkData', verifyToken, customerDashboardController.getCustomerCountLinkData);
+router.post('/getCustomerMasterStatus', verifyToken, customerDashboardController.getCustomerMasterStatus);
+router.post('/updateCustomerJobStatus', verifyToken, customerDashboardController.updateCustomerJobStatus);
+// Customer Dashboard Routes End
 
 
 module.exports = router;

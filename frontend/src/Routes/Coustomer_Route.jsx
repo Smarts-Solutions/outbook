@@ -2,6 +2,7 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import CustomerDashboard from '../layouts/Customer/Dashboard'
+import DashboardLinkData from '../layouts/Customer/DashboardLinkData';
 import CustomerList from '../layouts/Customer/Customer/CustomerList';
 import ClientList from '../layouts/Customer/Customer/ClientList';
 import JobList from '../layouts/Customer/Customer/JobList';
@@ -17,6 +18,7 @@ const Customer_Route = () => {
                 <div className="page-content">
                     <Routes>
                         <Route path="/dashboard" element={<CustomerDashboard />} />
+                        <Route path="/dashboard/data" element={<DashboardLinkData />} />
                         <Route path="/customer" element={<CustomerList />} />
                         <Route path="/client" element={<ClientList />} />
                         <Route path="/job" element={<JobList />} />

@@ -24,6 +24,64 @@ export async function get_All_Customer_Users(data, token) {
 // Customer Users End
 
 
+// Customer Dashboard Start
+export async function CUSTOMER_DASHBOARD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDashboardData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_ACTIVITYLOG(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDashboardActivityLog`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_LINKDATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerCountLinkData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_MASTER_STATUS(token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerMasterStatus`, {}, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function UPDATE_CUSTOMER_JOB_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}updateCustomerJobStatus`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+// Customer Dashboard End
+
+
 
 
 

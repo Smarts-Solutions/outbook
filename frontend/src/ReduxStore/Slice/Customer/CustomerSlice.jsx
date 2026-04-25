@@ -39,7 +39,11 @@ import {
 
   // customer users
   get_All_Customer_Users,
-  
+  CUSTOMER_DASHBOARD,
+  CUSTOMER_ACTIVITYLOG,
+  CUSTOMER_LINKDATA,
+  CUSTOMER_MASTER_STATUS,
+  UPDATE_CUSTOMER_JOB_STATUS,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -67,6 +71,58 @@ export const getAllCustomerUsers = createAsyncThunk(
     }
   }
 );
+
+// Customer Dashboard Start
+export const CustomerDashboardData = createAsyncThunk("getCustomerDashboardData", async (data) => {
+  try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_DASHBOARD(req, authToken);
+      return res; 
+  } catch (err) {
+      throw err;
+  }
+});
+
+export const CustomerActivityLog = createAsyncThunk("getCustomerDashboardActivityLog", async (data) => {
+  try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_ACTIVITYLOG(req, authToken);
+      return res; 
+  } catch (err) {
+      throw err;
+  }
+});
+
+export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", async (data) => {
+  try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_LINKDATA(req, authToken);
+      return res;
+  } catch (err) {
+      throw err;
+  }
+});
+
+export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (data) => {
+  try {
+      const { authToken } = data;
+      const res = await CUSTOMER_MASTER_STATUS(authToken);
+      return res;
+  } catch (err) {
+      throw err;
+  }
+});
+
+export const updateCustomerJobStatus = createAsyncThunk("updateCustomerJobStatus", async (data) => {
+  try {
+      const { req, authToken } = data;
+      const res = await UPDATE_CUSTOMER_JOB_STATUS(req, authToken);
+      return res;
+  } catch (err) {
+      throw err;
+  }
+});
+// Customer Dashboard End
 
 // Customer Users End
 
