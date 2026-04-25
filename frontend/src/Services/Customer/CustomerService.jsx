@@ -79,6 +79,50 @@ export async function UPDATE_CUSTOMER_JOB_STATUS(data, token) {
     return await err;
   }
 }
+
+export async function CUSTOMER_LIST(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerList`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CLIENTS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerClients`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOBS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerJobs`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DROPDOWN(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDropdown`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 // Customer Dashboard End
 
 
@@ -190,7 +234,7 @@ export async function ADD_SERVICES(data, token) {
 // Get All Customer Services
 export async function ADD_PEPPER_WORK(data, token) {
   try {
-    
+    0
     // const formData = new FormData();
     // data.fileData.forEach((file, index) => {
     //   formData.append("files[]", file);

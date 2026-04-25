@@ -68,10 +68,51 @@ const updateCustomerJobStatus = async (req, res) => {
   }
 };
 
+const getCustomerDropdown = async (req, res) => {
+  try {
+    const { staff_id } = req.body;
+    const result = await customerDashboardService.getCustomerDropdown(staff_id);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const getCustomerList = async (req, res) => {
+  try {
+    const result = await customerDashboardService.getCustomerList(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const getCustomerClients = async (req, res) => {
+  try {
+    const result = await customerDashboardService.getCustomerClientList(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const getCustomerJobs = async (req, res) => {
+  try {
+    const result = await customerDashboardService.getCustomerJobList(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
   getCustomerCountLinkData,
   getCustomerMasterStatus,
   updateCustomerJobStatus,
+  getCustomerDropdown,
+  getCustomerList,
+  getCustomerClients,
+  getCustomerJobs,
 };

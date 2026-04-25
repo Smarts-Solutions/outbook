@@ -1,71 +1,45 @@
 import React, { useEffect, useState, useRef } from "react";
-import { GET_ASSIGNED_CUSTOMERS } from "../../../Services/CustomerUser/customerPortalService";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
+import {
+  CustomerList,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Swal from "sweetalert2";
+import ReactPaginate from "react-paginate";
 import { Download } from "lucide-react";
 
-const CustomerList = () => {
+const Customer = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [customerData, setCustomerData] = useState([]);
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  
   const [filteredData, setFilteredData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [filteredData1, setFilteredData1] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
   const debounceRef = useRef(null);
 
   useEffect(() => {
-    fetchCustomers();
+    GetAllCustomerData(1, pageSize, "");
   }, []);
-
-  const fetchCustomers = async () => {
-    setLoading(true);
-    const response = await GET_ASSIGNED_CUSTOMERS(token);
-    if (response.status) {
-      setCustomerData(response.data);
-      setFilteredData(response.data);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    const filtered = customerData.filter((item) => {
-      const matchesSearch =
-        item.trading_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.customer_code?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "" || item.status == statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-    setFilteredData(filtered);
-  }, [searchTerm, statusFilter, customerData]);
-
-  const handleExport = () => {
-    const headers = ["Trading Name", "Customer Code", "Type", "Account Manager", "Employee Id", "Created by", "Created At", "Status"];
-    const csvData = filteredData.map((item) => [
-      item.trading_name,
-      item.customer_code,
-      item.customer_type === "1" ? "Sole Trader" : item.customer_type === "2" ? "Company" : "Partnership",
-      `${item.account_manager_firstname || ""} ${item.account_manager_lastname || ""}`,
-      item.account_manager_employee_number,
-      item.customer_created_by,
-      item.created_at,
-      item.status == 1 ? "Active" : "Inactive"
-    ]);
-
-    const csvContent = [headers.join(","), ...csvData.map(e => e.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "My_Customers.csv";
-    a.click();
-  };
 
   const columns = [
     {
       name: "Trading Name",
       cell: (row) => (
-        <span style={{ color: "#26bdf0", fontWeight: "bold", cursor: "default" }}>
+        <a
+          onClick={() => HandleClientView(row)}
+          style={{ cursor: "pointer", color: "#26bdf0", fontWeight: "bold" }}
+          title={row.trading_name}
+        >
           {row.trading_name}
-        </span>
+        </a>
       ),
       selector: (row) => row.trading_name,
       sortable: true,
@@ -78,18 +52,12 @@ const CustomerList = () => {
     {
       name: "Type",
       selector: (row) =>
-        row.customer_type === "1"
-          ? "Sole Trader"
-          : row.customer_type === "2"
-            ? "Company"
-            : row.customer_type === "3"
-              ? "Partnership"
-              : "-",
+        row.customer_type === "1" ? "Sole Trader" : row.customer_type === "2" ? "Company" : "Partnership",
       sortable: true,
     },
     {
       name: "Account Manager",
-      selector: (row) => `${row.account_manager_firstname || ""} ${row.account_manager_lastname || ""}`,
+      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
     },
     {
@@ -118,11 +86,110 @@ const CustomerList = () => {
     },
   ];
 
+  const HandleClientView = (row) => {
+    if (row.form_process == "4") {
+      navigate("/customer/Clientlist", { state: row });
+    } else {
+      Swal.fire({ title: "Form not completed", text: "Please complete the form", icon: "error" });
+    }
+  };
+
+  const GetAllCustomerData = async (page = 1, limit = 10, term = "") => {
+    setLoading(true);
+    const req = { staff_id: staffDetails.id, page, limit, search: term };
+    const data = { req, authToken: token };
+    try {
+      const response = await dispatch(CustomerList(data)).unwrap();
+      if (response.status) {
+        setFilteredData(response.data || []);
+        setTotalRecords(response.pagination?.total || 0);
+      } else {
+        setFilteredData([]);
+        setTotalRecords(0);
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      setFilteredData([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const dataToFilter = Array.isArray(filteredData) ? filteredData : [];
+    const StatusfilterData = dataToFilter.filter(
+      (item) => item.status == statusFilter || statusFilter == "",
+    );
+    setFilteredData1(StatusfilterData);
+  }, [filteredData, statusFilter]);
+
+  const handlePageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    GetAllCustomerData(newPage, pageSize, searchTerm);
+  };
+
+  const handlePageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    GetAllCustomerData(1, newSize, searchTerm);
+  };
+
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      GetAllCustomerData(1, pageSize, term);
+    }, 500);
+  };
+
+  const handleExport = async () => {
+    setLoading(true);
+    const req = { staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
+    const res = await dispatch(CustomerList({ req, authToken: token })).unwrap();
+    if (res.status && res.data.length > 0) {
+      const exportData = res.data.map(item => ({
+        "Trading Name": item.trading_name,
+        "Customer Code": item.customer_code,
+        "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : "Partnership",
+        "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+        "Employee Id": item.account_manager_employee_number,
+        "Created by": item.customer_created_by,
+        "Created At": item.created_at,
+        "Status": item.status == 1 ? "Active" : "Inactive",
+      }));
+      downloadCSV(exportData, "Customer_Details.csv");
+    } else {
+      alert("No data to export!");
+    }
+    setLoading(false);
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
   return (
     <div className="container-fluid">
       <div className="content-title">
         <div className="row">
-          <div className="col-md-6">
+          <div className="col-md-6 col-sm-5">
             <div className="tab-title">
               <h3 className="mt-0">Customers</h3>
             </div>
@@ -139,41 +206,53 @@ const CustomerList = () => {
                 placeholder="Search Customers"
                 className="form-control"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
             <div className="col-md-2">
-              <select
-                className="form-select form-control"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All</option>
+              <select className="form-select form-control" onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="">All Status</option>
                 <option value="1">Active</option>
                 <option value="0">Inactive</option>
               </select>
             </div>
             <div className="col-md-6 text-end">
-              <button
-                className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2 float-end"
-                onClick={handleExport}
-              >
-                <Download size={16} />
-                <span>Export Excel</span>
-              </button>
+                <button className="btn btn-outline-info fw-bold d-inline-flex align-items-center gap-2" onClick={handleExport}>
+                    <Download size={16} /> Export Excel
+                </button>
             </div>
           </div>
 
-          {loading && (
-            <div className="overlay">
-              <div className="loader"></div>
+          <div className="datatable-wrapper">
+            {loading && <div className="overlay"><div className="loader"></div></div>}
+            <Datatable columns={columns} data={filteredData1} />
+            
+            <div className="d-flex justify-content-between align-items-center mt-3">
+                <ReactPaginate
+                    previousLabel={"Previous"}
+                    nextLabel={"Next"}
+                    breakLabel={"..."}
+                    pageCount={Math.ceil(totalRecords / pageSize)}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handlePageChange}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                    forcePage={currentPage - 1}
+                />
+                <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                </select>
             </div>
-          )}
-          <Datatable columns={columns} data={filteredData} />
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default CustomerList;
+export default Customer;

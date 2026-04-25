@@ -44,12 +44,14 @@ import {
   CUSTOMER_LINKDATA,
   CUSTOMER_MASTER_STATUS,
   UPDATE_CUSTOMER_JOB_STATUS,
+  CUSTOMER_LIST,
+  CUSTOMER_CLIENTS,
+  CUSTOMER_JOBS,
+  CUSTOMER_DROPDOWN,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
-
-
 
 // Customer Users Start
 
@@ -105,7 +107,7 @@ export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", asy
 
 export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (data) => {
   try {
-      const { authToken } = data;
+      const authToken = typeof data === 'string' ? data : data?.authToken;
       const res = await CUSTOMER_MASTER_STATUS(authToken);
       return res;
   } catch (err) {
@@ -120,6 +122,46 @@ export const updateCustomerJobStatus = createAsyncThunk("updateCustomerJobStatus
       return res;
   } catch (err) {
       throw err;
+  }
+});
+
+export const CustomerList = createAsyncThunk("getCustomerList", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_LIST(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerClientList = createAsyncThunk("getCustomerClients", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_CLIENTS(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobList = createAsyncThunk("getCustomerJobs", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_JOBS(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const GetCustomerDropdown = createAsyncThunk("getCustomerDropdown", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_DROPDOWN(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
   }
 });
 // Customer Dashboard End

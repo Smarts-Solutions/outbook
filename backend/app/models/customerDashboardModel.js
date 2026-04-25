@@ -441,10 +441,260 @@ const getCustomerCountLinkData = async (dashboard) => {
   }
 };
 
+const getCustomerDropdown = async (staff_id) => {
+  try {
+    const query = `
+        SELECT id, trading_name FROM customers WHERE id IN (
+          SELECT customer_id FROM customer_access WHERE staff_id = ?
+          UNION
+          SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+          UNION
+          SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+          UNION
+          SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+        ) AND status = '1' AND form_process = '4'
+        ORDER BY trading_name ASC
+    `;
+    const [rows] = await pool.execute(query, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+    return { status: true, data: rows };
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
+const getCustomerList = async (dashboard) => {
+  try {
+    let { staff_id, page, limit, search } = dashboard;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
+    const queryAssigned = `
+        SELECT customer_id FROM customer_access WHERE staff_id = ?
+        UNION
+        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+        UNION
+        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+        UNION
+        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+    `;
+    const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+    const assignedIds = assignedCustomers.map(c => c.customer_id);
+
+    if (assignedIds.length === 0) return { status: true, message: "No customers assigned.", data: [], pagination: { total: 0 } };
+    const idsStr = assignedIds.join(',');
+
+    let searchCondition = "";
+    let searchParams = [];
+    if (search) {
+      searchCondition = `
+        AND (
+          customers.trading_name LIKE ?
+          OR customers.customer_code LIKE ?
+          OR staffs.first_name LIKE ?
+          OR staffs.last_name LIKE ?
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
+    }
+
+    const [countResult] = await pool.execute(
+      `SELECT COUNT(id) AS total FROM customers WHERE id IN (${idsStr}) ${searchCondition}`,
+      [...searchParams]
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        customers.id,
+        customers.trading_name,
+        customers.customer_code,
+        customers.customer_type,
+        customers.status,
+        customers.form_process,
+        staffs.first_name AS account_manager_firstname,
+        staffs.last_name AS account_manager_lastname,
+        staffs.employee_number AS account_manager_employee_number,
+        creator.first_name AS customer_created_by,
+        DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at
+      FROM customers
+      LEFT JOIN staffs ON customers.account_manager_id = staffs.id
+      LEFT JOIN staffs AS creator ON customers.staff_id = creator.id
+      WHERE customers.id IN (${idsStr}) ${searchCondition}
+      ORDER BY customers.id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [rows] = await pool.execute(query, [...searchParams, limit, offset]);
+
+    return {
+      status: true,
+      message: "success.",
+      data: rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
+    };
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
+const getCustomerClientList = async (dashboard) => {
+  try {
+    let { staff_id, customer_id, page, limit, search } = dashboard;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
+    let assignedCondition = "";
+    if (customer_id && customer_id !== "") {
+      assignedCondition = `AND customers.id = ${customer_id}`;
+    } else {
+      const queryAssigned = `
+          SELECT customer_id FROM customer_access WHERE staff_id = ?
+          UNION
+          SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+          UNION
+          SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+          UNION
+          SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+      `;
+      const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+      const assignedIds = assignedCustomers.map(c => c.customer_id);
+      if (assignedIds.length === 0) return { status: true, message: "No assigned customers.", data: [], pagination: { total: 0 } };
+      assignedCondition = `AND customers.id IN (${assignedIds.join(',')})`;
+    }
+
+    let searchCondition = "";
+    let searchParams = [];
+    if (search) {
+      searchCondition = `AND (clients.trading_name LIKE ? OR clients.client_code LIKE ?)`;
+      searchParams = [`%${search}%`, `%${search}%`];
+    }
+
+    const [countResult] = await pool.execute(
+      `SELECT COUNT(clients.id) AS total FROM clients 
+       JOIN customers ON clients.customer_id = customers.id
+       WHERE 1=1 ${assignedCondition} ${searchCondition}`,
+      [...searchParams]
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        clients.id, clients.trading_name AS client_name, clients.client_code, clients.status,
+        customers.trading_name AS customer_name,
+        client_types.type AS client_type_name,
+        staffs.first_name AS client_created_by,
+        DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at
+      FROM clients
+      JOIN customers ON clients.customer_id = customers.id
+      LEFT JOIN client_types ON clients.client_type = client_types.id
+      LEFT JOIN staffs ON clients.staff_created_id = staffs.id
+      WHERE 1=1 ${assignedCondition} ${searchCondition}
+      ORDER BY clients.id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [rows] = await pool.execute(query, [...searchParams, limit, offset]);
+
+    return {
+      status: true,
+      message: "success.",
+      data: rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
+    };
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
+const getCustomerJobList = async (dashboard) => {
+  try {
+    let { staff_id, customer_id, page, limit, search } = dashboard;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+    search = search ? search.trim() : "";
+
+    let assignedCondition = "";
+    if (customer_id && customer_id !== "") {
+      assignedCondition = `AND customers.id = ${customer_id}`;
+    } else {
+      const queryAssigned = `
+          SELECT customer_id FROM customer_access WHERE staff_id = ?
+          UNION
+          SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+          UNION
+          SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+          UNION
+          SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+      `;
+      const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+      const assignedIds = assignedCustomers.map(c => c.customer_id);
+      if (assignedIds.length === 0) return { status: true, message: "No assigned customers.", data: [], pagination: { total: 0 } };
+      assignedCondition = `AND customers.id IN (${assignedIds.join(',')})`;
+    }
+
+    let searchCondition = "";
+    let searchParams = [];
+    if (search) {
+      searchCondition = `AND (jobs.job_code_id LIKE ? OR clients.client_name LIKE ?)`;
+      searchParams = [`%${search}%`, `%${search}%`];
+    }
+
+    const [countResult] = await pool.execute(
+      `SELECT COUNT(jobs.id) AS total FROM jobs 
+       JOIN customers ON jobs.customer_id = customers.id
+       JOIN clients ON jobs.client_id = clients.id
+       WHERE 1=1 ${assignedCondition} ${searchCondition}`,
+      [...searchParams]
+    );
+    const total = countResult[0].total;
+
+    const query = `
+      SELECT 
+        jobs.id AS job_id, jobs.job_code_id, jobs.job_priority, jobs.status_type,
+        clients.trading_name AS client_trading_name,
+        customers.trading_name AS customer_name,
+        job_types.name AS job_type_name,
+        master_statuses.name AS status_name,
+        staffs.first_name AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at
+      FROM jobs
+      JOIN customers ON jobs.customer_id = customers.id
+      JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN master_statuses ON jobs.status_type = master_statuses.id
+      LEFT JOIN staffs ON jobs.staff_created_id = staffs.id
+      WHERE 1=1 ${assignedCondition} ${searchCondition}
+      ORDER BY jobs.id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [rows] = await pool.execute(query, [...searchParams, limit, offset]);
+
+    return {
+      status: true,
+      message: "success.",
+      data: rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
+    };
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
   getCustomerCountLinkData,
   getMasterStatus,
   updateJobStatus,
+  getCustomerDropdown,
+  getCustomerList,
+  getCustomerClientList,
+  getCustomerJobList,
 };

@@ -30,8 +30,12 @@ router.post('/getAllCustomerUsers',verifyToken, customerUsersController.getAllCu
 router.post('/getCustomerDashboardData', verifyToken, customerDashboardController.getCustomerDashboardData);
 router.post('/getCustomerDashboardActivityLog', verifyToken, customerDashboardController.getCustomerDashboardActivityLog);
 router.post('/getCustomerCountLinkData', verifyToken, customerDashboardController.getCustomerCountLinkData);
-router.post('/getCustomerMasterStatus', verifyToken, customerDashboardController.getCustomerMasterStatus);
-router.post('/updateCustomerJobStatus', verifyToken, customerDashboardController.updateCustomerJobStatus);
+router.post("/getCustomerMasterStatus", verifyToken, customerDashboardController.getCustomerMasterStatus);
+router.post("/updateCustomerJobStatus", verifyToken, customerDashboardController.updateCustomerJobStatus);
+router.post("/getCustomerDropdown", verifyToken, customerDashboardController.getCustomerDropdown);
+router.post("/getCustomerList", verifyToken, customerDashboardController.getCustomerList);
+router.post("/getCustomerClients", verifyToken, customerDashboardController.getCustomerClients);
+router.post("/getCustomerJobs", verifyToken, customerDashboardController.getCustomerJobs);
 // Customer Dashboard Routes End
 
 
