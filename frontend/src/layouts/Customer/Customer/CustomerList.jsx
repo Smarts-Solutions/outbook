@@ -100,8 +100,9 @@ const Customer = () => {
     const data = { req, authToken: token };
     try {
       const response = await dispatch(CustomerList(data)).unwrap();
+      console.log("CustomerList API Response:", response);
       if (response.status) {
-        setFilteredData(response.data || []);
+        setFilteredData(Array.isArray(response.data) ? response.data : []);
         setTotalRecords(response.pagination?.total || 0);
       } else {
         setFilteredData([]);
@@ -119,8 +120,9 @@ const Customer = () => {
   useEffect(() => {
     const dataToFilter = Array.isArray(filteredData) ? filteredData : [];
     const StatusfilterData = dataToFilter.filter(
-      (item) => item.status == statusFilter || statusFilter == "",
+      (item) => String(item.status) === String(statusFilter) || statusFilter === "",
     );
+    console.log("Filtered Data for Table:", StatusfilterData);
     setFilteredData1(StatusfilterData);
   }, [filteredData, statusFilter]);
 

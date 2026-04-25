@@ -372,7 +372,7 @@ const getByCustomerJob = async (dashboard) => {
       JOIN clients ON clients.id = jobs.client_id
       JOIN customers ON customers.id = jobs.customer_id
       JOIN job_types ON job_types.id = jobs.job_type_id
-      JOIN status_types ON status_types.id = jobs.status_type
+      JOIN master_status ON master_status.id = jobs.status_type
       WHERE customers.id IN (${idsStr})
       AND jobs.id IN (${cleane_ids})
       ${searchCondition}
@@ -388,14 +388,14 @@ const getByCustomerJob = async (dashboard) => {
           clients.trading_name AS client_name,
           customers.trading_name AS customer_name,
           job_types.type AS job_type_name,
-          status_types.type AS status_name,
+          master_status.name AS status_name,
           DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
           ${jobCodeExpr} AS job_code
       FROM jobs
       JOIN clients ON clients.id = jobs.client_id
       JOIN customers ON customers.id = jobs.customer_id
       JOIN job_types ON job_types.id = jobs.job_type_id
-      JOIN status_types ON status_types.id = jobs.status_type
+      JOIN master_status ON master_status.id = jobs.status_type
       WHERE customers.id IN (${idsStr})
       AND jobs.id IN (${cleane_ids})
       ${searchCondition}
@@ -501,7 +501,10 @@ const getCustomerList = async (dashboard) => {
     }
 
     const [countResult] = await pool.execute(
-      `SELECT COUNT(id) AS total FROM customers WHERE id IN (${idsStr}) ${searchCondition}`,
+      `SELECT COUNT(DISTINCT customers.id) AS total 
+       FROM customers 
+       LEFT JOIN staffs ON customers.account_manager_id = staffs.id
+       WHERE customers.id IN (${idsStr}) ${searchCondition}`,
       [...searchParams]
     );
     const total = countResult[0].total;
@@ -542,7 +545,31 @@ const getCustomerList = async (dashboard) => {
 
 const getCustomerClientList = async (dashboard) => {
   try {
-    let { staff_id, customer_id, page, limit, search } = dashboard;
+    let { staff_id, customer_id, client_id, page, limit, search, action } = dashboard;
+
+    if (action === "getByid" && client_id) {
+      const [clientRows] = await pool.execute(`
+        SELECT clients.*, client_types.type AS client_type_name
+        FROM clients 
+        LEFT JOIN client_types ON clients.client_type = client_types.id
+        WHERE clients.id = ?`, [client_id]);
+      
+      if (clientRows.length === 0) return { status: false, message: "Client not found." };
+
+      const [contactDetails] = await pool.execute(`SELECT * FROM client_contact_details WHERE client_id = ?`, [client_id]);
+      const [companyDetails] = await pool.execute(`SELECT * FROM client_company_information WHERE client_id = ?`, [client_id]);
+
+      return {
+        status: true,
+        message: "success.",
+        data: {
+          client: clientRows[0],
+          contact_details: contactDetails,
+          company_details: companyDetails[0] || {}
+        }
+      };
+    }
+
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
@@ -613,15 +640,17 @@ const getCustomerClientList = async (dashboard) => {
 
 const getCustomerJobList = async (dashboard) => {
   try {
-    let { staff_id, customer_id, page, limit, search } = dashboard;
+    let { staff_id, customer_id, client_id, page, limit, search, action } = dashboard;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
     let assignedCondition = "";
-    if (customer_id && customer_id !== "") {
-      assignedCondition = `AND customers.id = ${customer_id}`;
+    if (action === "getByClient" && client_id) {
+      assignedCondition = `AND jobs.client_id = ${client_id}`;
+    } else if (action === "getByCustomer" && customer_id) {
+      assignedCondition = `AND jobs.customer_id = ${customer_id}`;
     } else {
       const queryAssigned = `
           SELECT customer_id FROM customer_access WHERE staff_id = ?
@@ -634,14 +663,14 @@ const getCustomerJobList = async (dashboard) => {
       `;
       const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
       const assignedIds = assignedCustomers.map(c => c.customer_id);
-      if (assignedIds.length === 0) return { status: true, message: "No assigned customers.", data: [], pagination: { total: 0 } };
-      assignedCondition = `AND customers.id IN (${assignedIds.join(',')})`;
+      if (assignedIds.length === 0) return { status: true, message: "No assigned jobs.", data: [], pagination: { total: 0 } };
+      assignedCondition = `AND jobs.customer_id IN (${assignedIds.join(',')})`;
     }
 
     let searchCondition = "";
     let searchParams = [];
     if (search) {
-      searchCondition = `AND (jobs.job_code_id LIKE ? OR clients.client_name LIKE ?)`;
+      searchCondition = `AND (jobs.job_id LIKE ? OR clients.trading_name LIKE ?)`;
       searchParams = [`%${search}%`, `%${search}%`];
     }
 
@@ -656,18 +685,18 @@ const getCustomerJobList = async (dashboard) => {
 
     const query = `
       SELECT 
-        jobs.id AS job_id, jobs.job_code_id, jobs.job_priority, jobs.status_type,
+        jobs.id, jobs.job_id AS job_code_id, jobs.job_priority, jobs.status_type,
         clients.trading_name AS client_trading_name,
         customers.trading_name AS customer_name,
-        job_types.name AS job_type_name,
-        master_statuses.name AS status_name,
+        job_types.type AS job_type_name,
+        master_status.name AS status_name,
         staffs.first_name AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at
       FROM jobs
       JOIN customers ON jobs.customer_id = customers.id
       JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-      LEFT JOIN master_statuses ON jobs.status_type = master_statuses.id
+      LEFT JOIN master_status ON jobs.status_type = master_status.id
       LEFT JOIN staffs ON jobs.staff_created_id = staffs.id
       WHERE 1=1 ${assignedCondition} ${searchCondition}
       ORDER BY jobs.id DESC
@@ -683,6 +712,7 @@ const getCustomerJobList = async (dashboard) => {
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
     };
   } catch (error) {
+    console.error("getCustomerJobList error:", error);
     return { status: false, message: error.message };
   }
 };

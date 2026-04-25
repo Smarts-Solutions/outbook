@@ -105,15 +105,7 @@ export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", asy
   }
 });
 
-export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (data) => {
-  try {
-      const authToken = typeof data === 'string' ? data : data?.authToken;
-      const res = await CUSTOMER_MASTER_STATUS(authToken);
-      return res;
-  } catch (err) {
-      throw err;
-  }
-});
+
 
 export const updateCustomerJobStatus = createAsyncThunk("updateCustomerJobStatus", async (data) => {
   try {
@@ -159,6 +151,16 @@ export const GetCustomerDropdown = createAsyncThunk("getCustomerDropdown", async
   try {
     const { req, authToken } = data;
     const res = await CUSTOMER_DROPDOWN(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (token) => {
+  try {
+    const authToken = typeof token === 'string' ? token : token.authToken;
+    const res = await CUSTOMER_MASTER_STATUS(authToken);
     return res;
   } catch (err) {
     throw err;
