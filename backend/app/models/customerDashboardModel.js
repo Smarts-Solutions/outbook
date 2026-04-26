@@ -1,5 +1,6 @@
 const pool = require('../config/database');
-const { getDateRange } = require('../utils/helper');
+const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate } = require('../utils/helper');
+const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
 const getCustomerDashboardData = async (dashboard) => {
   console.log("getCustomerDashboardData dashboard:", dashboard);
@@ -1024,12 +1025,12 @@ const customerClientAction = async (dashboard) => {
 };
 
 const customerJobAction = async (dashboard) => {
-  const { action, job_id, StaffUserId, ip } = dashboard;
+  const { action, job_id, StaffUserId, ip, field, row } = dashboard;
+  
   if (action === "delete") {
     try {
       if (parseInt(job_id) > 0) {
         const currentDate = new Date();
-        const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
         await SatffLogUpdateOperation({
           staff_id: StaffUserId,
           ip: ip,
@@ -1054,8 +1055,261 @@ const customerJobAction = async (dashboard) => {
       return { status: false, message: "Error deleting job." };
     }
   }
+
+  if (action === "getByJobId") {
+    try {
+      const query = `
+        SELECT 
+          jobs.*,
+          customers.trading_name AS customer_trading_name,
+          clients.trading_name AS client_trading_name,
+          clients.client_type,
+          client_company_information.company_number AS client_company_number,
+          job_types.type AS job_type_name,
+          timesheet.job_id AS timesheet_job_id,
+          master_status.name AS status_name
+        FROM jobs
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN client_company_information ON client_company_information.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        LEFT JOIN master_status ON jobs.status_type = master_status.id
+        WHERE jobs.id = ?
+      `;
+      const [rows] = await pool.execute(query, [job_id]);
+      
+      if (rows.length > 0) {
+        const jobData = rows[0];
+        
+        // Get tasks
+        const [tasks] = await pool.execute("SELECT * FROM client_job_task WHERE job_id = ?", [job_id]);
+        
+        // Get allowed staff
+        const [staff] = await pool.execute("SELECT staff_id FROM job_allowed_staffs WHERE job_id = ?", [job_id]);
+        
+        // Get status history
+        const [history] = await pool.execute(`
+          SELECT jh.*, ms.name AS status_name 
+          FROM job_status_history jh
+          LEFT JOIN master_status ms ON jh.status_id = ms.id
+          WHERE jh.job_id = ? ORDER BY jh.id ASC
+        `, [job_id]);
+
+        return {
+          status: true,
+          data: {
+            ...jobData,
+            tasks: {
+              task: tasks,
+              checklist_id: jobData.processing_checklist || 0
+            },
+            selectedStaffData: staff.map(s => s.staff_id),
+            status_history: history
+          }
+        };
+      }
+      return { status: false, message: "Job not found." };
+    } catch (err) {
+      return { status: false, message: "Error fetching job details." };
+    }
+  }
+
+  if (action === "copy_job") {
+    try {
+      const id = row.job_id;
+      const [[data]] = await pool.execute(`SELECT * FROM jobs WHERE id = ?`, [id]);
+      if (!data) return { status: false, message: "Job not found" };
+
+      const [[clientInfo]] = await pool.execute(`
+        SELECT clients.client_type, client_company_information.company_number
+        FROM jobs
+        JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN client_company_information ON client_company_information.client_id = clients.id
+        WHERE jobs.id = ?
+      `, [id]);
+
+      delete data.id;
+      const nextJobId = await generateNextUniqueCode({ table: "jobs", field: "job_id" });
+
+      data.created_at = new Date();
+      data.updated_at = new Date();
+      data.date_received_on = new Date();
+      data.allocated_on = new Date();
+      data.status_type = 1;
+      data.job_id = nextJobId;
+      data.status_updation_date = new Date();
+      data.filing_Companies_required = "0";
+      data.filing_Companies_date = null;
+      data.filing_hmrc_required = "0";
+      data.filing_hmrc_date = null;
+      data.opening_balance_required = "0";
+      data.opening_balance_date = null;
+
+      let Year_Ending_id_1 = null;
+      let due_on = null;
+      if ([2, 5].includes(Number(clientInfo?.client_type)) && Number(data?.service_id) == 1) {
+        const compayDetails = await getCompanyOfficerDetailsFun(clientInfo?.company_number);
+        if (compayDetails.status) {
+          Year_Ending_id_1 = compayDetails?.data?.accounts?.next_accounts?.period_end_on;
+          due_on = compayDetails?.data?.accounts?.next_accounts?.due_on;
+        }
+      } else {
+        due_on = await getDueDate(clientInfo?.client_type, data?.service_id);
+      }
+
+      data.Year_Ending_id_1 = Year_Ending_id_1;
+      data.due_on = due_on;
+      data.sla_deadline_date = await getSLADeadline(data?.service_id, data?.Bookkeeping_Frequency_id_2);
+
+      if (field == false) {
+        data.reviewer = null;
+        data.allocated_to = null;
+        data.processing_checklist = null;
+        data.reviewing_checklist = null;
+        data.processing_checklist_status = "0";
+        data.reviewing_checklist_status = "0";
+        data.checklist_modal_data = null;
+      }
+
+      const columns = Object.keys(data).join(",");
+      const values = Object.values(data);
+      const placeholders = Object.keys(data).map(() => "?").join(",");
+
+      const [result] = await pool.execute(`INSERT INTO jobs (${columns}) VALUES (${placeholders})`, values);
+      const insertId = result.insertId;
+
+      await JobStatusUpdate(insertId, data.status_type, new Date().toLocaleString('sv-SE'));
+
+      const [tasks] = await pool.execute(`SELECT * FROM client_job_task WHERE job_id = ?`, [id]);
+      for (const task of tasks) {
+        await pool.execute(
+          `INSERT INTO client_job_task SET job_id = ?, client_id = ?, task_id = ?, task_status = ?, time = ?`,
+          [insertId, task.client_id, task.task_id, task.task_status, task.time]
+        );
+      }
+
+      const [allocatedStaff] = await pool.execute(`SELECT * FROM job_allowed_staffs WHERE job_id = ?`, [id]);
+      for (const staff of allocatedStaff) {
+        await pool.execute(`INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`, [insertId, staff.staff_id]);
+      }
+
+      return { status: true, message: "Job copied successfully.", data: insertId };
+    } catch (err) {
+      console.error("copy_job error:", err);
+      return { status: false, message: err.message };
+    }
+  }
+
   return { status: false, message: "Invalid action." };
 };
+
+const customerJobUpdate = async (job) => {
+  const { 
+    job_id, client_id, service_id, job_type_id, status_type,
+    reviewer, allocated_to, allocated_on, date_received_on, YearEnd,
+    budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
+    total_time, engagement_model, expected_delivery_date, due_on,
+    submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date,
+    filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
+    opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
+    turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
+    invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,
+    notes, tasks, selectedStaffData, StaffUserId, ip, client_job_code,
+    processing_checklist, reviewing_checklist, processing_checklist_status, reviewing_checklist_status,
+    checklist_modal_data, job_priority
+  } = job;
+
+  try {
+    const query = `
+      UPDATE jobs SET 
+        client_id = ?, service_id = ?, job_type_id = ?, status_type = ?, 
+        reviewer = ?, allocated_to = ?, allocated_on = ?, date_received_on = ?, year_end = ?,
+        budgeted_hours = ?, total_preparation_time = ?, review_time = ?, feedback_incorporation_time = ?,
+        total_time = ?, engagement_model = ?, expected_delivery_date = ?, due_on = ?,
+        submission_deadline = ?, customer_deadline_date = ?, sla_deadline_date = ?, internal_deadline_date = ?,
+        filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?,
+        opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?,
+        turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?,
+        invoiced = ?, currency_id = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,
+        notes = ?, client_job_code = ?, processing_checklist = ?, reviewing_checklist = ?, 
+        processing_checklist_status = ?, reviewing_checklist_status = ?, checklist_modal_data = ?, job_priority = ?
+      WHERE id = ?
+    `;
+
+    const values = [
+      client_id, service_id, job_type_id, status_type,
+      reviewer, allocated_to, allocated_on, date_received_on, YearEnd,
+      budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
+      total_time, engagement_model, expected_delivery_date, due_on,
+      submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date,
+      filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
+      opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
+      turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
+      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,
+      notes, client_job_code, processing_checklist, reviewing_checklist,
+      processing_checklist_status, reviewing_checklist_status, JSON.stringify(checklist_modal_data), job_priority,
+      job_id
+    ];
+
+    await pool.execute(query, values);
+
+    // Update tasks
+    if (tasks && tasks.length > 0) {
+      await pool.execute("DELETE FROM client_job_task WHERE job_id = ?", [job_id]);
+      for (const t of tasks) {
+        await pool.execute(
+          "INSERT INTO client_job_task (job_id, client_id, task_id, time) VALUES (?, ?, ?, ?)",
+          [job_id, client_id, t.task_id, t.time]
+        );
+      }
+    }
+
+    // Update staff
+    if (selectedStaffData) {
+      await pool.execute("DELETE FROM job_allowed_staffs WHERE job_id = ?", [job_id]);
+      for (const sId of selectedStaffData) {
+        await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [job_id, sId]);
+      }
+    }
+
+    return { status: true, message: "Job updated successfully." };
+  } catch (err) {
+    console.error("customerJobUpdate error:", err);
+    return { status: false, message: err.message };
+  }
+};
+
+async function getDueDate(client_type, service_id) {
+  if (["1", "3", "7"].includes(client_type)) {
+    if (Number(service_id) === 1) {
+      const d = new Date();
+      const year = d.getFullYear();
+      let dueYear = d > new Date(`${year}-01-31`) ? year + 1 : year;
+      return `${dueYear}-01-31`;
+    } else if (Number(service_id) === 4) {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      return (m >= 4 || m <= 1) ? `${m >= 4 ? y + 1 : y}-01-31` : `${y}-01-31`;
+    }
+  }
+  return null;
+}
+
+async function getSLADeadline(value, Bookkeeping_Frequency_id_2) {
+  const date = new Date();
+  if ([1, 3, 4, 8].includes(Number(value))) {
+    const offsets = { 1: 28, 4: 5, 3: 5, 8: 10 };
+    date.setDate(date.getDate() + offsets[value]);
+    return date.toISOString().split("T")[0];
+  } else if ([2].includes(Number(value))) {
+    const offsets = { Daily: 1, Weekly: 3, Monthly: 10, Quarterly: 15, Yearly: 30 };
+    date.setDate(date.getDate() + (offsets[Bookkeeping_Frequency_id_2] || 1));
+    return date.toISOString().split("T")[0];
+  }
+  return null;
+}
 
 module.exports = {
   getCustomerDashboardData,
@@ -1069,4 +1323,5 @@ module.exports = {
   getCustomerJobList,
   customerClientAction,
   customerJobAction,
+  customerJobUpdate,
 };

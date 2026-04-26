@@ -97,6 +97,8 @@ export const CustomerActivityLog = createAsyncThunk("getCustomerDashboardActivit
   }
 });
 
+
+
 export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", async (data) => {
   try {
     const { req, authToken } = data;
@@ -203,6 +205,22 @@ export const CustomerJobAction = createAsyncThunk("customerJobAction", async (da
       StaffUserId: StaffUserId.id,
     };
     const res = await CUSTOMER_JOB_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobUpdate = createAsyncThunk("customerJobUpdate", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOB_UPDATE(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;

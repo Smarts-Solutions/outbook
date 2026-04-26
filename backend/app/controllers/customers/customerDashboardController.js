@@ -122,6 +122,15 @@ const customerJobAction = async (req, res) => {
   }
 };
 
+const customerJobUpdate = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerJobUpdate(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -134,4 +143,5 @@ module.exports = {
   getCustomerJobs,
   customerClientAction,
   customerJobAction,
+  customerJobUpdate,
 };

@@ -7,6 +7,7 @@ import {
   GetCustomerDropdown,
   CustomerClientList,
   getCustomerMasterStatus,
+  CustomerJobAction,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
@@ -173,11 +174,11 @@ const ClientList = () => {
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
   const [getAccessDataJob, setAccessDataJob] = useState({
-    insert: 0,
-    update: 0,
-    delete: 0,
-    view: 0,
-    all_jobs: 0,
+    insert: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
+    update: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
+    delete: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
+    view: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
+    all_jobs: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
   });
 
   const accessDataJob =
@@ -191,6 +192,17 @@ const ClientList = () => {
     )?.items || [];
 
   useEffect(() => {
+    const userRole = role?.toString().toUpperCase();
+    if (userRole === "CUSTOMER" || userRole === "SUPERADMIN") {
+      setAccessDataJob({
+        insert: 1,
+        update: 1,
+        delete: 1,
+        view: 1,
+        all_jobs: 1,
+      });
+      return;
+    }
     if (accessDataJob.length === 0) return;
     const updatedAccess = {
       insert: 0,
@@ -211,7 +223,7 @@ const ClientList = () => {
     });
 
     setAccessDataJob(updatedAccess);
-  }, []);
+  }, [role]);
 
   const GetClientDetails = async (client_id) => {
     const req = { action: "getByid", client_id: client_id, staff_id: staffDetails.id };
@@ -602,7 +614,7 @@ const ClientList = () => {
             ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
           };
           const data = { req: req, authToken: token };
-          await dispatch(CustomerJobList(data))
+          await dispatch(CustomerJobAction(data))
             .unwrap()
             .then(async (response) => {
               if (response.status) {
@@ -729,7 +741,7 @@ const ClientList = () => {
       staff_id: staffDetails.id
     };
     const data = { req: req, authToken: token };
-    await dispatch(CustomerJobList(data))
+    await dispatch(CustomerJobAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {

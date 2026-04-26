@@ -135,6 +135,17 @@ export async function CUSTOMER_JOB_ACTION(data, token) {
   }
 }
 
+export async function CUSTOMER_JOB_UPDATE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobUpdate`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function CUSTOMER_DROPDOWN(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}getCustomerDropdown`, data, {
