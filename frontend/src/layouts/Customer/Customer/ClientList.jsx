@@ -17,7 +17,7 @@ import ReactPaginate from "react-paginate";
 import { Download, ArrowLeft, Plus, User, Briefcase } from "lucide-react";
 
 const ClientLists = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const dispatch = useDispatch();
   const location = useLocation();
   const token = JSON.parse(localStorage.getItem("token"));
