@@ -9,15 +9,14 @@ import {
   GetCustomerDropdown,
   getCustomerMasterStatus,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
-import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
+import CustomerHierarchy from "../../../Components/ExtraComponents/CustomerHierarchy";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, ArrowLeft, Plus, User, Briefcase } from "lucide-react";
+import { Download, Plus, User, Briefcase } from "lucide-react";
 
 const ClientLists = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -29,7 +28,6 @@ const ClientLists = () => {
   const [customerId, setCustomerId] = useState(customer_id_sidebar || "");
   const [customerName, setCustomerName] = useState("");
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -40,20 +38,12 @@ const ClientLists = () => {
 
   const [ClientData, setClientData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState([]);
-  const [getCheckList, setCheckList] = useState([]);
-  const [getCheckList1, setCheckList1] = useState([]);
-  const [hararchyData, setHararchyData] = useState({
-    customer: { id: customerId, trading_name: customerName },
-  });
-  const [selectStatusIs, setStatusId] = useState("");
   const [statusDataAll, setStatusDataAll] = useState([]);
-  
   const [activeTab, setActiveTab] = useState("client");
 
-  // Permissions (Mirroring Admin logic but you might want to adjust for Customer User)
-  const [getAccessDataClient, setAccessDataClient] = useState({ insert: 1, update: 1, delete: 1, client: 1, all_clients: 1 });
-  const [getAccessDataJob, setAccessDataJob] = useState({ insert: 1, update: 1, delete: 1, job: 1, all_jobs: 1 });
-  const [getAccessDataCustomer, setAccessDataCustomer] = useState({ insert: 1, update: 1, delete: 1, view: 1, all_customers: 1 });
+  const [hararchyData, setHararchyData] = useState({
+    customer: { id: customerId, trading_name: "" },
+  });
 
   const GetAllCustomer = async () => {
     setLoading(true);
@@ -61,25 +51,22 @@ const ClientLists = () => {
     const data = { req: req, authToken: token };
     await dispatch(GetCustomerDropdown(data))
       .unwrap()
-      .then(async (response) => {
+      .then((response) => {
         if (response.status) {
-          setCustomerData(response.data?.data || response.data || []);
+          const data = response.data?.data || response.data || [];
+          setCustomerData(data);
+          if (customerId) {
+            const selected = data.find(c => c.id == customerId);
+            if (selected) setCustomerName(selected.trading_name);
+          }
         } else {
           setCustomerData([]);
         }
-      })
-      .catch((error) => {
-        return;
       })
       .finally(() => {
         setLoading(false);
       });
   };
-
-  useEffect(() => {
-    GetAllCustomer();
-    GetStatus();
-  }, []);
 
   const GetStatus = async () => {
     await dispatch(getCustomerMasterStatus({ req: { action: "get" }, authToken: token }))
@@ -90,23 +77,24 @@ const ClientLists = () => {
         } else {
           setStatusDataAll([]);
         }
-      })
-      .catch((error) => {
-        return;
       });
   };
 
   useEffect(() => {
-    if (activeTab !== "") {
-      if (activeTab === "checklist") {
-        getCheckListData();
-      } else if (activeTab === "client") {
-        GetAllClientData(customerId, 1, pageSize, "");
-      } else if (activeTab === "job") {
-        JobDetails(1, pageSize, "");
-      }
+    GetAllCustomer();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "job") {
+      GetStatus();
     }
-  }, [activeTab]);
+    
+    if (activeTab === "client") {
+      GetAllClientData(customerId, 1, pageSize, "");
+    } else if (activeTab === "job") {
+      JobDetails(1, pageSize, "");
+    }
+  }, [activeTab, customerId]);
 
   const SetTab = (e) => {
     setActiveTab(e);
@@ -114,55 +102,85 @@ const ClientLists = () => {
     setSearchTerm("");
   };
 
-  const initialTabs = [];
-  const [tabs, setTabs] = useState([]);
+  const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
+    setLoading(true);
+    const req = { action: "getByCustomer", customer_id: id, page, limit, search };
+    await dispatch(CustomerClientList({ req, authToken: token }))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setClientData(response.data || []);
+          setTotalRecords(response.pagination?.total || 0);
+        } else {
+          setClientData([]);
+          setTotalRecords(0);
+        }
+      })
+      .finally(() => setLoading(false));
+  };
 
-  useEffect(() => {
-    let tabsData = [];
-    tabsData.push({
-      id: "client",
-      label: "Client ",
-      icon: <User size={16} />,
+  const JobDetails = async (page = 1, limit = 10, search = "") => {
+    setLoading(true);
+    const req = { action: "getByCustomer", customer_id: customerId, page, limit, search };
+    await dispatch(CustomerJobList({ req, authToken: token }))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setGetJobDetails(response.data || []);
+          setTotalRecords(response.pagination?.total || 0);
+        } else {
+          setGetJobDetails([]);
+          setTotalRecords(0);
+        }
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleStatusChange = (e, row) => {
+    const Id = e.target.value;
+    sweatalert.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { job_id: row.job_id, status_type: Number(Id) };
+          const res = await dispatch(updateCustomerJobStatus({ req, authToken: token })).unwrap();
+          if (res.status) {
+            sweatalert.fire({ title: "Success", text: res.message, icon: "success", timer: 1000, showConfirmButton: false });
+            JobDetails(currentPage, pageSize, searchTerm);
+          } else {
+            sweatalert.fire({ title: "Error", text: res.message, icon: "error" });
+          }
+        } catch (error) {
+          sweatalert.fire({ title: "Error", text: "Something went wrong", icon: "error" });
+        }
+      }
     });
-    if (customerId != "") {
-      tabsData.push({
-        id: "job",
-        label: "Job",
-        icon: <Briefcase size={16} />,
-      });
-    }
-    setTabs(tabsData);
-  }, [customerId]);
+  };
 
   const ClientListColumns = [
     {
       name: "Client Name",
       cell: (row) => (
-        <div>
-          <a
-            onClick={() => HandleClientView(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
-            {row.client_name}
-          </a>
-        </div>
+        <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+          {row.client_name}
+        </a>
       ),
       selector: (row) => row.client_name,
       sortable: true,
     },
     {
       name: "Client Code",
-      cell: (row) => (
-        <div title={row.client_code || "-"}>{row.client_code || "-"}</div>
-      ),
       selector: (row) => row.client_code || "-",
       sortable: true,
     },
     {
       name: "Customer Name",
-      cell: (row) => (
-        <div title={row.customer_name || "-"}>{row.customer_name || "-"}</div>
-      ),
       selector: (row) => row.customer_name || "-",
       sortable: true,
     },
@@ -194,14 +212,7 @@ const ClientLists = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          <button
-            className="edit-icon"
-            onClick={() =>
-              navigate("/customer/client/edit", {
-                state: { row, id: customerId, activeTab: activeTab },
-              })
-            }
-          >
+          <button className="edit-icon" onClick={() => navigate("/customer/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
             <i className="ti-pencil" />
           </button>
         </div>
@@ -213,10 +224,7 @@ const ClientLists = () => {
     {
       name: "Job ID",
       cell: (row) => (
-        <a
-          onClick={() => HandleJobView(row)}
-          style={{ cursor: "pointer", color: "#26bdf0" }}
-        >
+        <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
           {row.job_code_id}
         </a>
       ),
@@ -225,6 +233,10 @@ const ClientLists = () => {
     },
     {
       name: "Job Priority",
+      cell: (row) => {
+        const v = row.job_priority || "-";
+        return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+      },
       selector: (row) => row.job_priority || "-",
       sortable: true,
     },
@@ -241,11 +253,7 @@ const ClientLists = () => {
     {
       name: "Status",
       cell: (row) => (
-        <select
-          className="form-select form-control"
-          value={row.status_type}
-          onChange={(e) => handleStatusChange(e, row)}
-        >
+        <select className="form-select form-control" value={row.status_type} onChange={(e) => handleStatusChange(e, row)}>
           {statusDataAll.map((status) => (
             <option key={status.id} value={status.id}>
               {status.name}
@@ -255,6 +263,51 @@ const ClientLists = () => {
       ),
       sortable: true,
       width: "250px",
+    },
+    {
+      name: "Client Contact Person",
+      cell: (row) => (
+        <div title={row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-"}>
+          {row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-"}
+        </div>
+      ),
+      selector: (row) => row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-",
+      sortable: true,
+    },
+    {
+      name: "Client Job Code",
+      selector: (row) => row.client_job_code || "-",
+      sortable: true,
+    },
+    {
+      name: "Outbook Account Manager",
+      cell: (row) => (
+        <div title={row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}>
+          {row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}
+        </div>
+      ),
+      selector: (row) => row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-",
+      sortable: true,
+    },
+    {
+      name: "Allocated To",
+      selector: (row) => row.allocated_id != null ? row.allocated_first_name + " " + row.allocated_last_name : "-",
+      sortable: true,
+    },
+    {
+      name: "Timesheet",
+      cell: (row) => (
+        <div title={row.total_hours_status == "1" && row.total_hours != null ? row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m" : "-"}>
+          {row.total_hours_status == "1" && row.total_hours != null ? row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m" : "-"}
+        </div>
+      ),
+      selector: (row) => row.total_hours_status == "1" && row.total_hours != null ? row.total_hours : "-",
+      sortable: true,
+    },
+    {
+      name: "Invoicing",
+      selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
+      sortable: true,
     },
     {
       name: "Created By",
@@ -270,18 +323,7 @@ const ClientLists = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          <button
-            className="edit-icon"
-            onClick={() =>
-              navigate("/customer/job/edit", {
-                state: {
-                  job_id: row.job_id,
-                  goto: "Customer",
-                  activeTab: activeTab,
-                },
-              })
-            }
-          >
+          <button className="edit-icon" onClick={() => navigate("/customer/job/edit", { state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab } })}>
             <i className="ti-pencil" />
           </button>
         </div>
@@ -289,52 +331,19 @@ const ClientLists = () => {
     },
   ];
 
-  const handleStatusChange = (e, row) => {
-    const Id = e.target.value;
-    sweatalert.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const req = { job_id: row.job_id, status_type: Number(Id) };
-          const res = await dispatch(updateCustomerJobStatus({ req, authToken: token })).unwrap();
-          if (res.status) {
-            sweatalert.fire({ title: "Success", text: res.message, icon: "success", timer: 1000, showConfirmButton: false });
-            JobDetails(currentPage, pageSize, searchTerm);
-          } else {
-            sweatalert.fire({ title: "Error", text: res.message, icon: "error" });
-          }
-        } catch (error) {
-          sweatalert.fire({ title: "Error", text: "Something went wrong", icon: "error" });
-        }
-      }
-    });
-  };
-
   const handlePageChange = (selected) => {
     const newPage = selected.selected + 1;
     setCurrentPage(newPage);
-    if (activeTab === "client") {
-      GetAllClientData(customerId, newPage, pageSize, searchTerm);
-    } else if (activeTab === "job") {
-      JobDetails(newPage, pageSize, searchTerm);
-    }
+    if (activeTab === "client") GetAllClientData(customerId, newPage, pageSize, searchTerm);
+    else if (activeTab === "job") JobDetails(newPage, pageSize, searchTerm);
   };
 
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
     setCurrentPage(1);
-    if (activeTab === "client") {
-      GetAllClientData(customerId, 1, newSize, searchTerm);
-    } else if (activeTab === "job") {
-      JobDetails(1, newSize, searchTerm);
-    }
+    if (activeTab === "client") GetAllClientData(customerId, 1, newSize, searchTerm);
+    else if (activeTab === "job") JobDetails(1, newSize, searchTerm);
   };
 
   const handleSearchChange = (term) => {
@@ -347,54 +356,14 @@ const ClientLists = () => {
     }, 500);
   };
 
-  const JobDetails = async (page = 1, limit = 10, search = "") => {
-    const req = { staff_id: staffDetails.id, customer_id: customerId, page, limit, search };
-    await dispatch(CustomerJobList({ req, authToken: token }))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          setGetJobDetails(response.data || []);
-          setTotalRecords(response.pagination?.total || 0);
-        } else {
-          setGetJobDetails([]);
-          setTotalRecords(0);
-        }
-      })
-      .catch(() => {
-        setGetJobDetails([]);
-        setTotalRecords(0);
-      });
-  };
-
-  const GetAllClientData = async (id, page = 1, limit = 10, search = "") => {
-    setLoading(true);
-    const req = { staff_id: staffDetails.id, customer_id: id, page, limit, search };
-    await dispatch(CustomerClientList({ req, authToken: token }))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          setClientData(response.data || []);
-          setTotalRecords(response.pagination?.total || 0);
-        } else {
-          setClientData([]);
-          setTotalRecords(0);
-        }
-      })
-      .catch(() => {
-        setClientData([]);
-        setTotalRecords(0);
-      })
-      .finally(() => setLoading(false));
-  };
-
   const handleExport = async () => {
     setLoading(true);
-    const req = { staff_id: staffDetails.id, customer_id: customerId, page: 1, limit: 100000, search: "" };
+    const req = { action: "getByCustomer", customer_id: customerId, page: 1, limit: 100000, search: "" };
     let exportData = [];
     if (activeTab === "client") {
       const res = await dispatch(CustomerClientList({ req, authToken: token })).unwrap();
-      if (res.status && res.data.data.length > 0) {
-        exportData = res.data.data.map(item => ({
+      if (res.status && res.data.length > 0) {
+        exportData = res.data.map(item => ({
           "Client Name": item.client_name,
           "Client Code": item.client_code,
           "Customer Name": item.customer_name,
@@ -406,13 +375,13 @@ const ClientLists = () => {
       }
     } else if (activeTab === "job") {
       const res = await dispatch(CustomerJobList({ req, authToken: token })).unwrap();
-      if (res.status && res.data.data.length > 0) {
-        exportData = res.data.data.map(item => ({
+      if (res.status && res.data.length > 0) {
+        exportData = res.data.map(item => ({
           "Job ID": item.job_code_id,
           "Priority": item.job_priority,
           "Client Name": item.client_trading_name,
           "Job Type": item.job_type_name,
-          Status: item.status_name,
+          Status: item.status,
           "Created By": item.job_created_by,
           "Created At": item.created_at,
         }));
@@ -441,23 +410,23 @@ const ClientLists = () => {
   };
 
   const HandleClientView = (row) => {
-    navigate("/customer/client/profile", { state: { Client_id: row.id, activeTab: activeTab } });
+    setHararchyData({ customer: { id: customerId, trading_name: customerName }, client: row });
+    navigate("/customer/client/profile", { state: { Client_id: row.id, activeTab: activeTab, customer_id: customerId } });
   };
 
   const HandleJobView = (row) => {
-    navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab } });
+    setHararchyData({ customer: { id: customerId, trading_name: customerName }, job: row });
+    navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId } });
   };
 
   const selectCustomerId = (id, name) => {
     sessionStorage.setItem("customer_id_sidebar", id);
     setCustomerId(id);
     setCustomerName(name);
+    setHararchyData({ customer: { id: id, trading_name: name } });
+    setActiveTab("client");
     setCurrentPage(1);
     setSearchTerm("");
-    if (id !== "") {
-        if(activeTab === "client") GetAllClientData(id, 1, pageSize, "");
-        else if(activeTab === "job") JobDetails(1, pageSize, "");
-    }
   };
 
   const customerOptions = [
@@ -466,6 +435,13 @@ const ClientLists = () => {
   ];
 
   const selectedOption = customerOptions.find((opt) => Number(opt.value) === Number(customerId)) || { value: "", label: "All" };
+
+  const tabs = [
+    { id: "client", label: "Client", icon: <User size={16} /> },
+  ];
+  if (customerId) {
+    tabs.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
+  }
 
   return (
     <div className="container-fluid">
@@ -501,19 +477,37 @@ const ClientLists = () => {
                     ))}
                   </ul>
                 </div>
-                <div className="col-md-4 d-flex justify-content-end">
-                   {/* Add Client / Create Job buttons could go here if Customer side allows creation */}
+                <div className="col-md-4 d-flex justify-content-end align-items-center">
+                    {activeTab === "client" && customerId && (
+                        <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab } })}>
+                             <Plus size={16} /> Add Client
+                        </div>
+                    )}
+                    {activeTab === "job" && customerId && (
+                         <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab } })}>
+                             <Plus size={16} /> Create Job
+                         </div>
+                    )}
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {customerId && (
+          <CustomerHierarchy
+            show={["Customer", activeTab.charAt(0).toUpperCase() + activeTab.slice(1)]}
+            active={1}
+            data={hararchyData}
+            NumberOfActive={totalRecords}
+          />
+        )}
+
         <div className="tab-content mt-4">
           <div className="report-data">
             <div className="d-flex justify-content-between align-items-center">
               <div className="tab-title">
-                <h3 className="mt-0">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s</h3>
+                <h3 className="mt-0">{activeTab === "client" ? "Clients" : "Jobs"}</h3>
               </div>
               <button className="btn btn-outline-info fw-bold d-inline-flex align-items-center gap-2" onClick={handleExport}>
                 <Download size={16} /> Export Excel

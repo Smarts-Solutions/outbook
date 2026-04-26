@@ -9,6 +9,13 @@ import JobList from '../layouts/Customer/Customer/JobList';
 import Sidebar from '../Components/Dashboard/Sidebar';
 import Header from '../Components/Dashboard/Header';
 
+import ClientEdit from "../layouts/Admin/Clients/Client_Edit";
+import ClientProfiles from "../layouts/Admin/Clients/ClientProfile_sidebar";
+import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
+import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
+import JobLogs from "../layouts/Admin/Jobs/JobLogs";
+import AddNewClient from "../layouts/Admin/Clients/CreateClient";
+
 const Customer_Route = () => {
     return (
         <div className="app-container">
@@ -22,6 +29,13 @@ const Customer_Route = () => {
                         <Route path="/customer" element={<CustomerList />} />
                         <Route path="/client" element={<ClientList />} />
                         <Route path="/job" element={<JobList />} />
+
+                        <Route path="/client/edit" element={<ClientEdit />} />
+                        <Route path="/client/profile" element={<ClientProfiles />} />
+                        <Route path="/addclient" element={<AddNewClient />} />
+                        <Route path="/createjob" element={<CreateJob />} />
+                        <Route path="/job/edit" element={<JobEdit />} />
+                        <Route path="/job/logs" element={<JobLogs />} />
 
                     </Routes>
                 </div>
