@@ -10,7 +10,7 @@ import Sidebar from '../Components/Dashboard/Sidebar';
 import Header from '../Components/Dashboard/Header';
 
 import ClientEdit from "../layouts/Admin/Clients/Client_Edit";
-import ClientProfiles from "../layouts/Admin/Clients/ClientProfile_sidebar";
+import ClientProfiles from "../layouts/Customer/Customer/ClientProfile_sidebar";
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Customer/Customer/EditJob";
 import JobLogs from "../layouts/Admin/Jobs/JobLogs";

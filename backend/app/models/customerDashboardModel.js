@@ -995,9 +995,11 @@ const getCustomerJobList = async (dashboard) => {
 };
 
 const customerClientAction = async (dashboard) => {
-  const { action, id, StaffUserId, ip } = dashboard;
+  const { action, id, client_id, StaffUserId, ip } = dashboard;
+  const effectiveClientId = id || client_id;
+
   if (action === "delete") {
-    if (parseInt(id) > 0) {
+    if (parseInt(effectiveClientId) > 0) {
       const currentDate = new Date();
       const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
       await SatffLogUpdateOperation({
@@ -1007,20 +1009,178 @@ const customerClientAction = async (dashboard) => {
         module_name: "client",
         log_message: `deleted client profile. client code :`,
         permission_type: "deleted",
-        module_id: id,
+        module_id: effectiveClientId,
       });
     }
 
     try {
-      await pool.execute("DELETE FROM clients WHERE id = ?", [id]);
-      await pool.execute("DELETE FROM client_company_information WHERE client_id = ?", [id]);
-      await pool.execute("DELETE FROM client_contact_details WHERE client_id = ?", [id]);
-      await pool.execute("DELETE FROM client_documents WHERE client_id = ?", [id]);
+      await pool.execute("DELETE FROM clients WHERE id = ?", [effectiveClientId]);
+      await pool.execute("DELETE FROM client_company_information WHERE client_id = ?", [effectiveClientId]);
+      await pool.execute("DELETE FROM client_contact_details WHERE client_id = ?", [effectiveClientId]);
+      await pool.execute("DELETE FROM client_documents WHERE client_id = ?", [effectiveClientId]);
       return { status: true, message: "Client deleted successfully." };
     } catch (err) {
       return { status: false, message: "Error deleting client." };
     }
   }
+
+  if (action === "getByid") {
+    try {
+      const [ExistClient] = await pool.execute(
+        "SELECT client_type, customer_id FROM `clients` WHERE id = ?", [effectiveClientId]
+      );
+
+      if (!ExistClient || ExistClient.length === 0) {
+        return { status: false, message: "No client found with the given ID." };
+      }
+
+      const client_type = ExistClient[0].client_type;
+      const customer_id = ExistClient[0].customer_id;
+
+      // Security check: verify if the staff has access to this customer
+      const queryAssigned = `
+          SELECT customer_id FROM customer_access WHERE staff_id = ? AND customer_id = ?
+          UNION
+          SELECT customer_id FROM staff_portfolio WHERE staff_id = ? AND customer_id = ?
+          UNION
+          SELECT id FROM customers WHERE (staff_id = ? OR account_manager_id = ?) AND id = ?
+      `;
+      const [assignedCustomers] = await pool.execute(queryAssigned, [StaffUserId, customer_id, StaffUserId, customer_id, StaffUserId, StaffUserId, customer_id]);
+      
+      if (assignedCustomers.length === 0) {
+        return { status: false, message: "Unauthorized access to this client." };
+      }
+
+      const query = `
+        SELECT 
+          clients.id AS client_id, 
+          clients.client_type AS client_type, 
+          clients.customer_id AS customer_id, 
+          clients.client_industry_id AS client_industry_id, 
+          clients.trading_name AS trading_name, 
+          clients.client_code AS client_code, 
+          clients.trading_address AS trading_address, 
+          clients.vat_registered AS vat_registered, 
+          clients.vat_number AS vat_number, 
+          clients.website AS website, 
+          clients.notes AS notes, 
+          clients.status AS status, 
+          client_contact_details.id AS contact_id,
+          client_contact_details.first_name AS first_name,
+          client_contact_details.last_name AS last_name,
+          client_contact_details.email AS email,
+          client_contact_details.phone_code AS phone_code,
+          client_contact_details.phone AS phone,
+          client_contact_details.residential_address AS residential_address,
+          customer_contact_person_role.name AS customer_role_contact_name,
+          customer_contact_person_role.id AS customer_role_contact_id,
+          client_company_information.company_name AS company_name,
+          client_company_information.entity_type AS entity_type,
+          client_company_information.company_status AS company_status,
+          client_company_information.company_number AS company_number,
+          client_company_information.registered_office_address AS registered_office_address,
+          DATE_FORMAT(client_company_information.incorporation_date, '%Y-%m-%d') AS incorporation_date,
+          client_company_information.incorporation_in AS incorporation_in,
+          client_documents.id AS client_documents_id,
+          client_documents.file_name AS file_name,
+          client_documents.original_name AS original_name,
+          client_documents.file_type AS file_type,
+          client_documents.file_size AS file_size,
+          client_documents.web_url AS web_url
+        FROM 
+          clients
+        LEFT JOIN 
+          client_contact_details ON clients.id = client_contact_details.client_id
+        LEFT JOIN 
+          customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+        LEFT JOIN 
+          client_company_information ON clients.id = client_company_information.client_id
+        LEFT JOIN 
+          client_documents ON client_documents.client_id = clients.id 
+        WHERE 
+          clients.id = ?
+      `;
+
+      const [rows] = await pool.execute(query, [effectiveClientId]);
+
+      if (rows.length > 0) {
+        const clientData = {
+          id: rows[0].client_id,
+          client_type: rows[0].client_type,
+          customer_id: rows[0].customer_id,
+          client_industry_id: rows[0].client_industry_id,
+          trading_name: rows[0].trading_name,
+          client_code: rows[0].client_code,
+          trading_address: rows[0].trading_address,
+          vat_registered: rows[0].vat_registered,
+          vat_number: rows[0].vat_number,
+          website: rows[0].website,
+          notes: rows[0].notes,
+          status: rows[0].status,
+        };
+
+        const contactDetails = [];
+        const seenContacts = new Set();
+        rows.forEach(row => {
+          if (row.contact_id && !seenContacts.has(row.contact_id)) {
+            contactDetails.push({
+              contact_id: row.contact_id,
+              customer_contact_person_role_id: row.customer_role_contact_id,
+              customer_contact_person_role_name: row.customer_role_contact_name,
+              first_name: row.first_name,
+              last_name: row.last_name,
+              email: row.email,
+              phone_code: row.phone_code,
+              phone: row.phone,
+              residential_address: row.residential_address,
+            });
+            seenContacts.add(row.contact_id);
+          }
+        });
+
+        const clientDocuments = [];
+        const seenDocs = new Set();
+        rows.forEach(row => {
+          if (row.client_documents_id && !seenDocs.has(row.client_documents_id)) {
+            clientDocuments.push({
+              client_documents_id: row.client_documents_id,
+              file_name: row.file_name,
+              original_name: row.original_name,
+              file_type: row.file_type,
+              file_size: row.file_size,
+              web_url: row.web_url,
+            });
+            seenDocs.add(row.client_documents_id);
+          }
+        });
+
+        const companyDetails = rows[0].company_name ? {
+          company_name: rows[0].company_name,
+          entity_type: rows[0].entity_type,
+          company_status: rows[0].company_status,
+          company_number: rows[0].company_number,
+          registered_office_address: rows[0].registered_office_address,
+          incorporation_date: rows[0].incorporation_date,
+          incorporation_in: rows[0].incorporation_in,
+        } : [];
+
+        const result = {
+          client: clientData,
+          contact_details: contactDetails,
+          client_documents: clientDocuments,
+          company_details: companyDetails
+        };
+
+        return { status: true, message: "success.", data: result };
+      } else {
+        return { status: false, message: "No client found." };
+      }
+    } catch (err) {
+      console.error("getByid error:", err);
+      return { status: false, message: err.message };
+    }
+  }
+
   return { status: false, message: "Invalid action." };
 };
 
