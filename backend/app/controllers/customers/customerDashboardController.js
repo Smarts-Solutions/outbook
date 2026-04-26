@@ -104,6 +104,24 @@ const getCustomerJobs = async (req, res) => {
   }
 };
 
+const customerClientAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerClientAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerJobAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerJobAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -114,4 +132,6 @@ module.exports = {
   getCustomerList,
   getCustomerClients,
   getCustomerJobs,
+  customerClientAction,
+  customerJobAction,
 };

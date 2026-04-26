@@ -48,6 +48,8 @@ import {
   CUSTOMER_CLIENTS,
   CUSTOMER_JOBS,
   CUSTOMER_DROPDOWN,
+  CUSTOMER_CLIENT_ACTION,
+  CUSTOMER_JOB_ACTION,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -169,6 +171,38 @@ export const CustomerJobList = createAsyncThunk("getCustomerJobs", async (data) 
       StaffUserId: StaffUserId.id,
     };
     const res = await CUSTOMER_JOBS(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerClientAction = createAsyncThunk("customerClientAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_CLIENT_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobAction = createAsyncThunk("customerJobAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOB_ACTION(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;

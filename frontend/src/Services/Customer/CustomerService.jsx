@@ -113,6 +113,28 @@ export async function CUSTOMER_JOBS(data, token) {
   }
 }
 
+export async function CUSTOMER_CLIENT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerClientAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function CUSTOMER_DROPDOWN(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}getCustomerDropdown`, data, {

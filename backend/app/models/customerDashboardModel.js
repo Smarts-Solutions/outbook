@@ -993,6 +993,70 @@ const getCustomerJobList = async (dashboard) => {
   }
 };
 
+const customerClientAction = async (dashboard) => {
+  const { action, id, StaffUserId, ip } = dashboard;
+  if (action === "delete") {
+    if (parseInt(id) > 0) {
+      const currentDate = new Date();
+      const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
+      await SatffLogUpdateOperation({
+        staff_id: StaffUserId,
+        ip: ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "client",
+        log_message: `deleted client profile. client code :`,
+        permission_type: "deleted",
+        module_id: id,
+      });
+    }
+
+    try {
+      await pool.execute("DELETE FROM clients WHERE id = ?", [id]);
+      await pool.execute("DELETE FROM client_company_information WHERE client_id = ?", [id]);
+      await pool.execute("DELETE FROM client_contact_details WHERE client_id = ?", [id]);
+      await pool.execute("DELETE FROM client_documents WHERE client_id = ?", [id]);
+      return { status: true, message: "Client deleted successfully." };
+    } catch (err) {
+      return { status: false, message: "Error deleting client." };
+    }
+  }
+  return { status: false, message: "Invalid action." };
+};
+
+const customerJobAction = async (dashboard) => {
+  const { action, job_id, StaffUserId, ip } = dashboard;
+  if (action === "delete") {
+    try {
+      if (parseInt(job_id) > 0) {
+        const currentDate = new Date();
+        const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
+        await SatffLogUpdateOperation({
+          staff_id: StaffUserId,
+          ip: ip,
+          date: currentDate.toISOString().split("T")[0],
+          module_name: "job",
+          log_message: `deletes job code:`,
+          permission_type: "deleted",
+          module_id: job_id,
+        });
+      }
+      const [result] = await pool.execute("DELETE FROM jobs WHERE id = ?", [job_id]);
+      await pool.execute("DELETE FROM client_job_task WHERE job_id = ?", [job_id]);
+      await pool.execute("DELETE FROM drafts WHERE job_id = ?", [job_id]);
+      await pool.execute("DELETE FROM missing_logs WHERE job_id = ?", [job_id]);
+      await pool.execute("DELETE FROM queries WHERE job_id = ?", [job_id]);
+      if (result.affectedRows > 0) {
+        return { status: true, message: "Job deleted successfully.", data: job_id };
+      } else {
+        return { status: false, message: "No job found with the given job_id." };
+      }
+    } catch (err) {
+      return { status: false, message: "Error deleting job." };
+    }
+  }
+  return { status: false, message: "Invalid action." };
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -1003,4 +1067,6 @@ module.exports = {
   getCustomerList,
   getCustomerClientList,
   getCustomerJobList,
+  customerClientAction,
+  customerJobAction,
 };

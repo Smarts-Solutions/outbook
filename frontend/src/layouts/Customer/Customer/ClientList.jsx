@@ -5,9 +5,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   CustomerClientList,
   CustomerJobList,
-  updateCustomerJobStatus,
   GetCustomerDropdown,
   getCustomerMasterStatus,
+  CustomerJobAction,
+  CustomerClientAction,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import CustomerHierarchy from "../../../Components/ExtraComponents/CustomerHierarchy";
@@ -136,6 +137,49 @@ const ClientLists = () => {
       .finally(() => setLoading(false));
   };
 
+  const handleDelete = (row, type) => {
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: `Do you want to delete this ${type}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            let response;
+            if (type === "client") {
+              const req = { action: "delete", id: row.id };
+              response = await dispatch(CustomerClientAction({ req, authToken: token })).unwrap();
+            } else if (type === "job") {
+              const req = { action: "delete", job_id: row.job_id };
+              response = await dispatch(CustomerJobAction({ req, authToken: token })).unwrap();
+            }
+
+            if (response?.status) {
+              sweatalert.fire({
+                title: "Deleted!",
+                text: response.message,
+                icon: "success",
+                timer: 1000,
+                showConfirmButton: false,
+              });
+              if (type === "client") GetAllClientData(customerId, currentPage, pageSize, searchTerm);
+              else JobDetails(currentPage, pageSize, searchTerm);
+            } else {
+              sweatalert.fire({ title: "Error", text: response?.message || "Delete failed", icon: "error" });
+            }
+          } catch (error) {
+            console.error("Delete error:", error);
+            sweatalert.fire({ title: "Error", text: "Something went wrong", icon: "error" });
+          }
+        }
+      });
+  };
+
   const handleStatusChange = (e, row) => {
     const Id = e.target.value;
     sweatalert.fire({
@@ -215,6 +259,11 @@ const ClientLists = () => {
           <button className="edit-icon" onClick={() => navigate("/customer/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
             <i className="ti-pencil" />
           </button>
+          {row.Delete_Status == null && (
+            <button className="delete-icon" onClick={() => handleDelete(row, "client")}>
+              <i className="ti-trash text-danger" />
+            </button>
+          )}
         </div>
       ),
     },
@@ -326,6 +375,11 @@ const ClientLists = () => {
           <button className="edit-icon" onClick={() => navigate("/customer/job/edit", { state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab } })}>
             <i className="ti-pencil" />
           </button>
+          {row.timesheet_job_id == null && (
+            <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+              <i className="ti-trash text-danger" />
+            </button>
+          )}
         </div>
       ),
     },

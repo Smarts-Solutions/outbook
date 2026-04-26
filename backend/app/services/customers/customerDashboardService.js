@@ -36,6 +36,14 @@ const getCustomerJobList = async (data) => {
   return await customerDashboardModel.getCustomerJobList(data);
 };
 
+const customerClientAction = async (data) => {
+  return await customerDashboardModel.customerClientAction(data);
+};
+
+const customerJobAction = async (data) => {
+  return await customerDashboardModel.customerJobAction(data);
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -46,4 +54,6 @@ module.exports = {
   getCustomerList,
   getCustomerClientList,
   getCustomerJobList,
+  customerClientAction,
+  customerJobAction,
 };

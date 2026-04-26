@@ -36,6 +36,8 @@ router.post("/getCustomerDropdown", verifyToken, customerDashboardController.get
 router.post("/getCustomerList", verifyToken, customerDashboardController.getCustomerList);
 router.post("/getCustomerClients", verifyToken, customerDashboardController.getCustomerClients);
 router.post("/getCustomerJobs", verifyToken, customerDashboardController.getCustomerJobs);
+router.post("/customerClientAction", verifyToken, customerDashboardController.customerClientAction);
+router.post("/customerJobAction", verifyToken, customerDashboardController.customerJobAction);
 // Customer Dashboard Routes End
 
 
