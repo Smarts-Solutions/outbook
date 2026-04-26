@@ -20,8 +20,8 @@ const updateCustomerJobStatus = async (data) => {
   return await customerDashboardModel.updateJobStatus(data);
 };
 
-const getCustomerDropdown = async (staff_id) => {
-  return await customerDashboardModel.getCustomerDropdown(staff_id);
+const getCustomerDropdown = async (data) => {
+  return await customerDashboardModel.getCustomerDropdown(data);
 };
 
 const getCustomerList = async (data) => {

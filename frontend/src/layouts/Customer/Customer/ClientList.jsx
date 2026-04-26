@@ -63,7 +63,7 @@ const ClientLists = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerData(response.data);
+          setCustomerData(response.data?.data || response.data || []);
         } else {
           setCustomerData([]);
         }

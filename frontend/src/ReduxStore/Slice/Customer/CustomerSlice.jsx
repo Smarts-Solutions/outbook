@@ -97,11 +97,18 @@ export const CustomerActivityLog = createAsyncThunk("getCustomerDashboardActivit
 
 export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", async (data) => {
   try {
-      const { req, authToken } = data;
-      const res = await CUSTOMER_LINKDATA(req, authToken);
-      return res;
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_LINKDATA(updatedReq, authToken);
+    return res;
   } catch (err) {
-      throw err;
+    throw err;
   }
 });
 
@@ -120,7 +127,14 @@ export const updateCustomerJobStatus = createAsyncThunk("updateCustomerJobStatus
 export const CustomerList = createAsyncThunk("getCustomerList", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await CUSTOMER_LIST(req, authToken);
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_LIST(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -130,7 +144,14 @@ export const CustomerList = createAsyncThunk("getCustomerList", async (data) => 
 export const CustomerClientList = createAsyncThunk("getCustomerClients", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await CUSTOMER_CLIENTS(req, authToken);
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_CLIENTS(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -140,7 +161,14 @@ export const CustomerClientList = createAsyncThunk("getCustomerClients", async (
 export const CustomerJobList = createAsyncThunk("getCustomerJobs", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await CUSTOMER_JOBS(req, authToken);
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOBS(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -150,7 +178,14 @@ export const CustomerJobList = createAsyncThunk("getCustomerJobs", async (data) 
 export const GetCustomerDropdown = createAsyncThunk("getCustomerDropdown", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await CUSTOMER_DROPDOWN(req, authToken);
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_DROPDOWN(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -160,12 +195,12 @@ export const GetCustomerDropdown = createAsyncThunk("getCustomerDropdown", async
 export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (data) => {
   try {
     const { req, authToken } = data;
-    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
-    const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
+      action: "get",
       ...req,
       ip: IP_Data,
-      StaffUserId: staffDetails?.id,
+      StaffUserId: StaffUserId.id,
     };
     const res = await CUSTOMER_MASTER_STATUS(updatedReq, authToken);
     return res;

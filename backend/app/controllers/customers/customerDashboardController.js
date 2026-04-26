@@ -70,8 +70,7 @@ const updateCustomerJobStatus = async (req, res) => {
 
 const getCustomerDropdown = async (req, res) => {
   try {
-    const { staff_id } = req.body;
-    const result = await customerDashboardService.getCustomerDropdown(staff_id);
+    const result = await customerDashboardService.getCustomerDropdown(req.body);
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });

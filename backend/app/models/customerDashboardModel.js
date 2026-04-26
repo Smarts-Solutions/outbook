@@ -187,15 +187,27 @@ const updateJobStatus = async (data) => {
 
 const getByCustomerClient = async (dashboard) => {
   try {
-    let { staff_id, ids, page, limit, search } = dashboard;
+    let { staff_id, StaffUserId, ids, customer_id, page, limit, search } = dashboard;
+
+    // Support both staff_id and StaffUserId
+    const effectiveStaffId = staff_id || StaffUserId;
 
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
-    const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    if (!cleane_ids) return { status: true, message: "No IDs provided.", data: [], pagination: { total: 0 } };
+    let filterCondition = "";
+    if (ids) {
+      const cleane_ids = ids.replace(/^,+|,+$/g, "");
+      if (cleane_ids) {
+        filterCondition = `AND clients.id IN (${cleane_ids})`;
+      }
+    } else if (customer_id) {
+      filterCondition = `AND clients.customer_id = ${customer_id}`;
+    }
+
+    if (!filterCondition) return { status: true, message: "No filters provided.", data: [], pagination: { total: 0 } };
 
     const clientCodeExpr = `
       CONCAT(
@@ -243,7 +255,7 @@ const getByCustomerClient = async (dashboard) => {
         UNION
         SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
     `;
-    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
     const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
     const idsStr = assignedCustomerIds.length > 0 ? assignedCustomerIds.join(',') : '0';
 
@@ -260,7 +272,7 @@ const getByCustomerClient = async (dashboard) => {
           WHERE cd.client_id = clients.id
       )
       WHERE customers.id IN (${idsStr})
-      AND clients.id IN (${cleane_ids})
+      ${filterCondition}
       ${searchCondition}
       `,
       [...searchParams],
@@ -291,7 +303,7 @@ const getByCustomerClient = async (dashboard) => {
           WHERE cd.client_id = clients.id
       )
       WHERE customers.id IN (${idsStr})
-      AND clients.id IN (${cleane_ids})
+      ${filterCondition}
       ${searchCondition}
       ORDER BY clients.id DESC
       LIMIT ? OFFSET ?;
@@ -361,15 +373,27 @@ const getByCustomerClient = async (dashboard) => {
 
 const getByCustomerJob = async (dashboard) => {
   try {
-    let { staff_id, ids, page, limit, search } = dashboard;
+    let { staff_id, StaffUserId, ids, customer_id, page, limit, search } = dashboard;
+
+    // Support both staff_id and StaffUserId
+    const effectiveStaffId = staff_id || StaffUserId;
 
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
-    const cleane_ids = ids.replace(/^,+|,+$/g, "");
-    if (!cleane_ids) return { status: true, message: "No IDs provided.", data: [], pagination: { total: 0 } };
+    let filterCondition = "";
+    if (ids) {
+      const cleane_ids = ids.replace(/^,+|,+$/g, "");
+      if (cleane_ids) {
+        filterCondition = `AND jobs.id IN (${cleane_ids})`;
+      }
+    } else if (customer_id) {
+      filterCondition = `AND jobs.customer_id = ${customer_id}`;
+    }
+
+    if (!filterCondition) return { status: true, message: "No filters provided.", data: [], pagination: { total: 0 } };
 
     const jobCodeExpr = `
       CONCAT(
@@ -413,7 +437,7 @@ const getByCustomerJob = async (dashboard) => {
         UNION
         SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
     `;
-    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
     const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
     const idsStr = assignedCustomerIds.length > 0 ? assignedCustomerIds.join(',') : '0';
 
@@ -425,7 +449,7 @@ const getByCustomerJob = async (dashboard) => {
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       WHERE customers.id IN (${idsStr})
-      AND jobs.id IN (${cleane_ids})
+      ${filterCondition}
       ${searchCondition}
       `,
       [...searchParams],
@@ -478,7 +502,7 @@ const getByCustomerJob = async (dashboard) => {
       LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
       LEFT JOIN master_status ON master_status.id = jobs.status_type
       WHERE customers.id IN (${idsStr})
-      AND jobs.id IN (${cleane_ids})
+      ${filterCondition}
       ${searchCondition}
       ORDER BY jobs.id DESC
       LIMIT ? OFFSET ?;
@@ -557,22 +581,41 @@ const getCustomerCountLinkData = async (dashboard) => {
   }
 };
 
-const getCustomerDropdown = async (staff_id) => {
+const getCustomerDropdown = async (dashboard) => {
   try {
-    const query = `
-        SELECT id, trading_name FROM customers WHERE id IN (
-          SELECT customer_id FROM customer_access WHERE staff_id = ?
-          UNION
-          SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-          UNION
-          SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-          UNION
-          SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-        ) AND status = '1' AND form_process = '4'
-        ORDER BY trading_name ASC
-    `;
-    const [rows] = await pool.execute(query, [staff_id, staff_id, staff_id, staff_id, staff_id]);
-    return { status: true, data: rows };
+    const { staff_id, StaffUserId, action } = dashboard;
+    const effectiveStaffId = staff_id || StaffUserId;
+
+    if (action === "get") {
+      const query = `
+          SELECT 
+            id, 
+            status, 
+            form_process, 
+            trading_name, 
+            CONCAT('cust_', SUBSTRING(trading_name,1,3),'_',SUBSTRING(customer_code,1,15)) AS customer_code
+          FROM customers 
+          WHERE id IN (
+            SELECT customer_id FROM customer_access WHERE staff_id = ?
+            UNION
+            SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+            UNION
+            SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+            UNION
+            SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+          ) AND status = '1' AND form_process = '4'
+          ORDER BY trading_name ASC
+      `;
+      const [rows] = await pool.execute(query, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
+      
+      return { 
+        status: true, 
+        message: "Success..",
+        data: rows
+      };
+    }
+    
+    return { status: false, message: "Invalid action." };
   } catch (error) {
     return { status: false, message: error.message };
   }
@@ -580,7 +623,11 @@ const getCustomerDropdown = async (staff_id) => {
 
 const getCustomerList = async (dashboard) => {
   try {
-    let { staff_id, page, limit, search } = dashboard;
+    let { staff_id, StaffUserId, page, limit, search, action } = dashboard;
+    
+    // Support both staff_id and StaffUserId
+    const effectiveStaffId = staff_id || StaffUserId;
+
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
@@ -595,10 +642,19 @@ const getCustomerList = async (dashboard) => {
         UNION
         SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
     `;
-    const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+    const [assignedCustomers] = await pool.execute(queryAssigned, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
     const assignedIds = assignedCustomers.map(c => c.customer_id);
 
-    if (assignedIds.length === 0) return { status: true, message: "No customers assigned.", data: [], pagination: { total: 0 } };
+    if (assignedIds.length === 0) {
+      return { 
+        status: true, 
+        message: "success.", 
+        data: {
+          data: [],
+          pagination: { totalItems: 0, totalPages: 0, currentPage: page, limit }
+        } 
+      };
+    }
     const idsStr = assignedIds.join(',');
 
     let searchCondition = "";
@@ -628,19 +684,21 @@ const getCustomerList = async (dashboard) => {
     const query = `
       SELECT 
         customers.id,
-        customers.trading_name,
-        customers.customer_code,
         customers.customer_type,
+        customers.staff_id,
+        CONCAT(staffs.first_name,' ',staffs.last_name) AS customer_created_by,
+        customers.account_manager_id,
+        customers.trading_name,
+        customers.trading_address,
+        customers.vat_registered,
+        customers.vat_number,
+        customers.customer_code,
         customers.status,
         customers.form_process,
-        staffs.first_name AS account_manager_firstname,
-        staffs.last_name AS account_manager_lastname,
-        staffs.employee_number AS account_manager_employee_number,
-        creator.first_name AS customer_created_by,
-        DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at
+        DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at,
+        CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) AS customer_code_id
       FROM customers
-      LEFT JOIN staffs ON customers.account_manager_id = staffs.id
-      LEFT JOIN staffs AS creator ON customers.staff_id = creator.id
+      LEFT JOIN staffs ON customers.staff_id = staffs.id
       WHERE customers.id IN (${idsStr}) ${searchCondition}
       ORDER BY customers.id DESC
       LIMIT ? OFFSET ?
@@ -650,9 +708,16 @@ const getCustomerList = async (dashboard) => {
 
     return {
       status: true,
-      message: "success.",
-      data: rows,
-      pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
+      message: "Success..",
+      data: {
+        data: rows,
+        pagination: {
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
+          currentPage: page,
+          limit
+        }
+      }
     };
   } catch (error) {
     return { status: false, message: error.message };
@@ -661,7 +726,10 @@ const getCustomerList = async (dashboard) => {
 
 const getCustomerClientList = async (dashboard) => {
   try {
-    let { staff_id, customer_id, client_id, page, limit, search, action } = dashboard;
+    let { staff_id, StaffUserId, customer_id, client_id, page, limit, search, action } = dashboard;
+
+    // Support both staff_id and StaffUserId
+    const effectiveStaffId = staff_id || StaffUserId;
 
     if (action === "getByid" && client_id) {
       const [clientRows] = await pool.execute(`
@@ -691,6 +759,15 @@ const getCustomerClientList = async (dashboard) => {
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
+    const clientCodeExpr = `
+      CONCAT(
+        'cli_',
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+      )
+    `;
+
     let assignedCondition = "";
     if (customer_id && customer_id !== "") {
       assignedCondition = `AND customers.id = ${customer_id}`;
@@ -704,7 +781,7 @@ const getCustomerClientList = async (dashboard) => {
           UNION
           SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
       `;
-      const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+      const [assignedCustomers] = await pool.execute(queryAssigned, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
       const assignedIds = assignedCustomers.map(c => c.customer_id);
       if (assignedIds.length === 0) return { status: true, message: "No assigned customers.", data: [], pagination: { total: 0 } };
       assignedCondition = `AND customers.id IN (${assignedIds.join(',')})`;
@@ -713,8 +790,15 @@ const getCustomerClientList = async (dashboard) => {
     let searchCondition = "";
     let searchParams = [];
     if (search) {
-      searchCondition = `AND (clients.trading_name LIKE ? OR clients.client_code LIKE ?)`;
-      searchParams = [`%${search}%`, `%${search}%`];
+      searchCondition = `
+        AND (
+          clients.trading_name LIKE ? 
+          OR clients.client_code LIKE ?
+          OR ${clientCodeExpr} LIKE ?
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [likeSearch, likeSearch, likeSearch];
     }
 
     const [countResult] = await pool.execute(
@@ -727,17 +811,23 @@ const getCustomerClientList = async (dashboard) => {
 
     const query = `
       SELECT 
-        clients.id, clients.trading_name AS client_name, clients.client_code, clients.status,
+        clients.id, 
+        clients.trading_name AS client_name, 
         customers.trading_name AS customer_name,
+        clients.status AS status,
         client_types.type AS client_type_name,
-        staffs.first_name AS client_created_by,
-        DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at
+        jobs.id AS Delete_Status,
+        CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+        DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+        ${clientCodeExpr} AS client_code
       FROM clients
       JOIN customers ON clients.customer_id = customers.id
       LEFT JOIN client_types ON clients.client_type = client_types.id
       LEFT JOIN staffs ON clients.staff_created_id = staffs.id
+      LEFT JOIN jobs ON clients.id = jobs.client_id
       WHERE 1=1 ${assignedCondition} ${searchCondition}
-      ORDER BY clients.id DESC
+      GROUP BY clients.id
+      ORDER BY clients.trading_name ASC
       LIMIT ? OFFSET ?
     `;
 
@@ -745,9 +835,15 @@ const getCustomerClientList = async (dashboard) => {
 
     return {
       status: true,
-      message: "success.",
+      message: "success",
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        search,
+      },
       data: rows,
-      pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
     };
   } catch (error) {
     return { status: false, message: error.message };
