@@ -36,7 +36,7 @@ const DashboardLinkData = () => {
 
   const GetStatus = async () => {
     setLoading(true);
-    await dispatch(getCustomerMasterStatus({ authToken: token }))
+    await dispatch(getCustomerMasterStatus({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -119,7 +119,7 @@ const DashboardLinkData = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const req = { job_id: row.id, status_type: Number(Id) };
+          const req = { job_id: row.job_id, status_type: Number(Id) };
           const res = await dispatch(updateCustomerJobStatus({ req, authToken: token })).unwrap();
 
           if (res.status) {
@@ -217,12 +217,12 @@ const DashboardLinkData = () => {
           }));
         } else {
           exportData = res.data.map(item => ({
-            "Job ID": item.job_code,
+            "Job ID": item.job_code_id,
             "Job Priority": item.job_priority || "-",
-            "Client Name": item.client_name,
+            "Client Name": item.client_trading_name,
             "Account Manager": item.account_manager_name || "-",
             "Job Type": item.job_type_name,
-            "Status": item.status_name,
+            "Status": item.status,
             "Created At": item.created_at,
           }));
         }
@@ -233,6 +233,41 @@ const DashboardLinkData = () => {
     }
   };
 
+  const maxManagers = allLinkedData && allLinkedData.length > 0
+    ? Math.max(...allLinkedData.map((row) => (row.account_managers || []).length))
+    : 0;
+
+  const dynamicManagerColumns = Array.from({ length: maxManagers }).flatMap(
+    (_, index) => [
+      {
+        name: `Individual Account Manager`,
+        cell: (row) => {
+          const manager = row.account_managers?.[index];
+          return (
+            <div title={manager?.full_name || "-"}>
+              {manager?.full_name || "-"}
+            </div>
+          );
+        },
+        selector: (row) => row.account_managers?.[index]?.full_name || "-",
+        sortable: true,
+      },
+      {
+        name: `Employee ID`,
+        cell: (row) => {
+          const manager = row.account_managers?.[index];
+          return (
+            <div title={manager?.employee_number || "-"}>
+              {manager?.employee_number || "-"}
+            </div>
+          );
+        },
+        selector: (row) => row.account_managers?.[index]?.employee_number || "-",
+        sortable: true,
+      },
+    ]
+  );
+
   const JobColumns = [
     {
       name: "Job ID",
@@ -240,12 +275,12 @@ const DashboardLinkData = () => {
         <div
           onClick={() => HandleJob(row)}
           style={{ cursor: "pointer", color: "#26bdf0" }}
-          title={row.job_code}
+          title={row.job_code_id}
         >
-          {row.job_code}
+          {row.job_code_id}
         </div>
       ),
-      selector: (row) => row.job_code,
+      selector: (row) => row.job_code_id,
       sortable: true,
       width: "180px"
     },
@@ -260,8 +295,8 @@ const DashboardLinkData = () => {
     },
     {
       name: "Client Name",
-      cell: (row) => <div title={row.client_name}>{row.client_name}</div>,
-      selector: (row) => row.client_name,
+      cell: (row) => <div title={row.client_trading_name || "-"}>{row.client_trading_name || "-"}</div>,
+      selector: (row) => row.client_trading_name || "-",
       sortable: true,
     },
     {
@@ -270,6 +305,13 @@ const DashboardLinkData = () => {
       selector: (row) => row.account_manager_name || "-",
       sortable: true,
     },
+    {
+      name: "Employee ID",
+      cell: (row) => <div title={row.account_manager_employee_number || "-"}>{row.account_manager_employee_number || "-"}</div>,
+      selector: (row) => row.account_manager_employee_number || "-",
+      sortable: true,
+    },
+    ...dynamicManagerColumns,
     {
       name: "Job Type",
       cell: (row) => <div title={row.job_type_name}>{row.job_type_name}</div>,
@@ -295,14 +337,82 @@ const DashboardLinkData = () => {
           )}
         </select>
       ),
-      selector: (row) => row.status_name,
+      selector: (row) => row.status,
       sortable: true,
       width: "250px"
     },
     {
+      name: "Client Contact Person",
+      cell: (row) => (
+        <div
+          title={
+            row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name || "-"
+          }
+        >
+          {row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name || "-"}
+        </div>
+      ),
+      selector: (row) =>
+        row.account_manager_officer_first_name +
+        " " +
+        row.account_manager_officer_last_name || "-",
+      sortable: true,
+    },
+    {
+      name: "Client Job Code",
+      cell: (row) => <div title={row.client_job_code || "-"}>{row.client_job_code || "-"}</div>,
+      selector: (row) => row.client_job_code || "-",
+      sortable: true,
+    },
+    {
       name: "Allocated To",
-      cell: (row) => <div title={row.allocated_name || "-"}>{row.allocated_name || "-"}</div>,
-      selector: (row) => row.allocated_name || "-",
+      cell: (row) => (
+        <div>
+          {row?.allocated_first_name != null
+            ? row?.allocated_first_name + " " + row?.allocated_last_name
+            : "-"}
+        </div>
+      ),
+      selector: (row) => row.allocated_first_name || "-",
+      sortable: true,
+    },
+    {
+      name: "Timesheet",
+      cell: (row) => (
+        <div
+          title={
+            row.total_hours_status == "1" && row.total_hours != null
+              ? row.total_hours.split(":")[0] +
+              "h " +
+              row.total_hours.split(":")[1] +
+              "m"
+              : "-"
+          }
+        >
+          {row.total_hours_status == "1" && row.total_hours != null
+            ? row.total_hours.split(":")[0] +
+            "h " +
+            row.total_hours.split(":")[1] +
+            "m"
+            : "-"}
+        </div>
+      ),
+      selector: (row) => row.total_hours || "-",
+      sortable: true,
+    },
+    {
+      name: "Invoicing",
+      selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
+      sortable: true,
+    },
+    {
+      name: "Created By",
+      cell: (row) => <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>,
+      selector: (row) => row.job_created_by || "-",
       sortable: true,
     },
     {

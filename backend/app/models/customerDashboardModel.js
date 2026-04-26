@@ -149,7 +149,26 @@ const getCustomerDashboardActivityLog = async (dashboard) => {
 
 const getMasterStatus = async () => {
   try {
-    const [rows] = await pool.query("SELECT id, name FROM master_status WHERE status = '1' ORDER BY name ASC");
+    const query = `
+      SELECT
+        master_status.id AS id,
+        master_status.name AS name,
+        master_status.status_type_id AS status_type_id,
+        master_status.is_disable AS is_disable,
+        master_status.x_days AS x_days,
+        status_types.type AS status_type,
+        master_status.created_at AS created_at,
+        master_status.updated_at AS updated_at
+      FROM 
+        master_status
+      JOIN 
+        status_types ON status_types.id = master_status.status_type_id
+      WHERE 
+        master_status.status = '1'
+      ORDER BY 
+        master_status.id DESC
+    `;
+    const [rows] = await pool.execute(query);
     return { status: true, data: rows };
   } catch (error) {
     return { status: false, message: error.message };
@@ -180,9 +199,10 @@ const getByCustomerClient = async (dashboard) => {
 
     const clientCodeExpr = `
       CONCAT(
+        'cli_',
         SUBSTRING(customers.trading_name, 1, 3), '_',
         SUBSTRING(clients.trading_name, 1, 3), '_',
-        LPAD(clients.id, 5, '0')
+        SUBSTRING(clients.client_code, 1, 15)
       )
     `;
 
@@ -259,7 +279,8 @@ const getByCustomerClient = async (dashboard) => {
           client_contact_details.phone AS phone,
           CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
           DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
-          ${clientCodeExpr} AS client_code
+          ${clientCodeExpr} AS client_code,
+          customers.id AS customer_id
       FROM clients
       JOIN customers ON customers.id = clients.customer_id    
       JOIN client_types ON client_types.id = clients.client_type
@@ -282,10 +303,45 @@ const getByCustomerClient = async (dashboard) => {
       offset,
     ]);
 
+    let finalResult = result;
+    if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+    }
+
     return {
       status: true,
       message: "success.",
-      data: result,
+      data: finalResult,
       pagination: {
         total,
         page,
@@ -330,13 +386,11 @@ const getByCustomerJob = async (dashboard) => {
     if (search) {
       searchCondition = `
         AND (
-          jobs.job_id LIKE ?
-          OR clients.trading_name LIKE ?
+          clients.trading_name LIKE ?
           OR customers.trading_name LIKE ?
           OR job_types.type LIKE ?
-          OR status_types.type LIKE ?
+          OR jobs.client_job_code LIKE ?
           OR ${jobCodeExpr} LIKE ?
-          OR ? LIKE CONCAT('%', ${jobCodeExpr}, '%')
         )
       `;
       const likeSearch = `%${search}%`;
@@ -346,8 +400,6 @@ const getByCustomerJob = async (dashboard) => {
         likeSearch,
         likeSearch,
         likeSearch,
-        likeSearch,
-        search,
       ];
     }
 
@@ -369,10 +421,9 @@ const getByCustomerJob = async (dashboard) => {
       `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
-      JOIN clients ON clients.id = jobs.client_id
-      JOIN customers ON customers.id = jobs.customer_id
-      JOIN job_types ON job_types.id = jobs.job_type_id
-      JOIN master_status ON master_status.id = jobs.status_type
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       WHERE customers.id IN (${idsStr})
       AND jobs.id IN (${cleane_ids})
       ${searchCondition}
@@ -382,20 +433,50 @@ const getByCustomerJob = async (dashboard) => {
     const total = countResult[0].total;
 
     const query = `
-      SELECT  
-          jobs.id AS id,
-          jobs.job_id AS job_code_only,
-          clients.trading_name AS client_name,
-          customers.trading_name AS customer_name,
-          job_types.type AS job_type_name,
-          master_status.name AS status_name,
-          DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-          ${jobCodeExpr} AS job_code
+      SELECT 
+        jobs.id AS id,
+        jobs.id AS job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        jobs.job_priority AS job_priority,
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        jobs.service_id AS job_service_id,
+        staffs3.id AS account_manager_id,
+        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        master_status.name AS status,
+        ${jobCodeExpr} AS job_code_id
       FROM jobs
-      JOIN clients ON clients.id = jobs.client_id
-      JOIN customers ON customers.id = jobs.customer_id
-      JOIN job_types ON job_types.id = jobs.job_type_id
-      JOIN master_status ON master_status.id = jobs.status_type
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN services ON jobs.service_id = services.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
       WHERE customers.id IN (${idsStr})
       AND jobs.id IN (${cleane_ids})
       ${searchCondition}
@@ -409,10 +490,45 @@ const getByCustomerJob = async (dashboard) => {
       offset,
     ]);
 
+    let finalResult = result;
+    if (result.length > 0) {
+      finalResult = await Promise.all(
+        result.map(async (element) => {
+          const Get_account_manger_id = `
+            SELECT s.id,
+                   CONCAT(s.first_name, ' ', s.last_name) AS full_name,
+                   s.employee_number
+            FROM staffs s
+            JOIN customer_service_account_managers csam 
+              ON s.id = csam.account_manager_id
+            JOIN customer_services cs 
+              ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = ?
+            AND cs.service_id = ?
+            AND s.id != ?
+          `;
+
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [
+              element.customer_id || 0,
+              element.job_service_id || 0,
+              element.account_manager_id || 0,
+            ],
+          );
+
+          return {
+            ...element,
+            account_managers: rowsAccountManager,
+          };
+        }),
+      );
+    }
+
     return {
       status: true,
       message: "success.",
-      data: result,
+      data: finalResult,
       pagination: {
         total,
         page,

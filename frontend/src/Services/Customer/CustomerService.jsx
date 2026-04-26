@@ -58,9 +58,9 @@ export async function CUSTOMER_LINKDATA(data, token) {
   }
 }
 
-export async function CUSTOMER_MASTER_STATUS(token) {
+export async function CUSTOMER_MASTER_STATUS(data, token) {
   try {
-    const res = await axios.post(`${Config.base_url}getCustomerMasterStatus`, {}, {
+    const res = await axios.post(`${Config.base_url}getCustomerMasterStatus`, data, {
       headers: header(token),
     });
     return await res?.data;

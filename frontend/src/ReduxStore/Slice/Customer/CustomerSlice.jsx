@@ -157,10 +157,17 @@ export const GetCustomerDropdown = createAsyncThunk("getCustomerDropdown", async
   }
 });
 
-export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (token) => {
+export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (data) => {
   try {
-    const authToken = typeof token === 'string' ? token : token.authToken;
-    const res = await CUSTOMER_MASTER_STATUS(authToken);
+    const { req, authToken } = data;
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: staffDetails?.id,
+    };
+    const res = await CUSTOMER_MASTER_STATUS(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;

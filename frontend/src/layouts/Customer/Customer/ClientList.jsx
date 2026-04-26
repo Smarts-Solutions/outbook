@@ -82,7 +82,7 @@ const ClientLists = () => {
   }, []);
 
   const GetStatus = async () => {
-    await dispatch(getCustomerMasterStatus(token))
+    await dispatch(getCustomerMasterStatus({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then((response) => {
         if (response.status) {
