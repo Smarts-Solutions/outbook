@@ -1440,6 +1440,104 @@ const customerJobUpdate = async (job) => {
   }
 };
 
+// ─── CUSTOMER JOB LOGS SUB-TAB APIs ────────────────────────────────────────
+
+const customerJobTimeline = async (dashboard) => {
+  const { job_id } = dashboard;
+  const query = `SELECT
+    staff_logs.id AS log_id,
+    staff_logs.staff_id AS staff_id,
+    DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+    staff_logs.created_at AS created_at,
+    CONCAT(
+      roles.role_name, ' ',
+      staffs.first_name, ' ',
+      staffs.last_name, ' ',
+      staff_logs.log_message, ' ',
+      CASE
+         WHEN staff_logs.module_name = 'job' THEN (
+          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
+          FROM jobs
+          JOIN clients ON jobs.client_id = clients.id
+          JOIN customers ON clients.customer_id = customers.id
+          WHERE jobs.id = staff_logs.module_id
+        )
+        ELSE ''
+      END
+    ) AS log_message
+  FROM staff_logs
+  JOIN staffs ON staffs.id = staff_logs.staff_id
+  JOIN roles ON roles.id = staffs.role_id
+  LEFT JOIN jobs ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id
+  WHERE staff_logs.module_name = 'job' AND staff_logs.module_id = ?
+  ORDER BY staff_logs.id DESC`;
+  const [result] = await pool.execute(query, [job_id]);
+  const groupedResult = result.reduce((acc, log) => {
+    const existingDate = acc.find((item) => item.date === log.date);
+    if (existingDate) {
+      existingDate.allContain.push({ created_at: log.created_at, log_message: log.log_message });
+    } else {
+      acc.push({ date: log.date, allContain: [{ created_at: log.created_at, log_message: log.log_message }] });
+    }
+    return acc;
+  }, []);
+  return { status: true, message: "success.", data: groupedResult };
+};
+
+const customerTaskTimesheetAction = async (dashboard) => {
+  const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const { action } = dashboard;
+  if (action === 'get') return taskTimeSheetModel.getTaskTimeSheet(dashboard);
+  if (action === 'getJobTimeSheet') return taskTimeSheetModel.getjobTimeSheet(dashboard);
+  if (action === 'updateJobTimeTotalHours') return taskTimeSheetModel.updateJobTimeTotalHours(dashboard);
+  if (action === 'updateTaskTimeSheetStatus') return taskTimeSheetModel.updateTaskTimeSheetStatus(dashboard);
+  return { status: false, message: 'Invalid action.' };
+};
+
+const customerMissingLogAction = async (dashboard) => {
+  const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const { action } = dashboard;
+  if (action === 'get') return taskTimeSheetModel.getMissingLog(dashboard);
+  if (action === 'getSingleView') return taskTimeSheetModel.getMissingLogSingleView(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addMissingLog(dashboard);
+  if (action === 'edit') return taskTimeSheetModel.editMissingLog(dashboard);
+  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(dashboard);
+  return { status: false, message: 'Invalid action.' };
+};
+
+const customerQueryAction = async (dashboard) => {
+  const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const { action } = dashboard;
+  if (action === 'get') return taskTimeSheetModel.getQuerie(dashboard);
+  if (action === 'getSingleView') return taskTimeSheetModel.getQuerieSingleView(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addQuerie(dashboard);
+  if (action === 'edit') return taskTimeSheetModel.editQuerie(dashboard);
+  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(dashboard);
+  return { status: false, message: 'Invalid action.' };
+};
+
+const customerDraftAction = async (dashboard) => {
+  const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const { action } = dashboard;
+  if (action === 'get') return taskTimeSheetModel.getDraft(dashboard);
+  if (action === 'getSingleView') return taskTimeSheetModel.getDraftSingleView(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addDraft(dashboard);
+  if (action === 'edit') return taskTimeSheetModel.editDraft(dashboard);
+  return { status: false, message: 'Invalid action.' };
+};
+
+const customerDocumentAction = async (dashboard) => {
+  const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const { action } = dashboard;
+  if (action === 'get') return taskTimeSheetModel.getJobDocument(dashboard);
+  if (action === 'delete') return taskTimeSheetModel.deleteJobDocument(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addedJobDocument(dashboard);
+  if (action === 'addJobDocument') return taskTimeSheetModel.addJobDocument(dashboard);
+  return { status: false, message: 'Invalid action.' };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function getDueDate(client_type, service_id) {
   if (["1", "3", "7"].includes(client_type)) {
     if (Number(service_id) === 1) {
@@ -1484,4 +1582,10 @@ module.exports = {
   customerClientAction,
   customerJobAction,
   customerJobUpdate,
+  customerJobTimeline,
+  customerTaskTimesheetAction,
+  customerMissingLogAction,
+  customerQueryAction,
+  customerDraftAction,
+  customerDocumentAction,
 };

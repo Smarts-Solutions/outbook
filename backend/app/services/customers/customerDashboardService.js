@@ -48,6 +48,30 @@ const customerJobUpdate = async (data) => {
   return await customerDashboardModel.customerJobUpdate(data);
 };
 
+const customerJobTimeline = async (data) => {
+  return await customerDashboardModel.customerJobTimeline(data);
+};
+
+const customerTaskTimesheetAction = async (data) => {
+  return await customerDashboardModel.customerTaskTimesheetAction(data);
+};
+
+const customerMissingLogAction = async (data) => {
+  return await customerDashboardModel.customerMissingLogAction(data);
+};
+
+const customerQueryAction = async (data) => {
+  return await customerDashboardModel.customerQueryAction(data);
+};
+
+const customerDraftAction = async (data) => {
+  return await customerDashboardModel.customerDraftAction(data);
+};
+
+const customerDocumentAction = async (data) => {
+  return await customerDashboardModel.customerDocumentAction(data);
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -61,4 +85,10 @@ module.exports = {
   customerClientAction,
   customerJobAction,
   customerJobUpdate,
+  customerJobTimeline,
+  customerTaskTimesheetAction,
+  customerMissingLogAction,
+  customerQueryAction,
+  customerDraftAction,
+  customerDocumentAction,
 };

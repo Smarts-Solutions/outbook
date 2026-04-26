@@ -131,6 +131,60 @@ const customerJobUpdate = async (req, res) => {
   }
 };
 
+const customerJobTimeline = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerJobTimeline(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerTaskTimesheetAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerTaskTimesheetAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerMissingLogAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerMissingLogAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerQueryAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerQueryAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerDraftAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerDraftAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerDocumentAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerDocumentAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -144,4 +198,10 @@ module.exports = {
   customerClientAction,
   customerJobAction,
   customerJobUpdate,
+  customerJobTimeline,
+  customerTaskTimesheetAction,
+  customerMissingLogAction,
+  customerQueryAction,
+  customerDraftAction,
+  customerDocumentAction,
 };

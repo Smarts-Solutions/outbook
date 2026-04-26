@@ -158,8 +158,71 @@ export async function CUSTOMER_DROPDOWN(data, token) {
 }
 // Customer Dashboard End
 
+export async function CUSTOMER_JOB_TIMELINE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobTimeline`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
+export async function CUSTOMER_TASK_TIMESHEET_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerTaskTimesheetAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
+export async function CUSTOMER_MISSING_LOG_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerMissingLogAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_QUERY_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerQueryAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DRAFT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DOCUMENT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDocumentAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
 
 // get Timesheet Report Data

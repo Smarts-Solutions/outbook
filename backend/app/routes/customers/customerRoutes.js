@@ -39,6 +39,12 @@ router.post("/getCustomerJobs", verifyToken, customerDashboardController.getCust
 router.post("/customerClientAction", verifyToken, customerDashboardController.customerClientAction);
 router.post("/customerJobAction", verifyToken, customerDashboardController.customerJobAction);
 router.post("/customerJobUpdate", verifyToken, customerDashboardController.customerJobUpdate);
+router.post("/customerJobTimeline", verifyToken, customerDashboardController.customerJobTimeline);
+router.post("/customerTaskTimesheetAction", verifyToken, customerDashboardController.customerTaskTimesheetAction);
+router.post("/customerMissingLogAction", verifyToken, uploadMultiple, customerDashboardController.customerMissingLogAction);
+router.post("/customerQueryAction", verifyToken, uploadMultiple, customerDashboardController.customerQueryAction);
+router.post("/customerDraftAction", verifyToken, customerDashboardController.customerDraftAction);
+router.post("/customerDocumentAction", verifyToken, uploadMultiple, customerDashboardController.customerDocumentAction);
 // Customer Dashboard Routes End
 
 
