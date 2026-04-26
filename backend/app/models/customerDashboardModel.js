@@ -852,11 +852,24 @@ const getCustomerClientList = async (dashboard) => {
 
 const getCustomerJobList = async (dashboard) => {
   try {
-    let { staff_id, customer_id, client_id, page, limit, search, action } = dashboard;
+    let { staff_id, StaffUserId, customer_id, client_id, page, limit, search, action } = dashboard;
+    
+    // Support both staff_id and StaffUserId
+    const effectiveStaffId = staff_id || StaffUserId;
+
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
+
+    const jobCodeExpr = `
+      CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      )
+    `;
 
     let assignedCondition = "";
     if (action === "getByClient" && client_id) {
@@ -873,7 +886,7 @@ const getCustomerJobList = async (dashboard) => {
           UNION
           SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
       `;
-      const [assignedCustomers] = await pool.execute(queryAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+      const [assignedCustomers] = await pool.execute(queryAssigned, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
       const assignedIds = assignedCustomers.map(c => c.customer_id);
       if (assignedIds.length === 0) return { status: true, message: "No assigned jobs.", data: [], pagination: { total: 0 } };
       assignedCondition = `AND jobs.customer_id IN (${assignedIds.join(',')})`;
@@ -882,14 +895,24 @@ const getCustomerJobList = async (dashboard) => {
     let searchCondition = "";
     let searchParams = [];
     if (search) {
-      searchCondition = `AND (jobs.job_id LIKE ? OR clients.trading_name LIKE ?)`;
-      searchParams = [`%${search}%`, `%${search}%`];
+      searchCondition = `
+        AND (
+          customers.trading_name LIKE ?
+          OR clients.trading_name LIKE ?
+          OR job_types.type LIKE ?
+          OR jobs.job_id LIKE ?
+          OR ${jobCodeExpr} LIKE ?
+        )
+      `;
+      const likeSearch = `%${search}%`;
+      searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
     }
 
     const [countResult] = await pool.execute(
-      `SELECT COUNT(jobs.id) AS total FROM jobs 
+      `SELECT COUNT(DISTINCT jobs.id) AS total FROM jobs 
        JOIN customers ON jobs.customer_id = customers.id
        JOIN clients ON jobs.client_id = clients.id
+       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
        WHERE 1=1 ${assignedCondition} ${searchCondition}`,
       [...searchParams]
     );
@@ -897,20 +920,58 @@ const getCustomerJobList = async (dashboard) => {
 
     const query = `
       SELECT 
-        jobs.id, jobs.job_id AS job_code_id, jobs.job_priority, jobs.status_type,
-        clients.trading_name AS client_trading_name,
-        customers.trading_name AS customer_name,
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
         job_types.type AS job_type_name,
-        master_status.name AS status_name,
-        staffs.first_name AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task 
       FROM jobs
-      JOIN customers ON jobs.customer_id = customers.id
-      JOIN clients ON jobs.client_id = clients.id
+      JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       LEFT JOIN master_status ON jobs.status_type = master_status.id
-      LEFT JOIN staffs ON jobs.staff_created_id = staffs.id
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
       WHERE 1=1 ${assignedCondition} ${searchCondition}
+      GROUP BY jobs.id
       ORDER BY jobs.id DESC
       LIMIT ? OFFSET ?
     `;
@@ -919,7 +980,7 @@ const getCustomerJobList = async (dashboard) => {
 
     return {
       status: true,
-      message: "success.",
+      message: "Success.",
       data: rows,
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
     };
