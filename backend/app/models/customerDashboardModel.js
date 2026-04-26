@@ -692,13 +692,16 @@ const getCustomerList = async (dashboard) => {
         customers.trading_address,
         customers.vat_registered,
         customers.vat_number,
-        customers.customer_code,
         customers.status,
         customers.form_process,
         DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at,
-        CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) AS customer_code_id
+        staff2.first_name AS account_manager_firstname,
+        staff2.last_name AS account_manager_lastname,
+        staff2.employee_number AS account_manager_employee_number,
+        CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) AS customer_code
       FROM customers
       LEFT JOIN staffs ON customers.staff_id = staffs.id
+      LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
       WHERE customers.id IN (${idsStr}) ${searchCondition}
       ORDER BY customers.id DESC
       LIMIT ? OFFSET ?
