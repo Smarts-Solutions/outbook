@@ -75,46 +75,44 @@ const CustomerClientProfile = () => {
     fetchSiteDetails();
 
     if (location.state && location.state.Client_id) {
-      const { Client_id, data } = location.state;
-      setHararchyData(data || { customer: {}, client: {}, job: {} });
-      if (data && data.customer && data.customer.id) {
+      const { Client_id, data, customer_id } = location.state;
+      const effectiveCustomerId = customer_id || (data && data.customer ? data.customer.id : cust_id_sidebar);
+      
+      setClientDetailSingle({ 
+        id: Client_id, 
+        client_name: data?.client?.client_name || data?.client?.trading_name || cli_id_sidebar_name || "" 
+      });
+
+      if (effectiveCustomerId) {
         setCustomerDetails({
-          id: data.customer.id,
-          trading_name: data.customer.trading_name
-        });
-        setClientDetailSingle({ 
-          id: Client_id, 
-          client_name: data.client?.client_name || "" 
+          id: effectiveCustomerId,
+          trading_name: data?.customer?.trading_name || cust_id_sidebar_name || ""
         });
       }
+
+      setHararchyData(data || { 
+        customer: { id: effectiveCustomerId, trading_name: cust_id_sidebar_name || "" },
+        client: { id: Client_id, client_name: "" }
+      });
+
       GetClientDetails(Client_id);
       GetAllJobList(Client_id);
-    } else if (
-      ![undefined, "", null].includes(cust_id_sidebar) &&
-      ![undefined, "", null].includes(cli_id_sidebar)
-    ) {
-      getAllClientData1(
-        cust_id_sidebar,
-        cust_id_sidebar_name,
-        cli_id_sidebar,
-        cli_id_sidebar_name,
-      );
+    } else if (cust_id_sidebar && cli_id_sidebar) {
+      setClientDetailSingle({ id: cli_id_sidebar, client_name: cli_id_sidebar_name || "" });
+      setCustomerDetails({ id: cust_id_sidebar, trading_name: cust_id_sidebar_name || "" });
       setHararchyData({
         customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
         client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
       });
-    } else if (![undefined, "", null].includes(cust_id_sidebar)) {
-      setCustomerDetails({
-        id: cust_id_sidebar,
-        trading_name: cust_id_sidebar_name,
-      });
+      GetClientDetails(cli_id_sidebar);
+      GetAllJobList(cli_id_sidebar);
+    } else if (cust_id_sidebar) {
+      setCustomerDetails({ id: cust_id_sidebar, trading_name: cust_id_sidebar_name });
       setHararchyData({
         customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
         client: { id: "", client_name: "" },
       });
       GetAllClientData(cust_id_sidebar, cust_id_sidebar_name);
-    } else {
-      GetAllJobListByCustomer("");
     }
   }, []);
 
@@ -204,7 +202,9 @@ const CustomerClientProfile = () => {
   };
 
   const [customerData, setCustomerData] = useState([]);
-  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "NoOfJobs");
+  const [activeTab, setActiveTab] = useState(
+    location.state?.activeTab === "client" ? "view client" : (location.state?.activeTab || "NoOfJobs")
+  );
   const [getClientDetails, setClientDetails] = useState({
     loading: true,
     data: [],
@@ -271,7 +271,20 @@ const CustomerClientProfile = () => {
     setAccessDataJob(updatedAccess);
   }, [role]);
 
+  const handleCreateJob = () => {
+    navigate("/createjob", {
+      state: {
+        customer_id: customerDetails.id || hararchyData.customer.id,
+        client_id: clientDetailSingle.id || hararchyData.client.id,
+        client_name: clientDetailSingle.client_name || hararchyData.client.client_name,
+        customer_name: customerDetails.trading_name || hararchyData.customer.trading_name,
+        backPath: "/customer/client/profile"
+      }
+    });
+  };
+
   const GetClientDetails = async (client_id) => {
+    setLoading(true);
     const req = { action: "getByid", client_id: client_id, staff_id: staffDetails.id };
     const data = { req: req, authToken: token };
     await dispatch(CustomerClientAction(data))
@@ -285,9 +298,16 @@ const CustomerClientProfile = () => {
           if (response.data.client_documents && response.data.client_documents.length > 0) {
             setFileStateClient(response.data.client_documents);
           }
-          informationSetData(response.data.client);
-          setClientInformationData(response.data.contact_details[0]);
-          setCompanyDetails(response.data.company_details);
+          const client = response.data.client;
+          informationSetData(client);
+          
+          // Smart mapping for different client types
+          const contact = response.data.contact_details?.[0] || 
+                          response.data.member_details?.[0] || 
+                          response.data.beneficiaries_details?.[0] || 
+                          {};
+          setClientInformationData(contact);
+          setCompanyDetails(response.data.company_details || []);
         } else {
           setClientDetails({
             loading: false,
@@ -297,6 +317,9 @@ const CustomerClientProfile = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -517,7 +540,7 @@ const CustomerClientProfile = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== ""
+    ...(clientDetailSingle.id !== "" || cli_id_sidebar !== ""
       ? [
           { id: "view client", label: "View Client", icon: <User size={16} /> },
           { id: "documents", label: "Documents", icon: <File size={16} /> }
@@ -630,9 +653,9 @@ const CustomerClientProfile = () => {
 
   const columns = [
     {
-      name: "Job ID",
+      name: "Job Code",
       cell: (row) => (
-        <div title={row.job_code_id}>
+        <div title={row.job_id}>
           {getAccessDataJob.view == 1 ||
             getAccessDataJob.all_jobs == 1 ||
             role === "SUPERADMIN" ? (
@@ -640,14 +663,14 @@ const CustomerClientProfile = () => {
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
             >
-              {row.job_code_id}
+              {row.job_id}
             </a>
           ) : (
-            <a>{row.job_code_id}</a>
+            <a>{row.job_id}</a>
           )}
         </div>
       ),
-      selector: (row) => row.job_code_id,
+      selector: (row) => row.job_id,
       sortable: true,
     },
     {
@@ -1126,18 +1149,7 @@ const CustomerClientProfile = () => {
     }, 500);
   };
 
-  const handleCreateJob = (row) => {
-    if (getClientDetails?.data?.client?.customer_id) {
-      navigate("/customer/createjob", {
-        state: {
-          customer_id: getClientDetails?.data?.client?.customer_id,
-          clientName: clientDetailSingle,
-          goto: "client",
-          activeTab: "client",
-        },
-      });
-    }
-  };
+
 
   const selectCustomerId = (id, name) => {
     if (id && id != "") {
@@ -1319,12 +1331,7 @@ const CustomerClientProfile = () => {
               >
                 <ArrowLeft size={16} /> Back
               </button>
-              {activeTab == "NoOfJobs" && (getAccessDataJob.insert == 1 || role === "SUPERADMIN") &&
-                clientDetailSingle.id !== "" && (
-                  <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}>
-                    <Plus size={16} /> Create Job
-                  </div>
-                )}
+
             </div>
           </div>
         </div>
@@ -1464,49 +1471,91 @@ const CustomerClientProfile = () => {
                       <div className="col-md-4 align-self-center mb-3 mb-lg-0">
                         <div className="dastyle-profile-main">
                           <div className="dastyle-profile-main-pic">
-                            <span className="dastyle-profile_main-pic-change"><i className="ti-user"></i></span>
+                            <span className="dastyle-profile_main-pic-change">
+                              <i className="ti-user"></i>
+                            </span>
                           </div>
                           <div className="dastyle-profile_user-detail">
                             <h5 className="dastyle-user-name">
-                              {clientInformationData.first_name + " " + clientInformationData.last_name}
+                              {getClientDetails?.data?.client?.client_type == 5 ||
+                              getClientDetails?.data?.client?.client_type == 6
+                                ? getClientDetails?.data?.member_details?.[0]
+                                    .first_name +
+                                  " " +
+                                  getClientDetails?.data?.member_details?.[0]
+                                    .last_name
+                                : getClientDetails?.data?.client?.client_type == 7
+                                ? getClientDetails?.data
+                                    ?.beneficiaries_details?.[0].first_name +
+                                  " " +
+                                  getClientDetails?.data
+                                    ?.beneficiaries_details?.[0].last_name
+                                : clientInformationData.first_name +
+                                  " " +
+                                  clientInformationData.last_name}
                             </h5>
-                            <p className="mb-0 dastyle-user-name-post">Client Code: {informationData.client_code}</p>
+                            <p className="mb-0 dastyle-user-name-post">
+                              Client Code: {informationData.client_code}
+                            </p>
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-3 ml-auto align-self-center">
+                      <div className="col-md-4 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li>
                             <Phone size={22} className="me-2 text-secondary align-middle" />
                             <b>Phone : </b>
-                            {clientInformationData.phone ? clientInformationData.phone_code + " " + clientInformationData.phone : "NA"}
+                            {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                              ? getClientDetails?.data?.member_details?.[0]
+                                  .phone_code +
+                                " " +
+                                getClientDetails?.data?.member_details?.[0]
+                                  .phone || "NA"
+                              : getClientDetails?.data?.client?.client_type == 7
+                              ? getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].phone_code +
+                                " " +
+                                getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].phone || "NA"
+                              : clientInformationData.phone_code +
+                                " " +
+                                clientInformationData.phone || "NA"}
                           </li>
                           <li className="mt-2">
                             <Mail size={22} className="text-secondary align-middle me-2" />
-                            <b>Email : </b> {clientInformationData.email || "NA"}
+                            <b>Email : </b>{" "}
+                            {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                              ? getClientDetails?.data?.member_details?.[0]
+                                  .email || "NA"
+                              : getClientDetails?.data?.client?.client_type == 7
+                              ? getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].email || "NA"
+                              : clientInformationData.email || "NA"}
                           </li>
                         </ul>
                       </div>
-                      <div className="col-md-3 align-self-center mt-2 mt-sm-0">
+                      <div className="col-md-4 align-self-center mt-2 mt-sm-0">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
                           <li className="mt-2"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
                         </ul>
                       </div>
-                      <div className="col-md-2 align-self-center text-end">
-                        <button 
-                          className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
-                          onClick={() => navigate("/customer/client/edit", { 
-                            state: { 
-                              row: informationData, 
-                              id: customerDetails.id, 
-                              activeTab: activeTab 
-                            } 
-                          })}
-                        >
-                          <Pencil size={14} /> Edit
-                        </button>
-                      </div>
+                    </div>
+                    <div className="text-end mt-3">
+                      <button 
+                        className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
+                        onClick={() => navigate("/customer/client/edit", { 
+                          state: { 
+                            row: informationData, 
+                            id: customerDetails.id, 
+                            activeTab: activeTab 
+                          } 
+                        })}
+                      >
+                        <Pencil size={14} /> Edit
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1516,44 +1565,86 @@ const CustomerClientProfile = () => {
                   <div className="card-header border-bottom pb-3 row">
                     <div className="col-8">
                       <h4 className="card-title">
-                        {informationData.client_type == 1 ? "Sole Trader" : informationData.client_type == 2 ? "Company" : informationData.client_type == 3 ? "Partnership" : ""}
+                        {informationData && informationData.client_type == 1
+                          ? "Sole Trader"
+                          : informationData.client_type == 2
+                            ? "Company"
+                            : informationData.client_type == 3
+                              ? "Partnership"
+                              : getClientDetails?.data?.client?.client_type == 5
+                                ? "Charity Incorporated Organisation Information"
+                                : getClientDetails?.data?.client?.client_type == 6
+                                  ? "Charity Unincorporated Association Information"
+                                  : getClientDetails?.data?.client?.client_type == 7
+                                    ? "Trust"
+                                    : ""}
                       </h4>
                     </div>
                   </div>
                   <div className="card-body pt-3">
                     <div className="row">
-                      <div className="col-lg-6">
-                        <ul className="list-unstyled faq-qa">
-                          {informationData.client_type == 1 || informationData.client_type == 3 ? (
-                            <>
+                      {informationData.client_type == 1 || informationData.client_type == 3 ? (
+                        <>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
                               <li className="mb-4"><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
                               <li className="mb-4"><b>VAT Registered :</b> {informationData.vat_registered == 0 ? "No" : "Yes"}</li>
                               <li className="mb-4"><b>Website :</b> {informationData.website || "NA"}</li>
-                            </>
-                          ) : informationData.client_type == 2 ? (
-                            <>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
+                              <li className="mb-4"><b>VAT Number :</b> {informationData.vat_number || "NA"}</li>
+                            </ul>
+                          </div>
+                        </>
+                      ) : informationData.client_type == 2 ? (
+                        <>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
                               <li className="mb-4"><b>Company Name : </b> {companyDetails.company_name || "NA"}</li>
                               <li className="mb-4"><b>Company Status :</b> {companyDetails.company_status || "NA"}</li>
                               <li className="mb-4"><b>Registered Office Address :</b> {companyDetails.registered_office_address || "NA"}</li>
-                            </>
-                          ) : null}
-                        </ul>
-                      </div>
-                      <div className="col-lg-6">
-                        <ul className="list-unstyled faq-qa">
-                          {informationData.client_type == 1 || informationData.client_type == 3 ? (
-                            <>
-                              <li className="mb-4"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
-                              <li className="mb-4"><b>VAT Number :</b> {informationData.vat_number || "NA"}</li>
-                            </>
-                          ) : informationData.client_type == 2 ? (
-                            <>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
                               <li className="mb-4"><b>Entity Type :</b> {companyDetails.entity_type || "NA"}</li>
                               <li className="mb-4"><b>Company Number :</b> {companyDetails.company_number || "NA"}</li>
-                            </>
-                          ) : null}
-                        </ul>
-                      </div>
+                            </ul>
+                          </div>
+                        </>
+                      ) : [5, 6].includes(getClientDetails?.data?.client?.client_type) ? (
+                        <>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4"><b>Charity Name :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_name || "NA"}</li>
+                              <li className="mb-4"><b>Charity Number :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_number || "NA"}</li>
+                              <li className="mb-4"><b>Charity Status :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_status || "NA"}</li>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4"><b>Accounting Reference Date :</b> {getClientDetails?.data?.charity_details?.[0]?.accounting_reference_date || "NA"}</li>
+                            </ul>
+                          </div>
+                        </>
+                      ) : getClientDetails?.data?.client?.client_type == 7 ? (
+                        <>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4"><b>Trust Name :</b> {getClientDetails?.data?.trust_details?.[0]?.trust_name || "NA"}</li>
+                              <li className="mb-4"><b>Trust Type :</b> {getClientDetails?.data?.trust_details?.[0]?.trust_type || "NA"}</li>
+                            </ul>
+                          </div>
+                          <div className="col-lg-6">
+                            <ul className="list-unstyled faq-qa">
+                              <li className="mb-4"><b>Date of Establishment :</b> {getClientDetails?.data?.trust_details?.[0]?.date_of_establishment || "NA"}</li>
+                            </ul>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 </div>

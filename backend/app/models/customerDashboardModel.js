@@ -1080,71 +1080,85 @@ const customerClientAction = async (dashboard) => {
       const client_type = ExistClient[0].client_type;
       const customer_id = ExistClient[0].customer_id;
 
-      // Security check: verify if the staff has access to this customer
-      const queryAssigned = `
-          SELECT customer_id FROM customer_access WHERE staff_id = ? AND customer_id = ?
-          UNION
-          SELECT customer_id FROM staff_portfolio WHERE staff_id = ? AND customer_id = ?
-          UNION
-          SELECT id FROM customers WHERE (staff_id = ? OR account_manager_id = ?) AND id = ?
-      `;
-      const [assignedCustomers] = await pool.execute(queryAssigned, [StaffUserId, customer_id, StaffUserId, customer_id, StaffUserId, StaffUserId, customer_id]);
+      // Robust check for all client types matching Admin logic
+      let query = "";
+      let query2 = "";
       
-      if (assignedCustomers.length === 0) {
-        return { status: false, message: "Unauthorized access to this client." };
+      const commonSelect = `
+        clients.id AS client_id, 
+        clients.client_type AS client_type, 
+        clients.customer_id AS customer_id, 
+        clients.client_industry_id AS client_industry_id, 
+        clients.trading_name AS trading_name, 
+        clients.client_code AS client_code, 
+        clients.trading_address AS trading_address, 
+        clients.vat_registered AS vat_registered, 
+        clients.vat_number AS vat_number, 
+        clients.website AS website, 
+        clients.notes AS notes, 
+        clients.status AS status, 
+        clients.service_address,
+        clients.charity_commission_number,
+        clients.company_number,
+        CONCAT(
+          'cli_', 
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(clients.client_code, 1, 15)
+        ) AS full_client_code
+      `;
+
+      if (client_type == "1" || client_type == "3" || client_type == "4" || client_type == "6") {
+        query = `
+          SELECT ${commonSelect},
+          ccd.id AS contact_id, ccd.first_name, ccd.last_name, ccd.email, ccd.phone_code, ccd.phone, ccd.residential_address,
+          ccd.alternate_email, ccd.alternate_phone_code, ccd.alternate_phone, ccd.authorised_signatory_status,
+          msr.name AS customer_role_contact_name, msr.id AS customer_role_contact_id
+          FROM clients
+          JOIN customers ON customers.id = clients.customer_id
+          LEFT JOIN client_contact_details ccd ON clients.id = ccd.client_id
+          LEFT JOIN customer_contact_person_role msr ON msr.id = ccd.role
+          WHERE clients.id = ?
+        `;
+      } else if (client_type == "2") {
+        query = `
+          SELECT ${commonSelect},
+          cci.company_name, cci.entity_type, cci.company_status, cci.company_number AS cci_company_number, 
+          cci.registered_office_address, DATE_FORMAT(cci.incorporation_date, '%Y-%m-%d') AS incorporation_date, cci.incorporation_in,
+          ccd.id AS contact_id, ccd.first_name, ccd.last_name, ccd.email, ccd.phone_code, ccd.phone, ccd.residential_address,
+          msr.name AS customer_role_contact_name, msr.id AS customer_role_contact_id
+          FROM clients
+          JOIN customers ON customers.id = clients.customer_id
+          LEFT JOIN client_company_information cci ON clients.id = cci.client_id
+          LEFT JOIN client_contact_details ccd ON clients.id = ccd.client_id
+          LEFT JOIN customer_contact_person_role msr ON msr.id = ccd.role
+          WHERE clients.id = ?
+        `;
+      } else if (client_type == "5" || client_type == "7") {
+        query = `
+          SELECT ${commonSelect},
+          ccd.id AS contact_id, ccd.first_name, ccd.last_name, ccd.email, ccd.phone_code, ccd.phone, ccd.residential_address,
+          ccd.alternate_email, ccd.alternate_phone_code, ccd.alternate_phone, ccd.authorised_signatory_status,
+          msr.name AS customer_role_contact_name, msr.id AS customer_role_contact_id
+          FROM clients
+          JOIN customers ON customers.id = clients.customer_id
+          LEFT JOIN client_contact_details ccd ON clients.id = ccd.client_id
+          LEFT JOIN customer_contact_person_role msr ON msr.id = ccd.role
+          WHERE clients.id = ?
+        `;
+        query2 = `
+          SELECT ctcd.*, msr.name AS customer_role_contact_name, msr.id AS customer_role_contact_id
+          FROM client_trustee_contact_details ctcd
+          LEFT JOIN customer_contact_person_role msr ON msr.id = ctcd.role
+          WHERE ctcd.client_id = ?
+        `;
       }
 
-      const query = `
-        SELECT 
-          clients.id AS client_id, 
-          clients.client_type AS client_type, 
-          clients.customer_id AS customer_id, 
-          clients.client_industry_id AS client_industry_id, 
-          clients.trading_name AS trading_name, 
-          clients.client_code AS client_code, 
-          clients.trading_address AS trading_address, 
-          clients.vat_registered AS vat_registered, 
-          clients.vat_number AS vat_number, 
-          clients.website AS website, 
-          clients.notes AS notes, 
-          clients.status AS status, 
-          client_contact_details.id AS contact_id,
-          client_contact_details.first_name AS first_name,
-          client_contact_details.last_name AS last_name,
-          client_contact_details.email AS email,
-          client_contact_details.phone_code AS phone_code,
-          client_contact_details.phone AS phone,
-          client_contact_details.residential_address AS residential_address,
-          customer_contact_person_role.name AS customer_role_contact_name,
-          customer_contact_person_role.id AS customer_role_contact_id,
-          client_company_information.company_name AS company_name,
-          client_company_information.entity_type AS entity_type,
-          client_company_information.company_status AS company_status,
-          client_company_information.company_number AS company_number,
-          client_company_information.registered_office_address AS registered_office_address,
-          DATE_FORMAT(client_company_information.incorporation_date, '%Y-%m-%d') AS incorporation_date,
-          client_company_information.incorporation_in AS incorporation_in,
-          client_documents.id AS client_documents_id,
-          client_documents.file_name AS file_name,
-          client_documents.original_name AS original_name,
-          client_documents.file_type AS file_type,
-          client_documents.file_size AS file_size,
-          client_documents.web_url AS web_url
-        FROM 
-          clients
-        LEFT JOIN 
-          client_contact_details ON clients.id = client_contact_details.client_id
-        LEFT JOIN 
-          customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
-        LEFT JOIN 
-          client_company_information ON clients.id = client_company_information.client_id
-        LEFT JOIN 
-          client_documents ON client_documents.client_id = clients.id 
-        WHERE 
-          clients.id = ?
-      `;
-
       const [rows] = await pool.execute(query, [effectiveClientId]);
+      const [docs] = await pool.execute(
+        "SELECT id AS client_documents_id, file_name, original_name, file_type, file_size, web_url FROM client_documents WHERE client_id = ?",
+        [effectiveClientId]
+      );
 
       if (rows.length > 0) {
         const clientData = {
@@ -1154,12 +1168,16 @@ const customerClientAction = async (dashboard) => {
           client_industry_id: rows[0].client_industry_id,
           trading_name: rows[0].trading_name,
           client_code: rows[0].client_code,
+          full_client_code: rows[0].full_client_code,
           trading_address: rows[0].trading_address,
           vat_registered: rows[0].vat_registered,
           vat_number: rows[0].vat_number,
           website: rows[0].website,
           notes: rows[0].notes,
           status: rows[0].status,
+          service_address: rows[0].service_address,
+          charity_commission_number: rows[0].charity_commission_number,
+          company_number: rows[0].company_number,
         };
 
         const contactDetails = [];
@@ -1176,43 +1194,63 @@ const customerClientAction = async (dashboard) => {
               phone_code: row.phone_code,
               phone: row.phone,
               residential_address: row.residential_address,
+              alternate_email: row.alternate_email,
+              alternate_phone_code: row.alternate_phone_code,
+              alternate_phone: row.alternate_phone,
+              authorised_signatory_status: row.authorised_signatory_status == "1",
             });
             seenContacts.add(row.contact_id);
           }
         });
 
-        const clientDocuments = [];
-        const seenDocs = new Set();
-        rows.forEach(row => {
-          if (row.client_documents_id && !seenDocs.has(row.client_documents_id)) {
-            clientDocuments.push({
-              client_documents_id: row.client_documents_id,
-              file_name: row.file_name,
-              original_name: row.original_name,
-              file_type: row.file_type,
-              file_size: row.file_size,
-              web_url: row.web_url,
-            });
-            seenDocs.add(row.client_documents_id);
-          }
-        });
-
-        const companyDetails = rows[0].company_name ? {
-          company_name: rows[0].company_name,
-          entity_type: rows[0].entity_type,
-          company_status: rows[0].company_status,
-          company_number: rows[0].company_number,
-          registered_office_address: rows[0].registered_office_address,
-          incorporation_date: rows[0].incorporation_date,
-          incorporation_in: rows[0].incorporation_in,
-        } : [];
-
-        const result = {
+        let result = {
           client: clientData,
-          contact_details: contactDetails,
-          client_documents: clientDocuments,
-          company_details: companyDetails
+          client_documents: docs,
         };
+
+        if (client_type == "2") {
+          result.company_details = {
+            company_name: rows[0].company_name,
+            entity_type: rows[0].entity_type,
+            company_status: rows[0].company_status,
+            company_number: rows[0].cci_company_number,
+            registered_office_address: rows[0].registered_office_address,
+            incorporation_date: rows[0].incorporation_date,
+            incorporation_in: rows[0].incorporation_in,
+          };
+          result.contact_details = contactDetails;
+        } else if (client_type == "5" || client_type == "7") {
+          const [rows2] = await pool.execute(query2, [effectiveClientId]);
+          const trusteeDetails = rows2.map(row => ({
+            contact_id: row.id,
+            customer_contact_person_role_id: row.customer_role_contact_id,
+            customer_contact_person_role_name: row.customer_role_contact_name,
+            first_name: row.first_name,
+            last_name: row.last_name,
+            email: row.email,
+            phone_code: row.phone_code,
+            phone: row.phone,
+            authorised_signatory_status: row.authorised_signatory_status == "1",
+          }));
+          
+          if (client_type == "5") {
+            const [charityData] = await pool.execute(`SELECT * FROM client_charity_information WHERE client_id = ?`, [effectiveClientId]);
+            result.charity_details = charityData;
+            result.member_details = contactDetails;
+            result.trustee_details = trusteeDetails;
+          } else {
+            const [trustData] = await pool.execute(`SELECT * FROM client_trust_information WHERE client_id = ?`, [effectiveClientId]);
+            result.trust_details = trustData;
+            result.beneficiaries_details = contactDetails;
+            result.trustee_details = trusteeDetails;
+          }
+        } else if (client_type == "6") {
+          const [charityData] = await pool.execute(`SELECT * FROM client_charity_information WHERE client_id = ?`, [effectiveClientId]);
+          result.charity_details = charityData;
+          result.member_details = contactDetails;
+        } else {
+          result.contact_details = contactDetails;
+        }
 
         return { status: true, message: "success.", data: result };
       } else {
@@ -1220,7 +1258,7 @@ const customerClientAction = async (dashboard) => {
       }
     } catch (err) {
       console.error("getByid error:", err);
-      return { status: false, message: err.message };
+      return { status: false, message: "Error fetching client details." };
     }
   }
 
@@ -1270,7 +1308,17 @@ const customerJobAction = async (dashboard) => {
           client_company_information.company_number AS client_company_number,
           job_types.type AS job_type_name,
           timesheet.job_id AS timesheet_job_id,
-          master_status.name AS status_name
+          master_status.name AS status_name,
+          staffs1.first_name AS allocated_first_name,
+          staffs1.last_name AS allocated_last_name,
+          staffs2.first_name AS reviewer_first_name,
+          staffs2.last_name AS reviewer_last_name,
+          staffs3.first_name AS outbooks_acount_manager_first_name,
+          staffs3.last_name AS outbooks_acount_manager_last_name,
+          staffs3.employee_number AS account_manager_employee_number,
+          customer_contact_details.id AS account_manager_officer_id,
+          customer_contact_details.first_name AS account_manager_officer_first_name,
+          customer_contact_details.last_name AS account_manager_officer_last_name
         FROM jobs
         LEFT JOIN customers ON jobs.customer_id = customers.id
         LEFT JOIN clients ON jobs.client_id = clients.id
@@ -1278,6 +1326,10 @@ const customerJobAction = async (dashboard) => {
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
         LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         LEFT JOIN master_status ON jobs.status_type = master_status.id
+        LEFT JOIN staffs staffs1 ON jobs.allocated_to = staffs1.id
+        LEFT JOIN staffs staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         WHERE jobs.id = ?
       `;
       const [rows] = await pool.execute(query, [job_id]);
@@ -1293,10 +1345,10 @@ const customerJobAction = async (dashboard) => {
         
         // Get status history
         const [history] = await pool.execute(`
-          SELECT jh.*, ms.name AS status_name 
-          FROM job_status_history jh
-          LEFT JOIN master_status ms ON jh.status_id = ms.id
-          WHERE jh.job_id = ? ORDER BY jh.id ASC
+          SELECT jsu.*, ms.name AS status_name 
+          FROM job_status_updation jsu
+          LEFT JOIN master_status ms ON jsu.status_type = ms.id
+          WHERE jsu.job_id = ? ORDER BY jsu.id ASC
         `, [job_id]);
 
         return {
@@ -1420,8 +1472,26 @@ const customerJobUpdate = async (job) => {
     invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,
     notes, tasks, selectedStaffData, StaffUserId, ip, client_job_code,
     processing_checklist, reviewing_checklist, processing_checklist_status, reviewing_checklist_status,
-    checklist_modal_data, job_priority
+    checklist_modal_data, job_priority,
+    field, row: updateRow
   } = job;
+
+  // Handle single field updates (like status change from dropdown)
+  if (field && updateRow) {
+    try {
+      const query = `UPDATE jobs SET ${field} = ? WHERE id = ?`;
+      await pool.execute(query, [updateRow[field], job_id]);
+      
+      if (field === "status_type") {
+        await JobStatusUpdate(job_id, updateRow[field], new Date().toLocaleString('sv-SE'));
+      }
+      
+      return { status: true, message: "Job updated successfully." };
+    } catch (err) {
+      console.error("customerJobUpdate single field error:", err);
+      return { status: false, message: "Error updating job field." };
+    }
+  }
 
   try {
     const query = `

@@ -464,8 +464,11 @@ const ClientLists = () => {
   };
 
   const HandleClientView = (row) => {
-    setHararchyData({ customer: { id: customerId, trading_name: customerName }, client: row });
-    navigate("/customer/client/profile", { state: { Client_id: row.id, activeTab: activeTab, customer_id: customerId } });
+    const updatedData = { ...hararchyData, client: row };
+    setHararchyData(updatedData);
+    sessionStorage.setItem("cli_id_sidebar", row.id);
+    sessionStorage.setItem("cli_id_sidebar_name", row.client_name);
+    navigate("/customer/client/profile", { state: { Client_id: row.id, activeTab: activeTab, customer_id: customerId, data: updatedData } });
   };
 
   const HandleJobView = (row) => {
@@ -474,10 +477,9 @@ const ClientLists = () => {
   };
 
   const selectCustomerId = (id, name) => {
-    sessionStorage.setItem("customer_id_sidebar", id);
+    sessionStorage.setItem("cust_id_sidebar", id);
+    sessionStorage.setItem("cust_id_sidebar_name", name);
     setCustomerId(id);
-    setCustomerName(name);
-    setHararchyData({ customer: { id: id, trading_name: name } });
     setActiveTab("client");
     setCurrentPage(1);
     setSearchTerm("");

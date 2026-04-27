@@ -224,9 +224,11 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
 
   useEffect(() => {
-    JobDetails();
-    GetStatus();
-  }, []);
+    if (job_id || location.state?.job_id) {
+      JobDetails();
+      GetStatus();
+    }
+  }, [job_id, location.state?.job_id]);
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: job_id || location.state?.job_id };
