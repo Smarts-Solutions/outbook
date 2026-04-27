@@ -85,6 +85,10 @@ const getcustomerschecklist = async (customer) => {
   return customerModel.getcustomerschecklist(customer);
 }
 
+const getCustomersJobs = async (data) => {
+  return customerModel.getCustomersJobs(data);
+};
+
 module.exports = {
   addCustomer,
   customerAction,
@@ -95,5 +99,6 @@ module.exports = {
   customerUpdate,
   customerStatusUpdate,
   getcustomerschecklist,
-  deleteCustomer
+  deleteCustomer,
+  getCustomersJobs
 };

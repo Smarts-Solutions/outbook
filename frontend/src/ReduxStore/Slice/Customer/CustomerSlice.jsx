@@ -39,6 +39,7 @@ import {
 
   // customer users
   get_All_Customer_Users,
+  get_Customers_Jobs
   
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
@@ -62,6 +63,19 @@ export const getAllCustomerUsers = createAsyncThunk(
       };
       const res = await get_All_Customer_Users(updatedReq, authToken);
       return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const getCustomersJobs = createAsyncThunk(
+  "getCustomersJobs",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await get_Customers_Jobs(req, authToken);
+      return res;
     } catch (err) {
       throw err;
     }

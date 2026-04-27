@@ -19,6 +19,9 @@ const getAllCustomerUsers = async (req, res) => {
     const action = customerUsers.action;
     let result;
 
+    try { await pool.execute(`ALTER TABLE customer_access ADD COLUMN client_id TEXT`); } catch (e) {}
+    try { await pool.execute(`ALTER TABLE customer_access MODIFY COLUMN job_id TEXT`); } catch (e) {}
+
     if (action === 'getCustomerUsers') {
       const page = customerUsers.page || 1;
       const limit = customerUsers.limit || 10;
@@ -35,7 +38,9 @@ const getAllCustomerUsers = async (req, res) => {
           customer_contact_person_role.id AS customer_contact_person_role_id,
           staffs.status,
           staffs.created_at,
-          GROUP_CONCAT(customer_access.customer_id) AS allCustomerAccess
+          GROUP_CONCAT(DISTINCT NULLIF(customer_access.customer_id, '')) AS allCustomerAccess,
+          GROUP_CONCAT(DISTINCT NULLIF(customer_access.client_id, '')) AS selectedClients,
+          GROUP_CONCAT(DISTINCT NULLIF(customer_access.job_id, '')) AS selectedJobs
           FROM staffs 
           LEFT JOIN customer_contact_person_role ON customer_contact_person_role.id = staffs.customer_contact_person_role_id
           LEFT JOIN customer_access ON customer_access.staff_id = staffs.id
@@ -83,6 +88,8 @@ const getAllCustomerUsers = async (req, res) => {
       let role_id = customerUsers.role_id;
       let status = customerUsers.status;
       let allCustomerAccess = customerUsers.allCustomerAccess; // array of customer IDs
+      let selectedClients = customerUsers.selectedClients || []; // array of client IDs
+      let selectedJobs = customerUsers.selectedJobs; // array of job IDs
       let ip = customerUsers.ip;
       let StaffUserId = customerUsers.StaffUserId;
       let password = "abc@123456";
@@ -104,9 +111,23 @@ const getAllCustomerUsers = async (req, res) => {
 
       // insert into customer_access table
       if (allCustomerAccess && allCustomerAccess.length > 0) {
-        const accessInsertQuery = `INSERT INTO customer_access (staff_id, customer_id) VALUES (?, ?)`;
+        const accessInsertQuery = `INSERT INTO customer_access (staff_id, customer_id, client_id, job_id) VALUES (?, ?, ?, ?)`;
         for (const customerId of allCustomerAccess) {
-          await pool.execute(accessInsertQuery, [newCustomerUserId, customerId]);
+          // Filter selected clients for this customer
+          let custClients = [];
+          if (selectedClients && selectedClients.length > 0) {
+            const [clientRows] = await pool.execute(`SELECT id FROM clients WHERE id IN (${selectedClients.join(',')}) AND customer_id = ?`, [customerId]);
+            custClients = clientRows.map(r => r.id);
+          }
+
+          // Filter selected jobs for this customer
+          let custJobs = [];
+          if (selectedJobs && selectedJobs.length > 0) {
+            const [jobRows] = await pool.execute(`SELECT id FROM jobs WHERE id IN (${selectedJobs.join(',')}) AND customer_id = ?`, [customerId]);
+            custJobs = jobRows.map(r => r.id);
+          }
+
+          await pool.execute(accessInsertQuery, [newCustomerUserId, customerId, custClients.join(','), custJobs.join(',')]);
         }
       }
 
@@ -240,6 +261,8 @@ const getAllCustomerUsers = async (req, res) => {
       let phone_code = customerUsers.phone_code;
       let status = customerUsers.status;
       let allCustomerAccess = customerUsers.allCustomerAccess; // array of customer IDs
+      let selectedClients = customerUsers.selectedClients || []; // array of client IDs
+      let selectedJobs = customerUsers.selectedJobs; // array of job IDs
       let ip = customerUsers.ip;
 
 
@@ -263,10 +286,25 @@ const getAllCustomerUsers = async (req, res) => {
         // update customer_access table
         const deleteAccessQuery = `DELETE FROM customer_access WHERE staff_id = ?`;
         await pool.execute(deleteAccessQuery, [customer_user_id]);
+
         if (allCustomerAccess && allCustomerAccess.length > 0) {
-          const accessInsertQuery = `INSERT INTO customer_access (staff_id, customer_id) VALUES (?, ?)`;
+          const accessInsertQuery = `INSERT INTO customer_access (staff_id, customer_id, client_id, job_id) VALUES (?, ?, ?, ?)`;
           for (const customerId of allCustomerAccess) {
-            await pool.execute(accessInsertQuery, [customer_user_id, customerId]);
+            // Filter selected clients for this customer
+            let custClients = [];
+            if (selectedClients && selectedClients.length > 0) {
+              const [clientRows] = await pool.execute(`SELECT id FROM clients WHERE id IN (${selectedClients.join(',')}) AND customer_id = ?`, [customerId]);
+              custClients = clientRows.map(r => r.id);
+            }
+
+            // Filter selected jobs for this customer
+            let custJobs = [];
+            if (selectedJobs && selectedJobs.length > 0) {
+              const [jobRows] = await pool.execute(`SELECT id FROM jobs WHERE id IN (${selectedJobs.join(',')}) AND customer_id = ?`, [customerId]);
+              custJobs = jobRows.map(r => r.id);
+            }
+
+            await pool.execute(accessInsertQuery, [customer_user_id, customerId, custClients.join(','), custJobs.join(',')]);
           }
         }
 

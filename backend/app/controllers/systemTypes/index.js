@@ -7,8 +7,7 @@ const customerSourceController = require('./customerSourceController');
 const customerSubSourceController = require('./customerSubSourceController');
 const customerInternal = require('./Internal');
 const customerSubInternal = require('./subInternal');
-
-
+const customerContactPersonAccessController = require('./customerContactPersonAccessController');
 
 module.exports = {
     statusTypeController,
@@ -19,5 +18,6 @@ module.exports = {
     customerSourceController,
     customerSubSourceController,
     customerInternal,
-    customerSubInternal
+    customerSubInternal,
+    customerContactPersonAccessController
     };

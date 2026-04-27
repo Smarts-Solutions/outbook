@@ -20,6 +20,7 @@ import {
   customerSubSource,
   INTERNALAPI,
   SUBINTERNALAPI,
+  CUSTOMERCONTACTPERSONACCESS,
   
   
 } from "../../../Services/Settings/settingService";
@@ -397,7 +398,25 @@ export const customerSubInternalApi = createAsyncThunk(
   }
 );
 
- 
+export const CustomerContactPersonAccess = createAsyncThunk(
+  "customerContactPersonAccess",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await CUSTOMERCONTACTPERSONACCESS(updatedReq, authToken);
+
+      return await res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
 
 //Setting Slice
 const SettingSlice = createSlice({
@@ -624,6 +643,17 @@ const SettingSlice = createSlice({
         state.customersubinternal = action.payload;
       })
       .addCase(customerSubInternalApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerContactPersonAccess.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerContactPersonAccess.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerContactPersonAccess = action.payload;
+      })
+      .addCase(CustomerContactPersonAccess.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

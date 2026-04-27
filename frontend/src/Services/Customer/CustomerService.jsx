@@ -23,6 +23,17 @@ export async function get_All_Customer_Users(data, token) {
 
 // Customer Users End
 
+export async function get_Customers_Jobs(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomersJobs`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err;
+  }
+}
+
 
 
 

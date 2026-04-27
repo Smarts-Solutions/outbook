@@ -21,6 +21,7 @@ import CustomerDetails from "../layouts/Admin/customer/CustomerDetails";
 
 import Status from "../layouts/Admin/StatusPage/Status";
 import Access from "../layouts/Admin/AccessPage/Access";
+import CustomerAccess from "../layouts/Admin/AccessPage/CustomerAccess";
 import Setting from "../layouts/Admin/Settings/Setting";
 import Staff from "../layouts/Admin/Staff/Staff";
 import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
@@ -270,6 +271,7 @@ const Admin_Route = () => {
               <Route path="/staff" element={<Staff />} />
               <Route path="/staff/viewlogs" element={<ViewLogs />} />
               <Route path="/access" element={<Access />} />
+              <Route path="/customer-access" element={<CustomerAccess />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/add/jobtype" element={<JobType />} />
               <Route path="/settings/task" element={<Task />} />

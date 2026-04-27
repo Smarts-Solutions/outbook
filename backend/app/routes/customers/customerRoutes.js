@@ -19,6 +19,7 @@ router.post('/customerStatusUpdate',verifyToken, customerController.customerStat
 router.post('/deleteCustomer',verifyToken, customerController.deleteCustomer);
 
 router.post('/getcustomerschecklist',verifyToken, customerController.getcustomerschecklist);
+router.post('/getCustomersJobs',verifyToken, customerController.getCustomersJobs);
 
 
 // Customer Users Routes Start

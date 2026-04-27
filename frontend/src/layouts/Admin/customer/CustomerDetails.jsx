@@ -2,12 +2,12 @@ import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
-import { getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllCustomerDropDown, getCustomersJobs } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { PersonRole } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { getAllCustomerUsers } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
-import Validation_Message from "../../../Utils/Validation_Message";
+
 import { useFormik } from "formik";
 
 import Swal from "sweetalert2";
@@ -38,7 +38,6 @@ const CustomerUsers = () => {
 
 
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -63,6 +62,11 @@ const CustomerUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const debounceTimer = useRef(null);
+
+  const [allCustomers, setAllCustomers] = useState([]);
+  const [allClients, setAllClients] = useState([]);
+  const [allJobs, setAllJobs] = useState([]);
+  const [selectedJobs, setSelectedJobs] = useState([]);
 
 
 
@@ -150,13 +154,22 @@ const CustomerUsers = () => {
 
   useEffect(() => {
     GetAllCustomer();
-    //   GetAllCustomer({
-    //   searchValue: "",
-    //   pageNo: 1
-    // });
-
+    FetchCustomersJobs();
     CustomerPersonRoleData();
   }, []);
+
+  const FetchCustomersJobs = async () => {
+    try {
+      const response = await dispatch(getCustomersJobs({ req: {}, authToken: token })).unwrap();
+      if (response.status) {
+        setAllCustomers(response.data.customers);
+        setAllClients(response.data.clients);
+        setAllJobs(response.data.jobs);
+      }
+    } catch (error) {
+      console.error("Error fetching customers/jobs:", error);
+    }
+  };
 
 
 
@@ -563,27 +576,6 @@ const CustomerUsers = () => {
       ],
     },
     {
-      type: "multiselect",
-      name: "allCustomerAccess",
-      label: "All Customer Access",
-      label_size: 12,
-      col_size: 6,
-      disable: false,
-      options: customerDataAll?.map((item) => ({
-        value: item.id,
-        label: item.trading_name,
-      }))
-    },
-    //    {
-    //   type: "multiselect-pagination",
-    //   name: "allCustomerAccess",
-    //   label: "All Customer Access",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   options: customerOptions
-    // },
-    {
       type: "select",
       name: "customer_contact_person_role_id",
       label: "Customer Role",
@@ -595,6 +587,20 @@ const CustomerUsers = () => {
         label: item.name,
       }))
     },
+    {
+      type: "multiselect",
+      name: "allCustomerAccess",
+      label: "All Customer Access",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: customerDataAll?.map((item) => ({
+        value: item.id,
+        label: item.trading_name,
+      }))
+    },
+
+
 
   ];
 
@@ -612,6 +618,12 @@ const CustomerUsers = () => {
       allCustomerAccess: updatedata?.allCustomerAccess
         ? updatedata.allCustomerAccess.split(",").map(Number)
         : [] || [],
+      selectedClients: updatedata?.selectedClients
+        ? updatedata.selectedClients.split(",").map(Number)
+        : [],
+      selectedJobs: updatedata?.selectedJobs
+        ? updatedata.selectedJobs.split(",").map(Number)
+        : [],
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
@@ -648,6 +660,8 @@ const CustomerUsers = () => {
         status: values.status,
         staff_to: values.staff_to,
         allCustomerAccess: values.allCustomerAccess,
+        selectedClients: values.selectedClients,
+        selectedJobs: values.selectedJobs,
         customer_contact_person_role_id: values.customer_contact_person_role_id,
         created_by: staffDetails.id,
         action: type === "edit" ? "updateCustomerUsers" : "addCustomerUsers",
@@ -693,17 +707,67 @@ const CustomerUsers = () => {
     },
   });
 
+  const prevCustomerAccess = useRef(formik.values.allCustomerAccess);
+
+  useEffect(() => {
+    // Skip if it's the initial load for edit mode
+    if (showAddCustomerModal) {
+      const added = (formik.values.allCustomerAccess || []).filter(id => !(prevCustomerAccess.current || []).includes(id));
+      const removed = (prevCustomerAccess.current || []).filter(id => !(formik.values.allCustomerAccess || []).includes(id));
+
+      let newSelectedClients = [...(formik.values.selectedClients || [])];
+      let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+
+      if (added.length > 0) {
+        added.forEach(customerId => {
+          const clients = allClients.filter(c => c.customer_id === customerId);
+          clients.forEach(client => {
+            if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+            const jobs = allJobs.filter(j => j.client_id === client.id);
+            jobs.forEach(job => {
+              if (!newSelectedJobs.includes(job.id)) newSelectedJobs.push(job.id);
+            });
+          });
+        });
+        formik.setFieldValue("selectedClients", newSelectedClients);
+        formik.setFieldValue("selectedJobs", newSelectedJobs);
+      }
+
+      if (removed.length > 0) {
+        removed.forEach(customerId => {
+          const clients = allClients.filter(c => c.customer_id === customerId);
+          const clientIds = clients.map(c => c.id);
+          newSelectedClients = newSelectedClients.filter(id => !clientIds.includes(id));
+
+          const jobs = allJobs.filter(j => j.customer_id === customerId);
+          const jobIds = jobs.map(j => j.id);
+          newSelectedJobs = newSelectedJobs.filter(id => !jobIds.includes(id));
+        });
+        formik.setFieldValue("selectedClients", newSelectedClients);
+        formik.setFieldValue("selectedJobs", newSelectedJobs);
+      }
+      prevCustomerAccess.current = formik.values.allCustomerAccess;
+    }
+  }, [formik.values.allCustomerAccess, allClients, allJobs, showAddCustomerModal]);
+
+  useEffect(() => {
+    if (showAddCustomerModal) {
+      prevCustomerAccess.current = formik.values.allCustomerAccess;
+    }
+  }, [showAddCustomerModal]);
+
 
   return (
     <div>
       <CommanModal
         isOpen={showAddCustomerModal}
         backdrop="static"
-        size="ms-7"
+        size="xl"
         title={type === "edit" ? "Update Customer User" : "Add Customer User"}
         hideBtn={true}
         handleClose={() => {
           setShowAddCustomerModal(false);
+          prevCustomerAccess.current = [];
           formik.resetForm();
         }}
 
@@ -716,30 +780,163 @@ const CustomerUsers = () => {
           btn_name={type === "edit" ? "Update" : "Add"}
           closeBtn={(e) => {
             formik.resetForm();
+            prevCustomerAccess.current = [];
             setShowAddCustomerModal(false);
           }}
-        />
-        {/* <Formicform
-          fieldtype={fields.filter(
-            (field) => !field.showWhen || field.showWhen(formik.values)
-          )}
-          formik={formik}
-          btn_name={type === "edit" ? "Edit Customer User" : "Add Customer User"}
-          handleSearchSelectData={handleCustomerSearch}
-          loadMoreSelectData={() =>
-            GetAllCustomer({
-              searchValue: customerSearch,
-              pageNo: customerPage + 1,
-              append: true
-            })
+          additional_field={
+            formik.values.allCustomerAccess && formik.values.allCustomerAccess.length > 0 && (
+              <div className="mt-4 border-top pt-3">
+                <h5 className="mb-3 text-primary">Assign Jobs for Selected Customers</h5>
+                <div className="accordion" id="customerAccordion">
+                  {formik.values.allCustomerAccess.map((customerId) => {
+                    const customer = allCustomers.find((c) => c.id === customerId);
+                    if (!customer) return null;
+
+                    const customerClients = allClients.filter((c) => c.customer_id === customerId);
+
+                    return (
+                      <div key={customerId} className="accordion-item mb-3 border">
+                        <h2 className="accordion-header" id={`heading-${customerId}`}>
+                          <button
+                            className="accordion-button bg-light fw-bold"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target={`#collapse-${customerId}`}
+                            aria-expanded="true"
+                            aria-controls={`collapse-${customerId}`}
+                          >
+                            Customer: {customer.trading_name}
+                          </button>
+                        </h2>
+                        <div
+                          id={`collapse-${customerId}`}
+                          className="accordion-collapse collapse show"
+                          aria-labelledby={`heading-${customerId}`}
+                        >
+                          <div className="accordion-body">
+                            {customerClients.length > 0 ? (
+                              customerClients.map((client) => {
+                                const clientJobs = allJobs.filter((j) => j.client_id === client.id);
+                                const isAllSelected = clientJobs.length > 0 && clientJobs.every((j) => formik.values.selectedJobs?.includes(j.id));
+
+                                return (
+                                  <div key={client.id} className="card shadow-none border mb-2">
+                                    <div className="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                      <div className="d-flex align-items-center">
+                                        <div className="form-check me-3">
+                                          <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id={`client-${client.id}`}
+                                            checked={formik.values.selectedClients?.includes(client.id)}
+                                            onChange={(e) => {
+                                              let newSelectedClients = [...(formik.values.selectedClients || [])];
+                                              let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+                                              const jobIds = clientJobs.map((j) => j.id);
+
+                                              if (e.target.checked) {
+                                                newSelectedClients.push(client.id);
+                                                // Optionally auto-select all jobs when client is checked? 
+                                                // User said "defaultall", so maybe yes.
+                                                jobIds.forEach(id => {
+                                                  if(!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
+                                                });
+                                              } else {
+                                                newSelectedClients = newSelectedClients.filter(id => id !== client.id);
+                                                newSelectedJobs = newSelectedJobs.filter(id => !jobIds.includes(id));
+                                              }
+                                              formik.setFieldValue("selectedClients", newSelectedClients);
+                                              formik.setFieldValue("selectedJobs", newSelectedJobs);
+                                            }}
+                                          />
+                                          <label className="form-check-label fw-semibold text-secondary" htmlFor={`client-${client.id}`}>
+                                            Client: {client.trading_name}
+                                          </label>
+                                        </div>
+                                      </div>
+                                      <div className="form-check">
+                                        <input
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          id={`all-jobs-${client.id}`}
+                                          checked={isAllSelected}
+                                          onChange={(e) => {
+                                            const jobIds = clientJobs.map((j) => j.id);
+                                            let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+                                            let newSelectedClients = [...(formik.values.selectedClients || [])];
+
+                                            if (e.target.checked) {
+                                              jobIds.forEach((id) => {
+                                                if (!newSelectedJobs.includes(id)) {
+                                                  newSelectedJobs.push(id);
+                                                }
+                                              });
+                                              if(!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+                                            } else {
+                                              newSelectedJobs = newSelectedJobs.filter((id) => !jobIds.includes(id));
+                                              // Should we uncheck client if all jobs are unchecked? 
+                                              // Maybe not, they might want the client access but no specific jobs.
+                                            }
+                                            formik.setFieldValue("selectedJobs", newSelectedJobs);
+                                            formik.setFieldValue("selectedClients", newSelectedClients);
+                                          }}
+                                        />
+                                        <label className="form-check-label small" htmlFor={`all-jobs-${client.id}`}>
+                                          Select All Client Jobs
+                                        </label>
+                                      </div>
+                                    </div>
+                                    <div className="card-body py-2">
+                                      <div className="row">
+                                        {clientJobs.length > 0 ? (
+                                          clientJobs.map((job) => (
+                                            <div key={job.id} className="col-md-4 mb-1">
+                                              <div className="form-check">
+                                                <input
+                                                  type="checkbox"
+                                                  className="form-check-input"
+                                                  id={`job-${job.id}`}
+                                                  checked={formik.values.selectedJobs && formik.values.selectedJobs.includes(job.id)}
+                                                  onChange={(e) => {
+                                                    let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+                                                    let newSelectedClients = [...(formik.values.selectedClients || [])];
+                                                    if (e.target.checked) {
+                                                      newSelectedJobs.push(job.id);
+                                                      if(!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+                                                    } else {
+                                                      newSelectedJobs = newSelectedJobs.filter((id) => id !== job.id);
+                                                    }
+                                                    formik.setFieldValue("selectedJobs", newSelectedJobs);
+                                                    formik.setFieldValue("selectedClients", newSelectedClients);
+                                                  }}
+                                                />
+                                                <label className="form-check-label small" htmlFor={`job-${job.id}`}>
+                                                  {job.job_id}
+                                                </label>
+                                              </div>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <div className="col-12 small text-muted">No jobs found for this client</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div className="text-muted small">No clients found for this customer</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )
           }
-          selectDataHasMore={customerHasMore}
-          resetSelectData={resetCustomerDropdown}
-          closeBtn={() => {
-            formik.resetForm();
-            setShowAddCustomerModal(false);
-          }}
-        /> */}
+        />
       </CommanModal>
 
       <div className="container-fluid">

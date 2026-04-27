@@ -1266,7 +1266,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
 
-        
+
         try {
             // Process 1 table
             const checkQuery = `
@@ -3678,6 +3678,34 @@ const deleteCustomer = async (customer) => {
 
 }
 
+const getCustomersJobs = async (data) => {
+    try {
+        const [customers] = await pool.execute(`SELECT id, trading_name FROM customers WHERE status = '1' ORDER BY trading_name ASC`);
+        const [clients] = await pool.execute(`SELECT id, trading_name, customer_id FROM clients WHERE status = '1' ORDER BY trading_name ASC`);
+        const [jobs] = await pool.execute(`
+            SELECT 
+                jobs.id, 
+                jobs.client_id, 
+                jobs.customer_id,
+                CONCAT(
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(clients.trading_name, 1, 3), '_',
+                    SUBSTRING(job_types.type, 1, 4), '_',
+                    SUBSTRING(jobs.job_id, 1, 15)
+                ) AS job_id
+            FROM jobs
+            LEFT JOIN customers ON customers.id = jobs.customer_id
+            LEFT JOIN clients ON clients.id = jobs.client_id
+            LEFT JOIN job_types ON job_types.id = jobs.job_type_id
+            ORDER BY jobs.job_id ASC
+        `);
+        
+        return { status: true, message: 'Success', data: { customers, clients, jobs } };
+    } catch (error) {
+        return { status: false, message: error.message };
+    }
+}
+
 
 module.exports = {
     createCustomer,
@@ -3695,7 +3723,6 @@ module.exports = {
     getcustomerschecklist,
     getCustomer_dropdown_delete,
     getAllAccountManager,
-    get_customers_filter
-
-
+    get_customers_filter,
+    getCustomersJobs
 };
