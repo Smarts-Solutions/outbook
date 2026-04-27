@@ -524,7 +524,7 @@ function TimesheetReport() {
         });
       return
       // External get All jobs
-      var req = { action: "getByCustomer", customer_id: "" };
+      var req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       var data = { req: req, authToken: token };
       await dispatch(JobAction(data))
         .unwrap()
@@ -567,7 +567,7 @@ function TimesheetReport() {
     } else if (internal_external == "2") {
       return;
       // External get All jobs
-      const req = { action: "getByCustomer", customer_id: "" };
+      const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       const data = { req: req, authToken: token };
       await dispatch(JobAction(data))
         .unwrap()
@@ -1339,7 +1339,6 @@ function TimesheetReport() {
 
                 <div className="d-flex align-items-center gap-2">
                   <Select
-
                     options={[
                       { value: "", label: "Select..." },
                       ...getAllFilterData.map((opt) => ({

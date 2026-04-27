@@ -157,9 +157,9 @@ const ClientList = () => {
   };
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    { id: "view client", label: "View Client", icon: <User size={16} /> },
-    { id: "documents", label: "Documents", icon: <File size={16} /> },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} className="me-1" /> },
+    { id: "view client", label: "View Client", icon: <User size={16} className="me-1" />, },
+    { id: "documents", label: "Documents", icon: <File size={16} className="me-1" /> },
   ];
 
   const GetStatus = async () => {
@@ -659,12 +659,12 @@ const ClientList = () => {
             />
           ) : row.file_type === "application/pdf" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <FileText size={24} color="#FF0000" />
+              <FileText size={24} style={{ color: "#FF0000" }} />
               <span>PDF</span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <File size={24} color="#000" />
+              <File size={24} style={{ color: "#000" }} />
               <span>{row.file_type}</span>
             </div>
           )}
@@ -1213,7 +1213,8 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => setActiveTab(tab.id)}
                       >
-                        {tab.icon}{" "}
+                        {/* <i className={tab.icon}></i> */}
+                        {tab.icon}
                         {tab.label}
                       </button>
                     </li>
@@ -1333,12 +1334,11 @@ const ClientList = () => {
 
                     {customerData && customerData.length > 0 && (
                       <button
-                        className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                        className="btn btn-outline-info fw-bold float-end border-3"
                         onClick={handleExport}
                       >
-                        <Download size={16} />
-
-                        <span>Export Excel</span>
+                        <Download size={16}/>{" "}
+                        Export Excel
                       </button>
                     )}
                   </div>
@@ -1960,15 +1960,9 @@ const ClientList = () => {
                                                               />
                                                             ) : file.type ===
                                                               "application/pdf" ? (
-                                                              <FileText
-                                                                size={24}
-                                                                color="#FF0000"
-                                                              />
+                                                              <FileText size={24} style={{ color: "#FF0000" }} />
                                                             ) : (
-                                                              <File
-                                                                size={24}
-                                                                color="#000"
-                                                              />
+                                                              <File size={24} style={{ color: "#000" }} />
                                                             )}
                                                           </td>
                                                           <td className="file_name">

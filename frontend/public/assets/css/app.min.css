@@ -3375,6 +3375,10 @@ span.sidebar-icons {
   border-radius: 5px;
 }
 
+.datatable-container .rdt_TableRow:hover {
+  z-index: 99;
+}
+
 button.secondary-icon {
   color: #222222;
   border: 3px solid #222222;
@@ -4668,7 +4672,7 @@ i.exp_icon {
 }
 
 .dropdown-menu.custom-dropdown.show {
-  z-index: 999 !important;
+  z-index: 999999 !important;
 }
 
 .data-table-extensions>.data-table-extensions-filter>.icon {
@@ -4951,15 +4955,17 @@ button.secondary-icon,
 /* .css-b62m3t-container {
   z-index: 2;
 } */
- /*
+/*
 
 .icon-fix .me-1 {  
     margin-top: -3px;
 }*/
-img, svg {
-    vertical-align: middle;
-    position: relative;
-    top: -2px; /* tweak this value */
+img,
+svg {
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+  /* tweak this value */
 }
 
 .table-equal {

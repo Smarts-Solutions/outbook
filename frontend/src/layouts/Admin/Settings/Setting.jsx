@@ -516,14 +516,14 @@ const Setting = () => {
 
   const serviceData = async (req) => {
 
-    if (req.action == "delete") {
-      console.log("serviceData called with req:", req);
-      if (req.data.job_service_exists == true) {
-        await GetAllJobsName(req);
-        return; // Exit the function to prevent the dispatch from being called
-      }
+    // if (req.action == "delete") {
+    //   console.log("serviceData called with req:", req);
+    //   if (req.data.job_service_exists == true) {
+    //     await GetAllJobsName(req);
+    //     return; // Exit the function to prevent the dispatch from being called
+    //   }
       
-    }
+    // }
    
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
@@ -1085,7 +1085,8 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
-                {row.is_disable == 0 && (
+                {row.is_disable == 0 && row.job_service_exists === null && (
+             
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row, "4")}

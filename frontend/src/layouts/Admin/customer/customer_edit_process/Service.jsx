@@ -917,7 +917,8 @@ const Service = () => {
                                 setTempServices(item.id);
                               }}
                             >
-                              Assign Account Manager <User size={16} />
+                              Assign Account Manager{" "}
+                              <User size={18} />
                             </button>
                           </td>
                         </tr>

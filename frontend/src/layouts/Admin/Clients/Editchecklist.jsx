@@ -10,7 +10,12 @@ import {
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
-import { Save,Plus ,ArrowLeft} from "lucide-react";
+import {
+  Save,
+  X,
+  Plus,
+  ArrowLeft
+} from "lucide-react";
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -451,7 +456,7 @@ const CreateCheckList = () => {
                   className="btn btn-info ms-2"
                   onClick={addTask}
                 >
-                 <Plus size={16}/> Add Task
+                  <Plus size={16} className="pe-1" /> Add Task
                 </button>
               </div>
             </div>
@@ -560,7 +565,7 @@ const CreateCheckList = () => {
                   className="btn btn-outline-success"
                   onClick={handleSubmit}
                 >
-                  <Save size={16}/>
+                 <Save size={16} className="pe-1" />
                   Submit
                 </button>
               </div>

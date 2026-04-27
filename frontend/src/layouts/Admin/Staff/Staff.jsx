@@ -87,44 +87,93 @@ const StaffPage = () => {
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
 
-  const [staffDataAllRecords, setStaffDataAllRecords] = useState({
-    loading: true,
-    data: [],
-  });
+  const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+  const [managerOptions, setManagerOptions] = useState([]);
+  const [managerPage, setManagerPage] = useState(1);
+  const [managerHasMore, setManagerHasMore] = useState(true);
+  const [managerSearch, setManagerSearch] = useState("");
+  const [managerLoading, setManagerLoading] = useState(false);
+  const managerCacheRef = useRef({});
+  const managerDebounceTimeout = useRef(null);
 
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    GetAllStaffData(1, 10000, "");
+    // GetAllStaffData(1, 10000, ""); // Removed this as we now fetch on click
   }, []);
 
-  const GetAllStaffData = async (page = 1, limit = 10, search = "") => {
-    setLoading(true);
-    //  setStaffDataAll({ loading: true, data: [] });
-    await dispatch(
-      Staff({
-        req: { action: "get", page, limit, search },
-        authToken: token,
-      }),
-    )
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setStaffDataAllRecords({
-            loading: false,
-            data: response?.data?.data,
-          });
-        } else {
-          setStaffDataAllRecords({ loading: false, data: [] });
-        }
-      })
-      .catch((error) => {
-        return;
-      })
-      .finally(() => {
-        setLoading(false);
+  const GetLineManagerData = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
+    if (managerLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (managerCacheRef.current[cacheKey]) {
+      const cached = managerCacheRef.current[cacheKey];
+      setManagerOptions((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.value, item])).values(),
+        );
+        return unique;
       });
+      return;
+    }
+
+    setManagerLoading(true);
+    try {
+      const response = await dispatch(
+        Staff({
+          req: { action: "get", page: pageNo, limit: 20, search: searchValue },
+          authToken: token,
+        }),
+      ).unwrap();
+
+      if (response.status) {
+        const formatted = response.data.data
+          .filter(
+            (data) =>
+              data.role !== "ADMIN" &&
+              data.role !== "SUPERADMIN" &&
+              data.id !== editStaffData.id,
+          )
+          .map((data) => ({
+            label: `${data.first_name} ${data.last_name}`,
+            value: data.id,
+          }));
+
+        managerCacheRef.current[cacheKey] = formatted;
+        setManagerOptions((prev) => {
+          const combined = append ? [...prev, ...formatted] : formatted;
+          const unique = Array.from(
+            new Map(combined.map((item) => [item.value, item])).values(),
+          );
+          return unique;
+        });
+        setManagerHasMore(response.data.data.length === 20);
+        setManagerPage(pageNo);
+      } else {
+        if (!append) setManagerOptions([]);
+      }
+    } catch (error) {
+      console.error("Manager Error:", error);
+      if (!append) setManagerOptions([]);
+    } finally {
+      setManagerLoading(false);
+    }
+  };
+
+  const handleManagerSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(managerDebounceTimeout.current);
+    managerDebounceTimeout.current = setTimeout(() => {
+      setManagerSearch(value);
+      setManagerPage(1);
+      GetLineManagerData({ searchValue: value, pageNo: 1 });
+    }, 500);
   };
 
   useEffect(() => {
@@ -517,7 +566,8 @@ const StaffPage = () => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <EllipsisVertical size={18}/>
+                  
+                  <EllipsisVertical size={18} />
                 </button>
                 <div
                   className="dropdown-menu custom-dropdown"
@@ -795,25 +845,6 @@ const StaffPage = () => {
         { label: "Inactive", value: "0" },
       ],
     },
-    // {
-    //   type: "selectSearch",
-    //   name: "staff_to",
-    //   label: "Line Manager",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   options: staffDataAll?.data
-    //     .filter(
-    //       (data) =>
-    //         data.role !== "ADMIN" &&
-    //         data.role !== "SUPERADMIN" &&
-    //         data.id !== editStaffData.id,
-    //     )
-    //     .map((data) => ({
-    //       label: `${data.first_name} ${data.last_name}`,
-    //       value: data.id,
-    //     })),
-    // },
     {
       type: "selectSearch",
       name: "staff_to",
@@ -821,27 +852,23 @@ const StaffPage = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
-      options: staffDataAllRecords?.data
-        ?.filter(
-          (data) =>
-            data.role !== "ADMIN" &&
-            data.role !== "SUPERADMIN" &&
-            data.id !== editStaffData.id,
-        )
-        .map((data) => {
-          if (formik.values.staff_to == data.id) {
-            return {
-              label: `${data.first_name} ${data.last_name}`,
-              value: data.id,
-              selected: true, // ✅ selected row
-            };
-          } else {
-            return {
-              label: `${data.first_name} ${data.last_name}`,
-              value: data.id,
-            };
-          }
-        }),
+      options: managerOptions,
+      onMenuOpen: () => {
+        if (managerOptions.length === 0) {
+          GetLineManagerData({ searchValue: "", pageNo: 1 });
+        }
+      },
+      onInputChange: (value) => handleManagerSearch(value),
+      onMenuScrollToBottom: () => {
+        if (managerHasMore && !managerLoading) {
+          GetLineManagerData({
+            searchValue: managerSearch,
+            pageNo: managerPage + 1,
+            append: true,
+          });
+        }
+      },
+      isLoading: managerLoading,
     },
 
     {
@@ -1193,7 +1220,7 @@ const StaffPage = () => {
                           formik.resetForm();
                         }}
                       >
-                        <Plus size={16} /> Add Staff
+                        <Plus size={16}/> Add Staff
                       </button>
                     )}
                   </div>
@@ -1213,17 +1240,15 @@ const StaffPage = () => {
                 onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
-            {staffDataAll?.data && staffDataAll.data.length > 0 && (
-              <div className="col-md-8 d-flex justify-content-end">
-                <button
-                  className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
-                  onClick={handleExport}
-                >
-                  <Download size={16} />
-                  <span>Export Excel</span>
-                </button>
-              </div>
-            )}
+            <div className="col-md-8 d-flex justify-content-end">
+              <button
+                className="btn btn-outline-info fw-bold border-3"
+                onClick={handleExport}
+              >
+                <Download size={16}/>{" "}
+                Export Excel
+              </button>
+            </div>
           </div>
 
           {tabs?.map((tab) => (
@@ -1515,7 +1540,7 @@ const StaffPage = () => {
             color="primary"
             onClick={handleUpdate}
           >
-            <Save size={16} />
+           <Save size={16} className="pe-1" />
             Update
           </Button>
         </div>

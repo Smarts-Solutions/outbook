@@ -1,8 +1,10 @@
 
 /node_modules
+/.env
 /.pnp
 .pnp.js
 /updation.txt
+
 
 
 .DS_Store

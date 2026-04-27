@@ -91,7 +91,7 @@ const EditCheckList = () => {
     const data = { req, authToken: token };
     try {
       const response = await dispatch(getList(data)).unwrap();
-     
+
       if (response.status && response?.data?.result) {
         const d = response?.data?.result;
 
@@ -115,11 +115,11 @@ const EditCheckList = () => {
           getJobTypeData(d.service_id);
         }
 
-       
+
 
         if (Array.isArray(d.customer_id) && d.customer_id.length > 0) {
           getServiceData(d.customer_id);
-         }
+        }
 
         setAllExistIds(response?.data?.allExistIds || {});
       }
@@ -211,7 +211,7 @@ const EditCheckList = () => {
   const getServiceData = async (customer_ids) => {
 
     customer_ids = Array.isArray(customer_ids) ? customer_ids.map(String) : [];
-     
+
     if (!Array.isArray(customer_ids) || customer_ids.length === 0) {
       getAllServices();
       return;
@@ -234,11 +234,11 @@ const EditCheckList = () => {
       );
 
       setServiceAllData(uniqueServices);
-     
+
     } catch (error) {
       console.error("getServicesByCustomers error", error);
       setServiceAllData([]);
-     
+
     }
   }
 
@@ -912,17 +912,19 @@ const EditCheckList = () => {
               </div>
             </div>
 
-            <div className="col-lg-12 mt-3">
+            <div className="col-lg-8 mt-3">
               <label className="form-label">Upload File (CSV / Excel) </label>
-              <div className="d-flex align-items-center">
-                <input
-                  type="file"
-                  className="form-control w-50"
-                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                  onChange={handleFileChange}
-                />
+              <div className="row align-items-center">
+                <div className="col-md-6">
+                  <input
+                    type="file"
+                    className="form-control w-100"
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    onChange={handleFileChange}
+                  />
+                </div>
 
-                <div className="ms-3">
+                <div className="col-md-6">
                   {existingFile ? (
                     <div className="d-flex flex-column">
                       <span className="text-muted small">Previously Uploaded:</span>

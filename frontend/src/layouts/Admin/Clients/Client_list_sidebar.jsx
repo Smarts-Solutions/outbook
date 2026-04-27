@@ -15,7 +15,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, ArrowLeft, Plus, User, Briefcase } from "lucide-react";
+import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Download} from "lucide-react";
 
 const ClientLists = () => {
   const navigate = useNavigate();
@@ -30,37 +30,91 @@ const ClientLists = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Customer Pagination states
+  const [custPage, setCustPage] = useState(1);
+  const [custHasMore, setCustHasMore] = useState(true);
+  const [custLoading, setCustLoading] = useState(false);
+  const [custSearch, setCustSearch] = useState("");
+  const custCacheRef = useRef({});
+  const custDebounceTimeout = useRef(null);
+
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
 
-  const GetAllCustomer = async () => {
-    setLoading(true);
-    const req = { action: "get_dropdown" };
+  const GetAllCustomer = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
+    if (custLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (custCacheRef.current[cacheKey]) {
+      const cached = custCacheRef.current[cacheKey];
+      setCustomerData((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.id, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
+    setCustLoading(true);
+    const req = {
+      action: "get",
+      page: pageNo,
+      limit: 20,
+      search: searchValue || "",
+      staff_id: staffDetails?.id,
+    };
     const data = { req: req, authToken: token };
     await dispatch(getAllCustomerDropDown(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerData(response.data);
+          const newData = response.data.data || [];
+          custCacheRef.current[cacheKey] = newData;
+          setCustomerData((prev) => {
+            const combined = append ? [...prev, ...newData] : newData;
+            const unique = Array.from(
+              new Map(combined.map((item) => [item.id, item])).values(),
+            );
+            return unique;
+          });
+          setCustHasMore(newData.length === 20);
+          setCustPage(pageNo);
         } else {
-          setCustomerData([]);
+          if (!append) setCustomerData([]);
         }
       })
-      .catch((error) => {
-        return;
+      .catch(() => {
+        if (!append) setCustomerData([]);
       })
       .finally(() => {
-        setLoading(false);
+        setCustLoading(false);
       });
   };
 
+  const handleCustomerSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(custDebounceTimeout.current);
+    custDebounceTimeout.current = setTimeout(() => {
+      setCustSearch(value);
+      setCustPage(1);
+      GetAllCustomer({ searchValue: value, pageNo: 1 });
+    }, 500);
+  };
+
   useEffect(() => {
-    GetAllCustomer();
+    // GetAllCustomer(1); // On-demand
   }, []);
 
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [ClientData, setClientData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
@@ -261,8 +315,8 @@ const ClientLists = () => {
     ) {
       tabsData.push({
         id: "client",
-        label: "Client ",
-        icon: <User size={16} />,
+        label: "Client",
+        icon: <User size={16} className="me-1" />,
       });
     }
     if (
@@ -274,7 +328,7 @@ const ClientLists = () => {
         tabsData.push({
           id: "job",
           label: "Job",
-          icon: <Briefcase size={16} />,
+          icon: <Briefcase size={16} className="me-1" />,
         });
       }
     }
@@ -1281,14 +1335,37 @@ const ClientLists = () => {
                 value={selectedOption}
                 onChange={(selected) => {
                   const selectedCustomer = CustomerData.find(
-                    (customer) => customer.id == selected.value,
+                    (customer) => customer.id == selected?.value,
                   );
                   selectCustomerId(
-                    selected.value,
-                    selectedCustomer?.trading_name,
+                    selected?.value || "",
+                    selectedCustomer?.trading_name || "",
                   );
+                  if (!selected || selected.value === "") {
+                    setCustHasMore(true);
+                    setCustPage(1);
+                    setCustSearch("");
+                    setCustomerData([]);
+                    custCacheRef.current = {};
+                  }
                 }}
-                placeholder="All"
+                onMenuOpen={() => {
+                  if (CustomerData.length === 0) {
+                    GetAllCustomer({ searchValue: "", pageNo: 1 });
+                  }
+                }}
+                onInputChange={(value) => handleCustomerSearch(value)}
+                onMenuScrollToBottom={() => {
+                  if (custHasMore && !custLoading) {
+                    GetAllCustomer({
+                      searchValue: custSearch,
+                      pageNo: custPage + 1,
+                      append: true,
+                    });
+                  }
+                }}
+                isLoading={custLoading}
+                placeholder="Select Customer"
               />
             </div>
 
@@ -1315,7 +1392,8 @@ const ClientLists = () => {
                           aria-selected={activeTab === tab.id}
                           onClick={() => SetTab(tab.id)}
                         >
-                          {tab.icon}{" "}
+                          {/* <i className={tab.icon}></i> */}
+                          {tab.icon}
                           {tab.label}
                         </button>
                       </li>
@@ -1341,7 +1419,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <Plus size={16} /> Add Client
+                           <Plus size={16}/> Add Client
                           </div>
                         </>
                       ) : ClientData?.length > 0 &&
@@ -1361,7 +1439,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <Plus size={16} /> Create Job
+                           <Plus size={16}/> Create Job
                           </div>
                         </>
                       ) : (getAccessDataCustomer.insert === 1 ||
@@ -1376,7 +1454,7 @@ const ClientLists = () => {
                               })
                             }
                           >
-                            <Plus size={16} /> Add Checklist
+                           <Plus size={16}/> Add Checklist
                           </div>
                         </>
                       ) : null}
@@ -1389,7 +1467,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <ArrowLeft size={16} /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) : activeTab === "status" ? (
@@ -1400,7 +1478,7 @@ const ClientLists = () => {
                           window.history.back();
                         }}
                       >
-                        <ArrowLeft size={16} /> Back
+                        <ArrowLeft size={16}/> Back
                       </div>
                     </>
                   ) : null}

@@ -1,22 +1,22 @@
 const limit = require("../../utils/limiter");
 const timeSheetService = require('../../services/timeSheet/timeSheetService');
 
- const timesheetQueue = require("../../queues/timesheet.queue");
+const timesheetQueue = require("../../queues/timesheet.queue");
 
 const getTimesheet = async (req, res) => {
   try {
-     const { ...Timesheet } = req.body;
-    
-       const result = await timeSheetService.getTimesheet(Timesheet);
-       if(!result.status){
-        return  res.status(200).json({ status: false, message: result.message });  
-        }else{
-        return  res.status(200).json({ status: true, message: result.message , data : result.data , filterDataWeek : result.filterDataWeek , filterDataWeekSubmitTimeSheet : result.filterDataWeekSubmitTimeSheet });
-        }
-    
-    } catch (error) {
-      res.status(500).json({ status:false, message: error.message});
+    const { ...Timesheet } = req.body;
+
+    const result = await timeSheetService.getTimesheet(Timesheet);
+    if (!result.status) {
+      return res.status(200).json({ status: false, message: result.message });
+    } else {
+      return res.status(200).json({ status: true, message: result.message, data: result.data, filterDataWeek: result.filterDataWeek, filterDataWeekSubmitTimeSheet: result.filterDataWeekSubmitTimeSheet });
     }
+
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
 }
 
 
@@ -53,7 +53,7 @@ const saveTimesheet1 = async (req,res) => {
       return  res.status(200).json({ status: true, message: result.message , data : result.data});
       }
   } catch (error) {
-    res.status(500).json({ status:false, message: error.message});
+    res.status(500).json({ status: false, message: error.message });
   }
 }
 
@@ -130,19 +130,19 @@ const saveTimesheet = async (req, res) => {
 
 const getStaffHourMinute = async (req, res) => {
   try {
-     const { ...Timesheet } = req.body;
-    
-       const result = await timeSheetService.getStaffHourMinute(Timesheet);
+    const { ...Timesheet } = req.body;
 
-       if(!result.status){
-        return  res.status(200).json({ status: false, message: result.message });  
-        }else{
-        return  res.status(200).json({ status: true, message: result.message , data : result.data});
-        }
-    
-    } catch (error) {
-      res.status(500).json({ status:false, message: error.message});
+    const result = await timeSheetService.getStaffHourMinute(Timesheet);
+
+    if (!result.status) {
+      return res.status(200).json({ status: false, message: result.message });
+    } else {
+      return res.status(200).json({ status: true, message: result.message, data: result.data });
     }
+
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
 }
 
 
