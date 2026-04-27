@@ -653,9 +653,9 @@ const CustomerClientProfile = () => {
 
   const columns = [
     {
-      name: "Job Code",
+      name: "Job ID",
       cell: (row) => (
-        <div title={row.job_id}>
+        <div title={row.job_code_id}>
           {getAccessDataJob.view == 1 ||
             getAccessDataJob.all_jobs == 1 ||
             role === "SUPERADMIN" ? (
@@ -663,14 +663,14 @@ const CustomerClientProfile = () => {
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
             >
-              {row.job_id}
+              {row.job_code_id}
             </a>
           ) : (
-            <a>{row.job_id}</a>
+            <a>{row.job_code_id}</a>
           )}
         </div>
       ),
-      selector: (row) => row.job_id,
+      selector: (row) => row.job_code_id,
       sortable: true,
     },
     {
