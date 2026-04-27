@@ -24,10 +24,10 @@ const ClientLists = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
 
-  const customer_id_sidebar = sessionStorage.getItem("customer_id_sidebar");
+  const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
   const [customerId, setCustomerId] = useState(customer_id_sidebar || "");
-  const [customerName, setCustomerName] = useState("");
+  const [customerName, setCustomerName] = useState(sessionStorage.getItem("cust_id_sidebar_name") || "");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -43,7 +43,7 @@ const ClientLists = () => {
   const [activeTab, setActiveTab] = useState("client");
 
   const [hararchyData, setHararchyData] = useState({
-    customer: { id: customerId, trading_name: "" },
+    customer: { id: customerId, trading_name: sessionStorage.getItem("cust_id_sidebar_name") || "" },
   });
 
   const GetAllCustomer = async () => {
@@ -58,7 +58,10 @@ const ClientLists = () => {
           setCustomerData(data);
           if (customerId) {
             const selected = data.find(c => c.id == customerId);
-            if (selected) setCustomerName(selected.trading_name);
+            if (selected) {
+              setCustomerName(selected.trading_name);
+              setHararchyData({ customer: { id: customerId, trading_name: selected.trading_name } });
+            }
           }
         } else {
           setCustomerData([]);
@@ -480,6 +483,8 @@ const ClientLists = () => {
     sessionStorage.setItem("cust_id_sidebar", id);
     sessionStorage.setItem("cust_id_sidebar_name", name);
     setCustomerId(id);
+    setCustomerName(name);
+    setHararchyData({ customer: { id: id, trading_name: name } });
     setActiveTab("client");
     setCurrentPage(1);
     setSearchTerm("");

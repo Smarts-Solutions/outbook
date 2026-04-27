@@ -153,9 +153,20 @@ const CustomerClientProfile = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerDataAll(response.data);
+          const dataList = response.data || [];
+          setCustomerDataAll(dataList);
+          if (cust_id_sidebar) {
+            const selected = dataList.find(c => Number(c.id) === Number(cust_id_sidebar));
+            if (selected) {
+              setCustomerDetails({ id: cust_id_sidebar, trading_name: selected.trading_name });
+              setHararchyData(prev => ({
+                ...prev,
+                customer: { id: cust_id_sidebar, trading_name: selected.trading_name }
+              }));
+            }
+          }
         } else {
-          setCustomerDataAll(response.data);
+          setCustomerDataAll([]);
         }
       })
       .catch((error) => {
