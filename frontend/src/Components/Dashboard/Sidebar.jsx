@@ -151,7 +151,7 @@ const Sidebar = () => {
 
             {role === "CUSTOMER" && (
               <>
-                <li className={activeLink === "/customer/customer" ? "active" : ""}>
+                {/* <li className={activeLink === "/customer/customer" ? "active" : ""}>
                   <Link
                     to="/customer/customer"
                     onClick={(e) => handleLinkClick(e, "/customer/customer")}
@@ -161,7 +161,7 @@ const Sidebar = () => {
                     </span>
                     <span>Customer</span>
                   </Link>
-                </li>
+                </li> */}
                 <li className={activeLink === "/customer/client" ? "active" : ""}>
                   <Link
                     to="/customer/client"
