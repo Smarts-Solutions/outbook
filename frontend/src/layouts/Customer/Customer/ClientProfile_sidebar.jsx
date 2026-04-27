@@ -2,12 +2,13 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
-  CustomerJobList,
+  CustomerJobAction,
   updateCustomerJobStatus,
   GetCustomerDropdown,
   CustomerClientList,
+  CustomerClientAction,
+  CustomerJobList,
   getCustomerMasterStatus,
-  CustomerJobAction,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
@@ -18,7 +19,8 @@ import ReactPaginate from "react-paginate";
 import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
-const ClientList = () => {
+
+const CustomerClientProfile = () => {
   const navigate = useNavigate();
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const cust_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
@@ -228,7 +230,7 @@ const ClientList = () => {
   const GetClientDetails = async (client_id) => {
     const req = { action: "getByid", client_id: client_id, staff_id: staffDetails.id };
     const data = { req: req, authToken: token };
-    await dispatch(CustomerClientList(data))
+    await dispatch(CustomerClientAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -259,7 +261,8 @@ const ClientList = () => {
   ];
 
   const GetStatus = async () => {
-    await dispatch(getCustomerMasterStatus({ req: { action: "get" }, authToken: token }))
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(getCustomerMasterStatus(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -287,7 +290,7 @@ const ClientList = () => {
       .then(async (result) => {
         if (result.isConfirmed) {
           try {
-            const req = { job_id: row.job_id, status_type: Number(Id), staff_id: staffDetails.id };
+            const req = { job_id: row.job_id, status_type: Number(Id) };
             const res = await dispatch(
               updateCustomerJobStatus({ req, authToken: token }),
             ).unwrap();
@@ -610,7 +613,6 @@ const ClientList = () => {
         if (result.isConfirmed) {
           const req = {
             action: "delete",
-            staff_id: staffDetails.id,
             ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
           };
           const data = { req: req, authToken: token };
@@ -626,9 +628,7 @@ const ClientList = () => {
                   timer: 1500,
                 });
 
-                type === "job"
-                  ? GetAllJobList(clientDetailSingle.id)
-                  : GetClientDetails(clientDetailSingle.id);
+                GetAllJobList(clientDetailSingle.id);
               } else {
                 sweatalert.fire({
                   title: "Failed",
@@ -658,8 +658,6 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-   
-
     if(row?.has_client_job_task === 0){
       sweatalert.fire({
         title: "warning",
@@ -687,8 +685,6 @@ const ClientList = () => {
       })
       .then(async (result) => {
         if (result.isConfirmed) {
-
-
           if (!['', undefined, null, 0].includes(row.reviewer_id) || !['', undefined, null, 0].includes(row.allocated_id)) {
             sweatalert
               .fire({
@@ -702,7 +698,6 @@ const ClientList = () => {
                 cancelButtonText: "No",
                 showCancelButton: true,
                 showCloseButton: true,
-                // allowOutsideClick: false
               })
               .then(async (result) => {
                 if (result.isConfirmed) {
@@ -724,8 +719,6 @@ const ClientList = () => {
             copyJobRequest(row, true);
             return;
           }
-
-
         } else {
           return;
         }
@@ -733,7 +726,6 @@ const ClientList = () => {
   };
 
   const copyJobRequest = async (row, field = true) => {
-
     const req = {
       action: "copy_job",
       row: row,
@@ -752,8 +744,7 @@ const ClientList = () => {
             showConfirmButton: false,
             timer: 1500,
           });
-          GetAllJobListByCustomer("", 1, pageSize, "");
-          
+          GetAllJobListByCustomer(customerDetails.id, 1, pageSize, "");
         } else {
           sweatalert.fire({
             title: "Failed",
@@ -768,7 +759,6 @@ const ClientList = () => {
       .catch((error) => {
         return;
       });
-
   }
 
   const GetAllJobList = async (
@@ -778,7 +768,6 @@ const ClientList = () => {
     search = searchTerm,
   ) => {
     setJobLoading(true);
-
     const req = {
       action: "getByClient",
       client_id,
@@ -787,9 +776,7 @@ const ClientList = () => {
       limit,
       search,
     };
-
     const data = { req, authToken: token };
-
     await dispatch(CustomerJobList(data))
       .unwrap()
       .then((response) => {
@@ -813,7 +800,6 @@ const ClientList = () => {
     search = searchTerm,
   ) => {
     setJobLoading(true);
-
     const req = {
       action: "getByCustomer",
       customer_id,
@@ -822,9 +808,7 @@ const ClientList = () => {
       limit,
       search,
     };
-
     const data = { req, authToken: token };
-
     await dispatch(CustomerJobList(data))
       .unwrap()
       .then((response) => {
@@ -844,16 +828,10 @@ const ClientList = () => {
   const handlePageChange = ({ selected }) => {
     const newPage = selected + 1;
     setCurrentPage(newPage);
-
     if (clientDetailSingle.id) {
       GetAllJobList(clientDetailSingle.id, newPage, pageSize, searchTerm);
     } else {
-      GetAllJobListByCustomer(
-        customerDetails.id,
-        newPage,
-        pageSize,
-        searchTerm,
-      );
+      GetAllJobListByCustomer(customerDetails.id, newPage, pageSize, searchTerm);
     }
   };
 
@@ -861,7 +839,6 @@ const ClientList = () => {
     const newSize = Number(e.target.value);
     setPageSize(newSize);
     setCurrentPage(1);
-
     if (clientDetailSingle.id) {
       GetAllJobList(clientDetailSingle.id, 1, newSize, searchTerm);
     } else {
@@ -872,11 +849,9 @@ const ClientList = () => {
   const handleSearchChange = (value) => {
     setSearchTerm(value);
     setCurrentPage(1);
-
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
-
     debounceRef.current = setTimeout(() => {
       if (clientDetailSingle.id) {
         GetAllJobList(clientDetailSingle.id, 1, pageSize, value);
@@ -927,10 +902,8 @@ const ClientList = () => {
     }
   };
 
-  // CHANGED: "All" option (id="") select karne par customer ki saari jobs dikhao
   const selectClientId = (id, name) => {
     if (id != "") {
-      // Specific client selected
       sessionStorage.setItem("cli_id_sidebar", id);
       sessionStorage.setItem("cli_id_sidebar_name", name);
       GetAllJobList(id);
@@ -942,7 +915,6 @@ const ClientList = () => {
       });
       setActiveTab("NoOfJobs");
     } else {
-      // CHANGED: "All" selected - customer ki saari jobs dikhao
       sessionStorage.removeItem("cli_id_sidebar");
       setClientDetailSingle({ id: "", client_name: "" });
       setHararchyData({
@@ -953,40 +925,16 @@ const ClientList = () => {
       informationSetData([]);
       setClientInformationData([]);
       setCompanyDetails([]);
-      // CHANGED: Customer ki saari jobs fetch karo
       GetAllJobListByCustomer(customerDetails.id, 1, pageSize, searchTerm);
       setCurrentPage(1);
       setActiveTab("NoOfJobs");
     }
   };
 
-  const exportData = customerData.map((item) => ({
-    "Job Code Id": item.job_code_id,
-    "Job Priority": item.job_priority,
-    "Client Trading Name": item.client_trading_name,
-    "Job Type Name": item.job_type_name,
-    "Account Manager":
-      item.account_manager_officer_first_name +
-      " " +
-      item.account_manager_officer_last_name,
-    "Outbooks Account Manager":
-      item.outbooks_acount_manager_first_name +
-      " " +
-      item.outbooks_acount_manager_last_name,
-    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
-    Invoiced: item.invoiced == "1" ? "YES" : "NO",
-    "Created By": item.job_created_by,
-    "Created At": item.created_at,
-    Status: item.status,
-  }));
-
-  // Prepare customer options for the select dropdown
   const customerOptions = [
     { value: "", label: "All" },
     ...(customerDataAll || [])
-      .filter(
-        (val) => Number(val.status) === 1 && Number(val.form_process) === 4,
-      )
+      .filter((val) => Number(val.status) === 1 && Number(val.form_process) === 4)
       .map((val) => ({
         value: val.id,
         label: val.trading_name,
@@ -996,11 +944,8 @@ const ClientList = () => {
   const selectedOption =
     customerDetails.id === ""
       ? { value: "", label: "All" }
-      : customerOptions.find(
-        (opt) => Number(opt.value) === Number(customerDetails.id),
-      );
+      : customerOptions.find((opt) => Number(opt.value) === Number(customerDetails.id));
 
-  // CHANGED: Client options mein "All" option sabse pehle add kiya
   const clientOptions = [
     { value: "", label: "All" },
     ...(clientData || []).map((client) => ({
@@ -1009,13 +954,10 @@ const ClientList = () => {
     })),
   ];
 
-  // CHANGED: "All" select hone par selectedOptionClient = { value: "", label: "All" }
   const selectedOptionClient =
     clientDetailSingle.id === ""
       ? { value: "", label: "All" }
-      : clientOptions.find(
-        (opt) => Number(opt.value) === Number(clientDetailSingle.id),
-      );
+      : clientOptions.find((opt) => Number(opt.value) === Number(clientDetailSingle.id));
 
   const handleExport = async () => {
     setLoading(true);
@@ -1026,71 +968,45 @@ const ClientList = () => {
       limit: 100000,
       search: "",
     };
-
     const data = { req, authToken: token };
     const response = await dispatch(CustomerJobList(data)).unwrap();
-    if (!response.status) {
+    if (!response.status || !response.data || response.data.length === 0) {
       alert("No data to export!");
       setLoading(false);
       return;
     }
-    const apiData = response?.data;
-
-    if (!apiData || apiData.length === 0) {
-      alert("No data to export!");
-      setLoading(false);
-      return;
-    }
-
-    const exportData = apiData?.map((item) => ({
+    const exportData = response.data.map((item) => ({
       "Job Code Id": item.job_code_id || "-",
       "Job Priority": item.job_priority || "-",
       "Client Trading Name": item.client_trading_name || "-",
       "Job Type Name": item.job_type_name || "-",
-      // "Account Manager":
-      //   item.account_manager_officer_first_name +
-      //   " " +
-      //   item.account_manager_officer_last_name||"-",
       "Client Contact Person":
-        item.account_manager_officer_first_name &&
-          item.account_manager_officer_last_name
-          ? item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name
+        item.account_manager_officer_first_name && item.account_manager_officer_last_name
+          ? item.account_manager_officer_first_name + " " + item.account_manager_officer_last_name
           : "-",
       "Outbooks Account Manager":
-        item.outbooks_acount_manager_first_name +
-        " " +
-        item.outbooks_acount_manager_last_name || "-",
+        item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name || "-",
       "Employee ID": item.account_manager_employee_number || "-",
       "Allocated To":
-        item.allocated_id != null
-          ? item.allocated_first_name + " " + item.allocated_last_name
-          : "-",
-      Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
+        item.allocated_id != null ? item.allocated_first_name + " " + item.allocated_last_name : "-",
+      Invoiced: item.invoiced == "1" ? "YES" : "NO",
       "Created By": item.job_created_by || "-",
       "Created At": item.created_at || "-",
       Status: item.status || "-",
     }));
-
     setLoading(false);
-
     downloadCSV(exportData, "Job Details.csv");
   };
 
   const downloadCSV = (data, filename) => {
     const csvRows = [];
-
     const headers = Object.keys(data[0]);
     csvRows.push(headers.join(","));
-
     data.forEach((row) => {
       const values = headers.map((h) => `"${row[h] || ""}"`);
       csvRows.push(values.join(","));
     });
-
     const csvString = csvRows.join("\n");
-
     const blob = new Blob([csvString], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -1111,19 +1027,12 @@ const ClientList = () => {
           <div className="form-group col-md-4 mb-0">
             <label className="form-label mb-2">Customer</label>
             <Select
-              id="tabSelect"
-              name="staff_id"
               className="basic-multi-select"
               options={customerOptions}
               value={selectedOption}
               onChange={(selected) => {
-                const selectedCustomer = customerDataAll.find(
-                  (customer) => customer.id == selected.value,
-                );
-                selectCustomerId(
-                  selected.value,
-                  selectedCustomer?.trading_name,
-                );
+                const selectedCustomer = customerDataAll.find((customer) => customer.id == selected.value);
+                selectCustomerId(selected.value, selectedCustomer?.trading_name);
               }}
               classNamePrefix="react-select"
               isSearchable
@@ -1131,7 +1040,7 @@ const ClientList = () => {
             />
           </div>
 
-          {customerDetails.id != "" ? (
+          {customerDetails.id != "" && (
             <>
               <div className="form-group col-md-4 mb-0">
                 <label className="form-label mb-2">Client</label>
@@ -1143,10 +1052,7 @@ const ClientList = () => {
                     value={"The customer's client is not available."}
                   />
                 ) : (
-                  // CHANGED: "All" option add kiya, aur value="" ho to "All" show karo
                   <Select
-                    id="tabSelect"
-                    name="staff_id"
                     className="basic-multi-select"
                     classNamePrefix="react-select"
                     isSearchable
@@ -1154,16 +1060,10 @@ const ClientList = () => {
                     value={selectedOptionClient}
                     onChange={(selected) => {
                       if (selected.value === "") {
-                        // "All" selected
                         selectClientId("", "");
                       } else {
-                        const selectedClient = clientData.find(
-                          (client) => client.id == selected.value,
-                        );
-                        selectClientId(
-                          selected.value,
-                          selectedClient?.client_name,
-                        );
+                        const selectedClient = clientData.find((client) => client.id == selected.value);
+                        selectClientId(selected.value, selectedClient?.client_name);
                       }
                     }}
                     placeholder="Select Client"
@@ -1174,402 +1074,200 @@ const ClientList = () => {
               <div className="page-title-box pt-2">
                 <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
                   <div className=" col-md-6 col-lg-8">
-                    <ul
-                      className="nav nav-pills rounded-tabs"
-                      id="pills-tab"
-                      role="tablist"
-                    >
+                    <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
                       {tabs.map((tab) => (
-                        <li
-                          className="nav-item"
-                          role="presentation"
-                          key={tab.id}
-                        >
+                        <li className="nav-item" role="presentation" key={tab.id}>
                           <button
-                            className={`nav-link ${activeTab === tab.id ? "active" : ""
-                              }`}
+                            className={`nav-link ${activeTab === tab.id ? "active" : ""}`}
                             id={`${tab.id}-tab`}
-                            data-bs-toggle="pill"
-                            data-bs-target={`#${tab.id}`}
                             type="button"
                             role="tab"
                             aria-controls={tab.id}
                             aria-selected={activeTab === tab.id}
                             onClick={() => setActiveTab(tab.id)}
                           >
-                            {tab.icon}{" "} {tab.label}
+                            {tab.icon} {tab.label}
                           </button>
                         </li>
                       ))}
                     </ul>
                   </div>
                   {activeTab == "NoOfJobs" && (
-                    <>
-                      <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                        {/* CHANGED: Create Job button sirf tab dikhega jab specific client select ho */}
-                        {(getAccessDataJob.insert == 1 ||
-                          role === "SUPERADMIN") &&
-                          clientDetailSingle.id !== "" &&
-                          clientData.length > 0 && (
-                            <div
-                              className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
-                              onClick={handleCreateJob}
-                            >
-                              <Plus size={16} /> Create Job
-                            </div>
-                          )}
-                      </div>
-                    </>
-                  )}
-
-                  {activeTab === "view client" && (
-                    <div className="col-md-4 col-auto"></div>
+                    <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+                      {(getAccessDataJob.insert == 1 || role === "SUPERADMIN") &&
+                        clientDetailSingle.id !== "" &&
+                        clientData.length > 0 && (
+                          <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}>
+                            <Plus size={16} /> Create Job
+                          </div>
+                        )}
+                    </div>
                   )}
                 </div>
               </div>
 
               <Hierarchy
-                show={[
-                  "Customer",
-                  "Client",
-                  activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab,
-                ]}
+                show={["Customer", "Client", activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab]}
                 active={2}
                 data={hararchyData}
                 NumberOfActive={activeTab == "NoOfJobs" ? totalRecords : ""}
               />
             </>
-          ) : (
-            ""
           )}
         </div>
 
         <div className="mt-2">
           {activeTab == "NoOfJobs" && (
-            <div
-              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
-                }`}
-              id={"NoOfJobs"}
-              role="tabpanel"
-              aria-labelledby={`NoOfJobs-tab`}
-            >
-              <div className="">
-                <div className="report-data mt-4 ">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-                      <li className="nav-item" role="presentation">
-                        <button
-                          className="nav-link active"
-                          id="assignedjob-tab"
-                          data-bs-toggle="pill"
-                          data-bs-target="#assignedjob"
-                          type="button"
-                          role="tab"
-                          aria-controls="assignedjob"
-                          aria-selected="true"
-                          tabIndex={-1}
-                        >
-                          Assigned Jobs
-                        </button>
-                      </li>
-                    </ul>
-
-                    {customerData && customerData.length > 0 && (
-                      <div className="col-md-2">
-                        <button
-                          className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
-                          onClick={handleExport}
-                        >
-                          <Download size={16} />
-
-                          <span>Export Excel</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="tab-content" id="pills-tabContent">
-                    <div
-                      className="tab-pane fade active show"
-                      id="assignedjob"
-                      role="tabpanel"
-                      aria-labelledby="assignedjob-tab"
-                    >
-                      <div className="col-md-3 mb-2">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search jobs..."
-                          value={searchTerm}
-                          onChange={(e) => handleSearchChange(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="datatable-wrapper ">
-                        {jobLoading && (
-                          <div className="overlay">
-                            <div className="loader"></div>
-                          </div>
-                        )}
-
-                        {customerData && customerData.length > 0 && (
-                          <>
-                            <Datatable
-                              columns={columns}
-                              data={customerData}
-                              filter={false}
-                              pagination={false}
-                            />
-
-                            <ReactPaginate
-                              previousLabel={"Previous"}
-                              nextLabel={"Next"}
-                              breakLabel={"..."}
-                              pageCount={Math.ceil(totalRecords / pageSize)}
-                              marginPagesDisplayed={2}
-                              pageRangeDisplayed={5}
-                              onPageChange={handlePageChange}
-                              containerClassName={"pagination"}
-                              activeClassName={"active"}
-                              forcePage={currentPage - 1}
-                            />
-
-                            <select
-                              className="perpage-select"
-                              value={pageSize}
-                              onChange={handlePageSizeChange}
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                              <option value={500}>500</option>
-                            </select>
-                          </>
-                        )}
-                      </div>
+            <div className={`tab-pane fade show active`} id={"NoOfJobs"} role="tabpanel">
+              <div className="report-data mt-4 ">
+                <div className="d-flex justify-content-between align-items-center">
+                  <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link active" type="button" role="tab">
+                        Assigned Jobs
+                      </button>
+                    </li>
+                  </ul>
+                  {customerData && customerData.length > 0 && (
+                    <div className="col-md-2">
+                      <button
+                        className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                        onClick={handleExport}
+                      >
+                        <Download size={16} />
+                        <span>Export Excel</span>
+                      </button>
                     </div>
-                    <div
-                      className="tab-pane fade"
-                      id="alljob"
-                      role="tabpanel"
-                      aria-labelledby="alljob-tab"
-                    ></div>
+                  )}
+                </div>
+                <div className="tab-content">
+                  <div className="tab-pane fade active show">
+                    <div className="col-md-3 mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search jobs..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                      />
+                    </div>
+                    <div className="datatable-wrapper ">
+                      {jobLoading && (
+                        <div className="overlay"><div className="loader"></div></div>
+                      )}
+                      {customerData && customerData.length > 0 && (
+                        <>
+                          <Datatable columns={columns} data={customerData} filter={false} pagination={false} />
+                          <ReactPaginate
+                            previousLabel={"Previous"}
+                            nextLabel={"Next"}
+                            breakLabel={"..."}
+                            pageCount={Math.ceil(totalRecords / pageSize)}
+                            marginPagesDisplayed={2}
+                            pageRangeDisplayed={5}
+                            onPageChange={handlePageChange}
+                            containerClassName={"pagination"}
+                            activeClassName={"active"}
+                            forcePage={currentPage - 1}
+                          />
+                          <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
+                            {[5, 10, 20, 50, 100, 500].map(v => <option key={v} value={v}>{v}</option>)}
+                          </select>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           )}
           {activeTab == "view client" && clientInformationData && (
-            <div className="tab-content" id="pills-tabContent">
+            <div className="tab-content">
               <div className="report-data">
                 <div className="card-body">
                   <div className="dastyle-profile">
                     <div className="row">
-                      <div className="col-md-4 col-sm-12 col-lg-4 align-self-center mb-3 mb-lg-0">
+                      <div className="col-md-4 align-self-center mb-3 mb-lg-0">
                         <div className="dastyle-profile-main">
                           <div className="dastyle-profile-main-pic">
-                            <span className="dastyle-profile_main-pic-change">
-                              <i className="ti-user"></i>
-                            </span>
+                            <span className="dastyle-profile_main-pic-change"><i className="ti-user"></i></span>
                           </div>
                           <div className="dastyle-profile_user-detail">
                             <h5 className="dastyle-user-name">
-                              {clientInformationData.first_name +
-                                " " +
-                                clientInformationData.last_name}
+                              {clientInformationData.first_name + " " + clientInformationData.last_name}
                             </h5>
-                            <p className="mb-0 dastyle-user-name-post">
-                              Client Code: {informationData.client_code}
-                            </p>
+                            <p className="mb-0 dastyle-user-name-post">Client Code: {informationData.client_code}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
+                      <div className="col-md-4 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
-                          <li className="">
-                            <Phone
-                              size={22}
-                              className="me-2 text-secondary align-middle"
-                            />
+                          <li>
+                            <Phone size={22} className="me-2 text-secondary align-middle" />
                             <b>Phone : </b>
-                            {(clientInformationData &&
-                              clientInformationData.phone &&
-                              clientInformationData.phone_code +
-                              " " +
-                              clientInformationData.phone) ||
-                              "NA"}
+                            {clientInformationData.phone ? clientInformationData.phone_code + " " + clientInformationData.phone : "NA"}
                           </li>
                           <li className="mt-2">
-                            <Mail
-                              size={22}
-                              className="text-secondary align-middle me-2"
-                            />
-                            <b>Email : </b>{" "}
-                            {(clientInformationData &&
-                              clientInformationData.email) ||
-                              "NA"}
+                            <Mail size={22} className="text-secondary align-middle me-2" />
+                            <b>Email : </b> {clientInformationData.email || "NA"}
                           </li>
                         </ul>
                       </div>
-
-                      <div className=" col-md-4 col-sm-6 col-lg-4 align-self-center mt-2 mt-sm-0">
+                      <div className="col-md-4 align-self-center mt-2 mt-sm-0">
                         <ul className="list-unstyled personal-detail mb-0">
-                          <li className="row">
-                            <div className="col-md-12">
-                              <b>Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                            </div>
-                          </li>
-                          <li className="mt-2 row">
-                            <div className="col-md-12">
-                              <b>Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </div>
-                          </li>
+                          <li><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
+                          <li className="mt-2"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
                         </ul>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              {informationData.client_type == 4 ? (
-                ""
-              ) : (
-                <div className=" report-data mt-4">
+              {informationData.client_type != 4 && (
+                <div className="report-data mt-4">
                   <div className="card-header border-bottom pb-3 row">
                     <div className="col-8">
                       <h4 className="card-title">
-                        {informationData && informationData.client_type == 1
-                          ? "Sole Trader"
-                          : informationData.client_type == 2
-                            ? "Company"
-                            : informationData.client_type == 3
-                              ? "Partnership"
-                              : ""}
+                        {informationData.client_type == 1 ? "Sole Trader" : informationData.client_type == 2 ? "Company" : informationData.client_type == 3 ? "Partnership" : ""}
                       </h4>
                     </div>
                   </div>
-
-                  {informationData.client_type == 1 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b>Trading Name :</b>{" "}
-                              {informationData.trading_name || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered : </b>
-                              {informationData.vat_registered == 0
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website : </b>
-                              {informationData.website || "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {informationData.trading_address || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {informationData.vat_number || "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          {informationData.client_type == 1 || informationData.client_type == 3 ? (
+                            <>
+                              <li className="mb-4"><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
+                              <li className="mb-4"><b>VAT Registered :</b> {informationData.vat_registered == 0 ? "No" : "Yes"}</li>
+                              <li className="mb-4"><b>Website :</b> {informationData.website || "NA"}</li>
+                            </>
+                          ) : informationData.client_type == 2 ? (
+                            <>
+                              <li className="mb-4"><b>Company Name : </b> {companyDetails.company_name || "NA"}</li>
+                              <li className="mb-4"><b>Company Status :</b> {companyDetails.company_status || "NA"}</li>
+                              <li className="mb-4"><b>Registered Office Address :</b> {companyDetails.registered_office_address || "NA"}</li>
+                            </>
+                          ) : null}
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          {informationData.client_type == 1 || informationData.client_type == 3 ? (
+                            <>
+                              <li className="mb-4"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
+                              <li className="mb-4"><b>VAT Number :</b> {informationData.vat_number || "NA"}</li>
+                            </>
+                          ) : informationData.client_type == 2 ? (
+                            <>
+                              <li className="mb-4"><b>Entity Type :</b> {companyDetails.entity_type || "NA"}</li>
+                              <li className="mb-4"><b>Company Number :</b> {companyDetails.company_number || "NA"}</li>
+                            </>
+                          ) : null}
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 2 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Company Name : </b>{" "}
-                              {companyDetails.company_name || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Company Status :</b>{" "}
-                              {companyDetails.company_status || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Registered Office Address :</b>{" "}
-                              {companyDetails.registered_office_address || "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Entity Type :</b>{" "}
-                              {companyDetails.entity_type || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Company Number :</b>{" "}
-                              {companyDetails.company_number || "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ) : informationData.client_type == 3 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                              <p className="font-14  ml-3"></p>
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered :</b>{" "}
-                              {informationData &&
-                                informationData.vat_registered == "0"
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website :</b>{" "}
-                              {(informationData && informationData.website) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {(informationData &&
-                                informationData.vat_number) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    ""
-                  )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1580,4 +1278,4 @@ const ClientList = () => {
   );
 };
 
-export default ClientList;
+export default CustomerClientProfile;

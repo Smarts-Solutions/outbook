@@ -35,7 +35,205 @@ export async function get_Customers_Jobs(data, token) {
 }
 
 
+// Customer Dashboard Start
+export async function CUSTOMER_DASHBOARD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDashboardData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
+export async function CUSTOMER_ACTIVITYLOG(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDashboardActivityLog`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_LINKDATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerCountLinkData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_MASTER_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerMasterStatus`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function UPDATE_CUSTOMER_JOB_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}updateCustomerJobStatus`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_LIST(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerList`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CLIENTS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerClients`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOBS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerJobs`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CLIENT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerClientAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_UPDATE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobUpdate`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DROPDOWN(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDropdown`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+// Customer Dashboard End
+
+export async function CUSTOMER_JOB_TIMELINE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobTimeline`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_TASK_TIMESHEET_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerTaskTimesheetAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_MISSING_LOG_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerMissingLogAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_QUERY_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerQueryAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DRAFT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DOCUMENT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDocumentAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
 
 // get Timesheet Report Data
@@ -143,7 +341,7 @@ export async function ADD_SERVICES(data, token) {
 // Get All Customer Services
 export async function ADD_PEPPER_WORK(data, token) {
   try {
-    
+    0
     // const formData = new FormData();
     // data.fileData.forEach((file, index) => {
     //   formData.append("files[]", file);
