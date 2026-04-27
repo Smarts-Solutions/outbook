@@ -4,7 +4,8 @@ const { getCompanyOfficerDetailsFun } = require('../controllers/companies/compan
 
 const getCustomerDashboardData = async (dashboard) => {
   console.log("getCustomerDashboardData dashboard:", dashboard);
-  const { staff_id, date_filter } = dashboard;
+  const { staff_id, date_filter, customer_id, StaffUserId } = dashboard;
+  const effectiveStaffId = staff_id || StaffUserId;
   let { startDate, endDate } = await getDateRange(date_filter);
 
   try {
@@ -18,7 +19,7 @@ const getCustomerDashboardData = async (dashboard) => {
         UNION
         SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
     `;
-    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
     const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
 
     if (assignedCustomerIds.length === 0) {
@@ -37,20 +38,34 @@ const getCustomerDashboardData = async (dashboard) => {
     const idsStr = assignedCustomerIds.join(',');
 
     // 2. Get Clients for these Customers
+    let clientCondition = "";
+    if (customer_id) {
+        clientCondition = `AND customer_id = ${pool.escape(customer_id)}`;
+    }
+
     const ClientQuery = `
         SELECT id FROM clients 
         WHERE customer_id IN (${idsStr})
+        ${clientCondition}
+        AND DATE(created_at) BETWEEN ? AND ?
         ORDER BY id DESC
     `;
-    const [ClientData] = await pool.execute(ClientQuery);
+    const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
 
     // 3. Get Jobs for these Customers
+    let jobCondition = "";
+    if (customer_id) {
+        jobCondition = `AND customer_id = ${pool.escape(customer_id)}`;
+    }
+
     const JobQuery = `
         SELECT id, status_type FROM jobs 
         WHERE customer_id IN (${idsStr})
+        ${jobCondition}
+        AND DATE(created_at) BETWEEN ? AND ?
         ORDER BY id DESC
     `;
-    const [JobData] = await pool.execute(JobQuery);
+    const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
 
     const result = {
       client: {
