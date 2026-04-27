@@ -10,7 +10,7 @@ import {
 import sweatalert from "sweetalert2";
 import { getCustomerMasterStatus } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Select from 'react-select';
-import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, AlertCircle, Info, CheckCircle2, PlayCircle } from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, AlertCircle, Info, CheckCircle2, PlayCircle, FileText, File, Mail, Phone } from "lucide-react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../../Utils/Config";
@@ -229,7 +229,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   }, []);
 
   const JobDetails = async () => {
-    const req = { action: "getByJobId", job_id: location.state.job_id };
+    const req = { action: "getByJobId", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
     await dispatch(CustomerJobAction(data))
       .unwrap()
@@ -237,28 +237,28 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         if (response.status) {
           setSelectedStaffData(response.data.selectedStaffData || []);
           setBudgetedHours({
-            hours: response.data.budgeted_hours.split(":")[0],
-            minutes: response.data.budgeted_hours.split(":")[1],
+            hours: response.data.budgeted_hours ? response.data.budgeted_hours.split(":")[0] : "00",
+            minutes: response.data.budgeted_hours ? response.data.budgeted_hours.split(":")[1] : "00",
           });
           setReviewTime({
-            hours: response.data.review_time.split(":")[0],
-            minutes: response.data.review_time.split(":")[1],
+            hours: response.data.review_time ? response.data.review_time.split(":")[0] : "00",
+            minutes: response.data.review_time ? response.data.review_time.split(":")[1] : "00",
           });
           setPreparationTimne({
-            hours: response.data.total_preparation_time.split(":")[0],
-            minutes: response.data.total_preparation_time.split(":")[1],
+            hours: response.data.total_preparation_time ? response.data.total_preparation_time.split(":")[0] : "00",
+            minutes: response.data.total_preparation_time ? response.data.total_preparation_time.split(":")[1] : "00",
           });
           setTotalTime({
-            hours: response.data.total_time.split(":")[0],
-            minutes: response.data.total_time.split(":")[1],
+            hours: response.data.total_time ? response.data.total_time.split(":")[0] : "00",
+            minutes: response.data.total_time ? response.data.total_time.split(":")[1] : "00",
           });
           setFeedbackIncorporationTime({
-            hours: response.data.feedback_incorporation_time.split(":")[0],
-            minutes: response.data.feedback_incorporation_time.split(":")[1],
+            hours: response.data.feedback_incorporation_time ? response.data.feedback_incorporation_time.split(":")[0] : "00",
+            minutes: response.data.feedback_incorporation_time ? response.data.feedback_incorporation_time.split(":")[1] : "00",
           });
           setInvoiceTime({
-            hours: response.data.invoice_hours.split(":")[0],
-            minutes: response.data.invoice_hours.split(":")[1],
+            hours: response.data.invoice_hours ? response.data.invoice_hours.split(":")[0] : "00",
+            minutes: response.data.invoice_hours ? response.data.invoice_hours.split(":")[1] : "00",
           });
 
 
@@ -454,6 +454,11 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
           }));
           setStatusId(response.data.status_type);
           setStatusHistory(response.data.status_history || []);
+          setAllJobData({
+            status: response.status,
+            data: response.data,
+            message: response.message,
+          });
         }
       })
       .catch((error) => {
@@ -479,16 +484,18 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
 
   const handleJobEdit = () => {
-    navigate("/admin/job/edit", {
+    navigate("/customer/job/edit", {
       state: {
-        job_id: location.state.job_id,
-        activeTab: location.state.activeTab,
+        job_id: job_id || location.state?.job_id,
+        activeTab: location.state?.activeTab,
+        data: location?.state?.data,
+        goto: goto
       },
     });
   };
 
   const handleDelete = async (row, type) => {
-    const req = { action: "delete", job_id: location.state.job_id };
+    const req = { action: "delete", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
 
     await dispatch(CustomerJobAction(data))
@@ -592,9 +599,43 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
       });
   };
 
-  const RearrangeEngagementOptionArr = JobInformationData?.EngagementModel 
-    ? JobInformationData.EngagementModel.split(",").map(e => e.trim()).filter(e => e)
-    : [];
+  let filteredData = {};
+  const RearrangeEngagementOptionArr = [];
+
+  try {
+    let engagementModel = AllJobData.data?.engagement_model;
+    
+    // Handle JSON string if necessary
+    if (typeof engagementModel === "string") {
+      try {
+        engagementModel = JSON.parse(engagementModel);
+      } catch (e) {
+        engagementModel = null;
+      }
+    }
+
+    if (Array.isArray(engagementModel) && engagementModel[0]) {
+      const modelObj = engagementModel[0];
+      const keyMapping = {
+        fte_dedicated_staffing: "Fte Dedicated Staffing",
+        percentage_model: "Percentage Model",
+        adhoc_payg_hourly: "Adhoc Payg Hourly",
+        customised_pricing: "Customised Pricing",
+      };
+
+      Object.keys(modelObj).forEach((key) => {
+        if (modelObj[key] === "1" || modelObj[key] === 1) {
+          filteredData[key] = modelObj[key];
+          if (keyMapping[key]) {
+            RearrangeEngagementOptionArr.push(keyMapping[key]);
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error parsing engagement model:", error);
+    filteredData = {};
+  }
 
 
 
@@ -1567,7 +1608,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     </button>
                   )}
 
-                {location.state.timesheet_job_id == null
+                {JobInformationData.timesheet_job_id == null
                   ? (getAccessDataJob.delete === 1 ||
 
                     role === "SUPERADMIN") && (

@@ -14,9 +14,9 @@ import {
   deleteFileFromFolder,
 } from "../../../../Utils/graphAPI";
 import { allowedTypes } from "../../../../Utils/Comman_function";
-import { FileText, File, Plus } from "lucide-react";
+import { FileText, File, Plus, Download, Trash2 } from "lucide-react";
 
-const CustomerDocuments = ({ getAccessDataJob }) => {
+const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
@@ -46,7 +46,7 @@ const CustomerDocuments = ({ getAccessDataJob }) => {
   }, []);
 
   const GetAllDocumentList = async () => {
-    const req = { action: "get", job_id: location.state.job_id };
+    const req = { action: "get", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
     await dispatch(CustomerDocumentAction(data))
       .unwrap()
@@ -71,21 +71,21 @@ const CustomerDocuments = ({ getAccessDataJob }) => {
       name: "File Image",
       cell: (row) => (
         <div>
-          {row.file_type.startsWith("image/") ? (
+          {row.file_type?.startsWith("image/") ? (
             <img
               src={row.web_url}
               alt={row.original_name}
-              style={{ width: "50px", height: "50px" }}
+              style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px" }}
             />
           ) : row.file_type === "application/pdf" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <FileText size={24} color="#FF0000" />
-              <span>PDF</span>
+              <FileText size={20} color="#FF0000" />
+              <span className="fs-12">PDF</span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <File size={24} color="#000" />
-              <span>{row.file_type}</span>
+              <File size={20} color="#6c757d" />
+              <span className="fs-12 text-truncate" style={{ maxWidth: "80px" }}>{row.file_type || "File"}</span>
             </div>
           )}
         </div>
@@ -123,15 +123,15 @@ const CustomerDocuments = ({ getAccessDataJob }) => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex justify-content-end gap-2">
-          {(getAccessDataJob.delete === 1 || role === "SUPERADMIN") && (
-            <>
+          {(getAccessDataJob?.delete === 1 || role === "SUPERADMIN") && (
+            <div className="d-flex gap-2">
               <button
                 className="delete-icon"
                 onClick={() => removeItem(row, 2)}
+                title="Delete Document"
               >
                 <i className="ti-trash fs-5 text-danger" />
               </button>
-
               <button
                 className="download-icon"
                 onClick={() =>
@@ -141,10 +141,11 @@ const CustomerDocuments = ({ getAccessDataJob }) => {
                     row.original_name,
                   )
                 }
+                title="Download Document"
               >
-                <i className="ti-download" />
+                <Download size={18} />
               </button>
-            </>
+            </div>
           )}
         </div>
       ),

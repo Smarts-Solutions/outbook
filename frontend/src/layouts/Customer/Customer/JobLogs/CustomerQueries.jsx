@@ -18,7 +18,7 @@ import {
 } from "../../../../Utils/graphAPI";
 import { Download, Plus, FileText, File, Eye } from "lucide-react";
 
-const CustomerQueries = ({ getAccessDataJob, goto }) => {
+const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
@@ -98,7 +98,7 @@ const CustomerQueries = ({ getAccessDataJob, goto }) => {
   }, []);
 
   const GetQueryAllList = async () => {
-    const req = { action: "get", job_id: location.state.job_id };
+    const req = { action: "get", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
     await dispatch(CustomerQueryAction(data))
       .unwrap()
@@ -135,7 +135,7 @@ const CustomerQueries = ({ getAccessDataJob, goto }) => {
   const HandleAddQuery = async () => {
     const req = {
       action: "add",
-      job_id: location.state.job_id,
+      job_id: job_id || location.state?.job_id,
       data: AllQueryInputdata,
     };
     const data = { req: req, authToken: token };

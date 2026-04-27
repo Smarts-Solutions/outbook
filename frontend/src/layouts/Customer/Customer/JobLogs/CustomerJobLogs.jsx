@@ -24,6 +24,12 @@ const CustomerJobLogs = () => {
   const location = useLocation();
   const tab = sessionStorage.getItem("activeTab2") || "job information";
   const [selectedTab, setSelectedTab] = useState(tab);
+  const role = JSON.parse(localStorage.getItem("role"));
+
+  const [jobId, setJobId] = useState(location?.state?.job_id || sessionStorage.getItem("currentJobId"));
+  const [hierarchyData, setHierarchyData] = useState(location?.state?.data || JSON.parse(sessionStorage.getItem("currentHierarchyData") || "{}"));
+  const [goto, setGoto] = useState(location?.state?.goto || sessionStorage.getItem("currentGoto"));
+
   const [getAccessDataJob, setAccessDataJob] = useState({
     insert: 0,
     update: 0,
@@ -37,6 +43,26 @@ const CustomerJobLogs = () => {
     )?.items || [];
 
   useEffect(() => {
+    if (location?.state?.job_id) {
+      setJobId(location.state.job_id);
+      sessionStorage.setItem("currentJobId", location.state.job_id);
+    }
+    if (location?.state?.data) {
+      setHierarchyData(location.state.data);
+      sessionStorage.setItem("currentHierarchyData", JSON.stringify(location.state.data));
+    }
+    if (location?.state?.goto) {
+      setGoto(location.state.goto);
+      sessionStorage.setItem("currentGoto", location.state.goto);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const userRole = role?.toString().toUpperCase();
+    if (userRole === "CUSTOMER" || userRole === "SUPERADMIN") {
+      setAccessDataJob({ insert: 1, update: 1, delete: 1, view: 1 });
+      return;
+    }
     if (accessDataJob.length === 0) return;
     const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
     accessDataJob.forEach((item) => {
@@ -46,9 +72,7 @@ const CustomerJobLogs = () => {
       if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
     setAccessDataJob(updatedAccess);
-  }, []);
-
-  useEffect(() => {}, [tab]);
+  }, [accessDataJob, role]);
 
   return (
     <div className="container-fluid">
@@ -102,7 +126,7 @@ const CustomerJobLogs = () => {
                           );
                         }}
                       >
-                        <Clock size={18} className="me-1" />
+                        <Table size={18} className="me-1" />
                         Task Timesheet
                       </button>
                     </li>
@@ -124,7 +148,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "job timeline");
                         }}
                       >
-                        <Table size={18} className="me-1" />
+                        <Clock  size={18} className="me-1" />
                         Job Timeline
                       </button>
                     </li>
@@ -146,7 +170,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "missing logs");
                         }}
                       >
-                        <AlertTriangle size={18} className="me-1" />
+                        <AlertTriangle  size={18} className="me-1" />
                         Missing Logs
                       </button>
                     </li>
@@ -168,7 +192,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "queries");
                         }}
                       >
-                        <HelpCircle size={18} className="me-1"/>
+                        <HelpCircle  size={18} className="me-1" />
                         Queries
                       </button>
                     </li>
@@ -190,7 +214,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "drafts");
                         }}
                       >
-                        <File size={18} className="me-1" />
+                        <File  size={18} className="me-1" />
                         Drafts
                       </button>
                     </li>
@@ -226,9 +250,9 @@ const CustomerJobLogs = () => {
                     onClick={() => {
                       sessionStorage.setItem(
                         "activeTab",
-                        location.state.goto == "report"
+                        goto == "report"
                           ? "client"
-                          : location.state.activeTab || "client",
+                          : location.state?.activeTab || "client",
                       );
                       window.history.back();
                       sessionStorage.removeItem("activeTab2");
@@ -243,17 +267,17 @@ const CustomerJobLogs = () => {
         </div>
       </div>
 
-      {location?.state?.goto == "report" ? (
+      {goto == "report" ? (
         ""
       ) : (
         <Hierarchy
           show={
-            location?.state?.goto == "Customer"
+            goto == "Customer"
               ? ["Customer", "Job", selectedTab]
               : ["Customer", "Client", "Job", selectedTab]
           }
-          active={location.state.goto == "Customer" ? 2 : 3}
-          data={location.state.data}
+          active={goto == "Customer" ? 2 : 3}
+          data={hierarchyData}
         />
       )}
 
@@ -268,9 +292,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="job-information-tab"
         >
           <JobInformation
-            job_id={location?.state?.job_id}
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
 
@@ -284,8 +308,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="job-timeline-tab"
         >
           <JobTimeline
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
         <div
@@ -298,8 +323,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="task-timesheet-tab"
         >
           <TaskTimesheet
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
         <div
@@ -312,8 +338,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="missing-logs-tab"
         >
           <MissingLogs
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
         <div
@@ -325,8 +352,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="queries-tab"
         >
           <Queries
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
         <div
@@ -338,8 +366,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="drafts-tab"
         >
           <Drafts
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
         <div
@@ -352,8 +381,9 @@ const CustomerJobLogs = () => {
           aria-labelledby="documents-tab"
         >
           <Documents
+            job_id={jobId}
             getAccessDataJob={getAccessDataJob}
-            goto={location?.state?.goto}
+            goto={goto}
           />
         </div>
       </div>

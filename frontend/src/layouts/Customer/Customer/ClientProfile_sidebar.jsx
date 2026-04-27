@@ -16,13 +16,28 @@ import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
-import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
+import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, AlertCircle, Info, CheckCircle2, PlayCircle, FileText, File, Phone, Mail, Download, Briefcase, User, ArrowRight } from "lucide-react";
+import { Formik, Field, Form } from "formik";
+import {
+  fetchSiteAndDriveInfo,
+  createFolderIfNotExists,
+  uploadFileToFolder,
+  SiteUrlFolderPath,
+  deleteFileFromFolder,
+} from "../../../Utils/graphAPI";
+import { allowedTypes } from "../../../Utils/Comman_function";
+import { Button } from "antd";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 
 const CustomerClientProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+
   const cust_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const cli_id_sidebar = sessionStorage.getItem("cli_id_sidebar");
 
@@ -43,12 +58,38 @@ const CustomerClientProfile = () => {
 
   const [jobLoading, setJobLoading] = useState(false);
   const debounceRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const [fileState, setFileState] = useState([]);
+  const [newFiles, setNewFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
+  const [siteUrl, setSiteUrl] = useState("");
+  const [sharepoint_token, setSharepoint_token] = useState("");
+  const [folderPath, setFolderPath] = useState("");
+
+  const [fileStateClient, setFileStateClient] = useState([]);
 
   useEffect(() => {
     GetAllCustomer();
     GetStatus();
+    fetchSiteDetails();
 
-    if (
+    if (location.state && location.state.Client_id) {
+      const { Client_id, data } = location.state;
+      setHararchyData(data || { customer: {}, client: {}, job: {} });
+      if (data && data.customer && data.customer.id) {
+        setCustomerDetails({
+          id: data.customer.id,
+          trading_name: data.customer.trading_name
+        });
+        setClientDetailSingle({ 
+          id: Client_id, 
+          client_name: data.client?.client_name || "" 
+        });
+      }
+      GetClientDetails(Client_id);
+      GetAllJobList(Client_id);
+    } else if (
       ![undefined, "", null].includes(cust_id_sidebar) &&
       ![undefined, "", null].includes(cli_id_sidebar)
     ) {
@@ -76,6 +117,13 @@ const CustomerClientProfile = () => {
       GetAllJobListByCustomer("");
     }
   }, []);
+
+  const fetchSiteDetails = async () => {
+    const data = await SiteUrlFolderPath();
+    setSiteUrl(data.siteUrl);
+    setSharepoint_token(data.sharepoint_token);
+    setFolderPath(data.folderPath);
+  };
 
   const getAllClientData1 = async (
     customer_id,
@@ -155,12 +203,8 @@ const CustomerClientProfile = () => {
       });
   };
 
-  const location = useLocation();
-  const dispatch = useDispatch();
-  const token = JSON.parse(localStorage.getItem("token"));
-  const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
-  const [activeTab, setActiveTab] = useState("NoOfJobs");
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({
     loading: true,
     data: [],
@@ -238,6 +282,9 @@ const CustomerClientProfile = () => {
             loading: false,
             data: response.data,
           });
+          if (response.data.client_documents && response.data.client_documents.length > 0) {
+            setFileStateClient(response.data.client_documents);
+          }
           informationSetData(response.data.client);
           setClientInformationData(response.data.contact_details[0]);
           setCompanyDetails(response.data.company_details);
@@ -253,10 +300,228 @@ const CustomerClientProfile = () => {
       });
   };
 
+  const DocumentListColumns = [
+    {
+      name: "File Image",
+      cell: (row) => (
+        <div>
+          {row.file_type?.startsWith("image/") ? (
+            <img
+              src={row.web_url}
+              alt={row.original_name}
+              style={{ width: "40px", height: "40px", objectFit: "cover" }}
+            />
+          ) : row.file_type === "application/pdf" ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <FileText size={20} color="#FF0000" />
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <File size={20} color="#000" />
+            </div>
+          )}
+        </div>
+      ),
+      selector: (row) => row.web_url,
+      sortable: true,
+    },
+    {
+      name: "File Name",
+      cell: (row) => <div title={row.original_name || "-"}>{row.original_name || "-"}</div>,
+      selector: (row) => row.original_name || "-",
+      sortable: true,
+    },
+    {
+      name: "File Type",
+      cell: (row) => <div title={row.file_type || "-"}>{row.file_type || "-"}</div>,
+      selector: (row) => row.file_type || "-",
+      sortable: true,
+    },
+    {
+      name: "File Size",
+      cell: (row) => (
+        <div title={row.file_size || "-"}>
+          {row.file_size < 1024 * 1024
+            ? `${(row.file_size / 1024).toFixed(2)} KB`
+            : `${(row.file_size / (1024 * 1024)).toFixed(2)} MB` || "-"}
+        </div>
+      ),
+      selector: (row) => row.file_size || "-",
+      sortable: true,
+    },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div className="d-flex">
+          <button className="delete-icon me-2" onClick={() => removeItem(row, 2)}>
+            <i className="ti-trash text-danger" />
+          </button>
+          <button
+            className="download-icon"
+            onClick={() =>
+              downloadFileFromSharePoint(
+                row.web_url,
+                sharepoint_token,
+                row.original_name,
+              )
+            }
+          >
+            <i className="ti-download text-primary" />
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+  ];
+
+  const downloadFileFromSharePoint = async (sharePointFileUrl, accessToken, fileName) => {
+    try {
+      const response = await fetch(sharePointFileUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      const fileBlob = await response.blob();
+      const fileURL = window.URL.createObjectURL(fileBlob);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName;
+      downloadLink.click();
+      window.URL.revokeObjectURL(fileURL);
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({ icon: "warning", title: "Oops...", text: "Unable to connect to SharePoint." });
+      fileInputRef.current.value = "";
+      return;
+    }
+    const files = event.currentTarget.files;
+    if (!files) return;
+    const fileArray = Array.from(files);
+    const validFiles = fileArray.filter((file) => allowedTypes.includes(file.type));
+    if (validFiles.length !== fileArray.length) {
+      sweatalert.fire({ icon: "error", title: "Oops...", text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed." });
+      fileInputRef.current.value = "";
+      return;
+    }
+    const existingFileNames = new Set(newFiles.map((file) => file.name));
+    const uniqueValidFiles = validFiles.filter((file) => !existingFileNames.has(file.name));
+    if (uniqueValidFiles.length === 0) {
+      Swal.fire({ icon: "warning", title: "Oops...", text: "Files with the same name already exist." });
+      return;
+    }
+    const updatedNewFiles = [...newFiles, ...uniqueValidFiles];
+    setNewFiles(updatedNewFiles);
+    const previewArray = updatedNewFiles.map((file) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      return new Promise((resolve) => { reader.onload = () => resolve(reader.result); });
+    });
+    Promise.all(previewArray).then((previewData) => { setPreviews(previewData); });
+  };
+
+  const resetFileInput = () => {
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setFileState([]);
+    setNewFiles([]);
+    setPreviews([]);
+  };
+
+  const handleDocumentSubmit = async (values) => {
+    const invalidValues = [undefined, null, "", 0, "0"];
+    let client_name = "CLIENT_DEMO";
+    if (!invalidValues.includes(clientDetailSingle.id) && !invalidValues.includes(customerDetails.id)) {
+      client_name = "CUST" + customerDetails.id + "_CLIENT" + clientDetailSingle.id;
+    }
+
+    const uploadedFilesArray = [];
+    if (newFiles.length > 0) {
+      const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+      if (sharepoint_token && !invalidTokens.includes(sharepoint_token)) {
+        setLoading(true);
+        const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+        const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, client_name, sharepoint_token);
+
+        for (const file of newFiles) {
+          const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+          const uploadedFileInfo = {
+            web_url: uploadDataUrl,
+            filename: file.lastModified + "-" + file.name,
+            originalname: file.name,
+            mimetype: file.type,
+            size: file.size,
+          };
+          uploadedFilesArray.push(uploadedFileInfo);
+        }
+        const req = {
+          action: "addClientDocument",
+          client_id: clientDetailSingle.id,
+          uploadedFiles: uploadedFilesArray,
+        };
+        await dispatch(CustomerClientAction({ req, authToken: token }))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              sweatalert.fire({ title: response.message, icon: "success", timer: 3000 }).then(() => {
+                resetFileInput();
+                GetClientDetails(clientDetailSingle.id);
+                setLoading(false);
+              });
+            }
+          })
+          .catch(() => { setLoading(false); });
+      }
+    } else {
+      sweatalert.fire({ icon: "warning", title: "Oops...", text: "Please select a file to upload." });
+    }
+  };
+
+  const removeItem = async (file, type) => {
+    if (type == 1) return;
+    const invalidTokens = ["", "sharepoint_token_not_found", "error", undefined, null];
+    if (invalidTokens.includes(sharepoint_token)) {
+      Swal.fire({ icon: "warning", title: "Oops...", text: "Unable to connect to SharePoint." });
+      return;
+    }
+
+    sweatalert.fire({
+      title: "Are you sure?",
+      text: "You want to delete this file?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const req = { action: "deleteClientFile", doc_id: file.id || file.client_documents_id };
+        await dispatch(CustomerClientAction({ req, authToken: token }))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              sweatalert.fire({ title: "Deleted", icon: "success", timer: 1500, showConfirmButton: false });
+              GetClientDetails(clientDetailSingle.id);
+            }
+          });
+      }
+    });
+  };
+
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
     ...(clientDetailSingle.id !== ""
-      ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
+      ? [
+          { id: "view client", label: "View Client", icon: <User size={16} /> },
+          { id: "documents", label: "Documents", icon: <File size={16} /> }
+        ]
       : []),
   ];
 
@@ -1022,26 +1287,76 @@ const CustomerClientProfile = () => {
           <div className="loader"></div>
         </div>
       )}
-      <div className="content-title">
-        <div className="row">
-          <div className="form-group col-md-4 mb-0">
-            <label className="form-label mb-2">Customer</label>
-            <Select
-              className="basic-multi-select"
-              options={customerOptions}
-              value={selectedOption}
-              onChange={(selected) => {
-                const selectedCustomer = customerDataAll.find((customer) => customer.id == selected.value);
-                selectCustomerId(selected.value, selectedCustomer?.trading_name);
-              }}
-              classNamePrefix="react-select"
-              isSearchable
-              placeholder="All"
-            />
+      <div className="col-sm-12">
+        <div className="page-title-box">
+          <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
+            <div className=" col-md-6 col-lg-8">
+              <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
+                {tabs.map((tab) => (
+                  <li className="nav-item" role="presentation" key={tab.id}>
+                    <button
+                      className={`nav-link ${activeTab === tab.id ? "active" : ""}`}
+                      id={`${tab.id}-tab`}
+                      type="button"
+                      role="tab"
+                      aria-controls={tab.id}
+                      aria-selected={activeTab === tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      {tab.icon} {tab.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+              <button
+                type="button"
+                className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                onClick={() => {
+                  window.history.back();
+                }}
+              >
+                <ArrowLeft size={16} /> Back
+              </button>
+              {activeTab == "NoOfJobs" && (getAccessDataJob.insert == 1 || role === "SUPERADMIN") &&
+                clientDetailSingle.id !== "" && (
+                  <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}>
+                    <Plus size={16} /> Create Job
+                  </div>
+                )}
+            </div>
           </div>
+        </div>
 
-          {customerDetails.id != "" && (
-            <>
+        <Hierarchy
+          show={["Customer", "Client", activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab]}
+          active={2}
+          data={hararchyData}
+          NumberOfActive={activeTab == "NoOfJobs" ? totalRecords : ""}
+        />
+      </div>
+
+      {!clientDetailSingle.id && (
+        <div className="content-title mt-3">
+          <div className="row">
+            <div className="form-group col-md-4 mb-0">
+              <label className="form-label mb-2">Customer</label>
+              <Select
+                className="basic-multi-select"
+                options={customerOptions}
+                value={selectedOption}
+                onChange={(selected) => {
+                  const selectedCustomer = customerDataAll.find((customer) => customer.id == selected.value);
+                  selectCustomerId(selected.value, selectedCustomer?.trading_name);
+                }}
+                classNamePrefix="react-select"
+                isSearchable
+                placeholder="All"
+              />
+            </div>
+
+            {customerDetails.id != "" && (
               <div className="form-group col-md-4 mb-0">
                 <label className="form-label mb-2">Client</label>
                 {clientData.length == 0 ? (
@@ -1070,51 +1385,10 @@ const CustomerClientProfile = () => {
                   />
                 )}
               </div>
-
-              <div className="page-title-box pt-2">
-                <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
-                  <div className=" col-md-6 col-lg-8">
-                    <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
-                      {tabs.map((tab) => (
-                        <li className="nav-item" role="presentation" key={tab.id}>
-                          <button
-                            className={`nav-link ${activeTab === tab.id ? "active" : ""}`}
-                            id={`${tab.id}-tab`}
-                            type="button"
-                            role="tab"
-                            aria-controls={tab.id}
-                            aria-selected={activeTab === tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                          >
-                            {tab.icon} {tab.label}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  {activeTab == "NoOfJobs" && (
-                    <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                      {(getAccessDataJob.insert == 1 || role === "SUPERADMIN") &&
-                        clientDetailSingle.id !== "" &&
-                        clientData.length > 0 && (
-                          <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}>
-                            <Plus size={16} /> Create Job
-                          </div>
-                        )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <Hierarchy
-                show={["Customer", "Client", activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab]}
-                active={2}
-                data={hararchyData}
-                NumberOfActive={activeTab == "NoOfJobs" ? totalRecords : ""}
-              />
-            </>
-          )}
+            )}
+          </div>
         </div>
+      )}
 
         <div className="mt-2">
           {activeTab == "NoOfJobs" && (
@@ -1200,7 +1474,7 @@ const CustomerClientProfile = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-4 ml-auto align-self-center">
+                      <div className="col-md-3 ml-auto align-self-center">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li>
                             <Phone size={22} className="me-2 text-secondary align-middle" />
@@ -1213,11 +1487,25 @@ const CustomerClientProfile = () => {
                           </li>
                         </ul>
                       </div>
-                      <div className="col-md-4 align-self-center mt-2 mt-sm-0">
+                      <div className="col-md-3 align-self-center mt-2 mt-sm-0">
                         <ul className="list-unstyled personal-detail mb-0">
                           <li><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
                           <li className="mt-2"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
                         </ul>
+                      </div>
+                      <div className="col-md-2 align-self-center text-end">
+                        <button 
+                          className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
+                          onClick={() => navigate("/customer/client/edit", { 
+                            state: { 
+                              row: informationData, 
+                              id: customerDetails.id, 
+                              activeTab: activeTab 
+                            } 
+                          })}
+                        >
+                          <Pencil size={14} /> Edit
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1272,9 +1560,104 @@ const CustomerClientProfile = () => {
               )}
             </div>
           )}
+          {activeTab == "documents" && (
+            <div className="tab-pane fade show active">
+              <div className="report-data mt-4">
+                <div className="card-header border-bottom pb-3 mb-3">
+                  <h4 className="card-title">Client Documents</h4>
+                </div>
+                <div className="card-body">
+                  <Formik initialValues={{ files: [] }} onSubmit={handleDocumentSubmit}>
+                    {({ setFieldValue }) => (
+                      <Form>
+                        <div className="row">
+                          <div className="col-md-6">
+                            <div className="form-group">
+                              <label className="form-label">Upload Documents</label>
+                              <div className="input-group">
+                                <input
+                                  type="file"
+                                  className="form-control"
+                                  multiple
+                                  ref={fileInputRef}
+                                  onChange={(e) => handleFileChange(e)}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {newFiles.length > 0 && (
+                          <div className="table-responsive mt-3">
+                            <table className="table table-bordered mb-0">
+                              <thead>
+                                <tr>
+                                  <th>Preview</th>
+                                  <th>File Name</th>
+                                  <th>Type</th>
+                                  <th>Size</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {newFiles.map((file, index) => (
+                                  <tr key={index}>
+                                    <td>
+                                      {file.type.startsWith("image/") ? (
+                                        <img src={previews[index]} alt="preview" style={{ width: "40px", height: "40px" }} />
+                                      ) : file.type === "application/pdf" ? (
+                                        <FileText size={24} color="#FF0000" />
+                                      ) : (
+                                        <File size={24} color="#000" />
+                                      )}
+                                    </td>
+                                    <td>{file.name}</td>
+                                    <td>{file.type}</td>
+                                    <td>
+                                      {file.size < 1024 * 1024
+                                        ? `${(file.size / 1024).toFixed(2)} KB`
+                                        : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+                                    </td>
+                                    <td>
+                                      <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-danger"
+                                        onClick={() => {
+                                          const updatedFiles = newFiles.filter((_, idx) => idx !== index);
+                                          setNewFiles(updatedFiles);
+                                          setPreviews(previews.filter((_, idx) => idx !== index));
+                                        }}
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            <div className="mt-3">
+                              <Button type="primary" onClick={handleDocumentSubmit} className="btn btn-primary d-inline-flex align-items-center gap-2">
+                                Save <ArrowRight size={16} />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </Form>
+                    )}
+                  </Formik>
+                </div>
+                <div className="datatable-wrapper mt-4">
+                  <Datatable
+                    columns={DocumentListColumns}
+                    data={fileStateClient}
+                    filter={true}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
-    </div>
   );
 };
 

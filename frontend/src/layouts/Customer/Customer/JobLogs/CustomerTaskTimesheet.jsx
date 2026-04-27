@@ -10,7 +10,7 @@ import { getCustomerMasterStatus } from "../../../../ReduxStore/Slice/Customer/C
 import sweatalert from "sweetalert2";
 import { Download, Plus, Eye } from "lucide-react";
 
-const CustomerTaskTimesheet = ({ getAccessDataJob, goto }) => {
+const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
@@ -59,7 +59,7 @@ const CustomerTaskTimesheet = ({ getAccessDataJob, goto }) => {
   }, [jobTimeData, addjobtimesheet]);
 
   const GetAllTaskTimeSheetData = async () => {
-    const req = { action: "get", job_id: location.state.job_id };
+    const req = { action: "get", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
     await dispatch(CustomerTaskTimesheetAction(data))
       .unwrap()

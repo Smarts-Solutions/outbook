@@ -27,7 +27,18 @@ const DashboardLinkData = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [hararchyData, setHararchyData] = useState({
+    customer: {},
+    client: {},
+    job: {},
+  });
   const debounceRef = useRef(null);
+
+  useEffect(() => {
+    if (location?.state?.data) {
+      setHararchyData(location.state.data);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     GetLinkedData();
@@ -152,11 +163,35 @@ const DashboardLinkData = () => {
   };
 
   const HandleJob = (row) => {
-    navigate("/customer/job", { state: row });
+    setHararchyData((prevState) => {
+      const updatedData = {
+        ...prevState,
+        job: row,
+      };
+      navigate("/customer/job/logs", {
+        state: {
+          job_id: row?.job_id,
+          timesheet_job_id: row?.timesheet_job_id,
+          data: updatedData,
+          goto: "client",
+          activeTab: location?.state?.activeTab,
+        },
+      });
+      return updatedData;
+    });
   };
 
   const HandleClientView = (row) => {
-    navigate("/customer/client", { state: row });
+    setHararchyData((prevState) => {
+      const updatedData = {
+        ...prevState,
+        client: row,
+      };
+      navigate("/customer/client/profile", {
+        state: { Client_id: row.id, data: updatedData },
+      });
+      return updatedData;
+    });
   };
 
   const downloadCSV = (data, filename) => {

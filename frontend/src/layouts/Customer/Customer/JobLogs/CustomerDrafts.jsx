@@ -10,7 +10,7 @@ import sweatalert from "sweetalert2";
 import { convertDate, validate } from "../../../../Utils/Comman_function";
 import { Download, Plus, Eye } from "lucide-react";
 
-const CustomerDrafts = ({ getAccessDataJob, goto }) => {
+const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
@@ -68,7 +68,7 @@ const CustomerDrafts = ({ getAccessDataJob, goto }) => {
   }, []);
 
   const GetAllDraftList = async () => {
-    const req = { action: "get", job_id: location.state.job_id };
+    const req = { action: "get", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
     await dispatch(CustomerDraftAction(data))
       .unwrap()
@@ -129,7 +129,7 @@ const CustomerDrafts = ({ getAccessDataJob, goto }) => {
       return;
     }
     const req = {
-      job_id: location.state.job_id,
+      job_id: job_id || location.state?.job_id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
       final_draft_sent_on:
         AllDraftInputdata.was_it_complete == 0

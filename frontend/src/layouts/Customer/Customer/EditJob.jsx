@@ -16,6 +16,7 @@ import { CreateJobErrorMessage } from "../../../Utils/Common_Message";
 import Select from "react-select";
 import Swal from "sweetalert2";
 import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, CheckCircle2, Info, AlertCircle, PlayCircle } from "lucide-react";
+import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../Utils/Config";
@@ -2919,6 +2920,19 @@ const EditJob = () => {
   return (
     <div>
       <div className="container-fluid">
+        {location?.state?.goto == "report" ? (
+          ""
+        ) : (
+          <Hierarchy
+            show={
+              location?.state?.goto == "Customer"
+                ? ["Customer", "Job", "Edit Job"]
+                : ["Customer", "Client", "Job", "Edit Job"]
+            }
+            active={location.state.goto == "Customer" ? 2 : 3}
+            data={location?.state?.data}
+          />
+        )}
         <div className="row mt-4">
           <div className="col-xl-12">
             <div className="card">

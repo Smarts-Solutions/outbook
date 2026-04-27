@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { CustomerJobAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { CustomerJobTimeline as CustomerJobTimelineAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Download, Info } from "lucide-react";
 
-const CustomerJobTimeline = () => {
+const CustomerJobTimeline = ({ job_id }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
   const [JobTimelineData, setJobTimelineData] = useState([]);
+  const [currentJobId, setCurrentJobId] = useState(job_id || location.state?.job_id || sessionStorage.getItem("currentJobId"));
 
   useEffect(() => {
-    GetJobTimeline();
-  }, []);
+    if (job_id) {
+       setCurrentJobId(job_id);
+    } else if (location.state?.job_id) {
+       setCurrentJobId(location.state.job_id);
+    }
+  }, [job_id, location.state?.job_id]);
+
+  useEffect(() => {
+    if (currentJobId) {
+      GetJobTimeline();
+    }
+  }, [currentJobId]);
 
   const GetJobTimeline = async () => {
-    const req = { action: "getJobTimeline", job_id: location.state.job_id, staff_id: StaffUserId.id };
+    const req = { action: "getJobTimeline", job_id: currentJobId, staff_id: StaffUserId.id };
     const data = { req: req, authToken: token };
-    await dispatch(CustomerJobAction(data))
+    await dispatch(CustomerJobTimelineAction(data))
       .unwrap()
       .then((res) => {
         if (res.status) {

@@ -20,7 +20,7 @@ import {
 } from "../../../../Utils/graphAPI";
 import { Download, Plus, FileText, File, Eye } from "lucide-react";
 
-const CustomerMissingLogs = ({ getAccessDataJob, goto }) => {
+const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
  
@@ -157,7 +157,7 @@ const CustomerMissingLogs = ({ getAccessDataJob, goto }) => {
   };
 
   const GetMissingLogDetails = async () => {
-    const req = { action: "get", job_id: location.state.job_id };
+    const req = { action: "get", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
 
     await dispatch(CustomerMissingLogAction(data))
@@ -178,7 +178,7 @@ const CustomerMissingLogs = ({ getAccessDataJob, goto }) => {
   const HandleMissionView = async (row) => {
     const req = { action: "getSingleView", id: row.id };
     const data = { req: req, authToken: token };
-    await dispatch(GetMissingLog(data))
+    await dispatch(CustomerMissingLogAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -195,7 +195,7 @@ const CustomerMissingLogs = ({ getAccessDataJob, goto }) => {
   const handleSubmit = async (e) => {
     const req = {
       action: "add",
-      job_id: location.state.job_id,
+      job_id: job_id || location.state?.job_id,
       missionDetails: missionLogAllInputData,
     };
     const data = { req: req, authToken: token };

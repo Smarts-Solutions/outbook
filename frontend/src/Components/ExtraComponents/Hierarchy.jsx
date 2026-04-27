@@ -4,20 +4,23 @@ import {useNavigate} from 'react-router-dom'
 const Hierarchy = ({ show, active, data , NumberOfActive }) => {
      const navigate = useNavigate()
     const fun = (navigateTo , active) => {
+        const role = JSON.parse(localStorage.getItem("role"));
+        const basePath = role === "CUSTOMER" ? "/customer" : "/admin/customer";
+
         if(active<navigateTo){
             return
         }
         if(active == 1){
-            navigate('/admin/customer')
+            navigate(basePath)
         }
         if(active == 2 && navigateTo == 1){
-            navigate('/admin/customer')
+            navigate(basePath)
         }
         if(active == 2 && navigateTo == 2){
             window.history.back()
         }
         if(active == 3 && navigateTo == 1){
-            navigate('/admin/customer')
+            navigate(basePath)
         }
         if(active == 3 && navigateTo == 2){
             window.history.back()

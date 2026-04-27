@@ -736,16 +736,18 @@ const getCustomerClientList = async (dashboard) => {
     const effectiveStaffId = staff_id || StaffUserId;
 
     if (action === "getByid" && client_id) {
-      const [clientRows] = await pool.execute(`
+      const query = `
         SELECT clients.*, client_types.type AS client_type_name
         FROM clients 
         LEFT JOIN client_types ON clients.client_type = client_types.id
-        WHERE clients.id = ?`, [client_id]);
-      
+        WHERE clients.id = ?`;
+      const [clientRows] = await pool.execute(query, [client_id]);
+
       if (clientRows.length === 0) return { status: false, message: "Client not found." };
 
       const [contactDetails] = await pool.execute(`SELECT * FROM client_contact_details WHERE client_id = ?`, [client_id]);
       const [companyDetails] = await pool.execute(`SELECT * FROM client_company_information WHERE client_id = ?`, [client_id]);
+      const [clientDocuments] = await pool.execute(`SELECT * FROM client_documents WHERE client_id = ?`, [client_id]);
 
       return {
         status: true,
@@ -753,7 +755,8 @@ const getCustomerClientList = async (dashboard) => {
         data: {
           client: clientRows[0],
           contact_details: contactDetails,
-          company_details: companyDetails[0] || {}
+          company_details: companyDetails[0] || {},
+          client_documents: clientDocuments || []
         }
       };
     }
@@ -1021,6 +1024,46 @@ const customerClientAction = async (dashboard) => {
       return { status: true, message: "Client deleted successfully." };
     } catch (err) {
       return { status: false, message: "Error deleting client." };
+    }
+  }
+
+  if (action === "addClientDocument") {
+    const { uploadedFiles } = dashboard;
+    try {
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        for (let file of uploadedFiles) {
+          const file_name = file.filename;
+          const original_name = file.originalname;
+          const file_type = file.mimetype;
+          const file_size = file.size;
+          const web_url = file.web_url;
+
+          const checkQuery = `SELECT id FROM client_documents WHERE client_id = ? AND original_name = ?`;
+          const [rows] = await pool.execute(checkQuery, [effectiveClientId, original_name]);
+          if (rows.length > 0) continue;
+
+          const insertQuery = `
+                INSERT INTO client_documents (
+                    client_id, file_name, original_name, file_type, file_size , web_url
+                ) VALUES (?, ?, ?, ?, ?, ?)
+            `;
+          await pool.execute(insertQuery, [effectiveClientId, file_name, original_name, file_type, file_size, web_url]);
+        }
+        return { status: true, message: "Client document uploaded successfully.", data: effectiveClientId };
+      }
+      return { status: true, message: "No files uploaded.", data: effectiveClientId };
+    } catch (error) {
+      return { status: false, message: "Error uploading document." };
+    }
+  }
+
+  if (action === "deleteClientFile") {
+    const { doc_id } = dashboard;
+    try {
+      await pool.execute("DELETE FROM client_documents WHERE id = ?", [doc_id]);
+      return { status: true, message: "File deleted successfully." };
+    } catch (err) {
+      return { status: false, message: "Error deleting file." };
     }
   }
 
