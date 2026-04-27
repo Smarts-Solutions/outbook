@@ -177,11 +177,262 @@ const getMasterStatus = async () => {
 };
 
 const updateJobStatus = async (data) => {
+  const { job_id, status_type, StaffUserId, ip } = data;
+
   try {
-    const { job_id, status_type } = data;
-    await pool.query("UPDATE jobs SET status_type = ? WHERE id = ?", [status_type, job_id]);
-    return { status: true, message: "Job status updated successfully" };
+    // 1. Security Check: Does the staff have access to this job?
+    const checkQuery = `
+      SELECT j.id, j.status_type, j.customer_id 
+      FROM jobs j
+      WHERE j.id = ? AND j.customer_id IN (
+        SELECT customer_id FROM customer_access WHERE staff_id = ?
+        UNION
+        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+        UNION
+        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+        UNION
+        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+      )
+    `;
+    const [jobRows] = await pool.execute(checkQuery, [job_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
+
+    if (jobRows.length === 0) {
+      return { status: false, message: "Job not found or access denied." };
+    }
+
+    const ExistJobData = jobRows;
+    const oldStatusType = ExistJobData[0].status_type;
+
+    // 2. Validation logic (copied from jobModel.js)
+
+    // Check if Processor is assigned
+    if ([4, 5, 7, 3].includes(parseInt(status_type))) {
+      const [[ExistAllocatedTo]] = await pool.execute(
+        `SELECT allocated_to FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+
+      if (["", null, undefined, 0, "0"].includes(ExistAllocatedTo?.allocated_to)) {
+        return {
+          status: false,
+          message: "Please assign the job to the Processor.",
+          data: "W",
+        };
+      }
+    }
+
+    // Check if Reviewer is assigned
+    if ([5, 7, 17, 18, 19, 20].includes(parseInt(status_type))) {
+      const [[ExistReviewer]] = await pool.execute(
+        `SELECT reviewer FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+
+      if (["", null, undefined, 0, "0"].includes(ExistReviewer?.reviewer)) {
+        return {
+          status: false,
+          message: "Please assign the job to the reviewer.",
+          data: "W",
+        };
+      }
+    }
+
+    // Check if First Draft is sent
+    if ([7, 18, 19, 20].includes(parseInt(status_type))) {
+      const [ExistDraft] = await pool.execute(
+        `SELECT job_id FROM drafts WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistDraft.length === 0) {
+        return {
+          status: false,
+          message: "Please send the first draft.",
+          data: "W",
+        };
+      }
+    }
+
+    // Check Draft Feedback Received
+    if ([17].includes(parseInt(status_type))) {
+      const [ExistDraftFeedbackYes] = await pool.execute(
+        `SELECT 
+          CASE 
+            WHEN COUNT(*) > 0 THEN TRUE 
+            ELSE FALSE 
+          END AS is_condition_true
+      FROM drafts
+      WHERE job_id = ?
+        AND feedback_received = '1'
+        AND was_it_complete = '0'`,
+        [job_id]
+      );
+
+      const isCondition = ExistDraftFeedbackYes[0]?.is_condition_true;
+      if (isCondition == 0) {
+        return {
+          status: false,
+          message: "Please sent the draft feedback first.",
+          data: "W",
+        };
+      }
+    }
+
+    // Check if Queries are sent
+    if ([4].includes(parseInt(status_type))) {
+      const [ExistQueries] = await pool.execute(
+        `SELECT job_id FROM queries WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistQueries.length === 0) {
+        return {
+          status: false,
+          message: "Please send the Queries.",
+          data: "W",
+        };
+      }
+    }
+
+    // Check if Missing Logs are sent
+    if ([2].includes(parseInt(status_type))) {
+      const [ExistMissingLogs] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistMissingLogs.length === 0) {
+        return {
+          status: false,
+          message: "Please send Missing Paper Logs.",
+          data: "W",
+        };
+      }
+    }
+
+    // Check for Status 6 (Completed)
+    if ([6].includes(parseInt(status_type))) {
+      const [ExistDraft] = await pool.execute(
+        `SELECT job_id FROM drafts WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistDraft.length === 0) {
+        return {
+          status: false,
+          message: "Please sent first draft.",
+          data: "W",
+        };
+      }
+
+      const [[rowsDraftProcess]] = await pool.execute(
+        `SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`,
+        [job_id]
+      );
+
+      if (rowsDraftProcess.status_check === 0) {
+        return {
+          status: false,
+          message: "Please complete the draft.",
+          data: "W",
+        };
+      }
+    } else {
+      // Missing Log Review Check
+      const [ExistMissingLog] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE missing_log_reviewed_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if (ExistMissingLog.length > 0) {
+        return {
+          status: false,
+          message: "Please review the missing log.",
+          data: "W",
+        };
+      }
+
+      // Query Review Check
+      const [ExistQuery] = await pool.execute(
+        `SELECT job_id FROM queries WHERE final_query_response_received_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if (ExistQuery.length > 0) {
+        return {
+          status: false,
+          message: "Please review the query.",
+          data: "W",
+        };
+      }
+    }
+
+    // 3. Status-Specific Update Queries
+    let query = `
+         UPDATE jobs 
+         SET status_type = ? , status_updation_date = NOW()
+         WHERE id = ?
+       `;
+
+    if (parseInt(status_type) == 20) {
+      query = `
+        UPDATE jobs 
+        SET status_type = ?, status_updation_date = NOW(), filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
+        WHERE id = ?
+      `;
+    } else if (parseInt(status_type) == 19) {
+      query = `
+        UPDATE jobs 
+        SET status_type = ?, status_updation_date = NOW(), filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        WHERE id = ?
+      `;
+    } else if (parseInt(status_type) == 18) {
+      query = `
+        UPDATE jobs 
+        SET status_type = ?, status_updation_date = NOW(), filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        WHERE id = ?
+      `;
+    }
+
+    // 4. Update Status and History
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, status_type, status_update_date);
+
+    const [result] = await pool.execute(query, [status_type, job_id]);
+
+    if (result.affectedRows > 0) {
+      // 5. Logging
+      const [[StatusName]] = await pool.execute(
+        `SELECT 
+          MAX(CASE WHEN id = ? THEN name END) AS from_status, 
+          MAX(CASE WHEN id = ? THEN name END) AS to_status 
+         FROM master_status 
+         WHERE id IN (?, ?)`
+      , [oldStatusType, status_type, oldStatusType, status_type]);
+
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: StaffUserId,
+        ip: ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "job",
+        log_message: `updated the job status from ${StatusName.from_status} to ${StatusName.to_status}. job code:`,
+        permission_type: "updated",
+        module_id: job_id,
+      });
+
+      return { status: true, message: "Job status updated successfully." };
+    } else {
+      return { status: false, message: "No job found or no changes made." };
+    }
   } catch (error) {
+    console.error("updateJobStatus error", error);
     return { status: false, message: error.message };
   }
 };

@@ -141,7 +141,13 @@ export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", asy
 export const updateCustomerJobStatus = createAsyncThunk("updateCustomerJobStatus", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await UPDATE_CUSTOMER_JOB_STATUS(req, authToken);
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await UPDATE_CUSTOMER_JOB_STATUS(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
