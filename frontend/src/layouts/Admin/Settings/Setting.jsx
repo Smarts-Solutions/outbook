@@ -3735,18 +3735,39 @@ const Setting = () => {
                               />
 
                               {item?.selectedTasks?.length > 0 && (
-                                <div className="mt-2">
+                                <div className="mt-2 p-2 rounded"
+                                  style={{
+                                    border: "1px solid #e5e7eb",
+                                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                                    background: "#fff",
+                                  }}>
                                   {item.selectedTasks.map((task, taskIndex) => {
                                     const [hours, minutes] = (task?.budgeted_hour || "0:0").split(":");
                                     return (
-                                      <div key={task.value} className="d-flex align-items-center mb-1">
-                                        <span className="small me-2" style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={task.label}>
+                                      <div key={task.value} className="d-flex align-items-center mb-1 p-1"
+                                        style={{
+                                          border: "1px solid #c5c1c1ff",
+                                          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                                          background: "#fff",
+                                          borderRadius: "10px"
+                                        }}>
+                                        <div
+                                          style={{
+                                            width: "7px",
+                                            height: "7px",
+                                            borderRadius: "50%",
+                                            background: "#0d6efd33",
+                                            border: "1px solid #0d6efd",
+                                            flexShrink: 0,
+                                          }}
+                                        />
+                                        <span className="small ms-2" style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={task.label}>
                                           {task.label}
                                         </span>
-                                        <div className="input-group input-group-sm" style={{ width: "130px" }}>
+                                        <div className="input-group input-group-sm gap-1 " style={{ width: "130px", borderRadius: "10px" }}>
                                           <input
                                             type="text"
-                                            className="form-control form-control-sm"
+                                            className="form-control form-control-sm "
                                             value={hours}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "hour")}
                                           />
@@ -3764,6 +3785,7 @@ const Setting = () => {
                                   })}
                                 </div>
                               )}
+
 
                             </td>
 
