@@ -3818,7 +3818,7 @@ const Setting = () => {
             {allJobsData?.length > 0 && (
               <button
                 onClick={handleSubmitDeleteService}
-                className="btn btn-success float-end px-4 fw-bold shadow-sm"
+                className="btn btn-outline-success float-end px-4 fw-bold shadow-sm"
                 disabled={loading}
               >
                 {loading ? (
@@ -3826,7 +3826,7 @@ const Setting = () => {
                 ) : (
                   <Save size={16} className="me-1" />
                 )}
-                Submit Reassignment
+                Submit
               </button>
             )}
 
