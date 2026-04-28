@@ -4833,28 +4833,104 @@ const copy_job = async (job) => {
 
 
 
-const getJobsDeleteService = async (job) => {
+// const getJobsDeleteService = async (job) => {
 
-  // SELECT 
-  //   jobs.id AS job_id,
-  //   customers.trading_name AS customer_name,
-  //   clients.trading_name AS client_name,
-  //   CONCAT(
-  //     SUBSTRING(customers.trading_name, 1, 3), '_',
-  //     SUBSTRING(clients.trading_name, 1, 3), '_',
-  //     SUBSTRING(job_types.type, 1, 4), '_',
-  //     SUBSTRING(jobs.job_id, 1, 15)
-  //   ) AS job_code_id
-  //   FROM jobs
-  //   JOIN customers ON jobs.customer_id = customers.id
-  //   JOIN clients ON customers.id = clients.customer_id
-  //   JOIN job_types ON jobs.job_type_id = job_types.id
-  //   WHERE jobs.service_id = ?
+//   // SELECT 
+//   //   jobs.id AS job_id,
+//   //   customers.trading_name AS customer_name,
+//   //   clients.trading_name AS client_name,
+//   //   CONCAT(
+//   //     SUBSTRING(customers.trading_name, 1, 3), '_',
+//   //     SUBSTRING(clients.trading_name, 1, 3), '_',
+//   //     SUBSTRING(job_types.type, 1, 4), '_',
+//   //     SUBSTRING(jobs.job_id, 1, 15)
+//   //   ) AS job_code_id
+//   //   FROM jobs
+//   //   JOIN customers ON jobs.customer_id = customers.id
+//   //   JOIN clients ON customers.id = clients.customer_id
+//   //   JOIN job_types ON jobs.job_type_id = job_types.id
+//   //   WHERE jobs.service_id = ?
+
+//   const { service_id } = job;
+
+//   try {
+
+
+//     const [results] = await pool.execute(
+//       ` SELECT 
+//       jobs.id AS job_id,
+//       customers.trading_name AS customer_name,
+//       clients.trading_name AS client_name,
+
+//       CONCAT(
+//           SUBSTRING(customers.trading_name, 1, 3), '_',
+//           SUBSTRING(clients.trading_name, 1, 3), '_',
+//           SUBSTRING(job_types.type, 1, 4), '_',
+//           SUBSTRING(jobs.job_id, 1, 15)
+//       ) AS job_code_id,
+
+//       JSON_ARRAYAGG(
+//           JSON_OBJECT(
+//               'service_id', services.id,
+//               'service_name', services.name
+//           )
+//       ) AS services,
+
+//       JSON_ARRAYAGG(
+//         JSON_OBJECT(
+//             'job_type_id', job_types.id,
+//             'job_type_name', job_types.type,
+//             'service_id', job_types.service_id
+//         )
+//     ) AS jobTypes,
+
+//     JSON_ARRAYAGG(
+//         JSON_OBJECT(
+//             'task_id', task.id,
+//             'task_name', task.name,
+//             'service_id', task.service_id,
+//             'job_type_id', task.job_type_id,
+//             'budgeted_hour', task.budgeted_hour
+//         )
+//     ) AS tasks
+
+//       FROM jobs
+//       JOIN customers ON jobs.customer_id = customers.id
+//       JOIN clients ON customers.id = clients.customer_id
+
+//       JOIN customer_services ON customer_services.customer_id = customers.id
+//       JOIN services ON services.id = customer_services.service_id
+
+//       JOIN job_types ON job_types.service_id = services.id
+
+//       JOIN task ON task.service_id = services.id
+      
+//       WHERE jobs.service_id = ?
+//       GROUP BY 
+//           jobs.id,
+//           customers.trading_name,
+//           clients.trading_name,
+//           jobs.job_id
+
+//       ORDER BY jobs.id DESC
+//     `,
+//       [service_id]
+//     );
+
+//     return { status: true, message: "Success", data: results };
+
+//   } catch (error) {
+//     console.log(error);
+//   }
+
+// }
+
+
+const getJobsDeleteService = async (job) => {
 
   const { service_id } = job;
 
   try {
-
 
     const [results] = await pool.execute(
       ` SELECT 
@@ -4869,30 +4945,16 @@ const getJobsDeleteService = async (job) => {
           SUBSTRING(jobs.job_id, 1, 15)
       ) AS job_code_id,
 
-      JSON_ARRAYAGG(
-          JSON_OBJECT(
-              'service_id', services.id,
-              'service_name', services.name
-          )
-      ) AS services,
-
-      JSON_ARRAYAGG(
-        JSON_OBJECT(
-            'job_type_id', job_types.id,
-            'job_type_name', job_types.type,
-            'service_id', job_types.service_id
-        )
-    ) AS jobTypes,
-
-    JSON_ARRAYAGG(
-        JSON_OBJECT(
-            'task_id', task.id,
-            'task_name', task.name,
-            'service_id', task.service_id,
-            'job_type_id', task.job_type_id,
-            'budgeted_hour', task.budgeted_hour
-        )
-    ) AS tasks
+      services.id AS s_id,
+      services.name AS s_name,
+      job_types.id AS jt_id,
+      job_types.type AS jt_type,
+      job_types.service_id AS jt_s_id,
+      task.id AS t_id,
+      task.name AS t_name,
+      task.service_id AS t_s_id,
+      task.job_type_id AS t_jt_id,
+      task.budgeted_hour AS t_budgeted_hour
 
       FROM jobs
       JOIN customers ON jobs.customer_id = customers.id
@@ -4906,18 +4968,56 @@ const getJobsDeleteService = async (job) => {
       JOIN task ON task.service_id = services.id
       
       WHERE jobs.service_id = ?
-      GROUP BY 
-          jobs.id,
-          customers.trading_name,
-          clients.trading_name,
-          jobs.job_id
-
       ORDER BY jobs.id DESC
     `,
       [service_id]
     );
 
-    return { status: true, message: "Success", data: results };
+    const groupedData = results.reduce((acc, row) => {
+      let jobItem = acc.find(item => item.job_id === row.job_id);
+
+      if (!jobItem) {
+        jobItem = {
+          job_id: row.job_id,
+          customer_name: row.customer_name,
+          client_name: row.client_name,
+          job_code_id: row.job_code_id,
+          services: [],
+          jobTypes: [],
+          tasks: []
+        };
+        acc.push(jobItem);
+      }
+
+      if (row.s_id && !jobItem.services.some(s => s.service_id === row.s_id)) {
+        jobItem.services.push({
+          service_id: row.s_id,
+          service_name: row.s_name
+        });
+      }
+
+      if (row.jt_id && !jobItem.jobTypes.some(jt => jt.job_type_id === row.jt_id)) {
+        jobItem.jobTypes.push({
+          job_type_id: row.jt_id,
+          job_type_name: row.jt_type,
+          service_id: row.jt_s_id
+        });
+      }
+
+      if (row.t_id && !jobItem.tasks.some(t => t.task_id === row.t_id)) {
+        jobItem.tasks.push({
+          task_id: row.t_id,
+          task_name: row.t_name,
+          service_id: row.t_s_id,
+          job_type_id: row.t_jt_id,
+          budgeted_hour: row.t_budgeted_hour
+        });
+      }
+
+      return acc;
+    }, []);
+
+    return { status: true, message: "Success", data: groupedData };
 
   } catch (error) {
     console.log(error);
