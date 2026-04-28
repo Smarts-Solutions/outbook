@@ -22,14 +22,16 @@ const Sidebar = () => {
   });
 
   const hasCustomerAccess = (permission, type = "view") => {
-    const module = customerAccessData.find(
-      (item) => item.permission_name === permission
-    );
+    if (customerAccessData) {
+      const module = customerAccessData && customerAccessData?.find(
+        (item) => item?.permission_name === permission
+      );
 
-    if (!module) return false;
+      if (!module) return false;
 
-    const access = module.items.find((i) => i.type === type);
-    return access?.is_assigned === 1;
+      const access = module.items.find((i) => i.type === type);
+      return access?.is_assigned === 1;
+    }
   };
 
 
