@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import TaskTimesheet from "./CustomerTaskTimesheet";
 import MissingLogs from "./CustomerMissingLogs";
 import Queries from "./CustomerQueries";
@@ -37,10 +37,13 @@ const CustomerJobLogs = () => {
     view: 0,
   });
 
-  const accessDataJob =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job",
-    )?.items || [];
+  const accessDataJob = useMemo(() => {
+    return (
+      JSON.parse(localStorage.getItem("accessData") || "[]").find(
+        (item) => item.permission_name === "job"
+      )?.items || []
+    );
+  }, []);
 
   useEffect(() => {
     if (location?.state?.job_id) {
@@ -59,20 +62,25 @@ const CustomerJobLogs = () => {
 
   useEffect(() => {
     const userRole = role?.toString().toUpperCase();
+
     if (userRole === "CUSTOMER" || userRole === "SUPERADMIN") {
       setAccessDataJob({ insert: 1, update: 1, delete: 1, view: 1 });
       return;
     }
-    if (accessDataJob.length === 0) return;
+
+    if (!accessDataJob.length) return;
+
     const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
+
     accessDataJob.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
       if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
+
     setAccessDataJob(updatedAccess);
-  }, [accessDataJob, role]);
+  }, [role, accessDataJob]);
 
   return (
     <div className="container-fluid">
@@ -101,7 +109,7 @@ const CustomerJobLogs = () => {
                           );
                         }}
                       >
-                        <Info size={18} className="me-1"/>
+                        <Info size={18} className="me-1" />
                         Job Information
                       </button>
                     </li>
@@ -148,7 +156,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "job timeline");
                         }}
                       >
-                        <Clock  size={18} className="me-1" />
+                        <Clock size={18} className="me-1" />
                         Job Timeline
                       </button>
                     </li>
@@ -170,7 +178,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "missing logs");
                         }}
                       >
-                        <AlertTriangle  size={18} className="me-1" />
+                        <AlertTriangle size={18} className="me-1" />
                         Missing Logs
                       </button>
                     </li>
@@ -192,7 +200,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "queries");
                         }}
                       >
-                        <HelpCircle  size={18} className="me-1" />
+                        <HelpCircle size={18} className="me-1" />
                         Queries
                       </button>
                     </li>
@@ -214,7 +222,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "drafts");
                         }}
                       >
-                        <File  size={18} className="me-1" />
+                        <File size={18} className="me-1" />
                         Drafts
                       </button>
                     </li>
@@ -236,7 +244,7 @@ const CustomerJobLogs = () => {
                           sessionStorage.setItem("activeTab2", "documents");
                         }}
                       >
-                        <Folder  size={18} className="me-1" />
+                        <Folder size={18} className="me-1" />
                         Documents
                       </button>
                     </li>

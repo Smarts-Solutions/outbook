@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Datatable from "../../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
+
 import {
   CustomerTaskTimesheetAction,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -78,7 +79,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
   const handleTimeSheetView = async (job_id) => {
     const req = { action: "get", job_id: job_id };
     const data = { req: req, authToken: token };
-    await dispatch(CustomerTaskTimesheetAction({req: {action: "getJobTimeSheet", job_id: job_id}, authToken: token}))
+    await dispatch(CustomerTaskTimesheetAction({ req: { action: "getJobTimeSheet", job_id: job_id }, authToken: token }))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -165,7 +166,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
       });
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       name: "Task Name",
       selector: (row) => row.task_name || "-",
@@ -208,7 +209,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
               <button
                 className="view-icon"
                 onClick={() => {
-                  handleTimeSheetView(location.state.job_id);
+                  handleTimeSheetView(location.state?.job_id);
                   setRowData(row);
                   setViewtimesheet(true);
                 }}
@@ -223,7 +224,8 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
       button: true,
       reorder: false,
     },
-  ];
+  ], [goto, getAccessDataJob.update, role, location.state?.job_id]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
