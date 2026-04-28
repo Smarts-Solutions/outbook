@@ -390,266 +390,564 @@ const createCustomer = async (customer) => {
     }
 };
 
+// const getCustomer = async (customer) => {
+
+//     const { staff_id } = customer;
+
+//     const page = parseInt(customer.page) || 1;
+//     const limit = parseInt(customer.limit) || 10;
+//     const offset = (page - 1) * limit;
+
+//     const search = customer.search ? customer.search.trim() : "";
+//     const pattern = search ? `%${search}%` : `%`;
+
+//     const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
+//     const rows = await QueryRoleHelperFunction(staff_id);
+
+//     const RoleAccessQuery = `
+//         SELECT * FROM role_permissions 
+//         WHERE role_id = ? AND permission_id = ?
+//     `;
+
+//     const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id, 33]);
+
+//     // SUPERADMIN OR ROLE ACCESS
+//     if (rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
+
+//         try {
+
+//             const countQuery = `
+//             SELECT COUNT(DISTINCT customers.id) AS total
+//             FROM customers
+//             LEFT JOIN staffs ON customers.staff_id = staffs.id
+//             LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+//             WHERE 
+//                 customers.trading_name LIKE ? OR
+//                 staff2.first_name LIKE ? OR
+//                 staff2.last_name LIKE ? OR
+//                 CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ? OR
+//                 CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+//             `;
+
+//             const [[{ total }]] = await pool.execute(countQuery, [
+//                 pattern,
+//                 pattern,
+//                 pattern,
+//                 pattern,
+//                 pattern
+//             ]);
+
+//             const query = `
+//             SELECT  
+//                 customers.id,
+//                 customers.customer_type,
+//                 customers.staff_id,
+//                 CONCAT(staffs.first_name,' ',staffs.last_name) AS customer_created_by,
+//                 customers.account_manager_id,
+//                 customers.trading_name,
+//                 customers.trading_address,
+//                 customers.vat_registered,
+//                 customers.vat_number,
+//                 customers.website,
+//                 customers.form_process,
+//                 DATE_FORMAT(customers.created_at,'%d/%m/%Y') AS created_at,
+//                 DATE_FORMAT(customers.updated_at,'%d/%m/%Y') AS updated_at,
+//                 customers.status,
+//                 staff2.first_name AS account_manager_firstname,
+//                 staff2.last_name AS account_manager_lastname,
+//                 staff2.employee_number AS account_manager_employee_number,
+//                 CONCAT(
+//                     'cust_',
+//                     SUBSTRING(customers.trading_name,1,3),'_',
+//                     SUBSTRING(customers.customer_code,1,15)
+//                 ) AS customer_code,
+//                 CASE
+//                     WHEN EXISTS (
+//                         SELECT 1 FROM clients WHERE clients.customer_id = customers.id
+//                     ) THEN 1 ELSE 0
+//                 END AS is_client
+//             FROM customers
+//             LEFT JOIN staffs ON customers.staff_id = staffs.id
+//             LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+//             LEFT JOIN clients ON clients.customer_id = customers.id
+//             WHERE
+//                 customers.trading_name LIKE ? OR
+//                 staff2.first_name LIKE ? OR
+//                 staff2.last_name LIKE ? OR
+//                 CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ? OR
+//                 CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+//             GROUP BY customers.id
+//             ORDER BY customers.id DESC
+//             LIMIT ? OFFSET ?
+//             `;
+
+//             const [result] = await pool.execute(query, [
+//                 pattern,
+//                 pattern,
+//                 pattern,
+//                 pattern,
+//                 pattern,
+//                 limit,
+//                 offset
+//             ]);
+
+//             return {
+//                 status: true,
+//                 message: "Success",
+//                 data: {
+//                     data: result,
+//                     pagination: {
+//                         totalItems: total,
+//                         totalPages: Math.ceil(total / limit),
+//                         currentPage: page,
+//                         limit
+//                     }
+//                 }
+//             };
+
+//         } catch (error) {
+
+//             console.error("Error fetching customers:", error);
+
+//             return {
+//                 status: false,
+//                 message: "Error fetching customers",
+//                 error: error.message
+//             };
+
+//         }
+
+//     }
+
+//     // NON SUPERADMIN
+
+//     try {
+
+//         let countQuery = `
+//         SELECT COUNT(DISTINCT customers.id) AS total
+//         FROM customers
+//         JOIN staffs AS staff1 ON customers.staff_id = staff1.id
+//         JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+//         LEFT JOIN clients ON clients.customer_id = customers.id
+//         LEFT JOIN assigned_jobs_staff_view 
+//             ON assigned_jobs_staff_view.customer_id = customers.id
+//         LEFT JOIN customer_company_information 
+//             ON customers.id = customer_company_information.customer_id
+//         WHERE
+//             (
+//                 customers.staff_id = ?
+//                 OR assigned_jobs_staff_view.staff_id = ?
+//                 OR customers.staff_id IN (${LineManageStaffId})
+//                 OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+//             )
+//         `;
+
+//         let query = `
+//         SELECT
+//             customers.id,
+//             customers.customer_type,
+//             customers.staff_id,
+//             customers.account_manager_id,
+//             customers.trading_name,
+//             customers.trading_address,
+//             customers.vat_registered,
+//             customers.vat_number,
+//             customers.website,
+//             customers.form_process,
+//             DATE_FORMAT(customers.created_at,'%d/%m/%Y') AS created_at,
+//             DATE_FORMAT(customers.updated_at,'%d/%m/%Y') AS updated_at,
+//             customers.status,
+//             staff1.first_name AS staff_firstname,
+//             staff1.last_name AS staff_lastname,
+//             CONCAT(staff1.first_name,' ',staff1.last_name) AS customer_created_by,
+//             staff2.first_name AS account_manager_firstname,
+//             staff2.last_name AS account_manager_lastname,
+//             customer_company_information.company_name,
+//             customer_company_information.company_number,
+//             CONCAT(
+//                 'cust_',
+//                 SUBSTRING(customers.trading_name,1,3),'_',
+//                 SUBSTRING(customers.customer_code,1,15)
+//             ) AS customer_code,
+//             CASE
+//                 WHEN clients.id IS NOT NULL THEN 1
+//                 ELSE 0
+//             END AS is_client
+//         FROM customers
+//         JOIN staffs AS staff1 ON customers.staff_id = staff1.id
+//         JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+//         LEFT JOIN clients ON clients.customer_id = customers.id
+//         LEFT JOIN assigned_jobs_staff_view 
+//             ON assigned_jobs_staff_view.customer_id = customers.id
+//         LEFT JOIN customer_company_information 
+//             ON customers.id = customer_company_information.customer_id
+//         WHERE
+//             (
+//                 customers.staff_id = ?
+//                 OR assigned_jobs_staff_view.staff_id = ?
+//                 OR customers.staff_id IN (${LineManageStaffId})
+//                 OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+//             )
+//         `;
+
+//         const params = [staff_id, staff_id];
+
+//         if (search) {
+
+//             const searchCondition = `
+//             AND (
+//                 customers.trading_name LIKE ?
+//                 OR staff2.first_name LIKE ?
+//                 OR staff2.last_name LIKE ?
+//                 OR CONCAT(staff1.first_name,' ',staff1.last_name) LIKE ?
+//                 OR CONCAT('cust_',SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+//             )
+//             `;
+
+//             countQuery += searchCondition;
+//             query += searchCondition;
+
+//             params.push(pattern, pattern, pattern, pattern, pattern);
+
+//         }
+
+//         const [[{ total }]] = await pool.execute(countQuery, params);
+
+//         query += `
+//         GROUP BY customers.id
+//         ORDER BY customers.id DESC
+//         LIMIT ? OFFSET ?
+//         `;
+
+//         params.push(limit, offset);
+
+//         const [result] = await pool.execute(query, params);
+
+//         return {
+//             status: true,
+//             message: "Success",
+//             data: {
+//                 data: result,
+//                 pagination: {
+//                     totalItems: total,
+//                     totalPages: Math.ceil(total / limit),
+//                     currentPage: page,
+//                     limit
+//                 }
+//             }
+//         };
+
+//     } catch (error) {
+
+//         console.error("Error selecting data:", error);
+
+//         return {
+//             status: false,
+//             message: "Error selecting data",
+//             data: error
+//         };
+
+//     }
+
+// };
+
 const getCustomer = async (customer) => {
+  const { staff_id } = customer;
 
-    const { staff_id } = customer;
 
-    const page = parseInt(customer.page) || 1;
-    const limit = parseInt(customer.limit) || 10;
-    const offset = (page - 1) * limit;
+  // console time milesecond
+  
+ 
 
-    const search = customer.search ? customer.search.trim() : "";
-    const pattern = search ? `%${search}%` : `%`;
 
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
-    const rows = await QueryRoleHelperFunction(staff_id);
+  const page = parseInt(customer.page) || 1;
+  const limit = parseInt(customer.limit) || 10;
+  const offset = (page - 1) * limit;
 
-    const RoleAccessQuery = `
-        SELECT * FROM role_permissions 
-        WHERE role_id = ? AND permission_id = ?
-    `;
+  const search = customer.search ? customer.search.trim() : "";
+  const pattern = `%${search}%`;
 
-    const [RoleAccess] = await pool.execute(RoleAccessQuery, [rows[0].role_id, 33]);
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
+  const rows = await QueryRoleHelperFunction(staff_id);
 
-    // SUPERADMIN OR ROLE ACCESS
-    if (rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
+  const RoleAccessQuery = `
+    SELECT * FROM role_permissions 
+    WHERE role_id = ? AND permission_id = ?
+  `;
 
-        try {
+  const [RoleAccess] = await pool.execute(RoleAccessQuery, [
+    rows[0].role_id,
+    33,
+  ]);
 
-            const countQuery = `
-            SELECT COUNT(DISTINCT customers.id) AS total
-            FROM customers
-            LEFT JOIN staffs ON customers.staff_id = staffs.id
-            LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-            WHERE 
-                customers.trading_name LIKE ? OR
-                staff2.first_name LIKE ? OR
-                staff2.last_name LIKE ? OR
-                CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ? OR
-                CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
-            `;
-
-            const [[{ total }]] = await pool.execute(countQuery, [
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                pattern
-            ]);
-
-            const query = `
-            SELECT  
-                customers.id,
-                customers.customer_type,
-                customers.staff_id,
-                CONCAT(staffs.first_name,' ',staffs.last_name) AS customer_created_by,
-                customers.account_manager_id,
-                customers.trading_name,
-                customers.trading_address,
-                customers.vat_registered,
-                customers.vat_number,
-                customers.website,
-                customers.form_process,
-                DATE_FORMAT(customers.created_at,'%d/%m/%Y') AS created_at,
-                DATE_FORMAT(customers.updated_at,'%d/%m/%Y') AS updated_at,
-                customers.status,
-                staff2.first_name AS account_manager_firstname,
-                staff2.last_name AS account_manager_lastname,
-                staff2.employee_number AS account_manager_employee_number,
-                CONCAT(
-                    'cust_',
-                    SUBSTRING(customers.trading_name,1,3),'_',
-                    SUBSTRING(customers.customer_code,1,15)
-                ) AS customer_code,
-                CASE
-                    WHEN EXISTS (
-                        SELECT 1 FROM clients WHERE clients.customer_id = customers.id
-                    ) THEN 1 ELSE 0
-                END AS is_client
-            FROM customers
-            LEFT JOIN staffs ON customers.staff_id = staffs.id
-            LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-            LEFT JOIN clients ON clients.customer_id = customers.id
-            WHERE
-                customers.trading_name LIKE ? OR
-                staff2.first_name LIKE ? OR
-                staff2.last_name LIKE ? OR
-                CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ? OR
-                CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
-            GROUP BY customers.id
-            ORDER BY customers.id DESC
-            LIMIT ? OFFSET ?
-            `;
-
-            const [result] = await pool.execute(query, [
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                limit,
-                offset
-            ]);
-
-            return {
-                status: true,
-                message: "Success",
-                data: {
-                    data: result,
-                    pagination: {
-                        totalItems: total,
-                        totalPages: Math.ceil(total / limit),
-                        currentPage: page,
-                        limit
-                    }
-                }
-            };
-
-        } catch (error) {
-
-            console.error("Error fetching customers:", error);
-
-            return {
-                status: false,
-                message: "Error fetching customers",
-                error: error.message
-            };
-
-        }
-
-    }
-
-    // NON SUPERADMIN
-
+  // ===============================
+  // ✅ SUPERADMIN (UNCHANGED - already fast)
+  // ===============================
+  if (
+    rows.length > 0 &&
+    (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+  ) {
     try {
-
-        let countQuery = `
-        SELECT COUNT(DISTINCT customers.id) AS total
+      const countQuery = `
+        SELECT COUNT(*) AS total
         FROM customers
-        JOIN staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN assigned_jobs_staff_view 
-            ON assigned_jobs_staff_view.customer_id = customers.id
-        LEFT JOIN customer_company_information 
-            ON customers.id = customer_company_information.customer_id
-        WHERE
-            (
-                customers.staff_id = ?
-                OR assigned_jobs_staff_view.staff_id = ?
-                OR customers.staff_id IN (${LineManageStaffId})
-                OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            )
-        `;
+        LEFT JOIN staffs ON customers.staff_id = staffs.id
+        LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+        WHERE 
+          customers.trading_name LIKE ?
+          OR staff2.first_name LIKE ?
+          OR staff2.last_name LIKE ?
+          OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
+          OR CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+      `;
 
-        let query = `
-        SELECT
-            customers.id,
-            customers.customer_type,
-            customers.staff_id,
-            customers.account_manager_id,
-            customers.trading_name,
-            customers.trading_address,
-            customers.vat_registered,
-            customers.vat_number,
-            customers.website,
-            customers.form_process,
-            DATE_FORMAT(customers.created_at,'%d/%m/%Y') AS created_at,
-            DATE_FORMAT(customers.updated_at,'%d/%m/%Y') AS updated_at,
-            customers.status,
-            staff1.first_name AS staff_firstname,
-            staff1.last_name AS staff_lastname,
-            CONCAT(staff1.first_name,' ',staff1.last_name) AS customer_created_by,
-            staff2.first_name AS account_manager_firstname,
-            staff2.last_name AS account_manager_lastname,
-            customer_company_information.company_name,
-            customer_company_information.company_number,
-            CONCAT(
-                'cust_',
-                SUBSTRING(customers.trading_name,1,3),'_',
-                SUBSTRING(customers.customer_code,1,15)
-            ) AS customer_code,
-            CASE
-                WHEN clients.id IS NOT NULL THEN 1
-                ELSE 0
-            END AS is_client
+      const [[{ total }]] = await pool.execute(countQuery, [
+        pattern,
+        pattern,
+        pattern,
+        pattern,
+        pattern,
+      ]);
+
+      const query = `
+        SELECT  
+          customers.id,
+          customers.customer_type,
+          customers.staff_id,
+          CONCAT(staffs.first_name,' ',staffs.last_name) AS customer_created_by,
+          customers.account_manager_id,
+          customers.trading_name,
+          customers.trading_address,
+          customers.vat_registered,
+          customers.vat_number,
+          customers.website,
+          customers.form_process,
+          DATE_FORMAT(customers.created_at,'%d/%m/%Y') AS created_at,
+          DATE_FORMAT(customers.updated_at,'%d/%m/%Y') AS updated_at,
+          customers.status,
+          staff2.first_name AS account_manager_firstname,
+          staff2.last_name AS account_manager_lastname,
+          staff2.employee_number,
+          CONCAT(
+            'cust_',
+            SUBSTRING(customers.trading_name,1,3),'_',
+            SUBSTRING(customers.customer_code,1,15)
+          ) AS customer_code,
+          EXISTS (
+            SELECT 1 FROM clients WHERE clients.customer_id = customers.id
+          ) AS is_client
         FROM customers
-        JOIN staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN clients ON clients.customer_id = customers.id
-        LEFT JOIN assigned_jobs_staff_view 
-            ON assigned_jobs_staff_view.customer_id = customers.id
-        LEFT JOIN customer_company_information 
-            ON customers.id = customer_company_information.customer_id
-        WHERE
-            (
-                customers.staff_id = ?
-                OR assigned_jobs_staff_view.staff_id = ?
-                OR customers.staff_id IN (${LineManageStaffId})
-                OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-            )
-        `;
-
-        const params = [staff_id, staff_id];
-
-        if (search) {
-
-            const searchCondition = `
-            AND (
-                customers.trading_name LIKE ?
-                OR staff2.first_name LIKE ?
-                OR staff2.last_name LIKE ?
-                OR CONCAT(staff1.first_name,' ',staff1.last_name) LIKE ?
-                OR CONCAT('cust_',SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
-            )
-            `;
-
-            countQuery += searchCondition;
-            query += searchCondition;
-
-            params.push(pattern, pattern, pattern, pattern, pattern);
-
-        }
-
-        const [[{ total }]] = await pool.execute(countQuery, params);
-
-        query += `
-        GROUP BY customers.id
+        LEFT JOIN staffs ON customers.staff_id = staffs.id
+        LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+        WHERE 
+          customers.trading_name LIKE ?
+          OR staff2.first_name LIKE ?
+          OR staff2.last_name LIKE ?
+          OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
+          OR CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
         ORDER BY customers.id DESC
         LIMIT ? OFFSET ?
-        `;
+      `;
 
-        params.push(limit, offset);
+      const [result] = await pool.execute(query, [
+        pattern,
+        pattern,
+        pattern,
+        pattern,
+        pattern,
+        limit,
+        offset,
+      ]);
 
-        const [result] = await pool.execute(query, params);
-
-        return {
-            status: true,
-            message: "Success",
-            data: {
-                data: result,
-                pagination: {
-                    totalItems: total,
-                    totalPages: Math.ceil(total / limit),
-                    currentPage: page,
-                    limit
-                }
-            }
-        };
-
+      return {
+        status: true,
+        message: "Success",
+        data: {
+          data: result,
+          pagination: {
+            totalItems: total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
+            limit,
+          },
+        },
+      };
     } catch (error) {
+      return { status: false, message: error.message };
+    }
+  }
 
-        console.error("Error selecting data:", error);
+  // ===============================
+  // 🚀 NON SUPERADMIN (OPTIMIZED)
+  // ===============================
+  try {
+    // 🔥 UNION BASE FILTER
+    const unionFilter = `
+      SELECT id FROM customers WHERE staff_id = ?
 
-        return {
-            status: false,
-            message: "Error selecting data",
-            data: error
-        };
+      UNION
 
+      SELECT c.id
+      FROM customers c
+      JOIN assigned_jobs_staff_view ajsv 
+        ON ajsv.customer_id = c.id
+      WHERE ajsv.staff_id = ?
+
+      UNION
+
+      SELECT id FROM customers 
+      WHERE staff_id IN (${LineManageStaffId})
+
+      UNION
+
+      SELECT c.id
+      FROM customers c
+      JOIN assigned_jobs_staff_view ajsv 
+        ON ajsv.customer_id = c.id
+      WHERE ajsv.staff_id IN (${LineManageStaffId})
+    `;
+
+    // =====================
+    // ✅ COUNT QUERY
+    // =====================
+    let countQuery = `
+      SELECT COUNT(*) as total FROM (
+        ${unionFilter}
+      ) AS filtered_ids
+    `;
+
+    let countParams = [staff_id, staff_id];
+
+    if (search) {
+      countQuery = `
+        SELECT COUNT(*) as total
+        FROM (
+          ${unionFilter}
+        ) ids
+        JOIN customers c ON c.id = ids.id
+        JOIN staffs s1 ON c.staff_id = s1.id
+        JOIN staffs s2 ON c.account_manager_id = s2.id
+        WHERE
+          c.trading_name LIKE ?
+          OR s2.first_name LIKE ?
+          OR s2.last_name LIKE ?
+          OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
+          OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+      `;
+
+      countParams.push(
+        pattern,
+        pattern,
+        pattern,
+        pattern,
+        pattern
+      );
     }
 
-};
+    const [[{ total }]] = await pool.execute(countQuery, countParams);
+
+    // =====================
+    // ✅ MAIN DATA QUERY
+    // =====================
+    let query = `
+      SELECT
+        c.id,
+        c.customer_type,
+        c.staff_id,
+        c.account_manager_id,
+        c.trading_name,
+        c.trading_address,
+        c.vat_registered,
+        c.vat_number,
+        c.website,
+        c.form_process,
+        DATE_FORMAT(c.created_at,'%d/%m/%Y') AS created_at,
+        DATE_FORMAT(c.updated_at,'%d/%m/%Y') AS updated_at,
+        c.status,
+
+        s1.first_name AS staff_firstname,
+        s1.last_name AS staff_lastname,
+        CONCAT(s1.first_name,' ',s1.last_name) AS customer_created_by,
+
+        s2.first_name AS account_manager_firstname,
+        s2.last_name AS account_manager_lastname,
+
+        cci.company_name,
+        cci.company_number,
+
+        CONCAT(
+          'cust_',
+          SUBSTRING(c.trading_name,1,3),'_',
+          SUBSTRING(c.customer_code,1,15)
+        ) AS customer_code,
+
+        CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END AS is_client
+
+      FROM (
+        ${unionFilter}
+      ) ids
+
+      JOIN customers c ON c.id = ids.id
+      JOIN staffs s1 ON c.staff_id = s1.id
+      JOIN staffs s2 ON c.account_manager_id = s2.id
+
+      LEFT JOIN clients cl ON cl.customer_id = c.id
+      LEFT JOIN customer_company_information cci 
+        ON c.id = cci.customer_id
+    `;
+
+    let params = [staff_id, staff_id];
+
+    if (search) {
+      query += `
+        WHERE
+          c.trading_name LIKE ?
+          OR s2.first_name LIKE ?
+          OR s2.last_name LIKE ?
+          OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
+          OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+      `;
+
+      params.push(
+        pattern,
+        pattern,
+        pattern,
+        pattern,
+        pattern
+      );
+    }
+
+    query += `
+      ORDER BY c.id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    params.push(limit, offset);
+
+    const [result] = await pool.execute(query, params);
+    
+    return {
+      status: true,
+      message: "Success",
+      data: {
+        data: result,
+        pagination: {
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
+          currentPage: page,
+          limit,
+        },
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: false,
+      message: "Error fetching data",
+      error: error.message,
+    };
+  }
+}
 
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
