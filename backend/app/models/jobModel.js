@@ -1865,7 +1865,7 @@ const getJobByClient = async (job) => {
 
     //console.log("query -", query);
 
-    console.log("query", query)
+
     const [result] = await pool.execute(query);
 
     //////-----START Assign Customer Service Data START----////////
