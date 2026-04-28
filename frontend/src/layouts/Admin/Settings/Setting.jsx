@@ -415,40 +415,98 @@ const Setting = () => {
     });
   };
 
-  const handleDeleteServiceClick = async () => {
-
-    //console.log("errorsBudgetTimeTask called",errorsBudgetTimeTask);
-    if (Object.keys(errorsBudgetTimeTask).length > 0) {
+  const handleSubmitDeleteService = async () => {
+    if (!allJobsData || allJobsData.length === 0) {
       sweatalert.fire({
         icon: "error",
-        title: "Error",
-        text: "Please enter valid hours or minutes.",
+        title: "No Jobs Found",
+        text: "There are no jobs to update.",
         timer: 2000,
       });
-      return
+      return;
     }
 
-    console.log("deleteServiceInfo:", deleteServiceInfo);
-    console.log("selectedService:", selectedService);
-    console.log("selectedJobType:", selectedJobType);
-    console.log("selectedTasks:", selectedTasks);
-    let data = {
-      delete_service: deleteServiceInfo,
-      update_service: selectedService,
-      update_job_type: selectedJobType,
-      update_tasks: selectedTasks
+    // Validation
+    for (let i = 0; i < allJobsData.length; i++) {
+      const job = allJobsData[i];
+
+      if (!job.service_id) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Missing Service",
+          text: `Please select a Service for Job: ${job.job_code_id}`,
+          timer: 2000,
+        });
+        return;
+      }
+
+      if (!job.job_type_id) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Missing Job Type",
+          text: `Please select a Job Type for Job: ${job.job_code_id}`,
+          timer: 2000,
+        });
+        return;
+      }
+
+      if (!job.selectedTasks || job.selectedTasks.length === 0) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Missing Tasks",
+          text: `Please select at least one Task for Job: ${job.job_code_id}`,
+          timer: 2000,
+        });
+        return;
+      }
+
+      // Validate budget hours for each task in the job
+      for (let j = 0; j < job.selectedTasks.length; j++) {
+        const task = job.selectedTasks[j];
+        const budgeted_hour = task.budgeted_hour || "0:0";
+        const [h, m] = budgeted_hour.split(":").map(val => parseInt(val) || 0);
+
+        if (h === 0 && m === 0) {
+          sweatalert.fire({
+            icon: "error",
+            title: "Invalid Budget Hour",
+            text: `Please enter budget hours for task "${task.label}" in Job: ${job.job_code_id}. It is mandatory.`,
+            timer: 3000,
+          });
+          return;
+        }
+      }
+    }
+
+    const payload = {
+      delete_service_id: deleteServiceInfo?.id,
+      jobs_data: allJobsData.map((job) => ({
+        job_id: job.job_id,
+        service_id: job.service_id,
+        job_type_id: job.job_type_id,
+        task_ids: job.selectedTasks.map((task) => task.value),
+        tasks_budget_hours: job.selectedTasks.map((task) => ({
+          task_id: task.value,
+          budgeted_hour: task.budgeted_hour || "0:0"
+        }))
+      }))
     };
 
+    console.log("Payload", payload)
+
+    return;
+
     setLoading(true);
-    const req = { action: "deletExistingJob", data: data };
+    const req = { action: "deleteServiceAndReassign", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
-      .then(async (response) => {
+      .then((response) => {
         setLoading(false);
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
-            title: response.message,
+            title: "Success",
+            text: response.message,
             icon: "success",
             timer: 2000,
           });
@@ -457,15 +515,16 @@ const Setting = () => {
           }, 2000);
         } else {
           sweatalert.fire({
-            title: response.message,
+            title: "Error",
+            text: response.message,
             icon: "error",
             timer: 2000,
           });
         }
-
       })
       .catch((error) => {
-        return;
+        setLoading(false);
+        console.error("Submission error:", error);
       });
   };
 
@@ -623,9 +682,9 @@ const Setting = () => {
         await GetAllJobsName(req);
         return; // Exit the function to prevent the dispatch from being called
       }
-      
+
     }
-   
+
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -1187,7 +1246,7 @@ const Setting = () => {
                   </button>
                 )}
                 {row.is_disable == 0 && (
-             
+
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row, "4")}
@@ -3549,7 +3608,7 @@ const Setting = () => {
                     <tbody>
                       {allJobsData?.map((item, index) => {
                         return (
-                          <tr key={item?.id}>
+                          <tr key={item?.job_id}>
 
                             <td>{index + 1}</td>
 
@@ -3614,7 +3673,7 @@ const Setting = () => {
                                     //   index === self.findIndex((s) => s.job_type_id === type.job_type_id)
                                     (type) => type.service_id === item.service_id
                                   )
-                                  
+
                                   ?.map((type) => ({
                                     value: type?.job_type_id,
                                     label: `${type?.job_type_name}`,
@@ -3653,7 +3712,7 @@ const Setting = () => {
                                   ?.filter(
                                     // (task, index, self) =>
                                     //   index === self.findIndex((s) => s.task_id === task.task_id)
-                                      (task) => task.job_type_id === item.job_type_id
+                                    (task) => task.job_type_id === item.job_type_id
                                   )
                                   ?.map((task) => ({
                                     value: task.task_id,
@@ -3734,9 +3793,18 @@ const Setting = () => {
               <X size={16} /> Cancel
             </button>
 
-            {selectedJobType && (
-              <button onClick={handleDeleteServiceClick} className="btn btn-btn btn-outline-success float-end">
-                <Save size={16} /> Confirm
+            {allJobsData?.length > 0 && (
+              <button
+                onClick={handleSubmitDeleteService}
+                className="btn btn-success float-end px-4 fw-bold shadow-sm"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                ) : (
+                  <Save size={16} className="me-1" />
+                )}
+                Submit Reassignment
               </button>
             )}
 
