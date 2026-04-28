@@ -279,7 +279,6 @@ function sendEmailInWorkerMissingTimeSheet(rows) {
   const worker = new Worker(join(__dirname, "missingTimesheetReportEmail.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--", msg)
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {

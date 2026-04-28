@@ -785,7 +785,7 @@ const getClientTypeChecklist = async (checklist) => {
 //     ORDER BY checklists.id DESC;`
 //     try {
 //     const [result] = await pool.execute(query);
-//     //console.log("result",result)
+
 //     return {
 //       status: true,
 //       message: "checklist get successfully.",
@@ -808,7 +808,7 @@ const getByServiceWithJobType = async (checklist) => {
     ORDER BY task.id DESC;`;
   try {
     const [result] = await pool.execute(query);
-    // console.log("result",result)
+   
     return {
       status: true,
       message: "get Task in Job Create successfully.",

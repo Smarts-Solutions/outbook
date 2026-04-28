@@ -116,7 +116,6 @@ const Main_Route = () => {
     ClearSession();
   }, []);
 
-  console.log("role", role)
 
   return (
     <div>

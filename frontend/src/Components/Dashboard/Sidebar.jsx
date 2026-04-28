@@ -6,6 +6,8 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const role = JSON.parse(localStorage.getItem("role"));
+  const customerAccessData = JSON.parse(localStorage.getItem("customerAccessData")) || {};
+
   const updatedShowTab = JSON.parse(localStorage.getItem("updatedShowTab"));
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [menuState, setMenuState] = useState({
@@ -18,6 +20,18 @@ const Sidebar = () => {
       "/admin/job/customreport": false, // For "Custom Job Report" dropdown
     },
   });
+
+  const hasCustomerAccess = (permission, type = "view") => {
+    const module = customerAccessData.find(
+      (item) => item.permission_name === permission
+    );
+
+    if (!module) return false;
+
+    const access = module.items.find((i) => i.type === type);
+    return access?.is_assigned === 1;
+  };
+
 
   useEffect(() => {
     setActiveLink(location.pathname);
@@ -137,53 +151,51 @@ const Sidebar = () => {
         <div className="menu-content h-100 mm-active" data-simplebar="init">
           <ul className="metismenu left-sidenav-menu mm-show">
             {/* Dashboard Link */}
-            <li className={activeLink === "/admin/dashboard" ? "active" : ""}>
-              <Link
-                to="/admin/dashboard"
-                onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
-              >
-                <span className="sidebar-icons">
-                  <LayoutGrid />
-                </span>
-                <span>Dashboard</span>
-              </Link>
-            </li>
+            {role !== "CUSTOMER" && (
+              <li className={activeLink === "/admin/dashboard" ? "active" : ""}>
+                <Link to="/admin/dashboard">
+                  <span className="sidebar-icons">
+                    <LayoutGrid />
+                  </span>
+                  <span>Dashboard</span>
+                </Link>
+              </li>
+            )}
+
+            {role === "CUSTOMER" && hasCustomerAccess("dashboard") && (
+              <li className={activeLink === "/customer/dashboard" ? "active" : ""}>
+                <Link to="/customer/dashboard">
+                  <span className="sidebar-icons">
+                    <LayoutGrid />
+                  </span>
+                  <span>Dashboard</span>
+                </Link>
+              </li>
+            )}
 
             {role === "CUSTOMER" && (
               <>
-                {/* <li className={activeLink === "/customer/customer" ? "active" : ""}>
-                  <Link
-                    to="/customer/customer"
-                    onClick={(e) => handleLinkClick(e, "/customer/customer")}
-                  >
-                    <span className="sidebar-icons">
-                      <Users />
-                    </span>
-                    <span>Customer</span>
-                  </Link>
-                </li> */}
-                <li className={activeLink === "/customer/client" ? "active" : ""}>
-                  <Link
-                    to="/customer/client"
-                    onClick={(e) => handleLinkClick(e, "/customer/client")}
-                  >
-                    <span className="sidebar-icons">
-                      <User />
-                    </span>
-                    <span>Clients</span>
-                  </Link>
-                </li>
-                <li className={activeLink === "/customer/job" ? "active" : ""}>
-                  <Link
-                    to="/customer/job"
-                    onClick={(e) => handleLinkClick(e, "/customer/job")}
-                  >
-                    <span className="sidebar-icons">
-                      <Briefcase />
-                    </span>
-                    <span>Jobs</span>
-                  </Link>
-                </li>
+
+                {role === "CUSTOMER" && hasCustomerAccess("client") && (
+                  <li className={activeLink === "/customer/client" ? "active" : ""}>
+                    <Link to="/customer/client">
+                      <span className="sidebar-icons">
+                        <User />
+                      </span>
+                      <span>Clients</span>
+                    </Link>
+                  </li>
+                )}
+                {role === "CUSTOMER" && hasCustomerAccess("job") && (
+                  <li className={activeLink === "/customer/job" ? "active" : ""}>
+                    <Link to="/customer/job">
+                      <span className="sidebar-icons">
+                        <Briefcase />
+                      </span>
+                      <span>Jobs</span>
+                    </Link>
+                  </li>
+                )}
               </>
             )}
             {role !== "CUSTOMER" && (

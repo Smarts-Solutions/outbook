@@ -201,7 +201,7 @@ const HandelStaffPortfolio = async (req, res) => {
     switch (action) {
       case "get":
         result = await authService.GetStaffPortfolio(staff);
-        console.log("result", result);
+     
         res.status(200).json({ status: true, data: result });
         break;
 

@@ -9,6 +9,7 @@ import {
   getCustomerMasterStatus,
   CustomerJobAction,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
@@ -74,6 +75,8 @@ const ClientList = () => {
       GetAllJobListByCustomer("");
     }
   }, []);
+
+
 
   const getAllClientData1 = async (
     customer_id,
@@ -191,9 +194,20 @@ const ClientList = () => {
       (item) => item.permission_name === "all_jobs",
     )?.items || [];
 
+  // Get customer access data from new API (for customer users)
+  const customerAccessData =
+    JSON.parse(localStorage.getItem("customerAccessData") || "[]").find(
+      (item) => item.permission_name === "job",
+    )?.items || [];
+
+  const customerAccessDataAll =
+    JSON.parse(localStorage.getItem("customerAccessData") || "[]").find(
+      (item) => item.permission_name === "all_jobs",
+    )?.items || [];
+
   useEffect(() => {
     const userRole = role?.toString().toUpperCase();
-    if (userRole === "CUSTOMER" || userRole === "SUPERADMIN") {
+    if (userRole === "SUPERADMIN") {
       setAccessDataJob({
         insert: 1,
         update: 1,
@@ -203,6 +217,33 @@ const ClientList = () => {
       });
       return;
     }
+
+    // For customer users, use permissions from new API
+    if (userRole === "CUSTOMER") {
+      const updatedAccess = {
+        insert: 0,
+        update: 0,
+        delete: 0,
+        view: 0,
+        all_jobs: 0,
+      };
+
+      customerAccessData.forEach((item) => {
+        if (item.type === "insert") updatedAccess.insert = item.is_assigned ? 1 : 0;
+        if (item.type === "update") updatedAccess.update = item.is_assigned ? 1 : 0;
+        if (item.type === "delete") updatedAccess.delete = item.is_assigned ? 1 : 0;
+        if (item.type === "view") updatedAccess.view = item.is_assigned ? 1 : 0;
+      });
+
+      customerAccessDataAll.forEach((item) => {
+        if (item.type === "view") updatedAccess.all_jobs = item.is_assigned ? 1 : 0;
+      });
+
+      setAccessDataJob(updatedAccess);
+      return;
+    }
+
+    // For other users, use existing accessData logic
     if (accessDataJob.length === 0) return;
     const updatedAccess = {
       insert: 0,
@@ -658,9 +699,9 @@ const ClientList = () => {
   };
 
   const copyRow = async (row) => {
-   
 
-    if(row?.has_client_job_task === 0){
+
+    if (row?.has_client_job_task === 0) {
       sweatalert.fire({
         title: "warning",
         icon: "warning",
@@ -674,7 +715,7 @@ const ClientList = () => {
       });
       return
     }
-    
+
     sweatalert
       .fire({
         title: "Are you sure?",
@@ -753,7 +794,7 @@ const ClientList = () => {
             timer: 1500,
           });
           GetAllJobListByCustomer("", 1, pageSize, "");
-          
+
         } else {
           sweatalert.fire({
             title: "Failed",

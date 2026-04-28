@@ -3,7 +3,6 @@ const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatus
 const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
 const getCustomerDashboardData = async (dashboard) => {
-  console.log("getCustomerDashboardData dashboard:", dashboard);
   const { staff_id, date_filter, customer_id, StaffUserId } = dashboard;
   const effectiveStaffId = staff_id || StaffUserId;
   let { startDate, endDate } = await getDateRange(date_filter);
@@ -23,16 +22,16 @@ const getCustomerDashboardData = async (dashboard) => {
     const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
 
     if (assignedCustomerIds.length === 0) {
-        return {
-            status: true,
-            message: "No assigned customers found.",
-            data: {
-                client: { count: 0, ids: "" },
-                job: { count: 0, ids: "" },
-                pending_job: { count: 0, ids: "" },
-                completed_job: { count: 0, ids: "" },
-            }
-        };
+      return {
+        status: true,
+        message: "No assigned customers found.",
+        data: {
+          client: { count: 0, ids: "" },
+          job: { count: 0, ids: "" },
+          pending_job: { count: 0, ids: "" },
+          completed_job: { count: 0, ids: "" },
+        }
+      };
     }
 
     const idsStr = assignedCustomerIds.join(',');
@@ -40,7 +39,7 @@ const getCustomerDashboardData = async (dashboard) => {
     // 2. Get Clients for these Customers
     let clientCondition = "";
     if (customer_id) {
-        clientCondition = `AND customer_id = ${pool.escape(customer_id)}`;
+      clientCondition = `AND customer_id = ${pool.escape(customer_id)}`;
     }
 
     const ClientQuery = `
@@ -55,7 +54,7 @@ const getCustomerDashboardData = async (dashboard) => {
     // 3. Get Jobs for these Customers
     let jobCondition = "";
     if (customer_id) {
-        jobCondition = `AND customer_id = ${pool.escape(customer_id)}`;
+      jobCondition = `AND customer_id = ${pool.escape(customer_id)}`;
     }
 
     const JobQuery = `
@@ -429,7 +428,7 @@ const updateJobStatus = async (data) => {
           MAX(CASE WHEN id = ? THEN name END) AS to_status 
          FROM master_status 
          WHERE id IN (?, ?)`
-      , [oldStatusType, status_type, oldStatusType, status_type]);
+        , [oldStatusType, status_type, oldStatusType, status_type]);
 
       const currentDate = new Date();
       await SatffLogUpdateOperation({
@@ -874,14 +873,14 @@ const getCustomerDropdown = async (dashboard) => {
           ORDER BY trading_name ASC
       `;
       const [rows] = await pool.execute(query, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-      
-      return { 
-        status: true, 
+
+      return {
+        status: true,
         message: "Success..",
         data: rows
       };
     }
-    
+
     return { status: false, message: "Invalid action." };
   } catch (error) {
     return { status: false, message: error.message };
@@ -891,7 +890,7 @@ const getCustomerDropdown = async (dashboard) => {
 const getCustomerList = async (dashboard) => {
   try {
     let { staff_id, StaffUserId, page, limit, search, action } = dashboard;
-    
+
     // Support both staff_id and StaffUserId
     const effectiveStaffId = staff_id || StaffUserId;
 
@@ -913,13 +912,13 @@ const getCustomerList = async (dashboard) => {
     const assignedIds = assignedCustomers.map(c => c.customer_id);
 
     if (assignedIds.length === 0) {
-      return { 
-        status: true, 
-        message: "success.", 
+      return {
+        status: true,
+        message: "success.",
         data: {
           data: [],
           pagination: { totalItems: 0, totalPages: 0, currentPage: page, limit }
-        } 
+        }
       };
     }
     const idsStr = assignedIds.join(',');
@@ -1126,7 +1125,7 @@ const getCustomerClientList = async (dashboard) => {
 const getCustomerJobList = async (dashboard) => {
   try {
     let { staff_id, StaffUserId, customer_id, client_id, page, limit, search, action } = dashboard;
-    
+
     // Support both staff_id and StaffUserId
     const effectiveStaffId = staff_id || StaffUserId;
 
@@ -1349,7 +1348,7 @@ const customerClientAction = async (dashboard) => {
       // Robust check for all client types matching Admin logic
       let query = "";
       let query2 = "";
-      
+
       const commonSelect = `
         clients.id AS client_id, 
         clients.client_type AS client_type, 
@@ -1498,7 +1497,7 @@ const customerClientAction = async (dashboard) => {
             phone: row.phone,
             authorised_signatory_status: row.authorised_signatory_status == "1",
           }));
-          
+
           if (client_type == "5") {
             const [charityData] = await pool.execute(`SELECT * FROM client_charity_information WHERE client_id = ?`, [effectiveClientId]);
             result.charity_details = charityData;
@@ -1533,7 +1532,7 @@ const customerClientAction = async (dashboard) => {
 
 const customerJobAction = async (dashboard) => {
   const { action, job_id, StaffUserId, ip, field, row } = dashboard;
-  
+
   if (action === "delete") {
     try {
       if (parseInt(job_id) > 0) {
@@ -1599,16 +1598,16 @@ const customerJobAction = async (dashboard) => {
         WHERE jobs.id = ?
       `;
       const [rows] = await pool.execute(query, [job_id]);
-      
+
       if (rows.length > 0) {
         const jobData = rows[0];
-        
+
         // Get tasks
         const [tasks] = await pool.execute("SELECT * FROM client_job_task WHERE job_id = ?", [job_id]);
-        
+
         // Get allowed staff
         const [staff] = await pool.execute("SELECT staff_id FROM job_allowed_staffs WHERE job_id = ?", [job_id]);
-        
+
         // Get status history
         const [history] = await pool.execute(`
           SELECT jsu.*, ms.name AS status_name 
@@ -1726,7 +1725,7 @@ const customerJobAction = async (dashboard) => {
 };
 
 const customerJobUpdate = async (job) => {
-  const { 
+  const {
     job_id, client_id, service_id, job_type_id, status_type,
     reviewer, allocated_to, allocated_on, date_received_on, YearEnd,
     budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
@@ -1747,11 +1746,11 @@ const customerJobUpdate = async (job) => {
     try {
       const query = `UPDATE jobs SET ${field} = ? WHERE id = ?`;
       await pool.execute(query, [updateRow[field], job_id]);
-      
+
       if (field === "status_type") {
         await JobStatusUpdate(job_id, updateRow[field], new Date().toLocaleString('sv-SE'));
       }
-      
+
       return { status: true, message: "Job updated successfully." };
     } catch (err) {
       console.error("customerJobUpdate single field error:", err);

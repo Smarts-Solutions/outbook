@@ -59,7 +59,6 @@ const CustomerLogin = () => {
     const req = { email: Email, password: password, isExpirytoken: isExpirytoken };
     const response = await SIGN_IN_CUSTOMER(req);
 
-    console.log("response customer login", response);
     if (response.status) {
       if (response.step === "CHANGE_PASSWORD") {
         setCustomerUserId(response.customer_user_id);

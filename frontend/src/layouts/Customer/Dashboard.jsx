@@ -47,7 +47,6 @@ const Dashboard = () => {
     greeting = "Good Evening!";
   }
 
-  console.log("role dashboard - ", role);
 
   const handleTabChange = (event) => {
     sessionStorage.setItem("activDashborde", event.target.value);
@@ -91,8 +90,7 @@ const Dashboard = () => {
       const data = { req: req, authToken: token };
 
       const res = await dispatch(CustomerDashboardData(data)).unwrap();
-      console.log("Customer Dashboard API Response:", res);
-
+     
       if (res.status) {
         setDashboard(res.data);
       } else {

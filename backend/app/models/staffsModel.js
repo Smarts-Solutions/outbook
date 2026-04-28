@@ -533,7 +533,7 @@ const sharepoint_token = async () => {
   const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
   try {
     const [[result]] = await pool.execute(query);
-    //console.log("result", result);
+
     if (result != undefined && result != null) {
       if (
         result.access_token != null &&
@@ -647,7 +647,7 @@ const getSharePointToken = async (staff) => {
   const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
   try {
     const [[result]] = await pool.execute(query);
-    //console.log("result", result);
+
     if (result != undefined && result != null) {
       if (
         result.access_token != null &&

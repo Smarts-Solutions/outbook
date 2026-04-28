@@ -98,6 +98,55 @@ const accessRolePermissions = async (data) => {
     }
 };
 
+const getCustomerAccessByCustomerId = async (data) => {
+    const { customer_id } = data;
+    
+    try {
+        // Get the customer_contact_person_role_id from staffs table
+        const [staffRows] = await pool.execute(
+            `SELECT customer_contact_person_role_id FROM staffs WHERE id = ? AND role_id = 12`,
+            [customer_id]
+        );
+        
+        if (staffRows.length === 0) {
+            return [];
+        }
+        
+        const role_id = staffRows[0].customer_contact_person_role_id;
+        
+        if (!role_id) {
+            return [];
+        }
+        
+        // Get permissions for this role
+        const query = `
+        SELECT 
+            permissions.permission_name, 
+            permissions.type,
+            permissions.id,
+            CASE 
+                WHEN customer_contact_person_role_permissions.permission_id IS NOT NULL THEN TRUE 
+                ELSE FALSE 
+            END AS is_assigned
+        FROM 
+            permissions
+        LEFT JOIN 
+            customer_contact_person_role_permissions ON permissions.id = customer_contact_person_role_permissions.permission_id AND customer_contact_person_role_permissions.role_id = ?
+        WHERE permissions.permission_name IN ('dashboard', 'customer', 'client', 'job', 'document', 'report')
+        AND NOT (permissions.permission_name = 'customer' AND permissions.type = 'insert')
+        AND NOT (permissions.permission_name = 'report' AND permissions.type != 'view')
+        ORDER BY FIELD(permissions.permission_name, 'dashboard', 'customer', 'client', 'job', 'document', 'report');
+        `;
+        
+        const [rows] = await pool.execute(query, [role_id]);
+        return rows;
+    } catch (err) {
+        console.error('Error fetching customer access by customer_id:', err);
+        throw err;
+    }
+};
+
 module.exports = {
-    accessRolePermissions
+    accessRolePermissions,
+    getCustomerAccessByCustomerId
 };

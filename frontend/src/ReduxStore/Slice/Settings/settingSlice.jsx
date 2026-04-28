@@ -21,6 +21,7 @@ import {
   INTERNALAPI,
   SUBINTERNALAPI,
   CUSTOMERCONTACTPERSONACCESS,
+  GETCUSTOMERACCESSBYID,
   
   
 } from "../../../Services/Settings/settingService";
@@ -418,6 +419,26 @@ export const CustomerContactPersonAccess = createAsyncThunk(
   }
 );
 
+export const GetCustomerAccessById = createAsyncThunk(
+  "getCustomerAccessById",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GETCUSTOMERACCESSBYID(updatedReq, authToken);
+
+      return await res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
@@ -654,6 +675,17 @@ const SettingSlice = createSlice({
         state.customerContactPersonAccess = action.payload;
       })
       .addCase(CustomerContactPersonAccess.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GetCustomerAccessById.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(GetCustomerAccessById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerAccessById = action.payload;
+      })
+      .addCase(GetCustomerAccessById.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

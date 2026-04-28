@@ -45,7 +45,6 @@ const Dashboard = () => {
     greeting = "Good Evening!";
   }
 
-  console.log("role dashboard - ", role);
 
   const handleTabChange = (event) => {
     sessionStorage.setItem("activDashborde", event.target.value);
