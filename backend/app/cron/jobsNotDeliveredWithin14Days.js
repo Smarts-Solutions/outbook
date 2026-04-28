@@ -131,6 +131,8 @@ parentPort.on("message", async (rows) => {
       csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
   }
+  
+  
 
   for (const row of rows) {
     try {
@@ -139,13 +141,13 @@ parentPort.on("message", async (rows) => {
 
         if ([1, 2, 8].includes(row.role_id)) {
           let toEmail = row.staff_email;
-          let subjectEmail = "Alert: Jobs Not Delivered Within 14 Days of Rreceived On Date";
+          let subjectEmail = "Alert: Jobs Not Delivered Within 14 Days of Received On Date";
           let htmlEmail = `
-        <h3>Alert: Jobs Not Delivered Within 14 Days of Rreceived On Date</h3>
+        <h3>Alert: Jobs Not Delivered Within 14 Days of Received On Date</h3>
         <p>Hello,</p>
         <p>
           This is to inform you that some jobs have not been delivered within 
-          <strong>14 days of their Rreceived On date</strong>.
+          <strong>14 days of their Received On date</strong>.
         </p>
         <p>
           Please review the attached report and take the necessary action to 
@@ -176,13 +178,13 @@ parentPort.on("message", async (rows) => {
             if(res.status){
               
               let toEmail = row.staff_email;
-              let subjectEmail = "Alert: Jobs Not Delivered Within 14 Days of Rreceived On Date";
+              let subjectEmail = "Alert: Jobs Not Delivered Within 14 Days of Received On Date";
               let htmlEmail = `
-            <h3>Alert: Jobs Not Delivered Within 14 Days of Rreceived On Date</h3>
+            <h3>Alert: Jobs Not Delivered Within 14 Days of Received On Date</h3>
             <p>Hello,</p>
             <p>
               This is to inform you that some jobs have not been delivered within 
-              <strong>14 days of their Rreceived On date</strong>.
+              <strong>14 days of their Received On date</strong>.
             </p>
             <p>
               Please review the attached report and take the necessary action to
