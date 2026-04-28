@@ -185,7 +185,7 @@ const Setting = () => {
       .then((response) => {
         if (response.status) {
           setDeleteServiceModal(true);
-          setAllJobsData(response.data || []);
+          setAllJobsData(response?.data || []);
         } else {
           setDeleteServiceModal(false);
           setAllJobsData([]);
@@ -196,29 +196,92 @@ const Setting = () => {
       });
   };
 
+  // const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
+  //   setAllJobsData((prev) => {
+  //     const updated = [...prev];
+
+  //     if (type === "service") {
+  //       updated[rowIndex] = {
+  //         ...updated[rowIndex],
+  //         service_id: selectedOption?.value || null,
+  //         selectedService: selectedOption?.serviceData || null
+  //       };
+  //     }
+
+  //     if (type === "jobType") {
+  //       updated[rowIndex] = {
+  //         ...updated[rowIndex],
+  //         job_type_id: selectedOption?.value || null,
+  //         selectedJobType: selectedOption?.jobTypeData || null
+  //       };
+  //     }
+
+  //     if (type === "task") {
+  //       updated[rowIndex] = {
+  //         ...updated[rowIndex],
+  //         task_id: selectedOption?.map((item) => item.value) || [],
+  //         selectedTasks: selectedOption || []
+  //       };
+  //     }
+
+  //     return updated;
+  //   });
+  // };
+
+
+
   const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
     setAllJobsData((prev) => {
       const updated = [...prev];
+      const row = updated[rowIndex];
 
       if (type === "service") {
+        const serviceId = selectedOption?.value || null;
+
+        // Filter job types based on service
+        const filteredJobTypes = row.jobTypes.filter(
+          (jt) => jt.service_id === serviceId
+        );
+
         updated[rowIndex] = {
-          ...updated[rowIndex],
-          service_id: selectedOption?.value || null,
-          selectedService: selectedOption?.serviceData || null
+          ...row,
+          service_id: serviceId,
+          selectedService: selectedOption?.serviceData || null,
+
+          // RESET
+          job_type_id: null,
+          selectedJobType: null,
+          task_id: [],
+          selectedTasks: [],
+
+          filteredJobTypes // optional: use in UI
         };
       }
 
       if (type === "jobType") {
+        const jobTypeId = selectedOption?.value || null;
+
+        // Filter tasks based on job type
+        const filteredTasks = row.tasks.filter(
+          (task) => task.job_type_id === jobTypeId
+        );
+
         updated[rowIndex] = {
-          ...updated[rowIndex],
-          job_type_id: selectedOption?.value || null,
-          selectedJobType: selectedOption?.jobTypeData || null
+          ...row,
+          job_type_id: jobTypeId,
+          selectedJobType: selectedOption?.jobTypeData || null,
+
+          // RESET TASKS
+          task_id: [],
+          selectedTasks: [],
+
+          filteredTasks // optional
         };
       }
 
       if (type === "task") {
         updated[rowIndex] = {
-          ...updated[rowIndex],
+          ...row,
           task_id: selectedOption?.map((item) => item.value) || [],
           selectedTasks: selectedOption || []
         };
@@ -227,6 +290,44 @@ const Setting = () => {
       return updated;
     });
   };
+
+  const handleBudgetTimeDeleteService = (e, rowIndex, taskIndex, type) => {
+    const { value } = e.target;
+    const isValid = /^\d*$/.test(value);
+    if (!isValid) return;
+
+    setAllJobsData((prev) => {
+      const updated = [...prev];
+      const job = updated[rowIndex];
+      const tasks = [...job.selectedTasks];
+      const task = tasks[taskIndex];
+
+      let [hour, minute] = (task?.budgeted_hour || "0:0").split(":");
+
+      if (type === "hour") {
+        hour = value;
+      } else if (type === "minute") {
+        let numValue = Number(value);
+        if (isNaN(numValue) || numValue < 0) numValue = 0;
+        if (numValue > 59) numValue = 59;
+        minute = numValue.toString();
+      }
+
+      tasks[taskIndex] = {
+        ...task,
+        budgeted_hour: `${hour}:${minute}`,
+      };
+
+      updated[rowIndex] = {
+        ...job,
+        selectedTasks: tasks,
+      };
+
+      return updated;
+    });
+  };
+
+
 
   const getJobTypeSelectedService = async (serviceData) => {
     const req = { action: "get", service_id: serviceData.id };
@@ -3509,8 +3610,9 @@ const Setting = () => {
                                 placeholder="Choose Job Type"
                                 options={item?.jobTypes
                                   ?.filter(
-                                    (type, index, self) =>
-                                      index === self.findIndex((s) => s.job_type_id === type.job_type_id)
+                                    // (type, index, self) =>
+                                    //   index === self.findIndex((s) => s.job_type_id === type.job_type_id)
+                                    (type) => type.service_id === item.service_id
                                   )
                                   
                                   ?.map((type) => ({
@@ -3549,8 +3651,9 @@ const Setting = () => {
                                 placeholder="Choose Task"
                                 options={item?.tasks
                                   ?.filter(
-                                    (task, index, self) =>
-                                      index === self.findIndex((s) => s.task_id === task.task_id)
+                                    // (task, index, self) =>
+                                    //   index === self.findIndex((s) => s.task_id === task.task_id)
+                                      (task) => task.job_type_id === item.job_type_id
                                   )
                                   ?.map((task) => ({
                                     value: task.task_id,
@@ -3571,6 +3674,37 @@ const Setting = () => {
                                   }),
                                 }}
                               />
+
+                              {item?.selectedTasks?.length > 0 && (
+                                <div className="mt-2">
+                                  {item.selectedTasks.map((task, taskIndex) => {
+                                    const [hours, minutes] = (task?.budgeted_hour || "0:0").split(":");
+                                    return (
+                                      <div key={task.value} className="d-flex align-items-center mb-1">
+                                        <span className="small me-2" style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={task.label}>
+                                          {task.label}
+                                        </span>
+                                        <div className="input-group input-group-sm" style={{ width: "130px" }}>
+                                          <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={hours}
+                                            onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "hour")}
+                                          />
+                                          <span className="input-group-text px-1">h</span>
+                                          <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={minutes}
+                                            onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "minute")}
+                                          />
+                                          <span className="input-group-text px-1">m</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
 
                             </td>
 
