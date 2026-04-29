@@ -50,7 +50,7 @@ const Sidebar = () => {
       };
 
       if (
-        location.pathname.startsWith("/admin/customer") ||
+        (location.pathname === "/admin/customer" || location.pathname.startsWith("/admin/customer/")) ||
         location.pathname.startsWith("/admin/ClientLists") ||
         location.pathname.startsWith("/admin/client/profiles")
       ) {
@@ -99,7 +99,7 @@ const Sidebar = () => {
       if (reportPaths.some((p) => linkPathname.startsWith(p))) {
         newDropdown["/admin/reports"] = true;
       } else if (
-        linkPathname.startsWith("/admin/customer") ||
+        (linkPathname === "/admin/customer" || linkPathname.startsWith("/admin/customer/")) ||
         linkPathname.startsWith("/admin/client") ||
         linkPathname === "/admin/ClientLists"
       ) {
@@ -205,7 +205,7 @@ const Sidebar = () => {
                 {/* Customer Dropdown */}
                 <li
                   className={
-                    activeLink.startsWith("/admin/customer") ||
+                    (activeLink === "/admin/customer" || activeLink.startsWith("/admin/customer/")) ||
                       activeLink.startsWith("/admin/ClientLists") ||
                       activeLink.startsWith("/admin/client/profiles")
                       ? "active"
