@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-   GET_ALL_CHECKLIST,
-   CustomerJobAction,
-   updateCustomerJobStatus
- } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+  GET_ALL_CHECKLIST,
+  CustomerJobAction,
+  updateCustomerJobStatus
+} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { getCustomerMasterStatus } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Select from 'react-select';
@@ -113,10 +113,10 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   const getDurationData = () => {
     const history = AllJobData.data?.status_history || [];
     if (history.length === 0) return { items: [], total: "" };
-    
+
     let processed = [];
     let totalMs = 0;
-    
+
     const formatPreciseDuration = (ms) => {
       if (isNaN(ms) || ms < 0) return "0 Day";
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
@@ -128,17 +128,17 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
       return `${days} Day${days > 1 ? 's' : ''}`;
     }
-    
+
     for (let i = 0; i < history.length; i++) {
       const current = history[i];
       const next = history[i + 1];
-      
+
       const startDate = new Date(current.status_update_date);
       const endDate = next ? new Date(next.status_update_date) : new Date();
-      
+
       const diffMs = endDate - startDate;
       totalMs += diffMs;
-      
+
       processed.push({
         status: current.status_name,
         from: startDate,
@@ -146,7 +146,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         duration: formatPreciseDuration(diffMs)
       });
     }
-    
+
     return { items: processed, total: formatFullDuration(totalMs) };
   };
 
@@ -265,13 +265,13 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
 
           let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
-              show: false,
-              data: [],
-              title: "",
-              loading: false,
-              type: ""
-            }
-           setChecklistModal(checklisModalData);
+            show: false,
+            data: [],
+            title: "",
+            loading: false,
+            type: ""
+          }
+          setChecklistModal(checklisModalData);
           setJobInformationData((prevState) => ({
             ...prevState,
             processing_checklist: response.data.processing_checklist ?? null,
@@ -496,39 +496,6 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     });
   };
 
-  const handleDelete = async (row, type) => {
-    const req = { action: "delete", job_id: job_id || location.state?.job_id };
-    const data = { req: req, authToken: token };
-
-    await dispatch(CustomerJobAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          sweatalert.fire({
-            title: "Deleted",
-            icon: "success",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          setTimeout(() => {
-            window.history.back();
-          }, 1500);
-        } else {
-          sweatalert.fire({
-            title: "Failed",
-            icon: "error",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
-
   const handleStatusChange = (e) => {
     const Id = e.target.value;
     sweatalert
@@ -606,7 +573,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
   try {
     let engagementModel = AllJobData.data?.engagement_model;
-    
+
     // Handle JSON string if necessary
     if (typeof engagementModel === "string") {
       try {
@@ -1610,15 +1577,6 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     </button>
                   )}
 
-                {JobInformationData.timesheet_job_id == null
-                  ? (getAccessDataJob.delete === 1 ||
-
-                    role === "SUPERADMIN") && (
-                    <button className="delete-icon" onClick={handleDelete}>
-                      <i className="ti-trash text-danger" />
-                    </button>
-                  )
-                  : ""}
               </>
             )}
           </div>
@@ -2282,7 +2240,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         }
                       >
                         <option value={null}>-- Select --</option>
-                       <option value={0}>Not Required</option>
+                        <option value={0}>Not Required</option>
                         {AllJobData?.data?.processing_checklist_data
                           ?.filter((item) => {
 
@@ -2401,7 +2359,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     <div className="col-lg-12 mt-4">
                       <div className="card shadow-sm border" style={{ borderRadius: '15px', overflow: 'hidden', background: '#ffffff', borderColor: '#e4eef7' }}>
                         <div className="card-header border-0 bg-white pt-4 px-4 pb-0">
-                           <h5 className="fs-15 fw-bold mb-0 d-flex align-items-center" style={{ color: '#313949' }}>
+                          <h5 className="fs-15 fw-bold mb-0 d-flex align-items-center" style={{ color: '#313949' }}>
                             <Clock size={18} className="me-2" style={{ color: '#00bcd4' }} />
                             Status Duration History
                           </h5>
@@ -2410,8 +2368,8 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                           <div className="timeline-wrapper position-relative ps-1">
                             {/* Vertical Line */}
                             {getDurationData().items.length > 1 && (
-                              <div className="position-absolute border-start" 
-                                   style={{ left: '15px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
+                              <div className="position-absolute border-start"
+                                style={{ left: '15px', top: '22px', bottom: '22px', borderLeft: '2px solid #f1f4f8', zIndex: 1 }}></div>
                             )}
 
                             {getDurationData().items.length > 0 ? (
@@ -2419,19 +2377,19 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                 const statusName = (item.status || "").toLowerCase();
                                 let StatusIcon = Clock;
                                 let color = "#00bcd4"; // Default Blue
-                                
+
                                 if (statusName.includes("not") || statusName.includes("pending") || statusName.includes("started")) {
                                   StatusIcon = AlertCircle;
                                   color = "#ffa726"; // Orange
                                 } else if (statusName.includes("progress") || statusName.includes("running") || statusName.includes("process")) {
                                   StatusIcon = PlayCircle;
-                                  color = "#00bcd4"; 
+                                  color = "#00bcd4";
                                 } else if (statusName.includes("review") || statusName.includes("check")) {
                                   StatusIcon = Clock;
                                   color = "#00bcd4";
                                 } else if (statusName.includes("complete") || statusName.includes("done")) {
                                   StatusIcon = CheckCircle2;
-                                  color = "#27ae60"; 
+                                  color = "#27ae60";
                                 }
 
                                 return (
@@ -2442,13 +2400,13 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                         <StatusIcon size={22} color={color} strokeWidth={2} />
                                       </div>
                                     </div>
-                                    
+
                                     {/* Content Column */}
                                     <div className="ms-3 flex-grow-1">
                                       <div className="d-flex justify-content-between align-items-center" style={{ height: '22px' }}>
                                         <h6 className="fs-14 fw-bold mb-0" style={{ color: '#313949' }}>{item.status || "Status Update"}</h6>
-                                        <div className="px-2 py-0 rounded fs-11 fw-bold" 
-                                             style={{ background: '#e1f5fe', color: '#039be5', minWidth: '40px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div className="px-2 py-0 rounded fs-11 fw-bold"
+                                          style={{ background: '#e1f5fe', color: '#039be5', minWidth: '40px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                           {item.duration}
                                         </div>
                                       </div>
@@ -2460,13 +2418,13 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                 );
                               })
                             ) : (
-                               <div className="text-center py-4 bg-light rounded-3 border border-dashed">
-                                 <Info size={30} className="text-muted mb-2 opacity-50" />
-                                 <p className="text-muted fs-13 mb-0">No history available</p>
-                               </div>
+                              <div className="text-center py-4 bg-light rounded-3 border border-dashed">
+                                <Info size={30} className="text-muted mb-2 opacity-50" />
+                                <p className="text-muted fs-13 mb-0">No history available</p>
+                              </div>
                             )}
                           </div>
-                          
+
                           <div className="mt-2 pt-3 border-top d-flex justify-content-between align-items-center" style={{ borderColor: '#f1f3f5' }}>
                             <span className="fs-13 fw-semibold text-muted">Total Duration</span>
                             <span className="fs-16 fw-bold" style={{ color: '#313949' }}>{getDurationData().total}</span>
@@ -3110,7 +3068,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                   rows="1"
                                   placeholder="Add comment"
                                   value={row.comment}
-                                   readOnly
+                                  readOnly
                                 ></textarea>
                               </td>
                               <td>
