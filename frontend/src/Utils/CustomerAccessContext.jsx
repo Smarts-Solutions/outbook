@@ -16,10 +16,7 @@ export const useCustomerAccess = () => {
 export const CustomerAccessProvider = ({ children }) => {
     const dispatch = useDispatch();
     const location = useLocation();
-    const [accessData, setAccessData] = useState(() => {
-        const saved = localStorage.getItem('customerAccessData');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [accessData, setAccessData] = useState([]);
 
     const fetchAccessData = useCallback(async () => {
         const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
@@ -33,7 +30,6 @@ export const CustomerAccessProvider = ({ children }) => {
                 const response = await dispatch(GetCustomerAccessById(data)).unwrap();
                 if (response.status && response.data) {
                     setAccessData(response.data);
-                    localStorage.setItem('customerAccessData', JSON.stringify(response.data));
                 }
             } catch (error) {
                 console.error("Error fetching customer access:", error);
