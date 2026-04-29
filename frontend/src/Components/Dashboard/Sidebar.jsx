@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
 import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const role = JSON.parse(localStorage.getItem("role"));
-  const customerAccessData = JSON.parse(localStorage.getItem("customerAccessData")) || {};
+  const { hasAccess } = useCustomerAccess();
 
   const updatedShowTab = JSON.parse(localStorage.getItem("updatedShowTab"));
   const [activeLink, setActiveLink] = useState(location.pathname);
@@ -21,18 +22,7 @@ const Sidebar = () => {
     },
   });
 
-  const hasCustomerAccess = (permission, type = "view") => {
-    if (customerAccessData) {
-      const module = customerAccessData && customerAccessData?.find(
-        (item) => item?.permission_name === permission
-      );
 
-      if (!module) return false;
-
-      const access = module.items.find((i) => i.type === type);
-      return access?.is_assigned === 1;
-    }
-  };
 
 
   useEffect(() => {
@@ -164,7 +154,7 @@ const Sidebar = () => {
               </li>
             )}
 
-            {role === "CUSTOMER" && hasCustomerAccess("dashboard") && (
+            {role === "CUSTOMER" && hasAccess("dashboard") && (
               <li className={activeLink === "/customer/dashboard" ? "active" : ""}>
                 <Link to="/customer/dashboard">
                   <span className="sidebar-icons">
@@ -178,7 +168,7 @@ const Sidebar = () => {
             {role === "CUSTOMER" && (
               <>
 
-                {role === "CUSTOMER" && hasCustomerAccess("client") && (
+                {role === "CUSTOMER" && hasAccess("client") && (
                   <li className={activeLink === "/customer/client" ? "active" : ""}>
                     <Link to="/customer/client">
                       <span className="sidebar-icons">
@@ -188,7 +178,7 @@ const Sidebar = () => {
                     </Link>
                   </li>
                 )}
-                {role === "CUSTOMER" && hasCustomerAccess("job") && (
+                {role === "CUSTOMER" && hasAccess("job") && (
                   <li className={activeLink === "/customer/job" ? "active" : ""}>
                     <Link to="/customer/job">
                       <span className="sidebar-icons">

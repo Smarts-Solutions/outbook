@@ -11,6 +11,7 @@ import {
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { useNavigate, useLocation } from "react-router-dom";
+import { useCustomerAccess } from "../../../Utils/CustomerAccessContext";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
@@ -158,6 +159,7 @@ const ClientList = () => {
 
   const location = useLocation();
   const dispatch = useDispatch();
+  const { hasAccess } = useCustomerAccess();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
@@ -176,95 +178,13 @@ const ClientList = () => {
   });
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
-  const [getAccessDataJob, setAccessDataJob] = useState({
-    insert: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    update: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    delete: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    view: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    all_jobs: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-  });
-
-  const accessDataJob =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job",
-    )?.items || [];
-
-  const accessDataJobAll =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs",
-    )?.items || [];
-
-  // Get customer access data from new API (for customer users)
-  const customerAccessData =
-    JSON.parse(localStorage.getItem("customerAccessData") || "[]").find(
-      (item) => item.permission_name === "job",
-    )?.items || [];
-
-  const customerAccessDataAll =
-    JSON.parse(localStorage.getItem("customerAccessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs",
-    )?.items || [];
-
-  useEffect(() => {
-    const userRole = role?.toString().toUpperCase();
-    if (userRole === "SUPERADMIN") {
-      setAccessDataJob({
-        insert: 1,
-        update: 1,
-        delete: 1,
-        view: 1,
-        all_jobs: 1,
-      });
-      return;
-    }
-
-    // For customer users, use permissions from new API
-    if (userRole === "CUSTOMER") {
-      const updatedAccess = {
-        insert: 0,
-        update: 0,
-        delete: 0,
-        view: 0,
-        all_jobs: 0,
-      };
-
-      customerAccessData.forEach((item) => {
-        if (item.type === "insert") updatedAccess.insert = item.is_assigned ? 1 : 0;
-        if (item.type === "update") updatedAccess.update = item.is_assigned ? 1 : 0;
-        if (item.type === "delete") updatedAccess.delete = item.is_assigned ? 1 : 0;
-        if (item.type === "view") updatedAccess.view = item.is_assigned ? 1 : 0;
-      });
-
-      customerAccessDataAll.forEach((item) => {
-        if (item.type === "view") updatedAccess.all_jobs = item.is_assigned ? 1 : 0;
-      });
-
-      setAccessDataJob(updatedAccess);
-      return;
-    }
-
-    // For other users, use existing accessData logic
-    if (accessDataJob.length === 0) return;
-    const updatedAccess = {
-      insert: 0,
-      update: 0,
-      delete: 0,
-      view: 0,
-      all_jobs: 0,
-    };
-    accessDataJob.forEach((item) => {
-      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-      if (item.type === "update") updatedAccess.update = item.is_assigned;
-      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-      if (item.type === "view") updatedAccess.view = item.is_assigned;
-    });
-
-    accessDataJobAll.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
-    });
-
-    setAccessDataJob(updatedAccess);
-  }, [role]);
+  const getAccessDataJob = {
+    insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
+    delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
+    view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
+    all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
+  };
 
   const GetClientDetails = async (client_id) => {
     const req = { action: "getByid", client_id: client_id, staff_id: staffDetails.id };

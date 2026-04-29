@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { isLoginAuthCheckToken, isLogOut } from "../../ReduxStore/Slice/Auth/authSlice";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { GetCustomerAccessById } from "../../ReduxStore/Slice/Settings/settingSlice";
+
 
 const Header = () => {
   const navigate = useNavigate();
@@ -24,7 +24,6 @@ const Header = () => {
   useEffect(() => {
     isLoginAuthCheck();
     ClearSession();
-    GetCustomerAccess();
   }, []);
 
   useEffect(() => {
@@ -40,24 +39,7 @@ const Header = () => {
     };
   }, [isMenuEnlarged]);
 
-  // Fetch customer access by customer_id (for customer users)
-  const GetCustomerAccess = async () => {
-    if (staffDetails?.id && role?.toString().toUpperCase() === "CUSTOMER") {
-      const req = { customer_id: staffDetails.id };
-      const data = { req, authToken: token };
-      await dispatch(GetCustomerAccessById(data))
-        .unwrap()
-        .then((response) => {
-          if (response.status && response.data) {
 
-            localStorage.setItem("customerAccessData", JSON.stringify(response.data));
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching customer access:", error);
-        });
-    }
-  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
