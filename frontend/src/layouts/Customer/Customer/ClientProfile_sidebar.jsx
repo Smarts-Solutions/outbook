@@ -215,7 +215,7 @@ const CustomerClientProfile = () => {
 
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState(
-    location.state?.activeTab === "client" ? "view client" : (location.state?.activeTab || "NoOfJobs")
+    location.state?.activeTab === "client" ? "NoOfJobs" : (location.state?.activeTab || "NoOfJobs")
   );
   const [getClientDetails, setClientDetails] = useState({
     loading: true,
