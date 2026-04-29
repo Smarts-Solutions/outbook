@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Select from "react-select";
 import { CircleAlert, Download } from "lucide-react";
+import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -17,6 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
+  const { hasAccess } = useCustomerAccess();
 
   const [dashboard, setDashboard] = useState({
     client: { count: 0, ids: "" },
@@ -219,6 +221,18 @@ const Dashboard = () => {
     if (parseInt(data.count) === 0) {
       return;
     }
+
+    // Permission check
+    if (type === "client") {
+      if (!hasAccess("client", "view") && role !== "SUPERADMIN") {
+        return;
+      }
+    } else if (["job", "pending_job", "completed_job"].includes(type)) {
+      if (!hasAccess("job", "view") && role !== "SUPERADMIN") {
+        return;
+      }
+    }
+
     const req = {
       staff_id: staffDetails.id,
       key: type,
@@ -578,7 +592,14 @@ const Dashboard = () => {
                     <div className="row justify-content-center">
                       <div
                         className="col-md-12 col-xl-4 col-lg-6"
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          cursor:
+                            (hasAccess("client", "view") ||
+                              role === "SUPERADMIN") &&
+                            parseInt(dashboard.client.count) > 0
+                              ? "pointer"
+                              : "default",
+                        }}
                       >
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
@@ -615,7 +636,14 @@ const Dashboard = () => {
                       </div>
                       <div
                         className="col-md-12 col-xl-4 col-lg-6"
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          cursor:
+                            (hasAccess("job", "view") ||
+                              role === "SUPERADMIN") &&
+                            parseInt(dashboard.job.count) > 0
+                              ? "pointer"
+                              : "default",
+                        }}
                       >
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
@@ -646,7 +674,14 @@ const Dashboard = () => {
                       </div>
                       <div
                         className="col-md-12 col-xl-4 col-lg-6"
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          cursor:
+                            (hasAccess("job", "view") ||
+                              role === "SUPERADMIN") &&
+                            parseInt(dashboard.pending_job.count) > 0
+                              ? "pointer"
+                              : "default",
+                        }}
                       >
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
@@ -684,7 +719,14 @@ const Dashboard = () => {
                       </div>
                       <div
                         className="col-md-12 col-xl-4 col-lg-6"
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          cursor:
+                            (hasAccess("job", "view") ||
+                              role === "SUPERADMIN") &&
+                            parseInt(dashboard.completed_job.count) > 0
+                              ? "pointer"
+                              : "default",
+                        }}
                       >
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
