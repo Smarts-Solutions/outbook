@@ -11,6 +11,7 @@ import {
   getCustomerMasterStatus,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useCustomerAccess } from "../../../Utils/CustomerAccessContext";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
@@ -77,10 +78,10 @@ const CustomerClientProfile = () => {
     if (location.state && location.state.Client_id) {
       const { Client_id, data, customer_id } = location.state;
       const effectiveCustomerId = customer_id || (data && data.customer ? data.customer.id : cust_id_sidebar);
-      
-      setClientDetailSingle({ 
-        id: Client_id, 
-        client_name: data?.client?.client_name || data?.client?.trading_name || cli_id_sidebar_name || "" 
+
+      setClientDetailSingle({
+        id: Client_id,
+        client_name: data?.client?.client_name || data?.client?.trading_name || cli_id_sidebar_name || ""
       });
 
       if (effectiveCustomerId) {
@@ -90,7 +91,7 @@ const CustomerClientProfile = () => {
         });
       }
 
-      setHararchyData(data || { 
+      setHararchyData(data || {
         customer: { id: effectiveCustomerId, trading_name: cust_id_sidebar_name || "" },
         client: { id: Client_id, client_name: "" }
       });
@@ -230,57 +231,40 @@ const CustomerClientProfile = () => {
   });
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
+  const { hasAccess } = useCustomerAccess();
   const [getAccessDataJob, setAccessDataJob] = useState({
-    insert: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    update: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    delete: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    view: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
-    all_jobs: ["CUSTOMER", "SUPERADMIN"].includes(role?.toString().toUpperCase()) ? 1 : 0,
+    insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
+    delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
+    view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
+    all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
   });
 
-  const accessDataJob =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "job",
-    )?.items || [];
-
-  const accessDataJobAll =
-    JSON.parse(localStorage.getItem("accessData") || "[]").find(
-      (item) => item.permission_name === "all_jobs",
-    )?.items || [];
+  const [getAccessDataClient, setAccessDataClient] = useState({
+    insert: hasAccess("client", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
+    delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
+    view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
+  });
 
   useEffect(() => {
-    const userRole = role?.toString().toUpperCase();
-    if (userRole === "CUSTOMER" || userRole === "SUPERADMIN") {
-      setAccessDataJob({
-        insert: 1,
-        update: 1,
-        delete: 1,
-        view: 1,
-        all_jobs: 1,
-      });
-      return;
-    }
-    if (accessDataJob.length === 0) return;
-    const updatedAccess = {
-      insert: 0,
-      update: 0,
-      delete: 0,
-      view: 0,
-      all_jobs: 0,
+    const updatedAccessJob = {
+      insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+      update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
+      delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
+      view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
+      all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
     };
-    accessDataJob.forEach((item) => {
-      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-      if (item.type === "update") updatedAccess.update = item.is_assigned;
-      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-      if (item.type === "view") updatedAccess.view = item.is_assigned;
-    });
+    setAccessDataJob(updatedAccessJob);
 
-    accessDataJobAll.forEach((item) => {
-      if (item.type === "view") updatedAccess.all_jobs = item.is_assigned;
-    });
-
-    setAccessDataJob(updatedAccess);
-  }, [role]);
+    const updatedAccessClient = {
+      insert: hasAccess("client", "insert") || role === "SUPERADMIN" ? 1 : 0,
+      update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
+      delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
+      view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
+    };
+    setAccessDataClient(updatedAccessClient);
+  }, [role, hasAccess]);
 
   const handleCreateJob = () => {
     navigate("/createjob", {
@@ -311,12 +295,12 @@ const CustomerClientProfile = () => {
           }
           const client = response.data.client;
           informationSetData(client);
-          
+
           // Smart mapping for different client types
-          const contact = response.data.contact_details?.[0] || 
-                          response.data.member_details?.[0] || 
-                          response.data.beneficiaries_details?.[0] || 
-                          {};
+          const contact = response.data.contact_details?.[0] ||
+            response.data.member_details?.[0] ||
+            response.data.beneficiaries_details?.[0] ||
+            {};
           setClientInformationData(contact);
           setCompanyDetails(response.data.company_details || []);
         } else {
@@ -551,11 +535,11 @@ const CustomerClientProfile = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== "" || cli_id_sidebar !== ""
+    ...((clientDetailSingle.id !== "" || cli_id_sidebar !== "") && getAccessDataClient.view == 1
       ? [
-          { id: "view client", label: "View Client", icon: <User size={16} /> },
-          { id: "documents", label: "Documents", icon: <File size={16} /> }
-        ]
+        { id: "view client", label: "View Client", icon: <User size={16} /> },
+        { id: "documents", label: "Documents", icon: <File size={16} /> }
+      ]
       : []),
   ];
 
@@ -835,38 +819,40 @@ const CustomerClientProfile = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
-            <>
-              <button className="edit-icon" onClick={() => handleEdit(row)}>
-                <i className="ti-pencil" />
-              </button>
+    ...((getAccessDataJob.update == 1 || getAccessDataJob.delete == 1 || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
+              <>
+                <button className="edit-icon" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil" />
+                </button>
 
-              <button className="copy-icon" onClick={() => copyRow(row)}>
-                <i className="ti-files"></i>
-              </button>
-            </>
-          )}
-          {row.timesheet_job_id == null
-            ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
-              </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+                <button className="copy-icon" onClick={() => copyRow(row)}>
+                  <i className="ti-files"></i>
+                </button>
+              </>
+            )}
+            {row.timesheet_job_id == null
+              ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {
@@ -957,7 +943,7 @@ const CustomerClientProfile = () => {
   };
 
   const copyRow = async (row) => {
-    if(row?.has_client_job_task === 0){
+    if (row?.has_client_job_task === 0) {
       sweatalert.fire({
         title: "warning",
         icon: "warning",
@@ -971,7 +957,7 @@ const CustomerClientProfile = () => {
       });
       return
     }
-    
+
     sweatalert
       .fire({
         title: "Are you sure?",
@@ -1408,358 +1394,360 @@ const CustomerClientProfile = () => {
         </div>
       )}
 
-        <div className="mt-2">
-          {activeTab == "NoOfJobs" && (
-            <div className={`tab-pane fade show active`} id={"NoOfJobs"} role="tabpanel">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-                  <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-                    <li className="nav-item" role="presentation">
-                      <button className="nav-link active" type="button" role="tab">
-                        Assigned Jobs
-                      </button>
-                    </li>
-                  </ul>
-                  {customerData && customerData.length > 0 && (
-                    <div className="col-md-2">
-                      <button
-                        className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
-                        onClick={handleExport}
-                      >
-                        <Download size={16} />
-                        <span>Export Excel</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div className="tab-content">
-                  <div className="tab-pane fade active show">
-                    <div className="col-md-3 mb-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search jobs..."
-                        value={searchTerm}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                      />
-                    </div>
-                    <div className="datatable-wrapper ">
-                      {jobLoading && (
-                        <div className="overlay"><div className="loader"></div></div>
-                      )}
-                      {customerData && customerData.length > 0 && (
-                        <>
-                          <Datatable columns={columns} data={customerData} filter={false} pagination={false} />
-                          <ReactPaginate
-                            previousLabel={"Previous"}
-                            nextLabel={"Next"}
-                            breakLabel={"..."}
-                            pageCount={Math.ceil(totalRecords / pageSize)}
-                            marginPagesDisplayed={2}
-                            pageRangeDisplayed={5}
-                            onPageChange={handlePageChange}
-                            containerClassName={"pagination"}
-                            activeClassName={"active"}
-                            forcePage={currentPage - 1}
-                          />
-                          <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
-                            {[5, 10, 20, 50, 100, 500].map(v => <option key={v} value={v}>{v}</option>)}
-                          </select>
-                        </>
-                      )}
-                    </div>
+      <div className="mt-2">
+        {activeTab == "NoOfJobs" && (
+          <div className={`tab-pane fade show active`} id={"NoOfJobs"} role="tabpanel">
+            <div className="report-data mt-4 ">
+              <div className="d-flex justify-content-between align-items-center">
+                <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+                  <li className="nav-item" role="presentation">
+                    <button className="nav-link active" type="button" role="tab">
+                      Assigned Jobs
+                    </button>
+                  </li>
+                </ul>
+                {customerData && customerData.length > 0 && (
+                  <div className="col-md-2">
+                    <button
+                      className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                      onClick={handleExport}
+                    >
+                      <Download size={16} />
+                      <span>Export Excel</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="tab-content">
+                <div className="tab-pane fade active show">
+                  <div className="col-md-3 mb-2">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search jobs..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                    />
+                  </div>
+                  <div className="datatable-wrapper ">
+                    {jobLoading && (
+                      <div className="overlay"><div className="loader"></div></div>
+                    )}
+                    {customerData && customerData.length > 0 && (
+                      <>
+                        <Datatable columns={columns} data={customerData} filter={false} pagination={false} />
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          pageCount={Math.ceil(totalRecords / pageSize)}
+                          marginPagesDisplayed={2}
+                          pageRangeDisplayed={5}
+                          onPageChange={handlePageChange}
+                          containerClassName={"pagination"}
+                          activeClassName={"active"}
+                          forcePage={currentPage - 1}
+                        />
+                        <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
+                          {[5, 10, 20, 50, 100, 500].map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          )}
-          {activeTab == "view client" && clientInformationData && (
-            <div className="tab-content">
-              <div className="report-data">
-                <div className="card-body">
-                  <div className="dastyle-profile">
-                    <div className="row">
-                      <div className="col-md-4 align-self-center mb-3 mb-lg-0">
-                        <div className="dastyle-profile-main">
-                          <div className="dastyle-profile-main-pic">
-                            <span className="dastyle-profile_main-pic-change">
-                              <i className="ti-user"></i>
-                            </span>
-                          </div>
-                          <div className="dastyle-profile_user-detail">
-                            <h5 className="dastyle-user-name">
-                              {getClientDetails?.data?.client?.client_type == 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
-                                ? getClientDetails?.data?.member_details?.[0]
-                                    .first_name +
-                                  " " +
-                                  getClientDetails?.data?.member_details?.[0]
-                                    .last_name
-                                : getClientDetails?.data?.client?.client_type == 7
-                                ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].first_name +
-                                  " " +
-                                  getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].last_name
-                                : clientInformationData.first_name +
-                                  " " +
-                                  clientInformationData.last_name}
-                            </h5>
-                            <p className="mb-0 dastyle-user-name-post">
-                              Client Code: {informationData.client_code}
-                            </p>
-                          </div>
+          </div>
+        )}
+        {activeTab == "view client" && clientInformationData && (
+          <div className="tab-content">
+            <div className="report-data">
+              <div className="card-body">
+                <div className="dastyle-profile">
+                  <div className="row">
+                    <div className="col-md-4 align-self-center mb-3 mb-lg-0">
+                      <div className="dastyle-profile-main">
+                        <div className="dastyle-profile-main-pic">
+                          <span className="dastyle-profile_main-pic-change">
+                            <i className="ti-user"></i>
+                          </span>
                         </div>
-                      </div>
-                      <div className="col-md-4 ml-auto align-self-center">
-                        <ul className="list-unstyled personal-detail mb-0">
-                          <li>
-                            <Phone size={22} className="me-2 text-secondary align-middle" />
-                            <b>Phone : </b>
+                        <div className="dastyle-profile_user-detail">
+                          <h5 className="dastyle-user-name">
                             {getClientDetails?.data?.client?.client_type == 5 ||
-                            getClientDetails?.data?.client?.client_type == 6
+                              getClientDetails?.data?.client?.client_type == 6
                               ? getClientDetails?.data?.member_details?.[0]
-                                  .phone_code +
-                                " " +
-                                getClientDetails?.data?.member_details?.[0]
-                                  .phone || "NA"
+                                .first_name +
+                              " " +
+                              getClientDetails?.data?.member_details?.[0]
+                                .last_name
                               : getClientDetails?.data?.client?.client_type == 7
-                              ? getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].phone_code +
+                                ? getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].first_name +
                                 " " +
                                 getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].phone || "NA"
-                              : clientInformationData.phone_code +
+                                  ?.beneficiaries_details?.[0].last_name
+                                : clientInformationData.first_name +
                                 " " +
-                                clientInformationData.phone || "NA"}
-                          </li>
-                          <li className="mt-2">
-                            <Mail size={22} className="text-secondary align-middle me-2" />
-                            <b>Email : </b>{" "}
-                            {getClientDetails?.data?.client?.client_type == 5 ||
-                            getClientDetails?.data?.client?.client_type == 6
-                              ? getClientDetails?.data?.member_details?.[0]
-                                  .email || "NA"
-                              : getClientDetails?.data?.client?.client_type == 7
-                              ? getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].email || "NA"
-                              : clientInformationData.email || "NA"}
-                          </li>
-                        </ul>
-                      </div>
-                      <div className="col-md-4 align-self-center mt-2 mt-sm-0">
-                        <ul className="list-unstyled personal-detail mb-0">
-                          <li><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
-                          <li className="mt-2"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
-                        </ul>
+                                clientInformationData.last_name}
+                          </h5>
+                          <p className="mb-0 dastyle-user-name-post">
+                            Client Code: {informationData.client_code}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <div className="col-md-4 ml-auto align-self-center">
+                      <ul className="list-unstyled personal-detail mb-0">
+                        <li>
+                          <Phone size={22} className="me-2 text-secondary align-middle" />
+                          <b>Phone : </b>
+                          {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                            ? getClientDetails?.data?.member_details?.[0]
+                              .phone_code +
+                            " " +
+                            getClientDetails?.data?.member_details?.[0]
+                              .phone || "NA"
+                            : getClientDetails?.data?.client?.client_type == 7
+                              ? getClientDetails?.data
+                                ?.beneficiaries_details?.[0].phone_code +
+                              " " +
+                              getClientDetails?.data
+                                ?.beneficiaries_details?.[0].phone || "NA"
+                              : clientInformationData.phone_code +
+                              " " +
+                              clientInformationData.phone || "NA"}
+                        </li>
+                        <li className="mt-2">
+                          <Mail size={22} className="text-secondary align-middle me-2" />
+                          <b>Email : </b>{" "}
+                          {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                            ? getClientDetails?.data?.member_details?.[0]
+                              .email || "NA"
+                            : getClientDetails?.data?.client?.client_type == 7
+                              ? getClientDetails?.data
+                                ?.beneficiaries_details?.[0].email || "NA"
+                              : clientInformationData.email || "NA"}
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="col-md-4 align-self-center mt-2 mt-sm-0">
+                      <ul className="list-unstyled personal-detail mb-0">
+                        <li><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
+                        <li className="mt-2"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
+                      </ul>
+                    </div>
+                  </div>
+                  {getAccessDataClient.update == 1 && (
                     <div className="text-end mt-3">
-                      <button 
+                      <button
                         className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
-                        onClick={() => navigate("/customer/client/edit", { 
-                          state: { 
-                            row: informationData, 
-                            id: customerDetails.id, 
-                            activeTab: activeTab 
-                          } 
+                        onClick={() => navigate("/customer/client/edit", {
+                          state: {
+                            row: informationData,
+                            id: customerDetails.id,
+                            activeTab: activeTab
+                          }
                         })}
                       >
                         <Pencil size={14} /> Edit
                       </button>
                     </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            {informationData.client_type != 4 && (
+              <div className="report-data mt-4">
+                <div className="card-header border-bottom pb-3 row">
+                  <div className="col-8">
+                    <h4 className="card-title">
+                      {informationData && informationData.client_type == 1
+                        ? "Sole Trader"
+                        : informationData.client_type == 2
+                          ? "Company"
+                          : informationData.client_type == 3
+                            ? "Partnership"
+                            : getClientDetails?.data?.client?.client_type == 5
+                              ? "Charity Incorporated Organisation Information"
+                              : getClientDetails?.data?.client?.client_type == 6
+                                ? "Charity Unincorporated Association Information"
+                                : getClientDetails?.data?.client?.client_type == 7
+                                  ? "Trust"
+                                  : ""}
+                    </h4>
+                  </div>
+                </div>
+                <div className="card-body pt-3">
+                  <div className="row">
+                    {informationData.client_type == 1 || informationData.client_type == 3 ? (
+                      <>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
+                            <li className="mb-4"><b>VAT Registered :</b> {informationData.vat_registered == 0 ? "No" : "Yes"}</li>
+                            <li className="mb-4"><b>Website :</b> {informationData.website || "NA"}</li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
+                            <li className="mb-4"><b>VAT Number :</b> {informationData.vat_number || "NA"}</li>
+                          </ul>
+                        </div>
+                      </>
+                    ) : informationData.client_type == 2 ? (
+                      <>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Company Name : </b> {companyDetails.company_name || "NA"}</li>
+                            <li className="mb-4"><b>Company Status :</b> {companyDetails.company_status || "NA"}</li>
+                            <li className="mb-4"><b>Registered Office Address :</b> {companyDetails.registered_office_address || "NA"}</li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Entity Type :</b> {companyDetails.entity_type || "NA"}</li>
+                            <li className="mb-4"><b>Company Number :</b> {companyDetails.company_number || "NA"}</li>
+                          </ul>
+                        </div>
+                      </>
+                    ) : [5, 6].includes(getClientDetails?.data?.client?.client_type) ? (
+                      <>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Charity Name :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_name || "NA"}</li>
+                            <li className="mb-4"><b>Charity Number :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_number || "NA"}</li>
+                            <li className="mb-4"><b>Charity Status :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_status || "NA"}</li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Accounting Reference Date :</b> {getClientDetails?.data?.charity_details?.[0]?.accounting_reference_date || "NA"}</li>
+                          </ul>
+                        </div>
+                      </>
+                    ) : getClientDetails?.data?.client?.client_type == 7 ? (
+                      <>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Trust Name :</b> {getClientDetails?.data?.trust_details?.[0]?.trust_name || "NA"}</li>
+                            <li className="mb-4"><b>Trust Type :</b> {getClientDetails?.data?.trust_details?.[0]?.trust_type || "NA"}</li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4"><b>Date of Establishment :</b> {getClientDetails?.data?.trust_details?.[0]?.date_of_establishment || "NA"}</li>
+                          </ul>
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                 </div>
               </div>
-              {informationData.client_type != 4 && (
-                <div className="report-data mt-4">
-                  <div className="card-header border-bottom pb-3 row">
-                    <div className="col-8">
-                      <h4 className="card-title">
-                        {informationData && informationData.client_type == 1
-                          ? "Sole Trader"
-                          : informationData.client_type == 2
-                            ? "Company"
-                            : informationData.client_type == 3
-                              ? "Partnership"
-                              : getClientDetails?.data?.client?.client_type == 5
-                                ? "Charity Incorporated Organisation Information"
-                                : getClientDetails?.data?.client?.client_type == 6
-                                  ? "Charity Unincorporated Association Information"
-                                  : getClientDetails?.data?.client?.client_type == 7
-                                    ? "Trust"
-                                    : ""}
-                      </h4>
-                    </div>
-                  </div>
-                  <div className="card-body pt-3">
-                    <div className="row">
-                      {informationData.client_type == 1 || informationData.client_type == 3 ? (
-                        <>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Trading Name :</b> {informationData.trading_name || "NA"}</li>
-                              <li className="mb-4"><b>VAT Registered :</b> {informationData.vat_registered == 0 ? "No" : "Yes"}</li>
-                              <li className="mb-4"><b>Website :</b> {informationData.website || "NA"}</li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Trading Address :</b> {informationData.trading_address || "NA"}</li>
-                              <li className="mb-4"><b>VAT Number :</b> {informationData.vat_number || "NA"}</li>
-                            </ul>
-                          </div>
-                        </>
-                      ) : informationData.client_type == 2 ? (
-                        <>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Company Name : </b> {companyDetails.company_name || "NA"}</li>
-                              <li className="mb-4"><b>Company Status :</b> {companyDetails.company_status || "NA"}</li>
-                              <li className="mb-4"><b>Registered Office Address :</b> {companyDetails.registered_office_address || "NA"}</li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Entity Type :</b> {companyDetails.entity_type || "NA"}</li>
-                              <li className="mb-4"><b>Company Number :</b> {companyDetails.company_number || "NA"}</li>
-                            </ul>
-                          </div>
-                        </>
-                      ) : [5, 6].includes(getClientDetails?.data?.client?.client_type) ? (
-                        <>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Charity Name :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_name || "NA"}</li>
-                              <li className="mb-4"><b>Charity Number :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_number || "NA"}</li>
-                              <li className="mb-4"><b>Charity Status :</b> {getClientDetails?.data?.charity_details?.[0]?.charity_status || "NA"}</li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Accounting Reference Date :</b> {getClientDetails?.data?.charity_details?.[0]?.accounting_reference_date || "NA"}</li>
-                            </ul>
-                          </div>
-                        </>
-                      ) : getClientDetails?.data?.client?.client_type == 7 ? (
-                        <>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Trust Name :</b> {getClientDetails?.data?.trust_details?.[0]?.trust_name || "NA"}</li>
-                              <li className="mb-4"><b>Trust Type :</b> {getClientDetails?.data?.trust_details?.[0]?.trust_type || "NA"}</li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-6">
-                            <ul className="list-unstyled faq-qa">
-                              <li className="mb-4"><b>Date of Establishment :</b> {getClientDetails?.data?.trust_details?.[0]?.date_of_establishment || "NA"}</li>
-                            </ul>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          {activeTab == "documents" && (
-            <div className="tab-pane fade show active">
-              <div className="report-data mt-4">
-                <div className="card-header border-bottom pb-3 mb-3">
-                  <h4 className="card-title">Client Documents</h4>
-                </div>
-                <div className="card-body">
-                  <Formik initialValues={{ files: [] }} onSubmit={handleDocumentSubmit}>
-                    {({ setFieldValue }) => (
-                      <Form>
-                        <div className="row">
-                          <div className="col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">Upload Documents</label>
-                              <div className="input-group">
-                                <input
-                                  type="file"
-                                  className="form-control"
-                                  multiple
-                                  ref={fileInputRef}
-                                  onChange={(e) => handleFileChange(e)}
-                                />
-                              </div>
+            )}
+          </div>
+        )}
+        {activeTab == "documents" && (
+          <div className="tab-pane fade show active">
+            <div className="report-data mt-4">
+              <div className="card-header border-bottom pb-3 mb-3">
+                <h4 className="card-title">Client Documents</h4>
+              </div>
+              <div className="card-body">
+                <Formik initialValues={{ files: [] }} onSubmit={handleDocumentSubmit}>
+                  {({ setFieldValue }) => (
+                    <Form>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <div className="form-group">
+                            <label className="form-label">Upload Documents</label>
+                            <div className="input-group">
+                              <input
+                                type="file"
+                                className="form-control"
+                                multiple
+                                ref={fileInputRef}
+                                onChange={(e) => handleFileChange(e)}
+                              />
                             </div>
                           </div>
                         </div>
-                        {newFiles.length > 0 && (
-                          <div className="table-responsive mt-3">
-                            <table className="table table-bordered mb-0">
-                              <thead>
-                                <tr>
-                                  <th>Preview</th>
-                                  <th>File Name</th>
-                                  <th>Type</th>
-                                  <th>Size</th>
-                                  <th>Action</th>
+                      </div>
+                      {newFiles.length > 0 && (
+                        <div className="table-responsive mt-3">
+                          <table className="table table-bordered mb-0">
+                            <thead>
+                              <tr>
+                                <th>Preview</th>
+                                <th>File Name</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {newFiles.map((file, index) => (
+                                <tr key={index}>
+                                  <td>
+                                    {file.type.startsWith("image/") ? (
+                                      <img src={previews[index]} alt="preview" style={{ width: "40px", height: "40px" }} />
+                                    ) : file.type === "application/pdf" ? (
+                                      <FileText size={24} color="#FF0000" />
+                                    ) : (
+                                      <File size={24} color="#000" />
+                                    )}
+                                  </td>
+                                  <td>{file.name}</td>
+                                  <td>{file.type}</td>
+                                  <td>
+                                    {file.size < 1024 * 1024
+                                      ? `${(file.size / 1024).toFixed(2)} KB`
+                                      : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+                                  </td>
+                                  <td>
+                                    <button
+                                      type="button"
+                                      className="btn btn-sm btn-outline-danger"
+                                      onClick={() => {
+                                        const updatedFiles = newFiles.filter((_, idx) => idx !== index);
+                                        setNewFiles(updatedFiles);
+                                        setPreviews(previews.filter((_, idx) => idx !== index));
+                                      }}
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </td>
                                 </tr>
-                              </thead>
-                              <tbody>
-                                {newFiles.map((file, index) => (
-                                  <tr key={index}>
-                                    <td>
-                                      {file.type.startsWith("image/") ? (
-                                        <img src={previews[index]} alt="preview" style={{ width: "40px", height: "40px" }} />
-                                      ) : file.type === "application/pdf" ? (
-                                        <FileText size={24} color="#FF0000" />
-                                      ) : (
-                                        <File size={24} color="#000" />
-                                      )}
-                                    </td>
-                                    <td>{file.name}</td>
-                                    <td>{file.type}</td>
-                                    <td>
-                                      {file.size < 1024 * 1024
-                                        ? `${(file.size / 1024).toFixed(2)} KB`
-                                        : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
-                                    </td>
-                                    <td>
-                                      <button
-                                        type="button"
-                                        className="btn btn-sm btn-outline-danger"
-                                        onClick={() => {
-                                          const updatedFiles = newFiles.filter((_, idx) => idx !== index);
-                                          setNewFiles(updatedFiles);
-                                          setPreviews(previews.filter((_, idx) => idx !== index));
-                                        }}
-                                      >
-                                        <X size={14} />
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                            <div className="mt-3">
-                              <Button type="primary" onClick={handleDocumentSubmit} className="btn btn-primary d-inline-flex align-items-center gap-2">
-                                Save <ArrowRight size={16} />
-                              </Button>
-                            </div>
+                              ))}
+                            </tbody>
+                          </table>
+                          <div className="mt-3">
+                            <Button type="primary" onClick={handleDocumentSubmit} className="btn btn-primary d-inline-flex align-items-center gap-2">
+                              Save <ArrowRight size={16} />
+                            </Button>
                           </div>
-                        )}
-                      </Form>
-                    )}
-                  </Formik>
-                </div>
-                <div className="datatable-wrapper mt-4">
-                  <Datatable
-                    columns={DocumentListColumns}
-                    data={fileStateClient}
-                    filter={true}
-                  />
-                </div>
+                        </div>
+                      )}
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+              <div className="datatable-wrapper mt-4">
+                <Datatable
+                  columns={DocumentListColumns}
+                  data={fileStateClient}
+                  filter={true}
+                />
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-        </div>
       </div>
+    </div>
   );
 };
 

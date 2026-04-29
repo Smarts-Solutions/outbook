@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useCustomerAccess } from "../../../Utils/CustomerAccessContext";
 import {
   CustomerClientList,
   CustomerJobList,
@@ -23,6 +24,7 @@ const ClientLists = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
+  const { hasAccess } = useCustomerAccess();
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
@@ -255,21 +257,25 @@ const ClientLists = () => {
       ),
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          <button className="edit-icon" onClick={() => navigate("/customer/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
-            <i className="ti-pencil" />
-          </button>
-          {row.Delete_Status == null && (
-            <button className="delete-icon" onClick={() => handleDelete(row, "client")}>
-              <i className="ti-trash text-danger" />
-            </button>
-          )}
-        </div>
-      ),
-    },
+    ...((hasAccess("client", "update") || hasAccess("client", "delete")) ? [
+        {
+        name: "Actions",
+        cell: (row) => (
+            <div className="d-flex">
+            {hasAccess("client", "update") && (
+                <button className="edit-icon" onClick={() => navigate("/customer/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
+                <i className="ti-pencil" />
+                </button>
+            )}
+            {hasAccess("client", "delete") && row.Delete_Status == null && (
+                <button className="delete-icon" onClick={() => handleDelete(row, "client")}>
+                <i className="ti-trash text-danger" />
+                </button>
+            )}
+            </div>
+        ),
+        }
+    ] : []),
   ];
 
   const JobColumns = [
@@ -305,7 +311,12 @@ const ClientLists = () => {
     {
       name: "Status",
       cell: (row) => (
-        <select className="form-select form-control" value={row.status_type} onChange={(e) => handleStatusChange(e, row)}>
+        <select
+          className="form-select form-control"
+          value={row.status_type}
+          onChange={(e) => handleStatusChange(e, row)}
+          disabled={!hasAccess("job", "update")}
+        >
           {statusDataAll.map((status) => (
             <option key={status.id} value={status.id}>
               {status.name}
@@ -371,21 +382,25 @@ const ClientLists = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          <button className="edit-icon" onClick={() => navigate("/customer/job/edit", { state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab } })}>
-            <i className="ti-pencil" />
-          </button>
-          {row.timesheet_job_id == null && (
-            <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
-              <i className="ti-trash text-danger" />
-            </button>
-          )}
-        </div>
-      ),
-    },
+    ...((hasAccess("job", "update") || hasAccess("job", "delete")) ? [
+        {
+        name: "Actions",
+        cell: (row) => (
+            <div className="d-flex">
+            {hasAccess("job", "update") && (
+                <button className="edit-icon" onClick={() => navigate("/customer/job/edit", { state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab } })}>
+                <i className="ti-pencil" />
+                </button>
+            )}
+            {hasAccess("job", "delete") && row.timesheet_job_id == null && (
+                <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+                <i className="ti-trash text-danger" />
+                </button>
+            )}
+            </div>
+        ),
+        }
+    ] : []),
   ];
 
   const handlePageChange = (selected) => {
@@ -497,10 +512,11 @@ const ClientLists = () => {
 
   const selectedOption = customerOptions.find((opt) => Number(opt.value) === Number(customerId)) || { value: "", label: "All" };
 
-  const tabs = [
-    { id: "client", label: "Client", icon: <User size={16} /> },
-  ];
-  if (customerId) {
+  const tabs = [];
+  if (hasAccess("client", "view")) {
+    tabs.push({ id: "client", label: "Client", icon: <User size={16} /> });
+  }
+  if (customerId && hasAccess("job", "view")) {
     tabs.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
   }
 
@@ -539,12 +555,12 @@ const ClientLists = () => {
                   </ul>
                 </div>
                 <div className="col-md-4 d-flex justify-content-end align-items-center">
-                    {activeTab === "client" && customerId && (
+                    {activeTab === "client" && customerId && hasAccess("client", "insert") && (
                         <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab } })}>
                              <Plus size={16} /> Add Client
                         </div>
                     )}
-                    {activeTab === "job" && customerId && (
+                    {activeTab === "job" && customerId && hasAccess("job", "insert") && (
                          <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab } })}>
                              <Plus size={16} /> Create Job
                          </div>

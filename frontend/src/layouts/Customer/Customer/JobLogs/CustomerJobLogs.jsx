@@ -19,31 +19,25 @@ import {
   File,
   Folder,
 } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerJobLogs = () => {
   const location = useLocation();
   const tab = sessionStorage.getItem("activeTab2") || "job information";
   const [selectedTab, setSelectedTab] = useState(tab);
   const role = JSON.parse(localStorage.getItem("role"));
+  const { hasAccess } = useCustomerAccess();
 
   const [jobId, setJobId] = useState(location?.state?.job_id || sessionStorage.getItem("currentJobId"));
   const [hierarchyData, setHierarchyData] = useState(location?.state?.data || JSON.parse(sessionStorage.getItem("currentHierarchyData") || "{}"));
   const [goto, setGoto] = useState(location?.state?.goto || sessionStorage.getItem("currentGoto"));
 
-  const [getAccessDataJob, setAccessDataJob] = useState({
-    insert: 0,
-    update: 0,
-    delete: 0,
-    view: 0,
-  });
-
-  const accessDataJob = useMemo(() => {
-    return (
-      JSON.parse(localStorage.getItem("accessData") || "[]").find(
-        (item) => item.permission_name === "job"
-      )?.items || []
-    );
-  }, []);
+  const getAccessDataJob = {
+    insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
+    delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
+    view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
+  };
 
   useEffect(() => {
     if (location?.state?.job_id) {
@@ -60,27 +54,6 @@ const CustomerJobLogs = () => {
     }
   }, [location]);
 
-  useEffect(() => {
-    const userRole = role?.toString().toUpperCase();
-
-    if (userRole === "CUSTOMER" || userRole === "SUPERADMIN") {
-      setAccessDataJob({ insert: 1, update: 1, delete: 1, view: 1 });
-      return;
-    }
-
-    if (!accessDataJob.length) return;
-
-    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
-
-    accessDataJob.forEach((item) => {
-      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-      if (item.type === "update") updatedAccess.update = item.is_assigned;
-      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-      if (item.type === "view") updatedAccess.view = item.is_assigned;
-    });
-
-    setAccessDataJob(updatedAccess);
-  }, [role, accessDataJob]);
 
   return (
     <div className="container-fluid">

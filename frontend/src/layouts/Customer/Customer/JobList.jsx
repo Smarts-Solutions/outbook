@@ -186,6 +186,13 @@ const ClientList = () => {
     all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
   };
 
+  const getAccessDataClient = {
+    insert: hasAccess("client", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
+    delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
+    view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
+  };
+
   const GetClientDetails = async (client_id) => {
     const req = { action: "getByid", client_id: client_id, staff_id: staffDetails.id };
     const data = { req: req, authToken: token };
@@ -214,7 +221,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== ""
+    ...(clientDetailSingle.id !== "" && getAccessDataClient.view == 1
       ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
@@ -494,38 +501,40 @@ const ClientList = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
-            <>
-              <button className="edit-icon" onClick={() => handleEdit(row)}>
-                <i className="ti-pencil" />
-              </button>
+    ...((getAccessDataJob.update == 1 || getAccessDataJob.delete == 1 || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
+              <>
+                <button className="edit-icon" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil" />
+                </button>
 
-              <button className="copy-icon" onClick={() => copyRow(row)}>
-                <i className="ti-files"></i>
-              </button>
-            </>
-          )}
-          {row.timesheet_job_id == null
-            ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
-              </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+                <button className="copy-icon" onClick={() => copyRow(row)}>
+                  <i className="ti-files"></i>
+                </button>
+              </>
+            )}
+            {row.timesheet_job_id == null
+              ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {
