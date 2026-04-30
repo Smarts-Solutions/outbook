@@ -1,4 +1,5 @@
 const customerDashboardModel = require('../../models/customerDashboardModel');
+const customerClientModel = require('../../models/customerClientModel');
 const jobModel = require('../../models/jobModel');
 const jobTypeTaskService = require('../jobTypeTask/jobTypeTaskService');
 const axios = require('axios');
@@ -43,6 +44,10 @@ const getCustomerJobList = async (data) => {
 
 const customerClientAction = async (data) => {
   return await customerDashboardModel.customerClientAction(data);
+};
+
+const customerClientAdd = async (data) => {
+  return await customerClientModel.createClient(data);
 };
 
 const customerJobAction = async (data) => {
@@ -150,6 +155,7 @@ module.exports = {
   getCustomerClientList,
   getCustomerJobList,
   customerClientAction,
+  customerClientAdd,
   customerJobAction,
   customerJobUpdate,
   customerJobTimeline,

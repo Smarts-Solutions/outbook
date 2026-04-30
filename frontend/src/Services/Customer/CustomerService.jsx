@@ -135,6 +135,17 @@ export async function CUSTOMER_CLIENT_ACTION(data, token) {
   }
 }
 
+export async function CUSTOMER_CLIENT_ADD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerClientAdd`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function CUSTOMER_JOB_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}customerJobAction`, data, {

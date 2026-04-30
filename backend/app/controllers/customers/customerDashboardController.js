@@ -113,6 +113,15 @@ const customerClientAction = async (req, res) => {
   }
 };
 
+const customerClientAdd = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerClientAdd(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
 const customerJobAction = async (req, res) => {
   try {
     const result = await customerDashboardService.customerJobAction(req.body);
@@ -255,6 +264,7 @@ module.exports = {
   getCustomerClients,
   getCustomerJobs,
   customerClientAction,
+  customerClientAdd,
   customerJobAction,
   customerJobUpdate,
   customerJobTimeline,

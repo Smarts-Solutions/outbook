@@ -38,6 +38,7 @@ router.post("/getCustomerList", verifyToken, customerDashboardController.getCust
 router.post("/getCustomerClients", verifyToken, customerDashboardController.getCustomerClients);
 router.post("/getCustomerJobs", verifyToken, customerDashboardController.getCustomerJobs);
 router.post("/customerClientAction", verifyToken, customerDashboardController.customerClientAction);
+router.post("/customerClientAdd", verifyToken, customerDashboardController.customerClientAdd);
 router.post("/customerJobAction", verifyToken, customerDashboardController.customerJobAction);
 router.post("/customerJobUpdate", verifyToken, customerDashboardController.customerJobUpdate);
 router.post("/customerJobTimeline", verifyToken, customerDashboardController.customerJobTimeline);

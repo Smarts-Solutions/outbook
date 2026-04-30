@@ -14,7 +14,7 @@ import ClientProfiles from "../layouts/Customer/Customer/ClientProfile_sidebar";
 import CreateJob from "../layouts/Customer/Customer/CreateJob";
 import JobEdit from "../layouts/Customer/Customer/EditJob";
 import JobLogs from "../layouts/Customer/Customer/JobLogs/CustomerJobLogs";
-import AddNewClient from "../layouts/Admin/Clients/CreateClient";
+import AddNewClient from "../layouts/Customer/Customer/CreateClient";
 
 const Customer_Route = () => {
     return (

@@ -51,6 +51,7 @@ import {
   CUSTOMER_JOBS,
   CUSTOMER_DROPDOWN,
   CUSTOMER_CLIENT_ACTION,
+  CUSTOMER_CLIENT_ADD,
   CUSTOMER_JOB_ACTION,
   CUSTOMER_JOB_TIMELINE,
   CUSTOMER_TASK_TIMESHEET_ACTION,
@@ -221,6 +222,22 @@ export const CustomerClientAction = createAsyncThunk("customerClientAction", asy
       StaffUserId: StaffUserId.id,
     };
     const res = await CUSTOMER_CLIENT_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerClientAdd = createAsyncThunk("customerClientAdd", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_CLIENT_ADD(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
