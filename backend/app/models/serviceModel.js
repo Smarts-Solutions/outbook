@@ -142,26 +142,30 @@ const deletExistingJob = async (Services) => {
     let { data, ip, StaffUserId } = Services
     let { delete_service_id , jobs_data  } = data
 
-    console.log("jobs_data --->>>", jobs_data)
+    // console.log("Services --->>>", Services)
+    // console.log("jobs_data --->>>", jobs_data)
+    // return;
+   
 
-    return
-    let deleted_service_info = data.delete_service
-    let update_service_info = data.update_service
-    let update_job_type_info = data.update_job_type
-    let update_tasks_info = data.update_tasks
-
-    let [get_job_id] = await pool.execute(`SELECT id , client_id FROM jobs WHERE service_id = ?`, [deleted_service_info.id]);
+    // let [get_job_id] = await pool.execute(`SELECT id , client_id FROM jobs WHERE service_id = ?`, [deleted_service_info.id]);
 
     
-    for (let index = 0; index < get_job_id.length; index++) {
-        const element = get_job_id[index];
-        console.log("element --->>>", element)
+    for (let index = 0; index < jobs_data?.length; index++) {
+        const element = jobs_data[index];
+        const job_id = element?.job_id;
+        const client_id = element?.client_id;
+        const service_id = element?.service_id;
+        const job_type_id = element?.job_type_id;
+        const tasks_budget_hours = element?.tasks_budget_hours;
+
+
+        
 
         //// find job 
         let query = `
             UPDATE jobs SET
-            service_id = ${update_service_info.id},job_type_id = ${update_job_type_info.id}
-            WHERE id=${element.id}
+            service_id = ${service_id},job_type_id = ${job_type_id}
+            WHERE id=${job_id}
         `;
 
         await pool.query(query);
@@ -169,10 +173,14 @@ const deletExistingJob = async (Services) => {
  
         // Task Insert
         // Delete job tasks
-        await pool.execute(`DELETE FROM client_job_task WHERE job_id = ?`, [element.id]);
-        for (let index = 0; index < update_tasks_info.length; index++) {
+         await pool.execute(`DELETE FROM client_job_task WHERE job_id = ?`, [job_id]);
+
+        for (let index = 0; index < tasks_budget_hours?.length; index++) {
             // insert client_job_task this tasks
-            const task = update_tasks_info[index];
+            const task = tasks_budget_hours[index];
+             const task_id = task?.task_id;
+             const budgeted_hour = task?.budgeted_hour;
+            console.log("task --->>>", task)
             const insertQuery = `
             INSERT INTO 
             client_job_task 
@@ -185,10 +193,10 @@ const deletExistingJob = async (Services) => {
              (?,?,?,?)`;
 
             const insertValues = [
-                element.id,
-                element.client_id,
-                task.id,
-                task.budgeted_hour 
+                job_id,
+                client_id,
+                task_id,
+                budgeted_hour 
             ];
 
             await pool.query(insertQuery, insertValues);
@@ -197,9 +205,9 @@ const deletExistingJob = async (Services) => {
 
     }
    
-     const query = `UPDATE services SET name = CONCAT(name,'_'${deleted_service_info.id}), deleted = '1' WHERE id = ? `;
-     await pool.execute(query, [deleted_service_info.id]);
-     return { status: true, message: 'Service deleted successfully.', data: get_job_id };
+     const query = `UPDATE services SET name = CONCAT(name,'_'${delete_service_id}), deleted = '1' WHERE id = ? `;
+     await pool.execute(query, [delete_service_id]);
+     return { status: true, message: 'Service deleted successfully.', data: [] };
 
 
 

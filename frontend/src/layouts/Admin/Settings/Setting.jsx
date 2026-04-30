@@ -482,6 +482,7 @@ const Setting = () => {
       delete_service_id: deleteServiceInfo?.id,
       jobs_data: allJobsData.map((job) => ({
         job_id: job.job_id,
+        client_id: job.client_id,
         service_id: job.service_id,
         job_type_id: job.job_type_id,
         task_ids: job.selectedTasks.map((task) => task.value),

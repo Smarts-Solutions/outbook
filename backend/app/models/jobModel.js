@@ -4935,6 +4935,7 @@ const getJobsDeleteService = async (job) => {
     const [results] = await pool.execute(
       ` SELECT 
       jobs.id AS job_id,
+      clients.id AS client_id,
       customers.trading_name AS customer_name,
       clients.trading_name AS client_name,
 
@@ -4979,6 +4980,7 @@ const getJobsDeleteService = async (job) => {
       if (!jobItem) {
         jobItem = {
           job_id: row.job_id,
+          client_id: row.client_id,
           customer_name: row.customer_name,
           client_name: row.client_name,
           job_code_id: row.job_code_id,
