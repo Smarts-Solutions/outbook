@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const { commonEmail } = require("../../utils/commonEmail");
 const e = require('cors');
 const jwt = require("jsonwebtoken");
+const { SatffLogUpdateOperation } = require('../../utils/helper');
 
 
 
@@ -237,6 +238,17 @@ const getAllCustomerUsers = async (req, res) => {
 
       console.log("ffff", result);
 
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: StaffUserId,
+        ip: ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "staff",
+        log_message: `created customer user profile for ${first_name} ${last_name}.`,
+        permission_type: "created",
+        module_id: newCustomerUserId,
+      });
+
       return res.status(200).json({ status: true, message: "Customer User added successfully." });
 
     }
@@ -249,6 +261,17 @@ const getAllCustomerUsers = async (req, res) => {
 
       const deleteQuery = `DELETE FROM staffs WHERE id = ?`;
       await pool.execute(deleteQuery, [customer_user_id]);
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: customerUsers.StaffUserId,
+        ip: customerUsers.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "staff",
+        log_message: `deleted customer user profile.`,
+        permission_type: "deleted",
+        module_id: customer_user_id,
+      });
+
       return res.status(200).json({ status: true, message: "Customer User deleted successfully." });
     }
     else if (action === 'updateCustomerUsers') {
@@ -307,6 +330,17 @@ const getAllCustomerUsers = async (req, res) => {
             await pool.execute(accessInsertQuery, [customer_user_id, customerId, custClients.join(','), custJobs.join(',')]);
           }
         }
+
+        const currentDate = new Date();
+        await SatffLogUpdateOperation({
+          staff_id: customerUsers.StaffUserId,
+          ip: ip,
+          date: currentDate.toISOString().split("T")[0],
+          module_name: "staff",
+          log_message: `updated customer user profile for ${first_name} ${last_name}.`,
+          permission_type: "updated",
+          module_id: customer_user_id,
+        });
 
         return res.status(200).json({ status: true, message: "Customer User updated successfully." });
 

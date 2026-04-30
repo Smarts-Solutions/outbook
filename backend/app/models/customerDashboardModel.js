@@ -1314,6 +1314,18 @@ const customerClientAction = async (dashboard) => {
             `;
           await pool.execute(insertQuery, [effectiveClientId, file_name, original_name, file_type, file_size, web_url]);
         }
+        // Log document upload
+        const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
+        await SatffLogUpdateOperation({
+          staff_id: StaffUserId,
+          ip: dashboard.ip,
+          date: new Date().toISOString().split("T")[0],
+          module_name: "client",
+          log_message: `uploaded ${uploadedFiles.length} document(s) to client profile. client code :`,
+          permission_type: "updated",
+          module_id: effectiveClientId,
+        });
+
         return { status: true, message: "Client document uploaded successfully.", data: effectiveClientId };
       }
       return { status: true, message: "No files uploaded.", data: effectiveClientId };
@@ -1749,6 +1761,20 @@ const customerJobUpdate = async (job) => {
 
       if (field === "status_type") {
         await JobStatusUpdate(job_id, updateRow[field], new Date().toLocaleString('sv-SE'));
+        
+        // Log status change (non-blocking)
+        try {
+          const [StatusName] = await pool.execute(`SELECT name FROM master_status WHERE id = ?`, [updateRow[field]]);
+          SatffLogUpdateOperation({
+            staff_id: StaffUserId,
+            ip: ip,
+            date: new Date().toISOString().split("T")[0],
+            module_name: "job",
+            log_message: `updated the job status to ${StatusName[0]?.name || ''}. job code:`,
+            permission_type: "updated",
+            module_id: job_id,
+          }).catch(err => console.error("Logging error:", err));
+        } catch (e) {}
       }
 
       return { status: true, message: "Job updated successfully." };
@@ -1769,7 +1795,7 @@ const customerJobUpdate = async (job) => {
         filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?,
         opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?,
         turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?,
-        invoiced = ?, currency_id = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,
+        invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,
         notes = ?, client_job_code = ?, processing_checklist = ?, reviewing_checklist = ?, 
         processing_checklist_status = ?, reviewing_checklist_status = ?, checklist_modal_data = ?, job_priority = ?
       WHERE id = ?
@@ -1810,6 +1836,17 @@ const customerJobUpdate = async (job) => {
         await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [job_id, sId]);
       }
     }
+
+    // Log full job update (non-blocking)
+    SatffLogUpdateOperation({
+      staff_id: StaffUserId,
+      ip: ip,
+      date: new Date().toISOString().split("T")[0],
+      module_name: "job",
+      log_message: `updated job details. job code:`,
+      permission_type: "updated",
+      module_id: job_id,
+    }).catch(err => console.error("Logging error:", err));
 
     return { status: true, message: "Job updated successfully." };
   } catch (err) {
