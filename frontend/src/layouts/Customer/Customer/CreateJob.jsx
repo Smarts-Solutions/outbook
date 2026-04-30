@@ -5,12 +5,13 @@ import {
   GetAllJabData,
   AddAllJobType,
   GET_ALL_CHECKLIST,
-  GetOfficerDetails,
-  JobType,
-  DownloadChecklist
+  GetOfficerDetails
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
+import { JobType } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import axios from "axios";
 import * as XLSX from "xlsx";
+import { base_url } from "../../../Utils/Config";
 import { Modal, Button, Table, Form } from "react-bootstrap";
 import { ScrollToViewFirstError } from "../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../Utils/Common_Message";
@@ -21,206 +22,230 @@ const CreateJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const role = JSON.parse(localStorage.getItem("role"));
 
   const token = JSON.parse(localStorage.getItem("token"));
-  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
-  const staffCreatedId = staffDetails ? staffDetails.id : "";
-
+  const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" });
-  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" });
+  const [PreparationTimne, setPreparationTimne] = useState({
+    hours: "",
+    minutes: "",
+  });
+  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" });
-  const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" });
+  const [budgetedHours, setBudgetedHours] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" });
-  const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] });
+  const [AllChecklistData, setAllChecklistData] = useState({
+    loading: false,
+    data: [],
+  });
   const [getChecklistId, setChecklistId] = useState("");
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [taskNameError, setTaskNameError] = useState("");
   const [jobModalStatus, jobModalSetStatus] = useState(false);
-  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" });
+  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({
+    hours: "",
+    minutes: "",
+  });
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
 
+  //// Checklist Modal State
   const [checklistModal, setChecklistModal] = useState({
     show: false,
     data: [],
     title: "",
     loading: false,
-    type: "",
-    processing: [],
-    reviewing: []
+    type: ""
   });
 
-  const [serviceFieldsData, setServiceFieldsData] = useState([]);
-  const [allStaffData, setAllStaffData] = useState([]);
-  const [selectedStaffData, setSelectedStaffData] = useState([]);
-  const [allClientDetails, setAllClientDetails] = useState([]);
-  const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
-  const [clientType, setClientType] = useState("");
-
   const [jobData, setJobData] = useState({
-    CustomerDetails: [],
     AccountManager: "",
     Customer: "",
     Client: "",
-    client_id: "",
     ClientJobCode: "",
     CustomerAccountManager: "",
     Service: "",
     JobType: "",
-    BudgetedHours: "",
     Reviewer: "",
     AllocatedTo: "",
-    AllocatedOn: "",
-    DateReceivedOn: new Date().toISOString().split("T")[0],
-    YearEnd: "",
-    TotalPreparationTime: "",
-    ReviewTime: "",
-    FeedbackIncorporationTime: "",
-    TotalTime: "",
-    EngagementModel: "",
-    ExpectedDeliveryDate: null,
-    DueOn: null,
-    SubmissionDeadline: null,
-    CustomerDeadlineDate: null,
-    SLADeadlineDate: null,
-    InternalDeadlineDate: null,
-    FilingWithCompaniesHouseRequired: "0",
-    CompaniesHouseFilingDate: null,
-    FilingWithHMRCRequired: "0",
-    HMRCFilingDate: null,
-    OpeningBalanceAdjustmentRequired: "0",
-    OpeningBalanceAdjustmentDate: null,
-    NumberOfTransactions: "",
-    NumberOfTrialBalanceItems: "",
-    Turnover: "",
-    NoOfEmployees: "",
-    VATReconciliation: "0",
-    Bookkeeping: "0",
-    ProcessingType: "0",
-    Invoiced: "0",
-    Currency: "0",
-    InvoiceValue: "0",
-    InvoiceDate: null,
-    InvoiceHours: "",
-    InvoiceRemark: "",
-    notes: "",
+    AllocatedOn: new Date().toISOString().slice(0, 10),
+    DateReceivedOn: new Date().toISOString().slice(0, 10),
+    ExpectedDeliveryDate: "",
+    DueOn: "",
+    SubmissionDeadline: "",
+    CustomerDeadlineDate: "",
+    SLADeadlineDate: "",
+    InternalDeadlineDate: "",
     job_priority: "normal",
-    Bookkeeping_Frequency_id_2: "Daily",
+    FilingWithCompaniesHouseRequired: "",
+    CompaniesHouseFilingDate: "",
+    FilingWithHMRCRequired: "",
+    HMRCFilingDate: "",
+    YearEnd: "",
+    EngagementModel: "",
     processing_checklist: null,
-    reviewing_checklist: null
+    reviewing_checklist: null,
+
+    // Service-specific fields
+    Turnover_Period_id_0: "",
+    Turnover_Currency_id_0: "",
+    Turnover_id_0: "",
+    VAT_Registered_id_0: "",
+    VAT_Frequency_id_0: "",
+
+    Who_Did_The_Bookkeeping_id_1: "",
+    PAYE_Registered_id_1: "",
+    Number_of_Trial_Balance_Items_id_1: "",
+    Year_Ending_id_1: "",
+
+    Bookkeeping_Frequency_id_2: "",
+    Day_Date_id_2: "",
+    Week_Year_id_2: "",
+    Week_Month_id_2: "",
+    Week_id_2: "",
+    Fortnight_Year_id_2: "",
+    Fortnight_Month_id_2: "",
+    Fortnight_id_2: "",
+    Month_Year_id_2: "",
+    Month_id_2: "",
+    Quarter_Year_id_2: "",
+    Quarter_id_2: "",
+    Year_id_2: "",
+    Other_FromDate_id_2: "",
+    Other_ToDate_id_2: "",
+    Number_of_Total_Transactions_id_2: "",
+    Number_of_Bank_Transactions_id_2: "",
+    Number_of_Purchase_Invoices_id_2: "",
+    Number_of_Sales_Invoices_id_2: "",
+    Number_of_Petty_Cash_Transactions_id_2: "",
+    Number_of_Journal_Entries_id_2: "",
+    Number_of_Other_Transactions_id_2: "",
+    Transactions_Posting_id_2: "",
+    Quality_of_Paperwork_id_2: "",
+    Number_of_Integration_Software_Platforms_id_2: "",
+    CIS_id_2: "",
+    Posting_Payroll_Journals_id_2: "",
+    Department_Tracking_id_2: "",
+    Sales_Reconciliation_Required_id_2: "",
+    Factoring_Account_id_2: "",
+    Payment_Methods_id_2: "",
+
+    Payroll_Frequency_id_3: "",
+    Payroll_Week_Year_id_3: "",
+    Payroll_Week_Month_id_3: "",
+    Payroll_Week_id_3: "",
+    Payroll_Fortnight_Year_id_3: "",
+    Payroll_Fortnight_Month_id_3: "",
+    Payroll_Fortnight_id_3: "",
+    Payroll_Month_Year_id_3: "",
+    Payroll_Month_id_3: "",
+    Payroll_Quarter_Year_id_3: "",
+    Payroll_Quarter_id_3: "",
+    Payroll_Year_id_3: "",
+    Type_of_Payslip_id_3: "",
+    Percentage_of_Variable_Payslips_id_3: "",
+    Is_CIS_Required_id_3: "",
+    CIS_Frequency_id_3: "",
+    Number_of_Sub_contractors_id_3: "",
+
+    Whose_Tax_Return_is_it_id_4: "",
+    Number_of_Income_Sources_id_4: "",
+    If_Landlord_Number_of_Properties_id_4: "",
+    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "",
+    Tax_Year_id_4: "",
+
+    Management_Accounts_Frequency_id_6: "",
+    Management_Accounts_FromDate_id_6: "",
+    Management_Accounts_ToDate_id_6: "",
+
+    Year_id_33: "",
+
+    Period_id_32: "",
+    Day_Date_id_32: "",
+    Week_Year_id_32: "",
+    Week_Month_id_32: "",
+    Week_id_32: "",
+    Fortnight_Year_id_32: "",
+    Fortnight_Month_id_32: "",
+    Fortnight_id_32: "",
+    Month_Year_id_32: "",
+    Month_id_32: "",
+    Quarter_Year_id_32: "",
+    Quarter_id_32: "",
+    Year_id_32: "",
+    Other_FromDate_id_32: "",
+    Other_ToDate_id_32: "",
+
+    Payroll_Frequency_id_31: "",
+    Payroll_Week_Year_id_31: "",
+    Payroll_Week_Month_id_31: "",
+    Payroll_Week_id_31: "",
+    Payroll_Fortnight_Year_id_31: "",
+    Payroll_Fortnight_Month_id_31: "",
+    Payroll_Fortnight_id_31: "",
+    Payroll_Month_Year_id_31: "",
+    Payroll_Month_id_31: "",
+    Payroll_Quarter_Year_id_31: "",
+    Payroll_Quarter_id_31: "",
+    Payroll_Year_id_31: "",
+
+    Audit_Year_Ending_id_27: "",
+
+    Filing_Frequency_id_8: "",
+    Period_Ending_Date_id_8: "",
+    Filing_Date_id_8: "",
+
+    Year_id_28: "",
   });
 
-  useEffect(() => {
-    setJobData((prevState) => ({
-      ...prevState,
-      AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
-      Customer: AllJobData?.data?.customer?.customer_trading_name || "",
-      CustomerDetails: AllJobData?.data?.customerDetails || [],
-      Client: location?.state?.goto == "Customer" ? "" : location?.state?.clientName?.client_name || "",
-      client_id: location?.state?.goto == "Customer" ? "" : location?.state?.clientName?.id || "",
-    }));
-  }, [AllJobData]);
+  const [allClientDetails, setAllClientDetails] = useState([]);
+  const [clientType, setClientType] = useState("");
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  const [allStaffData, setAllStaffData] = useState([]);
+  const [selectedStaffData, setSelectedStaffData] = useState([]);
 
-  const GetJobData = async () => {
-    const req = { customer_id: location.state.customer_id };
-    const data = { req: req, authToken: token };
-    await dispatch(GetAllJabData(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setAllJobData({ loading: true, data: response.data });
-          setJobData((prevState) => ({
-            ...prevState,
-            Service: response.data?.services?.[0]?.service_id || "",
-            CustomerAccountManager: response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id?.toString() || "",
-            EngagementModel: Object.entries(response.data?.engagement_model[0] || {}).find(([key, value]) => value === "1")?.[0] || "",
-          }));
-          setAllStaffData(response?.data?.allStaff || []);
-          setAllClientDetails(response?.data?.client || []);
+  const getMonths = () => [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
-          if (location?.state?.goto != "Customer") {
-            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
-            setClientType(clientInfo?.client_client_type || "");
-            if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-              if (response.data?.services?.[0]?.service_id == 1) {
-                await get_information_company_number(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
-              } else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
-                await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
-              }
-            } else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-              if (response.data?.services?.[0]?.service_id == 1) {
-                await get_information_company_number(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
-              } else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
-                await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
-              }
-            } else if (clientInfo != "" && ["1", "3", "7"].includes(clientInfo?.client_client_type)) {
-              await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
-            } else if ([1, 4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
-              await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
-            }
-          }
-        } else {
-          setAllJobData({ loading: true, data: [] });
-          setAllStaffData([]);
-        }
-      })
-      .catch(() => {});
+  const getQuarters = () => ["Q1 (Jan-Mar)", "Q2 (Apr-Jun)", "Q3 (Jul-Sep)", "Q4 (Oct-Dec)"];
+
+  const getLastFiveYears = () => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
   };
 
-  useEffect(() => {
-    GetJobData();
-  }, []);
-
-  const get_information_company_number = async (company_number, service_id) => {
-    const data = { company_number: company_number, type: 'company_info' };
-    await dispatch(GetOfficerDetails(data))
-      .unwrap()
-      .then((res) => {
-        if (res.status) {
-          setClientInfoCompanyDetails(res.data);
-          if (!['', null, undefined].includes(service_id) && Number(service_id) == 1) {
-            setJobData((prevState) => ({
-              ...prevState,
-              Year_Ending_id_1: res.data?.accounts?.next_accounts?.period_end_on,
-              DueOn: res.data?.accounts?.next_accounts?.due_on,
-            }));
-          }
-        } else {
-          setClientInfoCompanyDetails({});
-        }
-      })
-      .catch(() => {});
+  const getDueDate = (date, months) => {
+    if (!date) return "";
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + months + 1);
+    d.setDate(0);
+    return d.toISOString().slice(0, 10);
   };
 
-  const dueOn_date_set = async (client_type, service_id) => {
-    let due_date = getDueDate(client_type, service_id);
-    due_date = ['', null, undefined].includes(due_date) ? null : due_date;
-    setJobData((prevState) => ({
-      ...prevState,
-      DueOn: due_date,
-    }));
-  };
-
-  function getDueDate(client_type, service_id) {
-    if (["1", "3", "7"].includes(client_type)) {
+  const dueOn_date_set = async (type, service_id) => {
+    if (type == "2") {
       if (Number(service_id) === 1) {
-        const d = new Date();
-        const year = d.getFullYear();
-        let dueYear = year;
-        if (d > new Date(`${year}-01-31`)) { dueYear = year + 1; }
-        return `${dueYear}-01-31`;
-      } else if (Number(service_id) === 4) {
         const d = new Date();
         const y = d.getFullYear();
         const m = d.getMonth() + 1;
-        if (m >= 4 || m <= 1) { return `${m >= 4 ? y + 1 : y}-01-31`; }
+        if (m >= 4 || m <= 1) {
+          return `${m >= 4 ? y + 1 : y}-01-31`;
+        }
         return `${y}-01-31`;
       } else if (Number(service_id) === 8) {
         const today = new Date();
@@ -231,7 +256,9 @@ const CreateJob = () => {
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-      } else { return null; }
+      } else {
+        return null;
+      }
     } else {
       if (Number(service_id) === 8) {
         const today = new Date();
@@ -246,45 +273,140 @@ const CreateJob = () => {
         const d = new Date();
         const y = d.getFullYear();
         const m = d.getMonth() + 1;
-        if (m >= 4 || m <= 1) { return `${m >= 4 ? y + 1 : y}-01-31`; }
+        if (m >= 4 || m <= 1) {
+          return `${m >= 4 ? y + 1 : y}-01-31`;
+        }
         return `${y}-01-31`;
-      } else { return null; }
-    }
-  }
-
-  const getAllChecklist = async () => {
-    if (
-      (location?.state?.goto == "Customer" ? jobData.Client : location?.state?.clientName?.id) &&
-      jobData?.Service &&
-      AllJobData?.data?.customer?.customer_id &&
-      jobData?.JobType
-    ) {
-      const req = {
-        action: "getByServiceWithJobType",
-        service_id: jobData.Service,
-        customer_id: AllJobData?.data?.customer?.customer_id,
-        job_type_id: jobData.JobType,
-        clientId: location?.state?.goto == "Customer" ? Number(jobData.Client) : location?.state?.clientName?.id,
-      };
-      const data = { req: req, authToken: token };
-      await dispatch(GET_ALL_CHECKLIST(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            setAllChecklistData({ loading: true, data: response.data || [] });
-          } else {
-            setAllChecklistData({ loading: true, data: [] });
-          }
-        })
-        .catch(() => {});
+      } else {
+        return null;
+      }
     }
   };
 
+  const get_information_company_number = async (company_number, service_id) => {
+    try {
+      const response = await axios.get(`${base_url}get_information_company_number/${company_number}`);
+      if (response.data.status) {
+        const next_accounts = response.data.data.next_accounts;
+        const period_end_on = next_accounts.period_end_on;
+        setJobData((prev) => ({
+          ...prev,
+          YearEnd: period_end_on,
+          Year_Ending_id_1: period_end_on,
+          DueOn: next_accounts.due_on,
+          SLADeadlineDate: next_accounts.due_on,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching company info:", error);
+    }
+  };
+
+  const handleViewChecklist = async (checklistId, title, type) => {
+    if (!checklistId) return;
+
+    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
+
+    if (checklistModal[type] && checklistModal[type].length > 0) {
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        data: [...prev[type]]
+      }));
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
+        responseType: 'arraybuffer'
+      });
+      const data = new Uint8Array(response.data);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      const formattedTasks = jsonData.slice(1)
+        .filter(row => row[0])
+        .map((row, index) => ({
+          id: index + 1,
+          task_name: row[0],
+          status: "pending",
+          remark: ""
+        }));
+
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        data: formattedTasks,
+        [type]: formattedTasks
+      }));
+    } catch (error) {
+      console.error("Error downloading checklist:", error);
+      setChecklistModal(prev => ({ ...prev, loading: false }));
+      sweatalert.fire("Error", "Could not load checklist tasks", "error");
+    }
+  };
+
+  const handleTaskStatusChange = (taskId, status) => {
+    setChecklistModal(prev => ({
+      ...prev,
+      data: prev.data.map(task =>
+        task.id === taskId ? { ...task, status } : task
+      )
+    }));
+  };
+
+  const handleTaskRemarkChange = (taskId, remark) => {
+    setChecklistModal(prev => ({
+      ...prev,
+      data: prev.data.map(task =>
+        task.id === taskId ? { ...task, remark } : task
+      )
+    }));
+  };
+
+  const handleSubmitChecklist = () => {
+    const type = checklistModal.type;
+    setChecklistModal(prev => ({
+      ...prev,
+      show: false,
+      [type]: [...prev.data]
+    }));
+    sweatalert.fire("Success", `${checklistModal.title} saved in session`, "success");
+  };
+
+  const GetJobData = async () => {
+    const req = {
+      action: "get",
+      customer_id: location.state.customer_id
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(GetAllJabData(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setAllJobData({ loading: true, data: response.data });
+          setAllClientDetails(response.data?.client || []);
+          setAllStaffData(response.data?.staff_other || []);
+
+          setJobData((prev) => ({
+            ...prev,
+            AccountManager: response.data?.customer?.customer_officer_name || "",
+            Customer: response.data?.customer?.customer_name || "",
+            EngagementModel: Object.entries(response.data?.engagement_model[0] || {}).find(([key, value]) => value === "1")?.[0] || "",
+          }));
+        }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
-    getAllChecklist();
-  }, [jobData.JobType, AllJobData?.data]);
+    GetJobData();
+  }, []);
 
   const GetJobType = async () => {
+    if (!jobData.Service) return;
     const req = { action: "get", service_id: jobData.Service };
     const data = { req: req, authToken: token };
     await dispatch(JobType(data))
@@ -303,259 +425,241 @@ const CreateJob = () => {
     GetJobType();
   }, [jobData.Service]);
 
+  const getAllChecklist = async () => {
+    if (
+      jobData.Client &&
+      jobData.Service &&
+      AllJobData?.data?.customer?.customer_id &&
+      jobData.JobType
+    ) {
+      const req = {
+        action: "getByServiceWithJobType",
+        service_id: jobData.Service,
+        customer_id: AllJobData?.data?.customer?.customer_id,
+        job_type_id: jobData.JobType,
+        clientId: Number(jobData.Client),
+      };
+      const data = { req: req, authToken: token };
+      await dispatch(GET_ALL_CHECKLIST(data))
+        .unwrap()
+        .then(() => {})
+        .catch(() => {});
+    }
+  };
+
+  useEffect(() => {
+    getAllChecklist();
+  }, [jobData.JobType, AllJobData?.data]);
+
   const HandleChange = async (e) => {
     let name = e.target.name;
     let value = e.target.value;
 
-    if (name == 'Client') {
-      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value)) || "";
+    if (name === 'Client') {
+      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) === Number(value)) || "";
       setClientType(clientInfo?.client_client_type || "");
-      if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-        if (Number(jobData?.Service) == 1) {
+
+      if (clientInfo !== "" && clientInfo?.client_company_number && clientInfo?.client_client_type === "2") {
+        if (Number(jobData?.Service) === 1) {
           await get_information_company_number(clientInfo?.client_company_number, jobData?.Service);
         } else if ([4, 8].includes(Number(jobData?.Service))) {
-          await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
         }
-      } else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-        if (Number(jobData?.Service) == 1) {
+      } else if (clientInfo !== "" && ["5"].includes(clientInfo?.client_client_type)) {
+        if (Number(jobData?.Service) === 1) {
           await get_information_company_number(clientInfo?.company_number, jobData?.Service);
         } else if ([4, 8].includes(Number(jobData?.Service))) {
-          await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
         }
       } else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
-        dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
-      } else if ([1, 4, 8].includes(Number(jobData?.Service))) {
-        dueOn_date_set(clientType, jobData?.Service);
-      }
-    }
-
-    if (name === "JobType") {
-      if (!['', 'undefined', undefined, null, 'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0) {
-      } else {
-        setAddTaskArr([]);
-      }
-    }
-
-    const date = new Date();
-    if (name == "Service") {
-      if ([1, 2, 3, 4, 8].includes(Number(value))) {
-        if (value == 1) {
-          const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
-          if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
-            await get_information_company_number(clientInfo?.client_company_number, value);
-          } else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
-            await get_information_company_number(clientInfo?.company_number, value);
-          } else {
-            await dueOn_date_set(clientType, value);
-          }
-          date.setDate(date.getDate() + 28);
-          setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-        } else {
-          setJobData((prevState) => ({ ...prevState, Year_Ending_id_1: null, DueOn: null }));
+        if ([4, 8].includes(Number(jobData?.Service))) {
+          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
         }
-
-        if (value == 2) {
-          date.setDate(date.getDate() + 1);
-          setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-        } else if (value == 3) {
-          date.setDate(date.getDate() + 5);
-          setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-        } else if (value == 4) {
-          await dueOn_date_set(clientType, value);
-          date.setDate(date.getDate() + 5);
-          setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-        } else if (value == 8) {
-          await dueOn_date_set(clientType, value);
-          date.setDate(date.getDate() + 10);
-          setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-        }
-      } else {
-        setJobData((prevState) => ({ ...prevState, SLADeadlineDate: null }));
       }
     }
 
-    if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
-      if (value == "Daily") {
-        date.setDate(date.getDate() + 1);
-        setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-      } else if (value == "Weekly") {
-        date.setDate(date.getDate() + 3);
-        setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-      } else if (value == "Monthly") {
-        date.setDate(date.getDate() + 10);
-        setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-      } else if (value == "Quarterly") {
-        date.setDate(date.getDate() + 15);
-        setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-      } else if (value == "Yearly") {
-        date.setDate(date.getDate() + 30);
-        setJobData((prevState) => ({ ...prevState, SLADeadlineDate: date.toISOString().split("T")[0] }));
-      }
-    }
-
-    if (["NumberOfTransactions", "NumberOfTrialBalanceItems", "Turnover"].includes(name)) {
-      if (!/^[0-9+]*$/.test(value)) { return; }
-    }
-    if (["BudgetedHours", "TotalPreparationTime", "ReviewTime", "FeedbackIncorporationTime"].includes(name)) {
-      value = value.replace(":", "");
-    }
-
-    setJobData((prevState) => ({ ...prevState, [name]: value }));
-    validate(name, value);
-  };
-
-  const validate = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors };
-    if (isSubmitting) {
-      for (const key in CreateJobErrorMessage) {
-        if (!jobData[key] && !["NumberOfTransactions", "NumberOfTrialBalanceItems", "Turnover"].includes(key)) {
-          newErrors[key] = CreateJobErrorMessage[key];
+    if (name === "Service") {
+      setJobData(prev => ({
+        ...prev,
+        [name]: value,
+        JobType: "",
+        processing_checklist: null,
+        reviewing_checklist: null
+      }));
+      setChecklistModal(prev => ({ ...prev, processing: [], reviewing: [] }));
+      
+      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) === Number(jobData.Client)) || "";
+      if (clientInfo) {
+        if (Number(value) === 1 && clientInfo.client_company_number) {
+          await get_information_company_number(clientInfo.client_company_number, value);
+        } else if ([4, 8].includes(Number(value))) {
+          const dueOn = await dueOn_date_set(clientInfo.client_client_type, value);
+          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
         }
       }
     } else {
-      if (!value && !["NumberOfTransactions", "NumberOfTrialBalanceItems", "Turnover"].includes(name)) {
-        if (CreateJobErrorMessage[name]) { newErrors[name] = CreateJobErrorMessage[name]; }
-      } else if (name == "NumberOfTransactions" && value > 1000000) {
-        newErrors[name] = CreateJobErrorMessage[name];
-      } else if (name == "NumberOfTrialBalanceItems" && value > 5000) {
-        newErrors[name] = CreateJobErrorMessage[name];
-      } else if (name == "Turnover" && value > 200000000) {
-        newErrors[name] = CreateJobErrorMessage[name];
-      } else {
-        delete newErrors[name];
-      }
+      setJobData((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
     }
+
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const openJobModal = (e) => {
+    const value = e.target.value;
+    const selectedJobType = get_Job_Type?.data?.find((item) => Number(item.id) === Number(value));
+    if (selectedJobType) {
+      setAddTaskArr(selectedJobType.task || []);
+      jobModalSetStatus(true);
+    }
+  };
+
+  const shouldShowField = (field, currentJobData) => {
+    if (!field.showIf) return true;
+    return Object.entries(field.showIf).every(([key, expectedValue]) => {
+      const actualValue = currentJobData[key];
+      if (Array.isArray(expectedValue)) {
+        return expectedValue.includes(actualValue);
+      }
+      return actualValue === expectedValue;
+    });
+  };
+
+  const validateAllFields = () => {
+    const newErrors = {};
+    const requiredFields = [
+      "AccountManager", "Customer", "Client", "CustomerAccountManager",
+      "Service", "JobType", "DateReceivedOn"
+    ];
+
+    requiredFields.forEach(field => {
+      if (!jobData[field]) {
+        newErrors[field] = CreateJobErrorMessage[field];
+      }
+    });
+
+    if (Number(jobData.Service) === 1 && !jobData.Year_Ending_id_1) {
+      newErrors["Year_Ending_id_1"] = "Year Ending is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in CreateJobErrorMessage) {
-       if (!validate(key, jobData[key], true)) { isValid = false; }
-    }
-    return isValid;
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitted(true);
 
-  function formatTime(hours, minutes) {
-    const formattedHours = (hours != "" && hours != null) ? String(hours).padStart(2, "0") : "00";
-    const formattedMinutes = (minutes != "" && minutes != null) ? String(minutes).padStart(2, "0") : "00";
-    return `${formattedHours}:${formattedMinutes}`;
-  }
-
-  const budgeted_hour_totalTime = AddTaskArr.length > 0 ? AddTaskArr.reduce((acc, task) => {
-    const [hours, minutes] = (task?.budgeted_hour || "0:0").split(":").map(Number);
-    acc.hours += hours;
-    acc.minutes += minutes;
-    if (acc.minutes >= 60) {
-      acc.hours += Math.floor(acc.minutes / 60);
-      acc.minutes = acc.minutes % 60;
-    }
-    return acc;
-  }, { hours: 0, minutes: 0 }) : { hours: 0, minutes: 0 };
-
-  useEffect(() => {
-    setBudgetedHours({
-      hours: budgeted_hour_totalTime.hours || "0",
-      minutes: budgeted_hour_totalTime.minutes || "0",
-    });
-  }, [AddTaskArr]);
-
-  const handleSubmit = async () => {
     if (!validateAllFields()) {
-        ScrollToViewFirstError(errors);
-        return;
-    }
-
-    if (AddTaskArr.length === 0) {
-      sweatalert.fire({ icon: "error", title: "Please add at least one task.", timer: 1500 });
+      ScrollToViewFirstError();
       return;
     }
 
-    let checklist_modal_data = null;
-    let processing_checklist_status = "2";
-    let reviewing_checklist_status = "2";
+    const submissionAddTaskArr = AddTaskArr.map(task => {
+      const [h, m] = (task.budgeted_hour || "0:0").split(":");
+      const totalMin = (Number(h) || 0) * 60 + (Number(m) || 0);
+      return { ...task, budgeted_hour: totalMin };
+    });
 
-    if (Array.isArray(checklistModal?.processing) && checklistModal?.processing?.length) {
-      checklist_modal_data = JSON.stringify(checklistModal);
-      let isNotChecked = checklistModal?.processing?.find(val => val.answer == "");
-      processing_checklist_status = isNotChecked ? "2" : "1";
-    }
-
-    if (Array.isArray(checklistModal?.reviewing) && checklistModal?.reviewing?.length) {
-      checklist_modal_data = JSON.stringify(checklistModal);
-      let isNotChecked = checklistModal?.reviewing?.find(val => val.answer == "");
-      reviewing_checklist_status = isNotChecked ? "2" : "1";
-    }
-
-    if (["", null, undefined, 0].includes(jobData?.processing_checklist)) { processing_checklist_status = "0"; }
-    if (["", null, undefined, 0].includes(jobData?.reviewing_checklist)) { reviewing_checklist_status = "0"; }
-
-    const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) +
-      Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) +
-      Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes);
-
-    const req = {
+    const payload = {
       ...jobData,
-      customer_id: AllJobData?.data?.customer?.customer_id,
-      client_id: location?.state?.goto == "Customer" ? Number(jobData.Client) : location?.state?.clientName?.id,
-      client_job_code: jobData.ClientJobCode,
-      customer_contact_details_id: Number(jobData.CustomerAccountManager),
-      service_id: Number(jobData.Service),
-      job_type_id: Number(jobData.JobType),
-      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
-      reviewer: Number(jobData.Reviewer),
-      allocated_to: Number(jobData.AllocatedTo),
-      allocated_on: jobData.AllocatedOn || new Date().toISOString().split("T")[0],
-      date_received_on: jobData.DateReceivedOn || new Date().toISOString().split("T")[0],
-      year_end: jobData.YearEnd,
-      total_preparation_time: formatTime(PreparationTimne.hours, PreparationTimne.minutes),
-      review_time: formatTime(reviewTime.hours, reviewTime.minutes),
-      feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
-      total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
-      staff_created_id: staffCreatedId,
-      other_staff: selectedStaffData?.map((data) => data.value).join(","),
-      tasks: { checklist_id: getChecklistId, task: AddTaskArr },
-      processing_checklist_status: processing_checklist_status,
-      reviewing_checklist_status: reviewing_checklist_status,
-      checklist_modal_data: checklist_modal_data,
+      AllocatedOn: jobData.AllocatedOn || null,
+      ExpectedDeliveryDate: jobData.ExpectedDeliveryDate || null,
+      SubmissionDeadline: jobData.SubmissionDeadline || null,
+      CustomerDeadlineDate: jobData.CustomerDeadlineDate || null,
+      InternalDeadlineDate: jobData.InternalDeadlineDate || null,
+      CompaniesHouseFilingDate: jobData.CompaniesHouseFilingDate || null,
+      HMRCFilingDate: jobData.HMRCFilingDate || null,
+      YearEnd: jobData.YearEnd || null,
+      
+      TotalPreparationTime: (Number(PreparationTimne.hours) || 0) * 60 + (Number(PreparationTimne.minutes) || 0),
+      review_time: (Number(reviewTime.hours) || 0) * 60 + (Number(reviewTime.minutes) || 0),
+      FeedbackIncorporationTime: (Number(FeedbackIncorporationTime.hours) || 0) * 60 + (Number(FeedbackIncorporationTime.minutes) || 0),
+      budgeted_hour: (Number(budgetedHours.hours) || 0) * 60 + (Number(budgetedHours.minutes) || 0),
+      
+      staff: selectedStaffData?.map(s => s.value).join(",") || null,
+      addTaskArr: submissionAddTaskArr,
+      
+      processing_checklist_status: checklistModal.processing ? JSON.stringify(checklistModal.processing) : null,
+      reviewing_checklist_status: checklistModal.reviewing ? JSON.stringify(checklistModal.reviewing) : null,
+      
+      action: "add",
+      customer_id: location.state.customer_id
     };
 
-    const data = { req: req, authToken: token };
-    setIsSubmitted(true);
-    await dispatch(AddAllJobType(data)).unwrap().then((response) => {
-      if (response.status) {
-        sweatalert.fire({ icon: "success", title: "Job Created Successfully", timer: 1500 });
-        navigate(-1);
-      } else {
-        sweatalert.fire({ icon: "error", title: response.message || "Error creating job" });
+    const data = { req: payload, authToken: token };
+    
+    sweatalert.fire({
+      title: "Are you sure?",
+      text: "You want to create this job!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, create it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await dispatch(AddAllJobType(data))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              sweatalert.fire("Success", response.message, "success");
+              navigate("/Customer/JobList", { state: { activeTab: "1" } });
+            } else {
+              sweatalert.fire("Error", response.message, "error");
+            }
+          })
+          .catch((error) => {
+            sweatalert.fire("Error", error.message || "Something went wrong", "error");
+          });
       }
-    }).catch(() => {});
-  };
-
-  const getLastFiveYears = () => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
-  };
-
-  const getMonths = () => [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  const getQuarters = () => ["Q1", "Q2", "Q3", "Q4"];
-
-  const matchesCondition = (expected, actual) => {
-    if (Array.isArray(expected)) return expected.map(String).includes(String(actual));
-    return String(expected) === String(actual);
-  };
-
-  const shouldShowField = (field, values) => {
-    if (!field.showIf) return true;
-    return Object.entries(field.showIf).every(([depKey, depVal]) => {
-      return matchesCondition(depVal, values[depKey]);
     });
   };
+
+  const RearrangeEngagementOptionArr = [];
+  const filteredData = AllJobData.data?.engagement_model?.[0]
+    ? Object.keys(AllJobData.data.engagement_model[0])
+      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+      .reduce((obj, key) => {
+        const keyMapping = {
+          fte_dedicated_staffing: "FTE Dedicated Staffing",
+          percentage_model: "Percentage Model",
+          adhoc_payg_hourly: "Adhoc Payg Hourly",
+          customised_pricing: "Customised Pricing",
+        };
+        if (keyMapping[key]) {
+          RearrangeEngagementOptionArr.push(keyMapping[key]);
+        }
+        obj[key] = AllJobData.data.engagement_model[0][key];
+        return obj;
+      }, {})
+    : {};
+
+  const totalHours =
+    (Number(PreparationTimne.hours) || 0) * 60 +
+    (Number(PreparationTimne.minutes) || 0) +
+    (Number(reviewTime.hours) || 0) * 60 +
+    (Number(reviewTime.minutes) || 0) +
+    (Number(FeedbackIncorporationTime.hours) || 0) * 60 +
+    (Number(FeedbackIncorporationTime.minutes) || 0);
+
+  useEffect(() => {
+    setTotalTime({
+      hours: Math.floor(totalHours / 60),
+      minutes: totalHours % 60,
+    });
+  }, [PreparationTimne, reviewTime, FeedbackIncorporationTime]);
 
   const serviceFields = [
     {
@@ -580,18 +684,18 @@ const CreateJob = () => {
     {
       id: 2,
       fields: [
-        { name: "Bookkeeping Frequency", key: "Bookkeeping_Frequency_id_2", type: "dropdown", options: ["Daily", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly", "Other"] },
+        { name: "Frequency", key: "Bookkeeping_Frequency_id_2", type: "dropdown", options: ["Daily", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly", "Other"] },
         { name: "Select Date", key: "Day_Date_id_2", type: "date", showIf: { Bookkeeping_Frequency_id_2: "Daily" } },
         { name: "Year", key: "Week_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Weekly" } },
         { name: "Month", key: "Week_Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Weekly" } },
         { name: "Week", key: "Week_id_2", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Bookkeeping_Frequency_id_2: "Weekly" } },
-        { name: "Year", key: "Fortnight_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" } },
-        { name: "Month", key: "Fortnight_Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" } },
-        { name: "Fortnight", key: "Fortnight_id_2", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" } },
-        { name: "Year", key: "Month_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Monthly" } },
-        { name: "Month", key: "Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Monthly" } },
-        { name: "Year", key: "Quarter_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Quarterly" } },
-        { name: "Quarter", key: "Quarter_id_2", type: "dropdown", options: getQuarters(), showIf: { Bookkeeping_Frequency_id_2: "Quarterly" } },
+        { name: "Year", key: "Fortnight_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Fortnight" } },
+        { name: "Month", key: "Fortnight_Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Fortnight" } },
+        { name: "Fortnight", key: "Fortnight_id_2", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Bookkeeping_Frequency_id_2: "Fortnight" } },
+        { name: "Year", key: "Month_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Month" } },
+        { name: "Month", key: "Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Month" } },
+        { name: "Year", key: "Quarter_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Quarter" } },
+        { name: "Quarter", key: "Quarter_id_2", type: "dropdown", options: getQuarters(), showIf: { Bookkeeping_Frequency_id_2: "Quarter" } },
         { name: "Year", key: "Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Yearly" } },
         { name: "From Date", key: "Other_FromDate_id_2", type: "date", showIf: { Bookkeeping_Frequency_id_2: "Other" } },
         { name: "To Date", key: "Other_ToDate_id_2", type: "date", showIf: { Bookkeeping_Frequency_id_2: "Other" } },
@@ -640,7 +744,7 @@ const CreateJob = () => {
       fields: [
         { name: "Whose Tax Return is it", key: "Whose_Tax_Return_is_it_id_4", type: "dropdown", options: ["Director", "Sole Trader", "Individual Earning more than £100k", "Partner in Partnership", "Landlord", "Other"] },
         { name: "Number of Income Sources", key: "Number_of_Income_Sources_id_4", type: "dropdown", options: ["1", "2", "3", "4", "5", "6", "7", "8", "9+"] },
-        { name: "If Landlord, Number of Properties", key: "If_Landlord_Number_of_Properties_id_4", type: "dropdown", options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "30+"] },
+        { name: "If Landlord, Number of Properties", key: "If_Landlord_Number_of_Properties_id_4", type: "dropdown", options: Array.from({ length: 30 }, (_, i) => (i + 1).toString()).concat(["30+"]) },
         { name: "If Sole Trader, Who is doing Bookkeeping", key: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4", type: "dropdown", options: ["Outbooks", "Customer", "Client", "Other Outsourced Bookkeeper", "Internal Bookkeeper", "Other"] },
         { name: "Tax Year", key: "Tax_Year_id_4", type: "dropdown", options: ["2018/19", "2019/20", "2020/21", "2021/22", "2022/23", "2023/24", "2024/25", "2025/26", "2026/27", "2027/28"] },
       ],
@@ -656,6 +760,55 @@ const CreateJob = () => {
     },
     { id: 7, fields: [] },
     {
+      id: 33,
+      fields: [
+        { name: "Year", key: "Year_id_33", type: "dropdown", options: getLastFiveYears() },
+      ],
+    },
+    {
+      id: 32,
+      fields: [
+        { name: "Period", key: "Period_id_32", type: "dropdown", options: ["Day", "Week", "Fortnight", "Month", "Quarter", "Year", "Other"] },
+        { name: "Select Date", key: "Day_Date_id_32", type: "date", showIf: { Period_id_32: "Day" } },
+        { name: "Year", key: "Week_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Week" } },
+        { name: "Month", key: "Week_Month_id_32", type: "dropdown", options: getMonths(), showIf: { Period_id_32: "Week" } },
+        { name: "Week", key: "Week_id_32", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Period_id_32: "Week" } },
+        { name: "Year", key: "Fortnight_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Fortnight" } },
+        { name: "Month", key: "Fortnight_Month_id_32", type: "dropdown", options: getMonths(), showIf: { Period_id_32: "Fortnight" } },
+        { name: "Fortnight", key: "Fortnight_id_32", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Period_id_32: "Fortnight" } },
+        { name: "Year", key: "Month_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Month" } },
+        { name: "Month", key: "Month_id_32", type: "dropdown", options: getMonths(), showIf: { Period_id_32: "Month" } },
+        { name: "Year", key: "Quarter_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Quarter" } },
+        { name: "Quarter", key: "Quarter_id_32", type: "dropdown", options: getQuarters(), showIf: { Period_id_32: "Quarter" } },
+        { name: "Year", key: "Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Year" } },
+        { name: "From Date", key: "Other_FromDate_id_32", type: "date", showIf: { Period_id_32: "Other" } },
+        { name: "To Date", key: "Other_ToDate_id_32", type: "date", showIf: { Period_id_32: "Other" } },
+      ],
+    },
+    {
+      id: 31,
+      fields: [
+        { name: "Frequency", key: "Payroll_Frequency_id_31", type: "dropdown", options: ["Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"] },
+        { name: "Year", key: "Payroll_Week_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Weekly" } },
+        { name: "Month", key: "Payroll_Week_Month_id_31", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_31: "Weekly" } },
+        { name: "Week", key: "Payroll_Week_id_31", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Payroll_Frequency_id_31: "Weekly" } },
+        { name: "Year", key: "Payroll_Fortnight_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Fortnightly" } },
+        { name: "Month", key: "Payroll_Fortnight_Month_id_31", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_31: "Fortnightly" } },
+        { name: "Fortnight", key: "Payroll_Fortnight_id_31", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Payroll_Frequency_id_31: "Fortnightly" } },
+        { name: "Year", key: "Payroll_Month_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Monthly" } },
+        { name: "Month", key: "Payroll_Month_id_31", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_31: "Monthly" } },
+        { name: "Year", key: "Payroll_Quarter_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Quarterly" } },
+        { name: "Quarter", key: "Payroll_Quarter_id_31", type: "dropdown", options: getQuarters(), showIf: { Payroll_Frequency_id_31: "Quarterly" } },
+        { name: "Year", key: "Payroll_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Yearly" } },
+      ],
+    },
+    {
+      id: 27,
+      fields: [
+        { name: "Year Ending", key: "Audit_Year_Ending_id_27", type: "date" },
+      ],
+    },
+    {
       id: 8,
       fields: [
         { name: "Filing Frequency", key: "Filing_Frequency_id_8", type: "dropdown", options: ["Monthly", "Quarterly", "Yearly"] },
@@ -663,79 +816,61 @@ const CreateJob = () => {
         { name: "Filing Date", key: "Filing_Date_id_8", type: "date", showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] } },
       ],
     },
+    {
+      id: 28,
+      fields: [
+        { name: "Year", key: "Year_id_28", type: "dropdown", options: getLastFiveYears() },
+      ],
+    }
   ];
 
-  const handleViewChecklist = async (checklistId, title, type) => {
-    if (!checklistId) return;
-    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
-    if (checklistModal[type] && checklistModal[type].length > 0) {
-      setChecklistModal(prev => ({ ...prev, loading: false, data: [...prev[type]] }));
-      return;
-    }
-    try {
-      const response = await dispatch(DownloadChecklist({ checklistId, token })).unwrap();
-      const data = new Uint8Array(response.data);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
-      const formattedRows = json.slice(1).filter(row => row && row[1]).map((row) => ({
-        s_no: row[0],
-        question: row[1],
-        answer: '',
-        comment: '',
-        date: ""
-      }));
-      setChecklistModal(prev => ({ ...prev, loading: false, [type]: formattedRows, data: formattedRows }));
-    } catch (error) {
-      sweatalert.fire({ icon: 'error', title: 'Error', text: 'Failed to load checklist file' });
-      setChecklistModal(prev => ({ ...prev, show: false, loading: false }));
-    }
-  };
+  const serviceOptions = [
+    { value: '', label: 'Select Service' },
+    ...(AllJobData?.data?.services || []).map((service) => ({
+      value: service.service_id,
+      label: service.service_name
+    }))
+  ];
 
-  const handleChecklistAnswerChange = (index, answer, type, attribute) => {
-    setChecklistModal(prev => {
-      const newData = [...prev[type]];
-      newData[index] = { ...newData[index], [attribute]: answer, date: (attribute === "answer" && !answer) ? "" : new Date().toISOString().split('T')[0] };
-      return { ...prev, [type]: newData };
-    });
-  };
+  const jobTypeOptions = [
+    { value: '', label: 'Select Job Type' },
+    ...(get_Job_Type?.data || []).map((jobtype) => ({
+      value: jobtype.id,
+      label: jobtype.type
+    }))
+  ];
 
-  const openJobModal = (e) => { if (e.target.value != "") { jobModalSetStatus(true); } };
-  const AddTask = (id) => {
-    const filterData = AllChecklistData.data.find((data) => data.task_id == id);
-    if (!filterData) return;
-    setAddTaskArr((prev) => prev.some(t => t.task_id === filterData.task_id) ? prev : [...prev, filterData]);
-  };
-  const RemoveTask = (id) => setAddTaskArr((prev) => prev.filter((task) => task.task_id !== id));
+  const reviewerOptions = [
+    { value: '', label: 'Select Reviewer' },
+    ...(AllJobData?.data?.reviewer || []).map((reviewer) => ({
+      value: reviewer.reviewer_id,
+      label: `${reviewer.reviewer_name} (${reviewer?.reviewer_email})`
+    }))
+  ];
 
-  const handleBudgetTime = (e, index, type) => {
-    const { value } = e.target;
-    if (!/^\d*$/.test(value)) return;
-    setAddTaskArr((prev) => {
-      const updated = [...prev];
-      let [hour, minute] = (updated[index]?.budgeted_hour || "0:0").split(":");
-      if (type === "hour") hour = value;
-      else if (type === "minute") {
-        let numValue = Number(value);
-        if (numValue > 59) numValue = 59;
-        minute = numValue.toString();
-      }
-      updated[index] = { ...updated[index], budgeted_hour: `${hour}:${minute}` };
-      return updated;
-    });
-  };
+  const allocatedStaffOptions = [
+    { value: '', label: 'Select Staff' },
+    ...(AllJobData?.data?.allocated || []).map((staff) => ({
+      value: staff.allocated_id,
+      label: `${staff.allocated_name} (${staff.allocated_email})`
+    }))
+  ];
 
-  const handleAddTask = () => {
-    if (!taskName.trim() || !BudgetedHoursAddTask.hours || BudgetedHoursAddTask.hours <= 0) {
-      sweatalert.fire({ icon: "error", title: "Please enter task name and hours" });
-      return;
-    }
-    const req = { task_id: "", task_name: taskName, budgeted_hour: `${BudgetedHoursAddTask.hours}:${BudgetedHoursAddTask.minutes || "0"}` };
-    setAddTaskArr([...AddTaskArr, req]);
-    setTaskName("");
-    setBudgetedHoursAddTask({ hours: "", minutes: "" });
-    setShowAddJobModal(false);
-  };
+  const customerAccountManagerOptions = [
+    { value: '', label: 'Select Customer Account Manager' },
+    ...(AllJobData?.data?.customer_account_manager || []).map((manager) => ({
+      value: manager.customer_account_manager_officer_id,
+      label: manager.customer_account_manager_officer_name
+    }))
+  ];
+
+  const clientOptions = [
+    { value: '', label: 'Select Client' },
+    ...(AllJobData?.data?.client || []).map((client) => ({
+      value: client.client_id,
+      label: client.client_trading_name
+    }))
+  ];
 
   return (
     <div className="container-fluid">
@@ -743,125 +878,448 @@ const CreateJob = () => {
         <div className="col-xl-12">
           <div className="card">
             <div className="card-header step-header-blue d-flex align-items-center">
-              <button type="button" className="btn p-0" onClick={() => navigate(-1)}><ArrowLeft size={16} /></button>
+              <button
+                type="button"
+                className="btn p-0"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft size={16} />
+              </button>
               <h3 className="card-title mb-0 ms-2">Create New Job</h3>
             </div>
-            <div className="card-body">
+
+            <div className="card-body form-steps">
               <div className="row">
-                <div className="card card_shadow mb-4">
-                  <div className="card-header card-header-light-blue"><h4 className="card-title mb-0 fs-16">Job Information</h4></div>
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="mb-3 col-lg-4">
-                        <label className="form-label">Outbook Account Manager <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control" disabled value={jobData.AccountManager} />
-                      </div>
-                      <div className="mb-3 col-lg-4">
-                        <label className="form-label">Customer <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control" disabled value={jobData.Customer} />
-                      </div>
-                      <div className="mb-3 col-lg-4">
-                        <label className="form-label">Client <span className="text-danger">*</span></label>
-                        {location?.state?.goto == "Customer" ? (
-                          <select className={`form-select ${errors["Client"] ? "is-invalid" : ""}`} name="Client" value={jobData.Client} onChange={HandleChange}>
-                            <option value="">Select Client</option>
-                            {allClientDetails?.map((client) => (<option key={client.client_id} value={client.client_id}>{client.client_trading_name}</option>))}
-                          </select>
-                        ) : (
-                          <input type="text" className="form-control" disabled value={jobData.Client} />
-                        )}
-                        {errors["Client"] && <div className="invalid-feedback">{errors["Client"]}</div>}
-                      </div>
-                      <div className="mb-3 col-lg-4">
-                        <label className="form-label">Service <span className="text-danger">*</span></label>
-                        <select className={`form-select ${errors["Service"] ? "is-invalid" : ""}`} name="Service" value={jobData.Service} onChange={HandleChange}>
-                          <option value="">Select Service</option>
-                          {AllJobData?.data?.services?.map((service) => (<option key={service.service_id} value={service.service_id}>{service.service_name}</option>))}
-                        </select>
-                        {errors["Service"] && <div className="invalid-feedback">{errors["Service"]}</div>}
-                      </div>
-                      <div className="mb-3 col-lg-4">
-                        <label className="form-label">Job Type <span className="text-danger">*</span></label>
-                        <select className={`form-select ${errors["JobType"] ? "is-invalid" : ""}`} name="JobType" value={jobData.JobType} onChange={HandleChange}>
-                          <option value="">Select Job Type</option>
-                          {get_Job_Type?.data?.map((jt) => (<option key={jt.id} value={jt.id}>{jt.type}</option>))}
-                        </select>
-                        {errors["JobType"] && <div className="invalid-feedback">{errors["JobType"]}</div>}
-                      </div>
+                <div className="col-lg-12">
+                  <div className="card card_shadow">
+                    <div className="card-header card-header-light-blue align-items-center d-flex">
+                      <h4 className="card-title mb-0 flex-grow-1 fs-16">Job Information</h4>
                     </div>
-                  </div>
-                </div>
-
-                {/* Dynamic Service Fields */}
-                <div className="card card_shadow mb-4">
-                  <div className="card-header card-header-light-blue"><h4 className="card-title mb-0 fs-16">Service Specifications</h4></div>
-                  <div className="card-body">
-                    <div className="row">
-                      {serviceFields.filter(group => group.id === 0 || group.id === Number(jobData.Service)).map(group => (
-                        group.fields.filter(field => shouldShowField(field, jobData)).map(field => (
-                          <div className="mb-3 col-lg-4" key={field.key}>
-                            <label className="form-label">{field.name}</label>
-                            {field.type === "dropdown" ? (
-                              <select className="form-select" name={field.key} value={jobData[field.key] || ""} onChange={HandleChange}>
-                                <option value="">Select {field.name}</option>
-                                {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                              </select>
-                            ) : (
-                              <input type={field.type} className="form-control" name={field.key} value={jobData[field.key] || ""} onChange={HandleChange} />
-                            )}
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Account Manager <span className="text-danger">*</span></label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            disabled
+                            value={jobData.AccountManager}
+                          />
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Customer <span className="text-danger">*</span></label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            disabled
+                            value={jobData.Customer}
+                          />
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Client <span className="text-danger">*</span></label>
+                          <Select
+                            options={clientOptions}
+                            value={clientOptions.find(opt => String(opt.value) === String(jobData.Client))}
+                            onChange={(opt) => HandleChange({ target: { name: "Client", value: opt.value } })}
+                            className={errors["Client"] ? "error-field" : ""}
+                          />
+                          {errors["Client"] && <div className="error-text">{errors["Client"]}</div>}
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Client Job Code</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="ClientJobCode"
+                            value={jobData.ClientJobCode}
+                            onChange={HandleChange}
+                          />
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Customer Account Manager <span className="text-danger">*</span></label>
+                          <Select
+                            options={customerAccountManagerOptions}
+                            value={customerAccountManagerOptions.find(opt => String(opt.value) === String(jobData.CustomerAccountManager))}
+                            onChange={(opt) => HandleChange({ target: { name: "CustomerAccountManager", value: opt.value } })}
+                            className={errors["CustomerAccountManager"] ? "error-field" : ""}
+                          />
+                          {errors["CustomerAccountManager"] && <div className="error-text">{errors["CustomerAccountManager"]}</div>}
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Service <span className="text-danger">*</span></label>
+                          <Select
+                            options={serviceOptions}
+                            value={serviceOptions.find(opt => String(opt.value) === String(jobData.Service))}
+                            onChange={(opt) => HandleChange({ target: { name: "Service", value: opt.value } })}
+                            className={errors["Service"] ? "error-field" : ""}
+                            isDisabled={!jobData.Client}
+                          />
+                          {errors["Service"] && <div className="error-text">{errors["Service"]}</div>}
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Job Type <span className="text-danger">*</span></label>
+                          <Select
+                            options={jobTypeOptions}
+                            value={jobTypeOptions.find(opt => String(opt.value) === String(jobData.JobType))}
+                            onChange={(opt) => {
+                              HandleChange({ target: { name: "JobType", value: opt.value } });
+                              openJobModal({ target: { value: opt.value } });
+                            }}
+                            className={errors["JobType"] ? "error-field" : ""}
+                          />
+                          {errors["JobType"] && <div className="error-text">{errors["JobType"]}</div>}
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Budgeted Time</label>
+                          <div className="input-group">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="H"
+                              value={budgetedHours.hours}
+                              onChange={(e) => setBudgetedHours({ ...budgetedHours, hours: e.target.value })}
+                            />
+                            <span className="input-group-text">H</span>
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="M"
+                              value={budgetedHours.minutes}
+                              onChange={(e) => setBudgetedHours({ ...budgetedHours, minutes: Math.min(59, Math.max(0, e.target.value)) })}
+                            />
+                            <span className="input-group-text">M</span>
                           </div>
-                        ))
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Checklist & Tasks */}
-                <div className="card card_shadow mb-4">
-                  <div className="card-header card-header-light-blue d-flex justify-content-between align-items-center">
-                    <h4 className="card-title mb-0 fs-16">Tasks & Checklist</h4>
-                    <Button variant="primary" size="sm" onClick={() => setShowAddJobModal(true)}><Plus size={14} /> Add Task</Button>
-                  </div>
-                  <div className="card-body">
-                    <div className="row mb-3">
-                      <div className="col-lg-6">
-                        <label className="form-label">Select Checklist</label>
-                        <select className="form-select" value={getChecklistId} onChange={(e) => { setChecklistId(e.target.value); openJobModal(e); }}>
-                          <option value="">Select Checklist</option>
-                          {AllChecklistData?.data?.map(c => <option key={c.checklist_id} value={c.checklist_id}>{c.checklist_name}</option>)}
-                        </select>
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Reviewer</label>
+                          <Select
+                            options={reviewerOptions}
+                            value={reviewerOptions.find(opt => String(opt.value) === String(jobData.Reviewer))}
+                            onChange={(opt) => HandleChange({ target: { name: "Reviewer", value: opt.value } })}
+                          />
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Allocated To</label>
+                          <Select
+                            options={allocatedStaffOptions}
+                            value={allocatedStaffOptions.find(opt => String(opt.value) === String(jobData.AllocatedTo))}
+                            onChange={(opt) => HandleChange({ target: { name: "AllocatedTo", value: opt.value } })}
+                          />
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Allocated On</label>
+                          <input
+                            type="date"
+                            className="form-control"
+                            name="AllocatedOn"
+                            value={jobData.AllocatedOn}
+                            onChange={HandleChange}
+                          />
+                        </div>
+                        <div className="mb-3 col-lg-4">
+                          <label className="form-label">Date Received On <span className="text-danger">*</span></label>
+                          <input
+                            type="date"
+                            className="form-control"
+                            name="DateReceivedOn"
+                            value={jobData.DateReceivedOn}
+                            onChange={HandleChange}
+                          />
+                          {errors["DateReceivedOn"] && <div className="error-text">{errors["DateReceivedOn"]}</div>}
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Preparation Time</label>
+                          <div className="input-group">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="H"
+                              value={PreparationTimne.hours}
+                              onChange={(e) => setPreparationTimne({ ...PreparationTimne, hours: e.target.value })}
+                            />
+                            <span className="input-group-text">H</span>
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="M"
+                              value={PreparationTimne.minutes}
+                              onChange={(e) => setPreparationTimne({ ...PreparationTimne, minutes: Math.min(59, Math.max(0, e.target.value)) })}
+                            />
+                            <span className="input-group-text">M</span>
+                          </div>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Review Time</label>
+                          <div className="input-group">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="H"
+                              value={reviewTime.hours}
+                              onChange={(e) => setReviewTime({ ...reviewTime, hours: e.target.value })}
+                            />
+                            <span className="input-group-text">H</span>
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="M"
+                              value={reviewTime.minutes}
+                              onChange={(e) => setReviewTime({ ...reviewTime, minutes: Math.min(59, Math.max(0, e.target.value)) })}
+                            />
+                            <span className="input-group-text">M</span>
+                          </div>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Feedback Incorporation Time</label>
+                          <div className="input-group">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="H"
+                              value={FeedbackIncorporationTime.hours}
+                              onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: e.target.value })}
+                            />
+                            <span className="input-group-text">H</span>
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="M"
+                              value={FeedbackIncorporationTime.minutes}
+                              onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, minutes: Math.min(59, Math.max(0, e.target.value)) })}
+                            />
+                            <span className="input-group-text">M</span>
+                          </div>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Total Time</label>
+                          <div className="input-group">
+                            <input type="text" className="form-control" disabled value={Totaltime.hours} />
+                            <span className="input-group-text">H</span>
+                            <input type="text" className="form-control" disabled value={Totaltime.minutes} />
+                            <span className="input-group-text">M</span>
+                          </div>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Engagement Model</label>
+                          <select
+                            className="form-select"
+                            name="EngagementModel"
+                            value={jobData.EngagementModel}
+                            onChange={HandleChange}
+                          >
+                            <option value="">Select Engagement Model</option>
+                            {Object.keys(filteredData).map((key, index) => (
+                              <option key={key} value={key}>{RearrangeEngagementOptionArr[index]}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Allocated to (Other)</label>
+                          <Select
+                            options={allStaffData.map(s => ({ label: s.full_name, value: s.id }))}
+                            isMulti
+                            value={selectedStaffData}
+                            onChange={setSelectedStaffData}
+                            placeholder="Select options"
+                          />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Job Priority</label>
+                          <select className="form-select" name="job_priority" value={jobData.job_priority} onChange={HandleChange}>
+                            <option value="normal">Normal</option>
+                            <option value="urgent">Urgent</option>
+                          </select>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Processing Checklist</label>
+                          <select
+                            className="form-select"
+                            name="processing_checklist"
+                            value={jobData.processing_checklist || ""}
+                            onChange={HandleChange}
+                          >
+                            <option value="">-- Select --</option>
+                            <option value="0">Not Required</option>
+                            {AllJobData?.data?.processing_checklist_data
+                              ?.filter(item => {
+                                const serviceIds = item.service_id?.split(",").map(Number) || [];
+                                const jobTypeIds = item.job_type_id?.split(",").map(Number) || [];
+                                return serviceIds.includes(Number(jobData.Service)) && jobTypeIds.includes(Number(jobData.JobType));
+                              })
+                              .map(item => <option key={item.id} value={item.id}>{item.check_list_name}</option>)
+                            }
+                          </select>
+                          {jobData.processing_checklist && jobData.processing_checklist !== "0" && (
+                            <button
+                              type="button"
+                              className="btn btn-link p-0 fs-12 text-primary mt-1"
+                              onClick={() => {
+                                const selected = AllJobData?.data?.processing_checklist_data?.find(i => Number(i.id) === Number(jobData.processing_checklist));
+                                handleViewChecklist(selected.id, selected.check_list_name, "processing");
+                              }}
+                            >
+                              <ExternalLink size={12} className="me-1" /> Fill checklist
+                            </button>
+                          )}
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Reviewing Checklist</label>
+                          <select
+                            className="form-select"
+                            name="reviewing_checklist"
+                            value={jobData.reviewing_checklist || ""}
+                            onChange={HandleChange}
+                          >
+                            <option value="">-- Select --</option>
+                            <option value="0">Not Required</option>
+                            {AllJobData?.data?.reviewing_checklist_data
+                              ?.filter(item => {
+                                const serviceIds = item.service_id?.split(",").map(Number) || [];
+                                const jobTypeIds = item.job_type_id?.split(",").map(Number) || [];
+                                return serviceIds.includes(Number(jobData.Service)) && jobTypeIds.includes(Number(jobData.JobType));
+                              })
+                              .map(item => <option key={item.id} value={item.id}>{item.check_list_name}</option>)
+                            }
+                          </select>
+                          {jobData.reviewing_checklist && jobData.reviewing_checklist !== "0" && (
+                            <button
+                              type="button"
+                              className="btn btn-link p-0 fs-12 text-primary mt-1"
+                              onClick={() => {
+                                const selected = AllJobData?.data?.reviewing_checklist_data?.find(i => Number(i.id) === Number(jobData.reviewing_checklist));
+                                handleViewChecklist(selected.id, selected.check_list_name, "reviewing");
+                              }}
+                            >
+                              <ExternalLink size={12} className="me-1" /> Fill checklist
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <Table bordered hover responsive size="sm">
-                      <thead className="table-light">
-                        <tr>
-                          <th>Task Name</th>
-                          <th style={{ width: '200px' }}>Budgeted Time (HH:MM)</th>
-                          <th style={{ width: '100px' }}>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {AddTaskArr.map((task, index) => (
-                          <tr key={index}>
-                            <td>{task.task_name}</td>
-                            <td>
-                              <div className="d-flex align-items-center">
-                                <input type="text" className="form-control form-control-sm text-center" style={{ width: '60px' }} value={(task.budgeted_hour || "0:0").split(":")[0]} onChange={(e) => handleBudgetTime(e, index, 'hour')} />
-                                <span className="mx-1">:</span>
-                                <input type="text" className="form-control form-control-sm text-center" style={{ width: '60px' }} value={(task.budgeted_hour || "0:0").split(":")[1]} onChange={(e) => handleBudgetTime(e, index, 'minute')} />
-                              </div>
-                            </td>
-                            <td className="text-center"><Button variant="link" className="text-danger p-0" onClick={() => RemoveTask(task.task_id)}><X size={16} /></Button></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
                   </div>
                 </div>
 
-                <div className="d-flex justify-content-end mb-4">
-                  <Button variant="light" className="me-2" onClick={() => navigate(-1)}>Cancel</Button>
-                  <Button variant="success" onClick={handleSubmit}><Save size={16} className="me-1" /> Create Job</Button>
+                {/* Dynamic Service Fields Section */}
+                {serviceFields.find(s => s.id === Number(jobData.Service))?.fields.length > 0 && (
+                  <div className="col-lg-12">
+                    <div className="card card_shadow">
+                      <div className="card-header card-header-light-blue">
+                        <h4 className="card-title mb-0 fs-16">Other Data</h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row mt-3">
+                          {serviceFields.find(s => s.id === Number(jobData.Service))?.fields.map((field, idx) => {
+                            if (!shouldShowField(field, jobData)) return null;
+                            return (
+                              <div className="col-lg-4 mb-3" key={idx}>
+                                <label className="form-label">{field.name}</label>
+                                {field.type === "dropdown" ? (
+                                  <select
+                                    className="form-select"
+                                    name={field.key}
+                                    value={jobData[field.key] || ""}
+                                    onChange={HandleChange}
+                                  >
+                                    <option value="">-- Select --</option>
+                                    {field.options?.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
+                                  </select>
+                                ) : (
+                                  <input
+                                    type={field.type || "text"}
+                                    className="form-control"
+                                    name={field.key}
+                                    value={jobData[field.key] || ""}
+                                    onChange={HandleChange}
+                                    min={field.min}
+                                    max={field.max}
+                                  />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deadline Section */}
+                <div className="col-lg-12">
+                  <div className="card card_shadow">
+                    <div className="card-header card-header-light-blue">
+                      <h4 className="card-title mb-0 fs-16">Deadline</h4>
+                    </div>
+                    <div className="card-body">
+                      <div className="row mt-3">
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Expected Delivery Date</label>
+                          <input type="date" className="form-control" name="ExpectedDeliveryDate" value={jobData.ExpectedDeliveryDate} onChange={HandleChange} />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Due On</label>
+                          <input type="date" className="form-control" name="DueOn" value={jobData.DueOn} onChange={HandleChange} />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Submission Deadline</label>
+                          <input type="date" className="form-control" name="SubmissionDeadline" value={jobData.SubmissionDeadline} onChange={HandleChange} />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Customer Deadline Date</label>
+                          <input type="date" className="form-control" name="CustomerDeadlineDate" value={jobData.CustomerDeadlineDate} onChange={HandleChange} />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">SLA Deadline Date</label>
+                          <input type="date" className="form-control" name="SLADeadlineDate" value={jobData.SLADeadlineDate} onChange={HandleChange} />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Internal Deadline Date</label>
+                          <input type="date" className="form-control" name="InternalDeadlineDate" value={jobData.InternalDeadlineDate} onChange={HandleChange} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Other Task Section */}
+                <div className="col-lg-12">
+                  <div className="card card_shadow">
+                    <div className="card-header card-header-light-blue">
+                      <h4 className="card-title mb-0 fs-16">Other Task</h4>
+                    </div>
+                    <div className="card-body">
+                      <div className="row mt-3">
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Filing With Companies House Required?</label>
+                          <select className="form-select" name="FilingWithCompaniesHouseRequired" value={jobData.FilingWithCompaniesHouseRequired} onChange={HandleChange}>
+                            <option value="">Please Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </select>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Companies House Filing Date</label>
+                          <input type="date" className="form-control" name="CompaniesHouseFilingDate" value={jobData.CompaniesHouseFilingDate} onChange={HandleChange} />
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">Filing with HMRC Required?</label>
+                          <select className="form-select" name="FilingWithHMRCRequired" value={jobData.FilingWithHMRCRequired} onChange={HandleChange}>
+                            <option value="">Please Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </select>
+                        </div>
+                        <div className="col-lg-4 mb-3">
+                          <label className="form-label">HMRC Filing Date</label>
+                          <input type="date" className="form-control" name="HMRCFilingDate" value={jobData.HMRCFilingDate} onChange={HandleChange} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-lg-12 text-end mb-4">
+                  <button type="button" className="btn btn-light me-2" onClick={() => navigate(-1)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Create Job</button>
                 </div>
               </div>
             </div>
@@ -869,50 +1327,87 @@ const CreateJob = () => {
         </div>
       </div>
 
-      {/* Add Task Modal */}
-      <Modal show={showAddJobModal} onHide={() => setShowAddJobModal(false)} centered>
-        <Modal.Header closeButton><Modal.Title className="fs-18">Add New Task</Modal.Title></Modal.Header>
+      {/* Checklist Modal */}
+      <Modal show={checklistModal.show} onHide={() => setChecklistModal(prev => ({ ...prev, show: false }))} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{checklistModal.title}</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          <div className="mb-3">
-            <label className="form-label">Task Name</label>
-            <input type="text" className="form-control" value={taskName} onChange={(e) => setTaskName(e.target.value)} />
-          </div>
-          <div className="row">
-            <div className="col-6">
-              <label className="form-label">Hours</label>
-              <input type="number" className="form-control" value={BudgetedHoursAddTask.hours} onChange={(e) => setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: e.target.value })} />
-            </div>
-            <div className="col-6">
-              <label className="form-label">Minutes</label>
-              <input type="number" className="form-control" value={BudgetedHoursAddTask.minutes} onChange={(e) => setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, minutes: e.target.value })} />
-            </div>
-          </div>
+          {checklistModal.loading ? (
+            <div className="text-center p-5">Loading tasks...</div>
+          ) : (
+            <Table responsive striped bordered hover>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Task Name</th>
+                  <th>Status</th>
+                  <th>Remark</th>
+                </tr>
+              </thead>
+              <tbody>
+                {checklistModal.data.map((task, index) => (
+                  <tr key={task.id}>
+                    <td>{index + 1}</td>
+                    <td>{task.task_name}</td>
+                    <td>
+                      <Form.Select
+                        size="sm"
+                        value={task.status}
+                        onChange={(e) => handleTaskStatusChange(task.id, e.target.value)}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="n/a">N/A</option>
+                      </Form.Select>
+                    </td>
+                    <td>
+                      <Form.Control
+                        size="sm"
+                        type="text"
+                        placeholder="Remark"
+                        value={task.remark}
+                        onChange={(e) => handleTaskRemarkChange(task.id, e.target.value)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="light" onClick={() => setShowAddJobModal(false)}>Close</Button>
-          <Button variant="primary" onClick={handleAddTask}>Add Task</Button>
+          <Button variant="secondary" onClick={() => setChecklistModal(prev => ({ ...prev, show: false }))}>Close</Button>
+          <Button variant="primary" onClick={handleSubmitChecklist}>Save Checklist</Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Checklist Selection Modal */}
-      <Modal show={jobModalStatus} onHide={() => jobModalSetStatus(false)} size="lg" centered>
-        <Modal.Header closeButton><Modal.Title className="fs-18">Checklist Tasks</Modal.Title></Modal.Header>
+      {/* Tasks Modal (triggered by Job Type selection) */}
+      <Modal show={jobModalStatus} onHide={() => jobModalSetStatus(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Tasks for Job Type</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          <Table bordered hover>
-            <thead className="table-light"><tr><th>Task Name</th><th className="text-center">Action</th></tr></thead>
+          <Table responsive bordered>
+            <thead>
+              <tr>
+                <th>Task Name</th>
+                <th>Budgeted Time (H:M)</th>
+              </tr>
+            </thead>
             <tbody>
-              {AllChecklistData.data.map(task => (
-                <tr key={task.task_id}>
+              {AddTaskArr.map((task, index) => (
+                <tr key={index}>
                   <td>{task.task_name}</td>
-                  <td className="text-center">
-                    <Button variant="soft-primary" size="sm" onClick={() => AddTask(task.task_id)}>Add</Button>
-                  </td>
+                  <td>{task.budgeted_hour}</td>
                 </tr>
               ))}
             </tbody>
           </Table>
         </Modal.Body>
-        <Modal.Footer><Button variant="primary" onClick={() => jobModalSetStatus(false)}>Done</Button></Modal.Footer>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => jobModalSetStatus(false)}>Close</Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );
