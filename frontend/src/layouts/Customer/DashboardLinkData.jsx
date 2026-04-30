@@ -174,7 +174,7 @@ const DashboardLinkData = () => {
           timesheet_job_id: row?.timesheet_job_id,
           data: updatedData,
           goto: "client",
-          activeTab: location?.state?.activeTab,
+          activeTab: "NoOfJobs",
         },
       });
       return updatedData;
@@ -188,7 +188,7 @@ const DashboardLinkData = () => {
         client: row,
       };
       navigate("/customer/client/profile", {
-        state: { Client_id: row.id, data: updatedData },
+        state: { Client_id: row.id, activeTab: "NoOfJobs", data: updatedData },
       });
       return updatedData;
     });

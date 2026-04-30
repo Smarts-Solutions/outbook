@@ -11,7 +11,7 @@ import Header from '../Components/Dashboard/Header';
 
 import ClientEdit from "../layouts/Admin/Clients/Client_Edit";
 import ClientProfiles from "../layouts/Customer/Customer/ClientProfile_sidebar";
-import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
+import CreateJob from "../layouts/Customer/Customer/CreateJob";
 import JobEdit from "../layouts/Customer/Customer/EditJob";
 import JobLogs from "../layouts/Customer/Customer/JobLogs/CustomerJobLogs";
 import AddNewClient from "../layouts/Admin/Clients/CreateClient";

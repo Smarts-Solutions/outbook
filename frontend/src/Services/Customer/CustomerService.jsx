@@ -853,3 +853,28 @@ export async function UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY(data, token) {
   }
 }
 
+// Get Job Type
+export async function JOB_TYPE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}JobType`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+// Download Checklist
+export async function DOWNLOAD_CHECKLIST(checklistId, token) {
+  try {
+    const res = await axios.get(`${Config.base_url}downloadChecklist/${checklistId}`, {
+      headers: header(token),
+      responseType: 'arraybuffer'
+    });
+    return res;
+  } catch (err) {
+    return err;
+  }
+}

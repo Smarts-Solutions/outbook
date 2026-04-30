@@ -370,7 +370,21 @@ const ClientList = () => {
       name: "Client Name",
       cell: (row) => (
         <div title={row.client_trading_name || "-"}>
-          {row.client_trading_name || "-"}
+          <a
+            onClick={() => {
+              navigate("/customer/client/profile", {
+                state: {
+                  Client_id: row.id || row.client_id,
+                  activeTab: "NoOfJobs",
+                  customer_id: row.customer_id,
+                  data: { ...hararchyData, client: row },
+                },
+              });
+            }}
+            style={{ cursor: "pointer", color: "#26bdf0" }}
+          >
+            {row.client_trading_name || "-"}
+          </a>
         </div>
       ),
       selector: (row) => row.client_trading_name || "-",
@@ -1223,23 +1237,9 @@ const ClientList = () => {
               <div className="">
                 <div className="report-data mt-4 ">
                   <div className="d-flex justify-content-between align-items-center">
-                    <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-                      <li className="nav-item" role="presentation">
-                        <button
-                          className="nav-link active"
-                          id="assignedjob-tab"
-                          data-bs-toggle="pill"
-                          data-bs-target="#assignedjob"
-                          type="button"
-                          role="tab"
-                          aria-controls="assignedjob"
-                          aria-selected="true"
-                          tabIndex={-1}
-                        >
-                          Assigned Jobs
-                        </button>
-                      </li>
-                    </ul>
+                    <div className="tab-title mb-3">
+                      <h4 className="mt-0">Assigned Jobs</h4>
+                    </div>
 
                     {customerData && customerData.length > 0 && (
                       <div className="col-md-2">

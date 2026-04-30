@@ -7,6 +7,10 @@ const CustomerHierarchy = ({ show, active, data, NumberOfActive }) => {
         if (active < navigateTo) {
             return
         }
+        const role = JSON.parse(localStorage.getItem("role"));
+        if (role === "CUSTOMER" && navigateTo == 1) {
+            return;
+        }
         if (active == 1) {
             navigate('/customer')
         }
@@ -34,7 +38,7 @@ const CustomerHierarchy = ({ show, active, data, NumberOfActive }) => {
             <div className="row">
                 <div className={`${show.length == 2 ? 'col-12 col-md-8' : show.length == 3 ? 'col-12 col-md-9' : 'col-12'}`}>
                     <div className="breadcrumb">
-                        <a className="active col-lg-3 col-md-3 col-sm-3 col-12" style={{ cursor: "default" }}>
+                        <a className="active col-lg-3 col-md-3 col-sm-3 col-12" style={{ cursor: JSON.parse(localStorage.getItem("role")) === "CUSTOMER" ? "default" : "pointer" }} onClick={() => fun(1, active)}>
                             <span className="breadcrumb__inner">
                                 <span className="breadcrumb__title">{show[0]}</span>
                                 <span className="breadcrumb__desc">{data?.customer?.trading_name}</span>

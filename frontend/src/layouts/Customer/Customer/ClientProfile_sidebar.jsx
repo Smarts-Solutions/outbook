@@ -267,14 +267,17 @@ const CustomerClientProfile = () => {
   }, [role, hasAccess]);
 
   const handleCreateJob = () => {
-    navigate("/createjob", {
+    navigate("/customer/createjob", {
       state: {
         customer_id: customerDetails.id || hararchyData.customer.id,
-        client_id: clientDetailSingle.id || hararchyData.client.id,
-        client_name: clientDetailSingle.client_name || hararchyData.client.client_name,
-        customer_name: customerDetails.trading_name || hararchyData.customer.trading_name,
-        backPath: "/customer/client/profile"
-      }
+        clientName: {
+          id: clientDetailSingle.id || hararchyData.client.id,
+          client_name: clientDetailSingle.client_name || hararchyData.client.client_name || hararchyData.client.trading_name,
+        },
+        goto: "client",
+        activeTab: activeTab,
+        data: hararchyData
+      },
     });
   };
 
@@ -1315,17 +1318,25 @@ const CustomerClientProfile = () => {
                 ))}
               </ul>
             </div>
-            <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+            <div className="col-md-6 col-lg-4 d-flex justify-content-end align-items-center gap-2 mt-2 mt-sm-0 ps-lg-0">
+              {getAccessDataJob.insert == 1 && (
+                <button
+                  type="button"
+                  className="btn btn-info text-white blue-btn"
+                  onClick={handleCreateJob}
+                >
+                  <Plus size={16} /> Create Job
+                </button>
+              )}
               <button
                 type="button"
-                className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                className="btn btn-info text-white blue-btn"
                 onClick={() => {
                   window.history.back();
                 }}
               >
                 <ArrowLeft size={16} /> Back
               </button>
-
             </div>
           </div>
         </div>
@@ -1396,13 +1407,9 @@ const CustomerClientProfile = () => {
           <div className={`tab-pane fade show active`} id={"NoOfJobs"} role="tabpanel">
             <div className="report-data mt-4 ">
               <div className="d-flex justify-content-between align-items-center">
-                <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-                  <li className="nav-item" role="presentation">
-                    <button className="nav-link active" type="button" role="tab">
-                      Assigned Jobs
-                    </button>
-                  </li>
-                </ul>
+                <div className="tab-title mb-3">
+                  <h4 className="mt-0">Assigned Jobs</h4>
+                </div>
                 {customerData && customerData.length > 0 && (
                   <div className="col-md-2">
                     <button

@@ -58,6 +58,8 @@ import {
   CUSTOMER_QUERY_ACTION,
   CUSTOMER_DRAFT_ACTION,
   CUSTOMER_DOCUMENT_ACTION,
+  JOB_TYPE,
+  DOWNLOAD_CHECKLIST,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -677,6 +679,26 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
     }
   }
 );
+
+export const JobType = createAsyncThunk("jobType", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await JOB_TYPE(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const DownloadChecklist = createAsyncThunk("downloadChecklist", async (data) => {
+  try {
+    const { checklistId, token } = data;
+    const res = await DOWNLOAD_CHECKLIST(checklistId, token);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
 
 export const getAllTaskTimeSheet = createAsyncThunk(
   "getTaskTimeSheet",
