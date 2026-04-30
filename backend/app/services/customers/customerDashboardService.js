@@ -1,4 +1,9 @@
 const customerDashboardModel = require('../../models/customerDashboardModel');
+const jobModel = require('../../models/jobModel');
+const jobTypeTaskService = require('../jobTypeTask/jobTypeTaskService');
+const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 
 const getCustomerDashboardData = async (dashboard) => {
   return customerDashboardModel.getCustomerDashboardData(dashboard);
@@ -72,6 +77,68 @@ const customerDocumentAction = async (data) => {
   return await customerDashboardModel.customerDocumentAction(data);
 };
 
+const getCustomerAddJobData = async (data) => {
+  return await jobModel.getAddJobData(data);
+};
+
+const customerJobAdd = async (data) => {
+  return await jobModel.jobAdd(data);
+};
+
+const customerChecklistAction = async (data) => {
+  return await jobTypeTaskService.checklistAction(data);
+};
+
+const customerJobType = async (data) => {
+  return await jobTypeTaskService.getJobType(data);
+};
+
+const customerGetOfficerDetails = async (data) => {
+  try {
+    let type = data.type;
+    let url = 'https://api.companieshouse.gov.uk/company/' + data.company_number;
+    if (type != "company_info") {
+      url += '/officers';
+    }
+
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: url,
+      headers: {
+        'Authorization': 'Basic bm9uT2Y4Snk5X2thX2ZnRzJndEZ5TkxwYThsSm1zVkd2ekZadlRiRjo='
+      }
+    };
+
+    const response = await axios.request(config);
+    const resultData = type === "company_info" ? response.data : response.data.items;
+    return { status: true, data: resultData, message: "success.." };
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
+const customerDownloadChecklist = async (checklist_id) => {
+  try {
+    const filenameFromDB = await jobTypeTaskService.getFilenameById(checklist_id);
+    if (!filenameFromDB) {
+      return { status: false, message: 'Checklist record not found' };
+    }
+
+    const diskFileName = `checklist_excel_${checklist_id}.zip`;
+    const filePath = path.join(__dirname, '../../../checklist_excel', diskFileName);
+
+    if (fs.existsSync(filePath)) {
+      const fileData = fs.readFileSync(filePath);
+      return { status: true, data: fileData, filename: filenameFromDB };
+    } else {
+      return { status: false, message: 'File not found on server' };
+    }
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -91,4 +158,10 @@ module.exports = {
   customerQueryAction,
   customerDraftAction,
   customerDocumentAction,
+  getCustomerAddJobData,
+  customerJobAdd,
+  customerChecklistAction,
+  customerGetOfficerDetails,
+  customerJobType,
+  customerDownloadChecklist,
 };

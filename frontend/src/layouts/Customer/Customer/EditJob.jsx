@@ -6,10 +6,10 @@ import {
   CustomerJobUpdate,
   GET_ALL_CHECKLIST,
   CustomerJobAction,
-  GetOfficerDetails
+  GetOfficerDetails,
+  JobType
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { JobType } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError } from "../../../Utils/Comman_function";
 import { Modal, Button, Table, Form } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../Utils/Common_Message";
@@ -120,8 +120,9 @@ const EditJob = () => {
     }
 
     try {
-      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
-        responseType: 'arraybuffer'
+      const response = await axios.get(`${base_url}customerDownloadChecklist/${checklistId}`, {
+        responseType: 'arraybuffer',
+        headers: { Authorization: token }
       });
 
 

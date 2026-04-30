@@ -235,6 +235,74 @@ export async function CUSTOMER_DOCUMENT_ACTION(data, token) {
   }
 }
 
+// New Customer Specific Job Management Services
+export async function CUSTOMER_ADD_JOB_DATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerAddJobData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_ADD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobAdd`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CHECKLIST_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerChecklistAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_OFFICER_DETAILS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerGetOfficerDetails`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_TYPE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobType`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DOWNLOAD_CHECKLIST(checklistId, token) {
+  try {
+    const res = await axios.get(`${Config.base_url}customerDownloadChecklist/${checklistId}`, {
+      headers: header(token),
+      responseType: 'blob',
+    });
+    return res;
+  } catch (err) {
+    return err;
+  }
+}
+
 
 // get Timesheet Report Data
 export async function get_Timesheet_ReportData(data) {

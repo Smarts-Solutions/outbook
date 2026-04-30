@@ -185,6 +185,65 @@ const customerDocumentAction = async (req, res) => {
   }
 };
 
+const getCustomerAddJobData = async (req, res) => {
+  try {
+    const result = await customerDashboardService.getCustomerAddJobData(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerJobAdd = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerJobAdd(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerChecklistAction = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerChecklistAction(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerGetOfficerDetails = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerGetOfficerDetails(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerJobType = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerJobType(req.body);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+const customerDownloadChecklist = async (req, res) => {
+  try {
+    const result = await customerDashboardService.customerDownloadChecklist(req.params.checklist_id);
+    if (result.status === false) {
+      return res.status(404).send(result.message);
+    }
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=${result.filename}`);
+    return res.send(result.data);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   getCustomerDashboardData,
   getCustomerDashboardActivityLog,
@@ -204,4 +263,10 @@ module.exports = {
   customerQueryAction,
   customerDraftAction,
   customerDocumentAction,
+  getCustomerAddJobData,
+  customerJobAdd,
+  customerChecklistAction,
+  customerGetOfficerDetails,
+  customerJobType,
+  customerDownloadChecklist,
 };

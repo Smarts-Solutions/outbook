@@ -58,8 +58,12 @@ import {
   CUSTOMER_QUERY_ACTION,
   CUSTOMER_DRAFT_ACTION,
   CUSTOMER_DOCUMENT_ACTION,
-  JOB_TYPE,
-  DOWNLOAD_CHECKLIST,
+  CUSTOMER_ADD_JOB_DATA,
+  CUSTOMER_JOB_ADD,
+  CUSTOMER_CHECKLIST_ACTION,
+  CUSTOMER_OFFICER_DETAILS,
+  CUSTOMER_JOB_TYPE,
+  CUSTOMER_DOWNLOAD_CHECKLIST,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -414,7 +418,8 @@ export const GetOfficerDetails = createAsyncThunk("seachCompany", async (data) =
       StaffUserId: StaffUserId.id,
       type: data.type
     };
-    const res = await GETOFFICERDETAILS(updatedReq);
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await CUSTOMER_OFFICER_DETAILS(updatedReq, token);
     return await res;
   } catch (err) {
     throw err;
@@ -604,7 +609,7 @@ export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
       ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
-    const res = await GET_ALL_JOB_DATA(updatedReq, authToken);
+    const res = await CUSTOMER_ADD_JOB_DATA(updatedReq, authToken);
 
     return await res;
   } catch (err) {
@@ -621,7 +626,7 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
       ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
-    const res = await Add_Job_Type(updatedReq, authToken);
+    const res = await CUSTOMER_JOB_ADD(updatedReq, authToken);
 
     return await res;
   } catch (err) {
@@ -672,7 +677,7 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
         ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
-      const res = await GETALLCHECKLIST(updatedReq, authToken);
+      const res = await CUSTOMER_CHECKLIST_ACTION(updatedReq, authToken);
       return await res;
     } catch (err) {
       throw err;
@@ -683,7 +688,7 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
 export const JobType = createAsyncThunk("jobType", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await JOB_TYPE(req, authToken);
+    const res = await CUSTOMER_JOB_TYPE(req, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -693,7 +698,7 @@ export const JobType = createAsyncThunk("jobType", async (data) => {
 export const DownloadChecklist = createAsyncThunk("downloadChecklist", async (data) => {
   try {
     const { checklistId, token } = data;
-    const res = await DOWNLOAD_CHECKLIST(checklistId, token);
+    const res = await CUSTOMER_DOWNLOAD_CHECKLIST(checklistId, token);
     return res;
   } catch (err) {
     throw err;

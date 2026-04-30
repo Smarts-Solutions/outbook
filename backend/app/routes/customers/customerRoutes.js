@@ -46,6 +46,14 @@ router.post("/customerMissingLogAction", verifyToken, uploadMultiple, customerDa
 router.post("/customerQueryAction", verifyToken, uploadMultiple, customerDashboardController.customerQueryAction);
 router.post("/customerDraftAction", verifyToken, customerDashboardController.customerDraftAction);
 router.post("/customerDocumentAction", verifyToken, uploadMultiple, customerDashboardController.customerDocumentAction);
+
+// New Customer Specific Job Management Routes
+router.post("/getCustomerAddJobData", verifyToken, customerDashboardController.getCustomerAddJobData);
+router.post("/customerJobAdd", verifyToken, customerDashboardController.customerJobAdd);
+router.post("/customerChecklistAction", verifyToken, customerDashboardController.customerChecklistAction);
+router.post("/customerGetOfficerDetails", verifyToken, customerDashboardController.customerGetOfficerDetails);
+router.post("/customerJobType", verifyToken, customerDashboardController.customerJobType);
+router.get("/customerDownloadChecklist/:checklist_id", verifyToken, customerDashboardController.customerDownloadChecklist);
 // Customer Dashboard Routes End
 
 

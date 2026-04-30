@@ -167,8 +167,9 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     }
 
     try {
-      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
-        responseType: 'arraybuffer'
+      const response = await axios.get(`${base_url}customerDownloadChecklist/${checklistId}`, {
+        responseType: 'arraybuffer',
+        headers: { Authorization: token }
       });
 
 
