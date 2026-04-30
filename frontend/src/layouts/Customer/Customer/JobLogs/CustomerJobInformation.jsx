@@ -1606,7 +1606,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       placeholder="Enter Account Manager Name"
                       disabled
                       name="AccountManager"
-                      defaultValue=""
+                      
                       onChange={(e) =>
                         setJobInformationData({
                           ...JobInformationData,
@@ -1627,7 +1627,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       placeholder="Enter Customer"
                       disabled
                       name="Customer"
-                      defaultValue=""
+                      
                       onChange={(e) =>
                         setJobInformationData({
                           ...JobInformationData,
@@ -1647,7 +1647,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       className="form-control"
                       placeholder="Enter Client Job Code"
                       name="Client"
-                      defaultValue=""
+                      
                       disabled
                       onChange={(e) =>
                         setJobInformationData({
@@ -1666,7 +1666,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       className="form-control"
                       placeholder="Client Job Code"
                       name="ClientJobCode"
-                      defaultValue=""
+                      
                       disabled
                       onChange={(e) =>
                         setJobInformationData({
@@ -1687,7 +1687,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       className="form-select"
                       name="CustomerAccountManager"
                       disabled
-                      defaultValue=""
+                      
                       onChange={(e) =>
                         setJobInformationData({
                           ...JobInformationData,
@@ -1723,7 +1723,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     <select
                       className="form-select mb-3"
                       name="Service"
-                      defaultValue=""
+                      
                       disabled
                       onChange={(e) =>
                         setJobInformationData({
@@ -1753,7 +1753,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       className="form-select mb-3 jobtype"
                       disabled
                       name="JobType"
-                      defaultValue=""
+                      
                       onChange={(e) =>
                         setJobInformationData({
                           ...JobInformationData,
@@ -1781,7 +1781,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         <div className="hours-div">
                           <input
                             type="text"
-                            defaultValue=""
+                            
                             className="form-control"
                             placeholder="Hours"
                             name="BudgetedHours"
@@ -1804,7 +1804,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             className="form-control"
                             placeholder="Minutes"
                             name="BudgetedHours"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setBudgetedHours({
@@ -1826,7 +1826,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     <select
                       className="form-select mb-3"
                       name="Reviewer"
-                      defaultValue=""
+                      
                       disabled
                       onChange={(e) =>
                         setJobInformationData({
@@ -1856,7 +1856,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     <select
                       className="form-select mb-3"
                       name="AllocatedTo"
-                      defaultValue=""
+                      
                       disabled
                       onChange={(e) =>
                         setJobInformationData({
@@ -1907,7 +1907,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                       className="form-control mb-3"
                       placeholder="DD-MM-YYYY"
                       name="DateReceivedOn"
-                      defaultValue=""
+                      
                       disabled
                       onChange={(e) =>
                         setJobInformationData({
@@ -1928,7 +1928,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 className="form-control"
                                                 placeholder="MM/YYYY"
                                                 name="YearEnd"
-                                                defaultValue=""
+                                                
                                                 disabled
                                                 onChange={(e) => setJobInformationData({ ...JobInformationData, YearEnd: e.target.value })}
                                                 value={JobInformationData.YearEnd}
@@ -1947,7 +1947,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             type="text"
                             className="form-control"
                             placeholder="Hours"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setPreparationTimne({
@@ -1966,7 +1966,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             type="text"
                             className="form-control"
                             placeholder="Minutes"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setPreparationTimne({
@@ -1993,7 +1993,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             type="text"
                             className="form-control"
                             placeholder="Hours"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setReviewTime({
@@ -2012,7 +2012,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             type="text"
                             className="form-control"
                             placeholder="Minutes"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setReviewTime({
@@ -2040,7 +2040,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                           <input
                             type="text"
                             className="form-control"
-                            defaultValue=""
+                            
                             placeholder="Hours"
                             disabled
                             onChange={(e) =>
@@ -2060,7 +2060,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             type="text"
                             className="form-control"
                             placeholder="Minutes"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setFeedbackIncorporationTime({
@@ -2091,7 +2091,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             disabled
-                            defaultValue=""
+                            
                             onChange={(e) =>
                               setTotalTime({
                                 ...Totaltime,
@@ -2111,7 +2111,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             placeholder={10}
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
-                            defaultValue=""
+                            
                             disabled
                             onChange={(e) =>
                               setTotalTime({
@@ -2136,7 +2136,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     <select
                       className="form-select mb-3 invoice_type_dropdown"
                       disabled
-                      defaultValue=""
+                      
                       name="EngagementModel"
                       onChange={(e) =>
                         setJobInformationData({
@@ -2455,7 +2455,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         className="form-control"
                         placeholder="DD-MM-YYYY"
                         name="ExpectedDeliveryDate"
-                        defaultValue=""
+                        
                         disabled
                         onChange={(e) =>
                           setJobInformationData({
@@ -2473,7 +2473,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         className="form-control"
                         placeholder="DD-MM-YYYY"
                         name="DueOn"
-                        defaultValue=""
+                        
                         disabled
                         onChange={(e) =>
                           setJobInformationData({
@@ -2491,7 +2491,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         className="form-control"
                         placeholder="DD-MM-YYYY"
                         name="SubmissionDeadline"
-                        defaultValue=""
+                        
                         disabled
                         onChange={(e) =>
                           setJobInformationData({
@@ -2511,7 +2511,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         className="form-control"
                         placeholder="DD-MM-YYYY"
                         name="CustomerDeadlineDate"
-                        defaultValue=""
+                        
                         disabled
                         onChange={(e) =>
                           setJobInformationData({
@@ -2529,7 +2529,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         className="form-control"
                         placeholder="DD-MM-YYYY"
                         name="SLADeadlineDate"
-                        defaultValue=""
+                        
                         disabled
                         onChange={(e) =>
                           setJobInformationData({
@@ -2549,7 +2549,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         className="form-control"
                         placeholder="DD-MM-YYYY"
                         name="InternalDeadlineDate"
-                        defaultValue=""
+                        
                         disabled
                         onChange={(e) =>
                           setJobInformationData({
@@ -2584,7 +2584,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                           className="form-select mb-3"
                           name="FilingWithCompaniesHouseRequired"
                           disabled
-                          defaultValue=""
+                          
                           onChange={(e) =>
                             setJobInformationData({
                               ...JobInformationData,
@@ -2612,7 +2612,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                           type="date"
                           className="form-control"
                           name="CompaniesHouseFilingDate"
-                          defaultValue=""
+                          
                           disabled
                           onChange={(e) =>
                             setJobInformationData({
@@ -2652,7 +2652,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                           type="date"
                           className="form-control"
                           name="HMRCFilingDate"
-                          defaultValue=""
+                          
                           disabled
                           onChange={(e) =>
                             setJobInformationData({
@@ -2700,7 +2700,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                           type="date"
                           className="form-control"
                           name="OpeningBalanceAdjustmentDate"
-                          defaultValue=""
+                          
                           disabled
                           onChange={(e) =>
                             setJobInformationData({
@@ -2865,7 +2865,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                               className="form-control"
                               placeholder="Invoice Value"
                               name="InvoiceValue"
-                              defaultValue=""
+                              
                               disabled
                               onChange={(e) =>
                                 setJobInformationData({
@@ -2884,7 +2884,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                               placeholder="DD-MM-YYYY"
                               name="InvoiceDate"
                               max="2024-08-27"
-                              defaultValue=""
+                              
                               disabled
                               onChange={(e) =>
                                 setJobInformationData({
@@ -2905,7 +2905,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     type="text"
                                     className="form-control"
                                     placeholder="Hours"
-                                    defaultValue=""
+                                    
                                     disabled
                                     onChange={(e) => {
                                       const value = e.target.value;
@@ -2934,7 +2934,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     type="text"
                                     className="form-control"
                                     placeholder="Minutes"
-                                    defaultValue=""
+                                    
                                     disabled
                                     onChange={(e) => {
                                       const value = e.target.value;
@@ -2967,7 +2967,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                               className="form-control"
                               placeholder="Invoice Remark"
                               name="InvoiceRemark"
-                              defaultValue=""
+                              
                               disabled
                               onChange={(e) =>
                                 setJobInformationData({
@@ -3121,7 +3121,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .bg-soft-info {
           background-color: rgba(53, 119, 241, 0.1);
         }

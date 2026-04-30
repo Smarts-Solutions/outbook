@@ -3,8 +3,9 @@ import {useNavigate} from 'react-router-dom'
 
 const Hierarchy = ({ show, active, data , NumberOfActive }) => {
      const navigate = useNavigate()
+     const role = localStorage.getItem("role") ? JSON.parse(localStorage.getItem("role")) : null;
+
     const fun = (navigateTo , active) => {
-        const role = JSON.parse(localStorage.getItem("role"));
         const basePath = role === "CUSTOMER" ? "/customer" : "/admin/customer";
 
         if(active<navigateTo){

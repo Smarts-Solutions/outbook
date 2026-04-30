@@ -490,8 +490,9 @@ const ClientLists = () => {
   };
 
   const HandleJobView = (row) => {
-    setHararchyData({ customer: { id: customerId, trading_name: customerName }, job: row });
-    navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId } });
+    const updatedData = { customer: { id: customerId, trading_name: customerName }, job: row };
+    setHararchyData(updatedData);
+    navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId, data: updatedData } });
   };
 
   const selectCustomerId = (id, name) => {
