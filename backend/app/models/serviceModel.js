@@ -140,6 +140,9 @@ const deleteServices = async (ServicesId) => {
 
 const deletExistingJob = async (Services) => {
     let { data, ip, StaffUserId } = Services
+    let { delete_service_id , jobs_data  } = data
+
+    console.log("jobs_data --->>>", jobs_data)
 
     return
     let deleted_service_info = data.delete_service

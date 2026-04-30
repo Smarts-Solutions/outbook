@@ -494,14 +494,15 @@ const Setting = () => {
 
     console.log("Payload", payload)
 
-    return;
+  
 
-    setLoading(true);
+   // setLoading(true);
     const req = { action: "deletExistingJob", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
         setLoading(false);
+        return;
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
