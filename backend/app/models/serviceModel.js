@@ -140,9 +140,6 @@ const deleteServices = async (ServicesId) => {
 
 const deletExistingJob = async (Services) => {
     let { data, ip, StaffUserId } = Services
-    console.log("delete data --->>>", data)
-    console.log("delete ip --->>>", ip)
-    console.log("delete StaffUserId --->>>", StaffUserId)
     let deleted_service_info = data.delete_service
     let update_service_info = data.update_service
     let update_job_type_info = data.update_job_type
@@ -266,6 +263,8 @@ const updateServices = async (Services) => {
         throw err;
     }
 };
+
+
 
 
 module.exports = {

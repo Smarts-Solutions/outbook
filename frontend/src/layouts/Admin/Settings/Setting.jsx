@@ -497,16 +497,15 @@ const Setting = () => {
     return;
 
     setLoading(true);
-    const req = { action: "deleteServiceAndReassign", data: payload };
+    const req = { action: "deletExistingJob", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
-      .then((response) => {
+      .then(async (response) => {
         setLoading(false);
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
-            title: "Success",
-            text: response.message,
+            title: response.message,
             icon: "success",
             timer: 2000,
           });
@@ -515,16 +514,15 @@ const Setting = () => {
           }, 2000);
         } else {
           sweatalert.fire({
-            title: "Error",
-            text: response.message,
+            title: response.message,
             icon: "error",
             timer: 2000,
           });
         }
+
       })
       .catch((error) => {
-        setLoading(false);
-        console.error("Submission error:", error);
+        return;
       });
   };
 
@@ -676,15 +674,14 @@ const Setting = () => {
 
   const serviceData = async (req) => {
 
-    // if (req.action == "delete") {
-    //   console.log("serviceData called with req:", req);
-    //   if (req.data.job_service_exists == true) {
-    //     await GetAllJobsName(req);
-    //     return; // Exit the function to prevent the dispatch from being called
-    //   }
-      
-    // }
-   
+    if (req.action == "delete") {
+      console.log("serviceData called with req:", req);
+      if (req.data.job_service_exists == true) {
+        await GetAllJobsName(req);
+        return; // Exit the function to prevent the dispatch from being called
+      }
+    }
+
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
@@ -1245,8 +1242,9 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
-                {row.is_disable == 0 && row.job_service_exists === null && (
-             
+                {/* && row.job_service_exists === null */}
+                {row.is_disable == 0 && (
+
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row, "4")}
