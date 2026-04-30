@@ -173,7 +173,7 @@ const deletExistingJob = async (Services) => {
  
         // Task Insert
         // Delete job tasks
-         await pool.execute(`DELETE FROM client_job_task WHERE job_id = ?`, [job_id]);
+        await pool.execute(`DELETE FROM client_job_task WHERE job_id = ?`, [job_id]);
 
         for (let index = 0; index < tasks_budget_hours?.length; index++) {
             // insert client_job_task this tasks
