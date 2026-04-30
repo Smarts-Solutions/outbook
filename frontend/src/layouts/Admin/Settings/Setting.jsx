@@ -185,7 +185,7 @@ const Setting = () => {
       .then((response) => {
         if (response.status) {
           setDeleteServiceModal(true);
-          setAllJobsData(response.data || []);
+          setAllJobsData(response?.data || []);
         } else {
           setDeleteServiceModal(false);
           setAllJobsData([]);
@@ -196,29 +196,92 @@ const Setting = () => {
       });
   };
 
+  // const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
+  //   setAllJobsData((prev) => {
+  //     const updated = [...prev];
+
+  //     if (type === "service") {
+  //       updated[rowIndex] = {
+  //         ...updated[rowIndex],
+  //         service_id: selectedOption?.value || null,
+  //         selectedService: selectedOption?.serviceData || null
+  //       };
+  //     }
+
+  //     if (type === "jobType") {
+  //       updated[rowIndex] = {
+  //         ...updated[rowIndex],
+  //         job_type_id: selectedOption?.value || null,
+  //         selectedJobType: selectedOption?.jobTypeData || null
+  //       };
+  //     }
+
+  //     if (type === "task") {
+  //       updated[rowIndex] = {
+  //         ...updated[rowIndex],
+  //         task_id: selectedOption?.map((item) => item.value) || [],
+  //         selectedTasks: selectedOption || []
+  //       };
+  //     }
+
+  //     return updated;
+  //   });
+  // };
+
+
+
   const handleSelectChangeDeleteService = (selectedOption, rowIndex, type) => {
     setAllJobsData((prev) => {
       const updated = [...prev];
+      const row = updated[rowIndex];
 
       if (type === "service") {
+        const serviceId = selectedOption?.value || null;
+
+        // Filter job types based on service
+        const filteredJobTypes = row.jobTypes.filter(
+          (jt) => jt.service_id === serviceId
+        );
+
         updated[rowIndex] = {
-          ...updated[rowIndex],
-          service_id: selectedOption?.value || null,
-          selectedService: selectedOption?.serviceData || null
+          ...row,
+          service_id: serviceId,
+          selectedService: selectedOption?.serviceData || null,
+
+          // RESET
+          job_type_id: null,
+          selectedJobType: null,
+          task_id: [],
+          selectedTasks: [],
+
+          filteredJobTypes // optional: use in UI
         };
       }
 
       if (type === "jobType") {
+        const jobTypeId = selectedOption?.value || null;
+
+        // Filter tasks based on job type
+        const filteredTasks = row.tasks.filter(
+          (task) => task.job_type_id === jobTypeId
+        );
+
         updated[rowIndex] = {
-          ...updated[rowIndex],
-          job_type_id: selectedOption?.value || null,
-          selectedJobType: selectedOption?.jobTypeData || null
+          ...row,
+          job_type_id: jobTypeId,
+          selectedJobType: selectedOption?.jobTypeData || null,
+
+          // RESET TASKS
+          task_id: [],
+          selectedTasks: [],
+
+          filteredTasks // optional
         };
       }
 
       if (type === "task") {
         updated[rowIndex] = {
-          ...updated[rowIndex],
+          ...row,
           task_id: selectedOption?.map((item) => item.value) || [],
           selectedTasks: selectedOption || []
         };
@@ -227,6 +290,44 @@ const Setting = () => {
       return updated;
     });
   };
+
+  const handleBudgetTimeDeleteService = (e, rowIndex, taskIndex, type) => {
+    const { value } = e.target;
+    const isValid = /^\d*$/.test(value);
+    if (!isValid) return;
+
+    setAllJobsData((prev) => {
+      const updated = [...prev];
+      const job = updated[rowIndex];
+      const tasks = [...job.selectedTasks];
+      const task = tasks[taskIndex];
+
+      let [hour, minute] = (task?.budgeted_hour || "0:0").split(":");
+
+      if (type === "hour") {
+        hour = value;
+      } else if (type === "minute") {
+        let numValue = Number(value);
+        if (isNaN(numValue) || numValue < 0) numValue = 0;
+        if (numValue > 59) numValue = 59;
+        minute = numValue.toString();
+      }
+
+      tasks[taskIndex] = {
+        ...task,
+        budgeted_hour: `${hour}:${minute}`,
+      };
+
+      updated[rowIndex] = {
+        ...job,
+        selectedTasks: tasks,
+      };
+
+      return updated;
+    });
+  };
+
+
 
   const getJobTypeSelectedService = async (serviceData) => {
     const req = { action: "get", service_id: serviceData.id };
@@ -314,40 +415,98 @@ const Setting = () => {
     });
   };
 
-  const handleDeleteServiceClick = async () => {
-
-    //console.log("errorsBudgetTimeTask called",errorsBudgetTimeTask);
-    if (Object.keys(errorsBudgetTimeTask).length > 0) {
+  const handleSubmitDeleteService = async () => {
+    if (!allJobsData || allJobsData.length === 0) {
       sweatalert.fire({
         icon: "error",
-        title: "Error",
-        text: "Please enter valid hours or minutes.",
+        title: "No Jobs Found",
+        text: "There are no jobs to update.",
         timer: 2000,
       });
-      return
+      return;
     }
 
-    console.log("deleteServiceInfo:", deleteServiceInfo);
-    console.log("selectedService:", selectedService);
-    console.log("selectedJobType:", selectedJobType);
-    console.log("selectedTasks:", selectedTasks);
-    let data = {
-      delete_service: deleteServiceInfo,
-      update_service: selectedService,
-      update_job_type: selectedJobType,
-      update_tasks: selectedTasks
+    // Validation
+    for (let i = 0; i < allJobsData.length; i++) {
+      const job = allJobsData[i];
+
+      if (!job.service_id) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Missing Service",
+          text: `Please select a Service for Job: ${job.job_code_id}`,
+          timer: 2000,
+        });
+        return;
+      }
+
+      if (!job.job_type_id) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Missing Job Type",
+          text: `Please select a Job Type for Job: ${job.job_code_id}`,
+          timer: 2000,
+        });
+        return;
+      }
+
+      if (!job.selectedTasks || job.selectedTasks.length === 0) {
+        sweatalert.fire({
+          icon: "error",
+          title: "Missing Tasks",
+          text: `Please select at least one Task for Job: ${job.job_code_id}`,
+          timer: 2000,
+        });
+        return;
+      }
+
+      // Validate budget hours for each task in the job
+      for (let j = 0; j < job.selectedTasks.length; j++) {
+        const task = job.selectedTasks[j];
+        const budgeted_hour = task.budgeted_hour || "0:0";
+        const [h, m] = budgeted_hour.split(":").map(val => parseInt(val) || 0);
+
+        if (h === 0 && m === 0) {
+          sweatalert.fire({
+            icon: "error",
+            title: "Invalid Budget Hour",
+            text: `Please enter budget hours for task "${task.label}" in Job: ${job.job_code_id}. It is mandatory.`,
+            timer: 3000,
+          });
+          return;
+        }
+      }
+    }
+
+    const payload = {
+      delete_service_id: deleteServiceInfo?.id,
+      jobs_data: allJobsData.map((job) => ({
+        job_id: job.job_id,
+        service_id: job.service_id,
+        job_type_id: job.job_type_id,
+        task_ids: job.selectedTasks.map((task) => task.value),
+        tasks_budget_hours: job.selectedTasks.map((task) => ({
+          task_id: task.value,
+          budgeted_hour: task.budgeted_hour || "0:0"
+        }))
+      }))
     };
 
+    console.log("Payload", payload)
+
+    return;
+
     setLoading(true);
-    const req = { action: "deletExistingJob", data: data };
+    const req = { action: "deleteServiceAndReassign", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
-      .then(async (response) => {
+      .then((response) => {
         setLoading(false);
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
-            title: response.message,
+            title: "Success",
+            text: response.message,
             icon: "success",
             timer: 2000,
           });
@@ -356,15 +515,16 @@ const Setting = () => {
           }, 2000);
         } else {
           sweatalert.fire({
-            title: response.message,
+            title: "Error",
+            text: response.message,
             icon: "error",
             timer: 2000,
           });
         }
-
       })
       .catch((error) => {
-        return;
+        setLoading(false);
+        console.error("Submission error:", error);
       });
   };
 
@@ -516,14 +676,14 @@ const Setting = () => {
 
   const serviceData = async (req) => {
 
-    if (req.action == "delete") {
-      console.log("serviceData called with req:", req);
-      if (req.data.job_service_exists == true) {
-        await GetAllJobsName(req);
-        return; // Exit the function to prevent the dispatch from being called
-      }
+    // if (req.action == "delete") {
+    //   console.log("serviceData called with req:", req);
+    //   if (req.data.job_service_exists == true) {
+    //     await GetAllJobsName(req);
+    //     return; // Exit the function to prevent the dispatch from being called
+    //   }
       
-    }
+    // }
    
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
@@ -1085,7 +1245,7 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
-                {row.is_disable == 0  && (
+                {row.is_disable == 0 && row.job_service_exists === null && (
              
                   <button
                     className="delete-icon"
@@ -3448,7 +3608,7 @@ const Setting = () => {
                     <tbody>
                       {allJobsData?.map((item, index) => {
                         return (
-                          <tr key={item?.id}>
+                          <tr key={item?.job_id}>
 
                             <td>{index + 1}</td>
 
@@ -3509,10 +3669,11 @@ const Setting = () => {
                                 placeholder="Choose Job Type"
                                 options={item?.jobTypes
                                   ?.filter(
-                                    (type, index, self) =>
-                                      index === self.findIndex((s) => s.job_type_id === type.job_type_id)
+                                    // (type, index, self) =>
+                                    //   index === self.findIndex((s) => s.job_type_id === type.job_type_id)
+                                    (type) => type.service_id === item.service_id
                                   )
-                                  
+
                                   ?.map((type) => ({
                                     value: type?.job_type_id,
                                     label: `${type?.job_type_name}`,
@@ -3549,8 +3710,9 @@ const Setting = () => {
                                 placeholder="Choose Task"
                                 options={item?.tasks
                                   ?.filter(
-                                    (task, index, self) =>
-                                      index === self.findIndex((s) => s.task_id === task.task_id)
+                                    // (task, index, self) =>
+                                    //   index === self.findIndex((s) => s.task_id === task.task_id)
+                                    (task) => task.job_type_id === item.job_type_id
                                   )
                                   ?.map((task) => ({
                                     value: task.task_id,
@@ -3571,6 +3733,59 @@ const Setting = () => {
                                   }),
                                 }}
                               />
+
+                              {item?.selectedTasks?.length > 0 && (
+                                <div className="mt-2 p-2 rounded"
+                                  style={{
+                                    border: "1px solid #e5e7eb",
+                                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                                    background: "#fff",
+                                  }}>
+                                  {item.selectedTasks.map((task, taskIndex) => {
+                                    const [hours, minutes] = (task?.budgeted_hour || "0:0").split(":");
+                                    return (
+                                      <div key={task.value} className="d-flex align-items-center mb-1 p-1"
+                                        style={{
+                                          border: "1px solid #c5c1c1ff",
+                                          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                                          background: "#fff",
+                                          borderRadius: "10px"
+                                        }}>
+                                        <div
+                                          style={{
+                                            width: "7px",
+                                            height: "7px",
+                                            borderRadius: "50%",
+                                            background: "#0d6efd33",
+                                            border: "1px solid #0d6efd",
+                                            flexShrink: 0,
+                                          }}
+                                        />
+                                        <span className="small ms-2" style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={task.label}>
+                                          {task.label}
+                                        </span>
+                                        <div className="input-group input-group-sm gap-1 " style={{ width: "130px", borderRadius: "10px" }}>
+                                          <input
+                                            type="text"
+                                            className="form-control form-control-sm "
+                                            value={hours}
+                                            onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "hour")}
+                                          />
+                                          <span className="input-group-text px-1">h</span>
+                                          <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={minutes}
+                                            onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "minute")}
+                                          />
+                                          <span className="input-group-text px-1">m</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
 
                             </td>
 
@@ -3600,9 +3815,18 @@ const Setting = () => {
               <X size={16} /> Cancel
             </button>
 
-            {selectedJobType && (
-              <button onClick={handleDeleteServiceClick} className="btn btn-btn btn-outline-success float-end">
-                <Save size={16} /> Confirm
+            {allJobsData?.length > 0 && (
+              <button
+                onClick={handleSubmitDeleteService}
+                className="btn btn-outline-success float-end px-4 fw-bold shadow-sm"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                ) : (
+                  <Save size={16} className="me-1" />
+                )}
+                Submit
               </button>
             )}
 
