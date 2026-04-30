@@ -45,7 +45,9 @@ import {
   Trash,
   HandPlatter,
   BriefcaseBusiness,
-  X
+  X,
+  Clock,
+  Timer
 } from "lucide-react";
 
 const Setting = () => {
@@ -307,10 +309,13 @@ const Setting = () => {
       if (type === "hour") {
         hour = value;
       } else if (type === "minute") {
-        let numValue = Number(value);
-        if (isNaN(numValue) || numValue < 0) numValue = 0;
-        if (numValue > 59) numValue = 59;
-        minute = numValue.toString();
+        if (value === "") {
+          minute = "";
+        } else {
+          let numValue = Number(value);
+          if (numValue > 59) numValue = 59;
+          minute = numValue.toString();
+        }
       }
 
       tasks[taskIndex] = {
@@ -381,10 +386,13 @@ const Setting = () => {
       if (type === "hour") {
         hour = value;
       } else if (type === "minute") {
-        let numValue = Number(value);
-        if (isNaN(numValue) || numValue < 0) numValue = 0;
-        if (numValue > 59) numValue = 59;
-        minute = numValue.toString();
+        if (value === "") {
+          minute = "";
+        } else {
+          let numValue = Number(value);
+          if (numValue > 59) numValue = 59;
+          minute = numValue.toString();
+        }
       }
 
       const newValue = `${hour}:${minute}`;
@@ -3528,10 +3536,8 @@ const Setting = () => {
 
                       <tbody>
                         {selectedTasks?.map((task, index) => {
-
-                          const [hours, minutes] = task?.budgeted_hour
-                            ? task.budgeted_hour.split(":")
-                            : ["", ""];
+                          const budgeted_hour = task?.budgeted_hour !== undefined && task?.budgeted_hour !== null ? task.budgeted_hour : "0:0";
+                          const [hours, minutes] = budgeted_hour.split(":");
 
                           const error = errorsBudgetTimeTask[task.value];
 
@@ -3544,28 +3550,31 @@ const Setting = () => {
                                 {task?.label}
                               </td>
                               <td>
-                                <div className="input-group">
-                                  {/* Hours */}
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    value={hours}
-                                    onChange={(e) => handleBudgetTime(e, index, "hour")}
-                                    style={{ width: "80px", marginRight: "5px" }}
-                                  />
-                                  <span className="input-group-text">h</span>
-
-                                  {/* Minutes */}
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    value={minutes}
-                                    onChange={(e) => handleBudgetTime(e, index, "minute")}
-                                    style={{ width: "80px", marginRight: "5px" }}
-
-
-                                  />
-                                  <span className="input-group-text">m</span>
+                                <div className="d-flex align-items-center gap-1 bg-white border rounded-2 px-2 py-1 shadow-sm" style={{ width: "fit-content", minHeight: "34px" }}>
+                                  <Clock size={15} className="text-muted me-1" />
+                                  <div className="d-flex align-items-center">
+                                    <input
+                                      type="text"
+                                      className="form-control form-control-sm text-center fw-bold shadow-none border-0 p-0"
+                                      value={hours}
+                                      onChange={(e) => handleBudgetTime(e, index, "hour")}
+                                      style={{ minWidth: "35px", width: "55px", fontSize: "14px" }}
+                                    
+                                    />
+                                    <span className="text-muted small ms-1" style={{ fontSize: "12px" }}>h</span>
+                                  </div>
+                                  <div className="text-muted mx-1" style={{ fontSize: "12px" }}>:</div>
+                                  <div className="d-flex align-items-center">
+                                    <input
+                                      type="text"
+                                      className="form-control form-control-sm text-center fw-bold shadow-none border-0 p-0"
+                                      value={minutes}
+                                      onChange={(e) => handleBudgetTime(e, index, "minute")}
+                                      style={{ width: "32px", fontSize: "14px" }}
+                                     
+                                    />
+                                    <span className="text-muted small ms-1" style={{ fontSize: "12px" }}>m</span>
+                                  </div>
                                 </div>
                                 {error && (
                                   <div className="error-text text-danger">
@@ -3742,43 +3751,42 @@ const Setting = () => {
                                     background: "#fff",
                                   }}>
                                   {item.selectedTasks.map((task, taskIndex) => {
-                                    const [hours, minutes] = (task?.budgeted_hour || "0:0").split(":");
+                                    const budgeted_hour = task?.budgeted_hour !== undefined && task?.budgeted_hour !== null ? task.budgeted_hour : "0:0";
+                                    const [hours, minutes] = budgeted_hour.split(":");
                                     return (
-                                      <div key={task.value} className="d-flex align-items-center mb-1 p-1"
-                                        style={{
-                                          border: "1px solid #c5c1c1ff",
-                                          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-                                          background: "#fff",
-                                          borderRadius: "10px"
-                                        }}>
+                                      <div key={task.value} className="d-flex align-items-center py-1 px-2 border-bottom last-child-border-0" style={{ minHeight: "38px" }}>
                                         <div
                                           style={{
-                                            width: "7px",
-                                            height: "7px",
+                                            width: "6px",
+                                            height: "6px",
                                             borderRadius: "50%",
-                                            background: "#0d6efd33",
-                                            border: "1px solid #0d6efd",
+                                            background: "#0d6efd",
                                             flexShrink: 0,
                                           }}
                                         />
-                                        <span className="small ms-2" style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={task.label}>
+                                        <span className="small ms-2 flex-grow-1 text-truncate fw-medium" title={task.label} style={{ fontSize: "12px" }}>
                                           {task.label}
                                         </span>
-                                        <div className="input-group input-group-sm gap-1 " style={{ width: "130px", borderRadius: "10px" }}>
+                                        <div className="d-flex align-items-center gap-1 bg-white border rounded-2 px-2 shadow-sm ms-auto" style={{ height: "30px" }}>
                                           <input
                                             type="text"
-                                            className="form-control form-control-sm "
+                                            className="form-control form-control-sm border-0 bg-transparent text-center p-0 fw-bold shadow-none"
                                             value={hours}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "hour")}
+                                            style={{ minWidth: "32px", width: "50px", fontSize: "13px" }}
+                                           
                                           />
-                                          <span className="input-group-text px-1">h</span>
+                                          <span className="text-muted" style={{ fontSize: "11px" }}>h</span>
+                                          <div className="text-muted mx-0" style={{ fontSize: "11px" }}>:</div>
                                           <input
                                             type="text"
-                                            className="form-control form-control-sm"
+                                            className="form-control form-control-sm border-0 bg-transparent text-center p-0 fw-bold shadow-none"
                                             value={minutes}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "minute")}
+                                            style={{ width: "26px", fontSize: "13px" }}
+                                           
                                           />
-                                          <span className="input-group-text px-1">m</span>
+                                          <span className="text-muted" style={{ fontSize: "11px" }}>m</span>
                                         </div>
                                       </div>
                                     );
