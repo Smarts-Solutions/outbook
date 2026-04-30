@@ -493,9 +493,7 @@ const Setting = () => {
       }))
     };
 
-    console.log("Payload", payload)
-
-  
+   //console.log("Payload", payload)
 
    // setLoading(true);
     const req = { action: "deletExistingJob", data: payload };
