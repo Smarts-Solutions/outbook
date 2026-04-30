@@ -503,7 +503,7 @@ const Setting = () => {
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-        return;
+       
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({

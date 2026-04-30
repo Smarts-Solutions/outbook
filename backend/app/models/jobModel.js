@@ -4968,7 +4968,7 @@ const getJobsDeleteService = async (job) => {
 
       JOIN task ON task.service_id = services.id
       
-      WHERE jobs.service_id = ?
+      WHERE jobs.service_id = ? AND services.deleted = '0'
       ORDER BY jobs.id DESC
     `,
       [service_id]
