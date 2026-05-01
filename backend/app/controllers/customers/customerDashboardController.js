@@ -233,9 +233,9 @@ const customerGetOfficerDetails = async (req, res) => {
 const customerJobType = async (req, res) => {
   try {
     const result = await customerDashboardService.customerJobType(req.body);
-    return res.status(200).send(result);
+    return res.status(200).json({ status: true, data: result });
   } catch (error) {
-    return res.status(500).send({ status: false, message: error.message });
+    return res.status(500).json({ status: false, message: error.message });
   }
 };
 
